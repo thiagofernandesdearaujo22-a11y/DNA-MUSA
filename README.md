@@ -1,3 +1,4 @@
+[index.html](https://github.com/user-attachments/files/29928943/index.html)
 [README.md](https://github.com/user-attachments/files/29927518/README.md)
 # MUSA+ — Protótipo
 
@@ -5,7 +6,3298 @@ Site estático de página única (`index.html`). Sem build, sem dependências �
 
 ## Deploy inicial (uma vez só)
 
-```bash
+```bash<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUSA+ — Protótipo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+  :root{
+    --bg: #0B0B0C;
+    --card: #161512;
+    --card-2: #1D1B17;
+    --gold: #D4AF37;
+    --gold-soft: #C9A96A;
+    --gold-deep: #8A6D1F;
+    --text: #F3EFE4;
+    --text-dim: #A9A392;
+    --text-faint: #6E6A5E;
+    --border: rgba(212,175,55,0.16);
+    --border-strong: rgba(212,175,55,0.4);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:#000;
+    font-family:'Inter',sans-serif;
+    color:var(--text);
+    display:flex;
+    justify-content:center;
+    padding:40px 16px;
+    min-height:100vh;
+  }
+  .phone{
+    width:390px;
+    max-width:100%;
+    background:var(--bg);
+    border-radius:36px;
+    border:1px solid rgba(212,175,55,0.25);
+    box-shadow:0 0 0 8px #050505, 0 30px 80px rgba(0,0,0,0.6), 0 0 60px rgba(212,175,55,0.05);
+    overflow:hidden;
+    position:relative;
+  }
+  .notch{height:28px;display:flex;align-items:center;justify-content:center;}
+  .notch::before{content:'';width:100px;height:14px;background:#000;border-radius:10px;}
+  .screen{height:800px;overflow-y:auto;padding:0 20px 30px;position:relative;}
+  .screen::-webkit-scrollbar{display:none;}
+  .view{display:none;}
+  .view.active{display:block;animation:fadeIn .35s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .backbar{display:flex;align-items:center;gap:8px;padding:14px 0 6px;cursor:pointer;color:var(--gold-soft);font-size:13px;}
+  .backbar i{font-size:16px;}
+
+  /* LAUNCHER */
+  .launcher{padding-top:56px;text-align:center;}
+  .brand{
+    font-family:'Playfair Display',serif;font-size:32px;font-weight:600;letter-spacing:1px;
+    background:linear-gradient(135deg,#F1DE9A,#D4AF37 45%,#8A6D1F);
+    -webkit-background-clip:text;background-clip:text;color:transparent;margin:0;
+  }
+  .brand-sub{font-size:10px;letter-spacing:2.5px;color:var(--text-faint);text-transform:uppercase;margin:4px 0 0;}
+  .sub{color:var(--text-dim);font-size:13px;margin:22px 0 40px;letter-spacing:0.3px;}
+  .profiles{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;}
+  .profile-card{cursor:pointer;text-align:center;transition:transform .25s ease;width:100px;}
+  .profile-card:hover{transform:translateY(-3px);}
+  .avatar{width:78px;height:78px;border-radius:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;position:relative;}
+  .avatar.gold{background:radial-gradient(circle at 30% 25%, #F1DE9A, #D4AF37 55%, #8A6D1F 100%);box-shadow:0 8px 26px rgba(212,175,55,0.35);}
+  .avatar.gold span{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;color:#0B0B0C;}
+  .avatar.dark{background:var(--card-2);border:1px solid var(--border);}
+  .avatar.dark i{font-size:26px;color:var(--gold-soft);}
+  .profile-name{font-size:12.5px;font-weight:600;margin:0;line-height:1.3;}
+  .profile-desc{font-size:10px;color:var(--text-dim);margin:3px 0 0;line-height:1.3;}
+
+  h1.page-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;margin:18px 0 4px;}
+  .page-sub{font-size:12px;color:var(--text-dim);margin:0 0 18px;}
+  .section-label{font-size:12.5px;font-weight:600;color:var(--gold-soft);text-transform:uppercase;letter-spacing:0.6px;margin:0 0 10px;}
+
+  .hero-card{background:linear-gradient(135deg, #241E14, #16130D);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:16px;cursor:pointer;position:relative;overflow:hidden;}
+  .hero-card::after{content:'';position:absolute;top:-40%;right:-20%;width:220px;height:220px;background:radial-gradient(circle, rgba(212,175,55,0.18), transparent 70%);}
+  .hero-eyebrow{font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--gold-soft);margin:0 0 8px;position:relative;}
+  .hero-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;margin:0 0 8px;position:relative;}
+  .hero-cta{font-size:12px;color:var(--text-dim);margin:0;position:relative;}
+
+  .pending-card{background:rgba(212,175,55,0.08);border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin-bottom:26px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .pending-card p{margin:0;font-size:12.5px;color:#EDE0BE;}
+  .pending-card i{color:var(--gold-soft);font-size:16px;flex-shrink:0;}
+
+  .row{display:flex;gap:12px;overflow-x:auto;margin-bottom:26px;padding-bottom:4px;scrollbar-width:none;}
+  .row::-webkit-scrollbar{display:none;}
+  .poster{min-width:128px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;cursor:pointer;position:relative;transition:border-color .2s ease, transform .2s ease;}
+  .poster:hover{border-color:rgba(212,175,55,0.5);transform:translateY(-2px);}
+  .poster.pendente{border-color:var(--border-strong);}
+  .poster .check{position:absolute;top:10px;right:10px;color:var(--gold-soft);font-size:13px;}
+  .poster .pend-tag{position:absolute;top:9px;right:9px;font-size:9px;color:var(--gold-soft);background:rgba(212,175,55,0.15);padding:2px 6px;border-radius:6px;}
+  .poster .sub{font-size:10.5px;color:var(--text-faint);margin:0;}
+  .poster .title{font-size:12.5px;font-weight:600;margin:5px 0 0;color:var(--text);}
+
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:26px;}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;}
+  .stat-label{font-size:11px;color:var(--text-dim);margin:0;}
+  .stat-value{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;margin:4px 0 0;}
+  .stat-meta{font-size:10px;color:var(--text-faint);margin:4px 0 0;}
+  .stat-meta.gold{color:var(--gold-soft);}
+
+  .insight{background:linear-gradient(135deg, rgba(212,175,55,0.12), rgba(212,175,55,0.03));border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:18px;}
+  .insight p{font-size:12.5px;margin:0;color:#EDE0BE;}
+
+  .ring-wrap{display:flex;align-items:center;gap:18px;margin-bottom:20px;}
+  .ring-num{font-family:'Playfair Display',serif;font-size:26px;font-weight:600;margin:0;}
+  .ring-label{font-size:12px;color:var(--text-dim);margin:2px 0 0;}
+
+  .video-block{background:var(--card);border:1px solid var(--border);border-radius:16px;height:190px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;position:relative;overflow:hidden;}
+  .video-block iframe{width:100%;height:100%;position:relative;z-index:1;}
+  .yt-fallback{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-dim);text-decoration:none;margin:-8px 0 16px;}
+  .yt-fallback:hover{color:var(--gold-soft);}
+  .video-block::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, rgba(212,175,55,0.08), transparent 60%);}
+  .video-block i{font-size:36px;color:var(--gold-soft);position:relative;}
+
+  .list-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 14px;margin-bottom:8px;font-size:13px;display:flex;justify-content:space-between;align-items:center;}
+  .list-item .tag{font-size:10.5px;color:var(--gold-soft);}
+
+  .badge{display:inline-block;background:rgba(212,175,55,0.14);color:var(--gold-soft);font-size:10.5px;text-transform:uppercase;letter-spacing:0.5px;padding:4px 10px;border-radius:8px;margin-bottom:10px;}
+
+  .info-box{background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:16px;}
+  .info-box .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold-soft);margin:0 0 6px;}
+  .info-box p.txt{font-size:13px;color:var(--text);margin:0 0 10px;line-height:1.5;}
+  .info-box p.txt:last-child{margin-bottom:0;}
+
+  .month-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+  .month-row:last-child{border-bottom:none;}
+  .month-name{font-size:13px;color:var(--text-dim);}
+  .month-bar-wrap{flex:1;margin:0 12px;background:#221F18;border-radius:6px;height:8px;overflow:hidden;}
+  .month-bar{height:100%;background:linear-gradient(90deg,#8A6D1F,#D4AF37);}
+  .month-val{font-size:12.5px;font-weight:600;min-width:44px;text-align:right;}
+
+  .filter-row{display:flex;gap:8px;overflow-x:auto;margin-bottom:20px;padding-bottom:4px;scrollbar-width:none;}
+  .filter-row::-webkit-scrollbar{display:none;}
+  .chip{flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:7px 14px;font-size:12px;color:var(--text-dim);cursor:pointer;white-space:nowrap;transition:all .2s ease;}
+  .chip.active{background:linear-gradient(135deg,#F1DE9A,#D4AF37 55%,#8A6D1F);color:#0B0B0C;font-weight:600;border-color:transparent;}
+
+  .poster-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .vposter{cursor:pointer;}
+  .vcover{
+    aspect-ratio:2/3;border-radius:14px;background:linear-gradient(150deg,#241E14,#161512);
+    border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+    position:relative;overflow:hidden;margin-bottom:8px;transition:border-color .2s ease, transform .2s ease;
+  }
+  .vposter:hover .vcover{border-color:var(--border-strong);transform:translateY(-2px);}
+  .vcover::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 40%, rgba(212,175,55,0.14), transparent 65%);}
+  .vcover i.play{font-size:26px;color:var(--gold-soft);position:relative;}
+  .vcover .lock-icon{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:8px;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;}
+  .vcover .lock-icon i{font-size:13px;color:var(--gold-soft);}
+  .vtitle{font-size:12px;font-weight:600;text-align:center;margin:0;line-height:1.3;color:var(--text);}
+
+  /* PERSONAL */
+  .avatar.dark.admin i{color:var(--text-dim);}
+  .alert-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px;}
+  .alert-stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;}
+  .alert-stat .num{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;margin:0;}
+  .alert-stat .lbl2{font-size:10.5px;color:var(--text-dim);margin:2px 0 0;}
+
+  .aluna-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;transition:border-color .2s ease;}
+  .aluna-card:hover{border-color:var(--border-strong);}
+  .aluna-name{font-size:13.5px;font-weight:600;margin:0 0 4px;}
+  .aluna-meta{font-size:11px;color:var(--text-faint);margin:0;}
+  .status-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px;}
+  .status-dot.ok{background:var(--gold-soft);}
+  .status-dot.alerta{background:#C9784A;}
+  .status-dot.vencendo{background:#E2A33D;}
+  .status-dot.lead{background:var(--text-faint);}
+  .status-txt{font-size:10.5px;}
+  .status-txt.ok{color:var(--gold-soft);}
+  .status-txt.alerta{color:#C9784A;}
+  .status-txt.vencendo{color:#E2A33D;}
+  .status-txt.lead{color:var(--text-faint);}
+
+  .tool-card{background:linear-gradient(135deg,#1D1B17,#141310);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:border-color .2s ease;}
+  .tool-card:hover{border-color:var(--border-strong);}
+  .tool-card i{font-size:22px;color:var(--gold-soft);}
+  .tool-card .tool-title{font-size:13.5px;font-weight:600;margin:0;}
+  .tool-card .tool-desc{font-size:11px;color:var(--text-dim);margin:2px 0 0;}
+
+  .local-back{display:flex;align-items:center;gap:6px;color:var(--gold-soft);font-size:12.5px;cursor:pointer;margin-bottom:12px;}
+
+  .chip-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px;}
+  .desvio-chip{font-size:11px;background:rgba(212,175,55,0.12);color:var(--gold-soft);padding:5px 10px;border-radius:8px;border:1px solid var(--border);cursor:pointer;}
+  .desvio-chip.selected{background:linear-gradient(135deg,#F1DE9A,#D4AF37 55%,#8A6D1F);color:#0B0B0C;font-weight:600;border-color:transparent;}
+
+  .form-group{margin-bottom:12px;}
+  .form-label{font-size:11px;color:var(--text-dim);margin:0 0 5px;display:block;}
+  .form-input, .form-select{width:100%;background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:9px 11px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;}
+  .form-input:focus, .form-select:focus{outline:none;border-color:var(--border-strong);}
+  .btn-gold{width:100%;background:linear-gradient(135deg,#F1DE9A,#D4AF37 55%,#8A6D1F);color:#0B0B0C;font-weight:600;font-size:13px;border:none;border-radius:10px;padding:11px;cursor:pointer;margin-top:6px;}
+  .exercicio-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 13px;margin-bottom:8px;}
+  .exercicio-item .ex-name{font-size:13px;font-weight:600;margin:0 0 3px;}
+  .exercicio-item .ex-meta{font-size:10.5px;color:var(--text-faint);margin:0;}
+  .exercicio-item .ex-video{font-size:10.5px;margin-top:4px;display:inline-block;}
+  .exercicio-item .ex-video.pending{color:#E2A33D;}
+  .exercicio-item .ex-video.ok{color:var(--gold-soft);}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="notch"></div>
+  <div class="screen">
+
+    <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
+      <i class="ti ti-arrow-left"></i>
+      <span id="backlabel">Voltar</span>
+    </div>
+
+    <!-- LAUNCHER -->
+    <div class="view active" data-view="launcher">
+      <div class="launcher">
+        <p class="brand">MUSA+</p>
+        <p class="brand-sub">Team Fernandes</p>
+        <p class="sub">Escolha uma opção</p>
+        <div class="profiles">
+          <div class="profile-card" onclick="openLevel2('home')">
+            <div class="avatar gold"><span>A</span></div>
+            <p class="profile-name">Andriele</p>
+            <p class="profile-desc">Treino, DNA e conteúdos</p>
+          </div>
+          <div class="profile-card" onclick="openLevel2('dados')">
+            <div class="avatar dark"><i class="ti ti-chart-bar"></i></div>
+            <p class="profile-name">Composição e suporte</p>
+            <p class="profile-desc">Seus dados e avaliações</p>
+          </div>
+          <div class="profile-card" onclick="openLevel2('mentoria')">
+            <div class="avatar dark"><i class="ti ti-school"></i></div>
+            <p class="profile-name">Mentoria</p>
+            <p class="profile-desc">Cursos e conteúdos</p>
+          </div>
+          <div class="profile-card" onclick="openLevel2('personal')">
+            <div class="avatar dark admin"><i class="ti ti-user-cog"></i></div>
+            <p class="profile-name">Personal</p>
+            <p class="profile-desc">Painel administrativo</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOME (aluna) -->
+    <div class="view" data-view="home">
+      <h1 class="page-title">Olá, Andriele</h1>
+      <p class="page-sub">Bem-vinda ao MUSA+</p>
+
+      <div class="hero-card" onclick="openDetail('central')">
+        <p class="hero-eyebrow" id="home-hero-eyebrow">Seu primeiro dia</p>
+        <p class="hero-title" id="home-hero-title">Seu DNA MUSA está calibrando</p>
+        <p class="hero-cta">Toque para abrir sua Central de Inteligência</p>
+      </div>
+
+      <p class="section-label">Treinos da semana</p>
+      <div class="row" id="row-dias"></div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <p class="stat-label">Volume desta semana</p>
+          <p class="stat-value" id="home-volume-valor">0 / 20</p>
+          <p class="stat-meta gold">Séries · nível iniciante</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Sequência ativa</p>
+          <p class="stat-value" id="home-sequencia-valor">Dia 1</p>
+          <p class="stat-meta" id="home-sequencia-meta">Sua jornada começa agora</p>
+        </div>
+      </div>
+
+      <p class="section-label">Seu DNA MUSA</p>
+      <div class="row" id="row-dna"></div>
+
+      <p class="section-label">Mobilidade e recuperação</p>
+      <div class="row" id="row-mobilidade"></div>
+    </div>
+
+    <!-- DADOS (composição / suporte) -->
+    <div class="view" data-view="dados">
+      <h1 class="page-title">Seus dados</h1>
+      <p class="page-sub">Composição corporal e suporte</p>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <p class="stat-label">Peso</p>
+          <p class="stat-value">64,2 kg</p>
+          <p class="stat-meta">Atualizado hoje</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">% gordura</p>
+          <p class="stat-value">24,1%</p>
+          <p class="stat-meta gold">Via antropometria</p>
+        </div>
+      </div>
+
+      <p class="section-label">Avaliações</p>
+      <div class="row" id="row-avaliacao"></div>
+
+      <p class="section-label">Suporte e técnica</p>
+      <p class="page-sub" style="margin-top:-6px;">Sugestões rápidas — a biblioteca completa está na Mentoria</p>
+      <div class="row" id="row-suporte"></div>
+
+      <p class="section-label">Dicas rápidas</p>
+      <div class="row" id="row-dicas"></div>
+    </div>
+
+    <!-- MENTORIA -->
+    <div class="view" data-view="mentoria">
+      <h1 class="page-title">Mentoria</h1>
+      <p class="page-sub">Cursos e conteúdos completos</p>
+
+      <div class="filter-row" id="filter-row"></div>
+      <div class="poster-grid" id="poster-grid"></div>
+    </div>
+
+    <!-- PERSONAL -->
+    <div class="view" data-view="personal">
+
+      <div id="personal-dashboard">
+        <h1 class="page-title">Painel do Personal</h1>
+        <p class="page-sub">Visão geral das suas alunas</p>
+
+        <div class="alert-row">
+          <div class="alert-stat"><p class="num">1</p><p class="lbl2">Aluna com faltas</p></div>
+          <div class="alert-stat"><p class="num">1</p><p class="lbl2">Plano vencendo em breve</p></div>
+        </div>
+
+        <p class="section-label">Ferramentas</p>
+        <div class="tool-card" onclick="showPersonalView('alunas')">
+          <i class="ti ti-users"></i>
+          <div><p class="tool-title">Alunas</p><p class="tool-desc">Busca, status, faltas e plano vencendo</p></div>
+        </div>
+        <div class="tool-card" onclick="showPersonalView('exercicios')">
+          <i class="ti ti-video"></i>
+          <div><p class="tool-title">Banco de exercícios</p><p class="tool-desc">Cadastre exercícios e links de vídeo</p></div>
+        </div>
+        <div class="tool-card" onclick="showPersonalView('conteudo')">
+          <i class="ti ti-library"></i>
+          <div><p class="tool-title">Biblioteca de conteúdo</p><p class="tool-desc">Vídeos e cursos da Mentoria</p></div>
+        </div>
+        <div class="tool-card" onclick="showPersonalView('treinos')">
+          <i class="ti ti-clipboard-list"></i>
+          <div><p class="tool-title">Biblioteca de treinos</p><p class="tool-desc">Modelos por nível, ênfase e frequência</p></div>
+        </div>
+        <div class="tool-card" onclick="showPersonalView('mobilidade')">
+          <i class="ti ti-stretching"></i>
+          <div><p class="tool-title">Biblioteca de mobilidade</p><p class="tool-desc">Mobilidades, alongamentos e aquecimento</p></div>
+        </div>
+        <div class="tool-card" onclick="showPersonalView('desafios')">
+          <i class="ti ti-flag"></i>
+          <div><p class="tool-title">Grupo de desafio</p><p class="tool-desc">Crie um treino e gere um link de inscrição</p></div>
+        </div>
+        <div class="tool-card" onclick="showPersonalView('patologias')">
+          <i class="ti ti-first-aid-kit"></i>
+          <div><p class="tool-title">Banco de patologias</p><p class="tool-desc">Joelho, quadril e ombro — o que evitar e permitir</p></div>
+        </div>
+      </div>
+
+      <div id="personal-alunas" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
+        <h1 class="page-title" style="margin-top:0;">Alunas</h1>
+        <p class="page-sub" id="alunas-count-label" style="margin-top:-6px;"></p>
+        <div class="form-group"><input class="form-input" id="aluna-search" placeholder="Buscar aluna por nome..." oninput="renderAlunas()"></div>
+        <div class="form-group">
+          <select class="form-select" id="aluna-status-filter" onchange="renderAlunas()">
+            <option>Todas</option><option>Ativas recentes</option><option>Leads antigos</option>
+          </select>
+        </div>
+        <div id="alunas-list"></div>
+      </div>
+
+      <div id="personal-aluna" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('alunas')"><i class="ti ti-arrow-left"></i><span>Alunas</span></div>
+        <div id="aluna-detail-content"></div>
+      </div>
+
+      <div id="personal-exercicios" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
+        <h1 class="page-title" style="margin-top:0;">Banco de exercícios</h1>
+        <p class="page-sub" id="ex-count-label">Organizado por grupo muscular</p>
+
+        <div id="ex-video-view" style="display:none;margin-top:16px;">
+          <div class="local-back" onclick="fecharVideoExercicio()"><i class="ti ti-arrow-left"></i><span>Voltar à lista</span></div>
+          <div id="ex-video-content"></div>
+        </div>
+
+        <div id="ex-lista-view" style="margin-top:16px;">
+          <div class="filter-row" id="ex-filter-row"></div>
+          <div id="ex-add-form" style="display:none;">
+            <p class="section-label">Adicionar exercício</p>
+            <div class="form-group"><label class="form-label">Nome do exercício</label><input class="form-input" id="ex-nome" placeholder="Ex: Cadeira flexora"></div>
+            <div class="form-group"><label class="form-label">Grupo muscular</label>
+              <select class="form-select" id="ex-grupo"></select>
+            </div>
+            <div class="form-group"><label class="form-label">Nível de complexidade</label>
+              <select class="form-select" id="ex-nivel"><option>Básico</option><option>Intermediário</option><option>Avançado</option></select>
+            </div>
+            <div class="form-group"><label class="form-label">Método padrão</label>
+              <select class="form-select" id="ex-metodo"><option>Nenhum</option><option>Restpause</option><option>Dropset</option><option>Cluster set</option><option>Bi-set</option><option>Tri-set</option><option>Pirâmide crescente</option></select>
+            </div>
+            <div class="form-group"><label class="form-label">Link do vídeo (opcional por enquanto)</label><input class="form-input" id="ex-video" placeholder="Cole o link quando tiver disponível"></div>
+            <button class="btn-gold" onclick="addExercicio()">Adicionar ao banco</button>
+          </div>
+          <div id="ex-lista"></div>
+        </div>
+      </div>
+
+      <div id="personal-conteudo" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
+        <h1 class="page-title" style="margin-top:0;">Biblioteca de conteúdo</h1>
+        <p class="page-sub">Isso alimenta diretamente a Mentoria das alunas</p>
+
+        <div id="conteudo-list-personal"></div>
+
+        <p class="section-label" style="margin-top:18px;">Adicionar conteúdo</p>
+        <div class="form-group"><label class="form-label">Título</label><input class="form-input" id="ct-titulo" placeholder="Ex: Execução: stiff"></div>
+        <div class="form-group"><label class="form-label">Categoria</label>
+          <select class="form-select" id="ct-categoria"><option>Cursos completos</option><option>Introdução</option><option>Métodos de treino</option><option>Exercícios de coxa</option><option>Exercícios de glúteo</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Descrição</label><input class="form-input" id="ct-desc" placeholder="Breve descrição do conteúdo"></div>
+        <div class="form-group"><label class="form-label">Link do vídeo</label><input class="form-input" id="ct-video" placeholder="Cole o link quando tiver disponível"></div>
+        <div class="form-group" style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="ct-locked" style="width:16px;height:16px;">
+          <label class="form-label" style="margin:0;" for="ct-locked">Conteúdo bloqueado (pago)</label>
+        </div>
+        <button class="btn-gold" onclick="addConteudo()">Adicionar à biblioteca</button>
+      </div>
+
+      <div id="personal-mobilidade" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
+        <h1 class="page-title" style="margin-top:0;">Biblioteca de mobilidade</h1>
+        <p class="page-sub" id="mob-count-label">Mobilidades, alongamentos e aquecimento</p>
+
+        <div class="form-group"><input class="form-input" id="mob-search" placeholder="Buscar por nome ou grupo ativo..." oninput="renderMobilidadeBanco()"></div>
+        <div id="mobilidade-list-personal"></div>
+
+        <p class="section-label" style="margin-top:18px;">Aquecimento</p>
+        <div id="aquecimento-list-personal"></div>
+      </div>
+
+      <div id="personal-treinos" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
+        <h1 class="page-title" style="margin-top:0;">Biblioteca de treinos</h1>
+        <p class="page-sub">Modelos prontos por nível, ênfase e frequência</p>
+
+        <div class="form-group"><label class="form-label">Nível</label>
+          <select class="form-select" id="tp-filtro-nivel" onchange="renderTemplates()">
+            <option>Todos</option><option>Iniciante</option><option>Intermediário</option><option>Avançado</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Ênfase</label>
+          <select class="form-select" id="tp-filtro-enfase" onchange="renderTemplates()">
+            <option>Todas</option><option>Glúteo</option><option>Quadríceps</option><option>Posterior</option><option>Emagrecimento</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Frequência</label>
+          <select class="form-select" id="tp-filtro-freq" onchange="renderTemplates()">
+            <option>Todas</option><option>3x</option><option>5x</option><option>6x</option><option>7x</option>
+          </select>
+        </div>
+
+        <div id="templates-list"></div>
+
+        <p class="section-label" style="margin-top:18px;">Criar novo template</p>
+        <div class="form-group"><label class="form-label">Nível</label>
+          <select class="form-select" id="tp-nivel" onchange="updateVolumeHint()">
+            <option>Iniciante</option><option>Intermediário</option><option>Avançado</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Ênfase</label><input class="form-input" id="tp-enfase" placeholder="Ex: Glúteo"></div>
+        <div class="form-group"><label class="form-label">Frequência semanal</label>
+          <select class="form-select" id="tp-freq"><option>3x</option><option>5x</option><option>6x</option><option>7x</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Volume recomendado (regra por nível)</label>
+          <div class="list-item" id="tp-volume-hint" style="cursor:default;"><span>Até 20 séries</span></div>
+        </div>
+        <div class="form-group"><label class="form-label">Adicionar exercício do banco</label>
+          <select class="form-select" id="tp-exercicio-select"></select>
+        </div>
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="addExercicioAoTemplate()">+ Adicionar à lista</button>
+        <div class="chip-list" id="tp-exercicios-selecionados" style="margin:12px 0;"></div>
+        <button class="btn-gold" onclick="salvarTemplate()">Salvar template</button>
+      </div>
+
+      <div id="personal-desafios" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
+        <h1 class="page-title" style="margin-top:0;">Grupo de desafio</h1>
+        <p class="page-sub">Crie um treino e gere um link de inscrição — quem entra participa só do desafio, sem acesso ao restante do app</p>
+
+        <div id="desafios-list"></div>
+
+        <p class="section-label" style="margin-top:18px;">Criar novo desafio</p>
+        <div class="form-group"><label class="form-label">Nome do desafio</label><input class="form-input" id="df-nome" placeholder="Ex: Desafio 7 Dias Glúteo de Aço"></div>
+        <div class="form-group"><label class="form-label">Treino vinculado</label>
+          <select class="form-select" id="df-treino"></select>
+        </div>
+        <div class="form-group"><label class="form-label">Duração (dias)</label><input class="form-input" id="df-duracao" placeholder="Ex: 7" type="number"></div>
+        <button class="btn-gold" onclick="criarDesafio()">Criar desafio e gerar link</button>
+      </div>
+
+      <div id="personal-patologias" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
+        <h1 class="page-title" style="margin-top:0;">Banco de patologias</h1>
+        <p class="page-sub">Consulta de referência — nunca ativa sozinho, sempre depende da sua confirmação na ficha da aluna</p>
+        <div class="filter-row" id="patologia-filter-row"></div>
+        <div id="patologia-list"></div>
+      </div>
+
+    </div>
+
+    <!-- DETAIL -->
+
+    <div class="view" data-view="detail">
+      <div id="detail-content"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let level2 = null;
+
+const faseAtual = 'Fase 1 · Emagrecimento (override por IMC)';
+const dias = [
+  {n:'Segunda', foco:'Inferiores A · Quadríceps e Glúteo', ex:['Leg Press 45 · 4x12','Agachamento Hack · 3x12','Extensão de quadril na máquina · 3x15','Abdução de quadril na polia · 3x15']},
+  {n:'Terça', foco:'Superiores · Costas e Abdômen', ex:['Remada articular aberta · 3x12','Remada articular fechada · 3x12','Prancha ventral · 3x30s','Abdominal canivete · 3x15']},
+  {n:'Quarta', foco:'Inferiores B · Glúteo e Posterior', ex:['Extensão de quadril no banco romano · 4x15','Cadeira flexora · 3x12','Leg Press 45 (pés altos) · 3x15','Abdução de quadril na polia · 3x15'], hoje:true},
+  {n:'Quinta', foco:'Superiores · Costas e Abdômen', ex:['Remada articular aberta · 3x12','Remada articular fechada · 3x12','Prancha ventral · 3x30s','Abdominal canivete · 3x15']},
+  {n:'Sexta', foco:'Inferiores C · Pernas completo', ex:['Agachamento Hack · 3x12','Leg Press 45 · 3x15','Cadeira flexora · 3x12','Extensão de quadril na máquina · 3x15']},
+  {n:'Sábado', foco:'Descanso', descanso:true},
+  {n:'Domingo', foco:'Descanso', descanso:true}
+];
+
+const mobilidadeItens = [
+  {n:'Mobilidade de quadril', dur:'8 min', desvio:null, foco:'Mobilidade geral de quadril, recomendada como rotina inicial até a primeira avaliação postural com fotos.', video:'https://youtu.be/NrF08RNhKyY'},
+  {n:'Alongamento pós-treino', dur:'6 min', desvio:null, foco:'Alongamento geral pós-treino — ótimo ponto de partida, já que você disse ter interesse em começar a alongar.', video:null},
+  {n:'Respiração e relaxamento', dur:'5 min', desvio:null, foco:'Manobras respiratórias e vácuo abdominal para recuperação e controle de core. Comece pela Parte 1 — Aprenda a Respirar. Sequência completa (7 vídeos) na Mentoria.', video:'https://youtu.be/8ixgAPGj2nE'}
+];
+
+function poster(container, title, sub, onClick, opts){
+  opts = opts || {};
+  const el = document.createElement('div');
+  el.className = 'poster' + (opts.pendente ? ' pendente' : '');
+  el.innerHTML =
+    (opts.done ? '<i class="ti ti-check check"></i>' : '') +
+    (opts.pendente ? '<span class="pend-tag">pendente</span>' : '') +
+    '<p class="sub">' + sub + '</p>' +
+    '<p class="title">' + title + '</p>';
+  el.onclick = onClick;
+  container.appendChild(el);
+}
+
+const rowDias = document.getElementById('row-dias');
+dias.forEach(function(d,i){
+  poster(rowDias, d.foco, d.n + (d.hoje ? ' · hoje' : ''), function(){ openDetail('dia', i); }, {done:d.done, pendente:d.pendente});
+});
+
+const rowDna = document.getElementById('row-dna');
+poster(rowDna, 'Perfil inteligente', 'Score 82%', function(){ openDetail('dna'); });
+poster(rowDna, 'Evolução mensal', 'Ver histórico', function(){ openDetail('evolucao'); });
+poster(rowDna, 'Indicadores', '25 métricas', function(){ openDetail('indicadores'); });
+
+const rowMob = document.getElementById('row-mobilidade');
+mobilidadeItens.forEach(function(m,i){
+  poster(rowMob, m.n, m.dur, function(){ openDetail('mobilidade', i); });
+});
+
+const rowAval = document.getElementById('row-avaliacao');
+poster(rowAval, 'Avaliação física', 'Última: há 12 dias', function(){ openDetail('video'); });
+poster(rowAval, 'Assimetria muscular', 'Análise de fotos', function(){ openDetail('video'); });
+
+const rowSuporte = document.getElementById('row-suporte');
+poster(rowSuporte, 'Execução: agachamento livre', '4 min', function(){ openDetail('video'); });
+poster(rowSuporte, 'Como ajustar sua carga', '3 min', function(){ openDetail('video'); });
+poster(rowSuporte, 'Fale com seu personal', 'Suporte direto', function(){ openDetail('video'); });
+
+const rowDicas = document.getElementById('row-dicas');
+poster(rowDicas, 'Amplitude no leg press', '2 min', function(){ openDetail('video'); });
+poster(rowDicas, 'Postura no agachamento', '2 min', function(){ openDetail('video'); });
+
+const conteudos = [
+  {n:'Fundamentos da Hipertrofia Feminina', cat:'Cursos completos', locked:false, desc:'Curso introdutório com os princípios de treino que guiam toda a metodologia MUSA+. 12 aulas · 3h40.'},
+  {n:'Protocolo Avançado de Glúteos', cat:'Cursos completos', locked:true, desc:'Aprofundamento em métodos de intensidade e periodização para ênfase de glúteo. 18 aulas · 5h10.'},
+  {n:'Correção Postural na Prática', cat:'Cursos completos', locked:true, desc:'Como identificar e corrigir os principais desvios posturais no dia a dia de treino. 9 aulas · 2h20.'},
+  {n:'Introdução ao método MUSA+', cat:'Introdução', locked:false, desc:'Uma visão geral de como a plataforma e a metodologia funcionam juntas. 6 min.'},
+  {n:'Como interpretar seu DNA', cat:'Introdução', locked:false, desc:'Entenda o que cada indicador do seu DNA MUSA significa na prática. 5 min.'},
+  {n:'Cluster set e restpause na prática', cat:'Métodos de treino', locked:false, desc:'Como executar corretamente os métodos de intensidade usados no seu treino. 4 min.'},
+  {n:'Rest Pause', cat:'Métodos de treino', locked:false, desc:'Como aplicar o método restpause corretamente durante o treino.', video:'https://youtu.be/ZpojZRSlNN0'},
+  {n:'Drop-Set', cat:'Métodos de treino', locked:false, desc:'Entenda o método dropset e quando utilizá-lo.', video:'https://youtu.be/q07XMVmZ1qk'},
+  {n:'Bi-Set', cat:'Métodos de treino', locked:false, desc:'Como estruturar um bi-set de forma eficiente.', video:'https://youtu.be/rSEVm1h0XtA'},
+  {n:'Tri-Set', cat:'Métodos de treino', locked:false, desc:'Como estruturar um tri-set de forma eficiente.', video:'https://youtu.be/-YDqVqmsUg8'},
+  {n:'Pirâmide Descrescente', cat:'Métodos de treino', locked:false, desc:'Método de pirâmide decrescente explicado na prática.', video:'https://youtu.be/Q1Prp4AE5EM'},
+  {n:'Pirâmide Crescente', cat:'Métodos de treino', locked:false, desc:'Método de pirâmide crescente explicado na prática.', video:'https://youtu.be/2lnzLHARO-Y'},
+  {n:'Método Circuito', cat:'Métodos de treino', locked:false, desc:'Como montar e executar um treino em circuito.', video:'https://youtu.be/cXBh3UR03SA'},
+  {n:'Método Gvt', cat:'Métodos de treino', locked:false, desc:'Entenda o método GVT (German Volume Training).', video:'https://youtu.be/JoA6V-KF5hY'},
+  {n:'Ajuste De Cargas', cat:'Métodos de treino', locked:false, desc:'Como ajustar cargas de forma inteligente ao longo do treino.', video:'https://youtu.be/sHNdfqr6yAQ'},
+  {n:'Ajuste De Cargas', cat:'Métodos de treino', locked:false, desc:'Como ajustar cargas de forma inteligente ao longo do treino.', video:'https://youtu.be/sHNdfqr6yAQ'},
+  {n:'Execução: agachamento livre', cat:'Exercícios de coxa', locked:false, desc:'Guia completo de execução, amplitude e posicionamento correto. 4 min.'},
+  {n:'Execução: cadeira extensora', cat:'Exercícios de coxa', locked:false, desc:'Detalhes técnicos para maximizar o estímulo de quadríceps com segurança. 3 min.'},
+  {n:'Execução: elevação pélvica', cat:'Exercícios de glúteo', locked:false, desc:'Como posicionar o quadril e manter a contração correta durante o movimento. 3 min.'},
+  {n:'Execução: abdução na polia', cat:'Exercícios de glúteo', locked:false, desc:'Técnica para isolar o glúteo médio com eficiência. 2 min.'},
+  {n:'Manobras Respiratórias — Curso Completo', cat:'Cursos completos', locked:false, desc:'Sequência completa: 3 vídeos de introdução (respiração, liberação de fáscia, manobra respiratória) + 4 aulas práticas.', aulas:[
+    {titulo:'Parte 1: Aprenda a Respirar', video:'https://youtu.be/8ixgAPGj2nE'},
+    {titulo:'Parte 2: Liberação da Fáscia Muscular', video:'https://youtu.be/wdgyIXsuoG8'},
+    {titulo:'Parte 3: Manobra Respiratória', video:'https://youtu.be/xFU5MbneT9E'},
+    {titulo:'Aula 1', video:'https://youtu.be/1jbwkF3qvlY'},
+    {titulo:'Aula 2', video:'https://youtu.be/zTavlpabQE0'},
+    {titulo:'Aula 3', video:'https://youtu.be/UjsuO_E2HWI'},
+    {titulo:'Aula 4', video:'https://youtu.be/AMS6nbcyk0k'}
+  ]}
+];
+
+const categorias = ['Todos', 'Cursos completos', 'Introdução', 'Métodos de treino', 'Exercícios de coxa', 'Exercícios de glúteo'];
+let filtroAtivo = 'Todos';
+
+const filterRow = document.getElementById('filter-row');
+categorias.forEach(function(cat){
+  const chip = document.createElement('div');
+  chip.className = 'chip' + (cat === filtroAtivo ? ' active' : '');
+  chip.textContent = cat;
+  chip.onclick = function(){
+    filtroAtivo = cat;
+    document.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
+    chip.classList.add('active');
+    renderGrid();
+  };
+  filterRow.appendChild(chip);
+});
+
+function renderGrid(){
+  const grid = document.getElementById('poster-grid');
+  grid.innerHTML = '';
+  const lista = conteudos.filter(function(c){ return filtroAtivo === 'Todos' || c.cat === filtroAtivo; });
+  lista.forEach(function(c){
+    const el = document.createElement('div');
+    el.className = 'vposter';
+    el.innerHTML =
+      '<div class="vcover">' +
+        (c.locked ? '<div class="lock-icon"><i class="ti ti-lock"></i></div>' : '') +
+        '<i class="ti ti-player-play play"></i>' +
+      '</div>' +
+      '<p class="vtitle">' + c.n + '</p>';
+    el.onclick = function(){ openDetail('conteudo', c); };
+    grid.appendChild(el);
+  });
+}
+renderGrid();
+
+/* ===== PERSONAL ===== */
+
+const alunasPersonal = [
+  {nome:'Graziele Steffens', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'', piramide:'1- gluteo 2-coxa 3-abdomen 4-braço', objetivo:'perda de peso e definição (me incomoda muito meu braço e a gordura das costas)', restricoes:'Nenhuma relatada', academia:'academia live fit - canoas', dataAnamnese:'2022-04-28'},
+  {nome:'Guilherme Barros', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'5x por semana', email:'guilherminhobarros@yahoo.com.br', telefone:'', piramide:'1°', objetivo:'Evoluir meu corpo.', restricoes:'Não.; Não.; Não.', academia:'Performance', dataAnamnese:'2022-05-04'},
+  {nome:'Deise', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'deisemolina.l@icloud.com', telefone:'', piramide:'Bumbum, coxas, barriga e braços', objetivo:'Foco e evolução', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2022-05-07'},
+  {nome:'Gabriela', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'gabriiela407@gmail.com', telefone:'', piramide:'Perna glúteo e abdomen', objetivo:'Me torna uma musa kkkk como as outras alunas ter uma evolução top pra me sentir novamente bem com o espelho', restricoes:'Nenhuma relatada', academia:'Performance fitness em eldorado', dataAnamnese:'2022-05-09'},
+  {nome:'Fabiana', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'4x por semana', email:'fabianabalt@gmail.com', telefone:'', piramide:'1- inferiores -glúteo e coxa 2 - core - abdômen e lombar  3 - postural - escapula aladas ombros e peitos fechado  4 - superiores', objetivo:'Orientação adequada quanto a postura dos exercícios;,  organizar os treinos, aeróbicos  e , flexibilidade dentro da minha disponibilidade e de acordo com o meu porte físico e necessidade do corpo, focando no que eu realmente preciso melhorar. Ter alguém p tirar dúvidas e me dizer o q fazer e qdo fazer.', restricoes:'Tenho Bursite/tendinite no Ombro direito, desgaste manguito , e tive cervicalgia e lombar por falta fortalecimento core e pela intensidade de treinos e corrida. Encurtamento músculo pissoas.; Escoliose em s e hiperlordose .; Não .', academia:'Smartfit / academia casa e aeróbico quartel', dataAnamnese:'2022-05-10'},
+  {nome:'Ana Paula', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'5x por semana', email:'anapaulamatossouza5@gmail.com', telefone:'', piramide:'1-Glúteo 2-Coxas 3-Posterior 4-costas', objetivo:'Quero ter uma boa relação com o meu corpo. Me sentir bem comigo mesma.', restricoes:'Nunca tive.; Não.; Nunca', academia:'Star fitniss', dataAnamnese:'2022-05-24'},
+  {nome:'gabriel', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'3x por semana', email:'andrades.santosg@gmail.com', telefone:'', piramide:'Braço, peito, costas, abdômen', objetivo:'Crescimento e definição muscular', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2022-06-01'},
+  {nome:'Andresa Medeiros de Cardoso', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'5x por semana', email:'andresamedeirosc@outlook.com', telefone:'', piramide:'1• Bunda / 2• Perna / 3• Barriga / 4• superiores', objetivo:'Ganhar massa', restricoes:'Tive no pé esquerdo uma batida muito forte , mas não quebrou , porém as vezes sinto um pouco de dor ( bem leve ) nada que prejudique.', academia:'Smart Fit', dataAnamnese:'2022-06-04'},
+  {nome:'Cláudia DIEHL Garcia', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'claudinha18diehl@gmail.com.br', telefone:'', piramide:'Glúteo , coxa', objetivo:'Otimizar resultados', restricoes:'Condropatia grau 3; Condropatia grau 3', academia:'Acho q smart fitness', dataAnamnese:'2022-06-05'},
+  {nome:'Jéssica Marins', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'jessicamarins.direito@gmail.com', telefone:'', piramide:'1', objetivo:'Ficar em forma e com musculação bem como ter acesso ao material para saber quais máquinas utilizar para ter um bom resultado.', restricoes:'Não.', academia:'Ainda não sei, a princípio performace deve ter todas as máquinas abaixo', dataAnamnese:'2022-06-07'},
+  {nome:'Keli barbieri', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'barbierikeli@gmail.com', telefone:'', piramide:'1 abdômen  2 glúteos  3 coxa', objetivo:'Definir, emagrecer e perder a celulite', restricoes:'Nenhuma relatada', academia:'Performance  Fitness Em Eldorado', dataAnamnese:'2022-06-08'},
+  {nome:'Charlene', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'chatrinsi@yahoo.com', telefone:'', piramide:'Não sei bem como te responder isso. Meu objetivo é emagrecer, eliminar barriga crescer o bumbum e tonificar o corpo.', objetivo:'Ter um guia para emagrecer e tonificar o corpo com saúde.', restricoes:'Sim no joelho direito e lombar; Tenho os ligamentos do joelho danificado. Posso fazer praticamente tudo desde que com cuidado.', academia:'PureGym', dataAnamnese:'2022-06-09'},
+  {nome:'Luciano Costa de Sá', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'5x por semana', email:'lucianocostasa@gmail.com', telefone:'', piramide:'quero 1) peito mas preciso atualmente 2) biceps e tricps 3) costas 4) Perna', objetivo:'Ganhar massa muscular e perder gordura corporal', restricoes:'braco esquerdo fraturado que consolidou com desvio; ja tive braco esquerdo fraturado que consolidou com desvio; braço esquerdo articulação do cotovelo com minima limitação', academia:'Performance', dataAnamnese:'2022-06-15'},
+  {nome:'Vagner Moura Magalhães', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'5x por semana', email:'vagnerxitapemirim@gmail.com', telefone:'', piramide:'Peito braço e costa', objetivo:'Definir', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2022-06-22'},
+  {nome:'Eduarda lopes', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'6x por semana', email:'dudalopes1999@gmail.com', telefone:'', piramide:'1- barriga; 2- bumbum; 3- costas, 4- coxa.', objetivo:'Ter auxílio nos treinos para obter resultados bons.', restricoes:'Rompimento parcial do ligamento do tornozelo.', academia:'Performance', dataAnamnese:'2022-06-28'},
+  {nome:'Henrique', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'henriquegarcia1597@gmail.com', telefone:'', piramide:'Barriga e cintura ( flancos )', objetivo:'Emagrecimento e fortalecimento muscular', restricoes:'Nenhuma relatada', academia:'Smartfit', dataAnamnese:'2022-06-29'},
+  {nome:'Ana Cristina', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'anacpdecastro1@gmail.com', telefone:'', piramide:'1-bumbum 2- coxas 3- barriga 4- costas', objetivo:'Eliminar gordura e ganhar músculo.', restricoes:'Não.', academia:'Performance', dataAnamnese:'2022-07-10'},
+  {nome:'Arisson motta', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'6x por semana', email:'arissonmotta17@hotmail.com', telefone:'', piramide:'1-braços 2-peito 3- pernas 4-costas', objetivo:'.', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2022-07-10'},
+  {nome:'Larissa', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'larissa.rsantanq@gmail.com', telefone:'', piramide:'1', objetivo:'Ter mais resultados', restricoes:'Nenhuma relatada', academia:'Yes fitness', dataAnamnese:'2022-07-12'},
+  {nome:'Franciele Freitas dos Santos', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'3x por semana', email:'francielefreitasdosssantos318@gmail.com', telefone:'', piramide:'Pernas, barriga, costas', objetivo:'Ganhar massa muscular, e manter o meu peso', restricoes:'Nenhuma relatada', academia:'Yes', dataAnamnese:'2022-07-13'},
+  {nome:'Fernanda Soares Rodrigues', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'2x por semana', email:'fernandasr3@gmail.com', telefone:'', piramide:'Bumbum, coxas, barriga, costas', objetivo:'Ter um treino organizado para perder gordura e ganhar massa muscular. Definir pernas e bumbum, criar mais cintura e deixar o abdômen mais definido. Tb quero a consultoria para não  me lesionar e fazer corretamente os exercícios.', restricoes:'As vezes for na lombar e  cervical.', academia:'Engenharia do corpo', dataAnamnese:'2022-07-13'},
+  {nome:'Simone da Rosa', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'3x por semana', email:'Mony_darosa@hotmail.com', telefone:'', piramide:'1-3-2-4', objetivo:'Perder barriga e definir coxas e bumbum', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2022-07-27'},
+  {nome:'Cibele Santos', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'4x por semana', email:'cibele_rs@hotmail.com', telefone:'', piramide:'Bumbum, barriga, coxa, braços', objetivo:'Treinar com mais certeza de que estou fazendo certo, com objetivo e segurança.', restricoes:'Nada grave.; Discopatia na lombar.; Não.', academia:'Yes Fitness', dataAnamnese:'2022-08-08'},
+  {nome:'Márcia Burgert', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'marcia.aidealimoveis@gmail.com', telefone:'', piramide:'1 barriga 2 coxa 3 bumbum 4 costas', objetivo:'Emagrecimento', restricoes:'Nenhuma relatada', academia:'Performace', dataAnamnese:'2022-08-10'},
+  {nome:'Wilkner Ladwig', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'5x por semana', email:'wilknerladwig34010@gmail.com', telefone:'', piramide:'2', objetivo:'Ganhar muita massa muscular.', restricoes:'Não.; Não.; Não.', academia:'Performance', dataAnamnese:'2022-08-23'},
+  {nome:'Kellen Rosynski', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'3x por semana', email:'kellenrosynski86@gmail.com', telefone:'', piramide:'1,2,3,4', objetivo:'Definição muscular,', restricoes:'Nenhuma relatada', academia:'Corpo e forma', dataAnamnese:'2022-08-24'},
+  {nome:'Juliana Machado Saucedo', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'juliana.machadosaucedo@gmail.com', telefone:'', piramide:'1- barriga 2- bumbum 3- coxa 4- costas', objetivo:'Emagrecer e definir', restricoes:'Tive uma contratura muscular na lombar', academia:'Yes fitness', dataAnamnese:'2022-08-24'},
+  {nome:'Amanda', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'amanda.lilge2012@gmail.com', telefone:'', piramide:'1° barriga 2° bumbum 3° perna 4° costas/braço', objetivo:'Emagrecer e ganhar massa muscular', restricoes:'Nenhuma relatada', academia:'Performance Fitness', dataAnamnese:'2022-09-07'},
+  {nome:'Deisi', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'4x por semana', email:'deisirejanesantos@gmail.com', telefone:'', piramide:'1200', objetivo:'Focar e definir o meu corpo de acordo!', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2022-09-29'},
+  {nome:'Fabiana Neves da Silveira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'5x por semana', email:'fabilzrn@gmail.com', telefone:'', piramide:'Bumbum, barriga, coxa, costas', objetivo:'Realizar exercícios corretamente', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2022-10-03'},
+  {nome:'Lúcia Scopinski', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'luciascopinski@gmail.com', telefone:'', piramide:'Bumbum, coxa, barriga e tríceps', objetivo:'Definir o corpo', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2022-10-16'},
+  {nome:'Rita Fric', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'rita.fric@gmail.com', telefone:'', piramide:'Glúteos, posterior, interna de coxa, abdômen', objetivo:'Redução de gordura e definição', restricoes:'Nenhuma relatada', academia:'Canoas Planet Club e em Lajeado Monte Olimpo', dataAnamnese:'2022-11-09'},
+  {nome:'Hellen Teixeira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'A definir', email:'teixeirahellen22@gmail.com', telefone:'', piramide:'1 bumbum , 2 barriga , 3 coxas , 4 braços .', objetivo:'Conseguir executar os exercícios de forma correta, para melhor resultados tanto na estética quanto mental .', restricoes:'Não .', academia:'Performance', dataAnamnese:'2022-11-15'},
+  {nome:'Brendha', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'3x por semana', email:'brendhamedeiros4@gmail.com', telefone:'', piramide:'1-bumbum 2-barriga 3-coxa 4-costa', objetivo:'Ter um resultado satisfatório.', restricoes:'Nenhuma relatada', academia:'Perfomance', dataAnamnese:'2022-11-15'},
+  {nome:'Karina Ribeiro', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'karinaribeirors@gmail.com', telefone:'', piramide:'Coxas, bumbum, braços e costas', objetivo:'Ganhar massa muscular, definir e perder gordura', restricoes:'Torci o tornozelo mas já passou; Diastase abdominal', academia:'As vezes na Performance outras na high fitnes', dataAnamnese:'2022-11-20'},
+  {nome:'Ezequiel Rodrigues Trindade', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'ezefuts@gmail.com', telefone:'', piramide:'1-braços, 2-peito, 3-barriga, 4-pernas', objetivo:'Melhora nos resultados dos treinos', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2022-11-20'},
+  {nome:'Bianca', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'biancasilveirars22@gmail.com', telefone:'', piramide:'Coxa, glúteo, braço e costa', objetivo:'Ganho de massa muscular e perda de massa gorda', restricoes:'Sim, tive erisipela na perna esquerda, mas não impede de fazer os exercícios', academia:'Performance e High fitnees', dataAnamnese:'2022-11-21'},
+  {nome:'Viviane Pereira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'vivianepera@hotmail.com', telefone:'', piramide:'2 1 3 4', objetivo:'Emagrecimento e massa magra', restricoes:'Sim estou me curando de uma tandinite no ombro', academia:'Performance', dataAnamnese:'2022-11-23'},
+  {nome:'Evelyn Vargas', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'evelynvargas725@gmail.com', telefone:'', piramide:'1 - Glúteos  2 - Coxas 3 - Barriga  4 - Costas  Exatamente como no exemplo', objetivo:'Meu objetivo principal é recuperar a minha auto estima. Após a minha segunda gestação (são duas cesarianas) tive muito aquele famoso efeito sanfona, isso acabou muito com a minha auto estima. Relaxei por completo. Com a depressão e ansiedade andando juntas acabei piorando. Chegando no auge dos 82kg (atualmente). A diástase também é minha inimiga, não gostaria de me submeter a procedimentos estéticos sem antes tentar de forma natural em construir o corpo dos meus sonhos.', restricoes:'Sim. Quando estava grávida de 3 meses, em 2017, tive muitas crises de dor na coluna. Fazia muita infiltração com o médico que me tratava na época em Guaíba. Como não passava e estava refém da infiltração procurei uma segunda opinião médica. Então fiz a ressonância magnética e constatou degeneração discal.', academia:'Yes Fitness', dataAnamnese:'2022-11-25'},
+  {nome:'Diovana Beatriz Gomes Zelake', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'4x por semana', email:'did.zelake@gmail.com', telefone:'', piramide:'Barriga, bumbum, coxa, braço', objetivo:'Definição e uma barriga chapada', restricoes:'Uma dor no ombro quando faço MT esforço', academia:'Em casa', dataAnamnese:'2022-12-05'},
+  {nome:'Alana Silva de Oliveira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'5x por semana', email:'alanavitor.mayapepe@gmail.com', telefone:'', piramide:'Todos', objetivo:'Alcançar minhas metas, evoluir chegar aonde eu nunca cheguei.', restricoes:'Nenhuma relatada', academia:'High fitness', dataAnamnese:'2022-12-05'},
+  {nome:'Daiana', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'daianakohls@hotmail.com', telefone:'', piramide:'1 bumbum,2 coxa, 3 barriga 4 costas', objetivo:'Definição de pernas e glúteos', restricoes:'Joelho, acidente de moto doi se subir muita escada', academia:'Em casa', dataAnamnese:'2022-12-05'},
+  {nome:'Karina', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'karina.gds@hotmail.com', telefone:'', piramide:'Barriga  Costas  Bumbum  Coxa', objetivo:'Alcançar meu objetivo de chegar aos 64 kg,e perder um bom pouco da barriga', restricoes:'Luxação na perna a 11 anos', academia:'Em casa/yes fitness', dataAnamnese:'2022-12-06'},
+  {nome:'Patrícia Gonzalez', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'patriciagonzalez_rs@hotmail.com', telefone:'', piramide:'1 barriga, 2 coxas, 3 braço, 4 bumbum, 5 costas', objetivo:'Emagrecer, perder barriga, definir o corpo', restricoes:'Nenhuma relatada', academia:'Engenharia do corpo Passo dareia', dataAnamnese:'2022-12-09'},
+  {nome:'camilly', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'camillyvescovi40@gmail.com', telefone:'', piramide:'1-barriga 2-bumbum 3-coxa 4-costas', objetivo:'ter resultados melhor', restricoes:'não tive; não tenho', academia:'gauleses', dataAnamnese:'2023-01-09'},
+  {nome:'Viviane goulart', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'vivianegoulart97@gmail.com', telefone:'', piramide:'1,2,4,3.', objetivo:'Aprendizado, crescimento de massa muscular.', restricoes:'Megapófise transversa bilateral em L5.', academia:'Academia corpo e forma.', dataAnamnese:'2023-01-09'},
+  {nome:'Samanta', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'3x por semana', email:'samantagoulart19@gmail.com', telefone:'', piramide:'Barriga, bumbum, coxa, costas', objetivo:'Ter resultados e aprender mais.', restricoes:'Nenhuma relatada', academia:'Academia Corpo e forma', dataAnamnese:'2023-01-09'},
+  {nome:'Bruna Melissa Morais Ferreira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'6x por semana', email:'bruna.melissa4@gmail.com', telefone:'', piramide:'1- glúteos, 2- barriga, 3 costas, 4- coxas', objetivo:'Experimentar a consultoria com toda a minha dedicação e ver os resultados q consigo.', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2023-01-11'},
+  {nome:'Brendha', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'brendharodrigues3@gmail.com', telefone:'', piramide:'1-Barriga, 2-Bumbum, 3-braços e 4- coxas', objetivo:'Emagrecimento', restricoes:'Sim, muai thay , joelho esquerdo incomoda um pouco as vezes. (Raramente)', academia:'Performance fitness', dataAnamnese:'2023-01-11'},
+  {nome:'Bruno Freitas Gadea', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'bfg_bruno@hotmail.com', telefone:'', piramide:'1-Abdomem, 2-peito, 3-braços, 4-costas', objetivo:'Buscar um corpo mais bonito, utilizando de forma correta e eficiente os exercícios, chegando a um resultado com saúde.', restricoes:'Dedo em gatilho no dedo médio da mão esquerda (mas não atrapalha nos exercícios). Pretendo operar no 1º semestre de 2023.; Dedo em gatilho na mão direita (nov 2022).', academia:'Performance Fitness (estou me inscrevendo)', dataAnamnese:'2023-01-11'},
+  {nome:'Marília Elusa dos Santos Brites', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'4x por semana', email:'mariliasantosbrites@gmail.com', telefone:'', piramide:'Barriga, braço, coxa, bumbum', objetivo:'Perder gordura, ganhar massa muscular', restricoes:'Escápulas dos joelhos deslocam', academia:'Engenharia do corpo', dataAnamnese:'2023-01-11'},
+  {nome:'Douglas soares', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'doug_mega@hotmail.com', telefone:'', piramide:'Costas, peitoral, pernas, barriga', objetivo:'Hipertrofia', restricoes:'Nenhuma relatada', academia:'Usina do corpo', dataAnamnese:'2023-01-12'},
+  {nome:'Luciane fonseca', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'lucianefonseca1980@gmail.com', telefone:'', piramide:'1-2-4', objetivo:'Definição', restricoes:'Nenhuma relatada', academia:'Nation', dataAnamnese:'2023-01-15'},
+  {nome:'Vanessa Morfan', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'vanessamorfan26@gmail.com', telefone:'', piramide:'1- bumbum, 2-coxa, 3-barriga, 4-costas', objetivo:'Melhorar qualidade de vida e hipertrofia', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2023-01-15'},
+  {nome:'DAIA Pires trentim', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'5x por semana', email:'daianepires201413@gmail.com', telefone:'', piramide:'Coxa', objetivo:'Bombum coxa barriga', restricoes:'51980102684', academia:'Performance', dataAnamnese:'2023-01-15'},
+  {nome:'Karina Saucedo', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'ksaucedo_rs@yahoo.com', telefone:'', piramide:'1 - barriga  2 - coxa 3 - bumbum 4 - costas', objetivo:'Emagrecimento e hipertrofia', restricoes:'Tive uma cesárea há 4 meses, mas até agora não me limitou.', academia:'MW Porto Alegre', dataAnamnese:'2023-01-17'},
+  {nome:'Camila Goulart Camboim', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'3x por semana', email:'camila.goulart_1@hotmail.com', telefone:'', piramide:'1° abdômen, 2° braços/costas,  3° bunda, 4° coxas....tipo tudo!', objetivo:'Fortalecer musculatura geral, principalmente abdominal, tirar excesso de gordura nas costas e braços, culotes, definir o corpo.', restricoes:'Tenho Psoríase e uma dor crônica em todo lado direito, discopatia degenerativa, esclerose óssea subcondral, coxartrose, artrite e artrose psorisiática.; Socroileíte bilateral, artropatia degenerativa coxofemoral, tendinopatia do glúteo mínimo e do médio. Estou encaminhando laudos.', academia:'Academia Corpo e Alma-Shopping Total', dataAnamnese:'2023-01-17'},
+  {nome:'Gabriel Brites', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'6x por semana', email:'britesgabriel253@gmail.com', telefone:'', piramide:'bíceps,peito,costa,pernas', objetivo:'definição', restricoes:'Nenhuma relatada', academia:'power estancia velha', dataAnamnese:'2023-01-23'},
+  {nome:'Evelin', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'evelin.oprach@hotmail.com', telefone:'', piramide:'coxas … bunda … costas … abdômen', objetivo:'Ganho de resistência e de musculatura', restricoes:'Nenhuma relatada', academia:'Eldorado - guaiba ideia', dataAnamnese:'2023-01-24'},
+  {nome:'MARIELE', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'mariele.saez@gmail.com', telefone:'', piramide:'3 2 1 4', objetivo:'Perder gordura, fortalecer músculos e treinar para o taf', restricoes:'Nenhuma relatada', academia:'.', dataAnamnese:'2023-02-10'},
+  {nome:'Maria Luiza Souza Pereira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'luiza_luh09@hotmail.com', telefone:'77999667009', piramide:'1- bumbum 2-coxa 3- barriga 4-superior no geral', objetivo:'Desenvolver a minha musculatura e evoluir nos treinos', restricoes:'Nenhuma relatada', academia:'Extreme sports', dataAnamnese:'2023-03-05'},
+  {nome:'Michele Sirlem Fagundes Cirne', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'5x por semana', email:'michelefagundescirne@gmail.com', telefone:'(51)996020374', piramide:'1- barriga, 2- bumbum, 3- coxa e 4 -braço', objetivo:'Perda de peso e definição', restricoes:'Nenhuma relatada', academia:'Em casa', dataAnamnese:'2023-03-07'},
+  {nome:'Carine da Silva trapp', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'3x por semana', email:'carinetrapp55@gmail.com', telefone:'51989408029', piramide:'1 - bumbum, 2- coxa, 3 -barriga , 4- costas', objetivo:'Olhar no espelho e me sentir bem com o que vejo, um corpo bonito', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2023-03-07'},
+  {nome:'Gabriela Jacobsen', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'A definir', email:'bgabrielajacobsen@gmail.com', telefone:'51996063772', piramide:'Barriga, costas, braços e bumbum', objetivo:'Trabalharmos juntos para obter um resultado satisfatório sobre meu corpo e criar bons hábitos com a musculação', restricoes:'Realizei cesárea', academia:'Performance fitness', dataAnamnese:'2023-03-15'},
+  {nome:'Sílvia', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'4x por semana', email:'silviastltransportes@outlook.com.br', telefone:'51 995996941', piramide:'1ºbumbum,2º coxas, 3º barriga, 4º costas', objetivo:'Ganhar massa magra, perder gordura e definir', restricoes:'Nenhuma relatada', academia:'Perfomance fitness- Eldorado do Sul', dataAnamnese:'2023-03-17'},
+  {nome:'Aline', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'5x por semana', email:'alinedutracosme2000@gmail.com', telefone:'51985312118', piramide:'1, 2, 3 e 4', objetivo:'Ganho de massa', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2023-03-27'},
+  {nome:'Betina', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'4x por semana', email:'betina.vom@gmail.com', telefone:'51995592955', piramide:'Bumbum, peenas, barriga e bracos', objetivo:'Emagrecer e criar massa', restricoes:'Nenhuma relatada', academia:'Usina do corpo', dataAnamnese:'2023-04-04'},
+  {nome:'Bruna Melo Soares', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'brunamelosoares@gmail.com', telefone:'51992293575', piramide:'Barriga,bumbum,coxas e costas', objetivo:'Emagrecer', restricoes:'Nenhuma relatada', academia:'Perfomance', dataAnamnese:'2023-04-10'},
+  {nome:'erica da silva abreu', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'6x por semana', email:'ericadasilvaabreu117@gmail.com', telefone:'51995098335', piramide:'1- coxa 2- barriga  3- glúteo  4- costas', objetivo:'me dedicar e alcançar meu objetivos', restricoes:'Nenhuma relatada', academia:'performance', dataAnamnese:'2023-05-13'},
+  {nome:'Carolina da Silva abreu', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'5x por semana', email:'abreuc916@gmail.com', telefone:'‪+55 51 98062‑0074‬', piramide:'1', objetivo:'Criar corpo', restricoes:'Nenhum', academia:'Academiaperformacef', dataAnamnese:'2023-05-13'},
+  {nome:'Letícia Graff', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'A definir', email:'leticiagraff123@gmail.com', telefone:'51980593827', piramide:'Emagrecimento 1 3 4', objetivo:'Emagrecimento e definição', restricoes:'Nenhuma relatada', academia:'Yes', dataAnamnese:'2023-05-14'},
+  {nome:'Maristela Brandão', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'4x por semana', email:'maristelabrandao99@gmail.com', telefone:'51989224998', piramide:'Braço  Coxas Bumbum  Barriga', objetivo:'Emagrecimento e definição', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2023-05-14'},
+  {nome:'Rafaela Mesquita Gouvea', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'rafa.gouvea@hotmail.com', telefone:'51985642726', piramide:'1°bumbum 2°coxa 3°barriga 4° definir braço', objetivo:'Auxílio para emagrecer e definição na musculatura', restricoes:'Tive, bursite no quadril e rompi ligamentos do tornozelo direito', academia:'Performance', dataAnamnese:'2023-05-16'},
+  {nome:'Juliano de Souza Machado', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'juliano38-machado@outlook.com', telefone:'51998741214', piramide:'1- bíceps 2- peito 3- costas 4- panturrilha', objetivo:'Ter bons resultados', restricoes:'Nenhuma relatada', academia:'Sublime - Alvorada/RS', dataAnamnese:'2023-05-28'},
+  {nome:'KARINE DE FÁTIMA TRINDADE BARBOSA', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'kaka.fisioterapeuta@gmail.com', telefone:'51992369212', piramide:'1- BARRIGA 2-COSTAS- 3-BRAÇOS - 4-PERNAS 5- BUMBUM', objetivo:'REDUZIR PESO, DEFINIR MUSCULATURA E GANHODE FORÇA MUSCULAR', restricoes:'CONDROMALÁCIA PATELAR E', academia:'PERFORMANCE', dataAnamnese:'2023-06-01'},
+  {nome:'Rovena Frenzel', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'ro.frenzel@gmail.com', telefone:'51981457664', piramide:'Exatamente esta ordem - bumbum, coxa, barriga, costas', objetivo:'Me ajudar a ter uma sequência de exercícios eficazes, levando a um corpo mais proporcional e harmonioso, ao invés de eu ficar perdida fazendo exercícios que de repente, não atinjam meus objetivos.', restricoes:'Tenho duas hérnias de disco na lombar, L4-L5 e L5- S1. Sei exatamente que preciso de exercícios pra fortalecimento do core e no geral pra não ter crises/dores e tbem procuro cuidar muito a postura/execução e tipo de exercício.; Só as hérnias que falei acima.', academia:'Performance Fitness', dataAnamnese:'2023-06-06'},
+  {nome:'Angélica Fric', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'nutricionistafric@gmail.com', telefone:'51991416225', piramide:'1- glúteos 2- coxas (lateral principalmente) 3 - abdômen 4 - superiores', objetivo:'Hipertrofia,  para superiores não tem problema treinar “pesado”, tenho maior dificuldade em inferiores devido as dores (exames que te mandei). Então se eu conseguir ficar com 60kg mas com maior volume muscular, eu fico bem feliz.', restricoes:'Sim, tá nos exames que enviei.; Já foi enviado.', academia:'Treino na Planet Club em Canoas, mas pretendo mudar para a Engenharia do Corpo mês que vem.', dataAnamnese:'2023-06-10'},
+  {nome:'Yasmin Flores de Oliveira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'yasminflores550@gmail.com', telefone:'51 984562913', piramide:'1° bumbum 2° coxa 3° barriga  4° costas', objetivo:'Ganhar massa muscular e ter definição.', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2023-06-26'},
+  {nome:'Kenya Balz', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'3x por semana', email:'kenyabalz.16@gmail.com', telefone:'51993634809', piramide:'1 - barriga, 2 - costas, 3 - bumbum, 4 - coxas', objetivo:'Perder peso com o menor grau de flacidez possível e definição muscular', restricoes:'Nenhuma relatada', academia:'Academia Mecca - centro - Gravataí', dataAnamnese:'2023-06-27'},
+  {nome:'Luciane Schmitt', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'6x por semana', email:'lu.mendes.marques@gmail.com', telefone:'(51)991714828', piramide:'Exatamente a ordem acima', objetivo:'Resultado', restricoes:'Ciático perna direita e braço esquerdo (tendinite); Sim', academia:'Performance', dataAnamnese:'2023-06-28'},
+  {nome:'Priscila Bissigo', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'4x por semana', email:'priscila.bissigo@hotmail.com', telefone:'51982889430', piramide:'Abdômen - glúteos - coxas - braços - costas', objetivo:'Potencializar os resultados', restricoes:'Nenhuma relatada', academia:'Yes', dataAnamnese:'2023-07-02'},
+  {nome:'Mariana Santana', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'A definir', email:'periciasrt@yahoo.com.br', telefone:'51999053099', piramide:'Bumbum e barriga', objetivo:'Definir', restricoes:'Nenhuma relatada', academia:'Smart', dataAnamnese:'2023-07-03'},
+  {nome:'Mariana conzatti', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'4x por semana', email:'marianaconzatti97@gmail.com', telefone:'51981858087', piramide:'1- coxa 2- glúteo 3- abdômen 4- braço', objetivo:'Ganho de massa magra e definição', restricoes:'Lombar, joelhos; Leve desgaste de cartilagem dos joelhos', academia:'Smart fit', dataAnamnese:'2023-07-07'},
+  {nome:'Maiara Santos', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'maiarasantosvez@gmail.com', telefone:'51992851011', piramide:'1 barriga  2 bumbum  3 coxas  4 costas', objetivo:'Perder peso e ganhar definição', restricoes:'Epicondilite no cotovelo direito', academia:'Moinhos fitness', dataAnamnese:'2023-07-07'},
+  {nome:'Eduardo barbosa oliveira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'Eduardobarbosaoliveira10@gmail.com', telefone:'51991941368', piramide:'1_abdomem 2-peito3- costas4-pernas', objetivo:'Perda de peso e ganho de massa muscular', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2023-07-10'},
+  {nome:'Carla hendler evaldt', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'carlahendler@yahoo.com', telefone:'51 982161600', piramide:'1 bumbum 2 coxa 3 barriga e cintura 4 costas', objetivo:'Definir corpo e ganhar massa muscular', restricoes:'Nenhuma relatada', academia:'Yes fitnes em Eldorado do Sul', dataAnamnese:'2023-07-17'},
+  {nome:'Victoria shakur', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'6x por semana', email:'vicshakur78@icloud.com', telefone:'51985446487', piramide:'1 glúteo  2 coxa 3 costas  4 abdômen', objetivo:'Hipertrofia', restricoes:'Naoo', academia:'Yes fitness', dataAnamnese:'2023-07-20'},
+  {nome:'Michel Borges Evaldt', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'carlaehendler@gmail.com', telefone:'51999597597', piramide:'1 peitoral, 2braco, 3 abdômen, 4 perna', objetivo:'Definir o corpo', restricoes:'Nenhuma relatada', academia:'Yes fitnes', dataAnamnese:'2023-07-26'},
+  {nome:'Juliana Oliveira de Sousa', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'6x por semana', email:'sensiju@gmail.com', telefone:'21990442382', piramide:'1- Coxa, 2- barriga, 3- bumbum, 4-costas', objetivo:'Emagrecer e ter um corpo definido', restricoes:'Nenhuma relatada', academia:'Pratick academia (em sobral)', dataAnamnese:'2023-07-26'},
+  {nome:'Aline De Santana Diaz Machado', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'alinesdmachado@gmail.com', telefone:'51 986517741', piramide:'Glúteo, quadríceps e posterior (porém o foco é tudo, até superiores haha)', objetivo:'Hipertrofia', restricoes:'Nenhuma', academia:'Titanium', dataAnamnese:'2023-07-27'},
+  {nome:'Caroline Castro da Silveira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'5x por semana', email:'ccastrosilveira@gmail.com', telefone:'51991672778', piramide:'1 - Glúteo 2 - Coxas 3 - Costas 4 - Braços', objetivo:'Melhora nos resultados', restricoes:'Sim, fratura da clavícula direita', academia:'Performance', dataAnamnese:'2023-07-28'},
+  {nome:'Daniele Arl Vertuoso Salvador', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'4x por semana', email:'danivertuoso@gmail.com', telefone:'47992106298', piramide:'1 - bumbum, 2 - quadriceps, 3 - abdômen, 4 - costas', objetivo:'ganhar força muscular', restricoes:'Nenhuma relatada', academia:'movefit', dataAnamnese:'2023-07-28'},
+  {nome:'Katiusca dos Santos Oliveira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'oliveirakatisantos.ks@gmail.com', telefone:'51 997837527', piramide:'3412', objetivo:'Perder barriga e medidas', restricoes:'Nenhuma relatada', academia:'Performace/ B12', dataAnamnese:'2023-08-01'},
+  {nome:'Kamilly Oliveira Tiburski', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'millytiburski08@icloud.com', telefone:'51997117981', piramide:'1 bumbum', objetivo:'coxa definida,bumbum redondo e grande,afinar a cintura e me manter sem barriga', restricoes:'Nenhuma relatada', academia:'casa ou performance', dataAnamnese:'2023-08-01'},
+  {nome:'Daiane  Pires trentim', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'4x por semana', email:'daianepires@gamail.com.br', telefone:'980102684', piramide:'1', objetivo:'Perder peso ganhar massa', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2023-08-02'},
+  {nome:'Gabriela de Souza Miguel', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'4x por semana', email:'gabrielasouzamiguel@gmail.com', telefone:'(35) 99926-3773', piramide:'1- bumbum 2- barriga 3- coxa 4- costas', objetivo:'Perder peso, perder barriga (pochete), aumentar glúteos e coxa, afinar a cintura e ficar gostosa🤷', restricoes:'Sim, no braço esquerdo; Fiz abaixo do osso do cóccix', academia:'Workout', dataAnamnese:'2023-08-02'},
+  {nome:'Samantha dos Santos de Oliveira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'samantha.santos2@yahoo.com.br', telefone:'51981324886', piramide:'1°barriga,2-bumbum,3-coxa,4-costas', objetivo:'Recuperar minha autoestima e construir uma rotina de exercícios.', restricoes:'Nenhuma relatada', academia:'TopFitness Academia', dataAnamnese:'2023-08-02'},
+  {nome:'Amanda Lacerda', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'5x por semana', email:'lacerdaamanda103@gmail.com', telefone:'51992772709', piramide:'1-bumbum 2-coxa toda 3- costas 4- barriga', objetivo:'Meu objetivo é eliminar as gorduras e criar músculos', restricoes:'Nenhuma relatada', academia:'Blacksullfitness', dataAnamnese:'2023-08-02'},
+  {nome:'Lisa Rodrigues Naiff', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'lisanaiff69@gmail.com', telefone:'(51)992062805', piramide:'3', objetivo:'Emagrecer', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2023-08-03'},
+  {nome:'Raquel Frenzel', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'3x por semana', email:'raquelfrenzel@gmail.com', telefone:'(51) 999446617', piramide:'Tudo, inclusive MSS', objetivo:'Reforço muscular, emagrecimento', restricoes:'Canelite', academia:'Na performance ou na yes fitnes (aceito sugestões)', dataAnamnese:'2023-08-05'},
+  {nome:'Leonardo Colombo', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'leolimao210582@gmail.com', telefone:'48 998678948', piramide:'Peito , abdômen, bunda , perna', objetivo:'Peder peso e definição', restricoes:'Sim.  Ombro; Punho', academia:'Engenharia do Corpo', dataAnamnese:'2023-08-06'},
+  {nome:'Millene salvado', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'6x por semana', email:'millenesalvado83@gmail.com', telefone:'51986490186', piramide:'1 bumbum 2 coxas  3 barriga  4 costas', objetivo:'Crescimento', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2023-08-09'},
+  {nome:'Analu Carvalho', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'3x por semana', email:'ana@caberaf.com.br', telefone:'51998308830', piramide:'1-abdomem 2- cintura 3-pernas e interno das coxas  4- costas', objetivo:'Alcançar com Êxito meu Objetivo', restricoes:'Quebrei  o tornozelo direito, tenho 9 pinos e uma placa, dói as vezes, e tbm nao consigo abaixar muitooo , por exemplo de cócoras nao consigo ficar; tenho Ernia de disco na coluna cervical X5 e X6, escapei de cirurgia que estava agendada para 12/04, mas como sai da crise pedi ao medico que suspendesse; tornozelo direito', academia:'Performance', dataAnamnese:'2023-08-14'},
+  {nome:'Leon Kayro', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'leonkayro123@gmail.com', telefone:'51982328548', piramide:'Tudo', objetivo:'Me curar', restricoes:'Sim', academia:'Performance', dataAnamnese:'2023-08-16'},
+  {nome:'Thales Fontoura Soares', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'6x por semana', email:'thales_fontoura@hotmail.com', telefone:'51997603480', piramide:'Ombros, perna, costas, bicep e tríceps, peito', objetivo:'Ficar mais gato', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2023-08-21'},
+  {nome:'Nathali Albuquerque', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'nathalbuq@gmail.com', telefone:'51989251100', piramide:'1. Barriga, 2. Coxa, 3. Braço, 4. Bumbum', objetivo:'Emagrecer pelo menos 10kg, perder barriga e definir. Tive uma gestação em 2020 que foi até 42 semanas e deixou a barriga bem flácida. Exercícios pra postura também são bem vindos, trabalho 8h direto sentada. Aumentar resistência física.', restricoes:'Rompi o ligamento do tornozelo em dezembro e as vezes ainda sinto um leve desconforto', academia:'High ou Performance', dataAnamnese:'2023-08-21'},
+  {nome:'Naiara Machado', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'3x por semana', email:'naiara_machado@hotmail.com', telefone:'51980558557', piramide:'3, 1, 2, 4', objetivo:'Emagrecimento e hipertrofia', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2023-08-22'},
+  {nome:'Vivian Oliveira da Silva', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'vivianoliveiradasilva23@gmail.com', telefone:'51989766806', piramide:'1 barriga 2 bumbum 3 coxas 4 costas', objetivo:'Perder peso e ganhar glúteos', restricoes:'Nenhuma relatada', academia:'Cia do corpo', dataAnamnese:'2023-09-01'},
+  {nome:'Camila da Silva Estevão', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'4x por semana', email:'camila_estevao15@hotmail.com', telefone:'51 991978368', piramide:'Quadríceps; glúteo; panturrilha; barriga', objetivo:'Hipertrofia', restricoes:'Nenhuma relatada', academia:'Moinhos fitness', dataAnamnese:'2023-09-02'},
+  {nome:'Caroline', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'3x por semana', email:'carollalgayer@icloud.com', telefone:'51997975459', piramide:'1 pernas , 2 bumbum, 3 barriga, 4 costas (coluna)', objetivo:'Ganhar definição de pernas e glúteo', restricoes:'Hiperlordose na cervical e lombar e discopatia degenerativa da lombar e da cervical', academia:'Bodytech', dataAnamnese:'2023-09-04'},
+  {nome:'Joao carlos l de souza filho', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'4x por semana', email:'joaocarloslemos91@gmail.com', telefone:'51989502000', piramide:'1 barriga 2 peito 3 costas 4 braços', objetivo:'Obter auxílio para. Conseguir resultados mais rapidamente', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2023-09-05'},
+  {nome:'Atricia cardoso', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'3x por semana', email:'atricia.cardoso@gmail.com', telefone:'51995655212', piramide:'1 2 3 4', objetivo:'Definição', restricoes:'Coluna lombar', academia:'Eldo e poa', dataAnamnese:'2023-09-09'},
+  {nome:'Mariana Medeiros Castanha', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'castanhamedeiros1@gmail.com', telefone:'(51)98413-3054', piramide:'1, 2, 3 e 4', objetivo:'Fortalecimento muscular e definição', restricoes:'Já tive um tumor no quadril e devido a isso, em alguns aparelhos, sinto um pouco de sensibilidade na região', academia:'Performance', dataAnamnese:'2023-09-18'},
+  {nome:'Daiandra Gonçalves', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'daiandra.dasilva@gmail.com', telefone:'51 984809431', piramide:'1 barriga 2 bumbum 3 coxas 4 costas', objetivo:'Voltar ao meu corpo de antes das gestações', restricoes:'Nenhuma relatada', academia:'Em casa', dataAnamnese:'2023-09-20'},
+  {nome:'Priscila Justo Becker', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'5x por semana', email:'priscilajbecker20@gmail.com', telefone:'(51) 995987375', piramide:'1 - Gluteos 2 - Coxa 3 - Braços (biceps, triceps, ombro - normalmente acumulo gordura nessa região) 4 - Costas', objetivo:'conseguir um treino que realmente me traga resultados e seja focado no meu corpo', restricoes:'Nenhuma relatada', academia:'Engenharia do corpo - Petrópolis', dataAnamnese:'2023-09-21'},
+  {nome:'Pablo Leonardo', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'pablodudu2010@gmail.com', telefone:'51999266207', piramide:'1 - Shape 2 - bíceps 3 - Costas 4 - Pernas', objetivo:'Consistência e apoio profissional', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2023-10-08'},
+  {nome:'Luciana Machado', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'lumachadorecova02@gmail.com', telefone:'51995502031', piramide:'1 Barriga,  2 bumbum,  3 coxa,  4 costas', objetivo:'Primeiro lugar pela saúde, segundo, definir o corpo', restricoes:'Nenhuma relatada', academia:'Sesc', dataAnamnese:'2023-10-10'},
+  {nome:'Adriana Do Couto Schnadelbach', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'6x por semana', email:'schnadelbachadriana@gmail.com', telefone:'51995027512', piramide:'1- quadricips, 2- glúteo, posteiror e abdômen', objetivo:'Ter um treino alinhado que eu evoluía e tenha ótimos resultados.', restricoes:'Vascular', academia:'Performance', dataAnamnese:'2023-10-23'},
+  {nome:'Bárbara Darski', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'darski.barbara@gmail.com', telefone:'51 994537683', piramide:'1 - barriga, 2 - bumbum, 3 - pernas, 4 - braços', objetivo:'Perder peso, ter qualidade de vida e definir meu corpo', restricoes:'Nunca tive, mas possuo condropatia patelar nos dois joelhos, fator genético; Condropatia patelar, grau 3 no joelho direito e grau 2 no joelho esquerdo; Nunca', academia:'Sesc Centro Histórico', dataAnamnese:'2023-10-23'},
+  {nome:'Alisson Bruno Oliveira da Cunha', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'alisson.obruno@gmail.com', telefone:'51996387029', piramide:'1-Peito, 2-Biceps, 3- coxa, 4- costas', objetivo:'Ganho de massa muscular e definição.', restricoes:'Nenhuma relatada', academia:'Engenharia do corpo', dataAnamnese:'2023-10-23'},
+  {nome:'Mari Dantas', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'5x por semana', email:'marisete.osorio@hotmail.com', telefone:'51985099341', piramide:'1Barriga 2costas 3Bumbum 4 coxa', objetivo:'Emagrecer e ganhar massa muscular', restricoes:'Nunca tive; Ñ; Ñ', academia:'Barra Thay', dataAnamnese:'2023-11-16'},
+  {nome:'Monica Colombo', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'A definir', email:'monicacolombo2013@gmail.com', telefone:'+5551998080439', piramide:'3 2 1 4', objetivo:'Diminuir medidas e definir perna coxa barriga e bumbum', restricoes:'Pé torção', academia:'Bem estar Cachoeirinha', dataAnamnese:'2023-11-20'},
+  {nome:'Natália Rodrigues', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'5x por semana', email:'nathyrodriguess_@hotmail.com', telefone:'51996405068', piramide:'1• bumbum, 2 • coxa, 3 • barriga e 4 • bíceps', objetivo:'Definir bumbum, coxas (tenho muita dificuldade em definir quadríceps), secar barriga', restricoes:'Nenhuma relatada', academia:'Academia Performance', dataAnamnese:'2023-11-20'},
+  {nome:'Rubia Bagesteiro', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'bagesteiro.r@gmail.com', telefone:'51995073871', piramide:'1- bumbum, 2-coxa, 3- braços, 4- costas', objetivo:'Diminuir o percentual de gordura e hipertrofia', restricoes:'Nenhuma relatada', academia:'Em primeiro momento em casa, mas penso em futuramente treinar em alguma academia de Eldorado', dataAnamnese:'2023-11-20'},
+  {nome:'Thaila Gomes', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'6x por semana', email:'thailaandry@gmail.com', telefone:'51994224479', piramide:'3,1,2,4', objetivo:'Saúde e alto estima', restricoes:'Nenhuma relatada', academia:'Arena Humaitá', dataAnamnese:'2023-11-20'},
+  {nome:'Luciana Teixeira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'A definir', email:'lucianaitaquy@gmail.com', telefone:'51 99180.9978', piramide:'3', objetivo:'Emagrecimento', restricoes:'Nenhuma relatada', academia:'Academia do meu predio por enquanto. Acredito que tenha todos os aparelhos abaixo. Tem bastante pessoas que estão malhando na academia, fazendo musculação.', dataAnamnese:'2023-11-20'},
+  {nome:'Flávia da Silva', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'A definir', email:'bemvindocliente8101@gmail.com', telefone:'51984681781', piramide:'1- barriga 2- bumbum 3-coxas 4- costas', objetivo:'Melhorar a saúde mental e física ( mto sedentária)', restricoes:'Nenhuma relatada', academia:'Ainda n sei , mas assim que der a YES', dataAnamnese:'2023-11-24'},
+  {nome:'Jessica Cabral', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'jessiicabral@live.com', telefone:'51989550503', piramide:'1 barriga 2 costas 3 bumbum 4 coxa', objetivo:'Hipertrofia quero definição no corpo sinto que os inferiores até mudou mas superiores estagnou', restricoes:'Nenhuma relatada', academia:'Yes', dataAnamnese:'2023-11-24'},
+  {nome:'Bianca', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'4x por semana', email:'biancasanttos15@hotmail.com', telefone:'51993730945', piramide:'1-barriga , 2- pernas, 3- bumbum', objetivo:'Emagrecer e definir', restricoes:'Ritimia leve', academia:'Performance', dataAnamnese:'2023-11-26'},
+  {nome:'Claudete Dantas Rolim', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'4x por semana', email:'clau.rolim8@gmail.com', telefone:'51 99448-9396', piramide:'Os 4', objetivo:'Tentar mudar um pouco o meu corpo', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2023-11-28'},
+  {nome:'Helen Caroline Brites dos Santos', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'4x por semana', email:'helenbrites342@gmail.com', telefone:'54991550436', piramide:'1- coxa 2-barriga 3- costas 4- bumbum', objetivo:'Atingir o peso ideal e ter o corpo definido', restricoes:'Leve desvio na coluna vertebral.', academia:'Engenharia do corpo', dataAnamnese:'2023-12-17'},
+  {nome:'Sonia marzona', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'2x por semana', email:'soniamariamarzona@gmail.com', telefone:'51994527474', piramide:'1) bumbum e costas 2) barriga 3) braço 4) coxa', objetivo:'Definir musculos e emagrecer', restricoes:'Nenhuma relatada', academia:'Performance fitness', dataAnamnese:'2024-01-04'},
+  {nome:'Monique Gonzalez Pereira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'moniquepereira645@gmail.com', telefone:'51993721614', piramide:'1 bumbum', objetivo:'Me ajudar a crescer os músculos', restricoes:'Nunca tive', academia:'Performance', dataAnamnese:'2024-01-05'},
+  {nome:'Jéssica Stéphanie', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'2x por semana', email:'jessica.nasario@gmail.com', telefone:'51-985076707', piramide:'Coxa, bumbum, barriga, braço', objetivo:'Definição muscular', restricoes:'Bursite no ombro direito; cervical retilínea; dores no joelho direito; Sim, bursite e cervical', academia:'BodyGym (Guaíba)', dataAnamnese:'2024-01-09'},
+  {nome:'Franciele', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'4x por semana', email:'franciele.morialdo@hotmail.com', telefone:'51995517353', piramide:'Bumbum, coxa, cintura, barriga (gosto de treinar costas também)', objetivo:'Ganhar massa muscular', restricoes:'Nenhuma relatada', academia:'Smart Fit menino Deus', dataAnamnese:'2024-01-10'},
+  {nome:'Bruna Pinós Rodzinski', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'rodzinskibruna@gmail.com', telefone:'51997209023', piramide:'1 coxa 2 bumbum 3 barriga 4 braço', objetivo:'hipertrofia e emagrecimento', restricoes:'Nenhuma relatada', academia:'performance', dataAnamnese:'2024-01-19'},
+  {nome:'Agatha', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'4x por semana', email:'agathajesus2909@gmail.com', telefone:'51989602709', piramide:'1 - barriga 2- coxa 3-bumbum', objetivo:'Emagrecer e definir a massa magra', restricoes:'Não, porém muita dor nas costas', academia:'Yes fitness', dataAnamnese:'2024-01-19'},
+  {nome:'Gisele', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'3x por semana', email:'gymanke1986@gmail.com', telefone:'51994031298', piramide:'Bumbum , coxa , barriga e braços', objetivo:'Um corpo definido', restricoes:'Tive na panturrilha esquerda ( trombose ) a seis meses', academia:'Yes fitness', dataAnamnese:'2024-01-22'},
+  {nome:'Luzeni Alves de oliveira Teixeira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'luzenir329@gmail.com', telefone:'65981325837', piramide:'1.3.4', objetivo:'Fazer os exercícios certo', restricoes:'Nenhuma relatada', academia:'Olímpica', dataAnamnese:'2024-02-08'},
+  {nome:'Danielli', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'5x por semana', email:'dfuchs347@gmail.com', telefone:'(51) 989241007', piramide:'1342', objetivo:'Perder peso e ganhar definição muscular', restricoes:'Sentia muita dor no joelho antes de começar a musculação. Já tive problemas na lombar e recentemente senti desconforto na mesma. Quando joguei vôlei ano passado tive uma leve lesão no ombro direito. E tmbm ando sentindo desconforto na escapula direita 🤡; Nada diagnosticado', academia:'Perfomance', dataAnamnese:'2024-02-12'},
+  {nome:'Cristiane Soares', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'6x por semana', email:'cristiane_oliveiraosares@hotmail.com', telefone:'51998313443', piramide:'1- bumbum 2- braço 3- barriga - costas', objetivo:'Fortalecimento', restricoes:'Nenhuma relatada', academia:'Engenharia', dataAnamnese:'2024-02-16'},
+  {nome:'Marilda', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'A definir', email:'Marilda1972@hotmail.com', telefone:'7865862453', piramide:'1coxa  2 barriga3 bumbum', objetivo:'Treinar com qualidade', restricoes:'Nenhuma relatada', academia:'You Fit', dataAnamnese:'2024-02-21'},
+  {nome:'Michele Abreu', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'michele.abreu@auxiliadorapredial.com.br', telefone:'51999571979', piramide:'1- barriga, 2- bumbum, 3- coxas 4- costas', objetivo:'Máximo de ganho muscular possível', restricoes:'Nenhuma relatada', academia:'Performance Fitness', dataAnamnese:'2024-03-07'},
+  {nome:'Marilene Lopes Mendonça', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'6x por semana', email:'ml4103766@gmail.com', telefone:'1978 7287503', piramide:'Costa', objetivo:'Perca de peso', restricoes:'Nenhuma relatada', academia:'Não sei o nome', dataAnamnese:'2024-03-14'},
+  {nome:'Maria Clara Gomes Brito', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'6x por semana', email:'maclaragomes.b@gmail.com', telefone:'51 996155298', piramide:'1- Barriga 1- Coxa 2- Superiores em geral 4- Bumbum', objetivo:'Eu gostaria de perder gordura e ganhar músculo.', restricoes:'Tenho uma fissura no joelho leve, causada provavelmente por condromalácia patelar.; Vou enviar à ressonância do joelho.; Não.', academia:'Performance de Eldorado.', dataAnamnese:'2024-03-15'},
+  {nome:'Eduarda da Silva coelho', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'6x por semana', email:'eduardacoeelho772@gmail.com', telefone:'(51)991983630', piramide:'2143', objetivo:'Hipertrofia', restricoes:'Nenhuma relatada', academia:'-', dataAnamnese:'2024-03-22'},
+  {nome:'Elis Agostini', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'3x por semana', email:'elis_agostini@hotmail.com', telefone:'51996901050', piramide:'1 - gluteos 2 - perna quadríceps, posterior  3 - abdômen', objetivo:'Definição e ganho de massa muscular', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2024-03-26'},
+  {nome:'Ana carolina luigi', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'5x por semana', email:'anacarolinacruzbessa@gmail.com', telefone:'321-9469794', piramide:'Bumbum, coxa, barriga, costas', objetivo:'Definir( acima não sei bem os nomes das máquinas ) então não sei o que tem )', restricoes:'Nenhuma relatada', academia:'Planet fitness', dataAnamnese:'2024-03-29'},
+  {nome:'Suehen', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'nattalleoliveira@hotmail.com', telefone:'5616744100', piramide:'1 barriga ,2 braços 3 pernas 4 costas', objetivo:'Aprender a me exercitar', restricoes:'No joelho', academia:'Ufit', dataAnamnese:'2024-04-04'},
+  {nome:'Karin Paliosa', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'A definir', email:'karin.radiologia@gmail.com', telefone:'51 993616934', piramide:'Glúteo, perna, costas, barriga', objetivo:'Aumentar massa magra, definição, aumentar glúteo', restricoes:'Nenhuma relatada', academia:'Fenix', dataAnamnese:'2024-04-05'},
+  {nome:'Natália Andrade', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'ailatan_edardna@hotmail.com', telefone:'051984656980', piramide:'Barriga/Bumbum/coxa/costas', objetivo:'Definição, emagrecimento, bem estar', restricoes:'Nenhuma relatada', academia:'Idéia Fitness Academia (Santa Rita)', dataAnamnese:'2024-04-08'},
+  {nome:'Edna Pereira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'edanamaria17@gmail.com', telefone:'3212084274', piramide:'1 e 3', objetivo:'Saúde', restricoes:'Não lembro', academia:'Nem uma', dataAnamnese:'2024-04-09'},
+  {nome:'laura Basso', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'laurabasso101@gmail.com', telefone:'51980132544', piramide:'1-bumbim 2-barriga 3-coxa  4-costas', objetivo:'Fazer os exercícios corretamente e ganhar massa muscular', restricoes:'nao tenho', academia:'performance', dataAnamnese:'2024-04-16'},
+  {nome:'Lugar preferido?', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'pamella.correaft@gmai.com', telefone:'+1 561 929 0601', piramide:'1 barriga; 2 coxa, 3 bumbum, 4 braço', objetivo:'Emagrecer', restricoes:'Nenhuma relatada', academia:'YouFit', dataAnamnese:'2024-04-18'},
+  {nome:'Claudia correa', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'4x por semana', email:'cld_maria@hotmail.com', telefone:'7742970981', piramide:'1 2,3,4,', objetivo:'Saúde definição', restricoes:'Pescoço', academia:'Planets fitness', dataAnamnese:'2024-05-01'},
+  {nome:'Schariana Larrea', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'4x por semana', email:'schariana.grandini@gmail.com', telefone:'51989175126', piramide:'3', objetivo:'Exercício corretos e ter definição muscular', restricoes:'Nenhuma relatada', academia:'Yes fitness', dataAnamnese:'2024-06-10'},
+  {nome:'Fabiana Azambuja dos Santos Barbosa', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'6x por semana', email:'pytty.faby@gmail.com', telefone:'51995452270', piramide:'1-barriga- 2 pernas 3- bracos 4- bumbum', objetivo:'Perder gordura e aumentar a massa magra', restricoes:'Nenhuma relatada', academia:'Em casa', dataAnamnese:'2024-06-23'},
+  {nome:'Giselle Troglio', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'gitroglio@hotmail.com', telefone:'51999869394', piramide:'Perna, barriga, costas, abdômen, braco', objetivo:'Ganhar massa muscular e perder gordura', restricoes:'Nenhuma relatada', academia:'Moinhos', dataAnamnese:'2024-06-26'},
+  {nome:'Vanessa Morfan', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'6x por semana', email:'vanessamorfan@icloud.con', telefone:'51995836100', piramide:'1- bumbum, 2-coxa, 3-barriga, 4-costas', objetivo:'Transforme meu corpo kkk', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2024-07-09'},
+  {nome:'Kimberlyn', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'kimberlynvitoriamoura@gmail.com', telefone:'51986108215', piramide:'1- barriga  2- bumbum 3- coxa 4- costas', objetivo:'É perder a gordura localizada da minha barriga', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2024-07-16'},
+  {nome:'Luana Cardoso Borges', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'4x por semana', email:'luannacardoso275@gmail.com', telefone:'51996374480', piramide:'Barriga - costas - bumbum - coxa', objetivo:'Meu objetivo é principalmente diminuir a barriga que me incomoda bastante e deixar o bumbum mais durinho', restricoes:'Nenhuma relatada', academia:'Rt fitness jardim dos lagos', dataAnamnese:'2024-07-18'},
+  {nome:'Stephani Azevedo Araujo', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'stephaniaraujo.2000@gmail.com', telefone:'51997308801', piramide:'1° Glúteos  2° Perna  3° barriga  4° costas/ parte superior no geral', objetivo:'definir o corpo', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2024-07-19'},
+  {nome:'Laís Silva Peixoto', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'laispeixotosilva123@gmail.com', telefone:'51993921086', piramide:'1- coxa 2 bumbum- barriga 4 braços', objetivo:'Preciso de treinos específicos, para o pouco que eu posso treinar que é 3 dias sejam bem aplicados. Tenho uma rotina corrida, filho de 1.8 meses então tudo precisa ser otimizado', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2024-07-30'},
+  {nome:'Flavia', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'fs456651@gmail.com', telefone:'2027517987', piramide:'2', objetivo:'Emagrecer e tirar a flacidez das pernas e dos braços', restricoes:'Nenhuma relatada', academia:'La fitness', dataAnamnese:'2024-08-02'},
+  {nome:'Caren Batista', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'cb030885@gmail.com', telefone:'51998503010', piramide:'1- bumbum 2- coxa 3-barriga 4-costas', objetivo:'Emagrecimento e definição.', restricoes:'Sim, desgaste na L5 (coluna); desgaste na L5 (coluna), não tenho exames recentes.', academia:'Studio Training', dataAnamnese:'2024-08-05'},
+  {nome:'Renata Jaqueline Sampaio', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'rjaquesampaio@gmail.com', telefone:'51996038856', piramide:'1- 3- 2-4', objetivo:'Glúteos ….. emagrecimento e ganho massa muscular', restricoes:'Tenho tendinite no joelho direito, normalmente sinto dor na canela ao fazer esteira', academia:'Engenharia do Corpo', dataAnamnese:'2024-08-05'},
+  {nome:'Isnelen Piacini', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'3x por semana', email:'isnelenpiacini06@gmail.com', telefone:'51993072923', piramide:'1° coxas, 2° bumbum, 3° Abdômen, 4° braços', objetivo:'Perda de peso e tonificação', restricoes:'Nenhuma relatada', academia:'No parque esportivo da Puc', dataAnamnese:'2024-08-12'},
+  {nome:'Ana Lúcia da rosa', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'darosaana799@gmail.com', telefone:'51 98186-2058', piramide:'1', objetivo:'Secar e definir meu corpo', restricoes:'Nenhuma relatada', academia:'Star fit', dataAnamnese:'2024-08-13'},
+  {nome:'Guilherme L Souza', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'A definir', email:'guilibretti@gmail.com', telefone:'051995229547', piramide:'1- Braço completo (tríceps, bíceps e ante braço) 2- Perna completa 3- Ombros 4- Abdômen', objetivo:'Adquirir um shape com volume e seco', restricoes:'Não.; Não.; Não.', academia:'Performance Residencial', dataAnamnese:'2024-08-14'},
+  {nome:'Maria Eduarda Guimarães de Souza', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'mariasouzaguimaraes2002@gmail.com', telefone:'51999070872', piramide:'1 bumbum 2 quadríceps 3 abdômen 4 braço', objetivo:'Emagrecer', restricoes:'Escoliose', academia:'Corpo e forma', dataAnamnese:'2024-08-14'},
+  {nome:'Nathalia Gonçalves San Martin', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'6x por semana', email:'natthaliag21@gmail.com', telefone:'51994239423', piramide:'Glúteo, coxa, barriga e costas', objetivo:'Definir o corpo', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2024-08-14'},
+  {nome:'Fabiana Peres Trindade', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'fabiana_perestrindade@hotmail.com', telefone:'51980457289', piramide:'Na real eu preciso de força muscular e emagrecer', objetivo:'Focar na academia', restricoes:'Bursite; Bha as águas levaram kkk', academia:'Atualmente na usina', dataAnamnese:'2024-08-16'},
+  {nome:'Felipe Carneiro de Araújo', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'fca.carneiro03@gmail.com', telefone:'48996015089', piramide:'1- peito , 2 - barriga , 3 - biceps , 4 - coxa', objetivo:'Emagrecer e definir', restricoes:'Nenhuma relatada', academia:'Engenharia do Corpo', dataAnamnese:'2024-08-19'},
+  {nome:'Rafaela Guimarães', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'5x por semana', email:'rafaela.pguimaraess@gmail.com', telefone:'5199272-6842', piramide:'2 1 3 4', objetivo:'Emagrecer e definir', restricoes:'Nenhuma relatada', academia:'Yes ou Performance', dataAnamnese:'2024-08-19'},
+  {nome:'Tatiane da Costa Caon', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'A definir', email:'tatianecc007@gmail.com', telefone:'51985621412', piramide:'1- 3 - 2 -4', objetivo:'Perder medidas e definir', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2024-08-20'},
+  {nome:'Jessika cunha', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'A definir', email:'jeekcunha@gmail.com', telefone:'51 996547272', piramide:'Glúteos, coxas, barriga e costas', objetivo:'Me auxiliar nos treinos', restricoes:'Apenas vertigem, tontura, quando faço algum exercício de subida e descida, ou algo muito rápido!', academia:'Em casa', dataAnamnese:'2024-08-21'},
+  {nome:'Francely Andrades Waszak', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'5x por semana', email:'francely.waszak@gmail.com', telefone:'51992952415', piramide:'1 barriga 2 perna 3 bumbum 4 peito', objetivo:'Perca de peso, definição muscular, bem estar', restricoes:'Desgaste de cartilagem no joelho esquerdo.', academia:'Performace', dataAnamnese:'2024-08-24'},
+  {nome:'gabriely waszak souza', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'gabriely.waszak@icloud.com', telefone:'51992070541', piramide:'barriga', objetivo:'emagrecimento', restricoes:'Nenhuma relatada', academia:'performance', dataAnamnese:'2024-08-24'},
+  {nome:'Priscila Ambos', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'prisilambos@gmail.com', telefone:'51 98266-0725', piramide:'1-bumbum urgente  2 coxas urgente   3-barriga urgente  4 - braços', objetivo:'Depois que eu perdi 22 kg eu tô.com as pernas finas e o bumbum caído isso me encomenda  muito fora a barriga  os braços  gordinhos ainda mais não quero emagrecer  quero deixar  essas partes do meu corpo melhores bumbum empinado  barriga com.menos gordura  braços  também  e coxas mais grossas  não estou feliz com meu corpo tudo fica feio', restricoes:'Não tenho nada som preguiça', academia:'Ainda nao sei preciso  de indicação  nao consigo  me adaptar  e tenho vergonha  de ir pra academia', dataAnamnese:'2024-09-07'},
+  {nome:'Giovana mazuhim', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'5x por semana', email:'giovanathamy@gmail.com', telefone:'51986592605', piramide:'Todos', objetivo:'Consiga atingir o máximo dos meus objetivos', restricoes:'Tenho o menisco discoide; Não enchente levou', academia:'Performance', dataAnamnese:'2024-09-07'},
+  {nome:'Paula Oliveira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'paula95817338@gmail.com', telefone:'51997762225', piramide:'1-barriga 2bumbum 3coxa 4costas', objetivo:'Sair da zona de conforto, parar de treinar fofo e pegar pesado', restricoes:'Nenhuma relatada', academia:'Talvez na yes fitness em eldorado, vou sair da academia que estou em Guaíba.', dataAnamnese:'2024-09-07'},
+  {nome:'Eduarda Machado Coutinho Gadêa', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'4x por semana', email:'dudamachado00@outlook.com', telefone:'51999381049', piramide:'1 bumbum, 2 coxas, 3 barriga e 4 braços', objetivo:'Ganhar massa muscular', restricoes:'Escoliose lombar', academia:'Academia MOVE EXTREME JURERÊ', dataAnamnese:'2024-09-08'},
+  {nome:'Carolina Machado Vargas', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'carolinamachadovargas@gmail.com', telefone:'51992391295', piramide:'1 Barriga 2 bumbum 3 coxa 4 costas e reforço muscular devido a minha lesão por causa da ginástica artística como já fizemos em 2019 nos treinos', objetivo:'Tirar as minhas dores da cervical, lombar, e joelho, fazer o reforço muscular, emagrecer, perder a barriga e definir o corpo', restricoes:'Sim na coluna compressão disco, tendinite braço direito, lesão cervical perda de força braço direito e encurtamento perna esquerda devido a lesão fêmur....Nariga tinha treino específico pra isso em 2019; Tenho mas não tenho mais os exames por causa da enchente; As questões da coluna', academia:'Acredito que vou alternar academia e treino em casa ou em parque/ caminhada ao ar livre depende mto do meu tempo/ dia', dataAnamnese:'2024-09-09'},
+  {nome:'Thalia', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'kohlsthalia@gmail.com', telefone:'51980490716', piramide:'1- barriga  2-bumbum  3-coxas  4- costas', objetivo:'Me ajudar a alcançar os objetivos traçados de emagrecimento e definição', restricoes:'Somente dores na lombar; Tenho', academia:'Na Yes fitnes por enquanto', dataAnamnese:'2024-09-16'},
+  {nome:'Jenifer dos Santos', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'jenifer_dro@hotmail.com', telefone:'51984949198', piramide:'1- Bumbum 2- Pernas 3- Barriga 4- Costas', objetivo:'Emagrecer, criar bumbum e perna e definir a bartiga', restricoes:'Não tenho e nunca tive', academia:'Acredito que na Yes', dataAnamnese:'2024-09-30'},
+  {nome:'Aline Ribeiro Garcias', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'alinematosgrcias@gmail.com', telefone:'51992756129', piramide:'1 e 3', objetivo:'Emagrecer ,pretendo ficar com uns 59 k,afinar cintura,definir pernas ,mas n quero engrossar mais,bumbum só definir e empinar ,tmb n quero aumentar bumbum', restricoes:'Nenhuma relatada', academia:'Sencefit', dataAnamnese:'2024-10-03'},
+  {nome:'Angelina Paz Mendes', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'A definir', email:'angelinatst@gmail.com', telefone:'51985659734', piramide:'1 - costas  2 - braços  3 - glúteos  4 - coxas', objetivo:'Emagrecimento e definição muscular', restricoes:'Nenhuma relatada', academia:'Busata', dataAnamnese:'2024-10-09'},
+  {nome:'Renata Pedrotti Franco', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'renata.pedrotti@hotmail.com', telefone:'51989105995', piramide:'1 costas,2ombro e bíceps, 3 quadríceps 4 gluteo', objetivo:'Emagrecimento e definição muscular', restricoes:'Nenhuma relatada', academia:'Engenharia do corpo', dataAnamnese:'2024-10-16'},
+  {nome:'Ester correa zanotelli', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'ester.zanotelli@gmail.com', telefone:'51 997216657', piramide:'1 barriga, 2 bumbum, 3 coxa 4 peitoral', objetivo:'Direcionar para que eu faça exercícios corretamente para poder atingir com eficácia meus objetivos.', restricoes:'Eu sinto dor no meu joelho direito que preciso investigar.', academia:'Performance', dataAnamnese:'2024-10-21'},
+  {nome:'Juliano Pinto Mello', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'4x por semana', email:'juliano_mello@hotmail.com', telefone:'(55) 99664-4494', piramide:'Costas', objetivo:'Em um momento inicial, emagrecimento. Depois hipertrofia', restricoes:'Nenhuma relatada', academia:'TopOne Jardim Botânico', dataAnamnese:'2024-10-23'},
+  {nome:'Priscila Ribeiro Santos', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'2x por semana', email:'prytchy@hotmail.com', telefone:'51984816358', piramide:'3 -4- 2- 1', objetivo:'Eliminar peso e ganhar massa muscular', restricoes:'Já quebrei o 5º metatarso do pé direito e já tive uma torção no pé esquerdo', academia:'Engenharia do Corpo - São Leopoldo', dataAnamnese:'2024-10-28'},
+  {nome:'JEFERSON RODRIGUES BARBOSA', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'6x por semana', email:'Jefersonbarbosa1993@hotmail.com', telefone:'51 986600078', piramide:'Barriga, costas, braços, pernas para corrida', objetivo:'Aprender a sair do plano feito pela acadêmia', restricoes:'Ondo', academia:'Cia do corpo', dataAnamnese:'2024-11-05'},
+  {nome:'Ana Carolina Pereira Fedatto', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'6x por semana', email:'anacarolinapereirafedatto@gmail.com', telefone:'51996452269', piramide:'1-3-2-4', objetivo:'Me preparar para o teste de aptidao fisica, ganhar resistência e massa muscular', restricoes:'sim, no ligamento do dedao do pe direito', academia:'Performance Fitness', dataAnamnese:'2024-11-11'},
+  {nome:'Fernando kunzler', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'Fernandokunzler99@gmail.com', telefone:'51999860995', piramide:'Ombros e peito', objetivo:'Perder gordura e ganhar massa magra', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2024-11-14'},
+  {nome:'Rafael Brito Feck', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'rafaelbfeck@gmail.com', telefone:'51980114807', piramide:'Barriga, peitoral, bicips e costas', objetivo:'Emagrecimento/hipertrofia', restricoes:'Nenhuma relatada', academia:'Usina do corpo', dataAnamnese:'2024-11-14'},
+  {nome:'Renata Rolim', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'4x por semana', email:'contato.renatarolim@gmail.com', telefone:'55 98153-7900', piramide:'1 bumbum 2 barriga 3 ombro 4 costas', objetivo:'Quero perder gordura e ganhar massa magra, melhorar o treino pra atingir mais rapido o objetivo', restricoes:'Realizando o exercício na cadeira adutora, senti um estalo na junção dos ossos púbicos além de dor. Fiquei sem fazer o exercício por 2 semanas e quando voltei a fazer, iniciei com peso bem baixo por medo de me machucar novamente.; Tenho 26 graus de escoliose rotatória em C. Pulso esquerdo tem um cisto e impossibilita de realizar atividades que precise do apoio das mãos. Principalmente quando o braço e a mão formam um ângulo de 90 graus (por exemplo, ao fazer flexao)', academia:'Perfil (em gravatai)', dataAnamnese:'2024-11-15'},
+  {nome:'nicolsa batista fernandes dos santos', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'nicolasbckp612@Gmail.com', telefone:'51986136039', piramide:'1 - Barriga 2 - Coxas 3 - Costas 4 - Bumbum', objetivo:'Conseguir ter uma definição', restricoes:'Nenhuma relatada', academia:'Unisa do Corpo - Centro Historico', dataAnamnese:'2024-11-17'},
+  {nome:'Micaela de Souza Santos', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'2x por semana', email:'souza-micaela@outlook.com', telefone:'51980297897', piramide:'Barriga, costas, busto, bumbum', objetivo:'Melhor disposição física. Redução de medidas', restricoes:'Nunca tive', academia:'Ideal - Guaíba bairro santa rita', dataAnamnese:'2024-11-18'},
+  {nome:'Luisa Camila Buchert Moser', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'3x por semana', email:'luisacbmoser@hotmail.com', telefone:'51999931612', piramide:'1 barriga 2 bumbum 3 pernas', objetivo:'Definição e crescimento', restricoes:'Nenhuma relatada', academia:'Yes fitness', dataAnamnese:'2024-11-21'},
+  {nome:'Carla Simone Viafore', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'3x por semana', email:'carlasviafore@gmail.com', telefone:'51992116538', piramide:'Barriga, bumbum, braços e coxas', objetivo:'Emagrecer e ganhar massa muscular', restricoes:'joelho', academia:'Usina do corpo', dataAnamnese:'2024-11-25'},
+  {nome:'Denilson Bitencourt', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'denilsonnasbit23@gmail.com', telefone:'51982074359', piramide:'1- barriga (concentração de gordura)  2- glúteo (concentração de gordura) 3- costas 4- Coxa', objetivo:'- Atingir e manter o peso entre 85/87kg  - Definição abdominal - Melhorar meu desempenho nos esporte', restricoes:'Sim, desgaste nos discos da coluna.Tive nesse ano fratura e deslocamente em um dedo do pé, mas hoje já não influencia em movimento e treinos; Sim, Lordose lombar, e desgaste de alguns discos.', academia:'Em casa, tenho alguns equipamentos e da para trabalhar todos os musculos, somente perna que faço um trabalho maior com o próprio peso do corpo', dataAnamnese:'2024-11-26'},
+  {nome:'Yasmin lara Souza gutheil', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'yasmimlara12345@gmail.com', telefone:'51992353733', piramide:'1- bumbum 2- coxa 3-barriga 4-braços', objetivo:'Secar a barriga e definir os músculos', restricoes:'Não tenho', academia:'Sesc', dataAnamnese:'2024-12-02'},
+  {nome:'Fernanda', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'4x por semana', email:'fernandaahsilva@hotmail.com', telefone:'51984985578', piramide:'1 barriga, 2 bumbum, 3 coxa, 4 braço.', objetivo:'Perder peso e ficar muito gostosa', restricoes:'Nenhuma relatada', academia:'Tenho gympass, treino na Ideia Fitness e Coliseu', dataAnamnese:'2024-12-03'},
+  {nome:'Vinicius Bittencourt', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'vinicius.m.bittencourt@hotmail.com', telefone:'51985692526', piramide:'Não tenho um específico', objetivo:'Emagrecimento e definição', restricoes:'Fratura nos dois braços', academia:'Do condomínio', dataAnamnese:'2024-12-06'},
+  {nome:'Ednaldo', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'3x por semana', email:'edh.protec@hotmail.com', telefone:'7745783341', piramide:'1234', objetivo:'Melhor postura, fortalecimento geral e melhor disposição', restricoes:'Nenhuma relatada', academia:'', dataAnamnese:'2024-12-07'},
+  {nome:'Tais Lavarda', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'angela.lavarda97@gmail.com', telefone:'51994280158', piramide:'Barriga, braços, bunda e coxa', objetivo:'Perder gordura', restricoes:'Tenho o ligamento do lado de dentro do joelho direito inflamado, já fiz ecografia e consultas', academia:'Yes fitness', dataAnamnese:'2024-12-07'},
+  {nome:'Jêniffer Tavares Zeferino', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'4x por semana', email:'jeniffer.poa@hotmail.com', telefone:'51989491930', piramide:'1 membros inferiores 2 barriga 3 bumbum 4 costas', objetivo:'Melhorar o condicionamento físico e aumento de massa magra.', restricoes:'Sim. Tenho pés cavos, no qual tenho limitações: como por exemplo exercícios de impacto: correr.; Sim, cirurgia dos 6 aos 13 anos para correção dos pés cavos.', academia:'Academia condomínio', dataAnamnese:'2024-12-12'},
+  {nome:'Manassés Rafael dos Santos Torales', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'manassestorales@gmail.com', telefone:'51984239326', piramide:'3,4,2,1', objetivo:'Emagrecer, ganhar massa muscular', restricoes:'Nenhuma relatada', academia:'Smartfit', dataAnamnese:'2024-12-14'},
+  {nome:'Pedro Henrique Mendes Geremias Moreira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'pedromendes.drope@gmail.com', telefone:'51998501796', piramide:'1° barriga 2° braço 3° perna 4° costas', objetivo:'Emagrecer e definir', restricoes:'Faz uns 4 meses quebrei a cabeça do radio do braço esquerdo, próximo ao cotovelo', academia:'Ac fitnes', dataAnamnese:'2024-12-14'},
+  {nome:'Adriane Lopes Hermel', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'4x por semana', email:'Adriane.hermel@gmail.com', telefone:'51995744214', piramide:'1- bumbum,2-coxa, 3- barriga, 4- costas', objetivo:'Ter os exercícios corretos pra certinho e ter um bom resultado', restricoes:'Nenhuma relatada', academia:'Engenharia do corpo ou moinhos', dataAnamnese:'2025-01-29'},
+  {nome:'Felipe Motta batista', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'felipemottabatista@gmail.com', telefone:'51996957053', piramide:'3', objetivo:'Emagrecer e ganhar músculo', restricoes:'Nenhuma relatada', academia:'Em casa', dataAnamnese:'2025-02-10'},
+  {nome:'Caroline Pilastro', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'A definir', email:'carolinepilastro@outlook.com', telefone:'51990121794', piramide:'1 3 4 2', objetivo:'Alcançar meu objetivo com o foco personalizado', restricoes:'Não tenho, porem no periodo de colicas menstruais preferia fazer apenas superiores ou pesar mais no superior e menos inferior', academia:'Não treino', dataAnamnese:'2025-02-17'},
+  {nome:'Sindel piacini', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'sindelpiacini02@gmail.com', telefone:'51995806920', piramide:'Glúteo, costas, pernas, braços', objetivo:'Fortalecimento muscular.', restricoes:'Não.; Escoliose, mt dor ombros e lombar.', academia:'Smart Fit', dataAnamnese:'2025-02-21'},
+  {nome:'Daniel Valenzuela', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'4x por semana', email:'dazanval10@gmail.com', telefone:'4704030613', piramide:'1) pernas, 2- barriga 3) ombros 4) braços', objetivo:'Hipertrofia e uma rotina de treino balanceada e eficiente', restricoes:'Nenhuma relatada', academia:'LA Fitness', dataAnamnese:'2025-02-21'},
+  {nome:'Larissa Santana', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'larissa.rsantana@gmail.com', telefone:'51992704595', piramide:'1-  bumbum, 2- barriga, 3- coxa, 4- braços', objetivo:'Definir e crescer. Sempre treinei e vi resultado apenas quando estava foçada de verdade e pegando bastante peso, agora que sei que consigo preciso de uma rotina mais regrada.  Meu foco é o mesmo de quase toda mulher, crescer glúteo e pernas, diminuir a barriga, definir superiores', restricoes:'Não que eu lembre', academia:'Performance', dataAnamnese:'2025-02-25'},
+  {nome:'André Vitor Padilha da Silva', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'a.padilhasilva@gmail.com', telefone:'53984568409', piramide:'Parelho', objetivo:'Perda de gordura, ganho de massa muscular', restricoes:'Sim, deslocamento patelar nos dois joelhos, patela rasa.; Patela rasa; Sim, dois joelhos', academia:'Engenharia do corpo', dataAnamnese:'2025-02-25'},
+  {nome:'Luiza Gabriella', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'6x por semana', email:'lugabi0804@gmail.com', telefone:'51992079874', piramide:'1 bunda, 2 quadríceps, 3 barriga e cintura, 4 costas e braços', objetivo:'Chegar nos meus objetivos com treinos feitos pra mim. Ter auxílios em algumas dúvidas que eu não possa responder e entender um pouco mais sobre como funciona a transformação do corpo.', restricoes:'No meu primeiro dia de academia, fiz algo de errado, e no segundo treino depois de voltar pra casa, apareceu os sintomas de uma contratura na panturrilha. (Isso faz 1 mês) Repousei na época por uma semana praticamente, e depois continuei. Não conseguia andar normal.    Na enchente de 2023 já cai e bati o joelho bem forte no chão também, então talvez em algum momento tenha que fortalecer essas áreas.; Não.', academia:'Performance', dataAnamnese:'2025-03-02'},
+  {nome:'Camila Figueiredo Lemos', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'cami.lemosfl@gmail.com', telefone:'51 98617-0882', piramide:'1, 2, 3 e 4', objetivo:'Perda de peso.', restricoes:'Não.; Não.', academia:'.', dataAnamnese:'2025-03-07'},
+  {nome:'Gabriela fortes Cabral dos santos', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'gabrielacabral229@gmail.com', telefone:'51990143996', piramide:'1-bumbum 2-barriga 3- coxa 4- costas', objetivo:'Corpo definido', restricoes:'Nenhuma relatada', academia:'Yes fitness', dataAnamnese:'2025-03-12'},
+  {nome:'Aline da silva', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'A definir', email:'aline_nathally@hotmail.com', telefone:'9547085856', piramide:'1. 2. 3. 4', objetivo:'Criar um corpo lindo e saudável', restricoes:'Nenhuma relatada', academia:'Lá fitness', dataAnamnese:'2025-03-23'},
+  {nome:'joao carlos lemos de souza filho', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'joao.contabil@yahoo.com.br', telefone:'51989502000', piramide:'1 abdômen 2 peito 3 costas  4 pernas', objetivo:'Fica igual ao ramon dino', restricoes:'Mao; Mao', academia:'Ctpeamce', dataAnamnese:'2025-04-05'},
+  {nome:'Renata', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'3x por semana', email:'renatalopes2530@gmail.com', telefone:'51998064208', piramide:'1º Barriga, 2º pernas,3º coxa e 4º costas', objetivo:'Perder peso, perder barriga principalmente e ganhar mais pernas e bumbum', restricoes:'Dor no joelho direito , ele é para dentro e sinto que se Faço leg puxa pra dentro; Só esse detalhe no joelho parece que puxo para dentro quando faço leg ou agachamento', academia:'Ideia fitness', dataAnamnese:'2025-04-09'},
+  {nome:'Ana Paula Furini', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'3x por semana', email:'paula_furini@hotmail.com', telefone:'51 984846432', piramide:'1-coxa, 2-abdômen, 3-gluteo, 4-biceps', objetivo:'Definição muscular e hipertrofia', restricoes:'Desloquei uma vértebra da lombar, normalmente não sinto dores ao praticar exercícios, mas cuido bastante ao aumentar a carga no treino das pernas pq forço e fica incomodando as vezes', academia:'Perfect da assis brasil', dataAnamnese:'2025-04-28'},
+  {nome:'Fernando Pereira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'fernandosilp1@gmail.com', telefone:'51998163667', piramide:'Abdome, ombros, panturrilha, costas', objetivo:'Corrigur os níveis de musculatura corporal em ambos os lados do corpo e ter músculos mais estéticos.', restricoes:'Lombar: Nada grave, mas sinto pressão na lombar fazendo agachamento com barra, sumô e encolhimento de ombros. Ombros: Sinto ombro ao fazer supino com barra, prefiro sempre com alteres.; Não.; Não.', academia:'Perfect', dataAnamnese:'2025-04-28'},
+  {nome:'Graziele Stefanno', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'4x por semana', email:'graziele.moura.stefanno@gmail.com', telefone:'55996889180', piramide:'1 coxa, 2 barriga, 3 bumbum e 4 ombro, biceps, costas e  triceps', objetivo:'Perder gordura', restricoes:'Não! De vez em quando sinto dor no joelho esquerdo', academia:'Smartfit', dataAnamnese:'2025-05-12'},
+  {nome:'Diego Almir da Trindade Machado', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'3x por semana', email:'diego.trindade.machado@gmail.com', telefone:'51 991712262', piramide:'3, 4, 2, 1', objetivo:'Perder gordura', restricoes:'Leve no tendão de Aquiles; Não! Apenas uma leve dificuldade de mobilidade.', academia:'ALL Fit ou 26 Fit (pelo Gym Pass)', dataAnamnese:'2025-05-13'},
+  {nome:'Aline Gomes', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'linygomes@gmail.com', telefone:'51993473308', piramide:'barriga, bumbum, coxa, braços', objetivo:'emagrecer', restricoes:'Nenhuma relatada', academia:'Allpfit', dataAnamnese:'2025-05-14'},
+  {nome:'Camila Couto Frazão', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'6x por semana', email:'ccoutofrazao@gmail.com', telefone:'(51) 9 8973-2353', piramide:'1- glúteo  2- coxa 3- posterior  4- costas', objetivo:'Perder peso q ganhei na gestação e melhorar a aparência dos músculos', restricoes:'Nenhuma relatada', academia:'CT performance', dataAnamnese:'2025-05-20'},
+  {nome:'Paula Schmitt', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'paulaschmittc@gmail.com', telefone:'+351 967981658', piramide:'1- coxa;  2- bumbum;  3- barriga;  4- costas;', objetivo:'Ganhar inferiores: meu corpo é em formato de triângulo invertido, meu objetivo é deixar mais harmônico.', restricoes:'Sim, hipertensão patelar no joelho esquerdo, estou tomando medicação por 60 dias. Acaba final de junho. Rantudil 90 retard. Em pouco tempo (1 ano) aumentei muito o peso e sobrecarregou meu joelho esquerdo, que é a perna mais fraca.; Sim, não posso treinar com muito peso, nem corrida ou impactos.', academia:'Uma academia de bairro', dataAnamnese:'2025-06-02'},
+  {nome:'Barbara furnari', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'Barbaraalbieri@hotmail.com', telefone:'±14074856686', piramide:'Barriga', objetivo:'Perder peso', restricoes:'Nenhuma relatada', academia:'YMCA dr Philips', dataAnamnese:'2025-06-11'},
+  {nome:'Rafaela', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'rafaelax3@live.com', telefone:'7742255608', piramide:'3', objetivo:'Weight loss', restricoes:'No; No; No', academia:'Planet fitness', dataAnamnese:'2025-06-12'},
+  {nome:'Íris Fernanda Kessa de Jesus', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'iris-fernanda122011@hotmail.com', telefone:'17991789886', piramide:'1- barriga, 2- coxas, 3- bumbum, 4- costas', objetivo:'Emagrecer', restricoes:'Nenhuma relatada', academia:'Treinar em casa', dataAnamnese:'2025-06-14'},
+  {nome:'Kamila Milena Moura da Silva', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'5x por semana', email:'kamilamoura98@hotmail.com', telefone:'51984502809', piramide:'barriga - 1 bumbum - 2 coxa - 3 costas - 4', objetivo:'emagrecimento e definição', restricoes:'Nenhuma relatada', academia:'Yes fitness', dataAnamnese:'2025-06-16'},
+  {nome:'Mariana Gonçalves Soares', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'4x por semana', email:'soaresgmari.12@gmail.com', telefone:'9785309369', piramide:'Barriga, coxa, bumbum, costas', objetivo:'Alcançar o corpo dos meus sonhos', restricoes:'Nenhuma relatada', academia:'Planet fitness e em casa', dataAnamnese:'2025-06-17'},
+  {nome:'Fernando Soares', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'soaresfernando024@gmail.com', telefone:'51985006949', piramide:'Barriga, peito, braços e costas', objetivo:'Perder peso', restricoes:'Nenhuma relatada', academia:'Ainda estudando locais', dataAnamnese:'2025-07-18'},
+  {nome:'Fabiane severo de oliveira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'4x por semana', email:'fabiane_severo@outlook.com', telefone:'51-992635974', piramide:'Barriga, costas (reduzir as bordas de catupiry), bumbum, braços e coxas', objetivo:'Emagrecer', restricoes:'Cesárea há 4 meses', academia:'Em casa.', dataAnamnese:'2025-07-22'},
+  {nome:'Tamia Cunha', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'4x por semana', email:'lolocunha38@gmail.com', telefone:'(51)996449210', piramide:'1,3,4,2', objetivo:'Fortalecimento muscular', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2025-08-07'},
+  {nome:'Andrieli Laux', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'andrieli.lauxx@gmail.com', telefone:'51997972100', piramide:'1- glúteo  2- quadríceps  3-ombro e costas  4- barriga', objetivo:'Emagrecimento é definição', restricoes:'Nenhuma relatada', academia:'CT commando (ao lado da minha casa)', dataAnamnese:'2025-08-07'},
+  {nome:'Lisandra Bernardy', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'lili.bernardy@gmail.com', telefone:'51997889980', piramide:'1º barriga  2º braços  3º glúteos  4º coxa', objetivo:'Perda de peso', restricoes:'Tive fratura na tíbia', academia:'CTperformance - Eldorado do Sul', dataAnamnese:'2025-08-07'},
+  {nome:'Sofia Bamberg Cardozo dos Santos', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'5x por semana', email:'sofibamberg@gmail.com', telefone:'51985464624', piramide:'1 bumbum (glúteo médio principalmente, não gosto do meu glúteo de lado) 2cintura  3quadriceps  4costas  Quero braços definidos também', objetivo:'Conseguir chegar em uma meta de estética de corpo', restricoes:'Tenho problema na canela por conta do futvôlei, mas maior maior dificuldade é em corrida', academia:'Smart Fit Shopping Walling', dataAnamnese:'2025-08-07'},
+  {nome:'Eduardo Denti', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'3x por semana', email:'eng.eduardodenti@gmail.com', telefone:'51981151411', piramide:'1 . Costas 2. Ombros 3. Peito 4. Abdomen', objetivo:'Estética', restricoes:'Nenhuma relatada', academia:'Do meu condominio', dataAnamnese:'2025-08-07'},
+  {nome:'Bianca', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'biancasilveirars22@gmail.com.br', telefone:'51995219092', piramide:'3- 2-1-4 coloquei assim mas todas estão em primeiro', objetivo:'Perca de gordura e ganhar musculo', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2025-08-07'},
+  {nome:'Bruna Bruniszaki', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'A definir', email:'bruniszakibru@gmail.com', telefone:'51995419409', piramide:'1costas, 2 bracos, 3 pernas, 4 abdomen', objetivo:'Acelerar a queima', restricoes:'Tenho síndrome do túnel do carpo', academia:'Performance ( sans souci )', dataAnamnese:'2025-08-09'},
+  {nome:'Victoria Medeiros Dorneles', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'medeirosdornelesv@gmail.com', telefone:'51983526469', piramide:'3 - 2 - 1 - 4', objetivo:'Emagrecimento e ganho de massa magra (Fortalecimento tb para ter mais desenvoltura no Cross)', restricoes:'Ano passado tive uma lesão no pescoço (torcicolo) fazendo um movimento no Crossfit.', academia:'Academia Perfect', dataAnamnese:'2025-08-12'},
+  {nome:'saimon guevara brum', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'saimonbrum@gmail.com', telefone:'51991397251', piramide:'1 costas 2 braço 3 coxa 4 abdomen', objetivo:'Emagrecimento é definicao', restricoes:'Dedo médio da mão direita mas não senti alterações', academia:'Perfect', dataAnamnese:'2025-08-15'},
+  {nome:'Mauro', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'mauro_junior1@hotmail.com', telefone:'51 999636817', piramide:'1- braços 2 - pernas 3 - peito 4 - costas', objetivo:'Emagrecimento e ganho de massa muscular', restricoes:'Ruptura do reto femural e ligamentos de tornozelo', academia:'Engenharia do corpo', dataAnamnese:'2025-08-19'},
+  {nome:'Angélica Nobre', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'4x por semana', email:'nobangelica2019@gmail.com', telefone:'51989164716', piramide:'1- Barriga 2- costas 3- braços  4- bumbum', objetivo:'Emagrecer e fortalecer músculos', restricoes:'Sim, trinquei o cóccix há mais de 10 anos.', academia:'Sani academia', dataAnamnese:'2025-08-20'},
+  {nome:'Liane Cardoso guilherme', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'lcguilherme90@gmail.com', telefone:'51994661446', piramide:'1 - barriga, 2 - bumbum, 3 - costas e 4 - coxa', objetivo:'Emagrecimento e definição', restricoes:'Joelho', academia:'Não sei ainda', dataAnamnese:'2025-08-29'},
+  {nome:'Kewelin Alba', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'4x por semana', email:'kewelinalba4@gmail.com', telefone:'51997340897', piramide:'1- Bumbum, 2- Barriga, 3- Coxa , 4- Costas', objetivo:'Desenvolver minha musculatura, gostar do que vejo no espelho.', restricoes:'Sim.; Sim. Ok, enviarei.; Não.', academia:'Perfect Academia Baltazar', dataAnamnese:'2025-08-31'},
+  {nome:'Juliana Viana Andrade', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'juhvandrade@gmail.com', telefone:'51996328299', piramide:'costas, coxa, barriga e bumbum', objetivo:'resultado de definição', restricoes:'Nenhuma relatada', academia:'no litoral', dataAnamnese:'2025-09-01'},
+  {nome:'Jennifer Araujo', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'jenniferaraujos@gmail.com', telefone:'51984725089', piramide:'1- barriga  2- pernas 3- braços  4- bumbum', objetivo:'Definir meu corpo, ter uma rotina ativa e saudável.', restricoes:'Nenhuma relatada', academia:'Yes', dataAnamnese:'2025-09-04'},
+  {nome:'Cindy Kittler', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'kittlercindy@gmail.com', telefone:'51991941952', piramide:'Barriga, costas, coxa, bumbum, (mas também adoro treino de ombro).', objetivo:'definir e perder gordura.', restricoes:'Tenho condromalácia no joelho direito. As vezes me dói ao treinar.', academia:'Rt Fitnees em Guaíba.', dataAnamnese:'2025-09-08'},
+  {nome:'Gabriel Garcia', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'gabrielgarcias@live.com', telefone:'51996662407', piramide:'1 - peito  2 - ombro  3 - tríceps  4 - costa', objetivo:'treinos personalizados', restricoes:'tenho uma lesão no joelho no momento onde me impede exercícios de pernas, estou aguardando a data da cirurgia (janeiro) para retornar, por hora o médico indicou somente superiores, caminhada e bike; enviarei', academia:'engenharia do corpo', dataAnamnese:'2025-09-08'},
+  {nome:'Jucelaine Antunes Simoes', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'jucesimoes@hotmail.com', telefone:'51984554782', piramide:'3-1-2-4', objetivo:'Conseguir me dedicar com ajuda aos treinos', restricoes:'Nenhuma relatada', academia:'Top1  e Coliseu', dataAnamnese:'2025-09-11'},
+  {nome:'Vanessa Macedo Pacheco', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'nessamp10@hotmail.com', telefone:'51996598036', piramide:'Barriga, coxa, bumbum, braços', objetivo:'Emagrecer e fortalecer o corpo', restricoes:'Tenho dores no quadril, mas quando fazia atividade não sentia nada; Não até o momento', academia:'Pretendo na performance', dataAnamnese:'2025-09-15'},
+  {nome:'Tarso marcuzzo', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'3x por semana', email:'tcmarcuzzo13@gmail.com', telefone:'55996751312', piramide:'Peitoral', objetivo:'Perder bf', restricoes:'Nenhuma relatada', academia:'Eng do corpo', dataAnamnese:'2025-09-18'},
+  {nome:'Anna Caroliny Bordinhão Jorge', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'A definir', email:'anabordy29@gmail.com', telefone:'47997911252', piramide:'1. bumbum 2. coxa 3.  barriga 4. braços  5. costas', objetivo:'crescer', restricoes:'Nenhuma relatada', academia:'Roldão', dataAnamnese:'2025-09-25'},
+  {nome:'Rodrigo da Cruz Lisboa', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'4x por semana', email:'lisboa_r@hotmail.com', telefone:'53981554957', piramide:'Perna, peito, braço e costas', objetivo:'Ajustar meus treinos na academia/reforço muscular', restricoes:'Nenhuma relatada', academia:'Moinhos fitness - menino deus', dataAnamnese:'2025-09-26'},
+  {nome:'Fernanda', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'fernandaflores.financeiro@gmail.com', telefone:'51995452808', piramide:'Glúteos, quadríceps, posterior, superior em geral', objetivo:'Ganho de massa', restricoes:'Muitos anos atrás, no joelho direito', academia:'A princípio Performance', dataAnamnese:'2025-09-26'},
+  {nome:'Luara', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'2x por semana', email:'luara.franceschini@yahoo.com.br', telefone:'51989099916', piramide:'1 barriga/2 pernas / 3 bumbun/ 4 braços', objetivo:'Emagrecer 12/15 kg e voltar minha alto estima', restricoes:'Nenhuma relatada', academia:'Ideia ou RT jardim dos lagos', dataAnamnese:'2025-09-29'},
+  {nome:'Débora Rischtter', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'3x por semana', email:'debora.rischtter@gmail.com', telefone:'51 99102-4492', piramide:'3 - 1 - 2 - 4', objetivo:'Diminuir percentual gordura', restricoes:'Não lesão, mas senti a lombar no sumo terra e tive que reduzir carga e fortalecer.', academia:'WKT centro de treinamento', dataAnamnese:'2025-09-29'},
+  {nome:'Luigi Canova', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'luigi.canova@gmail.com', telefone:'51 993598824', piramide:'Barriga, peito, costas, pernas', objetivo:'Emagrecimento junto com a dieta do Thales', restricoes:'Braço quebrado quando criança', academia:'Não sei', dataAnamnese:'2025-09-30'},
+  {nome:'Bruna', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'3x por semana', email:'brunalarissafreire90@gmail.com', telefone:'38988167643', piramide:'Braços e Costa  Tem mais gordura acumulada)', objetivo:'Emagrecimento', restricoes:'Escoliose e Lordose', academia:'Em dúvida FULLTIME ou WCT', dataAnamnese:'2025-10-01'},
+  {nome:'Rafaela Carvalho da Silveira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'6x por semana', email:'raffasilveira_@hotmail.com', telefone:'5199346-8765', piramide:'Coxa, costas, bumbum, barriga', objetivo:'Definir mais o Corpo', restricoes:'Nenhuma relatada', academia:'Wave', dataAnamnese:'2025-10-06'},
+  {nome:'Ariane Garcia', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'1x por semana', email:'ferraz-ariane@hotmail.com', telefone:'51989546730', piramide:'1- barriga 2- pernas 3-bracos 4-costa', objetivo:'Perder peso e criar uma rotina ativa de exercícios', restricoes:'Nenhuma relatada', academia:'Em casa', dataAnamnese:'2025-10-12'},
+  {nome:'Flávia', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'4x por semana', email:'fonoflaviamachado@gmail.com', telefone:'51996355144', piramide:'coxa, costas, barriga, bumbum', objetivo:'Ganho de massa e definição', restricoes:'Nenhuma relatada', academia:'Olympo', dataAnamnese:'2025-10-15'},
+  {nome:'Marciele Girelli', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'marcielegirelli3@gmail.com', telefone:'51996500970', piramide:'1bumbum ,3barriga,2coxa 4 costas', objetivo:'Perder barriga e ganhar massa magra', restricoes:'Já tive no joelho', academia:'Em Porto Alegre , não conheço academia ainda não sei quais os aparelhos ela tem , vou ir nela por ser do lado da empresa', dataAnamnese:'2025-10-15'},
+  {nome:'Ariana Marques', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'ariane-ashley@hotmaiil.com', telefone:'51985981461', piramide:'Abdômen e bumbum', objetivo:'Definir', restricoes:'Nenhuma relatada', academia:'Engenharia do corpo', dataAnamnese:'2025-10-16'},
+  {nome:'Rafaella Martins Trindade', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'rafaellamtrindade@gmail.com', telefone:'51 996403997', piramide:'Barriga , bumbum ,coxa, costas', objetivo:'Resultado de um corpo moldado e fortalecido', restricoes:'Tornozelo nada grave', academia:'Performance', dataAnamnese:'2025-10-20'},
+  {nome:'Luciane', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'3x por semana', email:'apenasluh@hotmail.com', telefone:'51984503225', piramide:'1,2,3,4', objetivo:'Definição', restricoes:'Abdominoplastia', academia:'Ct performance', dataAnamnese:'2025-10-21'},
+  {nome:'Lucianna Moraes', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'4x por semana', email:'luaparticheli@gmail.com', telefone:'(51)993866665', piramide:'Emagrecer, músculo venha depois. 3 e 4', objetivo:'Emagrecer', restricoes:'Sim, já fraturei o metatarso correndo na esteira quando fazia academia de segunda a sábado.', academia:'Smart Fit', dataAnamnese:'2025-10-29'},
+  {nome:'Tania Maris Reus Salam von Saltiel', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'3x por semana', email:'tania.salam@hotmail.com', telefone:'(51)992801119', piramide:'3', objetivo:'Perder peso', restricoes:'Fiz uma cirurgia de artrodese na lombar; Cirurgia coluna; Não posso posso realizar treino Legpress', academia:'Sesc Protasio Alves', dataAnamnese:'2025-11-07'},
+  {nome:'Sabrina', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'3x por semana', email:'sabrinarockenbach.mkt@gmail.com', telefone:'51993555544', piramide:'1 - bumbum / 2 - cintura/barriga / 3 - costas. 4 - coxas', objetivo:'Afinar cintura e dar forma no bumbum.', restricoes:'Nenhuma relatada', academia:'Cia do corpo', dataAnamnese:'2025-11-08'},
+  {nome:'Fernanda', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'fernandareichimbak@gmail.com', telefone:'51991878598', piramide:'1-barriga,2- coxa, 3-bumbum, 4-costas', objetivo:'Perder gordura e definir', restricoes:'Nenhuma relatada', academia:'Ct Performance', dataAnamnese:'2025-11-11'},
+  {nome:'Tacianne Abreu', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'4x por semana', email:'tacianneabreu@gmail.com', telefone:'51996623475', piramide:'1, 3, 4,2', objetivo:'Definição muscular', restricoes:'Não possuo', academia:'Smart Fit', dataAnamnese:'2025-11-17'},
+  {nome:'Rita Lenise de Vargas Ascenço', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'rita.lenise@gmail.com', telefone:'51999165692', piramide:'3 2 4 1', objetivo:'Emagrecer, para saúde e auto estima', restricoes:'Sim', academia:'Posso treinar em casa ou só somente na academia', dataAnamnese:'2025-11-18'},
+  {nome:'Lea costa Borges', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'leaborges12@gmail.com', telefone:'51999899593', piramide:'Posterior e glúteos, costas abdômen', objetivo:'Treino mais específico', restricoes:'Sim; Sim; Só no ombro, mas só tenho muito força', academia:'Yes academia', dataAnamnese:'2025-11-18'},
+  {nome:'Ester Dalla Valle Lopes', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'A definir', freq:'3x por semana', email:'ester.lopes17@gmail.com', telefone:'51992920228', piramide:'bumbum, coxa, barriga e costas...', objetivo:'Fazer um treinamento assertivo para ter mais qualidade nos treinos, para ter perda de peso, ganho de massa magra, melhorar o condicionamento físico, fortalecer a coluna', restricoes:'tive uma lesão na coluna, não me recordo se era inicio de uma hernia, mas isso foi em 2018, fiz pilates e melhorou muito, como tenho seios muito grandes, sinto muita dor nas costas,; não tenho nenhuma cirurgia que  comprometa os movimentos', academia:'SESC - navegantes', dataAnamnese:'2025-11-19'},
+  {nome:'Rafaela Carvalho', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'rafaela.c99@gmail.com', telefone:'51995680554', piramide:'1 glúteo 2 barriga 3 coxa,4- costas', objetivo:'Alavancar meus resultados e chegar com o corpo que desejo', restricoes:'Sinto dores isoladas no joelhos, diante a uma consulta foi diagnosticado desgaste mas até o momento não interferiu nos treinos.', academia:'Ct performance', dataAnamnese:'2025-11-19'},
+  {nome:'Íris Cunha', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'4x por semana', email:'iriscunha60@gmail.com', telefone:'923804940', piramide:'3 e 1', objetivo:'Emagrecer e firmar o corpo', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2025-11-20'},
+  {nome:'Sandrine', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'sandrine.rosa1@gmail.com', telefone:'51991230734', piramide:'1- bumbum 2-coxas 3-bracos 4-costas', objetivo:'Emagrecimento e definição', restricoes:'Desvio na cervical', academia:'Performance', dataAnamnese:'2025-11-20'},
+  {nome:'Carolina Prates', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'carolinaprates99@gmail.com', telefone:'51992101341', piramide:'1º- barriga, 2º perna, 3º bumbum, 4º costas', objetivo:'Emagrecer e definir', restricoes:'Nenhuma relatada', academia:'Pretendo treinar na Performance', dataAnamnese:'2025-11-21'},
+  {nome:'Igor Piacini', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'6x por semana', email:'igor_piacini10@hotmail.com', telefone:'51995861984', piramide:'Conjunto completo.', objetivo:'Melhorar a qualidade do treino e consequentemente o fisico', restricoes:'Nenhuma relatada', academia:'Performance fitnnes', dataAnamnese:'2025-11-27'},
+  {nome:'schaienne corsini da silva', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'6x por semana', email:'schaicorsini@gmail.com', telefone:'55991967136', piramide:'coxa, bumbum, costas, barriga', objetivo:'fortalecer musculatura, evitar recidiva cancer', restricoes:'estou com um pouco de limitação no braço, devido a cirurgia de retirada de mamas e linfonodos que foi feita em fevereiro deste ano.; somente o braço que sinto um pouco', academia:'26fit ou up nova tramandai', dataAnamnese:'2025-11-28'},
+  {nome:'Ândria Rosa Dias', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'andriadias193@gmail.com', telefone:'51 999448920', piramide:'3,4,1,2', objetivo:'Quero secar e definir ao maximo. Não quero aquele corpo monstro, quero o mais slim possivel.', restricoes:'Sim, na perna direita. Quebrei a tibia e a fibia e com isso tenho menos fornça nessa perna e também sinto dores nas costas pq usei muleta por muito tempo.; Sim e tenho Hipertensão Arterial Pulmonar; Na tibia e na fibia', academia:'Varia muito, pois estou sempre viajando', dataAnamnese:'2025-12-01'},
+  {nome:'Lizandra da Silva Melos', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'lizanelos@yahoo.com.br', telefone:'51-998274337', piramide:'3- 1- 2 - 4', objetivo:'Ser cobrada para chegar aos resultado.', restricoes:'Coloquei silicone a 2 meses e meio', academia:'Performance', dataAnamnese:'2025-12-02'},
+  {nome:'Gabriela', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'gabrielaamador284@gmail.com', telefone:'51997328538', piramide:'1 bumbum 2 barriga  3 coxa  4 costas', objetivo:'Chegar ao meu desejo não só em estética mais com saúde e bem estar', restricoes:'Sim; Tenho uma hérnia discal ,e um emagioma na coluna e desgaste de algumas vértebras', academia:'26 fitnes', dataAnamnese:'2025-12-08'},
+  {nome:'Eduarda Reis', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'eduardareisfreitas00@gmail.com', telefone:'51 999712424', piramide:'1, 2, e 3', objetivo:'Definir o corpo', restricoes:'Sim, no tornozelo', academia:'Smart fit', dataAnamnese:'2025-12-08'},
+  {nome:'Gabriel de Matos Teixeira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'gabmattos489@gmail.com', telefone:'51993890755', piramide:'1° Braços 2° Ombro e costas 3° Peito e Abdômen 4° Pernas', objetivo:'Ganhar massa muscular, definição e conseguir desenvolver força. Tenho também a vontade de aprender melhor a fazer cada exercício e seguir um treino que me faça evoluir de fato.', restricoes:'Nenhuma relatada', academia:'Smart Fit Boubron Wallig', dataAnamnese:'2025-12-09'},
+  {nome:'Adriana Schnadelbach', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Avançado', freq:'5x por semana', email:'schnadelbachadriana90@gmail.com', telefone:'51995027512', piramide:'Coxa, bumbum, barriga e costas', objetivo:'Meu objetivo é fazer um treino que me de resultados.', restricoes:'Não tenho lesão, porém me sinto bem fraca nos últimos tempos', academia:'Performance', dataAnamnese:'2025-12-10'},
+  {nome:'Amanda de Lima Silveira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'amandalimasilveira0905@outlook.com', telefone:'51 980476473', piramide:'1 bumbum 2 coxa 3 costas barriga', objetivo:'ter constância nos exercicios fisicos no ano de 2026, estetica', restricoes:'Nenhuma relatada', academia:'yes ou performance', dataAnamnese:'2025-12-30'},
+  {nome:'Herica', status:'ok', statusLabel:'Ativa recente', nivel:'A definir', freq:'A definir', email:'herica.pin.lorena@gmail.com', telefone:'51997491112', piramide:'Bumbum,barriga,costas ,pernas', objetivo:'Perder gordura e criar massa muscular', restricoes:'Nenhuma relatada', academia:'Perfomece', dataAnamnese:'2026-01-08'},
+  {nome:'Henrique Cogo', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'4x por semana', email:'henriquecogo97@gmail.com', telefone:'51998480868', piramide:'1- OMBRO E TRAPEZIO  2- PEITO 3-COXAS 4-BRAÇOS', objetivo:'BUSCAR MELHOR FORMA', restricoes:'NADA', academia:'PERFOMECE', dataAnamnese:'2026-01-08'},
+  {nome:'Tainara Arruda', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'6x por semana', email:'tainarafarruda@gmail.com', telefone:'51985406087', piramide:'Barriga, bumbum, coxas, costas', objetivo:'Secar, perder peso, definição', restricoes:'Nenhuma relatada', academia:'Yes fitnes', dataAnamnese:'2026-01-09'},
+  {nome:'Jefferson nichetti', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'5x por semana', email:'peckerjefferson@gmail.com', telefone:'51981606548', piramide:'Peito , costas , tríceps e perna', objetivo:'Secar e definir', restricoes:'Desgaste na l3 l4 e l4 l5; Sim', academia:'Yesfitnes', dataAnamnese:'2026-01-09'},
+  {nome:'Agatha', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'3x por semana', email:'agathasije@gmail.com', telefone:'51989602709', piramide:'1 barriga  2 coxa  3 bunda  4 costa', objetivo:'Emagrecer e definir', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2026-01-10'},
+  {nome:'Rafaela Vargas da Silva', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'5x por semana', email:'vargasdasilvarafaela@gmail.com', telefone:'51 982262405', piramide:'1- barriga, 2- bumbum, 3- coxas, 4- costas', objetivo:'Hipertrofia', restricoes:'Nenhuma relatada', academia:'A do meu condomínio', dataAnamnese:'2026-01-12'},
+  {nome:'Josiani', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'5x por semana', email:'josiani.davila@gmail.com', telefone:'51 98121 1879', piramide:'1 bumbum, 2 barriga, 3 coxa, 4 costa', objetivo:'Ter resultado eficientes', restricoes:'Nenhuma relatada', academia:'Sani corpori', dataAnamnese:'2026-01-12'},
+  {nome:'Bruna Tierling', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'3x por semana', email:'brunnaltier@gmail.com', telefone:'+52 561 1124600', piramide:'Glúteo, coxas, costas, braços', objetivo:'Fortalecimento muscular', restricoes:'Sim; Condromalasia grau 3, quase 4, com indicação de cirurgia e aplicação de Synvisc one 1x ao ano', academia:'Predio', dataAnamnese:'2026-01-16'},
+  {nome:'Katheyn', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'katheyncarrero31@gmail.com', telefone:'51984843108', piramide:'1234', objetivo:'Melhorar a qualidade de vida e a estética física', restricoes:'Nenhuma relatada', academia:'Quero um treino q possa executar em casa e parques, mas também em academia', dataAnamnese:'2026-01-17'},
+  {nome:'Nathália Pomina da Silva', status:'ok', statusLabel:'Ativa recente', nivel:'A definir', freq:'4x por semana', email:'nathaliapomina@gmail.com', telefone:'51989489995', piramide:'1 bumbum , 2 barriga, 3 coxa, 4 superiores', objetivo:'Ter o corpo que desejo e me sentir bem', restricoes:'Cirurgia no tornozelo mas não compromete em nada', academia:'Usina do corpo', dataAnamnese:'2026-01-19'},
+  {nome:'Kryslen Ribeiro', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'2x por semana', email:'krys.leen@gmail.com', telefone:'51993829822', piramide:'1º reforço de glúteo e quadríceps 2° costas e ombro 3° abdômen', objetivo:'Fortalecimento para corrida', restricoes:'Sim, no quadril', academia:'Perfect', dataAnamnese:'2026-01-23'},
+  {nome:'Francielli Loss Volpatto', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'4x por semana', email:'franlvolpatto@gmail.com', telefone:'51 989316231', piramide:'1: Coxas; 2: triceps; 3: glúteo 4: costas', objetivo:'Definição muscular, hipertrofia', restricoes:'Nenhuma relatada', academia:'Engenharia do Corpo', dataAnamnese:'2026-01-26'},
+  {nome:'Yasmin', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'5x por semana', email:'yasminccamilo28@gmail.com', telefone:'51996529938', piramide:'1º bumbum 2º coxas 3º barriga 4º costas', objetivo:'alcançar o corpo desejado', restricoes:'lesão ligamentar no tornozelo direito; não tenho', academia:'performance', dataAnamnese:'2026-01-29'},
+  {nome:'Luany Braga Prado', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'3x por semana', email:'luanybraga57@gmail.com', telefone:'51980359459', piramide:'1: glúteo 2: coxa 3: costas  4: barriga', objetivo:'Ganhar massa muscular, ficar definida, ganhar mais bumbum e coxas', restricoes:'Nenhuma relatada', academia:'Ct performance', dataAnamnese:'2026-01-29'},
+  {nome:'Danielle Kressin', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'kressindanny@iclod.com', telefone:'51983140058', piramide:'Coxa/bumbum/costas/abdome', objetivo:'Crescer massa muscular', restricoes:'Já tive lombar', academia:'Moinhos fit', dataAnamnese:'2026-02-03'},
+  {nome:'Édlyn Carvalho Schenkel', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'edlyncarvalhoschenkel@gmail.com', telefone:'51992266540', piramide:'costas, braços (foco em acabar o tchauzinho e ficar com os braços fortes), barriga, pernas/bumbum', objetivo:'definição, foco específico e dicas (aprender ir até a falha, progredir carga, equilibrar os exercícios corretamente)', restricoes:'nao, canelite as vezes na corrida', academia:'ct performance', dataAnamnese:'2026-02-03'},
+  {nome:'Raquel Teixeira', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'5x por semana', email:'raquelsonda79@gmail.com', telefone:'51992841469', piramide:'1 - coxa 2 - braços  3 - bumbum  4- flanco (pneu)', objetivo:'Emagrecer e definir', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2026-02-11'},
+  {nome:'Sabine do Nascimento', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'3x por semana', email:'ssabinenascimento@gmail.com', telefone:'21979064840', piramide:'1° Abdômen, 2° braços( Tríceps e costas), 3° Glúteos e 4° Pernas (Posterior e Interno de coxas).', objetivo:'Queima de gordura e melhora na composição corporal.', restricoes:'Sim, estou com bursite no quadril esquerdo.; Bursite no quadril esquerdo em tratamento, fisioterapeuta.; Não.', academia:'Smart fit', dataAnamnese:'2026-02-16'},
+  {nome:'Kátia Fabiane Schneider', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'A definir', email:'katiadj12@hotmail.com', telefone:'51 99207-0519', piramide:'1-bumbum 2-coxa 3-posterior e o 4 deixo a critério do profissional, conforme necessidade.', objetivo:'Deixar o corpo mais harmônico, aumentando os inferiores', restricoes:'coluna lombar - vou enviar o laudo e uma imagem', academia:'Athrix Academia em Feliz e feriados e folgas Mais Fitnnes em Presidente Lucena', dataAnamnese:'2026-02-19'},
+  {nome:'Vanessa Morfan', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'5x por semana', email:'vanessamorfan@icloud.com', telefone:'51995836100', piramide:'Barriga - bumbum - coxa e costas', objetivo:'Melhirar o corpo kk e Melhorar a qualidade de vida ênfase na saúde também', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2026-02-20'},
+  {nome:'Maria eduarda', status:'ok', statusLabel:'Ativa recente', nivel:'A definir', freq:'2x por semana', email:'eduardacruzermachado2003@gmail.com', telefone:'51986076491', piramide:'barriga,coxa e bunda', objetivo:'ajuda pra melhorar o necessário', restricoes:'escoliose', academia:'perfomance', dataAnamnese:'2026-02-21'},
+  {nome:'Sabrina Menger', status:'ok', statusLabel:'Ativa recente', nivel:'Intermediário', freq:'3x por semana', email:'sabrinamenger@gmail.com', telefone:'(51)994962597', piramide:'1 - glúteos 2 - braços 3 - costas 4 - posterior coxa', objetivo:'Definir', restricoes:'Nenhuma relatada', academia:'Moinhos', dataAnamnese:'2026-02-23'},
+  {nome:'Cinara Bairros Vida', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'4x por semana', email:'cinarabairros@gmail.com', telefone:'51999592399', piramide:'Barriga, coxa, bumbum e costas', objetivo:'Meu objetivo massa muscular, fortalecimento, definição e melhorar desempenho na corrida.', restricoes:'Não tenho a cartilagem no joelho e tive tendinite pata de ganso devido a corrida.; Somente o cuidado com o joelho.', academia:'Moinhos', dataAnamnese:'2026-02-26'},
+  {nome:'Márcia Alves', status:'ok', statusLabel:'Ativa recente', nivel:'Intermediário', freq:'3x por semana', email:'dinerei.marcia@icloud.com', telefone:'51 995475409', piramide:'1 barriga 2 bumbum 3 costas 4 coxa', objetivo:'Emagrecimento', restricoes:'Desgaste de patela do joelho direito e esquerdo - direito está mais comprometido.', academia:'Tons de rosa ou Yess', dataAnamnese:'2026-03-05'},
+  {nome:'Simoni Adão Rocha', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'simoninutricionista@gmail.com', telefone:'51997974377', piramide:'Glúteo, posterior, abdômen costas', objetivo:'Me ajudar a sair desta estagnação', restricoes:'Um pouco de dores nos joelhos e encaixe da coxa no quadril nos últimos meses', academia:'CT performance e moinhos fitness Bourbon shopping', dataAnamnese:'2026-03-07'},
+  {nome:'Renata Brogni da Silva', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'A definir', email:'renata_brogni@hotmail.com', telefone:'981818145', piramide:'1-2-4-3', objetivo:'Melhorar a questão do condicionamento físico e flacidez', restricoes:'Tenho tenosinovite no tornozelo direito', academia:'Performace', dataAnamnese:'2026-03-27'},
+  {nome:'Betina Gauna Vincenti', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'betinagauna504@gmail.com', telefone:'51989601705', piramide:'3- barriga, 1-bumbum, e o resto todo', objetivo:'Emagrecer e ganhar massa moscular', restricoes:'Nenhuma relatada', academia:'CT PERFORMANCE', dataAnamnese:'2026-03-27'},
+  {nome:'Eliane Fátima Crupinski', status:'ok', statusLabel:'Ativa recente', nivel:'Intermediário', freq:'3x por semana', email:'elianecrupinskiagro@gmail.com', telefone:'51996504863', piramide:'1- barriga afinar cintura, pochete e peneuzinho. 2- Glúteo 3 perna 4 costas', objetivo:'definir corpo', restricoes:'Nenhuma relatada', academia:'ct performance', dataAnamnese:'2026-03-29'},
+  {nome:'JEFFERSON RUBIM FERREIRA', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'A definir', email:'rubim_07@hotmail.com', telefone:'51999175222', piramide:'1° Braços 2° Peito 3° Ombro 4° Barriga', objetivo:'Hipertrofia', restricoes:'Joelho esquerdo (mais desconforto na corrida) Motivo: futebol; Apenas desgaste nos joelhos', academia:'Smartfit', dataAnamnese:'2026-04-09'},
+  {nome:'Jaíne Menezes dos Santos', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'4x por semana', email:'jaine_menezes13@hotmail.com', telefone:'51997867893', piramide:'Braços Coxa Barriga Bumbum', objetivo:'Saúde e emagrecimento', restricoes:'Fiz cirurgia de Joanete a uns 7 anos atrás.', academia:'Do condomínio', dataAnamnese:'2026-04-09'},
+  {nome:'Renata Melo Rodrigues', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'4x por semana', email:'renatamelorodrigues1@gmail.com', telefone:'55 51985538500', piramide:'1 abdômen  2 coxas  3 bumbum  4 costas', objetivo:'Emagrecimento sem flacidez', restricoes:'Inflamação no ombro', academia:'Focus gym', dataAnamnese:'2026-04-10'},
+  {nome:'Rafael Ferrao', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'3x por semana', email:'rafsferrao@gmail.com', telefone:'51989437623', piramide:'Barriga; Peito; Costas; Coxa', objetivo:'Perder peso', restricoes:'Nenhuma relatada', academia:'Panobianco', dataAnamnese:'2026-04-13'},
+  {nome:'Janderson Cunha Roszkowski', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'3x por semana', email:'jandogremista@gmail.com', telefone:'51995752625', piramide:'2,3,1,4', objetivo:'Fortalecer e trincar kkkk', restricoes:'Nenhuma relatada', academia:'Vou começar com o seu plano', dataAnamnese:'2026-04-13'},
+  {nome:'Franciele Traub', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'5x por semana', email:'traubfranciele@gmail.com', telefone:'51997547979', piramide:'Barriga  Coxa Bumbum Costas', objetivo:'Perder barriga, definir cintura, perna e glúteo kkkkk', restricoes:'Nenhuma relatada', academia:'Ideia fitness', dataAnamnese:'2026-04-17'},
+  {nome:'Marcelo dos Reis da silva junior', status:'ok', statusLabel:'Ativa recente', nivel:'A definir', freq:'4x por semana', email:'marceloreissilvajr@gmail.com', telefone:'51996808282', piramide:'Peito ombro Costa barriga', objetivo:'Resultado', restricoes:'Sim tenho uma lesão no joelho direito já fiz cirurgia; No joelho direito', academia:'Smart Fit bourbon Ipiranga e ct performance', dataAnamnese:'2026-04-19'},
+  {nome:'Eduarda', status:'ok', statusLabel:'Ativa recente', nivel:'A definir', freq:'4x por semana', email:'duda.mentz@gmail.com', telefone:'51995105977', piramide:'2, 1, 3 e 4', objetivo:'Emagrecer e tonificar', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2026-04-22'},
+  {nome:'Gislaine Preto Pires', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'2x por semana', email:'gpretopires@gmail.com', telefone:'(51) 99986-7884', piramide:'2', objetivo:'Resultado', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2026-04-22'},
+  {nome:'Gisele de Abreu Moraes', status:'ok', statusLabel:'Ativa recente', nivel:'A definir', freq:'4x por semana', email:'GiseleMoraes1704@gmail.com', telefone:'51980122191', piramide:'1-coxas 2-glúteo  3- braços (emagreci muito na época que descobri diabetes e fiquei com sobra de pele) 4- costas', objetivo:'Potencializar resultados junto com acompanhamento nutricional, buscando melhorar o processo de emagrecimentos e de hipertrofia', restricoes:'Sim! Rompimento do menisco esquerdo! Cirurgia de meniscectomia realizada em dezembro de 2024 mas hoje vida normal não me limita em nada.; Cirurgia de retirada de menisco', academia:'Prime fit', dataAnamnese:'2026-04-23'},
+  {nome:'Viviane da Cunha Moreira', status:'ok', statusLabel:'Ativa recente', nivel:'A definir', freq:'4x por semana', email:'vi.dacunha@gmail.com', telefone:'51 992907258', piramide:'Barriga, coxa, bumbum, costas', objetivo:'Crescer', restricoes:'Não, mas meu joelho está dando sinais da idade, hahahh', academia:'Total', dataAnamnese:'2026-05-04'},
+  {nome:'Joice Lima', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'joiceclima97@gmail.com', telefone:'51995207714', piramide:'1 quadríceps, bumbum, barriga e costas', objetivo:'Definição', restricoes:'Nenhuma relatada', academia:'Ct performance', dataAnamnese:'2026-05-17'},
+  {nome:'Carolina pires', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'4x por semana', email:'carolzitz@gmail.com', telefone:'51 999845911', piramide:'Glúteo/ barriga / glúteo / barriga/ glúteo', objetivo:'Emagrecimento e hipertrofia', restricoes:'Nenhuma relatada', academia:'Usina do corpo', dataAnamnese:'2026-05-22'},
+  {nome:'Ariel Morais Ferreira', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'3x por semana', email:'ariiel.pdc@gmail.com', telefone:'51982362037', piramide:'1 coxa, 2 bumbum, 3 tríceps, 4 barriga', objetivo:'Definir coxa e bumbum', restricoes:'Condromalacia patelar nos dois joelhos e desgaste no menisco no joelho esquedo; Ressonância magnética dos dois joelhos', academia:'Ideia Fitness', dataAnamnese:'2026-06-07'},
+  {nome:'Sinara', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'2x por semana', email:'silvasinara704@gmail.com', telefone:'51980165964', piramide:'3 barriga', objetivo:'Perder abdômen', restricoes:'Nenhuma relatada', academia:'Casa', dataAnamnese:'2026-06-11'},
+  {nome:'JULIANA HERMES PEREIRA REGO', status:'ok', statusLabel:'Ativa recente', nivel:'A definir', freq:'5x por semana', email:'jhpr16@gmail.com', telefone:'51998005817', piramide:'1- braço / 2 - coxa / 3 - barriga / 4 - costas', objetivo:'Emagrecer e tornear', restricoes:'Nenhuma relatada', academia:'Yes Fitnnes', dataAnamnese:'2026-06-22'},
+  {nome:'Andriele Caroline Rubert', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'5x por semana', email:'andrielecarolinerubert@gmail.com', telefone:'51991423839', piramide:'1- bumbum, 2- barriga(perder), 3- pernas, 4- costas', objetivo:'Esse ano decidi que vou focar no meu corpo e deixar ele de um jeito que eu me sinta bem, já perdi muito peso mas nunca fiquei com o corpo que queria, agora estou focada nisso e acredito que tu pode me auxiliar nesse processo', restricoes:'Dor no joelho ao fazer afundo ou stiff — excluídos da prescrição inicial', academia:'Performance', dataAnamnese:'2026-06-30', idade:30, queixaDor:true, regiaoQueixa:'Joelho',
+   peso:'101 kg', altura:'1,69 m', imc:'35,4 (fase 1: emagrecimento prioritário)',
+   treinoAtual:{fase:'Fase 1 · Emagrecimento (override por IMC)', volume:'Dentro do limite de iniciante · até 20 séries/semana por ênfase',
+     dias:[
+       {n:'Segunda', foco:'Inferiores A · Quadríceps e Glúteo', ex:['Leg Press 45 · 4x12','Agachamento Hack · 3x12','Extensão de quadril na máquina · 3x15','Abdução de quadril na polia · 3x15']},
+       {n:'Terça', foco:'Superiores · Costas e Abdômen', ex:['Remada articular aberta · 3x12','Remada articular fechada · 3x12','Prancha ventral · 3x30s','Abdominal canivete · 3x15']},
+       {n:'Quarta', foco:'Inferiores B · Glúteo e Posterior', ex:['Extensão de quadril no banco romano · 4x15','Cadeira flexora · 3x12','Leg Press 45 (pés altos) · 3x15','Abdução de quadril na polia · 3x15']},
+       {n:'Quinta', foco:'Superiores · Costas e Abdômen', ex:['Remada articular aberta · 3x12','Remada articular fechada · 3x12','Prancha ventral · 3x30s','Abdominal canivete · 3x15']},
+       {n:'Sexta', foco:'Inferiores C · Pernas completo', ex:['Agachamento Hack · 3x12','Leg Press 45 · 3x15','Cadeira flexora · 3x12','Extensão de quadril na máquina · 3x15']}
+     ]}}
+];
+
+function renderAlunas(){
+  const list = document.getElementById('alunas-list');
+  const termo = (document.getElementById('aluna-search') ? document.getElementById('aluna-search').value : '').toUpperCase();
+  list.innerHTML = '';
+  const filtro = document.getElementById('aluna-status-filter') ? document.getElementById('aluna-status-filter').value : 'Todas';
+  const filtradas = alunasPersonal.filter(function(a){
+    const bateBusca = !termo || a.nome.toUpperCase().indexOf(termo) !== -1;
+    const bateStatus = filtro === 'Todas' || (filtro === 'Ativas recentes' && a.status === 'ok') || (filtro === 'Leads antigos' && a.status === 'lead');
+    return bateBusca && bateStatus;
+  });
+  document.getElementById('alunas-count-label').textContent = filtradas.length + ' de ' + alunasPersonal.length + ' alunas';
+  filtradas.slice(0, 80).forEach(function(a){
+    const i = alunasPersonal.indexOf(a);
+    const el = document.createElement('div');
+    el.className = 'aluna-card';
+    el.innerHTML =
+      '<div><p class="aluna-name">' + a.nome + '</p><p class="aluna-meta">' + a.nivel + ' · ' + a.freq + '</p></div>' +
+      '<span><span class="status-dot ' + a.status + '"></span><span class="status-txt ' + a.status + '">' + a.statusLabel + '</span></span>';
+    el.onclick = function(){ openAlunaDetail(i); };
+    list.appendChild(el);
+  });
+  if(filtradas.length > 80){
+    const note = document.createElement('p');
+    note.className = 'page-sub';
+    note.textContent = 'Mostrando 80 de ' + filtradas.length + ' — refine a busca para ver outras.';
+    list.appendChild(note);
+  }
+}
+renderAlunas();
+
+const patologiasCatalogo = [
+  {id:'condromalacia', regiao:'Joelho', nome:'Condromalácia patelar (graus 1-4)', oQueE:'Amolecimento/desgaste da cartilagem atrás da patela, com dor ao agachar, subir/descer escada ou ficar muito tempo sentada.', evitar:'Agachamento profundo com carga alta; cadeira extensora em amplitude completa com carga alta; saltos quando sintomática.', permitido:'Leg press com carga baixa e agachamento parcial; isométricos de quadríceps; elevação pélvica e ponte unilateral; baixo impacto (bike).', conduta:'Fortalecer glúteo médio e rotadores externos para controlar o valgo dinâmico; priorizar cadeia fechada com amplitude reduzida antes de progredir.'},
+  {id:'menisco', regiao:'Joelho', nome:'Lesão de menisco', oQueE:'Lesão na cartilagem em formato de C que amortece o joelho, comum em movimentos de torção com o pé fixo no chão.', evitar:'Agachamento com rotação; avanço/afundo com pivô; leg press com pés mal posicionados gerando torção.', permitido:'Leg press com trajetória controlada; extensão/flexão de joelho sem rotação; fortalecimento isométrico.', conduta:'Controlar amplitude, evitar flexão profunda combinada com rotação; progressão de carga mais lenta que o padrão.'},
+  {id:'artrose_joelho', regiao:'Joelho', nome:'Osteoartrose de joelho (desgaste articular)', oQueE:'Desgaste progressivo da cartilagem articular, mais comum com histórico de treino longo ou idade avançada.', evitar:'Impacto repetitivo (corrida, salto); amplitude completa com carga alta em fases sintomáticas.', permitido:'Fortalecimento muscular ao redor da articulação; exercícios de baixo impacto.', conduta:'Fortalecer sem aumentar o atrito articular — cadeia fechada controlada, evitar picos de carga.'},
+  {id:'tendinopatia_patelar', regiao:'Joelho', nome:'Tendinopatia patelar ("joelho de saltador")', oQueE:'Inflamação/degeneração do tendão patelar, geralmente por sobrecarga.', evitar:'Alto volume de saltos ou agachamentos explosivos enquanto sintomática.', permitido:'Trabalho excêntrico controlado; cargas moderadas e progressivas.', conduta:'Gestão de carga é mais eficaz que repouso total — reduzir volume, não necessariamente parar.'},
+  {id:'fai', regiao:'Quadril', nome:'Impacto femoroacetabular (FAI) / lesão labral do quadril', oQueE:'Atrito anormal entre o fêmur e o encaixe do quadril, ou lesão na cartilagem que reveste esse encaixe.', evitar:'Agachamento muito profundo; flexão de quadril extrema sob carga.', permitido:'Agachamento com amplitude controlada; exercícios de estabilização de quadril.', conduta:'Ajustar amplitude antes de reduzir carga; controlar rotação do quadril durante o movimento.'},
+  {id:'bursite_trocanterica', regiao:'Quadril', nome:'Bursite trocantérica', oQueE:'Inflamação da bolsa sinovial na lateral do quadril, causa dor lateral em quem faz muita abdução repetitiva.', evitar:'Volume alto de abdução de quadril unilateral repetitiva; deitar sobre o lado afetado com pressão direta.', permitido:'Fortalecimento de glúteo médio com volume controlado; exercícios bilaterais.', conduta:'Reduzir volume de abdução isolada temporariamente, sem eliminar o estímulo por completo.'},
+  {id:'coxartrose', regiao:'Quadril', nome:'Osteoartrose de quadril (coxartrose)', oQueE:'Desgaste articular do quadril, similar ao de joelho.', evitar:'Amplitude extrema combinada com carga alta.', permitido:'Fortalecimento progressivo; mobilidade controlada.', conduta:'Fortalecer para proteger a articulação, sem forçar amplitude dolorosa.'},
+  {id:'tendinopatia_glutea', regiao:'Quadril', nome:'Tendinopatia glútea', oQueE:'Sobrecarga do tendão do glúteo médio/mínimo na lateral do quadril, comum em mulheres.', evitar:'Compressão excessiva do tendão (adução extrema, deitar de lado sem apoio); volume alto de abdução.', permitido:'Fortalecimento progressivo evitando posições de compressão extrema.', conduta:'Cuidado especial com abdução em decúbito lateral — ajustar ângulo.'},
+  {id:'impacto_ombro', regiao:'Ombro', nome:'Síndrome do impacto / tendinopatia do manguito rotador', oQueE:'Compressão dos tendões do manguito rotador no espaço subacromial, dor ao elevar o braço acima da cabeça.', evitar:'Desenvolvimento por trás da nuca; elevação lateral acima da linha do ombro com carga alta; supino pesado com cotovelos muito abertos.', permitido:'Elevações controladas até a linha dos ombros; fortalecimento de manguito com carga leve.', conduta:'Fortalecer estabilizadores da escápula antes de progredir carga em empurrar/elevar.'},
+  {id:'labral_ombro', regiao:'Ombro', nome:'Lesão labral do ombro (SLAP)', oQueE:'Lesão na cartilagem que estabiliza a cabeça do úmero na cavidade do ombro.', evitar:'Movimentos overhead com carga alta; puxadas por trás da nuca.', permitido:'Exercícios de estabilização escapular; amplitude controlada frontal.', conduta:'Priorizar controle motor e estabilidade antes de carga.'},
+  {id:'instabilidade_ombro', regiao:'Ombro', nome:'Instabilidade / luxação recidivante de ombro', oQueE:'Frouxidão articular que permite deslocamentos parciais ou completos do ombro.', evitar:'Amplitude extrema em rotação externa com carga (ex: crucifixo muito aberto).', permitido:'Fortalecimento de manguito rotador e estabilizadores; amplitude controlada.', conduta:'Sempre priorizar controle sobre amplitude máxima.'},
+  {id:'bursite_subacromial', regiao:'Ombro', nome:'Bursite subacromial', oQueE:'Inflamação da bolsa sinovial sob o acrômio, geralmente associada à síndrome do impacto.', evitar:'Elevação repetitiva acima da linha do ombro.', permitido:'Exercícios abaixo da linha do ombro; fortalecimento de estabilizadores.', conduta:'Reduzir compressão, fortalecer ao redor.'}
+];
+
+let filtroPatologia = 'Todas';
+
+function renderPatologiaChips(){
+  const row = document.getElementById('patologia-filter-row');
+  row.innerHTML = '';
+  ['Todas','Joelho','Quadril','Ombro'].forEach(function(cat){
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (cat === filtroPatologia ? ' active' : '');
+    chip.textContent = cat;
+    chip.onclick = function(){ filtroPatologia = cat; renderPatologiaChips(); renderPatologiaList(); };
+    row.appendChild(chip);
+  });
+}
+
+function renderPatologiaList(){
+  const list = document.getElementById('patologia-list');
+  list.innerHTML = '';
+  const itens = filtroPatologia === 'Todas' ? patologiasCatalogo : patologiasCatalogo.filter(function(p){ return p.regiao === filtroPatologia; });
+  itens.forEach(function(p){
+    const el = document.createElement('div');
+    el.className = 'info-box';
+    el.innerHTML =
+      '<p class="lbl">' + p.regiao + '</p>' +
+      '<p style="font-size:13.5px;font-weight:600;margin:0 0 8px;">' + p.nome + '</p>' +
+      '<p class="txt"><b>O que é:</b> ' + p.oQueE + '</p>' +
+      '<p class="txt"><b>Evitar:</b> ' + p.evitar + '</p>' +
+      '<p class="txt"><b>Permitido:</b> ' + p.permitido + '</p>' +
+      '<p class="txt" style="margin-bottom:0;"><b>Conduta:</b> ' + p.conduta + '</p>';
+    list.appendChild(el);
+  });
+}
+
+function confirmarPatologia(nomeAluna, patologiaId){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  a.patologiaConfirmada = patologiaId === 'tecnica' ? 'tecnica' : patologiaId;
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+}
+
+const progressoesPorAluna = {};
+let alunaAberta = null;
+let detailDiaAtual = null;
+
+function getProgressoAluna(nome){
+  if(!progressoesPorAluna[nome]){
+    progressoesPorAluna[nome] = { semana: 1, historico: {}, diasConcluidos: {}, substituicoes: [] };
+  }
+  return progressoesPorAluna[nome];
+}
+
+function totalDiasDeTreino(){
+  return dias.filter(function(d){ return !d.descanso; }).length;
+}
+
+function checarConclusaoSemana(nomeAluna){
+  const prog = getProgressoAluna(nomeAluna);
+  const total = totalDiasDeTreino();
+  const concluidos = (prog.diasConcluidos[prog.semana] || []).length;
+  if(concluidos >= total){
+    prog.semana += 1;
+    return { avancou: true, concluidos: concluidos, total: total };
+  }
+  return { avancou: false, concluidos: concluidos, total: total };
+}
+
+const JANELA_MINIMA_FASE_SEMANAS = 10; // 2-3 meses, com base na literatura de correção postural (efeito mensurável em 4-6 semanas)
+
+function calcularElegibilidadeFase(nome){
+  const a = alunasPersonal.find(function(x){ return x.nome === nome; });
+  if(!a || !a.treinoAtual) return null;
+  const prog = getProgressoAluna(nome);
+  const stats = calcularEstatisticasAluna(nome);
+  const nutriStats = calcularNutricaoStats(nome);
+  const semanasNaFase = prog.semana; // fase começou na semana 1 pra Andriele
+
+  const criterios = [];
+  criterios.push({
+    nome: 'Tempo mínimo na fase (2-3 meses)',
+    atingido: semanasNaFase >= JANELA_MINIMA_FASE_SEMANAS,
+    detalhe: semanasNaFase + ' de ' + JANELA_MINIMA_FASE_SEMANAS + ' semanas'
+  });
+  const pctConstancia = stats.temDados ? Math.round((stats.totalConcluidos / stats.totalPlanejado) * 100) : 0;
+  criterios.push({
+    nome: 'Constância ≥ 70%',
+    atingido: pctConstancia >= 70,
+    detalhe: pctConstancia + '%'
+  });
+  if(a.treinoAtual.fase.indexOf('Emagrecimento') !== -1){
+    criterios.push({
+      nome: 'Resposta Nutricional ≥ 60',
+      atingido: nutriStats.temDados && nutriStats.respostaNutricional >= 60,
+      detalhe: nutriStats.temDados ? nutriStats.respostaNutricional : 'sem dados'
+    });
+    const pesoInicial = extrairPesoKg(a.peso);
+    const historico = a.pesoHistorico || [];
+    const pesoAtual = historico.length ? historico[historico.length - 1].peso : pesoInicial;
+    const percPerdido = pesoInicial ? Math.round(((pesoInicial - pesoAtual) / pesoInicial) * 1000) / 10 : 0;
+    criterios.push({
+      nome: 'Perda de peso registrada (≥ 3%)',
+      atingido: percPerdido >= 3,
+      detalhe: percPerdido + '% (' + pesoInicial + 'kg → ' + pesoAtual + 'kg)'
+    });
+  } else if(a.treinoAtual.fase.indexOf('postural') !== -1){
+    criterios.push({
+      nome: 'Confirmação visual do personal (nova foto)',
+      atingido: !!a.fotoReavaliada,
+      detalhe: a.fotoReavaliada ? 'Confirmada' : 'Pendente'
+    });
+  }
+
+  const elegivel = criterios.every(function(c){ return c.atingido; });
+  return { elegivel: elegivel, criterios: criterios };
+}
+
+function verificarCheckinPeso(nomeAluna){
+  const prog = getProgressoAluna(nomeAluna);
+  const mesAtual = Math.floor((prog.semana - 1) / 4) + 1;
+  if(!prog.pesoChecks) prog.pesoChecks = {};
+  if(prog.semana > 1 && (prog.semana - 1) % 4 === 0 && !prog.pesoChecks[mesAtual - 1]){
+    return mesAtual - 1;
+  }
+  return null;
+}
+
+function renderPerguntaPeso(mes){
+  return '<div class="info-box" style="margin-top:10px;">' +
+    '<p class="lbl">Check-in mensal de peso</p>' +
+    '<p class="txt">Já faz um mês! Pode me passar seu peso atual? Isso ajuda a calibrar quando é hora de avançar de fase.</p>' +
+    '<div class="form-group"><input class="form-input" id="peso-atual-input" type="number" step="0.1" placeholder="Ex: 98.5"></div>' +
+    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="registrarPesoMensal(' + mes + ')">Enviar</button>' +
+    '</div>';
+}
+
+function registrarPesoMensal(mes){
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+  if(!alunaAtual) return;
+  const prog = getProgressoAluna(alunaAtual.nome);
+  const peso = parseFloat(document.getElementById('peso-atual-input').value);
+  if(isNaN(peso)) return;
+  if(!prog.pesoChecks) prog.pesoChecks = {};
+  prog.pesoChecks[mes] = true;
+  if(!alunaAtual.pesoHistorico) alunaAtual.pesoHistorico = [];
+  alunaAtual.pesoHistorico.push({ semana: prog.semana, peso: peso });
+  const el = document.getElementById('registro-confirmacao') || document.getElementById('prog-reengajamento');
+  if(el) el.innerHTML = '<div class="insight"><p>Peso registrado! Isso já entra no cálculo de elegibilidade de mudança de fase.</p></div>';
+}
+
+function extrairExercicios(a){
+  const nomes = [];
+  if(a.treinoAtual){
+    a.treinoAtual.dias.forEach(function(d){
+      d.ex.forEach(function(linha){
+        const nome = linha.split(' · ')[0];
+        if(nomes.indexOf(nome) === -1) nomes.push(nome);
+      });
+    });
+  }
+  return nomes;
+}
+
+function sugerirAjusteCarga(carga, reps){
+  if(reps >= 12) return { texto: 'Aumentar carga', valor: Math.round((carga * 1.08) * 2) / 2 };
+  if(reps >= 10) return { texto: 'Manter — pequeno aumento no próximo ciclo', valor: carga };
+  if(reps >= 8) return { texto: 'Manter, repetir', valor: carga };
+  if(reps >= 6) return { texto: 'Pequena redução', valor: Math.round((carga * 0.95) * 2) / 2 };
+  return { texto: 'Redução mais significativa', valor: Math.round((carga * 0.90) * 2) / 2 };
+}
+
+function registrarSessao(){
+  const nome = document.getElementById('prog-exercicio').value;
+  const carga = parseFloat(document.getElementById('prog-carga').value);
+  const reps = parseInt(document.getElementById('prog-reps').value, 10);
+  if(!nome || isNaN(carga) || isNaN(reps)) return;
+  const prog = getProgressoAluna(alunaAberta.nome);
+  if(!prog.historico[nome]) prog.historico[nome] = [];
+  const sugestao = sugerirAjusteCarga(carga, reps);
+  prog.historico[nome].push({ semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao });
+  const i = alunasPersonal.indexOf(alunaAberta);
+  openAlunaDetail(i);
+}
+
+function avancarSemana(){
+  const resultado = checarConclusaoSemana(alunaAberta.nome);
+  const i = alunasPersonal.indexOf(alunaAberta);
+  openAlunaDetail(i);
+  const conf = document.getElementById('prog-reengajamento');
+  if(!resultado.avancou && conf){
+    conf.innerHTML = '<div class="insight"><p><b>Semana não concluída</b> (' + resultado.concluidos + '/' + resultado.total + ' treinos) — a semana não avança, e o sistema já disparou uma mensagem de check-in pra aluna, avisando você em paralelo.</p></div>' +
+      '<div class="form-group"><label class="form-label">Motivo relatado (opcional, pra seu controle)</label><input class="form-input" id="motivo-falta" placeholder="Ex: imprevisto de trabalho"></div>';
+  } else if(resultado.avancou && conf){
+    const prog = getProgressoAluna(alunaAberta.nome);
+    const semanaFechada = prog.semana - 1;
+    let extra = '';
+    if(!prog.nutricao || !prog.nutricao[semanaFechada]){
+      extra += renderPerguntaNutricao(semanaFechada);
+    }
+    const mesPendente = verificarCheckinPeso(alunaAberta.nome);
+    if(mesPendente !== null){
+      extra += renderPerguntaPeso(mesPendente);
+    }
+    conf.innerHTML = '<div class="insight" id="nutri-confirmacao"><p>Semana concluída!' + (extra ? ' Ainda faltam alguns check-ins dessa semana.' : '') + '</p></div>' + extra;
+  }
+}
+
+function avancarSemanaForcado(){
+  const prog = getProgressoAluna(alunaAberta.nome);
+  prog.semana += 1;
+  const i = alunasPersonal.indexOf(alunaAberta);
+  openAlunaDetail(i);
+}
+
+function calcularVolumePorCategoria(a){
+  if(!a.treinoAtual) return {};
+  const totais = {};
+  a.treinoAtual.dias.forEach(function(d){
+    d.ex.forEach(function(linha){
+      const partes = linha.split(' · ');
+      const nomeEx = partes[0];
+      const seriesMatch = (partes[1] || '').match(/^(\d+)x/);
+      const series = seriesMatch ? parseInt(seriesMatch[1], 10) : 0;
+      const exBanco = buscarExercicioNoBanco(nomeEx);
+      const categoria = exBanco ? exBanco.categoria : 'Outro';
+      totais[categoria] = (totais[categoria] || 0) + series;
+    });
+  });
+  return totais;
+}
+
+function renderProgressao(a){
+  const prog = getProgressoAluna(a.nome);
+  const exercicios = extrairExercicios(a);
+  if(exercicios.length === 0) return '';
+
+  let opcoes = exercicios.map(function(n){ return '<option value="' + n + '">' + n + '</option>'; }).join('');
+
+  let logHtml = '';
+  Object.keys(prog.historico).forEach(function(nomeEx){
+    const registros = prog.historico[nomeEx];
+    if(registros.length === 0) return;
+    logHtml += '<p style="font-size:12px;font-weight:600;color:var(--text-dim);margin:10px 0 6px;">' + nomeEx + '</p>';
+    registros.forEach(function(r){
+      logHtml += '<div class="list-item"><span>Semana ' + r.semana + ' · ' + r.carga + 'kg × ' + r.reps + ' reps</span><span class="tag">' + r.sugestao.texto + ' → ' + r.sugestao.valor + 'kg</span></div>';
+    });
+  });
+  if(!logHtml){
+    logHtml = '<div class="info-box"><p class="txt">Nenhuma sessão registrada ainda — a aluna registra pelo próprio treino, ou simule aqui.</p></div>';
+  }
+
+  const totalDias = totalDiasDeTreino();
+  const concluidosSemana = (prog.diasConcluidos[prog.semana] || []).length;
+
+  let reavaliacaoHtml = '';
+  if(prog.semana >= 6){
+    reavaliacaoHtml =
+      '<div class="insight" style="margin-top:14px;"><p><b>Reavaliação de ciclo (semana ' + prog.semana + ')</b><br>' +
+      'Hora de revisar: nível ainda condiz com a execução observada? Algum exercício estabilizou e pode evoluir de complexidade? Vale reavaliar peso/medidas para confirmar se a Fase 1 (emagrecimento) ainda é prioridade ou se já pode avançar para a ênfase estética declarada.</p></div>';
+  }
+
+  const volumePorCategoria = calcularVolumePorCategoria(a);
+  let volumeHtml = '<p class="section-label" style="margin-top:22px;">Volume total da semana (visível só pra você)</p><div class="info-box">';
+  Object.keys(volumePorCategoria).forEach(function(cat){
+    volumeHtml += '<p class="txt">' + cat + ': ' + volumePorCategoria[cat] + ' séries</p>';
+  });
+  volumeHtml += '<p class="txt" style="color:var(--text-faint);font-size:11.5px;margin-bottom:0;">Regra do nível (' + a.nivel + '): ' + (a.nivel === 'Iniciante' ? 'até 20 séries/semana por ênfase' : a.nivel === 'Intermediário' ? '25 a 30 séries/semana por ênfase' : 'até 50 séries/semana por ênfase') + '</p></div>';
+
+  return '<p class="section-label" style="margin-top:22px;">Progressão de carga — simulador</p>' +
+    '<div class="list-item" style="margin-bottom:10px;"><span>Semana atual do ciclo: ' + prog.semana + ' / 6</span></div>' +
+    '<div class="list-item" style="margin-bottom:10px;"><span>Treinos concluídos essa semana: ' + concluidosSemana + ' / ' + totalDias + '</span></div>' +
+    logHtml +
+    reavaliacaoHtml +
+    volumeHtml +
+    '<div class="form-group" style="margin-top:12px;"><label class="form-label">Exercício</label><select class="form-select" id="prog-exercicio">' + opcoes + '</select></div>' +
+    '<div class="form-group"><label class="form-label">Carga usada nesta sessão (kg)</label><input class="form-input" id="prog-carga" type="number" placeholder="Ex: 20"></div>' +
+    '<div class="form-group"><label class="form-label">Repetições executadas na 1ª série (é ela que define o ajuste)</label><input class="form-input" id="prog-reps" type="number" placeholder="Ex: 10"></div>' +
+    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="registrarSessao()">Registrar sessão</button>' +
+    '<button class="btn-gold" onclick="avancarSemana()">Simular fim de semana</button>' +
+    '<div id="prog-reengajamento" style="margin-top:10px;"></div>' +
+    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:14px;" onclick="exportarRelatorioEvolucao(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-file-export" style="font-size:14px;vertical-align:-2px;margin-right:6px;"></i>Exportar relatório de evolução</button>' +
+    '<p style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:16px;cursor:pointer;" onclick="resetarDadosTeste()">Resetar dados de teste (antes do lançamento)</p>';
+}
+
+function abrirSubstituicao(diaIndex, exIndex){
+  const a = alunaAberta;
+  const linhaAtual = a.treinoAtual.dias[diaIndex].ex[exIndex];
+  const nomeAtual = linhaAtual.split(' · ')[0];
+  const exAtualBanco = exerciciosBanco.find(function(e){ return e.nome.toUpperCase() === nomeAtual.toUpperCase(); });
+  const categoria = exAtualBanco ? exAtualBanco.categoria : null;
+  const opcoes = exerciciosBanco.filter(function(e){ return !categoria || e.categoria === categoria; }).slice(0, 40);
+
+  const prog = getProgressoAluna(a.nome);
+  const semanasDesdeAtribuicao = prog.semana; // treino atribuído na semana 1
+  const trocaPrecoce = semanasDesdeAtribuicao <= 2; // proxy pra "menos de 10 dias"
+
+  const form = document.getElementById('substituicao-form');
+  form.innerHTML =
+    '<div class="info-box" style="margin-top:10px;">' +
+    '<p class="lbl">Trocando: ' + nomeAtual + '</p>' +
+    '<div class="form-group"><select class="form-select" id="sub-novo-exercicio">' +
+      opcoes.map(function(e){ return '<option value="' + e.nome.replace(/"/g,'') + '">' + e.nome + '</option>'; }).join('') +
+    '</select></div>' +
+    (trocaPrecoce
+      ? '<div class="form-group"><label class="form-label">Motivo da troca (treino atribuído recentemente)</label>' +
+        '<select class="form-select" id="sub-motivo"><option>A máquina não existe na academia</option><option>A máquina está estragada</option></select></div>'
+      : '') +
+    '<button class="btn-gold" onclick="confirmarSubstituicao(' + diaIndex + ',' + exIndex + ')">Confirmar troca</button>' +
+    '</div>';
+}
+
+function confirmarSubstituicao(diaIndex, exIndex){
+  const a = alunaAberta;
+  const novoNome = document.getElementById('sub-novo-exercicio').value;
+  const motivoEl = document.getElementById('sub-motivo');
+  const motivo = motivoEl ? motivoEl.value : null;
+  const linhaAtual = a.treinoAtual.dias[diaIndex].ex[exIndex];
+  const nomeAntigo = linhaAtual.split(' · ')[0];
+  const setsReps = linhaAtual.split(' · ')[1] || '';
+
+  a.treinoAtual.dias[diaIndex].ex[exIndex] = novoNome + ' · ' + setsReps;
+  if(typeof dias !== 'undefined' && dias[diaIndex] && dias[diaIndex].ex[exIndex]){
+    dias[diaIndex].ex[exIndex] = novoNome + ' · ' + setsReps;
+  }
+
+  const prog = getProgressoAluna(a.nome);
+  prog.substituicoes.push({ semana: prog.semana, de: nomeAntigo, para: novoNome, motivo: motivo });
+
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+}
+
+function openAlunaDetail(i){
+  const a = alunasPersonal[i];
+  alunaAberta = a;
+  const el = document.getElementById('aluna-detail-content');
+  let treinoHtml = '<div class="list-item"><span>Ainda sem treino atribuído</span></div>';
+  if(a.treinoAtual){
+    treinoHtml = '<div class="badge">' + a.treinoAtual.fase + '</div>' +
+      '<p class="page-sub" style="margin:2px 0 10px;">' + a.treinoAtual.volume + '</p>';
+    a.treinoAtual.dias.forEach(function(d, di){
+      treinoHtml += '<p style="font-size:12px;font-weight:600;color:var(--text-dim);margin:10px 0 6px;">' + d.n + ' — ' + d.foco + '</p>';
+      d.ex.forEach(function(exLine, ei){
+        treinoHtml += '<div class="list-item" style="padding:8px 12px;"><span style="font-size:12.5px;">' + exLine + '</span><span class="tag" style="cursor:pointer;" onclick="abrirSubstituicao(' + di + ',' + ei + ')">Trocar</span></div>';
+      });
+    });
+    treinoHtml += '<div id="substituicao-form"></div>';
+  }
+
+  let queixaHtml = '';
+  if(a.queixaDor && !a.patologiaConfirmada){
+    const candidatas = patologiasCatalogo.filter(function(p){ return p.regiao === a.regiaoQueixa; });
+    queixaHtml = '<p class="section-label">IA identificou uma queixa</p>' +
+      '<div class="insight"><p>A aluna relatou dor ("' + a.restricoes + '"). Isso pode ser só ajuste de técnica — mas também pode indicar uma das patologias abaixo. Confirme se for o caso:</p></div>' +
+      '<div class="chip-list" style="margin-bottom:14px;">' +
+        candidatas.map(function(p){ return '<span class="desvio-chip" onclick="confirmarPatologia(\'' + a.nome.replace(/'/g,"\\'") + '\',\'' + p.id + '\')">' + p.nome + '</span>'; }).join('') +
+        '<span class="desvio-chip" onclick="confirmarPatologia(\'' + a.nome.replace(/'/g,"\\'") + '\',\'tecnica\')">Não é patologia — só ajuste de técnica</span>' +
+      '</div>';
+  } else if(a.patologiaConfirmada === 'tecnica'){
+    queixaHtml = '<p class="section-label">Queixa avaliada</p>' +
+      '<div class="insight"><p>Confirmado como ajuste de técnica, não patologia. Exercícios podem voltar à prescrição normal quando o personal achar adequado.</p></div>';
+  } else if(a.patologiaConfirmada){
+    const p = patologiasCatalogo.find(function(x){ return x.id === a.patologiaConfirmada; });
+    queixaHtml = '<p class="section-label">Patologia confirmada</p>' +
+      '<div class="info-box"><p style="font-size:13.5px;font-weight:600;margin:0 0 8px;">' + p.nome + '</p>' +
+      '<p class="txt"><b>Evitar:</b> ' + p.evitar + '</p>' +
+      '<p class="txt"><b>Permitido:</b> ' + p.permitido + '</p>' +
+      '<p class="txt" style="margin-bottom:0;"><b>Conduta:</b> ' + p.conduta + '</p></div>';
+  }
+
+  el.innerHTML =
+    '<h1 class="page-title" style="margin-top:0;">' + a.nome + '</h1>' +
+    '<p class="page-sub"><span class="status-dot ' + a.status + '"></span><span class="status-txt ' + a.status + '">' + a.statusLabel + '</span></p>' +
+    '<div class="stat-grid">' +
+      '<div class="stat-card"><p class="stat-label">Nível</p><p class="stat-value" style="font-size:15px;">' + a.nivel + '</p></div>' +
+      '<div class="stat-card"><p class="stat-label">Frequência desejada</p><p class="stat-value" style="font-size:15px;">' + a.freq + '</p></div>' +
+    '</div>' +
+    (a.imc ? '<p class="section-label">Composição corporal</p><div class="info-box"><p class="txt">' + a.peso + ' · ' + a.altura + '<br>IMC ' + a.imc + '</p></div>' : '') +
+    '<p class="section-label">Contato</p>' +
+    '<div class="info-box"><p class="txt">' + (a.email || 'Não informado') + '<br>' + (a.telefone || 'Telefone não informado') + '</p></div>' +
+    '<p class="section-label">Pirâmide de prioridade (resposta original)</p>' +
+    '<div class="info-box"><p class="txt">' + (a.piramide || 'Não respondida') + '</p></div>' +
+    '<p class="section-label">Objetivo com a consultoria</p>' +
+    '<div class="info-box"><p class="txt">' + (a.objetivo || 'Não informado') + '</p></div>' +
+    '<p class="section-label">Restrições / lesões relatadas</p>' +
+    '<div class="info-box"><p class="txt">' + a.restricoes + '</p></div>' +
+    queixaHtml +
+    '<p class="section-label">Academia</p>' +
+    '<div class="info-box"><p class="txt">' + (a.academia || 'Não informado') + '</p></div>' +
+    '<p class="section-label">Treino atual</p>' +
+    treinoHtml +
+    renderElegibilidadeFase(a) +
+    renderPromocaoNivel(a) +
+    renderBlocoPeriodizacao(a) +
+    renderTecnicaPendente(a) +
+    renderProgressao(a) +
+    '<p class="page-sub" style="margin-top:10px;">Anamnese respondida em ' + (a.dataAnamnese || 'data desconhecida') + '</p>';
+  showPersonalView('aluna');
+}
+
+function renderPromocaoNivel(a){
+  const elegibilidade = calcularElegibilidadePromocaoNivel(a.nome);
+  if(!elegibilidade) return '';
+  let html = '<p class="section-label" style="margin-top:22px;">Promoção de nível (iniciante → intermediário)</p>';
+  html += elegibilidade.criterios.map(function(c){
+    return '<div class="list-item"><span><i class="ti ti-' + (c.atingido ? 'circle-check' : 'circle-x') + '" style="font-size:13px;color:' + (c.atingido ? 'var(--gold-soft)' : 'var(--text-faint)') + ';vertical-align:-2px;margin-right:6px;"></i>' + c.nome + '</span><span class="tag">' + c.detalhe + '</span></div>';
+  }).join('');
+  html += '<div class="' + (elegibilidade.elegivel ? 'insight' : 'info-box') + '" style="margin-top:8px;"><p' + (elegibilidade.elegivel ? '' : ' class="txt"') + '>' + (elegibilidade.elegivel ? 'Critérios atendidos — pode promover pra intermediário quando confirmar.' : 'Ainda faltam critérios pra promoção de nível.') + '</p></div>';
+  return html;
+}
+
+function renderBlocoPeriodizacao(a){
+  if(!a.treinoAtual) return '';
+  const info = calcularBlocoAtual(a);
+  return '<p class="section-label" style="margin-top:22px;">Periodização</p>' +
+    '<div class="badge">' + info.bloco + '</div>' +
+    '<p class="txt" style="font-size:12px;color:var(--text-faint);margin:6px 0 0;">' + info.descricao + '</p>';
+}
+
+function renderTecnicaPendente(a){
+  if(!a.tecnicaAprovada) return '';
+  const pendentes = Object.keys(a.tecnicaAprovada).filter(function(k){ return a.tecnicaAprovada[k] === 'pendente'; });
+  if(pendentes.length === 0) return '';
+  let html = '<p class="section-label" style="margin-top:22px;">Técnica aguardando vídeo</p>';
+  pendentes.forEach(function(nomeEx){
+    html += '<div class="list-item"><span><i class="ti ti-video" style="font-size:13px;color:var(--gold-soft);vertical-align:-2px;margin-right:6px;"></i>' + nomeEx + '</span><span class="tag" style="cursor:pointer;" onclick="aprovarTecnica(\'' + a.nome.replace(/'/g,"\\'") + '\',\'' + nomeEx.replace(/'/g,"\\'") + '\')">Aprovar</span></div>';
+  });
+  return html;
+}
+
+function renderElegibilidadeFase(a){
+  const elegibilidade = calcularElegibilidadeFase(a.nome);
+  if(!elegibilidade) return '';
+  let html = '<p class="section-label" style="margin-top:22px;">Avaliação de mudança de fase</p>';
+  html += elegibilidade.criterios.map(function(c){
+    return '<div class="list-item"><span><i class="ti ti-' + (c.atingido ? 'circle-check' : 'circle-x') + '" style="font-size:13px;color:' + (c.atingido ? 'var(--gold-soft)' : 'var(--text-faint)') + ';vertical-align:-2px;margin-right:6px;"></i>' + c.nome + '</span><span class="tag">' + c.detalhe + '</span></div>';
+  }).join('');
+  html += '<div class="' + (elegibilidade.elegivel ? 'insight' : 'info-box') + '" style="margin-top:8px;"><p' + (elegibilidade.elegivel ? '' : ' class="txt"') + '>' + (elegibilidade.elegivel ? 'Critérios atendidos — pode avançar de fase quando confirmar.' : 'Ainda faltam critérios — o sistema não sugere avanço de fase até todos serem atingidos.') + '</p></div>';
+  return html;
+}
+
+function showPersonalView(which){
+  ['dashboard','alunas','aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias'].forEach(function(v){
+    document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
+  });
+  if(which === 'alunas'){ renderAlunas(); }
+  if(which === 'treinos'){ renderTemplates(); populateExercicioSelect(); }
+  if(which === 'desafios'){ renderDesafios(); populateTreinoSelect(); }
+  if(which === 'mobilidade'){ renderMobilidadeBanco(); renderAquecimentoBanco(); }
+  if(which === 'patologias'){ renderPatologiaChips(); renderPatologiaList(); }
+  if(which === 'exercicios'){
+    document.getElementById('ex-video-view').style.display = 'none';
+    document.getElementById('ex-lista-view').style.display = 'block';
+    mostrandoFormAdicionar = false;
+    renderExerciciosChips();
+    renderExerciciosLista();
+    populateGrupoSelect();
+  }
+}
+
+const exerciciosBanco = [
+  {nome:'FLEXÃO NO SOLO ADAPTADA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/uY3Y9eF79iw'},
+  {nome:'CRUCIFIXO INVERSO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/mtwV9vh1Yrc'},
+  {nome:'ELEVAÇÃO FRONTAL ALTERNADA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/kGQP3CIow4s'},
+  {nome:'ROSCA MARTELO COM CORDA NA POLIA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/KMpBtSwNRcw'},
+  {nome:'TRÍCEPS FRANCÊS BIL', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/rT5dEQzyZy8'},
+  {nome:'PRANCHA VENTRAL DINÂMICA OMBRO', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/jSqggWVyTVA'},
+  {nome:'FLEXÃO ADAPTADA NO SOFÁ', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/DcOgOamrNVQ'},
+  {nome:'CRUCIFIXO INVERSO C PESO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/mtwV9vh1Yrc'},
+  {nome:'DESENVOLVIMENTO FRONTAL', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Giue8EVBUdw'},
+  {nome:'FLEXÃO DE COTOVELO ELÁSTICO', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/dlGMepDtjWg'},
+  {nome:'TRÍCEPS FRANCÊS APOIADO', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1XNQYUWWr4w'},
+  {nome:'PRANCHA DINÂMICA', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/SgSRuUNSaSg'},
+  {nome:'SUPINO RETO COM BARRA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/kwBj4YYcHN0'},
+  {nome:'CRUCIFIXO INVERSO COM ELÁSTICO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/O5Tq-JCRTLU'},
+  {nome:'ROTAÇÃO EXTERNA OBROS ELÁSTICO', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/n6f8dVdeywM'},
+  {nome:'ROSCA DIRETA COM BARRA W', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/DP_r0Y3jaDQ'},
+  {nome:'TRÍCEPS COM CORDA NA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/5Pi0xpkSJ7I'},
+  {nome:'ABS BICICLETA ALT', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ZowzFb-NlVc'},
+  {nome:'FLEXÃO DIAGONAL NA POLIA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/_g-x6FKny3U'},
+  {nome:'CRUCIFIXO INVERSO COM HALTERES', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Qgi26Oy7Izk'},
+  {nome:'DESENVOLVIMENTO FRONTAL GUIADA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/n0sRwlEbFRY'},
+  {nome:'ROSCA DIRETA COM HALTERES', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/8UyF5zKDyiw'},
+  {nome:'TRÍCEPS FRA UNIL', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ZgC9-xF_5Zw'},
+  {nome:'FLEXÃO NO SOLO', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/PD8IJVrCIF0'},
+  {nome:'ENCOLHIMENTO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/AprTVnp8Glc'},
+  {nome:'EXTENSÃO DE OMBROS', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/86tIbUP2QDQ'},
+  {nome:'ROSCA MARTELO ALTERNADA COM HALTERES', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/-FFDmkFHLNI'},
+  {nome:'TRÍCEPS CORDA ELÁSTICO', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/8k42fwZDZQk'},
+  {nome:'ABS FLEXÃO ALTERNADA E CURTA QUADRIL', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/48duQzz6s3o'},
+  {nome:'CRUCIFIXO DEITADO', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Zu_EiENKB-s'},
+  {nome:'EXTENSÃO HORIZONTAL VOADOR', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/xRvxuj-CYJU'},
+  {nome:'ELEVAÇÃO FRONTAL COM HALTERS', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/8qBPQ9II95g'},
+  {nome:'ROSCA DIRETA COM CORDA NA POLIA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Zvco9SHfvb4'},
+  {nome:'TRÍCEPS CORDA N POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/8QoVDfqOfT0'},
+  {nome:'PRANCHA VENTRAL', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/BDwijwkx3IM'},
+  {nome:'VOADOR', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Xf-gNOsEAkk'},
+  {nome:'FACEPULL ELÁSTICO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/nEEC350vjtM'},
+  {nome:'ELEV LAT. DECLINADA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/RKZcUyuDXB4'},
+  {nome:'ROSCA SCOTT UNILATERAL', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/eMuzfwJLMHA'},
+  {nome:'TRÍCEPS APOIADO', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1XNQYUWWr4w'},
+  {nome:'ABS TESOURINHA', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ZamgsrcklEU'},
+  {nome:'FACEPULL NA POLIA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/nyD-Hl3ReJI'},
+  {nome:'MANGUITO ROT. EXTERNA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/MizDY8p0gDY'},
+  {nome:'ROSCA ALTERNADA COM HALTERES', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Tzz8CUv-LNk'},
+  {nome:'TRÍCEPS FRANCÊS ELÁSTICO', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/y9nmjsylNtk'},
+  {nome:'ABS REMADOR CURTO C', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/FAvPpXN-UrQ'},
+  {nome:'DESENVOLVIMENTO FRONTAL HALTERES', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/NwAXR-vZc4Y'},
+  {nome:'ROSCA MARTELO COM CORDA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/81XRt_q084Y'},
+  {nome:'TRÍCEPS SUPINADO', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/uEUz0NsQNjY'},
+  {nome:'SOBE E DESCE CADEIRA', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Nl9Ehzqqq6Q'},
+  {nome:'FLEXÃO FECHADA NO SOLO', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/hDbCcR_vCnY'},
+  {nome:'PULLDOWN COM ELÁSTICO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Zg9L-zYE0wI'},
+  {nome:'FACEPULL NA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/nyD-Hl3ReJI'},
+  {nome:'ROSCA MARTELO COM HALTERES', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/XX8i5RD3XCQ'},
+  {nome:'TRÍCEPS COICE UNI NA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/cQ7TeC_rdlg'},
+  {nome:'PRANCHA ALTA', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1L3sIFCFunU'},
+  {nome:'PULLDOWN COM CORDA NA POLIA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=H7jlJ-QxC9I'},
+  {nome:'ELEV LAT. INCLINADA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/IVqSmYZ2awM'},
+  {nome:'ROSCA MARTELO ALTERNADA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/CjfIwcLz5Xk'},
+  {nome:'TRÍCEPS  UNI NA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/udH-RZ2Wb2Y'},
+  {nome:'ABS OBLÍCUO TOCANDO O PÉ', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/7Wv15aDEhVc'},
+  {nome:'PULLDOWN ELÁSTICO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Zg9L-zYE0wI'},
+  {nome:'ROSCA ALTERNADA COM ISOMETRIA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/43EPuTFKvjQ'},
+  {nome:'TRÍCEPS ROLDANA COM BARRA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Q5HfQ30Q9os'},
+  {nome:'ABS QUADRIL CONTRA O SOLO', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/tTwLVwhe8Bg'},
+  {nome:'FLEXÃO DE BRAÇOS ADP', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/At33Ihk33pY'},
+  {nome:'PUXADA ABERTA FRONTAL Y', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/SBk4080mWa4'},
+  {nome:'ELEVAÇÃO LATERAL COM HALTERES', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/13giDFqI39I'},
+  {nome:'FLEXÃO DE COTOVELO COM MOCHILA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/X42BMTwuPMA'},
+  {nome:'ABS ESCALADA LATERAL', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/rLAnLALPjjE'},
+  {nome:'PUXADA COM TRIÂNGULO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Ps3_hCKtZ58'},
+  {nome:'ELEVAÇÃO LATERAL POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/w9ebX7LO9SI'},
+  {nome:'FLEXÃO COTOVELOS ROLDANA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/oOPtQW5lubk'},
+  {nome:'TRÍCEPS TESTA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/bpp_l5Gdv7c'},
+  {nome:'PRANCHA LATERAL', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/n9uoOzblcqk'},
+  {nome:'SUPINO INCLINADO COM HALTERES', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/aCY-5vtz3n8'},
+  {nome:'PUXADA FRONTAL BARRA FIXA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Ds5iplZZf9Q'},
+  {nome:'MANGUITO ELÁSTICO', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/uNHCiK5oARI'},
+  {nome:'ROSCA SCOTT', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/hFb3-9uXdHo'},
+  {nome:'TRÍCEPS BANCO EM CASA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/wkaPvUI9VBg'},
+  {nome:'ABS SUPRA', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/SEaT1STUVF8'},
+  {nome:'CRUCIFIXO COM HALTERES', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/t5LWZvJErcA'},
+  {nome:'PUXADA ABERTA SUPINADA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/-7QIrHHcIO4'},
+  {nome:'EXTENSÃO HORIZONTAL DE OMBROS', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/aVfjcMPZkJ4'},
+  {nome:'ROSCA BÍCEPS ALTERNADA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/VbneTGKw5pE'},
+  {nome:'TRÍCEPS CORDA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/V8OOh_Od_0o'},
+  {nome:'ABS INFRA', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ujwvd_T1R0c'},
+  {nome:'CROSSOVER DIAGONAL', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/_g-x6FKny3U'},
+  {nome:'PUXADA FRONTAL SUPINADA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/VyIVo-I0rVo'},
+  {nome:'EXT HORIZONTAL ELÁSTICO', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/mrNPUA1dmsc'},
+  {nome:'TRÍCEPS COM BARRA NA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/lglZg5PueKE'},
+  {nome:'ABS INFRA CURTO', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1bfJ7vBi_Tk'},
+  {nome:'SUPINO RETO COM HALTERES', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Z4GP4FWN9YM'},
+  {nome:'PUXADA NEUTRA BARRA FIXA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/zYNDXu3HxEw'},
+  {nome:'ELEVAÇÃO LATERAL ELÁSTICO', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/zZXRdoICDzY'},
+  {nome:'ROSCA MARTELO NA POLIA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/KMpBtSwNRcw'},
+  {nome:'MERGULHO NA PARALELA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/f3h0EtJIIhY'},
+  {nome:'ABS ESCALADA', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/cV6K_j5FLt8'},
+  {nome:'PUXADA NEUTRA FRONTAL', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/TmG8s45O-BI'},
+  {nome:'ELEVAÇÃO FRONTAL C BARRA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/dVpeHSXqbis'},
+  {nome:'TRÍCEPS FRANCÊS BILATERAL', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/rT5dEQzyZy8'},
+  {nome:'ABDOMINAL CANIVETE', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/kjoeOZKVxDM'},
+  {nome:'REMADA ABE CURV C BARRA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/4rIMCTLueQA'},
+  {nome:'ELEVAÇÃO FRONTAL NA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/AcbMzWL2E7Q'},
+  {nome:'ROSCA DIRETA INCLINADA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/VnU96uihAJc'},
+  {nome:'ABS REMADOR COMPLETO', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/cPePOSFPFQQ'},
+  {nome:'REMADA ABERTA C/ HALTER', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/HOD-Um14gFg'},
+  {nome:'EXTENSÃO HORIZINTAL HALTER', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/54jt9FkDs_w'},
+  {nome:'ROSCA 21 COM BARRA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/l-MktIlWRZg'},
+  {nome:'ABS BICICLETA UNIL.', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/IQMbbBpLWaM'},
+  {nome:'REMADA ABERTA COM HALTERES', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/giQfgYKYrGc'},
+  {nome:'ELEVAÇÃO LATERAL HALTERES', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/xaZ1GlPzse4'},
+  {nome:'PRANCHA VENTRAL 3 APOIOS', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/vJkSlg0__A4'},
+  {nome:'REMADA ABERTA ELÁSTICA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/soytMrqBEBs'},
+  {nome:'ELEVAÇÃO FRONTAL', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/x6kVaimzO7o'},
+  {nome:'REMADA ABERTA FRONTAL ELÁSTICO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/uuCA8vg7xSQ'},
+  {nome:'ELEVAÇÃO FRONTAL HALTERES', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/x6kVaimzO7o'},
+  {nome:'ABS CRUZADO ALTO', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/b1qXTPHPpjw'},
+  {nome:'CROOS OVER', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/_g-x6FKny3U'},
+  {nome:'REMADA ABERTA PRONADA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Je-c5O5DR5c'},
+  {nome:'EXTENSÃO HORIZONTAL UNI NA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/qCQOT8Py038'},
+  {nome:'ABS REMADOR CURTO', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/FAvPpXN-UrQ'},
+  {nome:'REMADA CURVADA SUPINADA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/3VU_r-9snjg'},
+  {nome:'DESENVOLVIMENTO FRONTAL ELÁSTICO', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/6p5_P_8VH-g'},
+  {nome:'PRANCHA LATERAL ADAP.', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/8l3N6o2SLMM'},
+  {nome:'SUPINO INCLINADO HALTERES', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/TXXG_sevBMk'},
+  {nome:'REMADA BAIXA NEUTRA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/gvRz36ZV9SQ'},
+  {nome:'ELEVAÇÃO LATERAL', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/7CpesOm6Z5U'},
+  {nome:'PRANCHA LATERAL DINÂMICA', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Z-V-LAchIn0'},
+  {nome:'MERGULHO NA PARALELA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/f3h0EtJIIhY'},
+  {nome:'REMADA BAIXA Y', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/iKW5nXARbMs'},
+  {nome:'DESENVOLVIMENTRO FRONTAL COM MOCHILA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/RcHEOOACjHk'},
+  {nome:'REMADA CURVADA ABE ELÁSTICO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ZCzFQX8LDJM'},
+  {nome:'MANGUITO UNILATERAL', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/286eFOvP_MI'},
+  {nome:'TRÍCEPS BARRA NA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Byff4QmSEc8'},
+  {nome:'EXTENSÃO LOMBAR DINÂMICA', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/y_5kPLWzrFQ'},
+  {nome:'SUPINO RETO ARTICULAR', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/kn6zOZXNW1Q'},
+  {nome:'REMADA CURVADA ABERTA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Je-c5O5DR5c'},
+  {nome:'ELEVAÇÃO DIAGONAL H', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/7_9oQNFkqU0'},
+  {nome:'EXTENSÃO LOMBAR GUIADO', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/M7wFYedPnLc'},
+  {nome:'REMADA CURVADA COM HALTERES', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ReiU3emM_8o'},
+  {nome:'ELEVAÇÃO FRONTAL ELÁSTICO', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/UavSXczA6pI'},
+  {nome:'SUPER MAN', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/lhg93GRGkGQ'},
+  {nome:'FLY', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/L4YtdisHldk'},
+  {nome:'REMADA CURVADA COM MOCHILA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/7nlABnGxDp0'},
+  {nome:'EXTENSÃO HORIZONTAL POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1MHzijrsAOY'},
+  {nome:'SUPINO INCLINADO ARTICULAR', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/oJkLYcqaA5E'},
+  {nome:'REMADA CURVADA NEUTRA ELÁSTICO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/_kI51Xc7tnE'},
+  {nome:'REMADA UNI AMPLITUDE ELEVADA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/_I2d2Ij0p5E'},
+  {nome:'EXTENSÃO HORIZONTAL NA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1MHzijrsAOY'},
+  {nome:'REMADA FECHADA CURVADA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/FeIxXCMuwUI'},
+  {nome:'REMADA FECHADA ELÁSTICO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/0xI3hZwo3OA'},
+  {nome:'REMADA UNI AMPLITUDE ELEVADA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/_I2d2Ij0p5E'},
+  {nome:'MANGUITO COM ELÁSTICO', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/o-53LBfn9ys'},
+  {nome:'REMADA UNI COM HALTERES', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/kS0KNWUgU7I'},
+  {nome:'REMADA UNILATERAL COM MOCHILA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/i__eZEOAYEE'},
+  {nome:'DESENVOLVIMENTO FRONTAL NA MÁQUINA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/iT29kcK5KcY'},
+  {nome:'EXTENSÃO HORIZONTAL NA POLIA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1MHzijrsAOY'},
+  {nome:'REMADA ABERTA COM LENÇOL', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/DKHa19UU4EU'},
+  {nome:'PULLOVER', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Ba4xQwfBz6g'},
+  {nome:'REMADA ARTICULAR ABERTA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ueWKZBDgQeA'},
+  {nome:'REMADA ARTICULAR FECHADA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Bjy5YMPzZao'},
+  {nome:'PUXADA ABERTA FRONTAL', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/rubLhTeJWwA'},
+  {nome:'PUXADA SUPINADA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/JROH1Y73n6E'},
+  {nome:'REMADA BAIXA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/tGWs8IjRN9s'},
+  {nome:'REMADA ABERTA NA POLIA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/-AhBdO6ngdE'},
+  {nome:'CRUCIFIXO INV COM APOIO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/IbhLDWWnGxc'},
+  {nome:'REMADA CAVALINHO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/MkfpH3Sl1lY'},
+  {nome:'REMADA ABERTA NO TRX', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/KoxP8668V1Y'},
+  {nome:'FLEXÃO NO SOLO ADAPTADA', grupo:'?', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/uY3Y9eF79iw'},
+  {nome:'FLEXÃO ADAPTADA NO SOFÁ', grupo:'?', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/DcOgOamrNVQ'},
+  {nome:'FLEXÃO NO SOLO', grupo:'?', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/PD8IJVrCIF0'},
+  {nome:'CRUCIFIXO DEITADO', grupo:'?', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/Zu_EiENKB-s'},
+  {nome:'AGACHAMENTO FRONTAL', grupo:'Abdômen', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/oMoGcwdus3w'},
+  {nome:'SUPINO RETO COM BARRA', grupo:'?', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/4HRd2iAIZgQ'},
+  {nome:'TRÍCEPS FRAN BIL', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/rT5dEQzyZy8'},
+  {nome:'PULLDOWN COM CORDA', grupo:'Costas', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/Zg9L-zYE0wI'},
+  {nome:'TRÍCEPS FRANCÊS APOIADO', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/1XNQYUWWr4w'},
+  {nome:'FLEXÃO FECHADA NO SOLO', grupo:'?', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/hDbCcR_vCnY'},
+  {nome:'TRÍCEPS FRA UNIL', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/ZgC9-xF_5Zw'},
+  {nome:'TRÍCEPS CORDA ELÁSTICO', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/8k42fwZDZQk'},
+  {nome:'TRÍCEPS APOIADO', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/1XNQYUWWr4w'},
+  {nome:'TRÍCEPS FRANCÊS ELÁSTICO', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/y9nmjsylNtk'},
+  {nome:'TRÍCEPS SUPINADO', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/uEUz0NsQNjY'},
+  {nome:'TRÍCEPS TESTA', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/bpp_l5Gdv7c'},
+  {nome:'REMADA ABERTA SUPINADA', grupo:'Costas', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/3VU_r-9snjg'},
+  {nome:'TRÍCEPS BANCO EM CASA', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/wkaPvUI9VBg'},
+  {nome:'EXTENSÃO LOMBAR DINÂMICA', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/y_5kPLWzrFQ'},
+  {nome:'EXTENSÃO LOMBAR GUIADO', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/M7wFYedPnLc'},
+  {nome:'SUPER MAN', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/lhg93GRGkGQ'},
+  {nome:'AFUNDO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/JM5sJCb1lsI'},
+  {nome:'BOM DIA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ZG44uKbHK4Q'},
+  {nome:'ABDUÇÃO DE QUADRIL NA POLIA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/NOkHTTQNqSk'},
+  {nome:'FLEXÃO PLANTAR', grupo:'Panturrilha', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/bc12xKf4-9A'},
+  {nome:'AFUNDO ALT. PLIOMÉTRICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1tY7QZwhpGU'},
+  {nome:'CADEIRA FLEXORA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Ve2BanEgCqY'},
+  {nome:'ABDUÇÃO DE QUADRIL ELÁSTICO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/e0M1vNL15sE'},
+  {nome:'FLEXÃO PLANTAR NA MÁQUINA', grupo:'Panturrilha', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/bs3NdonHzhs'},
+  {nome:'AFUNDO ALTERNADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/oY_nnRig9J4'},
+  {nome:'EDUCATIVO STIFF', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1P03JzjPPOE'},
+  {nome:'CADEIRA ABDUTORA( ABRIR )', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/WMx7JeUTXJs'},
+  {nome:'AFUNDO C/FLEX DE QUADRIL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/OMQhwRW23ZI'},
+  {nome:'FLEX. DE JOELHOS NO SOLO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/fWW4ASUCi_c'},
+  {nome:'ELEVAÇÃO FROG', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/j4_-w9BcarQ'},
+  {nome:'CADEIRA ADUTORA ( FECHAR )', grupo:'Panturrilha', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/lzuSEi65_IQ'},
+  {nome:'AFUNDO COM ELÁSTICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/YWvy-2OLeJU'},
+  {nome:'FLEX. JOELHOS ADP', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/6bE5P4x36-o'},
+  {nome:'ELEVAÇÃO PÉLVICA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/O84nvpikZiU'},
+  {nome:'AFUNDO DIN. C FLEX QUADRIL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/OMQhwRW23ZI'},
+  {nome:'FLEXÃO DE JOELHOS COM BOLA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/H0nTtztJK8M'},
+  {nome:'ELEVAÇÃO PÉLVICA UNILATERAL', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/WM4Blto4Uq0'},
+  {nome:'AFUNDO GUIADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/xMTJPIEVLpo'},
+  {nome:'STIFF COM ELÁSTICO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/wzeYDYTKwp0'},
+  {nome:'EXTENSÃO DE QUADRIL', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/uhfO-KWURBE'},
+  {nome:'AFUNDO NA BARRA GUIADA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/EcvoioUwyH8'},
+  {nome:'STIFF', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/D5sRfuzL0e4'},
+  {nome:'EXTENSÃO DE QUADRIL ELÁSTICO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/e_Kf5MpbkUo'},
+  {nome:'AGACHAMENTO BÚLGARO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/GGvEWR0Y4Wc'},
+  {nome:'STIFF UNILATERAL', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/6oPT1WncH8U'},
+  {nome:'AGACHAMENTO FRONTAL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/oMoGcwdus3w'},
+  {nome:'CAMA FLEXORA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ByKiWoif3iA'},
+  {nome:'EXTENSÃO DE QUADRIL VARIAÇÃO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/2lb69Bohm_8'},
+  {nome:'AGACHAMENTO GUIADO P', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/3SXMi9dGQkM'},
+  {nome:'FLEXÕ NÓRDICA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/DIRx__DoJqo'},
+  {nome:'FLEX. DE JOELHOS NO SOLO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/fWW4ASUCi_c'},
+  {nome:'AGACHAMENTO GUIADO Y', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ajf2fUekZr4'},
+  {nome:'FLEXÃO DE JOELHOS COM BOLA ADAPTADO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/DgDD-47bVGk'},
+  {nome:'FLEX. DE JOELHOS DE PÉ', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/-ixMlKa11bA'},
+  {nome:'AGACHAMENTO HACK', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/-qYxx4mRjoc'},
+  {nome:'STIFF COM HALTERES', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/5rJy8qqQofQ'},
+  {nome:'FLEX. JOELHOS ADP', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/6bE5P4x36-o'},
+  {nome:'AGACHAMENTO HACK Y', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/hqTvBjX4lgY'},
+  {nome:'STIFF UNI SEM APOIO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/E6QF1VWS1qY'},
+  {nome:'FLEXÃO DE JOELHOS COM BOLA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/H0nTtztJK8M'},
+  {nome:'AGACHAMENTO LIVRE', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/3Mq1lLgE00g'},
+  {nome:'STIFF UNI COM APOIO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/GyDrpYEPWQw'},
+  {nome:'FROG NO SOLO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/tWdgdM3B5rA'},
+  {nome:'AGACHAMENTO PC', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/pcfm6MBXeMg'},
+  {nome:'FLEXÃO DE JOELHOS EM PÉ', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/7H6O9-WYZ74'},
+  {nome:'GLÚT. 4 APOIOS JOE. ESTENDIDO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/xb_lnHwwZE4'},
+  {nome:'AGACHAMENTO PLIOM. ALTERNADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1tY7QZwhpGU'},
+  {nome:'GLÚT. 4 APOIOS JOE. FLETIDO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/4M4f8ZBLFkA'},
+  {nome:'AGACHAMENTO PLIOMÉTRICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/jg5y0pyv3Xo'},
+  {nome:'STIFF', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/D5sRfuzL0e4'},
+  {nome:'AGACHAMENTO SUMÔ COM PESO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/l_t_84gmZQQ'},
+  {nome:'TERRA ROMENO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/VpjkLAOz8CU'},
+  {nome:'AGACHAMENTO SUMÔ', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/4Gm4RDvDSNk'},
+  {nome:'TERRA ISOLADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/E7CZQS-PRoo'},
+  {nome:'AGACHAMENTO SUMÔ ELÁSTICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ubzfIt524k8'},
+  {nome:'LEVANTAMENTO TERRA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/EscCinkCoBI'},
+  {nome:'AJOELHA E LEVANTA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/0Zgh3NIsMfc'},
+  {nome:'ABDUÇÃO QUADRIL DEITADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/yBAkhqWLmYE'},
+  {nome:'AVANÇO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/l957uDIyzX0'},
+  {nome:'ELEVAÇÃO PÉLVICA COM BARRA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/bkLj_jbodUE'},
+  {nome:'BURP ADAPTADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/CtnnoxhzD7U'},
+  {nome:'ABD QUADRIL SENTADO ELÁSTICO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/58bn5r9XEcI'},
+  {nome:'CADEIRA EXTENSORA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Ox4ZtBUAGo4'},
+  {nome:'ABDUÇÃO QUADRIL NO SOLO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=tTwLVwhe8Bg'},
+  {nome:'CADEIRA EXTENSORA UNI', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/HRjzMl7a-IY'},
+  {nome:'Glúteo 4 apoios com caneleiras', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/JmnIUWP5gno'},
+  {nome:'CADEIRINHA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/BOHl-YMWFnk'},
+  {nome:'EDUCATIVO AGACHAMENTO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/WP-gDofgT8c'},
+  {nome:'Extensão de quadril  na polia com tronco inclinado', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/dvsgo4Gj-hA'},
+  {nome:'FLEXÃO DE QUADRIL DEITADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/GJ4DAuWxuVU'},
+  {nome:'Extensão de quadril no banco romano', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/6ODl8JFyyYA'},
+  {nome:'FLEXÃO DE QUADRIL EM PÉ', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Cj7FbWvklPE'},
+  {nome:'Abdução de quadril na polia com tronco inclinado', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtube.com/shorts/MpTUBFeZya8'},
+  {nome:'LEG PRESS 45', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/HHYpoJ1l4Z0'},
+  {nome:'Abdução de quadril na polia com rotação', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtube.com/shorts/HmcyJwfM92w'},
+  {nome:'LEG PRESS 45 Y', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/V5Y0w8nbmdU'},
+  {nome:'LEG PRESS HORIZONTAL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/0KLrU6JXOUE'},
+  {nome:'CADEIRA ABDUTORA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/L0L9s4OTbOU'},
+  {nome:'LEVANTAMENO TERRA EM CASA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Hgas-jdhnEQ'},
+  {nome:'CADEIRA ABDUTORA-TRONCO A FRENTE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/aKzeShloHJs'},
+  {nome:'LEVANTAMENTO TERRA COM BARRA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/EscCinkCoBI'},
+  {nome:'PASSADA COM HALTERES', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1sbNNUMstns'},
+  {nome:'extensão de quadril na máquina - variação', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/IWpwUAgwnpI'},
+  {nome:'PASSADA LIVRE', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/4UIJPNFNHG0'},
+  {nome:'EXTENSÃO DE QUADRIL NA MÁQUINA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/0jzdxWcaT5I'},
+  {nome:'SENTA E LEVANTA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/iqK9m1CLnQE'},
+  {nome:'EXTENSÃO DE QUADRIL COM CANELEIRAS NO BANCO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/5BuJFrdn_AY'},
+  {nome:'TERRA ISOLADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/E7CZQS-PRoo'},
+  {nome:'TERRA ROMENO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/VpjkLAOz8CU'},
+  {nome:'ELEVAÇÃO PÉLVICA NA MÁQUINA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/K1QVmQb59rI'},
+  {nome:'TERRA ROMÊNO ELÁSTICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/3kVNP8g0xmY'},
+  {nome:'extensão de quadril curtinha no alto', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/QXrJE4FF-TM'},
+  {nome:'TERRA SUMÔ ELÁSTICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/k7O5CZGwrh4'},
+  {nome:'TERRA SUMÔ Y', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ofnXsX-8aU8'},
+  {nome:'AGACHAMENTO SQUAT', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=I3RAHGIS92I'},
+  {nome:'AGACHAMENTO BÚLGARO COM PESO CONTRALATERAL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/RSULENERtug'}
+];
+
+const categoriasMusculo = ['Quadríceps', 'Posterior de Coxa', 'Glúteos', 'Panturrilha', 'Abdômen', 'Peito', 'Ombros', 'Costas', 'Bíceps', 'Tríceps', 'Sem categoria'];
+
+const mapaGrupoOriginal = {
+  'Quadríceps': 'Quadríceps', 'Isquiotibiais': 'Posterior de Coxa', 'Glúteos': 'Glúteos', 'Panturrilha': 'Panturrilha',
+  'Abdômen': 'Abdômen', 'Peito': 'Peito', 'Ombros': 'Ombros', 'Costas': 'Costas', 'Bíceps': 'Bíceps', 'Tríceps': 'Tríceps'
+};
+exerciciosBanco.forEach(function(e){
+  e.categoria = mapaGrupoOriginal[e.grupo] || 'Sem categoria';
+});
+
+let editMode = false;
+let filtroExercicio = 'Todos';
+let mostrandoFormAdicionar = false;
+
+function renderExerciciosChips(){
+  const row = document.getElementById('ex-filter-row');
+  row.innerHTML = '';
+  document.getElementById('ex-count-label').textContent = exerciciosBanco.length + ' exercícios cadastrados';
+  const todasChips = ['Todos'].concat(categoriasMusculo);
+  todasChips.forEach(function(cat){
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (cat === filtroExercicio && !mostrandoFormAdicionar ? ' active' : '');
+    chip.textContent = cat;
+    chip.onclick = function(){
+      filtroExercicio = cat;
+      mostrandoFormAdicionar = false;
+      renderExerciciosChips();
+      renderExerciciosLista();
+    };
+    if(editMode && cat !== 'Todos'){
+      chip.ondragover = function(ev){ ev.preventDefault(); chip.style.borderColor = 'var(--gold)'; chip.style.background = 'rgba(212,175,55,0.25)'; };
+      chip.ondragleave = function(){ chip.style.borderColor = ''; chip.style.background = cat === filtroExercicio ? '' : ''; renderExerciciosChips(); };
+      chip.ondrop = function(ev){
+        ev.preventDefault();
+        const nome = ev.dataTransfer.getData('text/plain');
+        const ex = exerciciosBanco.find(function(x){ return x.nome === nome; });
+        if(ex){ ex.categoria = cat; }
+        renderExerciciosChips();
+        renderExerciciosLista();
+      };
+    }
+    row.appendChild(chip);
+  });
+  const chipAdd = document.createElement('div');
+  chipAdd.className = 'chip' + (mostrandoFormAdicionar ? ' active' : '');
+  chipAdd.innerHTML = '<i class="ti ti-plus" style="font-size:12px;vertical-align:-1px;margin-right:3px;"></i>Adicionar';
+  chipAdd.onclick = function(){
+    mostrandoFormAdicionar = true;
+    populateGrupoSelect();
+    renderExerciciosChips();
+    document.getElementById('ex-add-form').style.display = 'block';
+    document.getElementById('ex-lista').style.display = 'none';
+  };
+  row.appendChild(chipAdd);
+}
+
+function renderExerciciosLista(){
+  document.getElementById('ex-add-form').style.display = 'none';
+  const list = document.getElementById('ex-lista');
+  list.style.display = 'block';
+  list.innerHTML = '';
+  const itens = filtroExercicio === 'Todos' ? exerciciosBanco : exerciciosBanco.filter(function(e){ return e.categoria === filtroExercicio; });
+  if(itens.length === 0){
+    list.innerHTML = '<div class="info-box"><p class="txt">Nenhum exercício nessa categoria ainda.</p></div>';
+    return;
+  }
+  itens.forEach(function(e){
+    const el = document.createElement('div');
+    el.className = 'exercicio-item';
+    el.style.cursor = 'pointer';
+    const grip = editMode ? '<i class="ti ti-grip-vertical" style="font-size:12px;color:var(--text-faint);margin-right:5px;"></i>' : '';
+    const videoHtml = e.video
+      ? '<span class="ex-video ok"><i class="ti ti-circle-check" style="font-size:11px;vertical-align:-1px;margin-right:3px;"></i>Assistir no app</span>'
+      : '<span class="ex-video pending"><i class="ti ti-clock" style="font-size:11px;vertical-align:-1px;margin-right:3px;"></i>Sem vídeo ainda</span>';
+    el.innerHTML =
+      '<p class="ex-name">' + grip + e.nome + '</p>' +
+      '<p class="ex-meta">' + e.categoria + (e.ambiente ? ' · ' + e.ambiente : '') + (e.nivel ? ' · ' + e.nivel : '') + '</p>' +
+      videoHtml;
+    if(editMode){
+      el.draggable = true;
+      el.style.cursor = 'grab';
+      el.ondragstart = function(ev){ ev.dataTransfer.setData('text/plain', e.nome); };
+    } else {
+      el.onclick = function(){ playExercicioVideo(e.nome); };
+    }
+    list.appendChild(el);
+  });
+  const linkReorganizar = document.createElement('p');
+  linkReorganizar.style.cssText = 'font-size:11px;color:var(--text-faint);text-align:center;margin-top:14px;cursor:pointer;';
+  linkReorganizar.textContent = editMode ? 'Concluir reorganização' : 'Reorganizar exercícios entre grupos';
+  linkReorganizar.onclick = toggleEditMode;
+  list.appendChild(linkReorganizar);
+}
+
+function playExercicioVideo(nome){
+  const e = exerciciosBanco.find(function(x){ return x.nome === nome; });
+  if(!e) return;
+  const embed = getEmbedUrl(e.video);
+  const el = document.getElementById('ex-video-content');
+  el.innerHTML =
+    (embed
+      ? '<div class="video-block"><iframe src="' + embed + '" title="' + e.nome + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>' + ytFallback(e.video)
+      : '<div class="video-block"><i class="ti ti-player-play"></i></div>') +
+    '<h1 class="page-title" style="margin-top:0;">' + e.nome + '</h1>' +
+    '<p class="page-sub">' + e.categoria + (e.nivel ? ' · ' + e.nivel : '') + '</p>' +
+    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="abrirEdicaoExercicio(\'' + nome.replace(/'/g,"\\'") + '\')">Ativar modo de edição</button>' +
+    '<div id="ex-edicao-form"></div>';
+  document.getElementById('ex-lista-view').style.display = 'none';
+  document.getElementById('ex-video-view').style.display = 'block';
+}
+
+function abrirEdicaoExercicio(nome){
+  const e = exerciciosBanco.find(function(x){ return x.nome === nome; });
+  if(!e) return;
+  const metodos = ['Nenhum','Restpause','Dropset','Cluster set','Bi-set','Tri-set','Pirâmide crescente'];
+  const opcoesMetodo = metodos.map(function(m){ return '<option' + (e.metodo === m ? ' selected' : '') + '>' + m + '</option>'; }).join('');
+  document.getElementById('ex-edicao-form').innerHTML =
+    '<div class="info-box" style="margin-top:10px;">' +
+      '<div class="form-group"><label class="form-label">Método padrão (opcional)</label><select class="form-select" id="edicao-metodo">' + opcoesMetodo + '</select></div>' +
+      '<div class="form-group"><label class="form-label">Link do vídeo (opcional)</label><input class="form-input" id="edicao-video" value="' + (e.video || '') + '" placeholder="Cole o link"></div>' +
+      '<button class="btn-gold" onclick="confirmarEdicaoExercicio(\'' + nome.replace(/'/g,"\\'") + '\')">Confirmar</button>' +
+    '</div>';
+}
+
+function confirmarEdicaoExercicio(nome){
+  const e = exerciciosBanco.find(function(x){ return x.nome === nome; });
+  if(!e) return;
+  e.metodo = document.getElementById('edicao-metodo').value;
+  e.video = document.getElementById('edicao-video').value.trim();
+  playExercicioVideo(nome);
+}
+
+function toggleEditMode(){
+  editMode = !editMode;
+  mostrandoFormAdicionar = false;
+  renderExerciciosChips();
+  renderExerciciosLista();
+}
+
+function fecharVideoExercicio(){
+  document.getElementById('ex-video-view').style.display = 'none';
+  document.getElementById('ex-lista-view').style.display = 'block';
+}
+
+
+const mobilidadeBanco = [
+  {nome:'Mobilidade Quadril Extensão', trabalho:'Mobilidade /Alongamento', grupo:'Ilio Psoas', video:'https://youtu.be/NrF08RNhKyY'},
+  {nome:'Mobilidade Quadril Extensão Diagonal', trabalho:'Mobilidade /Alongamento', grupo:'Ilio Psoas/ Adutores', video:'https://youtu.be/t-xiIUGzO3s'},
+  {nome:'Alongamento Adutores Sentado', trabalho:'Alongamento', grupo:'Adutores', video:'https://youtu.be/v0gqJQNR96k'},
+  {nome:'Mob.Quadril Adutores 4 Apoios', trabalho:'Mobilidade /Alongamento', grupo:'Adutores', video:'https://youtu.be/eT_hBpaNirQ'},
+  {nome:'Alengamento Reto Abdômen', trabalho:'Alongamento', grupo:'Abdomen', video:'https://youtu.be/uw2lrqLXv-I'},
+  {nome:'Mob. Quadrado Lombar', trabalho:'Alongamento', grupo:'Quadrado Lombar', video:'https://youtu.be/O2LUiv4LmMU'},
+  {nome:'Mob. Glúteo Médio E Máximo', trabalho:'Alongamento', grupo:'Glúteos', video:'https://youtu.be/H_OAHdhD2Ho'},
+  {nome:'Mob. Tensor De Fascia Lata', trabalho:'Alongamento', grupo:'Tensor Da Fáscia Lata', video:'https://youtu.be/HAXkyuefy2c'},
+  {nome:'Mobilidade Isquiotibiais Em Pé', trabalho:'Alongamento', grupo:'Isquitibiais', video:'https://youtu.be/lmtoMuWbuw4'},
+  {nome:'Mob.Deslocamento Lateral Elástico', trabalho:'Mobilidade', grupo:'Glúteo Méd, Mín', video:'https://youtu.be/RWsBO0rqkgU'},
+  {nome:'Mob.Retração De Espcapulas', trabalho:'Mobilidade', grupo:'Cintura Escapular', video:'https://youtu.be/d15LLZ_Uxvo'},
+  {nome:'Mob.Rotação Externa De Ombro', trabalho:'Mobilidade /Alongamento', grupo:'Cintura Escapular', video:'https://youtu.be/O6sxaHfOR6s'},
+  {nome:'Mob. Tornozelo', trabalho:'Mobilidade /Alongamento', grupo:'Tornozelo', video:'https://youtu.be/zgg3NtHWUpc'},
+  {nome:'Mob. Quadril Retração', trabalho:'Mobilidade', grupo:'Pelve', video:'https://youtu.be/Yb8-QOlWScM'},
+  {nome:'Mob. Ombros Deitado', trabalho:'Mobilidade', grupo:'Cintura Escapular', video:'https://youtu.be/HwDBulMMpcE'},
+  {nome:'Along. Isquitibiais Espaldar', trabalho:'Mobilidade', grupo:'Isquitibiais', video:'https://youtu.be/hfKEOGad5dc'},
+  {nome:'Along. P Piriforme', trabalho:'Mobilidade', grupo:'Piriforme', video:'https://youtu.be/H_OAHdhD2Ho'},
+  {nome:'Along. Peitoral M. Deltoides', trabalho:'Alongamento', grupo:'Peitoral E Deltoide', video:'https://youtu.be/Wh4dRJsVovQ'},
+  {nome:'Wall Ball Slide', trabalho:'Mobilidade', grupo:'Serrátil Anterior', video:'https://youtu.be/SBaDnfc9SgE'},
+  {nome:'Push Up Plus - Variação', trabalho:'Mobilidade', grupo:'Serrátil Anterior', video:'https://youtu.be/pdVvEmF97Rw'},
+  {nome:'Push Up Plus  Com Barra', trabalho:'Mobilidade', grupo:'Serrátil Anterior', video:'https://youtu.be/wlxPLG--5oo'},
+  {nome:'Push Up Plus Em 4 Apoios', trabalho:'Mobilidade', grupo:'Serrátil Anterior', video:'https://youtu.be/87IHSrAHdq8'}
+];
+
+const aquecimentoBanco = [
+  {nome:'Skipping', video:'https://youtu.be/6F0ModFWzIg'},
+  {nome:'Polichinelo', video:'https://youtu.be/6AIlJkFNrKA'}
+];
+
+function renderMobilidadeBanco(){
+  const list = document.getElementById('mobilidade-list-personal');
+  const termo = (document.getElementById('mob-search').value || '').toUpperCase();
+  list.innerHTML = '';
+  const filtrados = mobilidadeBanco.filter(function(m){
+    return !termo || m.nome.toUpperCase().indexOf(termo) !== -1 || m.grupo.toUpperCase().indexOf(termo) !== -1;
+  });
+  document.getElementById('mob-count-label').textContent = filtrados.length + ' de ' + mobilidadeBanco.length + ' itens';
+  filtrados.forEach(function(m){
+    const el = document.createElement('div');
+    el.className = 'exercicio-item';
+    el.innerHTML =
+      '<p class="ex-name">' + m.nome + '</p>' +
+      '<p class="ex-meta">' + m.trabalho + ' · ' + m.grupo + '</p>' +
+      '<a class="ex-video ok" href="' + m.video + '" target="_blank" rel="noopener"><i class="ti ti-circle-check" style="font-size:11px;vertical-align:-1px;margin-right:3px;"></i>Ver vídeo</a>';
+    list.appendChild(el);
+  });
+}
+
+function renderAquecimentoBanco(){
+  const list = document.getElementById('aquecimento-list-personal');
+  list.innerHTML = '';
+  aquecimentoBanco.forEach(function(a){
+    const el = document.createElement('div');
+    el.className = 'exercicio-item';
+    el.innerHTML =
+      '<p class="ex-name">' + a.nome + '</p>' +
+      '<a class="ex-video ok" href="' + a.video + '" target="_blank" rel="noopener"><i class="ti ti-circle-check" style="font-size:11px;vertical-align:-1px;margin-right:3px;"></i>Ver vídeo</a>';
+    list.appendChild(el);
+  });
+}
+
+function populateGrupoSelect(){
+  const sel = document.getElementById('ex-grupo');
+  if(sel.options.length > 0) return;
+  categoriasMusculo.forEach(function(cat){
+    const opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    sel.appendChild(opt);
+  });
+}
+
+function addExercicio(){
+  const nome = document.getElementById('ex-nome').value.trim();
+  if(!nome) return;
+  const cat = document.getElementById('ex-grupo').value;
+  exerciciosBanco.push({
+    nome: nome,
+    grupo: cat,
+    categoria: cat,
+    ambiente: 'Academia',
+    nivel: document.getElementById('ex-nivel').value,
+    metodo: document.getElementById('ex-metodo').value,
+    video: document.getElementById('ex-video').value.trim()
+  });
+  document.getElementById('ex-nome').value = '';
+  document.getElementById('ex-video').value = '';
+  mostrandoFormAdicionar = false;
+  filtroExercicio = cat;
+  renderExerciciosChips();
+  renderExerciciosLista();
+}
+
+function renderConteudoPersonal(){
+  const list = document.getElementById('conteudo-list-personal');
+  list.innerHTML = '';
+  conteudos.forEach(function(c){
+    const el = document.createElement('div');
+    el.className = 'exercicio-item';
+    el.innerHTML =
+      '<p class="ex-name">' + c.n + (c.locked ? ' <i class="ti ti-lock" style="font-size:11px;color:var(--gold-soft);"></i>' : '') + '</p>' +
+      '<p class="ex-meta">' + c.cat + '</p>';
+    list.appendChild(el);
+  });
+}
+renderConteudoPersonal();
+
+function addConteudo(){
+  const titulo = document.getElementById('ct-titulo').value.trim();
+  if(!titulo) return;
+  conteudos.push({
+    n: titulo,
+    cat: document.getElementById('ct-categoria').value,
+    locked: document.getElementById('ct-locked').checked,
+    desc: document.getElementById('ct-desc').value.trim() || 'Sem descrição ainda.'
+  });
+  document.getElementById('ct-titulo').value = '';
+  document.getElementById('ct-desc').value = '';
+  document.getElementById('ct-video').value = '';
+  document.getElementById('ct-locked').checked = false;
+  renderConteudoPersonal();
+  renderGrid();
+}
+
+/* ===== BIBLIOTECA DE TREINOS ===== */
+
+const volumeRegra = {
+  'Iniciante': 'Até 20 séries',
+  'Intermediário': '25 a 30 séries',
+  'Avançado': 'Até 50 séries'
+};
+
+const templatesBiblioteca = [
+  {nivel:'Iniciante', enfase:'Emagrecimento', freq:'3x', volume:volumeRegra['Iniciante'], exercicios:['Agachamento livre', 'Leg press']},
+  {nivel:'Intermediário', enfase:'Glúteo', freq:'5x', volume:volumeRegra['Intermediário'], exercicios:['Elevação pélvica', 'Leg press', 'Cadeira extensora']},
+  {nivel:'Avançado', enfase:'Glúteo', freq:'6x', volume:volumeRegra['Avançado'], exercicios:['Agachamento livre', 'Leg press', 'Elevação pélvica', 'Cadeira extensora']}
+];
+
+let templateExerciciosTemp = [];
+
+function renderTemplates(){
+  const nivel = document.getElementById('tp-filtro-nivel').value;
+  const enfase = document.getElementById('tp-filtro-enfase').value;
+  const freq = document.getElementById('tp-filtro-freq').value;
+  const list = document.getElementById('templates-list');
+  list.innerHTML = '';
+  const filtrados = templatesBiblioteca.filter(function(t){
+    return (nivel === 'Todos' || t.nivel === nivel) &&
+           (enfase === 'Todas' || t.enfase === enfase) &&
+           (freq === 'Todas' || t.freq === freq);
+  });
+  if(filtrados.length === 0){
+    list.innerHTML = '<div class="info-box"><p class="txt">Nenhum template com esse filtro ainda.</p></div>';
+    return;
+  }
+  filtrados.forEach(function(t){
+    const el = document.createElement('div');
+    el.className = 'info-box';
+    el.innerHTML =
+      '<p class="lbl">' + t.nivel + ' · ' + t.enfase + ' · ' + t.freq + '</p>' +
+      '<p class="txt">Volume: ' + t.volume + '</p>' +
+      '<p class="txt">Exercícios: ' + t.exercicios.join(', ') + '</p>' +
+      '<p class="txt" style="color:var(--text-faint);font-size:11.5px;">Progressão: teste de 10RM subjetivo por sessão · exercícios evoluem de complexidade básica para avançada conforme o nível da aluna.</p>';
+    list.appendChild(el);
+  });
+}
+
+function updateVolumeHint(){
+  const nivel = document.getElementById('tp-nivel').value;
+  document.getElementById('tp-volume-hint').innerHTML = '<span>' + volumeRegra[nivel] + '</span>';
+}
+
+function populateExercicioSelect(){
+  const sel = document.getElementById('tp-exercicio-select');
+  sel.innerHTML = '';
+  exerciciosBanco.forEach(function(e){
+    const opt = document.createElement('option');
+    opt.value = e.nome;
+    opt.textContent = e.nome;
+    sel.appendChild(opt);
+  });
+  updateVolumeHint();
+}
+
+function addExercicioAoTemplate(){
+  const nome = document.getElementById('tp-exercicio-select').value;
+  if(!nome || templateExerciciosTemp.indexOf(nome) !== -1) return;
+  templateExerciciosTemp.push(nome);
+  renderExerciciosSelecionados();
+}
+
+function renderExerciciosSelecionados(){
+  const wrap = document.getElementById('tp-exercicios-selecionados');
+  wrap.innerHTML = '';
+  templateExerciciosTemp.forEach(function(nome){
+    const chip = document.createElement('span');
+    chip.className = 'desvio-chip selected';
+    chip.textContent = nome + ' ×';
+    chip.onclick = function(){
+      templateExerciciosTemp = templateExerciciosTemp.filter(function(n){ return n !== nome; });
+      renderExerciciosSelecionados();
+    };
+    wrap.appendChild(chip);
+  });
+}
+
+function salvarTemplate(){
+  const nivel = document.getElementById('tp-nivel').value;
+  const enfase = document.getElementById('tp-enfase').value.trim();
+  const freq = document.getElementById('tp-freq').value;
+  if(!enfase || templateExerciciosTemp.length === 0) return;
+  templatesBiblioteca.push({
+    nivel: nivel, enfase: enfase, freq: freq,
+    volume: volumeRegra[nivel],
+    exercicios: templateExerciciosTemp.slice()
+  });
+  document.getElementById('tp-enfase').value = '';
+  templateExerciciosTemp = [];
+  renderExerciciosSelecionados();
+  renderTemplates();
+}
+
+/* ===== GRUPO DE DESAFIO ===== */
+
+const desafios = [
+  {nome:'Desafio 7 Dias Glúteo de Aço', treino:'Intermediário · Glúteo · 5x', inscritas:34, link:'musa.plus/desafio/gluteo-de-aco'}
+];
+
+function renderDesafios(){
+  const list = document.getElementById('desafios-list');
+  list.innerHTML = '';
+  desafios.forEach(function(d){
+    const el = document.createElement('div');
+    el.className = 'info-box';
+    el.innerHTML =
+      '<p class="lbl">' + d.nome + '</p>' +
+      '<p class="txt">Treino: ' + d.treino + '</p>' +
+      '<p class="txt">' + d.inscritas + ' inscritas</p>' +
+      '<div class="list-item" style="margin-top:6px;"><span style="color:var(--gold-soft);">' + d.link + '</span><i class="ti ti-copy" style="font-size:14px;color:var(--text-dim);"></i></div>';
+    list.appendChild(el);
+  });
+}
+
+function populateTreinoSelect(){
+  const sel = document.getElementById('df-treino');
+  sel.innerHTML = '';
+  templatesBiblioteca.forEach(function(t){
+    const opt = document.createElement('option');
+    const label = t.nivel + ' · ' + t.enfase + ' · ' + t.freq;
+    opt.value = label;
+    opt.textContent = label;
+    sel.appendChild(opt);
+  });
+}
+
+function criarDesafio(){
+  const nome = document.getElementById('df-nome').value.trim();
+  if(!nome) return;
+  const slug = nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+  desafios.push({
+    nome: nome,
+    treino: document.getElementById('df-treino').value,
+    inscritas: 0,
+    link: 'musa.plus/desafio/' + slug
+  });
+  document.getElementById('df-nome').value = '';
+  document.getElementById('df-duracao').value = '';
+  renderDesafios();
+}
+
+function setActive(name){
+  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+  document.querySelector('[data-view="' + name + '"]').classList.add('active');
+}
+
+function openLevel2(which){
+  level2 = which;
+  setActive(which);
+  document.getElementById('backbar').style.display = 'flex';
+  document.getElementById('backlabel').textContent = 'Voltar para o início';
+  if(which === 'personal'){ showPersonalView('dashboard'); }
+}
+
+function buscarExercicioNoBanco(nomeEx){
+  const nomeUpper = nomeEx.toUpperCase().trim();
+  let ex = exerciciosBanco.find(function(e){ return e.nome.toUpperCase() === nomeUpper; });
+  if(ex) return ex;
+  // Remove variações entre parênteses, ex: "Leg Press 45 (pés altos)" -> "Leg Press 45"
+  const nomeSemParenteses = nomeUpper.replace(/\s*\([^)]*\)\s*/g, '').trim();
+  ex = exerciciosBanco.find(function(e){ return e.nome.toUpperCase() === nomeSemParenteses; });
+  if(ex) return ex;
+  // Tenta por correspondência de início (um nome contém o outro)
+  ex = exerciciosBanco.find(function(e){
+    const b = e.nome.toUpperCase();
+    return b.indexOf(nomeSemParenteses) === 0 || nomeSemParenteses.indexOf(b) === 0;
+  });
+  return ex || null;
+}
+
+let cronometroInterval = null;
+let cronometroSegundos = 0;
+let cronometroRodando = false;
+
+let descansoIntervals = {};
+
+let seriesConcluidas = {};
+
+function concluirSerie(idx, serieIdx, segundosDescanso){
+  if(!seriesConcluidas[idx]) return;
+  seriesConcluidas[idx][serieIdx] = !seriesConcluidas[idx][serieIdx];
+  if(seriesConcluidas[idx][serieIdx]){
+    iniciarDescanso(idx, segundosDescanso);
+  }
+  openDetail('dia', detailDiaAtual);
+}
+
+function iniciarDescanso(idx, segundosTotais){
+  if(descansoIntervals[idx]) clearInterval(descansoIntervals[idx]);
+  let restante = segundosTotais;
+  const display = document.getElementById('descanso-display-' + idx);
+  if(!display) return;
+  display.style.color = 'var(--gold-soft)';
+  display.textContent = restante + 's';
+  descansoIntervals[idx] = setInterval(function(){
+    restante--;
+    const el = document.getElementById('descanso-display-' + idx);
+    if(!el){ clearInterval(descansoIntervals[idx]); return; }
+    if(restante > 0){
+      el.textContent = restante + 's';
+    } else {
+      clearInterval(descansoIntervals[idx]);
+      delete descansoIntervals[idx];
+      el.style.color = '#E2A33D';
+      el.textContent = '🔔 Vai! Próxima série';
+    }
+  }, 1000);
+}
+
+function alternarCronometro(){
+  const btn = document.getElementById('cronometro-btn');
+  if(!cronometroRodando){
+    cronometroRodando = true;
+    btn.textContent = 'Pausar';
+    cronometroInterval = setInterval(function(){
+      cronometroSegundos++;
+      const display = document.getElementById('cronometro-display');
+      if(display){
+        const min = String(Math.floor(cronometroSegundos / 60)).padStart(2, '0');
+        const seg = String(cronometroSegundos % 60).padStart(2, '0');
+        display.textContent = min + ':' + seg;
+      }
+    }, 1000);
+  } else {
+    cronometroRodando = false;
+    btn.textContent = 'Retomar';
+    clearInterval(cronometroInterval);
+  }
+}
+
+function calcularDescansoPorReps(reps){
+  if(reps == null || isNaN(reps)) return null;
+  if(reps >= 11) return '50-60s';
+  if(reps >= 9) return '90s';
+  return '120-180s'; // 6-8 reps, volume baixo / período de choque
+}
+
+function descansoParaSegundos(faixaTexto){
+  if(faixaTexto === '50-60s') return 55;
+  if(faixaTexto === '90s') return 90;
+  if(faixaTexto === '120-180s') return 150;
+  return 60;
+}
+
+function getEmbedUrl(url){
+  if(!url) return '';
+  const m1 = url.match(/youtu\.be\/([A-Za-z0-9_-]+)/);
+  const m2 = url.match(/[?&]v=([A-Za-z0-9_-]+)/);
+  const id = m1 ? m1[1] : (m2 ? m2[1] : '');
+  return id ? 'https://www.youtube.com/embed/' + id : '';
+}
+
+function ytFallback(url){
+  return url ? '<a class="yt-fallback" href="' + url + '" target="_blank" rel="noopener"><i class="ti ti-external-link" style="font-size:12px;"></i>O player não carregou? Abrir no YouTube</a>' : '';
+}
+
+let currentCursoMeta = null;
+
+function abrirCurso(c){
+  currentCursoMeta = c;
+  renderPlaylist();
+}
+
+function renderPlaylist(){
+  const el = document.getElementById('detail-content');
+  const c = currentCursoMeta;
+  let itens = '';
+  c.aulas.forEach(function(a, i){
+    itens += '<div class="list-item" style="cursor:pointer;" onclick="playAula(' + i + ')"><span>' + (i+1) + '. ' + a.titulo + '</span><i class="ti ti-player-play" style="font-size:14px;color:var(--gold-soft);"></i></div>';
+  });
+  el.innerHTML =
+    '<p class="page-sub" style="margin-top:14px;">' + c.cat + ' · Grátis</p>' +
+    '<h1 class="page-title" style="margin-top:0;">' + c.n + '</h1>' +
+    '<div class="info-box"><p class="txt">' + c.desc + '</p></div>' +
+    '<p class="section-label">Aulas (' + c.aulas.length + ')</p>' +
+    itens;
+}
+
+function playAula(i){
+  const a = currentCursoMeta.aulas[i];
+  const embed = getEmbedUrl(a.video);
+  const el = document.getElementById('detail-content');
+  el.innerHTML =
+    '<div class="local-back" style="margin-top:14px;" onclick="renderPlaylist()"><i class="ti ti-arrow-left"></i><span>Lista de aulas</span></div>' +
+    (embed
+      ? '<div class="video-block"><iframe src="' + embed + '" title="' + a.titulo + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>' + ytFallback(a.video)
+      : '<div class="video-block"><i class="ti ti-player-play"></i></div>') +
+    '<h1 class="page-title" style="margin-top:0;">' + a.titulo + '</h1>';
+}
+
+function calcularEfeitoCardio(minutosSemana){
+  const m = minutosSemana || 0;
+  const ajusteDefinicao = Math.min(25, Math.round(m / 8));
+  const ajusteGordura = -Math.min(20, Math.round(m / 10));
+  let ajusteHipertrofia;
+  if(m === 0) ajusteHipertrofia = 0;
+  else if(m <= 150) ajusteHipertrofia = 3; // zona ideal (bate com recomendação da OMS), sem interferência relevante
+  else if(m <= 250) ajusteHipertrofia = 0; // ainda seguro, neutro
+  else ajusteHipertrofia = -5; // volume muito alto, efeito de interferência começa a aparecer na literatura
+  return { ajusteDefinicao: ajusteDefinicao, ajusteGordura: ajusteGordura, ajusteHipertrofia: ajusteHipertrofia, minutosSemana: m };
+}
+
+function calcularEfeitoSono(horasMediasNoite){
+  if(horasMediasNoite == null || isNaN(horasMediasNoite)) return { ajusteRecuperacao: 0 };
+  if(horasMediasNoite >= 7 && horasMediasNoite <= 9) return { ajusteRecuperacao: 10 }; // faixa ideal (recomendação geral pra adultos)
+  if(horasMediasNoite > 9) return { ajusteRecuperacao: 5 }; // acima do ideal, ainda positivo
+  if(horasMediasNoite >= 6) return { ajusteRecuperacao: 0 }; // zona neutra
+  return { ajusteRecuperacao: -12 }; // abaixo de 6h cronicamente prejudica recuperação (literatura: até -20% síntese proteica)
+}
+
+function calcularNutricaoSemana(fugas, tipos, boaConstanciaSemana, dosesAlcool, alcoolFrequente, aguaLitros, metaAguaLitros, cardioMinutos, horasSono){
+  const respostaNutricional = fugas === 0 ? 95 : Math.max(30, 90 - fugas * 12);
+  let ajusteHipertrofia = 0;
+  let ajusteGordura = 0;
+  let ajusteRetencao = 0;
+  if(tipos.indexOf('doce') !== -1){ ajusteHipertrofia -= 8; ajusteGordura += 10; }
+  if(tipos.indexOf('mais') !== -1){ ajusteHipertrofia += boaConstanciaSemana ? 5 : 1; ajusteGordura += 1; }
+  if(tipos.indexOf('menos') !== -1){ ajusteHipertrofia -= 3; ajusteGordura -= 2; }
+  const doses = dosesAlcool || 0;
+  if(doses > 0){
+    const multiplicador = alcoolFrequente ? 1.6 : 1; // vira padrão repetido pesa mais que um episódio isolado
+    ajusteHipertrofia -= Math.round(doses * 2 * multiplicador);
+    ajusteGordura += Math.round(doses * 2 * multiplicador);
+    ajusteRetencao += Math.round(doses * 3 * multiplicador);
+  }
+  let pctHidratacao = null;
+  if(aguaLitros != null && metaAguaLitros){
+    pctHidratacao = Math.round((aguaLitros / metaAguaLitros) * 100);
+    if(pctHidratacao < 70){
+      ajusteRetencao += Math.round((70 - pctHidratacao) / 2); // hipohidratação crônica → retenção paradoxal
+    }
+  }
+  const efeitoCardio = calcularEfeitoCardio(cardioMinutos);
+  ajusteHipertrofia += efeitoCardio.ajusteHipertrofia;
+  ajusteGordura += efeitoCardio.ajusteGordura;
+  const efeitoSono = calcularEfeitoSono(horasSono);
+  return { respostaNutricional: respostaNutricional, ajusteHipertrofia: ajusteHipertrofia, ajusteGordura: ajusteGordura, ajusteRetencao: ajusteRetencao, dosesAlcool: doses, pctHidratacao: pctHidratacao, ajusteDefinicao: efeitoCardio.ajusteDefinicao, cardioMinutos: efeitoCardio.minutosSemana, ajusteRecuperacaoSono: efeitoSono.ajusteRecuperacao, horasSono: horasSono };
+}
+
+function calcularNutricaoStats(nome){
+  const prog = getProgressoAluna(nome);
+  const semanas = Object.keys(prog.nutricao || {});
+  if(semanas.length === 0) return { temDados: false };
+  let somaResposta = 0, somaAjusteHipertrofia = 0, somaAjusteGordura = 0, somaAjusteRetencao = 0, somaAjusteDefinicao = 0, somaAjusteRecuperacaoSono = 0, semanasComAlcool = 0, semanasComCardio = 0, semanasComSono = 0;
+  semanas.forEach(function(s){
+    const n = prog.nutricao[s];
+    somaResposta += n.resultado.respostaNutricional;
+    somaAjusteHipertrofia += n.resultado.ajusteHipertrofia;
+    somaAjusteGordura += n.resultado.ajusteGordura;
+    somaAjusteRetencao += (n.resultado.ajusteRetencao || 0);
+    somaAjusteDefinicao += (n.resultado.ajusteDefinicao || 0);
+    if(n.resultado.horasSono != null && !isNaN(n.resultado.horasSono)){
+      somaAjusteRecuperacaoSono += (n.resultado.ajusteRecuperacaoSono || 0);
+      semanasComSono++;
+    }
+    if(n.resultado.dosesAlcool > 0) semanasComAlcool++;
+    if(n.resultado.cardioMinutos > 0) semanasComCardio++;
+  });
+  const respostaMedia = Math.round(somaResposta / semanas.length);
+  const potencialHipertrofia = Math.max(20, Math.min(95, 60 + somaAjusteHipertrofia));
+  const potencialGanhoGordura = Math.max(10, Math.min(95, 25 + somaAjusteGordura));
+  const retencaoHidricaEstimada = Math.max(0, Math.min(100, somaAjusteRetencao));
+  const mediaAjusteRecuperacaoSono = semanasComSono > 0 ? Math.round(somaAjusteRecuperacaoSono / semanasComSono) : 0;
+  return { temDados: true, respostaNutricional: respostaMedia, potencialHipertrofia: potencialHipertrofia, potencialGanhoGordura: potencialGanhoGordura, retencaoHidricaEstimada: retencaoHidricaEstimada, ajusteGorduraAcumulado: somaAjusteGordura, somaAjusteDefinicao: somaAjusteDefinicao, ajusteRecuperacaoSono: mediaAjusteRecuperacaoSono, semanasRespondidas: semanas.length, semanasComAlcool: semanasComAlcool, semanasComCardio: semanasComCardio, semanasComSono: semanasComSono };
+}
+
+function calcularPotencialDefinicao(nome){
+  const stats = calcularEstatisticasAluna(nome);
+  const nutriStats = calcularNutricaoStats(nome);
+  if(!stats.temDados || !nutriStats.temDados) return null;
+  const pctConstancia = Math.round((stats.totalConcluidos / stats.totalPlanejado) * 100);
+  return Math.max(10, Math.min(95, Math.round(30 + 0.3 * pctConstancia + nutriStats.somaAjusteDefinicao)));
+}
+
+function explicacaoIndicador(nome, valor){
+  const textos = {
+    'Constância': valor >= 80 ? 'Excelente constância — é a base de tudo, continue assim.' : valor >= 60 ? 'Boa constância. Tente não deixar passar mais de 1 treino por semana.' : 'Tente manter mais dias de treino por semana — é o que mais pesa em todo o sistema.',
+    'Capacidade de progressão': 'Não esqueça de anotar carga e repetições certinho na 1ª série de cada exercício — é isso que faz esse número refletir sua evolução real.',
+    'Capacidade de recuperação': valor >= 70 ? 'Sua recuperação está indo bem — continue priorizando sono e hidratação.' : 'Priorize sono (7-9h por noite) e hidratação essa semana — isso ajuda diretamente esse número a subir.',
+    'Potencial de hipertrofia': valor >= 60 ? 'Seguir a dieta está ajudando esse potencial a se destravar.' : 'Manter o combinado da dieta, principalmente evitando doces e frituras fora do prescrito, ajuda a destravar esse potencial.',
+    'Resposta nutricional': valor >= 70 ? 'Ótima adesão à dieta — continue assim.' : 'Quanto mais você seguir o combinado, mais esse número sobe — pequenos ajustes já fazem diferença.',
+    'Potencial de ganho de gordura': valor <= 35 ? 'Você está mantendo esse risco baixo — ótimo trabalho.' : 'Fique de olho nas fugas com doces e frituras — elas pesam mais nesse número que "comer um pouco mais" do prescrito.',
+    'Potencial de definição física': valor >= 60 ? 'Sua constância e o cardio estão ajudando bastante esse número.' : 'Manter constância no treino e incluir cardio moderado (até 150min/semana) ajuda a subir esse indicador, sem prejudicar sua hipertrofia.'
+  };
+  return textos[nome] || '';
+}
+
+let semanaNutricaoPendente = null;
+
+function renderPerguntaNutricao(semanaFechada){
+  semanaNutricaoPendente = semanaFechada;
+  return '<div class="info-box" style="margin-top:10px;">' +
+    '<p class="lbl">Check-in nutricional da semana</p>' +
+    '<p class="txt">Você seguiu a dieta essa semana? Sem julgamento, só queremos calibrar direitinho — quantas vezes você fugiu do planejado?</p>' +
+    '<div class="form-group"><input class="form-input" id="nutri-fugas" type="number" placeholder="Ex: 0"></div>' +
+    '<div class="form-group"><label class="form-label">Se fugiu, foi principalmente sobre o quê? (marque quantas se aplicarem)</label>' +
+      '<div style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;">' +
+        '<label><input type="checkbox" id="nutri-mais"> Comi mais do que o prescrito</label>' +
+        '<label><input type="checkbox" id="nutri-menos"> Comi menos do que o prescrito</label>' +
+        '<label><input type="checkbox" id="nutri-doce"> Doces, frituras ou lanches fora do prescrito</label>' +
+      '</div>' +
+    '</div>' +
+    '<p class="txt" style="margin-top:10px;">E sobre álcool essa semana? Pode ser sincera, sem julgamento — é só pra manter nosso perfil o mais assertivo possível.</p>' +
+    '<div class="form-group"><label class="form-label">Taças de vinho (150ml cada)</label><input class="form-input" id="nutri-alc-taca" type="number" placeholder="0"></div>' +
+    '<div class="form-group"><label class="form-label">Garrafas de vinho (750ml cada)</label><input class="form-input" id="nutri-alc-garrafa" type="number" placeholder="0"></div>' +
+    '<div class="form-group"><label class="form-label">Litros de vinho</label><input class="form-input" id="nutri-alc-litro" type="number" placeholder="0"></div>' +
+    '<div class="form-group"><label class="form-label">Copos de cerveja (chope, 300ml cada)</label><input class="form-input" id="nutri-alc-copo-cerveja" type="number" placeholder="0"></div>' +
+    '<div class="form-group"><label class="form-label">Latas de cerveja (350ml cada)</label><input class="form-input" id="nutri-alc-lata-cerveja" type="number" placeholder="0"></div>' +
+    '<p class="txt" style="margin-top:10px;">Por último — em média, quantos litros de água você bebeu por dia essa semana?</p>' +
+    '<div class="form-group"><input class="form-input" id="nutri-agua" type="number" step="0.1" placeholder="Ex: 2.5"></div>' +
+    '<p class="txt" style="margin-top:10px;">E cardio essa semana — fez algum?</p>' +
+    '<div class="form-group"><label class="form-label">Quantos dias de cardio?</label><input class="form-input" id="nutri-cardio-dias" type="number" placeholder="Ex: 2"></div>' +
+    '<div class="form-group"><label class="form-label">Tempo total, em minutos, somando todos os dias</label><input class="form-input" id="nutri-cardio-minutos" type="number" placeholder="Ex: 60"></div>' +
+    '<p class="txt" style="margin-top:10px;">Por último — em média, quantas horas você dormiu por noite essa semana?</p>' +
+    '<div class="form-group"><input class="form-input" id="nutri-sono" type="number" step="0.5" placeholder="Ex: 7"></div>' +
+    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="registrarNutricaoSemana()">Enviar</button>' +
+    '</div>';
+}
+
+function converterAlcoolParaDoses(){
+  const taca = parseFloat(document.getElementById('nutri-alc-taca').value) || 0;
+  const garrafa = parseFloat(document.getElementById('nutri-alc-garrafa').value) || 0;
+  const litro = parseFloat(document.getElementById('nutri-alc-litro').value) || 0;
+  const copoCerveja = parseFloat(document.getElementById('nutri-alc-copo-cerveja').value) || 0;
+  const lataCerveja = parseFloat(document.getElementById('nutri-alc-lata-cerveja').value) || 0;
+  // 1 dose ≈ 150ml de vinho ou ~330ml de cerveja
+  const doses = (taca * 1) + (garrafa * 5) + (litro * 6.7) + (copoCerveja * 1) + (lataCerveja * 1);
+  return Math.round(doses * 10) / 10;
+}
+
+function extrairPesoKg(pesoTexto){
+  if(!pesoTexto) return 65;
+  const m = String(pesoTexto).match(/(\d+(?:[.,]\d+)?)/);
+  return m ? parseFloat(m[1].replace(',', '.')) : 65;
+}
+
+function calcularMetaAguaLitros(pesoTexto){
+  const peso = extrairPesoKg(pesoTexto);
+  return Math.round(peso * 32.5) / 1000;
+}
+
+function registrarNutricaoSemana(){
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+  if(!alunaAtual || semanaNutricaoPendente === null) return;
+  const prog = getProgressoAluna(alunaAtual.nome);
+  const fugas = parseInt(document.getElementById('nutri-fugas').value, 10) || 0;
+  const tipos = [];
+  if(document.getElementById('nutri-mais').checked) tipos.push('mais');
+  if(document.getElementById('nutri-menos').checked) tipos.push('menos');
+  if(document.getElementById('nutri-doce').checked) tipos.push('doce');
+  const dosesAlcool = converterAlcoolParaDoses();
+  const aguaLitros = parseFloat(document.getElementById('nutri-agua').value);
+  const metaAgua = calcularMetaAguaLitros(alunaAtual.peso);
+  const cardioMinutos = parseFloat(document.getElementById('nutri-cardio-minutos').value) || 0;
+  const horasSonoInput = parseFloat(document.getElementById('nutri-sono').value);
+  const horasSono = isNaN(horasSonoInput) ? null : horasSonoInput;
+
+  const totalDias = totalDiasDeTreino();
+  const concluidosNaSemana = (prog.diasConcluidos[semanaNutricaoPendente] || []).length;
+  const boaConstancia = concluidosNaSemana >= totalDias;
+
+  const semanasAnteriores = [semanaNutricaoPendente - 1, semanaNutricaoPendente - 2].filter(function(s){ return prog.nutricao && prog.nutricao[s]; });
+  const semanasComAlcoolRecente = semanasAnteriores.filter(function(s){ return prog.nutricao[s].resultado.dosesAlcool > 0; }).length;
+  const alcoolFrequente = dosesAlcool > 0 && semanasComAlcoolRecente >= 1;
+
+  const resultado = calcularNutricaoSemana(fugas, tipos, boaConstancia, dosesAlcool, alcoolFrequente, isNaN(aguaLitros) ? null : aguaLitros, metaAgua, cardioMinutos, horasSono);
+  if(!prog.nutricao) prog.nutricao = {};
+  prog.nutricao[semanaNutricaoPendente] = { fugas: fugas, tipos: tipos, resultado: resultado };
+  semanaNutricaoPendente = null;
+
+  const el = document.getElementById('nutri-confirmacao') || document.getElementById('registro-confirmacao') || document.getElementById('prog-reengajamento');
+  if(el) el.innerHTML = '<div class="insight"><p>Obrigada! Isso já ajustou sua Resposta Nutricional, Potencial de Hipertrofia, Potencial de Ganho de Gordura e Retenção Hídrica no DNA MUSA.</p></div>';
+}
+
+
+function calcularProbabilidadeSucesso(nome){
+  const stats = calcularEstatisticasAluna(nome);
+  if(!stats.temDados) return null;
+  const alunaObj = alunasPersonal.find(function(a){ return a.nome === nome; });
+  const ajusteIdade = ajusteRecuperacaoPorIdade(alunaObj ? alunaObj.idade : null);
+  const pctConstancia = Math.round((stats.totalConcluidos / stats.totalPlanejado) * 100);
+  const nutriStatsRec = calcularNutricaoStats(nome);
+  const ajusteSono = nutriStatsRec.temDados ? nutriStatsRec.ajusteRecuperacaoSono : 0;
+  const capRecuperacao = Math.max(20, Math.min(95, (stats.progressoes >= 2 ? 68 : 60) + ajusteIdade.ajuste + ajusteSono));
+  const capProgressao = Math.min(90, 55 + stats.progressoes * 10);
+  const nutriStats = calcularNutricaoStats(nome);
+  const potHipertrofia = nutriStats.temDados ? nutriStats.potencialHipertrofia : 50;
+  const respNutricional = nutriStats.temDados ? nutriStats.respostaNutricional : 50;
+  const potGordura = nutriStats.temDados ? nutriStats.potencialGanhoGordura : 30;
+
+  // Constância pesa mais (é o maior preditor isolado), seguida de progressão e recuperação.
+  // Nutrição entra dos dois lados: potencial de hipertrofia/resposta nutricional somam,
+  // potencial de ganho de gordura (invertido) subtrai — "muita coisa errada" puxa a probabilidade pra baixo de verdade.
+  const bruto =
+    0.30 * pctConstancia +
+    0.20 * capProgressao +
+    0.15 * capRecuperacao +
+    0.15 * potHipertrofia +
+    0.10 * respNutricional +
+    0.10 * (100 - potGordura);
+
+  return Math.max(10, Math.min(97, Math.round(bruto)));
+}
+
+/* ===== REGRAS DE COMBINAÇÃO (BI-SET / TRI-SET) ===== */
+
+const UNILATERAIS_BLOQUEADOS = ['AFUNDO', 'BÚLGARO', 'LEG UNILATERAL'];
+const PARES_PROIBIDOS = [
+  ['CADEIRA FLEXORA', 'CAMA FLEXORA'],
+  ['CADEIRA FLEXORA', 'MESA FLEXORA']
+];
+
+function validarCombinacaoBiset(nomeEx1, nomeEx2){
+  const n1 = nomeEx1.toUpperCase();
+  const n2 = nomeEx2.toUpperCase();
+
+  for(const par of PARES_PROIBIDOS){
+    const bate = (n1.indexOf(par[0]) !== -1 && n2.indexOf(par[1]) !== -1) || (n1.indexOf(par[1]) !== -1 && n2.indexOf(par[0]) !== -1);
+    if(bate) return { valido: false, motivo: 'Essa combinação sobrecarrega demais o mesmo padrão de movimento sem ganho real.' };
+  }
+
+  const ehUnilateralBloqueado = function(n){ return UNILATERAIS_BLOQUEADOS.some(function(u){ return n.indexOf(u) !== -1 && n.indexOf('ALTERNAD') === -1; }); };
+  const bloq1 = ehUnilateralBloqueado(n1);
+  const bloq2 = ehUnilateralBloqueado(n2);
+  if(bloq1 || bloq2){
+    return { valido: false, motivo: 'Não combinamos um exercício bilateral/multiarticular com um unilateral "bloqueado" (uma perna, depois a outra) — desequilibra o ritmo do bi-set. Use a versão alternada, se existir.' };
+  }
+
+  return { valido: true, motivo: '' };
+}
+
+/* ===== ALTERNATIVA DE EMERGÊNCIA (equipamento ocupado) ===== */
+
+const ALTERNATIVAS_HALTERES = {
+  'REMADA': ['Remada curvada com halteres', 'Remada aberta com halteres', 'Remada curvada com barra', 'Remada aberta com barra'],
+  'LEG PRESS': ['Agachamento com halteres'],
+  'CADEIRA EXTENSORA': [],
+  'CADEIRA FLEXORA': ['Stiff com halteres'],
+  'CAMA FLEXORA': ['Stiff com halteres'],
+  'AGACHAMENTO': ['Agachamento com halteres'],
+  'ELEVAÇÃO PÉLVICA': ['Stiff com halteres']
+};
+
+function sugerirAlternativaEmergencia(nomeExercicio){
+  const nomeUpper = nomeExercicio.toUpperCase();
+  let opcoesHalteres = [];
+  Object.keys(ALTERNATIVAS_HALTERES).forEach(function(chave){
+    if(nomeUpper.indexOf(chave) !== -1){ opcoesHalteres = opcoesHalteres.concat(ALTERNATIVAS_HALTERES[chave]); }
+  });
+  opcoesHalteres = opcoesHalteres.filter(function(nome, i){ return opcoesHalteres.indexOf(nome) === i; });
+  const disponiveisNoBanco = opcoesHalteres.filter(function(nome){ return buscarExercicioNoBanco(nome); });
+  return {
+    nivel1_halteres: disponiveisNoBanco,
+    nivel2_backup: 'Verifique se há um backup pré-aprovado cadastrado para este exercício.',
+    nivel3_pular: 'Pule para o próximo exercício da sequência e volte a este quando o equipamento desocupar.'
+  };
+}
+
+/* ===== PORTÃO DE TÉCNICA ===== */
+
+function precisaAprovacaoTecnica(a, nomeExercicio){
+  if(!a.tecnicaAprovada) a.tecnicaAprovada = {};
+  const status = a.tecnicaAprovada[nomeExercicio];
+  if(status === 'aprovado') return false;
+  if(a.nivel === 'Iniciante') return status !== 'aprovado';
+  // Intermediária/avançada: checagem periódica, não obrigatória — só sinaliza se nunca foi verificado
+  return status === undefined ? 'periodica' : false;
+}
+
+function solicitarVideoTecnica(nomeAluna, nomeExercicio){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  if(!a.tecnicaAprovada) a.tecnicaAprovada = {};
+  a.tecnicaAprovada[nomeExercicio] = 'pendente';
+}
+
+function aprovarTecnica(nomeAluna, nomeExercicio){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  if(!a.tecnicaAprovada) a.tecnicaAprovada = {};
+  a.tecnicaAprovada[nomeExercicio] = 'aprovado';
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+}
+
+/* ===== PERIODIZAÇÃO (Base x Choque) — a partir de intermediária ===== */
+
+function calcularBlocoAtual(a){
+  if(a.nivel === 'Iniciante') return { bloco: 'Volume único (pirâmide de base)', descricao: 'Foco em progressão contínua de carga e técnica, sem alternância de blocos ainda.' };
+  const prog = getProgressoAluna(a.nome);
+  const ciclosCompletos = Math.floor((prog.semana - 1) / 5); // ciclo de reavaliação ~5 semanas
+  const posicaoNoPadrao = ciclosCompletos % 3;
+  if(posicaoNoPadrao === 2){
+    return { bloco: 'Bloco de Choque', descricao: 'Intensidade alta, volume mais baixo (2-3 semanas) — foco em força e quebra de rotina.' };
+  }
+  return { bloco: 'Bloco de Base', descricao: 'Volume alto, intensidade moderada (4-6 semanas) — foco em capacidade de trabalho e hipertrofia.' };
+}
+
+/* ===== PROMOÇÃO DE NÍVEL (iniciante → intermediário) ===== */
+
+const SEMANAS_MINIMAS_INICIANTE = 12;
+
+function calcularElegibilidadePromocaoNivel(nome){
+  const a = alunasPersonal.find(function(x){ return x.nome === nome; });
+  if(!a || a.nivel !== 'Iniciante') return null;
+  const prog = getProgressoAluna(nome);
+  const stats = calcularEstatisticasAluna(nome);
+  const pctConstancia = stats.temDados ? Math.round((stats.totalConcluidos / stats.totalPlanejado) * 100) : 0;
+  const tecnicasAprovadas = a.tecnicaAprovada ? Object.keys(a.tecnicaAprovada).filter(function(k){ return a.tecnicaAprovada[k] === 'aprovado'; }).length : 0;
+
+  const criterios = [
+    { nome: '12 semanas mínimas no programa', atingido: prog.semana >= SEMANAS_MINIMAS_INICIANTE, detalhe: prog.semana + ' de ' + SEMANAS_MINIMAS_INICIANTE + ' semanas' },
+    { nome: 'Constância ≥ 70%', atingido: pctConstancia >= 70, detalhe: pctConstancia + '%' },
+    { nome: 'Técnica aprovada em ao menos 1 exercício principal', atingido: tecnicasAprovadas >= 1, detalhe: tecnicasAprovadas + ' exercício(s) aprovado(s)' },
+    { nome: 'Progressões de carga reais registradas', atingido: stats.progressoes >= 1, detalhe: stats.progressoes + ' progressão(ões)' }
+  ];
+  return { elegivel: criterios.every(function(c){ return c.atingido; }), criterios: criterios };
+}
+
+function ajusteRecuperacaoPorIdade(idade){
+  if(!idade) return { ajuste: 0, nota: '' };
+  if(idade >= 45){
+    return { ajuste: -8, nota: 'Nessa faixa etária, a queda de estrogênio típica da menopausa costuma estreitar a janela de recuperação — treino de força continua sendo uma das melhores ferramentas pra essa fase, só vale dar mais atenção ao descanso entre sessões.' };
+  }
+  if(idade >= 40){
+    return { ajuste: -4, nota: 'A partir dessa faixa etária é comum a perimenopausa começar a influenciar a recuperação — nada preocupante, só um sinal pra observar com mais atenção.' };
+  }
+  return { ajuste: 0, nota: '' };
+}
+
+function calcularEstatisticasAluna(nome){
+  const prog = getProgressoAluna(nome);
+  let totalConcluidos = 0, totalSemanas = 0;
+  Object.keys(prog.diasConcluidos).forEach(function(s){
+    totalConcluidos += prog.diasConcluidos[s].length;
+    totalSemanas++;
+  });
+  const totalPlanejado = totalSemanas * totalDiasDeTreino();
+  let progressoes = 0;
+  Object.keys(prog.historico).forEach(function(ex){
+    prog.historico[ex].forEach(function(r){ if(r.sugestao.texto === 'Aumentar carga') progressoes++; });
+  });
+  return { totalConcluidos: totalConcluidos, totalPlanejado: totalPlanejado, progressoes: progressoes, temDados: totalConcluidos > 0 };
+}
+
+function openDetail(type, arg){
+  const el = document.getElementById('detail-content');
+
+if(type === 'central'){
+    const stats = calcularEstatisticasAluna('Andriele Caroline Rubert');
+    if(!stats.temDados){
+      el.innerHTML =
+        '<p class="page-sub" style="margin-top:14px;">Central de Inteligência</p>' +
+        '<h1 class="page-title" style="margin-top:0;">Bom dia, Andriele</h1>' +
+        '<div class="ring-wrap">' +
+          '<svg width="84" height="84" viewBox="0 0 96 96">' +
+            '<circle cx="48" cy="48" r="40" fill="none" stroke="#26231C" stroke-width="8"/>' +
+            '<circle cx="48" cy="48" r="40" fill="none" stroke="url(#goldring)" stroke-width="8" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="251" transform="rotate(-90 48 48)"/>' +
+            '<defs><linearGradient id="goldring" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F1DE9A"/><stop offset="100%" stop-color="#8A6D1F"/></linearGradient></defs>' +
+          '</svg>' +
+          '<div><p class="ring-num" style="font-size:16px;">Calibrando</p><p class="ring-label">seu DNA MUSA está começando a te conhecer</p></div>' +
+        '</div>' +
+        '<div class="insight"><p>Hoje é seu primeiro dia — cada treino registrado deixa suas previsões mais precisas.</p></div>';
+    } else {
+      const probabilidade = calcularProbabilidadeSucesso('Andriele Caroline Rubert');
+      const offset = Math.round(251 - (251 * probabilidade / 100));
+      const nutriStatsCentral = calcularNutricaoStats('Andriele Caroline Rubert');
+      let insightExtra = '';
+      if(nutriStatsCentral.temDados && nutriStatsCentral.potencialGanhoGordura > 55){
+        insightExtra = ' As fugas na dieta e/ou álcool das últimas semanas estão pesando nesse número — reduzir isso tende a acelerar os resultados que você quer ver.';
+      } else if(nutriStatsCentral.temDados){
+        insightExtra = ' Sua adesão à dieta está ajudando bastante nesse número.';
+      }
+      el.innerHTML =
+        '<p class="page-sub" style="margin-top:14px;">Central de Inteligência</p>' +
+        '<h1 class="page-title" style="margin-top:0;">Bom dia, Andriele</h1>' +
+        '<div class="ring-wrap">' +
+          '<svg width="84" height="84" viewBox="0 0 96 96">' +
+            '<circle cx="48" cy="48" r="40" fill="none" stroke="#26231C" stroke-width="8"/>' +
+            '<circle cx="48" cy="48" r="40" fill="none" stroke="url(#goldring)" stroke-width="8" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="' + offset + '" transform="rotate(-90 48 48)"/>' +
+            '<defs><linearGradient id="goldring" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F1DE9A"/><stop offset="100%" stop-color="#8A6D1F"/></linearGradient></defs>' +
+          '</svg>' +
+          '<div><p class="ring-num">' + probabilidade + '%</p><p class="ring-label">de probabilidade de sucesso</p></div>' +
+        '</div>' +
+        '<div class="insight"><p>Você completou ' + stats.totalConcluidos + ' de ' + stats.totalPlanejado + ' treinos planejados, e já teve ' + stats.progressoes + ' aumentos de carga registrados.' + insightExtra + '</p></div>';
+    }
+  } else if(type === 'dna'){
+    const stats = calcularEstatisticasAluna('Andriele Caroline Rubert');
+    let indsHtml = '';
+    if(!stats.temDados){
+      ['Potencial de hipertrofia', 'Capacidade de recuperação', 'Constância', 'Resposta nutricional'].forEach(function(nome){
+        indsHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-size:12.5px;color:var(--text-dim);">' + nome + '</span><span style="font-size:10.5px;color:var(--text-faint);border:1px dashed var(--border-strong);padding:3px 8px;border-radius:8px;">Calibrando</span></div>';
+      });
+    } else {
+      const pctConstancia = Math.round((stats.totalConcluidos / stats.totalPlanejado) * 100);
+      const alunaObj = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+      const ajusteIdade = ajusteRecuperacaoPorIdade(alunaObj ? alunaObj.idade : null);
+      const nutriStatsPreview = calcularNutricaoStats('Andriele Caroline Rubert');
+      const ajusteSonoPreview = nutriStatsPreview.temDados ? nutriStatsPreview.ajusteRecuperacaoSono : 0;
+      const capRecuperacao = Math.max(20, Math.min(95, (stats.progressoes >= 2 ? 68 : 60) + ajusteIdade.ajuste + ajusteSonoPreview));
+      const capProgressao = Math.min(90, 55 + stats.progressoes * 10);
+      const indicadoresReais = [
+        { n: 'Constância', v: pctConstancia },
+        { n: 'Capacidade de progressão', v: capProgressao },
+        { n: 'Capacidade de recuperação', v: capRecuperacao }
+      ];
+      indicadoresReais.forEach(function(i){
+        indsHtml += '<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px;"><span style="color:var(--text-dim);">' + i.n + '</span><span style="font-weight:600;">' + i.v + '</span></div><div style="background:#221F18;border-radius:6px;height:6px;overflow:hidden;margin-bottom:5px;"><div style="width:' + i.v + '%;height:100%;background:linear-gradient(90deg,#8A6D1F,#D4AF37);"></div></div><p style="font-size:11px;color:var(--text-faint);margin:0;">' + explicacaoIndicador(i.n, i.v) + (i.n === 'Capacidade de recuperação' && ajusteIdade.nota ? ' ' + ajusteIdade.nota : '') + '</p></div>';
+      });
+      const nutriStats = calcularNutricaoStats('Andriele Caroline Rubert');
+      if(nutriStats.temDados){
+        [{ n: 'Potencial de hipertrofia', v: nutriStats.potencialHipertrofia }, { n: 'Resposta nutricional', v: nutriStats.respostaNutricional }, { n: 'Potencial de ganho de gordura', v: nutriStats.potencialGanhoGordura }, { n: 'Potencial de definição física', v: calcularPotencialDefinicao('Andriele Caroline Rubert') }].forEach(function(i){
+          indsHtml += '<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px;"><span style="color:var(--text-dim);">' + i.n + '</span><span style="font-weight:600;">' + i.v + '</span></div><div style="background:#221F18;border-radius:6px;height:6px;overflow:hidden;margin-bottom:5px;"><div style="width:' + i.v + '%;height:100%;background:linear-gradient(90deg,#8A6D1F,#D4AF37);"></div></div><p style="font-size:11px;color:var(--text-faint);margin:0;">' + explicacaoIndicador(i.n, i.v) + '</p></div>';
+        });
+        if(nutriStats.retencaoHidricaEstimada > 0){
+          indsHtml += '<div class="insight" style="margin-top:6px;"><p><b>Retenção hídrica estimada: ' + nutriStats.retencaoHidricaEstimada + '</b><br>Isso é água, não gordura — geralmente resolve em alguns dias voltando à hidratação normal. ' + (nutriStats.semanasComAlcool > 0 ? 'Parte disso pode estar ligado ao consumo de álcool relatado.' : '') + '</p></div>';
+        }
+      } else {
+        ['Potencial de hipertrofia', 'Resposta nutricional'].forEach(function(nome){
+          indsHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-size:12.5px;color:var(--text-dim);">' + nome + '</span><span style="font-size:10.5px;color:var(--text-faint);border:1px dashed var(--border-strong);padding:3px 8px;border-radius:8px;">Calibrando</span></div>';
+        });
+      }
+    }
+    const heroTexto = stats.temDados ? calcularProbabilidadeSucesso('Andriele Caroline Rubert') + '%' : 'Calibrando — dia 1';
+    el.innerHTML =
+      '<p class="page-sub" style="margin-top:14px;">DNA MUSA</p>' +
+      '<h1 class="page-title" style="margin-top:0;">Perfil inteligente da Andriele</h1>' +
+      '<div class="hero-card" style="cursor:default;">' +
+        '<p class="hero-eyebrow">Probabilidade de sucesso</p>' +
+        '<p class="ring-num" style="position:relative;font-size:18px;">' + heroTexto + '</p>' +
+      '</div>' + indsHtml;
+  } else if(type === 'evolucao'){
+    const stats = calcularEstatisticasAluna('Andriele Caroline Rubert');
+    if(!stats.temDados){
+      el.innerHTML =
+        '<p class="page-sub" style="margin-top:14px;">DNA MUSA</p>' +
+        '<h1 class="page-title" style="margin-top:0;">Evolução mensal</h1>' +
+        '<div class="insight"><p>Ainda não há histórico — assim que você completar seus primeiros treinos, essa tela vai mostrar sua evolução mês a mês.</p></div>' +
+        '<p class="section-label">Dias de treino por mês</p>' +
+        '<div class="info-box"><p class="txt">Julho (mês atual): 0 treinos registrados até agora.</p></div>';
+    } else {
+      const prog = getProgressoAluna('Andriele Caroline Rubert');
+      const mes1 = [1,2,3,4,5,6].reduce(function(s,n){ return s + (prog.diasConcluidos[n] ? prog.diasConcluidos[n].length : 0); }, 0);
+      const mes2 = [7,8].reduce(function(s,n){ return s + (prog.diasConcluidos[n] ? prog.diasConcluidos[n].length : 0); }, 0);
+      el.innerHTML =
+        '<p class="page-sub" style="margin-top:14px;">DNA MUSA</p>' +
+        '<h1 class="page-title" style="margin-top:0;">Evolução mensal</h1>' +
+        '<div class="insight"><p>Você já treinou ' + stats.totalConcluidos + ' dias desde que começou — ' + stats.progressoes + ' exercícios já tiveram aumento de carga.</p></div>' +
+        '<p class="section-label">Dias de treino por mês (aprox.)</p>' +
+        '<div class="info-box">' +
+          '<div class="month-row"><span class="month-name">Mês atual (semanas 7-8)</span><div class="month-bar-wrap"><div class="month-bar" style="width:' + Math.round(mes2/10*100) + '%;"></div></div><span class="month-val">' + mes2 + '/10</span></div>' +
+          '<div class="month-row"><span class="month-name">Mês anterior (semanas 1-6)</span><div class="month-bar-wrap"><div class="month-bar" style="width:' + Math.round(mes1/30*100) + '%;"></div></div><span class="month-val">' + mes1 + '/30</span></div>' +
+        '</div>';
+    }
+  } else if(type === 'indicadores'){
+    el.innerHTML =
+      '<p class="page-sub" style="margin-top:14px;">DNA MUSA</p>' +
+      '<h1 class="page-title" style="margin-top:0;">Indicadores</h1>' +
+      '<div class="insight"><p>A explicação detalhada de cada indicador para a aluna ainda está em desenvolvimento — em breve cada métrica virá com uma leitura em linguagem simples.</p></div>';
+  } else if(type === 'mobilidade'){
+    const m = mobilidadeItens[arg];
+    const embedMob = getEmbedUrl(m.video);
+    el.innerHTML =
+      (embedMob
+        ? '<div class="video-block" style="margin-top:14px;"><iframe src="' + embedMob + '" title="' + m.n + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>' + ytFallback(m.video)
+        : '<div class="video-block" style="margin-top:14px;"><i class="ti ti-player-play"></i></div>') +
+      '<h1 class="page-title" style="margin-top:0;">' + m.n + '</h1>' +
+      '<p class="page-sub">' + m.dur + (m.desvio ? ' · pode ser feito em casa' : '') + '</p>' +
+      (m.desvio ? '<div class="info-box"><p class="lbl">O que identificamos</p><p class="txt">' + m.desvio + '</p><p class="lbl">O que estamos melhorando</p><p class="txt">' + m.foco + '</p></div>'
+                : '<div class="info-box"><p class="txt">' + m.foco + '</p></div>');
+  } else if(type === 'dia'){
+    const d = dias[arg];
+    if(detailDiaAtual !== arg){ seriesConcluidas = {}; }
+    detailDiaAtual = arg;
+    let corpoTreino = '<div class="list-item"><span>Dia de descanso — aproveite para recuperar.</span></div>';
+    if(!d.descanso){
+      const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+      const prog = alunaAtual ? getProgressoAluna(alunaAtual.nome) : null;
+      corpoTreino = '<div class="badge">' + faseAtual + '</div>' +
+        '<div class="list-item" style="justify-content:space-between;"><span id="cronometro-display" style="font-family:\'Playfair Display\',serif;font-size:18px;font-weight:600;">' + String(Math.floor(cronometroSegundos/60)).padStart(2,'0') + ':' + String(cronometroSegundos%60).padStart(2,'0') + '</span><button class="btn-gold" style="width:auto;margin:0;padding:8px 16px;" id="cronometro-btn" onclick="alternarCronometro()">' + (cronometroRodando ? 'Pausar' : (cronometroSegundos > 0 ? 'Retomar' : 'Iniciar treino')) + '</button></div>' +
+        '<p class="section-label">Treino do dia</p>' +
+        '<p class="page-sub" style="margin-top:-6px;">Registre a carga e as repetições da <b>1ª série</b> — é isso que ajusta sua progressão</p>';
+      d.ex.forEach(function(linha, j){
+        const partes = linha.split(' · ');
+        const nomeEx = partes[0];
+        let notaSemanaAnterior = '';
+        if(prog && prog.historico[nomeEx] && prog.historico[nomeEx].length){
+          const ultimo = prog.historico[nomeEx][prog.historico[nomeEx].length - 1];
+          notaSemanaAnterior = '<p style="font-size:11px;color:var(--gold-soft);margin:4px 0 8px;">Semana ' + ultimo.semana + ': ' + ultimo.carga + 'kg × ' + ultimo.reps + ' reps · ' + ultimo.sugestao.texto + ' → sugestão hoje: ' + ultimo.sugestao.valor + 'kg</p>';
+        }
+        const exBanco = buscarExercicioNoBanco(nomeEx);
+        const repsMatch = (partes[1] || '').match(/x(\d+)/);
+        const repsAlvo = repsMatch ? parseInt(repsMatch[1], 10) : null;
+        const descanso = calcularDescansoPorReps(repsAlvo);
+        const numSeries = repsMatch ? parseInt(partes[1].split('x')[0], 10) : 0;
+        if(!seriesConcluidas[j]) seriesConcluidas[j] = new Array(numSeries).fill(false);
+        let pillsSeries = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 8px;">';
+        for(let s = 0; s < numSeries; s++){
+          const feita = seriesConcluidas[j][s];
+          pillsSeries += '<span class="chip' + (feita ? ' active' : '') + '" style="padding:6px 12px;font-size:11px;cursor:pointer;" onclick="concluirSerie(' + j + ',' + s + ',' + descansoParaSegundos(descanso || '60s') + ')">' + (feita ? '✓ ' : '') + 'Série ' + (s+1) + '</span>';
+        }
+        pillsSeries += '</div><span id="descanso-display-' + j + '" style="font-size:13px;font-weight:600;color:var(--gold-soft);"></span>';
+
+        const verExecucao = '<p style="font-size:12px;color:var(--gold-soft);margin:2px 0 8px;cursor:pointer;" onclick="toggleVideoExercicioDia(' + j + ')"><i class="ti ti-player-play" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Ver execução</p><div id="video-ex-dia-' + j + '" style="display:none;margin-bottom:8px;"></div>';
+
+        const precisaTecnica = precisaAprovacaoTecnica(alunaAtual, nomeEx);
+        let avisoTecnica = '';
+        if(precisaTecnica === true || precisaTecnica === 'periodica'){
+          const jaSolicitado = alunaAtual.tecnicaAprovada && alunaAtual.tecnicaAprovada[nomeEx] === 'pendente';
+          avisoTecnica = jaSolicitado
+            ? '<p style="font-size:11px;color:var(--gold-soft);margin:2px 0 8px;">📹 Vídeo enviado — aguardando seu personal analisar.</p>'
+            : '<p style="font-size:11px;color:var(--gold-soft);margin:2px 0 8px;cursor:pointer;" onclick="pedirVideoTecnicaAluna(\'' + nomeEx.replace(/'/g,"\\'") + '\')">📹 Grave um vídeo desse exercício e envie pro seu personal analisar a técnica</p>';
+        }
+
+        const alternativaHtml = '<p style="font-size:11px;color:var(--text-faint);margin:2px 0 8px;cursor:pointer;" onclick="mostrarAlternativaEmergencia(' + j + ',\'' + nomeEx.replace(/'/g,"\\'") + '\')">Equipamento ocupado? Ver alternativa</p><div id="alt-emergencia-' + j + '" style="display:none;margin-bottom:8px;"></div>';
+
+        corpoTreino += '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:6px;">' +
+          '<div style="display:flex;justify-content:space-between;"><span>' + nomeEx + '</span><span class="tag">' + (partes[1] || '') + (descanso ? ' · ⏱ ' + descanso : '') + '</span></div>' +
+          (descanso ? pillsSeries : '') +
+          verExecucao +
+          avisoTecnica +
+          alternativaHtml +
+          notaSemanaAnterior +
+          '<div style="display:flex;gap:8px;">' +
+            '<input class="form-input" data-carga="' + j + '" type="number" placeholder="Carga (kg)" style="flex:1;">' +
+            '<input class="form-input" data-reps="' + j + '" type="number" placeholder="Reps · 1ª série" style="flex:1;">' +
+          '</div>' +
+        '</div>';
+      });
+      corpoTreino += '<button class="btn-gold" style="margin-top:10px;" onclick="registrarTreinoDia(' + arg + ')">Registrar treino de hoje</button>' +
+        '<div id="registro-confirmacao" style="margin-top:10px;"></div>';
+    }
+    el.innerHTML =
+      '<p class="page-sub" style="margin-top:14px;">' + d.n + '-feira' + (d.hoje ? ' · hoje' : '') + '</p>' +
+      '<h1 class="page-title" style="margin-top:0;">' + d.foco + '</h1>' +
+      corpoTreino;
+  } else if(type === 'conteudo'){
+    const c = arg;
+    if(c.aulas){
+      abrirCurso(c);
+      setActive('detail');
+      document.getElementById('backlabel').textContent = 'Voltar';
+      return;
+    }
+    const embed = getEmbedUrl(c.video);
+    el.innerHTML =
+      '<p class="page-sub" style="margin-top:14px;">' + c.cat + '</p>' +
+      '<h1 class="page-title" style="margin-top:0;">' + c.n + '</h1>' +
+      (c.locked
+        ? '<div class="video-block"><i class="ti ti-lock" style="font-size:32px;color:var(--gold-soft);"></i></div>'
+        : (embed
+          ? '<div class="video-block"><iframe src="' + embed + '" title="' + c.n + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>' + ytFallback(c.video)
+          : '<div class="video-block"><i class="ti ti-player-play"></i></div>')) +
+      '<div class="info-box"><p class="txt">' + c.desc + '</p></div>' +
+      (c.locked
+        ? '<div class="list-item"><span><i class="ti ti-lock" style="font-size:13px;vertical-align:-2px;margin-right:6px;color:var(--gold-soft);"></i>Conteúdo bloqueado</span><span class="tag">Desbloquear</span></div>'
+        : '');
+  } else {
+    el.innerHTML =
+      '<div class="video-block" style="margin-top:14px;"><i class="ti ti-player-play"></i></div>' +
+      '<h1 class="page-title" style="margin-top:0;">Conteúdo em vídeo</h1>' +
+      '<p class="page-sub">Player entra aqui na versão final do app.</p>';
+  }
+  setActive('detail');
+  document.getElementById('backlabel').textContent = 'Voltar';
+}
+
+function pedirVideoTecnicaAluna(nomeEx){
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+  if(!alunaAtual) return;
+  solicitarVideoTecnica(alunaAtual.nome, nomeEx);
+  openDetail('dia', detailDiaAtual);
+}
+
+function mostrarAlternativaEmergencia(idx, nomeEx){
+  const container = document.getElementById('alt-emergencia-' + idx);
+  if(!container) return;
+  if(container.style.display === 'none' || !container.innerHTML){
+    const alt = sugerirAlternativaEmergencia(nomeEx);
+    let html = '<div class="info-box">';
+    if(alt.nivel1_halteres.length){
+      html += '<p class="lbl">Opção com halteres (mais confiável)</p>';
+      alt.nivel1_halteres.forEach(function(op){ html += '<p class="txt">• ' + op + '</p>'; });
+    } else {
+      html += '<p class="txt">' + alt.nivel2_backup + '</p>';
+    }
+    html += '<p class="txt" style="color:var(--text-faint);font-size:11px;margin-top:8px;">Se nada disso estiver disponível: ' + alt.nivel3_pular + '</p>';
+    html += '</div>';
+    container.innerHTML = html;
+    container.style.display = 'block';
+  } else {
+    container.style.display = 'none';
+  }
+}
+
+function toggleVideoExercicioDia(idx){
+  const container = document.getElementById('video-ex-dia-' + idx);
+  if(!container) return;
+  if(container.style.display === 'none' || !container.innerHTML){
+    const d = dias[detailDiaAtual];
+    const nomeEx = d.ex[idx].split(' · ')[0];
+    const exBanco = buscarExercicioNoBanco(nomeEx);
+    const embed = exBanco ? getEmbedUrl(exBanco.video) : '';
+    container.innerHTML = embed
+      ? '<div class="video-block"><iframe src="' + embed + '" title="' + nomeEx + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>' + ytFallback(exBanco.video)
+      : '<div class="video-block" style="flex-direction:column;gap:6px;"><i class="ti ti-video-off" style="font-size:26px;color:var(--text-faint);"></i><p style="font-size:12px;color:var(--text-faint);margin:0;text-align:center;padding:0 20px;">Este vídeo ainda não está disponível — o link será atualizado em breve.</p></div>';
+    container.style.display = 'block';
+  } else {
+    container.style.display = 'none';
+  }
+}
+
+function registrarTreinoDia(diaIndex){
+  const d = dias[diaIndex];
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+  if(!alunaAtual) return;
+  const prog = getProgressoAluna(alunaAtual.nome);
+  let registrados = 0;
+  let houveReducao = false;
+  d.ex.forEach(function(linha, j){
+    const nomeEx = linha.split(' · ')[0];
+    const cargaEl = document.querySelector('[data-carga="' + j + '"]');
+    const repsEl = document.querySelector('[data-reps="' + j + '"]');
+    const carga = parseFloat(cargaEl.value);
+    const reps = parseInt(repsEl.value, 10);
+    if(isNaN(carga) || isNaN(reps)) return;
+    if(!prog.historico[nomeEx]) prog.historico[nomeEx] = [];
+    const sugestao = sugerirAjusteCarga(carga, reps);
+    prog.historico[nomeEx].push({ semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao });
+    if(sugestao.texto.indexOf('edução') !== -1) houveReducao = true;
+    registrados++;
+  });
+
+  let resultadoSemana = null;
+  if(registrados > 0){
+    if(!prog.diasConcluidos[prog.semana]) prog.diasConcluidos[prog.semana] = [];
+    if(prog.diasConcluidos[prog.semana].indexOf(d.n) === -1) prog.diasConcluidos[prog.semana].push(d.n);
+    resultadoSemana = checarConclusaoSemana(alunaAtual.nome);
+  }
+
+  openDetail('dia', diaIndex);
+  const conf = document.getElementById('registro-confirmacao');
+  if(registrados === 0){
+    conf.innerHTML = '<div class="insight"><p>Preencha ao menos um exercício com carga e repetições pra registrar.</p></div>';
+    return;
+  }
+
+  let msg = registrados + ' exercício(s) registrado(s).';
+  if(resultadoSemana && resultadoSemana.avancou){
+    msg += ' Semana concluída (' + resultadoSemana.total + '/' + resultadoSemana.total + ') — suas progressões de carga já estão calculadas pra próxima semana! 🎉';
+  } else if(resultadoSemana){
+    msg += ' ' + resultadoSemana.concluidos + ' de ' + resultadoSemana.total + ' treinos concluídos essa semana.';
+  }
+  conf.innerHTML = '<div class="insight"><p>' + msg + '</p></div>';
+
+  if(resultadoSemana && resultadoSemana.avancou){
+    const semanaFechada = prog.semana - 1;
+    if(!prog.nutricao || !prog.nutricao[semanaFechada]){
+      conf.innerHTML += renderPerguntaNutricao(semanaFechada);
+    }
+    const mesPendente = verificarCheckinPeso(alunaAtual.nome);
+    if(mesPendente !== null){
+      conf.innerHTML += renderPerguntaPeso(mesPendente);
+    }
+  }
+
+  if(houveReducao && !alunaAtual.cicloPerguntado && !alunaAtual.cicloInfo){
+    conf.innerHTML += renderPerguntaCiclo();
+  }
+}
+
+function renderPerguntaCiclo(){
+  return '<div class="info-box" style="margin-top:10px;">' +
+    '<p class="lbl">Notamos algo</p>' +
+    '<p class="txt">Notamos um desempenho um pouco mais baixo hoje — e tudo bem, isso acontece. Sabemos que o período pode influenciar a força em alguns momentos. Se quiser, pode nos contar há quantos dias foi sua última menstruação? Isso ajuda a deixar nossas análises mais precisas pra você.</p>' +
+    '<div class="form-group"><input class="form-input" id="ciclo-dias" type="number" placeholder="Ex: 20 dias atrás"></div>' +
+    '<div class="form-group"><label class="form-label">Usa algum medicamento/anticoncepcional?</label><select class="form-select" id="ciclo-medicamento"><option>Não</option><option>Sim</option></select></div>' +
+    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="registrarCiclo()">Enviar</button>' +
+    '<button class="btn-gold" onclick="pularCiclo()">Prefiro não responder</button>' +
+    '</div>';
+}
+
+function registrarCiclo(){
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+  const dias_atras = parseInt(document.getElementById('ciclo-dias').value, 10);
+  const medicamento = document.getElementById('ciclo-medicamento').value;
+  alunaAtual.cicloPerguntado = true;
+  if(!isNaN(dias_atras)){
+    const prog = getProgressoAluna(alunaAtual.nome);
+    const semanasAteProximoPeriodo = Math.round((28 - dias_atras) / 7);
+    alunaAtual.cicloInfo = { diasAtras: dias_atras, medicamento: medicamento, semanaEstimadaProximoPeriodo: prog.semana + semanasAteProximoPeriodo };
+  }
+  document.getElementById('registro-confirmacao').innerHTML = '<div class="insight"><p>Obrigada por compartilhar — isso vai deixar suas análises mais precisas, sem afetar nada além disso.</p></div>';
+}
+
+function pularCiclo(){
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+  alunaAtual.cicloPerguntado = true;
+  document.getElementById('registro-confirmacao').innerHTML = '<div class="insight"><p>Sem problemas — pode responder outra hora, se quiser.</p></div>';
+}
+
+function simularHistorico40Dias(){
+  const nome = 'Andriele Caroline Rubert';
+  const a = alunasPersonal.find(function(x){ return x.nome === nome; });
+  if(!a) return;
+
+  progressoesPorAluna[nome] = { semana: 1, historico: {}, diasConcluidos: {}, substituicoes: [] };
+  const prog = progressoesPorAluna[nome];
+
+  const semanas = [
+    { dias: ['Segunda','Terça','Quarta','Quinta','Sexta'] },
+    { dias: ['Segunda','Terça','Quarta','Quinta','Sexta'] },
+    { dias: ['Segunda','Terça','Quarta','Quinta'] },
+    { dias: ['Segunda','Terça','Quarta','Quinta','Sexta'] },
+    { dias: ['Segunda','Quarta','Quinta'] },
+    { dias: ['Terça','Quarta','Quinta','Sexta'] },
+    { dias: ['Segunda','Terça','Quarta','Sexta'] },
+    { dias: ['Segunda','Terça'] }
+  ];
+
+  const legPress = [
+    {carga:40, reps:13}, {carga:43, reps:11}, {carga:43, reps:10},
+    {carga:43, reps:13}, {carga:46.5, reps:10}, {carga:46.5, reps:11}, {carga:46.5, reps:10}
+  ];
+  const agachamentoHack = [
+    {carga:20, reps:10}, null, {carga:20, reps:11}, null, null, {carga:20, reps:11}, {carga:20, reps:10}
+  ];
+  const cadeiraFlexora = [
+    null, {carga:15, reps:10}, null, null, {carga:15, reps:4}, null, {carga:13.5, reps:9}
+  ];
+
+  function registrarSemana(nomeEx, listaSemanas){
+    listaSemanas.forEach(function(dado, idx){
+      if(!dado) return;
+      const semana = idx + 1;
+      const sugestao = sugerirAjusteCarga(dado.carga, dado.reps);
+      if(!prog.historico[nomeEx]) prog.historico[nomeEx] = [];
+      prog.historico[nomeEx].push({ semana: semana, carga: dado.carga, reps: dado.reps, sugestao: sugestao });
+    });
+  }
+  registrarSemana('Leg Press 45', legPress);
+  registrarSemana('Agachamento Hack', agachamentoHack);
+  registrarSemana('Cadeira flexora', cadeiraFlexora);
+
+  semanas.forEach(function(s, idx){
+    prog.diasConcluidos[idx + 1] = s.dias.slice();
+  });
+  prog.semana = 8;
+
+  prog.nutricao = {};
+  const metaAguaSeed = calcularMetaAguaLitros(a.peso);
+  const nutricaoSemanal = [
+    { fugas: 1, tipos: ['mais'], alcool: 0, agua: 2.8, cardio: 90, sono: 7.5 },
+    { fugas: 0, tipos: [], alcool: 2, agua: 2.5, cardio: 120, sono: 7 },
+    { fugas: 2, tipos: ['doce'], alcool: 0, agua: 2.0, cardio: 0, sono: 6.5 },
+    { fugas: 1, tipos: ['mais'], alcool: 3, agua: 1.8, cardio: 60, sono: 5.5 },
+    { fugas: 3, tipos: ['doce', 'menos'], alcool: 0, agua: 1.6, cardio: 0, sono: 5 },
+    { fugas: 1, tipos: ['mais'], alcool: 0, agua: 2.6, cardio: 100, sono: 7 },
+    { fugas: 2, tipos: ['doce'], alcool: 2, agua: 2.2, cardio: 40, sono: 6 }
+  ];
+  nutricaoSemanal.forEach(function(dado, idx){
+    const semana = idx + 1;
+    const boaConstancia = (prog.diasConcluidos[semana] || []).length >= totalDiasDeTreino();
+    const semanasAnteriores = [semana - 1, semana - 2].filter(function(s){ return prog.nutricao[s]; });
+    const alcoolFrequente = dado.alcool > 0 && semanasAnteriores.filter(function(s){ return prog.nutricao[s].resultado.dosesAlcool > 0; }).length >= 1;
+    prog.nutricao[semana] = { fugas: dado.fugas, tipos: dado.tipos, resultado: calcularNutricaoSemana(dado.fugas, dado.tipos, boaConstancia, dado.alcool, alcoolFrequente, dado.agua, metaAguaSeed, dado.cardio, dado.sono) };
+  });
+
+  a.cicloPerguntado = true;
+  a.cicloInfo = { diasAtras: 14, medicamento: 'Não', semanaEstimadaProximoPeriodo: 7 };
+
+  atualizarHomeEstatico();
+}
+
+function atualizarHomeEstatico(){
+  const stats = calcularEstatisticasAluna('Andriele Caroline Rubert');
+  if(!stats.temDados) return;
+  const eyebrow = document.getElementById('home-hero-eyebrow');
+  const title = document.getElementById('home-hero-title');
+  const volume = document.getElementById('home-volume-valor');
+  const seq = document.getElementById('home-sequencia-valor');
+  const seqMeta = document.getElementById('home-sequencia-meta');
+  const pct = Math.round((stats.totalConcluidos / stats.totalPlanejado) * 100);
+  if(eyebrow) eyebrow.textContent = 'Sua constância até agora';
+  if(title) title.textContent = pct + '% dos treinos concluídos';
+  if(volume) volume.textContent = stats.totalConcluidos + ' / ' + stats.totalPlanejado;
+  if(seq) seq.textContent = stats.progressoes + ' progressões';
+  if(seqMeta) seqMeta.textContent = 'de carga registradas até agora';
+}
+
+simularHistorico40Dias();
+
+function exportarRelatorioEvolucao(nome){
+  const a = alunasPersonal.find(function(x){ return x.nome === nome; });
+  if(!a) return;
+  const prog = getProgressoAluna(nome);
+  const stats = calcularEstatisticasAluna(nome);
+  const nutriStats = calcularNutricaoStats(nome);
+  const probabilidade = calcularProbabilidadeSucesso(nome);
+  const elegibilidade = calcularElegibilidadeFase(nome);
+  const hoje = new Date().toLocaleDateString('pt-BR');
+
+  let html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório de Evolução — ' + a.nome + '</title>';
+  html += '<style>' +
+    'body{font-family:Georgia,serif;background:#fff;color:#1a1a1a;max-width:720px;margin:40px auto;padding:0 24px;}' +
+    'h1{color:#8A6D1F;font-size:26px;margin-bottom:4px;}' +
+    'h2{color:#8A6D1F;font-size:17px;border-bottom:1px solid #D4AF37;padding-bottom:6px;margin-top:32px;}' +
+    '.meta{color:#666;font-size:13px;margin-bottom:24px;}' +
+    'table{width:100%;border-collapse:collapse;margin-top:8px;}' +
+    'td,th{padding:6px 8px;border-bottom:1px solid #eee;text-align:left;font-size:13px;}' +
+    'th{color:#8A6D1F;}' +
+    '.badge{display:inline-block;background:#F1DE9A;color:#5a4a12;padding:3px 10px;border-radius:6px;font-size:12px;}' +
+    '.ok{color:#0F6E56;} .pendente{color:#999;}' +
+    '@media print{ body{margin:0;} }' +
+    '</style></head><body>';
+
+  html += '<h1>MUSA+ — Relatório de Evolução</h1>';
+  html += '<p class="meta">' + a.nome + ' · gerado em ' + hoje + '</p>';
+
+  html += '<h2>Resumo geral</h2><table>' +
+    '<tr><td>Nível</td><td>' + a.nivel + '</td></tr>' +
+    '<tr><td>Frequência</td><td>' + a.freq + '</td></tr>' +
+    (a.treinoAtual ? '<tr><td>Fase atual</td><td>' + a.treinoAtual.fase + '</td></tr>' : '') +
+    '<tr><td>Semana atual do ciclo</td><td>' + prog.semana + '</td></tr>' +
+    (probabilidade !== null ? '<tr><td>Probabilidade de sucesso</td><td>' + probabilidade + '%</td></tr>' : '') +
+    '</table>';
+
+  if(stats.temDados){
+    const pct = Math.round((stats.totalConcluidos / stats.totalPlanejado) * 100);
+    html += '<h2>Constância</h2><table>' +
+      '<tr><td>Treinos concluídos</td><td>' + stats.totalConcluidos + ' de ' + stats.totalPlanejado + ' (' + pct + '%)</td></tr>' +
+      '<tr><td>Progressões de carga registradas</td><td>' + stats.progressoes + '</td></tr>' +
+      '</table>';
+  }
+
+  html += '<h2>Progressão de carga por exercício</h2>';
+  const nomesExercicios = Object.keys(prog.historico);
+  if(nomesExercicios.length === 0){
+    html += '<p>Nenhuma sessão registrada ainda.</p>';
+  }
+  nomesExercicios.forEach(function(nomeEx){
+    html += '<p style="margin-bottom:2px;"><b>' + nomeEx + '</b></p><table>';
+    prog.historico[nomeEx].forEach(function(r){
+      html += '<tr><td>Semana ' + r.semana + '</td><td>' + r.carga + 'kg × ' + r.reps + ' reps</td><td>' + r.sugestao.texto + '</td></tr>';
+    });
+    html += '</table>';
+  });
+
+  if(nutriStats.temDados){
+    html += '<h2>Nutrição e estilo de vida (média do período)</h2><table>' +
+      '<tr><td>Resposta Nutricional</td><td>' + nutriStats.respostaNutricional + '</td></tr>' +
+      '<tr><td>Potencial de Hipertrofia</td><td>' + nutriStats.potencialHipertrofia + '</td></tr>' +
+      '<tr><td>Potencial de Ganho de Gordura</td><td>' + nutriStats.potencialGanhoGordura + '</td></tr>' +
+      '<tr><td>Retenção Hídrica Estimada</td><td>' + nutriStats.retencaoHidricaEstimada + '</td></tr>' +
+      '<tr><td>Semanas com consumo de álcool relatado</td><td>' + nutriStats.semanasComAlcool + ' de ' + nutriStats.semanasRespondidas + '</td></tr>' +
+      '<tr><td>Semanas com cardio relatado</td><td>' + nutriStats.semanasComCardio + ' de ' + nutriStats.semanasRespondidas + '</td></tr>' +
+      '</table>';
+  }
+
+  if(a.pesoHistorico && a.pesoHistorico.length){
+    html += '<h2>Histórico de peso</h2><table><tr><th>Semana</th><th>Peso</th></tr>';
+    a.pesoHistorico.forEach(function(p){
+      html += '<tr><td>' + p.semana + '</td><td>' + p.peso + 'kg</td></tr>';
+    });
+    html += '</table>';
+  }
+
+  if(elegibilidade){
+    html += '<h2>Avaliação de mudança de fase</h2><table>';
+    elegibilidade.criterios.forEach(function(c){
+      html += '<tr><td>' + c.nome + '</td><td class="' + (c.atingido ? 'ok' : 'pendente') + '">' + (c.atingido ? '✓' : '○') + ' ' + c.detalhe + '</td></tr>';
+    });
+    html += '</table><p>' + (elegibilidade.elegivel ? '<span class="badge">Elegível para avançar de fase</span>' : 'Ainda não elegível — critérios pendentes acima.') + '</p>';
+  }
+
+  html += '<p class="meta" style="margin-top:40px;">Relatório gerado automaticamente pelo MUSA+ com base nos dados registrados no aplicativo.</p>';
+  html += '</body></html>';
+
+  const janela = window.open('', '_blank');
+  if(janela){
+    janela.document.write(html);
+    janela.document.close();
+  }
+}
+
+function resetarDadosTeste(){
+  const nome = 'Andriele Caroline Rubert';
+  const a = alunasPersonal.find(function(x){ return x.nome === nome; });
+  progressoesPorAluna[nome] = { semana: 1, historico: {}, diasConcluidos: {}, substituicoes: [] };
+  if(a){ a.cicloPerguntado = false; a.cicloInfo = null; }
+
+  const eyebrow = document.getElementById('home-hero-eyebrow');
+  const title = document.getElementById('home-hero-title');
+  const volume = document.getElementById('home-volume-valor');
+  const seq = document.getElementById('home-sequencia-valor');
+  const seqMeta = document.getElementById('home-sequencia-meta');
+  if(eyebrow) eyebrow.textContent = 'Seu primeiro dia';
+  if(title) title.textContent = 'Seu DNA MUSA está calibrando';
+  if(volume) volume.textContent = '0 / 20';
+  if(seq) seq.textContent = 'Dia 1';
+  if(seqMeta) seqMeta.textContent = 'Sua jornada começa agora';
+
+  alert('Dados de teste zerados. A Andriele volta ao dia 1.');
+  if(alunaAberta){ openAlunaDetail(alunasPersonal.indexOf(alunaAberta)); }
+}
+
+function goBack(){
+  const detailActive = document.querySelector('[data-view="detail"]').classList.contains('active');
+  if(detailActive){
+    setActive(level2);
+    document.getElementById('backlabel').textContent = 'Voltar para o início';
+  } else {
+    setActive('launcher');
+    document.getElementById('backbar').style.display = 'none';
+  }
+}
+</script>
+
+</body>
+</html>
+
 # 1. Dentro desta pasta (musa-deploy), inicialize o git
 git init
 git add .
