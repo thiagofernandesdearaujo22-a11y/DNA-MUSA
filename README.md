@@ -1,26 +1,25 @@
-[musa_plus_prototipo.html](https://github.com/user-attachments/files/29929071/musa_plus_prototipo.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MUSA+ — Protótipo</title>
+<title>MUSA+, Protótipo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
 <style>
   :root{
-    --bg: #0B0B0C;
+    --bg: #0A0908;
     --card: #161512;
     --card-2: #1D1B17;
-    --gold: #D4AF37;
-    --gold-soft: #C9A96A;
-    --gold-deep: #8A6D1F;
-    --text: #F3EFE4;
+    --gold: #D98B2E;
+    --gold-soft: #FCE8B8;
+    --gold-deep: #5C3814;
+    --text: #F5F0E8;
     --text-dim: #A9A392;
     --text-faint: #6E6A5E;
-    --border: rgba(212,175,55,0.16);
-    --border-strong: rgba(212,175,55,0.4);
+    --border: rgba(217,139,46,0.16);
+    --border-strong: rgba(217,139,46,0.4);
   }
   *{box-sizing:border-box;}
   body{
@@ -38,8 +37,8 @@
     max-width:100%;
     background:var(--bg);
     border-radius:36px;
-    border:1px solid rgba(212,175,55,0.25);
-    box-shadow:0 0 0 8px #050505, 0 30px 80px rgba(0,0,0,0.6), 0 0 60px rgba(212,175,55,0.05);
+    border:1px solid rgba(217,139,46,0.25);
+    box-shadow:0 0 0 8px #050505, 0 30px 80px rgba(0,0,0,0.6), 0 0 60px rgba(217,139,46,0.05);
     overflow:hidden;
     position:relative;
   }
@@ -49,7 +48,11 @@
   .screen::-webkit-scrollbar{display:none;}
   .view{display:none;}
   .view.active{display:block;animation:fadeIn .35s ease;}
+  .fade-content{animation:fadeIn .3s ease;}
   @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes introDnaFade{from{opacity:0;}to{opacity:1;}}
+  @keyframes introDnaDraw{to{stroke-dashoffset:0;}}
+  @keyframes introMusaFade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 
   .backbar{display:flex;align-items:center;gap:8px;padding:14px 0 6px;cursor:pointer;color:var(--gold-soft);font-size:13px;}
   .backbar i{font-size:16px;}
@@ -58,55 +61,55 @@
   .launcher{padding-top:56px;text-align:center;}
   .brand{
     font-family:'Playfair Display',serif;font-size:32px;font-weight:600;letter-spacing:1px;
-    background:linear-gradient(135deg,#F1DE9A,#D4AF37 45%,#8A6D1F);
+    background:linear-gradient(135deg,#FCE8B8,#D98B2E 45%,#5C3814);
     -webkit-background-clip:text;background-clip:text;color:transparent;margin:0;
   }
-  .brand-sub{font-size:10px;letter-spacing:2.5px;color:var(--text-faint);text-transform:uppercase;margin:4px 0 0;}
+  .brand-sub{font-size:11px;letter-spacing:2.5px;color:var(--text-faint);text-transform:uppercase;margin:4px 0 0;}
   .sub{color:var(--text-dim);font-size:13px;margin:22px 0 40px;letter-spacing:0.3px;}
   .profiles{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;}
   .profile-card{cursor:pointer;text-align:center;transition:transform .25s ease;width:100px;}
   .profile-card:hover{transform:translateY(-3px);}
   .avatar{width:78px;height:78px;border-radius:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;position:relative;}
-  .avatar.gold{background:radial-gradient(circle at 30% 25%, #F1DE9A, #D4AF37 55%, #8A6D1F 100%);box-shadow:0 8px 26px rgba(212,175,55,0.35);}
+  .avatar.gold{background:radial-gradient(circle at 30% 25%, #FCE8B8, #D98B2E 55%, #5C3814 100%);box-shadow:0 8px 26px rgba(217,139,46,0.35);}
   .avatar.gold span{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;color:#0B0B0C;}
   .avatar.dark{background:var(--card-2);border:1px solid var(--border);}
   .avatar.dark i{font-size:26px;color:var(--gold-soft);}
-  .profile-name{font-size:12.5px;font-weight:600;margin:0;line-height:1.3;}
-  .profile-desc{font-size:10px;color:var(--text-dim);margin:3px 0 0;line-height:1.3;}
+  .profile-name{font-size:12px;font-weight:600;margin:0;line-height:1.3;}
+  .profile-desc{font-size:11px;color:var(--text-dim);margin:3px 0 0;line-height:1.3;}
 
   h1.page-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;margin:18px 0 4px;}
   .page-sub{font-size:12px;color:var(--text-dim);margin:0 0 18px;}
-  .section-label{font-size:12.5px;font-weight:600;color:var(--gold-soft);text-transform:uppercase;letter-spacing:0.6px;margin:0 0 10px;}
+  .section-label{font-size:12px;font-weight:600;color:var(--gold-soft);text-transform:uppercase;letter-spacing:0.6px;margin:0 0 10px;}
 
   .hero-card{background:linear-gradient(135deg, #241E14, #16130D);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:16px;cursor:pointer;position:relative;overflow:hidden;}
-  .hero-card::after{content:'';position:absolute;top:-40%;right:-20%;width:220px;height:220px;background:radial-gradient(circle, rgba(212,175,55,0.18), transparent 70%);}
-  .hero-eyebrow{font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--gold-soft);margin:0 0 8px;position:relative;}
+  .hero-card::after{content:'';position:absolute;top:-40%;right:-20%;width:220px;height:220px;background:radial-gradient(circle, rgba(217,139,46,0.18), transparent 70%);}
+  .hero-eyebrow{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold-soft);margin:0 0 8px;position:relative;}
   .hero-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;margin:0 0 8px;position:relative;}
   .hero-cta{font-size:12px;color:var(--text-dim);margin:0;position:relative;}
 
-  .pending-card{background:rgba(212,175,55,0.08);border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin-bottom:26px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;}
-  .pending-card p{margin:0;font-size:12.5px;color:#EDE0BE;}
+  .pending-card{background:rgba(217,139,46,0.08);border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin-bottom:26px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .pending-card p{margin:0;font-size:12px;color:#EDE0BE;}
   .pending-card i{color:var(--gold-soft);font-size:16px;flex-shrink:0;}
 
   .row{display:flex;gap:12px;overflow-x:auto;margin-bottom:26px;padding-bottom:4px;scrollbar-width:none;}
   .row::-webkit-scrollbar{display:none;}
   .poster{min-width:128px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;cursor:pointer;position:relative;transition:border-color .2s ease, transform .2s ease;}
-  .poster:hover{border-color:rgba(212,175,55,0.5);transform:translateY(-2px);}
+  .poster:hover{border-color:rgba(217,139,46,0.5);transform:translateY(-2px);}
   .poster.pendente{border-color:var(--border-strong);}
   .poster .check{position:absolute;top:10px;right:10px;color:var(--gold-soft);font-size:13px;}
-  .poster .pend-tag{position:absolute;top:9px;right:9px;font-size:9px;color:var(--gold-soft);background:rgba(212,175,55,0.15);padding:2px 6px;border-radius:6px;}
-  .poster .sub{font-size:10.5px;color:var(--text-faint);margin:0;}
-  .poster .title{font-size:12.5px;font-weight:600;margin:5px 0 0;color:var(--text);}
+  .poster .pend-tag{position:absolute;top:9px;right:9px;font-size:11px;color:var(--gold-soft);background:rgba(217,139,46,0.15);padding:2px 6px;border-radius:6px;}
+  .poster .sub{font-size:11px;color:var(--text-faint);margin:0;}
+  .poster .title{font-size:12px;font-weight:600;margin:5px 0 0;color:var(--text);}
 
   .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:26px;}
   .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;}
   .stat-label{font-size:11px;color:var(--text-dim);margin:0;}
   .stat-value{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;margin:4px 0 0;}
-  .stat-meta{font-size:10px;color:var(--text-faint);margin:4px 0 0;}
+  .stat-meta{font-size:11px;color:var(--text-faint);margin:4px 0 0;}
   .stat-meta.gold{color:var(--gold-soft);}
 
-  .insight{background:linear-gradient(135deg, rgba(212,175,55,0.12), rgba(212,175,55,0.03));border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:18px;}
-  .insight p{font-size:12.5px;margin:0;color:#EDE0BE;}
+  .insight{background:linear-gradient(135deg, rgba(217,139,46,0.12), rgba(217,139,46,0.03));border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:18px;}
+  .insight p{font-size:12px;margin:0;color:#EDE0BE;}
 
   .ring-wrap{display:flex;align-items:center;gap:18px;margin-bottom:20px;}
   .ring-num{font-family:'Playfair Display',serif;font-size:26px;font-weight:600;margin:0;}
@@ -114,18 +117,19 @@
 
   .video-block{background:var(--card);border:1px solid var(--border);border-radius:16px;height:190px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;position:relative;overflow:hidden;}
   .video-block iframe{width:100%;height:100%;position:relative;z-index:1;}
-  .yt-fallback{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-dim);text-decoration:none;margin:-8px 0 16px;}
+  .yt-fallback{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-dim);text-decoration:none;margin:-8px 0 16px;}
   .yt-fallback:hover{color:var(--gold-soft);}
-  .video-block::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, rgba(212,175,55,0.08), transparent 60%);}
+  .video-block::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, rgba(217,139,46,0.08), transparent 60%);}
   .video-block i{font-size:36px;color:var(--gold-soft);position:relative;}
 
   .list-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 14px;margin-bottom:8px;font-size:13px;display:flex;justify-content:space-between;align-items:center;}
-  .list-item .tag{font-size:10.5px;color:var(--gold-soft);}
+  .list-item .tag{font-size:11px;color:var(--gold-soft);}
 
-  .badge{display:inline-block;background:rgba(212,175,55,0.14);color:var(--gold-soft);font-size:10.5px;text-transform:uppercase;letter-spacing:0.5px;padding:4px 10px;border-radius:8px;margin-bottom:10px;}
+  .badge{display:inline-block;background:rgba(217,139,46,0.14);color:var(--gold-soft);font-size:11px;text-transform:uppercase;letter-spacing:0.5px;padding:4px 10px;border-radius:8px;margin-bottom:10px;}
 
   .info-box{background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:16px;}
-  .info-box .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold-soft);margin:0 0 6px;}
+  .info-box .lbl{font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold-soft);margin:0 0 6px;}
+  .card-item-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;margin:0 0 6px;color:var(--text);}
   .info-box p.txt{font-size:13px;color:var(--text);margin:0 0 10px;line-height:1.5;}
   .info-box p.txt:last-child{margin-bottom:0;}
 
@@ -133,13 +137,17 @@
   .month-row:last-child{border-bottom:none;}
   .month-name{font-size:13px;color:var(--text-dim);}
   .month-bar-wrap{flex:1;margin:0 12px;background:#221F18;border-radius:6px;height:8px;overflow:hidden;}
-  .month-bar{height:100%;background:linear-gradient(90deg,#8A6D1F,#D4AF37);}
-  .month-val{font-size:12.5px;font-weight:600;min-width:44px;text-align:right;}
+  .month-bar{height:100%;background:linear-gradient(90deg,#5C3814,#D98B2E);}
+  .month-val{font-size:12px;font-weight:600;min-width:44px;text-align:right;}
 
   .filter-row{display:flex;gap:8px;overflow-x:auto;margin-bottom:20px;padding-bottom:4px;scrollbar-width:none;}
   .filter-row::-webkit-scrollbar{display:none;}
   .chip{flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:7px 14px;font-size:12px;color:var(--text-dim);cursor:pointer;white-space:nowrap;transition:all .2s ease;}
-  .chip.active{background:linear-gradient(135deg,#F1DE9A,#D4AF37 55%,#8A6D1F);color:#0B0B0C;font-weight:600;border-color:transparent;}
+  @keyframes pulseGold{0%{transform:scale(1);box-shadow:0 0 0 rgba(217,139,46,0.7);}50%{transform:scale(1.12);box-shadow:0 0 16px rgba(217,139,46,0.55);}100%{transform:scale(1);box-shadow:0 0 0 rgba(217,139,46,0);}}
+  .chip.pulse{animation:pulseGold .55s ease;}
+  @keyframes toastIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .toast-celebracao{animation:toastIn .3s ease;background:linear-gradient(135deg,#FCE8B8,#D98B2E 55%,#5C3814);color:#0B0B0C;font-weight:600;font-size:12px;padding:10px 14px;border-radius:10px;text-align:center;margin-bottom:10px;}
+  .chip.active{background:linear-gradient(135deg,#FCE8B8,#D98B2E 55%,#5C3814);color:#0B0B0C;font-weight:600;border-color:transparent;}
 
   .poster-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
   .vposter{cursor:pointer;}
@@ -149,7 +157,7 @@
     position:relative;overflow:hidden;margin-bottom:8px;transition:border-color .2s ease, transform .2s ease;
   }
   .vposter:hover .vcover{border-color:var(--border-strong);transform:translateY(-2px);}
-  .vcover::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 40%, rgba(212,175,55,0.14), transparent 65%);}
+  .vcover::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 40%, rgba(217,139,46,0.14), transparent 65%);}
   .vcover i.play{font-size:26px;color:var(--gold-soft);position:relative;}
   .vcover .lock-icon{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:8px;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;}
   .vcover .lock-icon i{font-size:13px;color:var(--gold-soft);}
@@ -160,18 +168,18 @@
   .alert-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px;}
   .alert-stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;}
   .alert-stat .num{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;margin:0;}
-  .alert-stat .lbl2{font-size:10.5px;color:var(--text-dim);margin:2px 0 0;}
+  .alert-stat .lbl2{font-size:11px;color:var(--text-dim);margin:2px 0 0;}
 
   .aluna-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;transition:border-color .2s ease;}
   .aluna-card:hover{border-color:var(--border-strong);}
-  .aluna-name{font-size:13.5px;font-weight:600;margin:0 0 4px;}
+  .aluna-name{font-size:13px;font-weight:600;margin:0 0 4px;}
   .aluna-meta{font-size:11px;color:var(--text-faint);margin:0;}
   .status-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px;}
   .status-dot.ok{background:var(--gold-soft);}
   .status-dot.alerta{background:#C9784A;}
   .status-dot.vencendo{background:#E2A33D;}
   .status-dot.lead{background:var(--text-faint);}
-  .status-txt{font-size:10.5px;}
+  .status-txt{font-size:11px;}
   .status-txt.ok{color:var(--gold-soft);}
   .status-txt.alerta{color:#C9784A;}
   .status-txt.vencendo{color:#E2A33D;}
@@ -180,24 +188,24 @@
   .tool-card{background:linear-gradient(135deg,#1D1B17,#141310);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:border-color .2s ease;}
   .tool-card:hover{border-color:var(--border-strong);}
   .tool-card i{font-size:22px;color:var(--gold-soft);}
-  .tool-card .tool-title{font-size:13.5px;font-weight:600;margin:0;}
+  .tool-card .tool-title{font-size:13px;font-weight:600;margin:0;}
   .tool-card .tool-desc{font-size:11px;color:var(--text-dim);margin:2px 0 0;}
 
-  .local-back{display:flex;align-items:center;gap:6px;color:var(--gold-soft);font-size:12.5px;cursor:pointer;margin-bottom:12px;}
+  .local-back{display:flex;align-items:center;gap:6px;color:var(--gold-soft);font-size:12px;cursor:pointer;margin-bottom:12px;}
 
   .chip-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px;}
-  .desvio-chip{font-size:11px;background:rgba(212,175,55,0.12);color:var(--gold-soft);padding:5px 10px;border-radius:8px;border:1px solid var(--border);cursor:pointer;}
-  .desvio-chip.selected{background:linear-gradient(135deg,#F1DE9A,#D4AF37 55%,#8A6D1F);color:#0B0B0C;font-weight:600;border-color:transparent;}
+  .desvio-chip{font-size:11px;background:rgba(217,139,46,0.12);color:var(--gold-soft);padding:5px 10px;border-radius:8px;border:1px solid var(--border);cursor:pointer;}
+  .desvio-chip.selected{background:linear-gradient(135deg,#FCE8B8,#D98B2E 55%,#5C3814);color:#0B0B0C;font-weight:600;border-color:transparent;}
 
   .form-group{margin-bottom:12px;}
   .form-label{font-size:11px;color:var(--text-dim);margin:0 0 5px;display:block;}
   .form-input, .form-select{width:100%;background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:9px 11px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;}
   .form-input:focus, .form-select:focus{outline:none;border-color:var(--border-strong);}
-  .btn-gold{width:100%;background:linear-gradient(135deg,#F1DE9A,#D4AF37 55%,#8A6D1F);color:#0B0B0C;font-weight:600;font-size:13px;border:none;border-radius:10px;padding:11px;cursor:pointer;margin-top:6px;}
+  .btn-gold{width:100%;background:linear-gradient(135deg,#FCE8B8,#D98B2E 55%,#5C3814);color:#0B0B0C;font-weight:600;font-size:13px;border:none;border-radius:10px;padding:11px;cursor:pointer;margin-top:6px;}
   .exercicio-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 13px;margin-bottom:8px;}
   .exercicio-item .ex-name{font-size:13px;font-weight:600;margin:0 0 3px;}
-  .exercicio-item .ex-meta{font-size:10.5px;color:var(--text-faint);margin:0;}
-  .exercicio-item .ex-video{font-size:10.5px;margin-top:4px;display:inline-block;}
+  .exercicio-item .ex-meta{font-size:11px;color:var(--text-faint);margin:0;}
+  .exercicio-item .ex-video{font-size:11px;margin-top:4px;display:inline-block;}
   .exercicio-item .ex-video.pending{color:#E2A33D;}
   .exercicio-item .ex-video.ok{color:var(--gold-soft);}
 </style>
@@ -213,15 +221,88 @@
       <span id="backlabel">Voltar</span>
     </div>
 
+    <!-- LOGIN -->
+    <div class="view active" data-view="login">
+      <div class="launcher">
+        <p class="brand">MUSA+</p>
+        <p class="brand-sub">Team Fernandes</p>
+        <p class="sub" style="margin-bottom:24px;">Entre pra continuar</p>
+
+        <div class="filter-row" id="login-tipo-row" style="justify-content:center;margin-bottom:18px;">
+          <div class="chip active" id="login-tab-aluna" onclick="alternarTipoLogin('aluna')">Sou aluna</div>
+          <div class="chip" id="login-tab-personal" onclick="alternarTipoLogin('personal')">Sou o personal</div>
+        </div>
+
+        <div id="login-form-aluna">
+          <div class="form-group"><input class="form-input" id="login-aluna-email" type="email" placeholder="Seu e-mail" value="andriele@teste.com"></div>
+          <div class="form-group"><input class="form-input" id="login-aluna-senha" type="password" placeholder="Crie ou digite sua senha" value="teste123"></div>
+          <p class="page-sub" style="font-size:11px;margin-top:-6px;">Primeira vez? Só digitar e-mail e uma senha já cadastra você.</p>
+          <button class="btn-gold" onclick="loginAluna()">Entrar</button>
+          <p id="login-aluna-erro" style="color:#E2A33D;font-size:12px;text-align:center;display:none;"></p>
+          <p style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:14px;cursor:pointer;" onclick="testarIntroNovamente()">[apenas em teste] Ver intro animada de novo</p>
+        </div>
+
+        <div id="login-form-personal" style="display:none;">
+          <div class="form-group"><input class="form-input" id="login-personal-email" type="email" placeholder="Seu e-mail" value="thiagofernandesdearaujo22@gmail.com"></div>
+          <div class="form-group"><input class="form-input" id="login-personal-senha" type="password" placeholder="Sua senha de personal" value="Senhanova22-"></div>
+          <button class="btn-gold" onclick="loginPersonal()">Entrar</button>
+          <p id="login-personal-erro" style="color:#E2A33D;font-size:12px;text-align:center;display:none;"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTRO ANIMADA -->
+    <div class="view" data-view="intro">
+      <div class="launcher" style="justify-content:center;">
+        <svg id="intro-dna" width="90" height="180" viewBox="0 0 90 180" style="margin:0 auto;opacity:0;animation:introDnaFade 1.8s ease forwards;">
+          <path d="M15,5 C15,45 75,45 75,85 C75,125 15,125 15,165" fill="none" stroke="#D98B2E" stroke-width="1.5" stroke-dasharray="400" stroke-dashoffset="400" style="animation:introDnaDraw 1.6s ease forwards;"/>
+          <path d="M75,5 C75,45 15,45 15,85 C15,125 75,125 75,165" fill="none" stroke="#FCE8B8" stroke-width="1.5" stroke-dasharray="400" stroke-dashoffset="400" style="animation:introDnaDraw 1.6s ease forwards;animation-delay:.15s;"/>
+          <g stroke="#D98B2E" stroke-width="1" opacity="0.7">
+            <line x1="18" y1="20" x2="72" y2="20"/><line x1="27" y1="45" x2="63" y2="45"/>
+            <line x1="45" y1="65" x2="45" y2="65"/><line x1="27" y1="85" x2="63" y2="85"/>
+            <line x1="18" y1="105" x2="72" y2="105"/><line x1="27" y1="125" x2="63" y2="125"/>
+            <line x1="45" y1="145" x2="45" y2="145"/><line x1="27" y1="160" x2="63" y2="160"/>
+          </g>
+        </svg>
+        <p id="intro-musa" class="brand" style="opacity:0;font-size:30px;letter-spacing:5px;font-weight:500;margin-top:18px;animation:introMusaFade 1.6s ease forwards;animation-delay:1.9s;">DNA MUSA</p>
+        <p id="intro-sub" style="opacity:0;color:var(--gold-soft);font-size:12px;letter-spacing:3px;text-transform:uppercase;margin-top:6px;animation:introMusaFade 1.6s ease forwards;animation-delay:2.3s;">Team Fernandes</p>
+      </div>
+    </div>
+
+    <!-- ONBOARDING -->
+    <div class="view" data-view="onboarding">
+      <div class="launcher">
+        <p class="brand">MUSA+</p>
+        <p class="brand-sub">Team Fernandes</p>
+        <p class="sub" style="margin:24px 0 8px;font-size:16px;color:var(--text);">Que bom ter você aqui</p>
+        <p class="page-sub" style="margin-bottom:28px;">A partir de agora, seu treino, sua evolução e seus indicadores vivem num só lugar, pensado pra você.</p>
+
+        <div class="info-box" style="text-align:left;margin-bottom:14px;">
+          <p class="txt" style="font-weight:600;margin-bottom:4px;"><i class="ti ti-clipboard-list" style="color:var(--gold-soft);margin-right:8px;"></i>Seu treino, sempre atualizado</p>
+          <p class="txt" style="margin-bottom:0;color:var(--text-faint);">Construído sob medida pra você, evoluindo junto com você a cada ciclo.</p>
+        </div>
+        <div class="info-box" style="text-align:left;margin-bottom:14px;">
+          <p class="txt" style="font-weight:600;margin-bottom:4px;"><i class="ti ti-dna-2" style="color:var(--gold-soft);margin-right:8px;"></i>Seu DNA MUSA</p>
+          <p class="txt" style="margin-bottom:0;color:var(--text-faint);">Indicadores que mostram sua evolução de verdade, não só a balança.</p>
+        </div>
+        <div class="info-box" style="text-align:left;margin-bottom:24px;">
+          <p class="txt" style="font-weight:600;margin-bottom:4px;"><i class="ti ti-message-circle-2" style="color:var(--gold-soft);margin-right:8px;"></i>Sol, sempre por perto</p>
+          <p class="txt" style="margin-bottom:0;color:var(--text-faint);">Tire dúvidas sobre seu treino a qualquer momento.</p>
+        </div>
+
+        <button class="btn-gold" onclick="finalizarOnboarding()">Começar</button>
+      </div>
+    </div>
+
     <!-- LAUNCHER -->
-    <div class="view active" data-view="launcher">
+    <div class="view" data-view="launcher">
       <div class="launcher">
         <p class="brand">MUSA+</p>
         <p class="brand-sub">Team Fernandes</p>
         <p class="sub">Escolha uma opção</p>
         <div class="profiles">
           <div class="profile-card" onclick="openLevel2('home')">
-            <div class="avatar gold"><span>A</span></div>
+            <div class="avatar gold" id="avatar-launcher"><span>A</span></div>
             <p class="profile-name">Andriele</p>
             <p class="profile-desc">Treino, DNA e conteúdos</p>
           </div>
@@ -235,7 +316,7 @@
             <p class="profile-name">Mentoria</p>
             <p class="profile-desc">Cursos e conteúdos</p>
           </div>
-          <div class="profile-card" onclick="openLevel2('personal')">
+          <div class="profile-card" id="card-personal-launcher" onclick="openLevel2('personal')">
             <div class="avatar dark admin"><i class="ti ti-user-cog"></i></div>
             <p class="profile-name">Personal</p>
             <p class="profile-desc">Painel administrativo</p>
@@ -253,6 +334,11 @@
         <p class="hero-eyebrow" id="home-hero-eyebrow">Seu primeiro dia</p>
         <p class="hero-title" id="home-hero-title">Seu DNA MUSA está calibrando</p>
         <p class="hero-cta">Toque para abrir sua Central de Inteligência</p>
+      </div>
+
+      <div class="list-item" style="cursor:pointer;background:var(--card-2);" onclick="openLevel2('chatia')">
+        <span><i class="ti ti-message-circle-2" style="color:var(--gold-soft);margin-right:8px;"></i>Pergunte à Sol</span>
+        <span class="tag">Nova</span>
       </div>
 
       <p class="section-label">Treinos da semana</p>
@@ -273,9 +359,6 @@
 
       <p class="section-label">Seu DNA MUSA</p>
       <div class="row" id="row-dna"></div>
-
-      <p class="section-label">Mobilidade e recuperação</p>
-      <div class="row" id="row-mobilidade"></div>
     </div>
 
     <!-- DADOS (composição / suporte) -->
@@ -300,7 +383,7 @@
       <div class="row" id="row-avaliacao"></div>
 
       <p class="section-label">Suporte e técnica</p>
-      <p class="page-sub" style="margin-top:-6px;">Sugestões rápidas — a biblioteca completa está na Mentoria</p>
+      <p class="page-sub" style="margin-top:-6px;">Sugestões rápidas, a biblioteca completa está na Mentoria</p>
       <div class="row" id="row-suporte"></div>
 
       <p class="section-label">Dicas rápidas</p>
@@ -329,34 +412,7 @@
         </div>
 
         <p class="section-label">Ferramentas</p>
-        <div class="tool-card" onclick="showPersonalView('alunas')">
-          <i class="ti ti-users"></i>
-          <div><p class="tool-title">Alunas</p><p class="tool-desc">Busca, status, faltas e plano vencendo</p></div>
-        </div>
-        <div class="tool-card" onclick="showPersonalView('exercicios')">
-          <i class="ti ti-video"></i>
-          <div><p class="tool-title">Banco de exercícios</p><p class="tool-desc">Cadastre exercícios e links de vídeo</p></div>
-        </div>
-        <div class="tool-card" onclick="showPersonalView('conteudo')">
-          <i class="ti ti-library"></i>
-          <div><p class="tool-title">Biblioteca de conteúdo</p><p class="tool-desc">Vídeos e cursos da Mentoria</p></div>
-        </div>
-        <div class="tool-card" onclick="showPersonalView('treinos')">
-          <i class="ti ti-clipboard-list"></i>
-          <div><p class="tool-title">Biblioteca de treinos</p><p class="tool-desc">Modelos por nível, ênfase e frequência</p></div>
-        </div>
-        <div class="tool-card" onclick="showPersonalView('mobilidade')">
-          <i class="ti ti-stretching"></i>
-          <div><p class="tool-title">Biblioteca de mobilidade</p><p class="tool-desc">Mobilidades, alongamentos e aquecimento</p></div>
-        </div>
-        <div class="tool-card" onclick="showPersonalView('desafios')">
-          <i class="ti ti-flag"></i>
-          <div><p class="tool-title">Grupo de desafio</p><p class="tool-desc">Crie um treino e gere um link de inscrição</p></div>
-        </div>
-        <div class="tool-card" onclick="showPersonalView('patologias')">
-          <i class="ti ti-first-aid-kit"></i>
-          <div><p class="tool-title">Banco de patologias</p><p class="tool-desc">Joelho, quadril e ombro — o que evitar e permitir</p></div>
-        </div>
+        <div class="poster-grid" id="grid-ferramentas-personal"></div>
       </div>
 
       <div id="personal-alunas" style="display:none;">
@@ -382,6 +438,15 @@
         <h1 class="page-title" style="margin-top:0;">Banco de exercícios</h1>
         <p class="page-sub" id="ex-count-label">Organizado por grupo muscular</p>
 
+        <div class="filter-row" style="margin-top:10px;">
+          <div class="chip active" id="subaba-videos-btn" onclick="alternarSubabaExercicios('videos')">Vídeos</div>
+          <div class="chip" id="subaba-metodos-btn" onclick="alternarSubabaExercicios('metodos')">Métodos</div>
+        </div>
+
+        <div id="subaba-metodos-view" style="display:none;margin-top:14px;"></div>
+
+        <div id="subaba-videos-container">
+
         <div id="ex-video-view" style="display:none;margin-top:16px;">
           <div class="local-back" onclick="fecharVideoExercicio()"><i class="ti ti-arrow-left"></i><span>Voltar à lista</span></div>
           <div id="ex-video-content"></div>
@@ -405,6 +470,8 @@
             <button class="btn-gold" onclick="addExercicio()">Adicionar ao banco</button>
           </div>
           <div id="ex-lista"></div>
+        </div>
+
         </div>
       </div>
 
@@ -434,6 +501,7 @@
         <h1 class="page-title" style="margin-top:0;">Biblioteca de mobilidade</h1>
         <p class="page-sub" id="mob-count-label">Mobilidades, alongamentos e aquecimento</p>
 
+        <div class="filter-row" id="mob-articulacao-row"></div>
         <div class="form-group"><input class="form-input" id="mob-search" placeholder="Buscar por nome ou grupo ativo..." oninput="renderMobilidadeBanco()"></div>
         <div id="mobilidade-list-personal"></div>
 
@@ -488,7 +556,7 @@
       <div id="personal-desafios" style="display:none;">
         <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
         <h1 class="page-title" style="margin-top:0;">Grupo de desafio</h1>
-        <p class="page-sub">Crie um treino e gere um link de inscrição — quem entra participa só do desafio, sem acesso ao restante do app</p>
+        <p class="page-sub">Crie um treino e gere um link de inscrição, quem entra participa só do desafio, sem acesso ao restante do app</p>
 
         <div id="desafios-list"></div>
 
@@ -504,9 +572,23 @@
       <div id="personal-patologias" style="display:none;">
         <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
         <h1 class="page-title" style="margin-top:0;">Banco de patologias</h1>
-        <p class="page-sub">Consulta de referência — nunca ativa sozinho, sempre depende da sua confirmação na ficha da aluna</p>
+        <p class="page-sub">Consulta de referência, nunca ativa sozinho, sempre depende da sua confirmação na ficha da aluna</p>
         <div class="filter-row" id="patologia-filter-row"></div>
         <div id="patologia-list"></div>
+      </div>
+
+      <div id="personal-desvios" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
+        <h1 class="page-title" style="margin-top:0;">Banco de desvios posturais</h1>
+        <p class="page-sub">Consulta de referência, a ativação de verdade acontece marcando na ficha de cada aluna</p>
+        <div id="desvios-list"></div>
+      </div>
+
+      <div id="personal-corrida" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
+        <h1 class="page-title" style="margin-top:0;">Banco de testes de corrida</h1>
+        <p class="page-sub">Testes de avaliação e tipos de treino pra alunos corredores</p>
+        <div id="corrida-list"></div>
       </div>
 
     </div>
@@ -515,6 +597,18 @@
 
     <div class="view" data-view="detail">
       <div id="detail-content"></div>
+    </div>
+
+    <!-- CHAT IA -->
+    <div class="view" data-view="chatia">
+      <h1 class="page-title">Pergunte à Sol</h1>
+      <p class="page-sub">Sua treinadora digital, sempre disponível</p>
+      <div id="chatia-mensagens" style="display:flex;flex-direction:column;gap:10px;margin:16px 0;min-height:200px;"></div>
+      <div id="chatia-status" style="font-size:12px;color:var(--text-faint);margin-bottom:8px;"></div>
+      <div style="display:flex;gap:8px;">
+        <input class="form-input" id="chatia-input" placeholder="Digite sua pergunta..." style="flex:1;" onkeypress="if(event.key==='Enter') enviarMensagemChatIA()">
+        <button class="btn-gold" style="width:auto;padding:12px 18px;margin:0;" onclick="enviarMensagemChatIA()">Enviar</button>
+      </div>
     </div>
 
   </div>
@@ -526,7 +620,7 @@ let level2 = null;
 const faseAtual = 'Fase 1 · Emagrecimento (override por IMC)';
 const dias = [
   {n:'Segunda', foco:'Inferiores A · Quadríceps e Glúteo', ex:['Leg Press 45 · 4x12','Agachamento Hack · 3x12','Extensão de quadril na máquina · 3x15','Abdução de quadril na polia · 3x15']},
-  {n:'Terça', foco:'Superiores · Costas e Abdômen', ex:['Remada articular aberta · 3x12','Remada articular fechada · 3x12','Prancha ventral · 3x30s','Abdominal canivete · 3x15']},
+  {n:'Terça', foco:'Superiores · Costas e Abdômen', ex:['Bi-set|||Remada articular aberta · 3x12|||Crucifixo Inverso · 3x15','Remada articular fechada · 3x12','Prancha ventral · 3x30s','Abdominal canivete · 3x15']},
   {n:'Quarta', foco:'Inferiores B · Glúteo e Posterior', ex:['Extensão de quadril no banco romano · 4x15','Cadeira flexora · 3x12','Leg Press 45 (pés altos) · 3x15','Abdução de quadril na polia · 3x15'], hoje:true},
   {n:'Quinta', foco:'Superiores · Costas e Abdômen', ex:['Remada articular aberta · 3x12','Remada articular fechada · 3x12','Prancha ventral · 3x30s','Abdominal canivete · 3x15']},
   {n:'Sexta', foco:'Inferiores C · Pernas completo', ex:['Agachamento Hack · 3x12','Leg Press 45 · 3x15','Cadeira flexora · 3x12','Extensão de quadril na máquina · 3x15']},
@@ -536,8 +630,8 @@ const dias = [
 
 const mobilidadeItens = [
   {n:'Mobilidade de quadril', dur:'8 min', desvio:null, foco:'Mobilidade geral de quadril, recomendada como rotina inicial até a primeira avaliação postural com fotos.', video:'https://youtu.be/NrF08RNhKyY'},
-  {n:'Alongamento pós-treino', dur:'6 min', desvio:null, foco:'Alongamento geral pós-treino — ótimo ponto de partida, já que você disse ter interesse em começar a alongar.', video:null},
-  {n:'Respiração e relaxamento', dur:'5 min', desvio:null, foco:'Manobras respiratórias e vácuo abdominal para recuperação e controle de core. Comece pela Parte 1 — Aprenda a Respirar. Sequência completa (7 vídeos) na Mentoria.', video:'https://youtu.be/8ixgAPGj2nE'}
+  {n:'Alongamento pós-treino', dur:'6 min', desvio:null, foco:'Alongamento geral pós-treino, ótimo ponto de partida, já que você disse ter interesse em começar a alongar.', video:null},
+  {n:'Respiração e relaxamento', dur:'5 min', desvio:null, foco:'Manobras respiratórias e vácuo abdominal para recuperação e controle de core. Comece pela Parte 1, Aprenda a Respirar. Sequência completa (7 vídeos) na Mentoria.', video:'https://youtu.be/8ixgAPGj2nE'}
 ];
 
 function poster(container, title, sub, onClick, opts){
@@ -561,12 +655,6 @@ dias.forEach(function(d,i){
 const rowDna = document.getElementById('row-dna');
 poster(rowDna, 'Perfil inteligente', 'Score 82%', function(){ openDetail('dna'); });
 poster(rowDna, 'Evolução mensal', 'Ver histórico', function(){ openDetail('evolucao'); });
-poster(rowDna, 'Indicadores', '25 métricas', function(){ openDetail('indicadores'); });
-
-const rowMob = document.getElementById('row-mobilidade');
-mobilidadeItens.forEach(function(m,i){
-  poster(rowMob, m.n, m.dur, function(){ openDetail('mobilidade', i); });
-});
 
 const rowAval = document.getElementById('row-avaliacao');
 poster(rowAval, 'Avaliação física', 'Última: há 12 dias', function(){ openDetail('video'); });
@@ -582,6 +670,7 @@ poster(rowDicas, 'Amplitude no leg press', '2 min', function(){ openDetail('vide
 poster(rowDicas, 'Postura no agachamento', '2 min', function(){ openDetail('video'); });
 
 const conteudos = [
+  {n:'Plano Nutricional MUSA+', cat:'Nutrição', locked:true, preco:'R$ 97/mês', desc:'Plano alimentar prescrito, individualizado, integrado ao seu DNA MUSA. Em breve, pagamentos ainda não estão ativos na plataforma.'},
   {n:'Fundamentos da Hipertrofia Feminina', cat:'Cursos completos', locked:false, desc:'Curso introdutório com os princípios de treino que guiam toda a metodologia MUSA+. 12 aulas · 3h40.'},
   {n:'Protocolo Avançado de Glúteos', cat:'Cursos completos', locked:true, desc:'Aprofundamento em métodos de intensidade e periodização para ênfase de glúteo. 18 aulas · 5h10.'},
   {n:'Correção Postural na Prática', cat:'Cursos completos', locked:true, desc:'Como identificar e corrigir os principais desvios posturais no dia a dia de treino. 9 aulas · 2h20.'},
@@ -602,7 +691,7 @@ const conteudos = [
   {n:'Execução: cadeira extensora', cat:'Exercícios de coxa', locked:false, desc:'Detalhes técnicos para maximizar o estímulo de quadríceps com segurança. 3 min.'},
   {n:'Execução: elevação pélvica', cat:'Exercícios de glúteo', locked:false, desc:'Como posicionar o quadril e manter a contração correta durante o movimento. 3 min.'},
   {n:'Execução: abdução na polia', cat:'Exercícios de glúteo', locked:false, desc:'Técnica para isolar o glúteo médio com eficiência. 2 min.'},
-  {n:'Manobras Respiratórias — Curso Completo', cat:'Cursos completos', locked:false, desc:'Sequência completa: 3 vídeos de introdução (respiração, liberação de fáscia, manobra respiratória) + 4 aulas práticas.', aulas:[
+  {n:'Manobras Respiratórias, Curso Completo', cat:'Cursos completos', locked:false, desc:'Sequência completa: 3 vídeos de introdução (respiração, liberação de fáscia, manobra respiratória) + 4 aulas práticas.', aulas:[
     {titulo:'Parte 1: Aprenda a Respirar', video:'https://youtu.be/8ixgAPGj2nE'},
     {titulo:'Parte 2: Liberação da Fáscia Muscular', video:'https://youtu.be/wdgyIXsuoG8'},
     {titulo:'Parte 3: Manobra Respiratória', video:'https://youtu.be/xFU5MbneT9E'},
@@ -613,7 +702,7 @@ const conteudos = [
   ]}
 ];
 
-const categorias = ['Todos', 'Cursos completos', 'Introdução', 'Métodos de treino', 'Exercícios de coxa', 'Exercícios de glúteo'];
+const categorias = ['Todos', 'Cursos completos', 'Introdução', 'Métodos de treino', 'Exercícios de coxa', 'Exercícios de glúteo', 'Nutrição'];
 let filtroAtivo = 'Todos';
 
 const filterRow = document.getElementById('filter-row');
@@ -642,7 +731,8 @@ function renderGrid(){
         (c.locked ? '<div class="lock-icon"><i class="ti ti-lock"></i></div>' : '') +
         '<i class="ti ti-player-play play"></i>' +
       '</div>' +
-      '<p class="vtitle">' + c.n + '</p>';
+      '<p class="vtitle">' + c.n + '</p>' +
+      (c.preco ? '<p style="font-size:11px;color:var(--gold-soft);margin:2px 0 0;">' + c.preco + '</p>' : '');
     el.onclick = function(){ openDetail('conteudo', c); };
     grid.appendChild(el);
   });
@@ -652,6 +742,64 @@ renderGrid();
 /* ===== PERSONAL ===== */
 
 const alunasPersonal = [
+  {nome:'Michelle Cristiane Ferreira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'', telefone:'00000000000', piramide:'Abdômen, pernas, cintura e braços', objetivo:'Perder peso e definir', restricoes:'Na adolescência fraturei Clavícula e tornozelo direito.', academia:'', dataAnamnese:'2022-03-09'},
+  {nome:'Luana Lenz', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'', telefone:'00000000000', piramide:'1 Barriga, 2 glúteos, 3 coxas, 4 costas', objetivo:'Emagrecer e definir', restricoes:'Nenhuma relatada', academia:'', dataAnamnese:'2022-03-09'},
+  {nome:'Evelline Lindenau', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'00000000000', piramide:'1° glúteos 2° coxas/pernas 3° abdômen 4° superiores', objetivo:'Ter um treino acertivo, manter a constância e assim alcançar resultados', restricoes:'Nenhuma relatada', academia:'Yes', dataAnamnese:'2022-03-14'},
+  {nome:'Leticia graff', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'06x por semana', email:'', telefone:'00000000000', piramide:'Todos', objetivo:'Emagrecer', restricoes:'Nenhuma relatada', academia:'Yes', dataAnamnese:'2022-03-14'},
+  {nome:'Marelize Geruza dos Santos Brites', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'6x por semana', email:'', telefone:'00000000000', piramide:'1 glúteo, 2 coxas, 3 trícrps, 4 panturrilha', objetivo:'Hipertrofia.', restricoes:'Uma pequena dor no joelho, mas era por fazer o exercicíos errado.', academia:'Atitude fit.', dataAnamnese:'2022-03-14'},
+  {nome:'Givanildo de castro Trindade', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'6x por semana', email:'', telefone:'00000000000', piramide:'1=costas  2=peito  3=braço  4=pernas', objetivo:'Hipertrofia', restricoes:'Nenhuma relatada', academia:'Daidojuku', dataAnamnese:'2022-03-14'},
+  {nome:'Fabiana Peres', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'00000000000', piramide:'1 bumbum 2 meio da coxa  3 peito 4 costa', objetivo:'Melhorar minha saúde e melhorar o corpo', restricoes:'Bursite dói muito kkkk', academia:'Daido juku', dataAnamnese:'2022-03-14'},
+  {nome:'Gabriela Souza Duarte', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'', telefone:'00000000000', piramide:'1:glúteos 2: pernas 3:Costa 4:abdômen', objetivo:'Para me motivar, me manter no foco kkk, me oferecer orientação física, alcança o corpo ideal', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2022-03-15'},
+  {nome:'Debora Mann', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'', telefone:'00000000000', piramide:'1Glúteo  2Perna 3Braço 4Abdômen', objetivo:'Emagrecer, tonificar/definir', restricoes:'Nenhuma relatada', academia:'Em Sapucaia', dataAnamnese:'2022-03-15'},
+  {nome:'Patrícia Silva', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'00000000000', piramide:'Pernas Braços  Glúteos  Abdômen', objetivo:'Definir e ganhar massa', restricoes:'Nenhuma relatada', academia:'Yes Fitness', dataAnamnese:'2022-03-15'},
+  {nome:'Micheli Araujo', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'6x por semana', email:'', telefone:'00000000000', piramide:'1- glúteos  2-posterior 3-quadriceps 4-costas', objetivo:'Emagrecer e definir', restricoes:'Não.', academia:'Performance', dataAnamnese:'2022-03-15'},
+  {nome:'Tanaiane da Silva Cardoso', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'00000000000', piramide:'Pernas,bumbum,braços e barriga', objetivo:'Conquistar um shape melhor. Não quero crescer,quero definição', restricoes:'Nunca', academia:'Onde eu estiver', dataAnamnese:'2022-03-15'},
+  {nome:'Michele Silva dos Santos', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'00000000000', piramide:'Posterior,glúteo,costas,coxas', objetivo:'Emagrecimento e definição', restricoes:'Nenhuma relatada', academia:'Yes fitnes', dataAnamnese:'2022-03-15'},
+  {nome:'Jessica Nunes de Lima', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'00000000000', piramide:'1 pernas 2 glúteos 3 costas', objetivo:'Afinar barriga e definir pernas e glúteos', restricoes:'Nenhuma relatada', academia:'Sublime - Alvorada RS', dataAnamnese:'2022-03-15'},
+  {nome:'Jenniffer Barbosa de Oliveira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'4x por semana', email:'', telefone:'00000000000', piramide:'1 glúteo,  2 coxa , 3 barriga', objetivo:'Coxa mais grossa e barriga definida', restricoes:'As vezes  muita dor nos joelhos', academia:'Engenharia do corpo  Alvorada', dataAnamnese:'2022-03-15'},
+  {nome:'Dienifer Silveira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'00000000000', piramide:'1 glúteo  2 posterior  3 parte interna da coxa  4 definir todo o corpo', objetivo:'Focar, definir o corpo com ênfase nos glúteos e posterior, ter um treino personalizado', restricoes:'Nenhuma relatada', academia:'Yes Fitness, a partir de abril performance Fitness', dataAnamnese:'2022-03-15'},
+  {nome:'Deivid Rogger Rodrigues Batista', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'', telefone:'00000000000', piramide:'Peito Abdômen  Costa Braço', objetivo:'Ganhar massa muscular e definição', restricoes:'Tornozelo a 10 anos atraz', academia:'Yes fitnes', dataAnamnese:'2022-03-16'},
+  {nome:'Gabriela Guimarães Andrade', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'6x por semana', email:'', telefone:'00000000000', piramide:'Glúteo, quadríceps, posterior e costas', objetivo:'Realizar os exercícios corretamente com foco no meu objetivo', restricoes:'Nenhuma relatada', academia:'Performance fitness', dataAnamnese:'2022-03-16'},
+  {nome:'Carolaine de Melo Borges', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'00000000000', piramide:'1', objetivo:'Glúteos kkk', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2022-03-19'},
+  {nome:'Paloma Alves de Oliveira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'00000000000', piramide:'1° abdômen, 2° pernas, 3° glúteos, 4°braços', objetivo:'Emagrecimento e definição', restricoes:'Nenhuma relatada', academia:'Engenharia do Corpo Alvorada', dataAnamnese:'2022-03-20'},
+  {nome:'Andri', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'', telefone:'00000000000', piramide:'Coxas Glúteo  Abdômen  Superiores', objetivo:'Emagrecimento e definição', restricoes:'Nenhuma relatada', academia:'Performace', dataAnamnese:'2022-03-21'},
+  {nome:'Débora', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'', telefone:'00000000000', piramide:'1 - glúteo  2 - perna 3 - braços  4 - abdômen', objetivo:'Definição', restricoes:'Nenhuma relatada', academia:'Sapucaia', dataAnamnese:'2022-03-22'},
+  {nome:'Suane Maciel Vieira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'6x por semana', email:'', telefone:'00000000000', piramide:'1° Quadriceps, 2° glúteos, 3° Abdomen, 4° superiores', objetivo:'Definição', restricoes:'Sim, ombro', academia:'Brothers em São Leopoldo', dataAnamnese:'2022-03-29'},
+  {nome:'Juliana Rodrigues', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'00000000000', piramide:'Pernas e glúteo', objetivo:'Melhorar cada vez mais', restricoes:'Somente dor nas costas', academia:'Torq Cidade Baixa', dataAnamnese:'2022-03-30'},
+  {nome:'andreza araujo feck', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'4x por semana', email:'', telefone:'00000000000', piramide:'1 gluteo, 2 perna ,3 abdomen , 4 costas', objetivo:'Ter mais enfase em meus treinos assim podendo ver resultados que não vejo , treinando por conta', restricoes:'Nenhuma relatada', academia:'academia de poa', dataAnamnese:'2022-04-04'},
+  {nome:'Katheyn Quintero', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'00000000000', piramide:'Membros inferiores: focando mais nos glúteos Coxas e panturrilhas Membros superiores: ombros, biceps e costas  Sem esquecer o abdômen', objetivo:'Crear massa magra', restricoes:'Tenho os ombros machucados, consigo treinar mas tem alguns exercícios que se me dificulta por exemplo remada alta.', academia:'Smart Fit', dataAnamnese:'2022-04-08'},
+  {nome:'Janaína', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'00000000000', piramide:'Glúteos, posterior de coxas, quadriceps  tríceps', objetivo:'Ficar gostosa', restricoes:'Nenhuma relatada', academia:'Engenharia do corpo', dataAnamnese:'2022-04-10'},
+  {nome:'Miriam Carolini Lessa Gonçalves', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'00000000000', piramide:'1-abdomem  2- gluteo 3- quadriceps 5- bicips', objetivo:'Me sentir melhor que hoje.', restricoes:'Nunca', academia:'Pretendo começar em casa, no próximo mês academia do Sesc', dataAnamnese:'2022-04-11'},
+  {nome:'Ana Paula de Matos Souza', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'00000000000', piramide:'1° glúteo, 2° coxas, 3° posterior e 4° costas', objetivo:'Quero muito melhorar meu físico, perder gordura localizada. E voltar a me sentir bem comigo mesma.', restricoes:'Nunca.', academia:'Smart fit', dataAnamnese:'2022-04-20'},
+  {nome:'Maria Aparecida Pinheiro leal', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'4x por semana', email:'', telefone:'00000000000', piramide:'Quadril', objetivo:'Fortalecer a musculatura e emagrecer', restricoes:'Sim', academia:'Performance', dataAnamnese:'2022-04-26'},
+  {nome:'Angelica Cezar de Andrade', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'00000000000', piramide:'1. Glúteos 2. Coxa 3. Costas 4. braços', objetivo:'Perda de peso e definição', restricoes:'Nenhuma relatada', academia:'Engenharia do Corpo', dataAnamnese:'2022-04-28'},
+  {nome:'Giovana', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'giovanathamy@gmail.com', telefone:'00000000000', piramide:'1', objetivo:'Chegar ao meu objetivo , sem barriga e bumbum na nuca', restricoes:'Sim', academia:'perfomace', dataAnamnese:'2022-06-24'},
+  {nome:'Rafaella Trindade', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'rafaellamtrindade@gmail.com', telefone:'00000000000', piramide:'Barriga , bumbum , perna e costas', objetivo:'Emagrecer  fortalecimento muscular q acho q estou perdendo , e sim né fica gostosa kkk', restricoes:'Lesão não q saiba mas sinto a lombar com frequência', academia:'Performance', dataAnamnese:'2022-07-13'},
+  {nome:'Gabriela Amador da Silva', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'gabrielaamador284@gmail.com', telefone:'00000000000', piramide:'1/2/3', objetivo:'Me trazer um corpo mais armonico que eu me sinta satisfeita e mega feliz e que eu consiga com seus treinos sair da minha zona de conforto que acho que nunca posso e não vou conseguir', restricoes:'Meu joelho direito tive uma lesão mais isso faz tempo mais ainda dói em alguns exercícios', academia:'Performance fitness', dataAnamnese:'2022-12-06'},
+  {nome:'Eduarda Machado Coutinho Gadea', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'dudamachado00@outlook.com', telefone:'00000000000', piramide:'1- barriga 2- coxa 3- bumbum 4- costas', objetivo:'Emagrecer e ganhar hipertrofia', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2023-01-11'},
+  {nome:'Atricia bez cardoso', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'atricia.cardoso@gmail.com', telefone:'00000000000', piramide:'1 pernas 2 barriga 3 braços', objetivo:'Definição muscular', restricoes:'Não uso barra nas costas devido a coluna', academia:'Em varias devido gmypass', dataAnamnese:'2023-01-11'},
+  {nome:'Sandrine rosa', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'sandrine.rosa1@gmail.com', telefone:'51991230734', piramide:'1- bumbum 2-pernas 3-barriga 4-costas/ braços', objetivo:'Evoluir e pegar gosto pelo hábito de ir malhar', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2023-05-27'},
+  {nome:'Yasmin Flores', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'yasminflores550@gmail.com', telefone:'51984572913', piramide:'1° bumbum 2° coxa 3° barriga  4° costas', objetivo:'Massa muscular e definição', restricoes:'Não tive lesão', academia:'Performance', dataAnamnese:'2023-06-24'},
+  {nome:'Tainara', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'5x por semana', email:'tainarafarruda@gmail.com', telefone:'51985406087', piramide:'Barriga Coxa Bunda  Costas', objetivo:'Chegar no objetivo.', restricoes:'Sim.', academia:'Performance', dataAnamnese:'2023-08-01'},
+  {nome:'Cláudia correa', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'4x por semana', email:'cld_maria@hotmail.com', telefone:'7742970981', piramide:'1e 2', objetivo:'Defendi', restricoes:'Pescoço', academia:'Planet Fitness', dataAnamnese:'2024-02-28'},
+  {nome:'Fernando Kunzler Paiani', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'6x por semana', email:'Fernandokunzler99@gmail.com', telefone:'51999860995', piramide:'1 ombros  2 peito  3 pernas  4 costas', objetivo:'Quero ganhar massa muscular e emagrecer', restricoes:'Nenhuma lesão', academia:'Performance fitness', dataAnamnese:'2024-09-19'},
+  {nome:'IGOR AUGUSTO PIACINI', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'A definir', email:'igor_piacini10@hotmail.com', telefone:'51995861984', piramide:'1 peito 2 costas 3 braços 4 pernas', objetivo:'Ganho de massa e emagrecimento', restricoes:'Nenhuma relatada', academia:'Performance fitnnes', dataAnamnese:'2024-11-13'},
+  {nome:'Juliana', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'juhvandrade@gmail.com', telefone:'51996328299', piramide:'1- Costas  2- coxa 3- braços 4- bumbum', objetivo:'Melhorar minha saúde física... Resultados físicos', restricoes:'Nenhuma relatada', academia:'Uma em Osório', dataAnamnese:'2025-02-20'},
+  {nome:'AnaLucia da rosa', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'darosaana799@gmail.com', telefone:'51981862058', piramide:'Glúteo', objetivo:'Ganhar  músculos  e definir', restricoes:'Nenhuma relatada', academia:'Pratique', dataAnamnese:'2026-07-20'},
+  {nome:'Mariel Madlene dos Santos', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'mariel.dos.santos@hotmail.com', telefone:'51996036844', piramide:'3,1,2,4', objetivo:'Perda de peso e definição muscular.', restricoes:'Não.', academia:'Performance', dataAnamnese:'2026-07-20'},
+  {nome:'Tamara Prestes', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'3x por semana', email:'tamaraprestes@yahoo.com', telefone:'51999946085', piramide:'1 e 3', objetivo:'Emagrecimento', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2026-07-20'},
+  {nome:'Bruna Melissa', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'4x por semana', email:'bruna.melissa4@gmail.com', telefone:'51981415219', piramide:'Costas, coxa, glúteos, barriga', objetivo:'Ter suporte profissional', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2026-07-20'},
+  {nome:'Ariana', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'ariane-ashley@hotmail.com', telefone:'51985981461', piramide:'Bumbum - Costas - Barriga', objetivo:'Melhorar meu desempenho', restricoes:'Nenhuma relatada', academia:'Daido', dataAnamnese:'2026-07-20'},
+  {nome:'Danielle', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'danny_kressin@yahoo.com.br', telefone:'51983140058', piramide:'Quadríceps/ posterior coxa/ glúteos/costas', objetivo:'Hipertrofia', restricoes:'Tive na lombar', academia:'Moinhos', dataAnamnese:'2026-07-20'},
+  {nome:'Adriana', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'schnadelbachadriana90@gmail.com', telefone:'51995027512', piramide:'Todos', objetivo:'Ganhar músculo e perder gordura', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2026-07-20'},
+  {nome:'Priscila Becker', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'3x por semana', email:'priscilajbecker20@gmail.com', telefone:'51995987375', piramide:'1 bunda 2 quadríceps 3 ombro e costas 4 posteriores 5 braços', objetivo:'Ficar gostosa', restricoes:'Acho q nada grave', academia:'Engenharia do corpo - Petropolis', dataAnamnese:'2026-07-20'},
+  {nome:'Eduarda Mentz', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'duda.mentz@gmail.com', telefone:'51995105977', piramide:'2,1,3,4', objetivo:'Emagrecimento é definição', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2026-07-20'},
+  {nome:'PATRÍCIA PEREIRA DA SILVA', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'patricia.silva.pps12@gmail.com', telefone:'51997656571', piramide:'1 - coxa, 2 - Bumbum, 3 - costas, 4- Ombros', objetivo:'Dar seguimento', restricoes:'Nenhuma relatada', academia:'YES', dataAnamnese:'2026-07-20'},
+  {nome:'Viviane Moreira', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'4x por semana', email:'vi.dacunha@gmail.com', telefone:'51992907258', piramide:'1 2', objetivo:'Ganhar massa', restricoes:'Nenhuma relatada', academia:'Total', dataAnamnese:'2026-07-20'},
+  {nome:'Andreli vanessa de campos', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'andrelivanessadecampos@gmail.com', telefone:'48988180167', piramide:'3,2,1,4', objetivo:'Emagrecimento', restricoes:'Nenhuma relatada', academia:'Pratique fitnes', dataAnamnese:'2026-07-20'},
+  {nome:'Eliane fatima crupinski', status:'ok', statusLabel:'Ativa recente', nivel:'Intermediário', freq:'4x por semana', email:'elianecrupinskiagro@gmail.com', telefone:'51996504863', piramide:'1 barriga 2 cintura 3costas 4 gluteo 5 pernas', objetivo:'Definir corpo', restricoes:'Nenhuma relatada', academia:'Ctperformace', dataAnamnese:'2026-07-20'},
+  {nome:'Priscila', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'2x por semana', email:'prytchy@hotmail.com', telefone:'51984816358', piramide:'Barriga 1 Bumbum 2  Costas 3 Coxa 4', objetivo:'Emagrecimento', restricoes:'Aim', academia:'26 fit', dataAnamnese:'2026-07-20'},
+  {nome:'Renata Lopes', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'3x por semana', email:'renatalopes2530@gmail.com', telefone:'51998064208', piramide:'1coxa  2 bumbum 2 barriga  4 costas', objetivo:'Harmonizar mais meu corpo ganhar mais músculos e perder gordura abdominal ( milagres)', restricoes:'Joelho', academia:'Ideia Cohab', dataAnamnese:'2026-07-21'},
   {nome:'Graziele Steffens', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'', piramide:'1- gluteo 2-coxa 3-abdomen 4-braço', objetivo:'perda de peso e definição (me incomoda muito meu braço e a gordura das costas)', restricoes:'Nenhuma relatada', academia:'academia live fit - canoas', dataAnamnese:'2022-04-28'},
   {nome:'Guilherme Barros', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Intermediário', freq:'5x por semana', email:'guilherminhobarros@yahoo.com.br', telefone:'', piramide:'1°', objetivo:'Evoluir meu corpo.', restricoes:'Não.; Não.; Não.', academia:'Performance', dataAnamnese:'2022-05-04'},
   {nome:'Deise', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'3x por semana', email:'deisemolina.l@icloud.com', telefone:'', piramide:'Bumbum, coxas, barriga e braços', objetivo:'Foco e evolução', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2022-05-07'},
@@ -987,7 +1135,7 @@ const alunasPersonal = [
   {nome:'Ariel Morais Ferreira', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'3x por semana', email:'ariiel.pdc@gmail.com', telefone:'51982362037', piramide:'1 coxa, 2 bumbum, 3 tríceps, 4 barriga', objetivo:'Definir coxa e bumbum', restricoes:'Condromalacia patelar nos dois joelhos e desgaste no menisco no joelho esquedo; Ressonância magnética dos dois joelhos', academia:'Ideia Fitness', dataAnamnese:'2026-06-07'},
   {nome:'Sinara', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'2x por semana', email:'silvasinara704@gmail.com', telefone:'51980165964', piramide:'3 barriga', objetivo:'Perder abdômen', restricoes:'Nenhuma relatada', academia:'Casa', dataAnamnese:'2026-06-11'},
   {nome:'JULIANA HERMES PEREIRA REGO', status:'ok', statusLabel:'Ativa recente', nivel:'A definir', freq:'5x por semana', email:'jhpr16@gmail.com', telefone:'51998005817', piramide:'1- braço / 2 - coxa / 3 - barriga / 4 - costas', objetivo:'Emagrecer e tornear', restricoes:'Nenhuma relatada', academia:'Yes Fitnnes', dataAnamnese:'2026-06-22'},
-  {nome:'Andriele Caroline Rubert', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'5x por semana', email:'andrielecarolinerubert@gmail.com', telefone:'51991423839', piramide:'1- bumbum, 2- barriga(perder), 3- pernas, 4- costas', objetivo:'Esse ano decidi que vou focar no meu corpo e deixar ele de um jeito que eu me sinta bem, já perdi muito peso mas nunca fiquei com o corpo que queria, agora estou focada nisso e acredito que tu pode me auxiliar nesse processo', restricoes:'Dor no joelho ao fazer afundo ou stiff — excluídos da prescrição inicial', academia:'Performance', dataAnamnese:'2026-06-30', idade:30, queixaDor:true, regiaoQueixa:'Joelho',
+  {nome:'Andriele Caroline Rubert', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'5x por semana', email:'andrielecarolinerubert@gmail.com', telefone:'51991423839', piramide:'1- bumbum, 2- barriga(perder), 3- pernas, 4- costas', objetivo:'Esse ano decidi que vou focar no meu corpo e deixar ele de um jeito que eu me sinta bem, já perdi muito peso mas nunca fiquei com o corpo que queria, agora estou focada nisso e acredito que tu pode me auxiliar nesse processo', restricoes:'Dor no joelho ao fazer afundo ou stiff, excluídos da prescrição inicial', academia:'Performance', dataAnamnese:'2026-06-30', idade:30, queixaDor:true, regiaoQueixa:'Joelho', desviosPosturaisConfirmados:['ombros_protrusos'],
    peso:'101 kg', altura:'1,69 m', imc:'35,4 (fase 1: emagrecimento prioritário)',
    treinoAtual:{fase:'Fase 1 · Emagrecimento (override por IMC)', volume:'Dentro do limite de iniciante · até 20 séries/semana por ênfase',
      dias:[
@@ -1010,7 +1158,8 @@ function renderAlunas(){
     return bateBusca && bateStatus;
   });
   document.getElementById('alunas-count-label').textContent = filtradas.length + ' de ' + alunasPersonal.length + ' alunas';
-  filtradas.slice(0, 80).forEach(function(a){
+  if(!window.alunasQtdVisivel) window.alunasQtdVisivel = 80;
+  filtradas.slice(0, window.alunasQtdVisivel).forEach(function(a){
     const i = alunasPersonal.indexOf(a);
     const el = document.createElement('div');
     el.className = 'aluna-card';
@@ -1020,24 +1169,72 @@ function renderAlunas(){
     el.onclick = function(){ openAlunaDetail(i); };
     list.appendChild(el);
   });
+  if(filtradas.length > window.alunasQtdVisivel){
+    const btn = document.createElement('button');
+    btn.className = 'btn-gold';
+    btn.style.cssText = 'background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:8px;';
+    btn.textContent = 'Carregar mais (' + (filtradas.length - window.alunasQtdVisivel) + ' restantes)';
+    btn.onclick = function(){ window.alunasQtdVisivel += 80; renderAlunas(); };
+    list.appendChild(btn);
+  }
   if(filtradas.length > 80){
     const note = document.createElement('p');
     note.className = 'page-sub';
-    note.textContent = 'Mostrando 80 de ' + filtradas.length + ' — refine a busca para ver outras.';
+    note.textContent = 'Mostrando 80 de ' + filtradas.length + ', refine a busca para ver outras.';
     list.appendChild(note);
   }
 }
 renderAlunas();
 
+const desviosPosturaisCatalogo = [
+  { id: 'cabeca_anteriorizada', nome: 'Anteriorização de cabeça', mobilidade: ['Alongamento de cervical posterior', 'Mobilidade de coluna torácica'], corretivo: ['Retração cervical (chin tuck)', 'Fortalecimento de flexores profundos do pescoço'] },
+  { id: 'ombros_protrusos', nome: 'Ombros protrusos / Abdução escapular', mobilidade: ['Alongamento de peitoral maior e menor', 'Alongamento de grande dorsal', 'Alongamento de redondo maior'], corretivo: ['Remada com retração escapular', 'Face pull'] },
+  { id: 'hipercifose', nome: 'Hipercifose torácica', mobilidade: ['Mobilidade de coluna torácica em extensão'], corretivo: ['Remada alta', 'Extensão torácica no rolo'] },
+  { id: 'escoliose_leve', nome: 'Escoliose leve (não estrutural)', mobilidade: ['Alongamento lateral de tronco'], corretivo: ['Prancha lateral', 'Exercício unilateral assimétrico conforme lado fraco'] },
+  { id: 'hiperlordose', nome: 'Hiperlordose lombar (síndrome cruzada inferior)', mobilidade: ['Alongamento de iliopsoas', 'Alongamento de paravertebrais lombares', 'Alongamento de reto femoral', 'Alongamento de tensor da fáscia lata'], corretivo: ['Fortalecimento de glúteo', 'Fortalecimento de isquiotibiais', 'Fortalecimento de reto abdominal e transverso abdominal', 'Prancha ventral', 'Elevação pélvica com retroversão ativa'] },
+  { id: 'retroversao_pelvica', nome: 'Retroversão pélvica', mobilidade: ['Alongamento de posterior de coxa', 'Alongamento de glúteo'], corretivo: ['Ativação de flexor de quadril', 'Fortalecimento de eretores lombares'] },
+  { id: 'anteversao_pelvica', nome: 'Anteversão pélvica', mobilidade: ['Alongamento de flexor de quadril', 'Alongamento de lombar'], corretivo: ['Prancha ventral', 'Fortalecimento de abdômen inferior'] },
+  { id: 'assimetria_quadril', nome: 'Assimetria de quadril / Desnivelamento pélvico (funcional)', mobilidade: ['Alongamento de quadrado lombar do lado mais alto', 'Alongamento de adutor do lado mais alto'], corretivo: ['Fortalecimento de glúteo médio bilateral', 'Exercício unilateral no lado mais fraco com volume extra', 'Ponte unilateral'] },
+  { id: 'geno_valgo', nome: 'Geno valgo (joelho para dentro)', mobilidade: ['Mobilidade de tornozelo'], corretivo: ['Fortalecimento de glúteo médio', 'Abdução de quadril na polia'] },
+  { id: 'geno_varo', nome: 'Geno varo (joelho para fora)', mobilidade: ['Alongamento de trato iliotibial'], corretivo: ['Fortalecimento de adutores', 'Controle motor de alinhamento de joelho'] },
+  { id: 'pe_pronado', nome: 'Pé pronado', mobilidade: ['Mobilidade de tornozelo em inversão'], corretivo: ['Fortalecimento de tibial posterior', 'Propriocepção em superfície instável'] },
+  { id: 'pe_supinado', nome: 'Pé supinado', mobilidade: ['Mobilidade de tornozelo em eversão'], corretivo: ['Fortalecimento de fibulares', 'Propriocepção em superfície instável'] },
+  { id: 'sway_back', nome: 'Sway Back', mobilidade: ['Alongamento de peitoral e grande dorsal', 'Alongamento de reto femoral'], corretivo: ['Fortalecimento de isquiotibiais', 'Retração escapular (rombóides/trapézio)', 'Fortalecimento de glúteo máximo', 'Prancha ventral com retroversão ativa'] },
+  { id: 'escapula_alada', nome: 'Escápula alada', mobilidade: ['Mobilidade torácica'], corretivo: ['Wall slide', 'Wall slide com elástico', 'Push-up plus', 'Fortalecimento de serrátil anterior e rombóides'] },
+  { id: 'aducao_escapular', nome: 'Adução escapular (tônus alto de trapézio/rombóides)', mobilidade: ['Mobilidade torácica', 'Alongamento de trapézio e rombóides'], corretivo: ['Push-up plus', 'Wall ball slide', 'Fortalecimento de peitoral', 'Fortalecimento de serrátil anterior'] },
+  { id: 'elevacao_escapular', nome: 'Elevação escapular', mobilidade: ['Alongamento de trapézio superior', 'Alongamento de levantador da escápula'], corretivo: ['Wall ball slide', 'Wall slide com elástico', 'Elevação em Y', 'Depressão escapular ativa (evitar puxada full overhead)'] },
+  { id: 'deslizamento_anterior_umero', nome: 'Deslizamento anterior do úmero', mobilidade: ['Alongamento de peitoral maior e menor', 'Alongamento de grande dorsal', 'Alongamento de redondo maior', 'Mobilidade de cápsula posterior do ombro'], corretivo: ['Fortalecimento de deltoide posterior', 'Fortalecimento no plano sagital', 'Atenção à amplitude completa na fase concêntrica'] },
+  { id: 'rotacao_inferior_escapular', nome: 'Rotação inferior escapular (= Depressão escapular)', mobilidade: ['Alongamento de grande dorsal e peitoral maior/menor'], corretivo: ['Fortalecimento de trapézio superior', 'Elevação em Y', 'Encolhimento de ombros'] },
+  { id: 'retificacao_toracica', nome: 'Retificação torácica', mobilidade: ['Alongamento de peitoral maior e menor', 'Alongamento de grande dorsal'], corretivo: ['Remada articulada', 'Remada baixa', 'Remada no cross (3x12-15, 1min descanso, fase concêntrica completa e excêntrica controlada)'] },
+  { id: 'retificacao_lombar', nome: 'Retificação lombar', mobilidade: ['Alongamento de isquiotibiais e adutores', 'Alongamento de panturrilha', 'Alongamento de oblíquo interno e reto abdominal'], corretivo: ['Fortalecimento de iliopsoas e paravertebrais lombares', 'Stiff', 'Remada curvada', 'Superman no solo', 'Ponte unilateral/bilateral'] }
+];
+
+function obterBlocoPostural(desviosConfirmados){
+  if(!desviosConfirmados || desviosConfirmados.length === 0) return [];
+  const exercicios = [];
+  desviosConfirmados.forEach(function(id){
+    const desvio = desviosPosturaisCatalogo.find(function(d){ return d.id === id; });
+    if(!desvio) return;
+    if(desvio.mobilidade[0]) exercicios.push({ nome: desvio.mobilidade[0], tipo: 'mobilidade' });
+    if(desvio.corretivo[0]) exercicios.push({ nome: desvio.corretivo[0], tipo: 'corretivo' });
+  });
+  return exercicios.slice(0, 3).map(function(item){
+    if(item.tipo === 'mobilidade'){
+      return { nome: item.nome, volume: '2x30s', descanso: '20s' };
+    }
+    return { nome: item.nome, volume: '3x15', descanso: '30-40s' };
+  });
+}
+
 const patologiasCatalogo = [
   {id:'condromalacia', regiao:'Joelho', nome:'Condromalácia patelar (graus 1-4)', oQueE:'Amolecimento/desgaste da cartilagem atrás da patela, com dor ao agachar, subir/descer escada ou ficar muito tempo sentada.', evitar:'Agachamento profundo com carga alta; cadeira extensora em amplitude completa com carga alta; saltos quando sintomática.', permitido:'Leg press com carga baixa e agachamento parcial; isométricos de quadríceps; elevação pélvica e ponte unilateral; baixo impacto (bike).', conduta:'Fortalecer glúteo médio e rotadores externos para controlar o valgo dinâmico; priorizar cadeia fechada com amplitude reduzida antes de progredir.'},
   {id:'menisco', regiao:'Joelho', nome:'Lesão de menisco', oQueE:'Lesão na cartilagem em formato de C que amortece o joelho, comum em movimentos de torção com o pé fixo no chão.', evitar:'Agachamento com rotação; avanço/afundo com pivô; leg press com pés mal posicionados gerando torção.', permitido:'Leg press com trajetória controlada; extensão/flexão de joelho sem rotação; fortalecimento isométrico.', conduta:'Controlar amplitude, evitar flexão profunda combinada com rotação; progressão de carga mais lenta que o padrão.'},
-  {id:'artrose_joelho', regiao:'Joelho', nome:'Osteoartrose de joelho (desgaste articular)', oQueE:'Desgaste progressivo da cartilagem articular, mais comum com histórico de treino longo ou idade avançada.', evitar:'Impacto repetitivo (corrida, salto); amplitude completa com carga alta em fases sintomáticas.', permitido:'Fortalecimento muscular ao redor da articulação; exercícios de baixo impacto.', conduta:'Fortalecer sem aumentar o atrito articular — cadeia fechada controlada, evitar picos de carga.'},
-  {id:'tendinopatia_patelar', regiao:'Joelho', nome:'Tendinopatia patelar ("joelho de saltador")', oQueE:'Inflamação/degeneração do tendão patelar, geralmente por sobrecarga.', evitar:'Alto volume de saltos ou agachamentos explosivos enquanto sintomática.', permitido:'Trabalho excêntrico controlado; cargas moderadas e progressivas.', conduta:'Gestão de carga é mais eficaz que repouso total — reduzir volume, não necessariamente parar.'},
+  {id:'artrose_joelho', regiao:'Joelho', nome:'Osteoartrose de joelho (desgaste articular)', oQueE:'Desgaste progressivo da cartilagem articular, mais comum com histórico de treino longo ou idade avançada.', evitar:'Impacto repetitivo (corrida, salto); amplitude completa com carga alta em fases sintomáticas.', permitido:'Fortalecimento muscular ao redor da articulação; exercícios de baixo impacto.', conduta:'Fortalecer sem aumentar o atrito articular, cadeia fechada controlada, evitar picos de carga.'},
+  {id:'tendinopatia_patelar', regiao:'Joelho', nome:'Tendinopatia patelar ("joelho de saltador")', oQueE:'Inflamação/degeneração do tendão patelar, geralmente por sobrecarga.', evitar:'Alto volume de saltos ou agachamentos explosivos enquanto sintomática.', permitido:'Trabalho excêntrico controlado; cargas moderadas e progressivas.', conduta:'Gestão de carga é mais eficaz que repouso total, reduzir volume, não necessariamente parar.'},
   {id:'fai', regiao:'Quadril', nome:'Impacto femoroacetabular (FAI) / lesão labral do quadril', oQueE:'Atrito anormal entre o fêmur e o encaixe do quadril, ou lesão na cartilagem que reveste esse encaixe.', evitar:'Agachamento muito profundo; flexão de quadril extrema sob carga.', permitido:'Agachamento com amplitude controlada; exercícios de estabilização de quadril.', conduta:'Ajustar amplitude antes de reduzir carga; controlar rotação do quadril durante o movimento.'},
   {id:'bursite_trocanterica', regiao:'Quadril', nome:'Bursite trocantérica', oQueE:'Inflamação da bolsa sinovial na lateral do quadril, causa dor lateral em quem faz muita abdução repetitiva.', evitar:'Volume alto de abdução de quadril unilateral repetitiva; deitar sobre o lado afetado com pressão direta.', permitido:'Fortalecimento de glúteo médio com volume controlado; exercícios bilaterais.', conduta:'Reduzir volume de abdução isolada temporariamente, sem eliminar o estímulo por completo.'},
   {id:'coxartrose', regiao:'Quadril', nome:'Osteoartrose de quadril (coxartrose)', oQueE:'Desgaste articular do quadril, similar ao de joelho.', evitar:'Amplitude extrema combinada com carga alta.', permitido:'Fortalecimento progressivo; mobilidade controlada.', conduta:'Fortalecer para proteger a articulação, sem forçar amplitude dolorosa.'},
-  {id:'tendinopatia_glutea', regiao:'Quadril', nome:'Tendinopatia glútea', oQueE:'Sobrecarga do tendão do glúteo médio/mínimo na lateral do quadril, comum em mulheres.', evitar:'Compressão excessiva do tendão (adução extrema, deitar de lado sem apoio); volume alto de abdução.', permitido:'Fortalecimento progressivo evitando posições de compressão extrema.', conduta:'Cuidado especial com abdução em decúbito lateral — ajustar ângulo.'},
+  {id:'tendinopatia_glutea', regiao:'Quadril', nome:'Tendinopatia glútea', oQueE:'Sobrecarga do tendão do glúteo médio/mínimo na lateral do quadril, comum em mulheres.', evitar:'Compressão excessiva do tendão (adução extrema, deitar de lado sem apoio); volume alto de abdução.', permitido:'Fortalecimento progressivo evitando posições de compressão extrema.', conduta:'Cuidado especial com abdução em decúbito lateral, ajustar ângulo.'},
   {id:'impacto_ombro', regiao:'Ombro', nome:'Síndrome do impacto / tendinopatia do manguito rotador', oQueE:'Compressão dos tendões do manguito rotador no espaço subacromial, dor ao elevar o braço acima da cabeça.', evitar:'Desenvolvimento por trás da nuca; elevação lateral acima da linha do ombro com carga alta; supino pesado com cotovelos muito abertos.', permitido:'Elevações controladas até a linha dos ombros; fortalecimento de manguito com carga leve.', conduta:'Fortalecer estabilizadores da escápula antes de progredir carga em empurrar/elevar.'},
   {id:'labral_ombro', regiao:'Ombro', nome:'Lesão labral do ombro (SLAP)', oQueE:'Lesão na cartilagem que estabiliza a cabeça do úmero na cavidade do ombro.', evitar:'Movimentos overhead com carga alta; puxadas por trás da nuca.', permitido:'Exercícios de estabilização escapular; amplitude controlada frontal.', conduta:'Priorizar controle motor e estabilidade antes de carga.'},
   {id:'instabilidade_ombro', regiao:'Ombro', nome:'Instabilidade / luxação recidivante de ombro', oQueE:'Frouxidão articular que permite deslocamentos parciais ou completos do ombro.', evitar:'Amplitude extrema em rotação externa com carga (ex: crucifixo muito aberto).', permitido:'Fortalecimento de manguito rotador e estabilizadores; amplitude controlada.', conduta:'Sempre priorizar controle sobre amplitude máxima.'},
@@ -1067,13 +1264,50 @@ function renderPatologiaList(){
     el.className = 'info-box';
     el.innerHTML =
       '<p class="lbl">' + p.regiao + '</p>' +
-      '<p style="font-size:13.5px;font-weight:600;margin:0 0 8px;">' + p.nome + '</p>' +
+      '<p class="card-item-title">' + p.nome + '</p>' +
       '<p class="txt"><b>O que é:</b> ' + p.oQueE + '</p>' +
       '<p class="txt"><b>Evitar:</b> ' + p.evitar + '</p>' +
       '<p class="txt"><b>Permitido:</b> ' + p.permitido + '</p>' +
       '<p class="txt" style="margin-bottom:0;"><b>Conduta:</b> ' + p.conduta + '</p>';
     list.appendChild(el);
   });
+}
+
+const testesCorridaCatalogo = [
+  { nome: 'Teste de Cooper (12 minutos)', tipo: 'Teste', desc: 'Correr a maior distância possível em 12 minutos. Estima o VO2máx e serve como linha de base pra prescrever intensidade dos treinos.' },
+  { nome: 'Teste de 1km contra o relógio', tipo: 'Teste', desc: 'Correr 1km no menor tempo possível. Usado pra estimar o ritmo de limiar e calibrar as zonas de treino.' },
+  { nome: 'Teste de limiar (Conconi indireto)', tipo: 'Teste', desc: 'Corrida progressiva em esteira ou pista, aumentando a velocidade a cada estágio, observando onde a frequência cardíaca deixa de subir proporcionalmente.' },
+  { nome: 'Rodagem contínua (base aeróbica)', tipo: 'Treino', desc: 'Corrida em ritmo confortável, constante, por 30-60min. Constrói a base aeróbica, entra na maioria das semanas.' },
+  { nome: 'Treino intervalado', tipo: 'Treino', desc: 'Blocos de corrida forte alternados com recuperação (ex: 8x400m forte + 200m trote). Melhora velocidade e capacidade anaeróbica.' },
+  { nome: 'Fartlek', tipo: 'Treino', desc: 'Variação livre de ritmo durante a corrida, sem intervalos cronometrados rígidos, alterna forte e leve conforme a sensação.' },
+  { nome: 'Tiro / Sprint', tipo: 'Treino', desc: 'Corridas curtas e muito intensas (50-200m) com recuperação completa entre elas. Foco em potência e velocidade máxima.' },
+  { nome: 'Rodagem longa', tipo: 'Treino', desc: 'Corrida mais longa que o normal, em ritmo confortável, geralmente 1x por semana. Constrói resistência de base pra provas mais longas.' },
+  { nome: 'Corrida regenerativa', tipo: 'Treino', desc: 'Corrida bem leve, curta, no dia seguinte a um treino intenso, ajuda na recuperação ativa sem acumular fadiga extra.' }
+];
+
+function renderCorridaBanco(){
+  const list = document.getElementById('corrida-list');
+  let html = '';
+  ['Teste', 'Treino'].forEach(function(secao){
+    html += '<p class="section-label" style="margin-top:16px;">' + (secao === 'Teste' ? 'Testes de avaliação' : 'Tipos de treino') + '</p>';
+    testesCorridaCatalogo.filter(function(t){ return t.tipo === secao; }).forEach(function(t){
+      html += '<div class="info-box"><p class="card-item-title">' + t.nome + '</p><p class="txt" style="margin-bottom:0;">' + t.desc + '</p></div>';
+    });
+  });
+  list.innerHTML = html;
+}
+
+function renderDesviosBanco(){
+  const list = document.getElementById('desvios-list');
+  let html = '';
+  desviosPosturaisCatalogo.forEach(function(d){
+    html += '<div class="info-box">' +
+      '<p class="card-item-title">' + d.nome + '</p>' +
+      '<p class="txt"><b>Mobilidade:</b> ' + d.mobilidade.join(', ') + '</p>' +
+      '<p class="txt" style="margin-bottom:0;"><b>Corretivo:</b> ' + d.corretivo.join(', ') + '</p>' +
+      '</div>';
+  });
+  list.innerHTML = html;
 }
 
 function confirmarPatologia(nomeAluna, patologiaId){
@@ -1170,7 +1404,7 @@ function verificarCheckinPeso(nomeAluna){
 }
 
 function renderPerguntaPeso(mes){
-  return '<div class="info-box" style="margin-top:10px;">' +
+  return '<div class="info-box" id="area-peso" style="margin-top:10px;">' +
     '<p class="lbl">Check-in mensal de peso</p>' +
     '<p class="txt">Já faz um mês! Pode me passar seu peso atual? Isso ajuda a calibrar quando é hora de avançar de fase.</p>' +
     '<div class="form-group"><input class="form-input" id="peso-atual-input" type="number" step="0.1" placeholder="Ex: 98.5"></div>' +
@@ -1188,8 +1422,8 @@ function registrarPesoMensal(mes){
   prog.pesoChecks[mes] = true;
   if(!alunaAtual.pesoHistorico) alunaAtual.pesoHistorico = [];
   alunaAtual.pesoHistorico.push({ semana: prog.semana, peso: peso });
-  const el = document.getElementById('registro-confirmacao') || document.getElementById('prog-reengajamento');
-  if(el) el.innerHTML = '<div class="insight"><p>Peso registrado! Isso já entra no cálculo de elegibilidade de mudança de fase.</p></div>';
+  const el = document.getElementById('area-peso');
+  if(el) el.innerHTML = '<p class="txt">Peso registrado! Isso já entra no cálculo de elegibilidade de mudança de fase.</p>';
 }
 
 function extrairExercicios(a){
@@ -1207,7 +1441,7 @@ function extrairExercicios(a){
 
 function sugerirAjusteCarga(carga, reps){
   if(reps >= 12) return { texto: 'Aumentar carga', valor: Math.round((carga * 1.08) * 2) / 2 };
-  if(reps >= 10) return { texto: 'Manter — pequeno aumento no próximo ciclo', valor: carga };
+  if(reps >= 10) return { texto: 'Manter, pequeno aumento no próximo ciclo', valor: carga };
   if(reps >= 8) return { texto: 'Manter, repetir', valor: carga };
   if(reps >= 6) return { texto: 'Pequena redução', valor: Math.round((carga * 0.95) * 2) / 2 };
   return { texto: 'Redução mais significativa', valor: Math.round((carga * 0.90) * 2) / 2 };
@@ -1232,7 +1466,7 @@ function avancarSemana(){
   openAlunaDetail(i);
   const conf = document.getElementById('prog-reengajamento');
   if(!resultado.avancou && conf){
-    conf.innerHTML = '<div class="insight"><p><b>Semana não concluída</b> (' + resultado.concluidos + '/' + resultado.total + ' treinos) — a semana não avança, e o sistema já disparou uma mensagem de check-in pra aluna, avisando você em paralelo.</p></div>' +
+    conf.innerHTML = '<div class="insight"><p><b>Semana não concluída</b> (' + resultado.concluidos + '/' + resultado.total + ' treinos), a semana não avança, e o sistema já disparou uma mensagem de check-in pra aluna, avisando você em paralelo.</p></div>' +
       '<div class="form-group"><label class="form-label">Motivo relatado (opcional, pra seu controle)</label><input class="form-input" id="motivo-falta" placeholder="Ex: imprevisto de trabalho"></div>';
   } else if(resultado.avancou && conf){
     const prog = getProgressoAluna(alunaAberta.nome);
@@ -1256,21 +1490,523 @@ function avancarSemanaForcado(){
   openAlunaDetail(i);
 }
 
-function calcularVolumePorCategoria(a){
-  if(!a.treinoAtual) return {};
-  const totais = {};
-  a.treinoAtual.dias.forEach(function(d){
-    d.ex.forEach(function(linha){
+/* ===== ITEM 1: Volume de transição (aluna que pausou e retomou) ===== */
+const VOLUME_TRANSICAO = 22; // entre o teto de iniciante (20) e o início de intermediário (25-30)
+const SEMANAS_TRANSICAO = 4;
+
+function calcularTetoVolume(nivel, semanaAtual, pausouRetomou){
+  if(pausouRetomou && semanaAtual <= SEMANAS_TRANSICAO){
+    return { teto: VOLUME_TRANSICAO, emTransicao: true };
+  }
+  const tetos = { 'Iniciante': 20, 'Intermediário': 30, 'Avançado': 50 };
+  return { teto: tetos[nivel] || 20, emTransicao: false };
+}
+
+/* ===== ITEM 2 e 3: Estimativa de duração de treino (com regra de unilateral) ===== */
+function estimarDuracaoExercicio(series, descansoTexto, unilateral){
+  const descansoSegundos = descansoParaSegundos(descansoTexto);
+  const execucaoPorSerie = 40; // segundos, média
+  let segundosPorSerie;
+  if(unilateral){
+    // perna 1 (~40s) + descanso curto entre pernas (25s) + perna 2 (~40s) + descanso completo
+    segundosPorSerie = 40 + 25 + 40 + descansoSegundos;
+  } else {
+    segundosPorSerie = execucaoPorSerie + descansoSegundos;
+  }
+  return Math.round((series * segundosPorSerie) / 60 * 10) / 10; // minutos
+}
+
+const PALAVRAS_UNILATERAL = ['UNILATERAL', 'JOELHOS EM PÉ', 'NA POLIA', 'AFUNDO', 'BÚLGARO', 'BULGARO', 'STEP UP'];
+function ehExercicioUnilateral(nomeExercicio){
+  const upper = nomeExercicio.toUpperCase();
+  return PALAVRAS_UNILATERAL.some(function(p){ return upper.indexOf(p) !== -1; });
+}
+
+/* ===== ITEM 4: Volume do Bloco de Choque (corte de 15-20%, nunca 40-50%) ===== */
+function calcularVolumeChoque(volumeBase){
+  return Math.round(volumeBase * 0.82); // ~18% de corte, dentro da faixa 15-20%
+}
+
+/* ===== ITEM 5: Blocos de cluster set variáveis ===== */
+const BLOCOS_CLUSTER_SET = [3, 4, 6, 8, 10];
+function sugerirBlocoCluster(indiceCiclo){
+  return BLOCOS_CLUSTER_SET[indiceCiclo % BLOCOS_CLUSTER_SET.length];
+}
+
+/* ===== ITEM 6: Multiarticulares contam volume duplo (Quadríceps + Glúteo) ===== */
+const MULTIARTICULARES_INFERIORES = ['AGACHAMENTO', 'LEG PRESS', 'HACK', 'BÚLGARO', 'BULGARO', 'AFUNDO', 'STEP UP'];
+function ehMultiarticularInferior(nomeExercicio){
+  const upper = nomeExercicio.toUpperCase();
+  return MULTIARTICULARES_INFERIORES.some(function(k){ return upper.indexOf(k) !== -1; });
+}
+function temAmplitudeElevada(nomeExercicio){
+  const upper = nomeExercicio.toUpperCase();
+  return upper.indexOf('PROFUNDO') !== -1 || upper.indexOf('AMPLITUDE ELEVADA') !== -1 || upper.indexOf('AMPLITUDE COMPLETA') !== -1;
+}
+function contaVolumeDuplo(nomeExercicio){
+  return ehMultiarticularInferior(nomeExercicio) && temAmplitudeElevada(nomeExercicio);
+}
+
+/* ===== ITEM 7: Restpause e Cluster set nunca empilhados no mesmo exercício ===== */
+function validarMetodoUnico(metodoTexto){
+  const upper = (metodoTexto || '').toUpperCase();
+  const temRestpause = upper.indexOf('RESTPAUSE') !== -1;
+  const temCluster = upper.indexOf('CLUSTER') !== -1;
+  if(temRestpause && temCluster){
+    return { valido: false, motivo: 'Restpause e Cluster set nunca são usados juntos na mesma série, escolha um método por vez (exceção: avançada, só na última série).' };
+  }
+  return { valido: true, motivo: '' };
+}
+
+/* ===== ITEM 8: Direcionamento de quadríceps (região distal) ===== */
+function sugerirExerciciosQuadriceps(direcionamento){
+  if(direcionamento === 'distal'){
+    return {
+      prioridade: ['Cadeira Extensora', 'Flexão Nórdica Reversa'],
+      nota: 'Flexão Nórdica Reversa ainda não está cadastrada no banco, pendente de cadastro.',
+      estrategia: 'isolados'
+    };
+  }
+  return {
+    prioridade: MULTIARTICULARES_INFERIORES,
+    nota: 'Sem necessidade de região distal, mantém estratégia de multiarticulares com boa amplitude (contam duplo pra Glúteo também).',
+    estrategia: 'multiarticulares'
+  };
+}
+
+/* ===== ITEM 9: Direcionamento de glúteo (região inferior/superior) ===== */
+const EXERCICIOS_GLUTEO_INFERIOR = ['Afundo', 'Agachamento Búlgaro', 'Step Up', 'Extensão de quadril no banco romano', 'Coice (glúteo na polia)'];
+const EXERCICIOS_GLUTEO_SUPERIOR = ['Extensão de quadril com perna estendida', 'Rotação de quadril', 'Abdução de quadril na polia', 'Cadeira Abdutora em pé'];
+
+function sugerirExerciciosGluteo(direcionamento){
+  if(direcionamento === 'inferior') return { prioridade: EXERCICIOS_GLUTEO_INFERIOR, regiao: 'Região inferior (próxima à prega glútea)' };
+  if(direcionamento === 'superior') return { prioridade: EXERCICIOS_GLUTEO_SUPERIOR, regiao: 'Região superior/lateral (glúteo médio)' };
+  if(direcionamento === 'ambas') return { prioridade: EXERCICIOS_GLUTEO_INFERIOR.concat(EXERCICIOS_GLUTEO_SUPERIOR), regiao: 'Ambas as regiões' };
+  return { prioridade: EXERCICIOS_GLUTEO_INFERIOR.concat(EXERCICIOS_GLUTEO_SUPERIOR).slice(0, 4), regiao: 'Sem prioridade específica, mix padrão' };
+}
+
+/* ===== ITEM 10: Reforço cruzado (grupo carente recebe volume leve em dia do "outro grupo") ===== */
+function sugerirReforcoCruzado(nomeExercicioLeve){
+  return nomeExercicioLeve + ' · 4x15-20 (carga baixa, longe da falha, estímulo, não sobrecarga)';
+}
+
+/* ===== ITEM 11: Famílias de movimento, rotação entre ciclos ===== */
+const FAMILIAS_MOVIMENTO = {
+  'puxada_horizontal': ['Remada Articular Aberta', 'Remada Articular Fechada', 'Remada Curvada com Halteres', 'Crucifixo Inverso', 'Remada Baixa'],
+  'agachamento': ['Agachamento Hack', 'Leg Press 45', 'Agachamento Livre'],
+  'flexao_cotovelo': ['Rosca Direta', 'Rosca Alternada com Halteres', 'Rosca Martelo'],
+  'extensao_cotovelo': ['Tríceps Corda', 'Tríceps Testa', 'Tríceps Francês']
+};
+
+function obterFamiliaDoExercicio(nomeExercicio){
+  const upper = nomeExercicio.toUpperCase();
+  for(const familia in FAMILIAS_MOVIMENTO){
+    if(FAMILIAS_MOVIMENTO[familia].some(function(e){ return e.toUpperCase() === upper; })){
+      return familia;
+    }
+  }
+  return null;
+}
+
+function rotacionarExercicio(nomeExercicioAtual, ehAncora, indiceCiclo){
+  if(ehAncora) return nomeExercicioAtual;
+  const familia = obterFamiliaDoExercicio(nomeExercicioAtual);
+  if(!familia) return nomeExercicioAtual; // sem família mapeada ainda, mantém como está
+  const opcoes = FAMILIAS_MOVIMENTO[familia];
+  const ciclo = indiceCiclo || 0;
+  return opcoes[ciclo % opcoes.length];
+}
+
+/* ===== ITEM 12: Vaga com 1 exercício carregando o volume, ou 2 dividindo o mesmo volume ===== */
+function dividirVolumeEmDois(nomeExercicio, seriesTotal, repsAlvo){
+  const familia = obterFamiliaDoExercicio(nomeExercicio);
+  if(!familia || FAMILIAS_MOVIMENTO[familia].length < 2) return null;
+  const opcoes = FAMILIAS_MOVIMENTO[familia];
+  const ex1 = opcoes[0];
+  const ex2 = opcoes[1] !== ex1 ? opcoes[1] : opcoes[2];
+  const seriesCada = Math.max(1, Math.round(seriesTotal / 2));
+  return [
+    ex1 + ' · ' + seriesCada + 'x' + repsAlvo,
+    ex2 + ' · ' + (seriesTotal - seriesCada) + 'x' + repsAlvo
+  ];
+}
+
+/* ===== ITEM 13: O GERADOR ===== */
+
+function obterPoolRealDoGrupo(grupoInterno){
+  const mapaGrupo = { 'Glúteo': 'Glúteos', 'Posterior': 'Isquiotibiais', 'Quadríceps': 'Quadríceps', 'Ombro': 'Ombros', 'Peito': 'Peito', 'Bíceps': 'Bíceps', 'Tríceps': 'Tríceps', 'Costas': 'Costas' };
+  const grupoReal = mapaGrupo[grupoInterno] || grupoInterno;
+  const comVideo = exerciciosBanco.filter(function(e){ return e.grupo === grupoReal && e.video; });
+  return comVideo.length >= 3 ? comVideo : exerciciosBanco.filter(function(e){ return e.grupo === grupoReal; });
+}
+
+function hashString(str){
+  let hash = 0;
+  for(let i = 0; i < str.length; i++){ hash = (hash * 31 + str.charCodeAt(i)) % 1000; }
+  return hash;
+}
+
+function capitalizarNomeExercicio(nome){
+  return nome.split(' ').map(function(palavra){
+    if(palavra.length <= 2) return palavra.toLowerCase(); // preposições curtas (de, em, na...)
+    return palavra.charAt(0) + palavra.slice(1).toLowerCase();
+  }).join(' ');
+}
+
+function obterPalavraChaveMovimento(nomeExercicio){
+  const upper = nomeExercicio.toUpperCase();
+  const padroesConhecidos = ['STIFF', 'CADEIRA', 'ELEVAÇÃO', 'EXTENSÃO', 'AFUNDO', 'AGACHAMENTO', 'FLEXÃO', 'ABDUÇÃO', 'ADUÇÃO', 'LEG PRESS', 'HACK', 'TERRA', 'BOM DIA', 'COICE', 'GLÚTEO', 'PONTE'];
+  for(let i = 0; i < padroesConhecidos.length; i++){
+    if(upper.indexOf(padroesConhecidos[i]) !== -1) return padroesConhecidos[i];
+  }
+  return upper.split(' ')[0]; // fallback: primeira palavra do nome
+}
+
+function selecionarExerciciosVariados(grupoInterno, nomeAluna, quantidade, indiceCiclo, padroesJaUsados){
+  const pool = obterPoolRealDoGrupo(grupoInterno);
+  if(pool.length === 0) return null;
+  const seed = hashString(nomeAluna || '') + (indiceCiclo || 0) * 7;
+  const selecionados = [];
+  const usados = {};
+  const padroesUsados = padroesJaUsados || {};
+  for(let i = 0; i < quantidade; i++){
+    let idx = (seed + i * 13) % pool.length;
+    let tentativas = 0;
+    let padrao = obterPalavraChaveMovimento(pool[idx].nome);
+    // Nunca repete padrão de movimento no mesmo dia (ex: Stiff + Stiff com Halteres é o mesmo padrão)
+    while((usados[idx] || padroesUsados[padrao]) && tentativas < pool.length){
+      idx = (idx + 1) % pool.length;
+      padrao = obterPalavraChaveMovimento(pool[idx].nome);
+      tentativas++;
+    }
+    usados[idx] = true;
+    padroesUsados[padrao] = true;
+    selecionados.push(capitalizarNomeExercicio(pool[idx].nome));
+  }
+  return selecionados;
+}
+
+function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
+  // perfil.enfase = grupo prioritário (ex: 'Glúteo'), perfil.secundario = 2º grupo da pirâmide
+  const enfase = perfil.enfase;
+  const secundario = perfil.secundario;
+  const reps = perfil.bloco === 'deload' ? 14 : (perfil.bloco === 'choque' ? 7 : (perfil.fase === 'Desempenho' ? 9 : 11));
+  const metodo = perfil.bloco === 'choque' ? ('Cluster set (blocos de ' + sugerirBlocoCluster(perfil.indiceCiclo || 0) + ')') : 'Padrão';
+
+  const bancoPorGrupo = {
+    'Glúteo': ['Elevação Pélvica', 'Agachamento Hack, profundo', 'Abdução de quadril na polia'],
+    'Posterior': ['Cadeira flexora', 'Extensão de quadril no banco romano', 'Flexora de Joelhos em Pé'],
+    'Quadríceps': ['Leg Press 45', 'Agachamento Hack, profundo', 'Cadeira Extensora'],
+    'Pernas': ['Leg Press 45', 'Cadeira flexora', 'Agachamento Hack, profundo']
+  };
+  function exerciciosDoGrupo(grupo, padroesJaUsadosNoDia){
+    // ITEM 8/9 conectados: usa direcionamento técnico quando definido
+    if(grupo === 'Glúteo' && perfil.direcionamentoGluteo && perfil.direcionamentoGluteo !== 'nenhum'){
+      return sugerirExerciciosGluteo(perfil.direcionamentoGluteo).prioridade;
+    }
+    if(grupo === 'Quadríceps' && perfil.direcionamentoQuadriceps === 'distal'){
+      return sugerirExerciciosQuadriceps('distal').prioridade;
+    }
+    const variados = selecionarExerciciosVariados(grupo, perfil.nomeAluna, 3, perfil.indiceCiclo, padroesJaUsadosNoDia);
+    return variados || bancoPorGrupo[grupo] || bancoPorGrupo['Pernas'];
+  }
+
+  const dias = [];
+
+  for(let d = 0; d < numDias; d++){
+    const ehDiaEnfase = d % 2 === 0; // dias pares = ênfase, ímpares = secundário (padrão validado com a Michele/Andriele)
+    const grupoPrincipal = ehDiaEnfase ? enfase : (secundario || enfase);
+    const grupoEstimulo = ehDiaEnfase ? secundario : enfase;
+    const padroesUsadosNoDia = {}; // compartilhado entre ênfase e estímulo, pra nunca repetir padrão de movimento no mesmo dia
+
+    let exPrincipais = exerciciosDoGrupo(grupoPrincipal, padroesUsadosNoDia).map(function(nome, posicao){
+      // ITEM 11: rotação por família, só rotaciona a partir do 2º ciclo (indiceCiclo > 0)
+      const nomeFinal = (perfil.indiceCiclo && perfil.indiceCiclo > 0) ? rotacionarExercicio(nome, false, perfil.indiceCiclo) : nome;
+      return nomeFinal + ' · ' + (perfil.bloco === 'deload' ? 2 : (perfil.nivel === 'Avançado' ? 4 : 3)) + 'x' + reps;
+    });
+    // Fase de emagrecimento + nível qualifica + técnica aprovada: aumenta densidade combinando os 2 primeiros como bi-set
+    if(perfil.bloco !== 'deload' && perfil.fase === 'Emagrecimento' && perfil.nivel !== 'Iniciante' && perfil.temTecnicaAprovada && exPrincipais.length >= 2){
+      exPrincipais = ['Bi-set|||' + exPrincipais[0] + '|||' + exPrincipais[1]].concat(exPrincipais.slice(2));
+    }
+    const exEstimulo = grupoEstimulo ? [exerciciosDoGrupo(grupoEstimulo, padroesUsadosNoDia)[0] + ' · ' + (perfil.bloco === 'deload' ? 2 : 3) + 'x' + (reps + 2)] : [];
+    const exPanturrilha = (perfil.frequencia <= 3) ? ['Panturrilha · 2x18'] : []; // baixa frequência: entra em todo dia, volume baixo
+    dias.push({
+      foco: 'Inferiores ' + String.fromCharCode(65 + d) + ' · ' + grupoPrincipal + (grupoEstimulo ? ' + estímulo ' + grupoEstimulo : ''),
+      ex: exPrincipais.concat(exEstimulo).concat(exPanturrilha),
+      metodo: metodo
+    });
+  }
+  return dias;
+}
+
+function gerarDiasSuperiores(perfil, numDias){
+  const reps = perfil.bloco === 'deload' ? 14 : (perfil.bloco === 'choque' ? 7 : (perfil.fase === 'Desempenho' ? 9 : 11));
+  const seriesCostas = perfil.bloco === 'deload' ? 2 : (perfil.nivel === 'Avançado' ? 3 : 2);
+  const inclureGluteoMedio = perfil.enfase === 'Glúteo';
+  const dias = [];
+
+  // Ordem composto-antes-de-isolado (item 3): Costas (puxada, composto) → Ombro/Peito (composto/misto) → Bíceps/Tríceps (isolado)
+  for(let d = 0; d < numDias; d++){
+    const padroesUsadosNoDia = {};
+
+    // Costas: variedade real do banco (51 opções), sempre protegida com 2-3 exercícios, nunca menos
+    const candidatosCostas = selecionarExerciciosVariados('Costas', (perfil.nomeAluna || '') + '_costas', 3, perfil.indiceCiclo);
+    const nomesCostas = candidatosCostas || ['Remada Articular Aberta', 'Remada Articular Fechada', 'Crucifixo Inverso'];
+    nomesCostas.forEach(function(n){ padroesUsadosNoDia[obterPalavraChaveMovimento(n.toUpperCase())] = true; });
+    let ex = [
+      nomesCostas[0] + ' · ' + seriesCostas + 'x' + reps,
+      nomesCostas[1] + ' · ' + seriesCostas + 'x' + reps
+    ];
+    if((perfil.indiceCiclo || 0) % 2 === 1 && nomesCostas[2]){
+      ex.push(nomesCostas[2] + ' · ' + Math.max(2, seriesCostas - 1) + 'x' + reps);
+    }
+
+    // Ombro/Peito/Bíceps/Tríceps reais, alternando qual par recebe ênfase a cada dia (garante ≥2x/semana pra cada, em 3+ dias)
+    const gruposSecundarios = (d % 2 === 0) ? ['Ombro', 'Peito'] : ['Bíceps', 'Tríceps'];
+    gruposSecundarios.forEach(function(grupo){
+      const candidato = selecionarExerciciosVariados(grupo, (perfil.nomeAluna || '') + '_' + grupo, 1, perfil.indiceCiclo);
+      if(candidato && candidato[0]){
+        ex.push(candidato[0] + ' · ' + (perfil.nivel === 'Avançado' ? 3 : 2) + 'x' + reps);
+      }
+    });
+
+    ex.push('Prancha ventral · 3x30s'); // isométrico de core, sempre por último no bloco de força
+    if(inclureGluteoMedio){
+      ex.push(sugerirReforcoCruzado('Abdução de quadril na polia'));
+    }
+    if(perfil.frequencia <= 3 || d % 2 === 0 || numDias <= 2){
+      ex.push('Panturrilha em pé · 3x15');
+    }
+    dias.push({ foco: 'Superiores ' + String.fromCharCode(65 + d) + ' · Costas, ' + gruposSecundarios.join('/') + ' e Abdômen', ex: ex });
+  }
+  return dias;
+}
+
+function gerarTreinoSemanal(perfil){
+  // perfil: { nivel, enfase, secundario, frequencia, bloco, tempoDisponivel, indiceCiclo, semanaAtual, pausouRetomou }
+  const numInferiores = Math.ceil(perfil.frequencia / 2);
+  const numSuperiores = perfil.frequencia - numInferiores;
+
+  const seriesTotais = calcularTetoVolume(perfil.nivel, perfil.semanaAtual || 1, !!perfil.pausouRetomou).teto *
+    (perfil.bloco === 'deload' ? 0.5 : (perfil.bloco === 'choque' ? 0.82 : (perfil.volumeReduzidoPorFadiga ? 0.85 : 1)));
+
+  const diasInf = gerarDiasInferiores(perfil, numInferiores, seriesTotais);
+  const diasSup = gerarDiasSuperiores(perfil, numSuperiores);
+
+  const semana = [];
+  let i = 0, s = 0;
+  while(i < diasInf.length || s < diasSup.length){
+    if(i < diasInf.length){ semana.push(diasInf[i]); i++; }
+    if(s < diasSup.length){ semana.push(diasSup[s]); s++; }
+  }
+
+  function calcularDuracaoDia(dia){
+    let total = 0;
+    dia.ex.forEach(function(linha){
       const partes = linha.split(' · ');
-      const nomeEx = partes[0];
       const seriesMatch = (partes[1] || '').match(/^(\d+)x/);
-      const series = seriesMatch ? parseInt(seriesMatch[1], 10) : 0;
-      const exBanco = buscarExercicioNoBanco(nomeEx);
-      const categoria = exBanco ? exBanco.categoria : 'Outro';
-      totais[categoria] = (totais[categoria] || 0) + series;
+      const repsMatch = (partes[1] || '').match(/x(\d+)/);
+      const series = seriesMatch ? parseInt(seriesMatch[1], 10) : 3;
+      const reps = repsMatch ? parseInt(repsMatch[1], 10) : 12;
+      const descanso = calcularDescansoPorReps(reps);
+      const unilateral = ehExercicioUnilateral(partes[0]);
+      if(descanso) total += estimarDuracaoExercicio(series, descanso, unilateral);
+    });
+    return total;
+  }
+
+  function bumpSeries(linha, jaTemExercicioNoTeto){
+    if(linha.indexOf('|||') !== -1) return { linha: linha, chegouNoTeto: false }; // não mexe em bi-set
+    if(linha.toUpperCase().indexOf('PANTURRILHA') !== -1) return { linha: linha, chegouNoTeto: false }; // panturrilha mantém volume baixo de propósito
+    if(linha.toUpperCase().indexOf('PRANCHA') !== -1) return { linha: linha, chegouNoTeto: false }; // isométrico, não segue a mesma lógica de teto de peso
+    if(linha.indexOf('carga baixa') !== -1) return { linha: linha, chegouNoTeto: false }; // reforço cruzado, é carga baixa de propósito, não conta pro teto
+    const match = linha.match(/^([^·]+·\s*)(\d+)x/);
+    if(!match) return { linha: linha, chegouNoTeto: false };
+    const seriesAtuais = parseInt(match[2], 10);
+    const tetoPorNivel = { 'Iniciante': 3, 'Intermediário': 4, 'Avançado': 5 };
+    const tetoNivel = perfil.bloco === 'deload' ? 2 : (tetoPorNivel[perfil.nivel] || 4);
+    // Regra real: no máximo 1 exercício do dia pode chegar no teto do nível, não importa qual, nunca 2 ou mais
+    const tetoPermitido = jaTemExercicioNoTeto.valor ? tetoNivel - 1 : tetoNivel;
+    if(seriesAtuais >= tetoPermitido) return { linha: linha, chegouNoTeto: seriesAtuais >= tetoNivel };
+    const novaLinha = linha.replace(/^([^·]+·\s*)(\d+)x/, function(match, prefixo, num){
+      return prefixo + (parseInt(num, 10) + 1) + 'x';
+    });
+    const novasSeries = seriesAtuais + 1;
+    return { linha: novaLinha, chegouNoTeto: novasSeries >= tetoNivel };
+  }
+
+  semana.forEach(function(dia){
+    // ITEM: reforço automático quando sobra tempo real (regra: usar quase 100% do tempo disponível)
+    // No deload, a sessão mais curta é intencional, nunca reforça pra preencher tempo
+    if(perfil.tempoDisponivel && perfil.bloco !== 'deload' && !perfil.volumeReduzidoPorFadiga){
+      let tentativasReforco = 0;
+      const jaTemExercicioNoTeto = { valor: false };
+      while(calcularDuracaoDia(dia) < perfil.tempoDisponivel * 0.95 && tentativasReforco < 15){
+        let algumMudou = false;
+        dia.ex = dia.ex.map(function(linha){
+          const resultado = bumpSeries(linha, jaTemExercicioNoTeto);
+          if(resultado.linha !== linha) algumMudou = true;
+          if(resultado.chegouNoTeto) jaTemExercicioNoTeto.valor = true;
+          return resultado.linha;
+        });
+        tentativasReforco++;
+        if(!algumMudou) break; // todo mundo já travou no teto permitido, parar de tentar
+      }
+
+      // Ainda sobra tempo real, mesmo respeitando o teto de série? Adiciona MAIS EXERCÍCIOS (não mais série),
+      // priorizando a ênfase real da pirâmide, até usar quase 100% do tempo disponível
+      const ehInferior = dia.foco.indexOf('Inferiores') === 0;
+      const ehSuperior = dia.foco.indexOf('Superiores') === 0;
+      if(ehInferior || ehSuperior){
+        const gruposSuperioresPossiveis = ['Ombro', 'Peito', 'Bíceps', 'Tríceps', 'Costas'];
+        const grupoDoDia = ehInferior
+          ? (dia.foco.indexOf(perfil.enfase) !== -1 ? perfil.enfase : perfil.secundario)
+          : gruposSuperioresPossiveis.find(function(g){ return dia.foco.indexOf(g) !== -1; }) || 'Costas';
+        let tentativasAdicionar = 0;
+        while(calcularDuracaoDia(dia) < perfil.tempoDisponivel * 0.9 && tentativasAdicionar < 8){
+          const nomesJaNoDia = dia.ex.map(function(l){ return l.split(' · ')[0].toUpperCase(); });
+          const padroesJaNoDia = {};
+          nomesJaNoDia.forEach(function(n){ padroesJaNoDia[obterPalavraChaveMovimento(n)] = true; });
+          const candidatos = selecionarExerciciosVariados(grupoDoDia, (perfil.nomeAluna || '') + '_extra' + tentativasAdicionar, 8, perfil.indiceCiclo);
+          let escolhido = null;
+          if(candidatos){
+            escolhido = candidatos.find(function(nome){
+              return nomesJaNoDia.indexOf(nome.toUpperCase()) === -1 && !padroesJaNoDia[obterPalavraChaveMovimento(nome)];
+            });
+          }
+          if(!escolhido) break; // sem candidato novo e distinto, para de tentar
+          const tetoPorNivel = { 'Iniciante': 3, 'Intermediário': 4, 'Avançado': 5 };
+          const seriesNovoEx = (tetoPorNivel[perfil.nivel] || 4) - 1; // nunca reivindica o teto máximo, esse já está ocupado
+          dia.ex.push(escolhido + ' · ' + seriesNovoEx + 'x' + (perfil.bloco === 'choque' ? 7 : 11) + ' (reforço da ênfase, tempo disponível permitia mais)');
+          tentativasAdicionar++;
+        }
+      }
+    }
+
+    // ITEM: corte automático se exceder o tempo disponível
+    // Protege: 2 primeiros exercícios (Costas em superiores / ênfase principal em inferiores), corta do fim pra início
+    const minimoProtegido = 2;
+    if(perfil.tempoDisponivel){
+      while(calcularDuracaoDia(dia) > perfil.tempoDisponivel && dia.ex.length > minimoProtegido){
+        dia.ex.pop();
+        dia.cortadoPorTempo = true;
+      }
+    }
+    const duracaoFinal = calcularDuracaoDia(dia);
+    dia.duracaoEstimadaMin = Math.round(duracaoFinal);
+    dia.excedeTempo = perfil.tempoDisponivel ? duracaoFinal > perfil.tempoDisponivel : false;
+  });
+
+  return semana;
+}
+
+/* ===== VALIDADOR DE PRESCRIÇÃO, investigação rigorosa automática ===== */
+
+function validarPrescricao(perfil, semana){
+  const checklist = [];
+
+  function contemPalavra(nomeEx, lista){
+    const upper = nomeEx.toUpperCase();
+    return lista.some(function(p){ return upper.indexOf(p) !== -1; });
+  }
+
+  // 1. Nível determinado
+  checklist.push({ item: 'Nível determinado', ok: !!perfil.nivel, detalhe: perfil.nivel || 'faltando' });
+
+  // 2. Fase / override de IMC decidido explicitamente (não deixado em aberto)
+  checklist.push({ item: 'Fase/override de IMC decidido (não pendente)', ok: perfil.faseDecidida === true, detalhe: perfil.faseDecidida ? 'decidido' : 'PENDENTE, decidir antes de fechar' });
+
+  // 3. Panturrilha com frequência adequada (todo dia se baixa frequência, senão 2x)
+  const diasComPanturrilha = semana.filter(function(d){ return d.ex.some(function(e){ return contemPalavra(e, ['PANTURRILHA']); }); }).length;
+  const minimoPanturrilha = perfil.frequencia <= 3 ? semana.length : 2;
+  checklist.push({ item: 'Panturrilha com frequência adequada', ok: diasComPanturrilha >= minimoPanturrilha, detalhe: diasComPanturrilha + ' de ' + semana.length + ' dias (mínimo ' + minimoPanturrilha + ')' });
+
+  // 4. Ênfase presente em todo dia de inferiores
+  const diasInferiores = semana.filter(function(d){ return d.foco.indexOf('Inferiores') !== -1; });
+  const enfaseEmTodos = diasInferiores.length === 0 || diasInferiores.every(function(d){ return d.foco.indexOf(perfil.enfase) !== -1 || d.ex.some(function(e){ return contemPalavra(e, [perfil.enfase.toUpperCase()]); }); });
+  checklist.push({ item: 'Ênfase presente em todo dia de inferiores', ok: enfaseEmTodos, detalhe: diasInferiores.length + ' dias de inferiores' });
+
+  // 5. Costas protegida nos dias de superiores
+  const diasSuperiores = semana.filter(function(d){ return d.foco.indexOf('Superiores') !== -1; });
+  const costasOk = diasSuperiores.every(function(d){
+    const count = d.ex.filter(function(e){ return contemPalavra(e, ['REMADA','PUXADA','CRUCIFIXO INVERSO','DESENVOLVIMENTO']); }).length;
+    return count >= 2;
+  });
+  checklist.push({ item: 'Costas protegida (mín. 2 exercícios/dia)', ok: costasOk });
+
+  // 6. Glúteo médio em superiores quando ênfase é Glúteo
+  if(perfil.enfase === 'Glúteo'){
+    const temAbducao = diasSuperiores.length === 0 || diasSuperiores.every(function(d){ return d.ex.some(function(e){ return contemPalavra(e, ['ABDUÇÃO']); }); });
+    checklist.push({ item: 'Glúteo médio incluído em superiores (ênfase é Glúteo)', ok: temAbducao });
+  }
+
+  // 7. Duração usa bem o tempo disponível (65-100%, nunca excede)
+  if(perfil.tempoDisponivel){
+    const duracaoOk = semana.every(function(d){
+      const dur = d.duracaoEstimadaMin != null ? d.duracaoEstimadaMin : 0;
+      return dur <= perfil.tempoDisponivel && dur >= perfil.tempoDisponivel * 0.5;
+    });
+    checklist.push({ item: 'Duração usa bem o tempo disponível (65-100%, sem exceder)', ok: duracaoOk, detalhe: semana.map(function(d){ return (d.duracaoEstimadaMin != null ? d.duracaoEstimadaMin : '?') + 'min'; }).join(', ') + ' de ' + perfil.tempoDisponivel + 'min' });
+  }
+
+  // 8. Correção postural incluída se houver desvio confirmado
+  if(perfil.desviosPosturais && perfil.desviosPosturais.length > 0){
+    checklist.push({ item: 'Bloco de correção postural aplicado', ok: perfil.blocoPosturalAplicado === true, detalhe: perfil.blocoPosturalAplicado ? 'aplicado' : 'PENDENTE, desvio confirmado mas bloco não incluído' });
+  }
+
+  // 9. Queixa de dor tratada como sugestão, nunca substituição silenciosa
+  if(perfil.queixaDor){
+    checklist.push({ item: 'Queixa de dor sinalizada formalmente (não substituição silenciosa)', ok: perfil.queixaSinalizadaFormalmente === true, detalhe: perfil.queixaSinalizadaFormalmente ? 'sinalizada' : 'PENDENTE, confirmar com o personal' });
+  }
+
+  const aprovado = checklist.every(function(c){ return c.ok; });
+  return { aprovado: aprovado, checklist: checklist };
+}
+
+function renderChecklistPrescricao(resultado){
+  let html = '<p class="section-label" style="margin-top:10px;">Validação automática da prescrição</p>';
+  resultado.checklist.forEach(function(c){
+    html += '<div class="list-item"><span><i class="ti ti-' + (c.ok ? 'circle-check' : 'circle-x') + '" style="font-size:13px;color:' + (c.ok ? 'var(--gold-soft)' : '#E2A33D') + ';vertical-align:-2px;margin-right:6px;"></i>' + c.item + '</span>' + (c.detalhe ? '<span class="tag">' + c.detalhe + '</span>' : '') + '</div>';
+  });
+  html += '<div class="' + (resultado.aprovado ? 'insight' : 'info-box') + '" style="margin-top:8px;"><p' + (resultado.aprovado ? '' : ' class="txt"') + '>' + (resultado.aprovado ? '✅ Prescrição aprovada, todos os critérios da metodologia foram cumpridos.' : '⚠️ Ainda há pendências, revise os itens marcados acima antes de fechar com a aluna.') + '</p></div>';
+  return html;
+}
+
+function calcularVolumePorCategoria(a){
+  if(!a.treinoAtual) return { totais: {}, duracaoTotalMin: 0 };
+  const totais = {};
+  let duracaoTotalMin = 0;
+  a.treinoAtual.dias.forEach(function(d){
+    d.ex.forEach(function(linhaOriginal){
+      const linhas = linhaOriginal.indexOf('|||') !== -1
+        ? linhaOriginal.split('|||').slice(1).map(function(l){ return l.trim(); })
+        : [linhaOriginal];
+      linhas.forEach(function(linha){
+        const partes = linha.split(' · ');
+        const nomeEx = partes[0];
+        const seriesMatch = (partes[1] || '').match(/^(\d+)x/);
+        const series = seriesMatch ? parseInt(seriesMatch[1], 10) : 0;
+        const repsMatch = (partes[1] || '').match(/x(\d+)/);
+        const reps = repsMatch ? parseInt(repsMatch[1], 10) : null;
+        const exBanco = buscarExercicioNoBanco(nomeEx);
+        const categoria = exBanco ? exBanco.categoria : 'Outro';
+        const unilateral = ehExercicioUnilateral(nomeEx);
+        const descanso = calcularDescansoPorReps(reps);
+
+        if(contaVolumeDuplo(nomeEx)){
+          totais['Quadríceps'] = (totais['Quadríceps'] || 0) + series;
+          totais['Glúteos'] = (totais['Glúteos'] || 0) + series;
+        } else {
+          totais[categoria] = (totais[categoria] || 0) + series;
+        }
+
+        if(descanso){
+          duracaoTotalMin += estimarDuracaoExercicio(series, descanso, unilateral);
+        }
+      });
     });
   });
-  return totais;
+  return { totais: totais, duracaoTotalMin: Math.round(duracaoTotalMin) };
 }
 
 function renderProgressao(a){
@@ -1290,7 +2026,7 @@ function renderProgressao(a){
     });
   });
   if(!logHtml){
-    logHtml = '<div class="info-box"><p class="txt">Nenhuma sessão registrada ainda — a aluna registra pelo próprio treino, ou simule aqui.</p></div>';
+    logHtml = '<div class="info-box"><p class="txt">Nenhuma sessão registrada ainda, a aluna registra pelo próprio treino, ou simule aqui.</p></div>';
   }
 
   const totalDias = totalDiasDeTreino();
@@ -1303,27 +2039,375 @@ function renderProgressao(a){
       'Hora de revisar: nível ainda condiz com a execução observada? Algum exercício estabilizou e pode evoluir de complexidade? Vale reavaliar peso/medidas para confirmar se a Fase 1 (emagrecimento) ainda é prioridade ou se já pode avançar para a ênfase estética declarada.</p></div>';
   }
 
-  const volumePorCategoria = calcularVolumePorCategoria(a);
+  const volumeResultado = calcularVolumePorCategoria(a);
+  const volumePorCategoria = volumeResultado.totais;
+  const infoTeto = calcularTetoVolume(a.nivel, prog.semana, !!a.pausouRetomou);
   let volumeHtml = '<p class="section-label" style="margin-top:22px;">Volume total da semana (visível só pra você)</p><div class="info-box">';
   Object.keys(volumePorCategoria).forEach(function(cat){
     volumeHtml += '<p class="txt">' + cat + ': ' + volumePorCategoria[cat] + ' séries</p>';
   });
-  volumeHtml += '<p class="txt" style="color:var(--text-faint);font-size:11.5px;margin-bottom:0;">Regra do nível (' + a.nivel + '): ' + (a.nivel === 'Iniciante' ? 'até 20 séries/semana por ênfase' : a.nivel === 'Intermediário' ? '25 a 30 séries/semana por ênfase' : 'até 50 séries/semana por ênfase') + '</p></div>';
+  volumeHtml += '<p class="txt" style="color:var(--gold-soft);margin:6px 0;">⏱ Duração total estimada da semana: ~' + volumeResultado.duracaoTotalMin + ' min</p>';
+  volumeHtml += '<p class="txt" style="color:var(--text-faint);font-size:12px;margin-bottom:0;">Teto de volume atual: ' + infoTeto.teto + ' séries/semana por ênfase' + (infoTeto.emTransicao ? ' · Volume de transição (retomada), libera pleno na semana ' + (SEMANAS_TRANSICAO + 1) : ' (' + a.nivel + ')') + '</p></div>';
 
-  return '<p class="section-label" style="margin-top:22px;">Progressão de carga — simulador</p>' +
+  return '<p class="section-label" style="margin-top:22px;">Progressão de carga</p>' +
     '<div class="list-item" style="margin-bottom:10px;"><span>Semana atual do ciclo: ' + prog.semana + ' / 6</span></div>' +
     '<div class="list-item" style="margin-bottom:10px;"><span>Treinos concluídos essa semana: ' + concluidosSemana + ' / ' + totalDias + '</span></div>' +
     logHtml +
     reavaliacaoHtml +
     volumeHtml +
-    '<div class="form-group" style="margin-top:12px;"><label class="form-label">Exercício</label><select class="form-select" id="prog-exercicio">' + opcoes + '</select></div>' +
-    '<div class="form-group"><label class="form-label">Carga usada nesta sessão (kg)</label><input class="form-input" id="prog-carga" type="number" placeholder="Ex: 20"></div>' +
-    '<div class="form-group"><label class="form-label">Repetições executadas na 1ª série (é ela que define o ajuste)</label><input class="form-input" id="prog-reps" type="number" placeholder="Ex: 10"></div>' +
-    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="registrarSessao()">Registrar sessão</button>' +
-    '<button class="btn-gold" onclick="avancarSemana()">Simular fim de semana</button>' +
-    '<div id="prog-reengajamento" style="margin-top:10px;"></div>' +
-    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:14px;" onclick="exportarRelatorioEvolucao(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-file-export" style="font-size:14px;vertical-align:-2px;margin-right:6px;"></i>Exportar relatório de evolução</button>' +
+    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:14px;" onclick="exportarRelatorioEvolucao(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-file-export" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>Exportar relatório de evolução</button>' +
     '<p style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:16px;cursor:pointer;" onclick="resetarDadosTeste()">Resetar dados de teste (antes do lançamento)</p>';
+}
+
+/* ===== FEEDBACK SOBRE O GERADOR, coletado organizado pra virar regra numa próxima conversa ===== */
+function carregarFeedbackGerador(){
+  try {
+    const raw = localStorage.getItem('musa_feedback_gerador');
+    return raw ? JSON.parse(raw) : [];
+  } catch(e){ return []; }
+}
+function salvarListaFeedbackGerador(lista){
+  try { localStorage.setItem('musa_feedback_gerador', JSON.stringify(lista)); } catch(e){}
+}
+
+function salvarFeedbackGerador(nomeAluna){
+  const texto = document.getElementById('feedback-gerador-texto').value.trim();
+  if(!texto) return;
+  const lista = carregarFeedbackGerador();
+  lista.push({ data: new Date().toLocaleDateString('pt-BR'), aluna: nomeAluna, texto: texto });
+  salvarListaFeedbackGerador(lista);
+  document.getElementById('feedback-gerador-texto').value = '';
+  renderListaFeedbackGerador();
+}
+
+function renderListaFeedbackGerador(){
+  const container = document.getElementById('lista-feedback-gerador');
+  if(!container) return;
+  const lista = carregarFeedbackGerador();
+  if(lista.length === 0){ container.innerHTML = ''; return; }
+  let html = '<p class="lbl" style="margin-top:14px;">Feedbacks guardados (' + lista.length + ')</p>';
+  lista.slice().reverse().forEach(function(f){
+    html += '<div class="info-box" style="margin-bottom:8px;"><p class="txt" style="margin-bottom:2px;">' + f.texto + '</p><p style="font-size:11px;color:var(--text-faint);margin:0;">' + f.aluna + ' · ' + f.data + '</p></div>';
+  });
+  html += '<div style="display:flex;gap:8px;">' +
+    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);font-size:12px;width:auto;flex:1;" onclick="copiarFeedbackGerador()">Copiar tudo</button>' +
+    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);font-size:12px;width:auto;flex:1;" onclick="baixarFeedbackGerador()"><i class="ti ti-download" style="font-size:12px;vertical-align:-2px;margin-right:4px;"></i>Baixar arquivo</button>' +
+  '</div>';
+  container.innerHTML = html;
+}
+
+function copiarFeedbackGerador(){
+  const lista = carregarFeedbackGerador();
+  const texto = lista.map(function(f){ return '[' + f.data + ' · ' + f.aluna + '] ' + f.texto; }).join('\n');
+  if(navigator.clipboard) navigator.clipboard.writeText(texto);
+}
+
+function baixarFeedbackGerador(){
+  const lista = carregarFeedbackGerador();
+  const texto = lista.map(function(f){ return '[' + f.data + ' · ' + f.aluna + '] ' + f.texto; }).join('\n');
+  const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'musa_feedbacks_gerador_' + new Date().toISOString().slice(0,10) + '.txt';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+function determinarFaseAluna(a){
+  if(a.pesoAtual && a.altura){
+    const imc = a.pesoAtual / (a.altura * a.altura);
+    if(imc >= 25) return 'Emagrecimento';
+  }
+  const objetivoTexto = (a.objetivo || '').toUpperCase();
+  if(objetivoTexto.indexOf('EMAGREC') !== -1 || objetivoTexto.indexOf('PERDA DE PESO') !== -1 || objetivoTexto.indexOf('PERDER PESO') !== -1){
+    return 'Emagrecimento';
+  }
+  if(objetivoTexto.indexOf('DESEMPENHO') !== -1 || objetivoTexto.indexOf('PERFORMANCE') !== -1 || objetivoTexto.indexOf('FORÇA') !== -1 || objetivoTexto.indexOf('FORCA') !== -1){
+    return 'Desempenho';
+  }
+  return 'Estética/Geral';
+}
+
+function temTecnicaAprovada(a){
+  if(!a.tecnicaAprovada) return false;
+  return Object.keys(a.tecnicaAprovada).some(function(k){ return a.tecnicaAprovada[k] === 'aprovado'; });
+}
+
+function extrairEnfaseSecundaria(piramideTexto){
+  const upper = (piramideTexto || '').toUpperCase();
+  const mapaKeywords = [
+    { termos: ['GLÚTEO', 'GLUTEO', 'BUMBUM', 'BUNDA'], grupo: 'Glúteo' },
+    { termos: ['QUADRÍCEPS', 'QUADRICEPS', 'COXA', 'PERNA'], grupo: 'Quadríceps' },
+    { termos: ['POSTERIOR'], grupo: 'Posterior' }
+  ];
+  const encontrados = [];
+  const termosEncontrados = [];
+  // Varre o texto caractere a caractere, registrando a posição de cada termo encontrado, na ordem em que aparecem
+  const ocorrencias = [];
+  mapaKeywords.forEach(function(item){
+    item.termos.forEach(function(termo){
+      const pos = upper.indexOf(termo);
+      if(pos !== -1) ocorrencias.push({ pos: pos, grupo: item.grupo, termo: termo });
+    });
+  });
+  ocorrencias.sort(function(a, b){ return a.pos - b.pos; });
+  ocorrencias.forEach(function(o){
+    if(encontrados.indexOf(o.grupo) === -1){ encontrados.push(o.grupo); termosEncontrados.push(o.termo); }
+  });
+  // "Perna" é um termo genérico, sem especificar quadríceps ou posterior, então balanceia os dois em vez de cair no padrão de Glúteo
+  if(termosEncontrados[0] === 'PERNA'){
+    return { enfase: 'Quadríceps', secundario: 'Posterior' };
+  }
+  return {
+    enfase: encontrados[0] || 'Glúteo',
+    secundario: encontrados[1] || (encontrados[0] === 'Quadríceps' ? 'Glúteo' : 'Posterior')
+  };
+}
+
+function calcularTempoRealDeMusculacao(a, blocoInfo){
+  const tetoPorNivel = { 'Iniciante': 60, 'Intermediário': 60, 'Avançado': 70 };
+  const teto = tetoPorNivel[a.nivel] || 60;
+  const prog = getProgressoAluna(a.nome);
+  // Retomando após pausa, ou ainda nas primeiras semanas: começa conservador (45min), sobe conforme o feedback for vindo
+  const emTransicaoOuInicio = prog.semana <= 4;
+  if(emTransicaoOuInicio) return Math.min(45, teto);
+  return teto; // o tempo declarado pela aluna vira teto do que sobra pra cardio, nunca aumenta a musculação além disso
+}
+
+function construirPerfilAluna(a){
+  const piramideInfo = extrairEnfaseSecundaria(a.piramide);
+  const enfase = piramideInfo.enfase;
+  const secundario = piramideInfo.secundario;
+  const blocoInfo = calcularBlocoAtual(a);
+  const freqMatch = (a.freq || '').match(/\d+/);
+  const freqNum = freqMatch ? parseInt(freqMatch[0], 10) : 3;
+  return {
+    nivel: a.nivel || 'Iniciante',
+    enfase: enfase,
+    secundario: secundario,
+    nomeAluna: a.nome,
+    frequencia: freqNum,
+    bloco: blocoInfo.blocoTecnico,
+    volumeReduzidoPorFadiga: !!blocoInfo.volumeReduzido,
+    tempoDisponivel: calcularTempoRealDeMusculacao(a, blocoInfo),
+    indiceCiclo: 0,
+    semanaAtual: 1,
+    pausouRetomou: false,
+    faseDecidida: true,
+    fase: determinarFaseAluna(a),
+    temTecnicaAprovada: temTecnicaAprovada(a)
+  };
+}
+
+function calcularSnapshotVolume(diasSemana){
+  const totais = {};
+  let duracaoTotal = 0;
+  diasSemana.forEach(function(dia){
+    (dia.ex || []).forEach(function(linhaOriginal){
+      const linhas = linhaOriginal.indexOf('|||') !== -1 ? linhaOriginal.split('|||').slice(1).map(function(l){ return l.trim(); }) : [linhaOriginal];
+      linhas.forEach(function(linha){
+        const partes = linha.split(' · ');
+        const nomeEx = partes[0];
+        const seriesMatch = (partes[1] || '').match(/^(\d+)x/);
+        const series = seriesMatch ? parseInt(seriesMatch[1], 10) : 0;
+        const exBanco = buscarExercicioNoBanco(nomeEx);
+        const categoria = exBanco ? (exBanco.grupo || exBanco.categoria) : 'Outro';
+        if(contaVolumeDuplo(nomeEx)){
+          totais['Quadríceps'] = (totais['Quadríceps'] || 0) + series;
+          totais['Glúteos'] = (totais['Glúteos'] || 0) + series;
+        } else {
+          totais[categoria] = (totais[categoria] || 0) + series;
+        }
+      });
+    });
+    duracaoTotal += dia.duracaoEstimadaMin || 0;
+  });
+  return { totais: totais, duracaoTotal: Math.round(duracaoTotal) };
+}
+
+let treinoPreviewPendente = null;
+
+function mostrarPreviewMudancaTreino(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  const area = document.getElementById('preview-mudanca-area');
+  if(!area) return;
+
+  const snapshotAntes = a.treinoAtual ? calcularSnapshotVolume(a.treinoAtual.dias) : { totais: {}, duracaoTotal: 0 };
+  const perfil = construirPerfilAluna(a);
+  const semanaPreview = gerarTreinoSemanal(perfil);
+  const snapshotDepois = calcularSnapshotVolume(semanaPreview);
+  const resultadoValidacao = validarPrescricao(perfil, semanaPreview);
+
+  treinoPreviewPendente = { nomeAluna: nomeAluna, semana: semanaPreview };
+
+  const categorias = Array.from(new Set(Object.keys(snapshotAntes.totais).concat(Object.keys(snapshotDepois.totais))));
+  let comparativoHtml = '<div class="info-box">';
+  if(categorias.length === 0){
+    comparativoHtml += '<p class="txt">Ainda sem treino anterior pra comparar, esse será o primeiro.</p>';
+  } else {
+    categorias.forEach(function(cat){
+      const antes = snapshotAntes.totais[cat] || 0;
+      const depois = snapshotDepois.totais[cat] || 0;
+      const seta = depois > antes ? '↑' : (depois < antes ? '↓' : '=');
+      comparativoHtml += '<p class="txt">' + cat + ': ' + antes + ' → ' + depois + ' séries ' + seta + '</p>';
+    });
+  }
+  comparativoHtml += '<p class="txt" style="color:var(--gold-soft);margin-top:6px;">Duração total da semana: ' + snapshotAntes.duracaoTotal + 'min → ' + snapshotDepois.duracaoTotal + 'min</p></div>';
+
+  area.innerHTML = '<p class="section-label" style="margin-top:14px;">O que vai mudar com esse ajuste</p>' +
+    comparativoHtml +
+    renderChecklistPrescricao(resultadoValidacao) +
+    '<button class="btn-gold" onclick="confirmarGerarTreinoPreview()">Confirmar e gerar esse novo treino</button>';
+}
+
+function confirmarGerarTreinoPreview(){
+  if(!treinoPreviewPendente) return;
+  const a = alunasPersonal.find(function(x){ return x.nome === treinoPreviewPendente.nomeAluna; });
+  if(!a) return;
+  const nomesDias = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+  const semanaComNome = treinoPreviewPendente.semana.map(function(d, i){ return Object.assign({ n: nomesDias[i] }, d); });
+  a.treinoAtual = { fase: (a.treinoAtual && a.treinoAtual.fase) || 'A definir', volume: 'Gerado automaticamente, revise antes de confirmar', dias: semanaComNome };
+  treinoPreviewPendente = null;
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+}
+
+function editarNivelAluna(nomeAluna, novoNivel){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  a.nivel = novoNivel;
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+  mostrarPreviewMudancaTreino(nomeAluna);
+}
+
+function editarFrequenciaAluna(nomeAluna, novaFreq){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  a.freq = novaFreq;
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+  mostrarPreviewMudancaTreino(nomeAluna);
+}
+
+function renderSecaoColapsavel(titulo, conteudoHtml, idUnico){
+  return '<div class="section-colapsavel" style="margin-top:22px;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="alternarSecaoColapsavel(\'' + idUnico + '\')">' +
+      '<p class="section-label" style="margin:0;">' + titulo + '</p>' +
+      '<i class="ti ti-chevron-down" id="chevron-' + idUnico + '" style="color:var(--gold-soft);font-size:16px;transition:transform .2s;"></i>' +
+    '</div>' +
+    '<div id="conteudo-' + idUnico + '" style="display:none;margin-top:8px;">' + conteudoHtml + '</div>' +
+  '</div>';
+}
+
+function alternarSecaoColapsavel(idUnico){
+  const conteudo = document.getElementById('conteudo-' + idUnico);
+  const chevron = document.getElementById('chevron-' + idUnico);
+  if(!conteudo) return;
+  const abrindo = conteudo.style.display === 'none';
+  conteudo.style.display = abrindo ? 'block' : 'none';
+  if(chevron) chevron.style.transform = abrindo ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+
+function renderResumoMetodologiaAutomatica(a){
+  const piramideInfo = extrairEnfaseSecundaria(a.piramide);
+  const enfaseDetectada = piramideInfo.enfase;
+  const secundarioDetectado = piramideInfo.secundario;
+  const dQuad = a.direcionamentoQuadriceps || 'nenhum';
+  const dGluteo = a.direcionamentoGluteo || 'nenhum';
+  const desvios = (a.desviosPosturaisConfirmados || []).length;
+  const blocoInfo = calcularBlocoAtual(a);
+
+  return '<p class="section-label" style="margin-top:22px;">Pirâmide de prioridade</p>' +
+    '<div class="info-box"><p class="txt" style="font-weight:600;">' + (a.piramide || 'Não respondida') + '</p></div>' +
+    '<p class="section-label" style="margin-top:16px;">Nossa metodologia, agindo automaticamente</p>' +
+    '<div class="info-box">' +
+      '<p class="txt">✓ Ênfase interpretada da pirâmide: <b>' + enfaseDetectada + '</b> · Secundário: <b>' + secundarioDetectado + '</b></p>' +
+      '<p class="txt">✓ Nível: <b>' + (a.nivel || 'A definir') + '</b> · Frequência: <b>' + (a.freq || 'A definir') + '</b></p>' +
+      '<p class="txt">✓ Bloco atual: <b>' + blocoInfo.bloco + '</b></p>' +
+      (blocoInfo.blocoTecnico === 'deload' || blocoInfo.volumeReduzido ? '<p class="txt" style="color:#E2A33D;">⚠️ ' + blocoInfo.descricao + '</p>' : '') +
+      '<p class="txt">' + (dQuad !== 'nenhum' ? '✓ Direcionamento de quadríceps ativo: <b>' + dQuad + '</b>' : 'Sem direcionamento específico de quadríceps') + '</p>' +
+      '<p class="txt">' + (dGluteo !== 'nenhum' ? '✓ Direcionamento de glúteo ativo: <b>' + dGluteo + '</b>' : 'Sem direcionamento específico de glúteo') + '</p>' +
+      '<p class="txt" style="margin-bottom:0;">' + (desvios > 0 ? '✓ ' + desvios + ' desvio(s) postural(is) confirmado(s), bloco de correção será incluído' : 'Nenhum desvio postural confirmado ainda') + '</p>' +
+    '</div>';
+}
+
+function gerarTreinoAutomaticoParaAluna(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+
+  const perfil = construirPerfilAluna(a);
+
+  const semana = gerarTreinoSemanal(perfil);
+  const nomesDias = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+  const semanaComNome = semana.map(function(d, i){ return Object.assign({ n: nomesDias[i] }, d); });
+
+  a.treinoAtual = { fase: (a.treinoAtual && a.treinoAtual.fase) || 'A definir', volume: 'Gerado automaticamente, revise antes de confirmar', dias: semanaComNome };
+
+  const resultado = validarPrescricao(perfil, semana);
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+  const areaValidacao = document.getElementById('validacao-treino-area');
+  if(areaValidacao) areaValidacao.innerHTML = renderChecklistPrescricao(resultado);
+}
+
+function editarSeriesReps(diaIndex, exIndex, novoValor){
+  const a = alunaAberta;
+  const nomeAtual = a.treinoAtual.dias[diaIndex].ex[exIndex].split(' · ')[0];
+  a.treinoAtual.dias[diaIndex].ex[exIndex] = nomeAtual + ' · ' + novoValor.trim();
+  if(typeof dias !== 'undefined' && dias[diaIndex] && dias[diaIndex].ex[exIndex]){
+    dias[diaIndex].ex[exIndex] = nomeAtual + ' · ' + novoValor.trim();
+  }
+}
+
+function removerExercicioTreino(diaIndex, exIndex){
+  const a = alunaAberta;
+  a.treinoAtual.dias[diaIndex].ex.splice(exIndex, 1);
+  if(typeof dias !== 'undefined' && dias[diaIndex]) dias[diaIndex].ex.splice(exIndex, 1);
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+}
+
+function abrirSelecaoGrupoParaAdicionar(diaIndex){
+  const grupos = ['Costas','Peito','Ombros','Bíceps','Tríceps','Quadríceps','Glúteos','Isquiotibiais','Panturrilha','Abdômen'];
+  const form = document.getElementById('add-exercicio-form-' + diaIndex);
+  if(!form) return;
+  form.innerHTML = '<p class="lbl" style="margin-top:8px;">De qual grupo muscular?</p>' +
+    '<div class="chip-list" style="margin:6px 0;">' +
+    grupos.map(function(g){ return '<span class="chip" style="cursor:pointer;" onclick="abrirSelecaoExercicioParaAdicionar(' + diaIndex + ',\'' + g + '\')">' + g + '</span>'; }).join('') +
+    '</div>';
+}
+
+function abrirSelecaoExercicioParaAdicionar(diaIndex, grupo){
+  const opcoes = exerciciosBanco.filter(function(e){ return e.grupo === grupo || e.categoria === grupo; });
+  const form = document.getElementById('add-exercicio-form-' + diaIndex);
+  if(!form) return;
+  form.innerHTML = '<p class="lbl" style="margin-top:8px;">Exercício de ' + grupo + '</p>' +
+    '<div class="form-group"><select class="form-select" id="add-exercicio-select-' + diaIndex + '">' +
+      opcoes.map(function(e){ return '<option value="' + e.nome.replace(/"/g,'') + '">' + e.nome + '</option>'; }).join('') +
+    '</select></div>' +
+    '<button class="btn-gold" style="width:auto;padding:8px 14px;margin:0;font-size:12px;" onclick="confirmarAdicionarExercicio(' + diaIndex + ')">Adicionar</button>';
+}
+
+function confirmarAdicionarExercicio(diaIndex){
+  const nomeEscolhido = document.getElementById('add-exercicio-select-' + diaIndex).value;
+  const a = alunaAberta;
+  a.treinoAtual.dias[diaIndex].ex.push(nomeEscolhido + ' · 3x12');
+  if(typeof dias !== 'undefined' && dias[diaIndex]) dias[diaIndex].ex.push(nomeEscolhido + ' · 3x12');
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+}
+
+function adicionarExercicioTreino(diaIndex){
+  const a = alunaAberta;
+  a.treinoAtual.dias[diaIndex].ex.push('Novo exercício · 3x12');
+  if(typeof dias !== 'undefined' && dias[diaIndex]) dias[diaIndex].ex.push('Novo exercício · 3x12');
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
 }
 
 function abrirSubstituicao(diaIndex, exIndex){
@@ -1331,8 +2415,8 @@ function abrirSubstituicao(diaIndex, exIndex){
   const linhaAtual = a.treinoAtual.dias[diaIndex].ex[exIndex];
   const nomeAtual = linhaAtual.split(' · ')[0];
   const exAtualBanco = exerciciosBanco.find(function(e){ return e.nome.toUpperCase() === nomeAtual.toUpperCase(); });
-  const categoria = exAtualBanco ? exAtualBanco.categoria : null;
-  const opcoes = exerciciosBanco.filter(function(e){ return !categoria || e.categoria === categoria; }).slice(0, 40);
+  const grupo = exAtualBanco ? (exAtualBanco.grupo || exAtualBanco.categoria) : null;
+  const opcoes = exerciciosBanco.filter(function(e){ return !grupo || e.grupo === grupo || e.categoria === grupo; });
 
   const prog = getProgressoAluna(a.nome);
   const semanasDesdeAtribuicao = prog.semana; // treino atribuído na semana 1
@@ -1379,26 +2463,48 @@ function openAlunaDetail(i){
   alunaAberta = a;
   const el = document.getElementById('aluna-detail-content');
   let treinoHtml = '<div class="list-item"><span>Ainda sem treino atribuído</span></div>';
+  let treinoAcoesHtml = '';
   if(a.treinoAtual){
     treinoHtml = '<div class="badge">' + a.treinoAtual.fase + '</div>' +
       '<p class="page-sub" style="margin:2px 0 10px;">' + a.treinoAtual.volume + '</p>';
     a.treinoAtual.dias.forEach(function(d, di){
-      treinoHtml += '<p style="font-size:12px;font-weight:600;color:var(--text-dim);margin:10px 0 6px;">' + d.n + ' — ' + d.foco + '</p>';
+      treinoHtml += '<p style="font-size:12px;font-weight:600;color:var(--text-dim);margin:10px 0 6px;">' + d.n + ', ' + d.foco + '</p>';
       d.ex.forEach(function(exLine, ei){
-        treinoHtml += '<div class="list-item" style="padding:8px 12px;"><span style="font-size:12.5px;">' + exLine + '</span><span class="tag" style="cursor:pointer;" onclick="abrirSubstituicao(' + di + ',' + ei + ')">Trocar</span></div>';
+        const partesEdit = exLine.split(' · ');
+        const nomeEdit = partesEdit[0];
+        const setsRepsEdit = partesEdit[1] || '';
+        treinoHtml += '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:4px;padding:8px 12px;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+            '<span style="font-size:12px;">' + nomeEdit + '</span>' +
+            '<span class="tag" style="cursor:pointer;" onclick="abrirSubstituicao(' + di + ',' + ei + ')">Trocar</span>' +
+          '</div>' +
+          '<div style="display:flex;gap:6px;">' +
+            '<input class="form-input" style="flex:1;padding:6px 8px;font-size:12px;" value="' + setsRepsEdit + '" onchange="editarSeriesReps(' + di + ',' + ei + ',this.value)" placeholder="ex: 4x12">' +
+            '<button class="btn-gold" style="width:auto;padding:6px 10px;margin:0;font-size:11px;background:#3a1414;color:#E2A33D;" onclick="removerExercicioTreino(' + di + ',' + ei + ')">Remover</button>' +
+          '</div>' +
+        '</div>';
       });
+      treinoHtml += '<p style="font-size:12px;color:var(--gold-soft);margin:6px 0 4px;cursor:pointer;" onclick="abrirSelecaoGrupoParaAdicionar(' + di + ')"><i class="ti ti-plus" style="font-size:12px;vertical-align:-2px;margin-right:4px;"></i>Adicionar exercício nesse dia</p>' +
+        '<div id="add-exercicio-form-' + di + '" style="margin-bottom:10px;"></div>';
     });
     treinoHtml += '<div id="substituicao-form"></div>';
   }
+  treinoAcoesHtml = '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:10px;" onclick="gerarTreinoAutomaticoParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-wand" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>' + (a.treinoAtual ? 'Gerar novo treino automaticamente' : 'Prescrever treino automaticamente') + '</button>';
+  treinoAcoesHtml += '<div id="validacao-treino-area"></div>';
+  treinoAcoesHtml += '<p class="section-label" style="margin-top:18px;">Seu feedback sobre esse treino</p>' +
+    '<p class="page-sub" style="margin-top:-4px;">Anote aqui o que achou estranho ou errado, isso fica guardado organizado pra você trazer numa próxima conversa e a gente transformar em regra permanente.</p>' +
+    '<div class="form-group"><textarea class="form-input" id="feedback-gerador-texto" rows="3" placeholder="Ex: achei o volume de posterior baixo demais pra essa aluna..."></textarea></div>' +
+    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="salvarFeedbackGerador(\'' + a.nome.replace(/'/g,"\\'") + '\')">Salvar feedback</button>' +
+    '<div id="lista-feedback-gerador"></div>';
 
   let queixaHtml = '';
   if(a.queixaDor && !a.patologiaConfirmada){
     const candidatas = patologiasCatalogo.filter(function(p){ return p.regiao === a.regiaoQueixa; });
     queixaHtml = '<p class="section-label">IA identificou uma queixa</p>' +
-      '<div class="insight"><p>A aluna relatou dor ("' + a.restricoes + '"). Isso pode ser só ajuste de técnica — mas também pode indicar uma das patologias abaixo. Confirme se for o caso:</p></div>' +
+      '<div class="insight"><p>A aluna relatou dor ("' + a.restricoes + '"). Isso pode ser só ajuste de técnica, mas também pode indicar uma das patologias abaixo. Confirme se for o caso:</p></div>' +
       '<div class="chip-list" style="margin-bottom:14px;">' +
         candidatas.map(function(p){ return '<span class="desvio-chip" onclick="confirmarPatologia(\'' + a.nome.replace(/'/g,"\\'") + '\',\'' + p.id + '\')">' + p.nome + '</span>'; }).join('') +
-        '<span class="desvio-chip" onclick="confirmarPatologia(\'' + a.nome.replace(/'/g,"\\'") + '\',\'tecnica\')">Não é patologia — só ajuste de técnica</span>' +
+        '<span class="desvio-chip" onclick="confirmarPatologia(\'' + a.nome.replace(/'/g,"\\'") + '\',\'tecnica\')">Não é patologia, só ajuste de técnica</span>' +
       '</div>';
   } else if(a.patologiaConfirmada === 'tecnica'){
     queixaHtml = '<p class="section-label">Queixa avaliada</p>' +
@@ -1406,7 +2512,7 @@ function openAlunaDetail(i){
   } else if(a.patologiaConfirmada){
     const p = patologiasCatalogo.find(function(x){ return x.id === a.patologiaConfirmada; });
     queixaHtml = '<p class="section-label">Patologia confirmada</p>' +
-      '<div class="info-box"><p style="font-size:13.5px;font-weight:600;margin:0 0 8px;">' + p.nome + '</p>' +
+      '<div class="info-box"><p style="font-size:13px;font-weight:600;margin:0 0 8px;">' + p.nome + '</p>' +
       '<p class="txt"><b>Evitar:</b> ' + p.evitar + '</p>' +
       '<p class="txt"><b>Permitido:</b> ' + p.permitido + '</p>' +
       '<p class="txt" style="margin-bottom:0;"><b>Conduta:</b> ' + p.conduta + '</p></div>';
@@ -1416,9 +2522,17 @@ function openAlunaDetail(i){
     '<h1 class="page-title" style="margin-top:0;">' + a.nome + '</h1>' +
     '<p class="page-sub"><span class="status-dot ' + a.status + '"></span><span class="status-txt ' + a.status + '">' + a.statusLabel + '</span></p>' +
     '<div class="stat-grid">' +
-      '<div class="stat-card"><p class="stat-label">Nível</p><p class="stat-value" style="font-size:15px;">' + a.nivel + '</p></div>' +
-      '<div class="stat-card"><p class="stat-label">Frequência desejada</p><p class="stat-value" style="font-size:15px;">' + a.freq + '</p></div>' +
+      '<div class="stat-card"><p class="stat-label">Nível</p>' +
+        '<select class="form-select" style="font-size:13px;padding:6px;margin-top:4px;" onchange="editarNivelAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)">' +
+          ['Iniciante','Intermediário','Avançado'].map(function(n){ return '<option value="' + n + '"' + (a.nivel === n ? ' selected' : '') + '>' + n + '</option>'; }).join('') +
+        '</select></div>' +
+      '<div class="stat-card"><p class="stat-label">Frequência desejada</p>' +
+        '<select class="form-select" style="font-size:13px;padding:6px;margin-top:4px;" onchange="editarFrequenciaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)">' +
+          ['2x por semana','3x por semana','4x por semana','5x por semana','6x por semana'].map(function(f){ return '<option value="' + f + '"' + (a.freq === f ? ' selected' : '') + '>' + f + '</option>'; }).join('') +
+        '</select></div>' +
     '</div>' +
+    '<p style="font-size:11px;color:var(--text-faint);margin:-8px 0 12px;">Ajustar aqui atualiza automaticamente toda a estrutura de treino gerada</p>' +
+    '<div id="preview-mudanca-area"></div>' +
     (a.imc ? '<p class="section-label">Composição corporal</p><div class="info-box"><p class="txt">' + a.peso + ' · ' + a.altura + '<br>IMC ' + a.imc + '</p></div>' : '') +
     '<p class="section-label">Contato</p>' +
     '<div class="info-box"><p class="txt">' + (a.email || 'Não informado') + '<br>' + (a.telefone || 'Telefone não informado') + '</p></div>' +
@@ -1431,15 +2545,20 @@ function openAlunaDetail(i){
     queixaHtml +
     '<p class="section-label">Academia</p>' +
     '<div class="info-box"><p class="txt">' + (a.academia || 'Não informado') + '</p></div>' +
+    renderPlanoFechado(a) +
     '<p class="section-label">Treino atual</p>' +
     treinoHtml +
-    renderElegibilidadeFase(a) +
-    renderPromocaoNivel(a) +
-    renderBlocoPeriodizacao(a) +
-    renderTecnicaPendente(a) +
-    renderProgressao(a) +
+    renderDirecionamentoTecnico(a) +
+    renderAvaliacaoPostural(a) +
+    renderResumoMetodologiaAutomatica(a) +
+    treinoAcoesHtml +
+    renderDuvidasSinalizadas(a) +
+    renderExerciciosEstagnados(a) +
+    renderSecaoColapsavel('Acompanhamento e histórico', renderElegibilidadeFase(a) + renderFunilEngajamento(a) + renderLinhaDoTempo(a) + renderPromocaoNivel(a) + renderBlocoPeriodizacao(a) + renderTecnicaPendente(a) + renderProgressao(a), 'acompanhamento') +
     '<p class="page-sub" style="margin-top:10px;">Anamnese respondida em ' + (a.dataAnamnese || 'data desconhecida') + '</p>';
   showPersonalView('aluna');
+  aplicarTransicaoSuave('aluna-detail-content');
+  renderListaFeedbackGerador();
 }
 
 function renderPromocaoNivel(a){
@@ -1447,9 +2566,9 @@ function renderPromocaoNivel(a){
   if(!elegibilidade) return '';
   let html = '<p class="section-label" style="margin-top:22px;">Promoção de nível (iniciante → intermediário)</p>';
   html += elegibilidade.criterios.map(function(c){
-    return '<div class="list-item"><span><i class="ti ti-' + (c.atingido ? 'circle-check' : 'circle-x') + '" style="font-size:13px;color:' + (c.atingido ? 'var(--gold-soft)' : 'var(--text-faint)') + ';vertical-align:-2px;margin-right:6px;"></i>' + c.nome + '</span><span class="tag">' + c.detalhe + '</span></div>';
+    return '<div class="list-item"><span><i class="ti ti-' + (c.atingido ? 'circle-check' : 'circle-x') + '" style="font-size:13px;color:' + (c.atingido ? 'var(--gold-soft)' : '#E2A33D') + ';vertical-align:-2px;margin-right:6px;"></i>' + c.nome + '</span><span class="tag">' + c.detalhe + '</span></div>';
   }).join('');
-  html += '<div class="' + (elegibilidade.elegivel ? 'insight' : 'info-box') + '" style="margin-top:8px;"><p' + (elegibilidade.elegivel ? '' : ' class="txt"') + '>' + (elegibilidade.elegivel ? 'Critérios atendidos — pode promover pra intermediário quando confirmar.' : 'Ainda faltam critérios pra promoção de nível.') + '</p></div>';
+  html += '<div class="' + (elegibilidade.elegivel ? 'insight' : 'info-box') + '" style="margin-top:8px;"><p' + (elegibilidade.elegivel ? '' : ' class="txt"') + '>' + (elegibilidade.elegivel ? 'Critérios atendidos, pode promover pra intermediário quando confirmar.' : 'Ainda faltam critérios pra promoção de nível.') + '</p></div>';
   return html;
 }
 
@@ -1472,19 +2591,318 @@ function renderTecnicaPendente(a){
   return html;
 }
 
+function renderDirecionamentoTecnico(a){
+  const dQuad = a.direcionamentoQuadriceps || 'nenhum';
+  const dGluteo = a.direcionamentoGluteo || 'nenhum';
+  const sugQuad = sugerirExerciciosQuadriceps(dQuad);
+  const sugGluteo = sugerirExerciciosGluteo(dGluteo);
+
+  return '<p class="section-label" style="margin-top:22px;">Direcionamento técnico</p>' +
+    '<div class="form-group"><label class="form-label">Precisa desenvolver região distal do quadríceps (perto do joelho)?</label>' +
+      '<select class="form-select" id="select-quad-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" onchange="salvarDirecionamento(\'' + a.nome.replace(/'/g,"\\'") + '\', \'quadriceps\', this.value)">' +
+        '<option value="nenhum"' + (dQuad === 'nenhum' ? ' selected' : '') + '>Não, manter multiarticulares</option>' +
+        '<option value="distal"' + (dQuad === 'distal' ? ' selected' : '') + '>Sim, priorizar região distal</option>' +
+      '</select></div>' +
+    '<div class="info-box" style="margin-bottom:14px;"><p class="txt">Prioridade: ' + sugQuad.prioridade.join(', ') + (sugQuad.nota ? '<br><span style="color:var(--text-faint);font-size:11px;">' + sugQuad.nota + '</span>' : '') + '</p></div>' +
+
+    '<div class="form-group"><label class="form-label">Região do glúteo a priorizar</label>' +
+      '<select class="form-select" id="select-gluteo-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" onchange="salvarDirecionamento(\'' + a.nome.replace(/'/g,"\\'") + '\', \'gluteo\', this.value)">' +
+        '<option value="nenhum"' + (dGluteo === 'nenhum' ? ' selected' : '') + '>Sem prioridade específica</option>' +
+        '<option value="inferior"' + (dGluteo === 'inferior' ? ' selected' : '') + '>Região inferior (prega glútea)</option>' +
+        '<option value="superior"' + (dGluteo === 'superior' ? ' selected' : '') + '>Região superior/lateral (glúteo médio)</option>' +
+        '<option value="ambas"' + (dGluteo === 'ambas' ? ' selected' : '') + '>Ambas</option>' +
+      '</select></div>' +
+    '<div class="info-box"><p class="txt">' + sugGluteo.regiao + '<br>Prioridade: ' + sugGluteo.prioridade.join(', ') + '</p></div>';
+}
+
+function salvarDirecionamento(nomeAluna, tipo, valor){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  if(tipo === 'quadriceps') a.direcionamentoQuadriceps = valor;
+  if(tipo === 'gluteo') a.direcionamentoGluteo = valor;
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+}
+
+function renderAvaliacaoPostural(a){
+  if(!a.desviosPosturaisConfirmados) a.desviosPosturaisConfirmados = [];
+  let html = '<p class="section-label" style="margin-top:22px;">Avaliação postural (a partir da anamnese/fotos)</p>' +
+    '<p class="page-sub" style="margin-top:-4px;">Selecione os desvios identificados, o sistema já relaciona a mobilidade e o corretivo certos, direto no treino do dia dela.</p>' +
+    '<div class="chip-list" style="margin-bottom:10px;">';
+  desviosPosturaisCatalogo.forEach(function(d){
+    const ativo = a.desviosPosturaisConfirmados.indexOf(d.id) !== -1;
+    html += '<span class="chip' + (ativo ? ' active' : '') + '" style="cursor:pointer;" onclick="alternarDesvioPostural(\'' + a.nome.replace(/'/g,"\\'") + '\',\'' + d.id + '\')">' + d.nome + '</span>';
+  });
+  html += '</div>';
+  if(a.desviosPosturaisConfirmados.length > 0){
+    const bloco = obterBlocoPostural(a.desviosPosturaisConfirmados);
+    html += '<div class="info-box"><p class="lbl">Bloco de mobilidade/correção que vai aparecer no treino dela</p>';
+    bloco.forEach(function(ex){ html += '<p class="txt">• ' + ex.nome + ', ' + ex.volume + ' · descanso ' + ex.descanso + '</p>'; });
+    html += '</div>';
+  }
+  return html;
+}
+
+function alternarDesvioPostural(nomeAluna, desvioId){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  if(!a.desviosPosturaisConfirmados) a.desviosPosturaisConfirmados = [];
+  const idx = a.desviosPosturaisConfirmados.indexOf(desvioId);
+  if(idx === -1){ a.desviosPosturaisConfirmados.push(desvioId); } else { a.desviosPosturaisConfirmados.splice(idx, 1); }
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+}
+
+function gerarLinhaDoTempo(a){
+  const prog = getProgressoAluna(a.nome);
+  const eventos = [];
+
+  (prog.feedbackTreino || []).forEach(function(f){
+    let texto = f.dia + ': intensidade ' + (f.intensidade != null ? f.intensidade + '/10' : 'não informada');
+    let icone = 'mood-smile';
+    if(f.desconforto){
+      texto += ' · desconforto em ' + f.exercicio + ' (' + f.escalaDesconforto + '/10)';
+      icone = 'alert-triangle';
+    }
+    eventos.push({ semana: f.semana, icone: icone, texto: texto });
+  });
+
+  Object.keys(prog.diasConcluidos || {}).forEach(function(semana){
+    const dias = prog.diasConcluidos[semana];
+    const total = totalDiasDeTreino();
+    const completa = dias.length >= total;
+    eventos.push({ semana: parseInt(semana, 10), icone: completa ? 'circle-check' : 'circle-x', texto: 'Semana ' + semana + ': ' + dias.length + '/' + total + ' treinos concluídos' + (completa ? '' : ', reengajamento disparado') });
+  });
+
+  Object.keys(prog.historico || {}).forEach(function(nomeEx){
+    prog.historico[nomeEx].forEach(function(r){
+      if(r.sugestao.texto === 'Aumentar carga'){
+        eventos.push({ semana: r.semana, icone: 'trending-up', texto: 'Progressão de carga em ' + nomeEx + ' → ' + r.sugestao.valor + 'kg' });
+      }
+    });
+  });
+
+  (a.pesoHistorico || []).forEach(function(p){
+    eventos.push({ semana: p.semana, icone: 'scale', texto: 'Peso registrado: ' + p.peso + 'kg' });
+  });
+
+  (a.desviosPosturaisConfirmados || []).forEach(function(id){
+    const d = desviosPosturaisCatalogo.find(function(x){ return x.id === id; });
+    if(d) eventos.push({ semana: 0, icone: 'yoga', texto: 'Desvio postural confirmado: ' + d.nome });
+  });
+
+  if(a.patologiaConfirmada && a.patologiaConfirmada !== 'tecnica'){
+    const p = patologiasCatalogo.find(function(x){ return x.id === a.patologiaConfirmada; });
+    if(p) eventos.push({ semana: 0, icone: 'first-aid-kit', texto: 'Patologia confirmada: ' + p.nome });
+  }
+
+  if(a.tecnicaAprovada){
+    Object.keys(a.tecnicaAprovada).forEach(function(ex){
+      if(a.tecnicaAprovada[ex] === 'aprovado'){
+        eventos.push({ semana: 0, icone: 'video', texto: 'Técnica aprovada: ' + ex });
+      }
+    });
+  }
+
+  eventos.sort(function(x, y){ return x.semana - y.semana; });
+  return eventos;
+}
+
+function renderGraficoPeso(a){
+  const historico = a.pesoHistorico || [];
+  if(historico.length < 2) return '';
+  const pesos = historico.map(function(p){ return p.peso; });
+  const min = Math.min.apply(null, pesos) - 1;
+  const max = Math.max.apply(null, pesos) + 1;
+  const largura = 280, altura = 90, padding = 10;
+  const pontos = historico.map(function(p, i){
+    const x = padding + (i / (historico.length - 1)) * (largura - padding * 2);
+    const y = altura - padding - ((p.peso - min) / (max - min)) * (altura - padding * 2);
+    return { x: x, y: y, peso: p.peso, semana: p.semana };
+  });
+  const linha = pontos.map(function(p, i){ return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
+  let svg = '<svg width="100%" viewBox="0 0 ' + largura + ' ' + altura + '" style="display:block;">' +
+    '<path d="' + linha + '" fill="none" stroke="#D98B2E" stroke-width="2"/>';
+  pontos.forEach(function(p){
+    svg += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="3" fill="#FCE8B8"/>' +
+      '<text x="' + p.x.toFixed(1) + '" y="' + (p.y - 8).toFixed(1) + '" font-size="9" fill="var(--text-faint)" text-anchor="middle">' + p.peso + '</text>';
+  });
+  svg += '</svg>';
+  return '<p class="lbl" style="margin-top:14px;">Evolução de peso</p><div class="info-box">' + svg + '</div>';
+}
+
+function renderLinhaDoTempo(a){
+  const eventos = gerarLinhaDoTempo(a);
+  let html = '<p class="section-label" style="margin-top:22px;">Linha do tempo</p>';
+  html += renderGraficoPeso(a);
+  if(eventos.length === 0){
+    html += '<div class="info-box"><p class="txt" style="margin-bottom:0;">Ainda sem eventos registrados, eles vão aparecer aqui conforme ela for treinando, registrando peso, e conforme você for confirmando avaliações.</p></div>';
+    return html;
+  }
+  const coresPorIcone = {
+    'circle-check': '#D98B2E', 'circle-x': '#E2A33D', 'trending-up': '#D98B2E',
+    'scale': '#8AB4D9', 'yoga': '#B893D9', 'first-aid-kit': '#E2A33D',
+    'video': '#D98B2E', 'mood-smile': '#D98B2E', 'alert-triangle': '#E2A33D'
+  };
+  html += '<div style="position:relative;padding-left:20px;margin-top:10px;">' +
+    '<div style="position:absolute;left:5px;top:6px;bottom:6px;width:2px;background:var(--border);"></div>';
+  eventos.forEach(function(ev){
+    const cor = coresPorIcone[ev.icone] || 'var(--gold-soft)';
+    html += '<div style="position:relative;padding-bottom:16px;">' +
+      '<div style="position:absolute;left:-20px;top:3px;width:10px;height:10px;border-radius:50%;background:' + cor + ';border:2px solid var(--bg);"></div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">' +
+        '<span style="font-size:13px;color:var(--text);">' + ev.texto + '</span>' +
+        (ev.semana > 0 ? '<span class="tag" style="flex-shrink:0;">Semana ' + ev.semana + '</span>' : '') +
+      '</div>' +
+    '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+const DURACAO_PLANO_DIAS = 180; // 6 meses, usado só se a aluna ainda não tiver plano real cadastrado
+
+function calcularFaseFunil(diasNoPrograma, duracaoPlano){
+  duracaoPlano = duracaoPlano || DURACAO_PLANO_DIAS;
+  const diasRestantes = duracaoPlano - diasNoPrograma;
+  if(diasNoPrograma <= 40){
+    return { fase: 'Boas-vindas', mensagem: 'Funil intensivo de acolhimento (primeiros 40 dias)', dias: diasNoPrograma };
+  }
+  if(diasRestantes <= -10){
+    return { fase: 'Carência expirada', mensagem: 'Passou dos 10 dias de carência, reavaliar renovação', dias: diasNoPrograma };
+  }
+  if(diasRestantes <= 0){
+    return { fase: 'Carência', mensagem: 'Dentro do período de carência (10 dias após o vencimento)', dias: diasNoPrograma };
+  }
+  if(diasRestantes <= 45){
+    return { fase: 'Pré-renovação', mensagem: 'Funil de renovação ativo, ' + diasRestantes + ' dias até vencer', dias: diasNoPrograma };
+  }
+  return { fase: 'Ritmo reduzido', mensagem: 'Comunicação de manutenção, ritmo reduzido', dias: diasNoPrograma };
+}
+
+function renderPlanoFechado(a){
+  const planos = { '30': '30 dias', '90': '90 dias (trimestral)', '180': '180 dias (semestral)', '365': '365 dias (anual)' };
+  const duracaoAtual = a.duracaoPlanoDias || '';
+  return '<p class="section-label">Plano fechado</p>' +
+    '<div class="form-group"><label class="form-label">Quando ela fechou o plano?</label>' +
+      '<input class="form-input" type="date" id="plano-data-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" value="' + (a.dataFechouPlano || '') + '" onchange="salvarPlanoFechado(\'' + a.nome.replace(/'/g,"\\'") + '\',\'data\',this.value)"></div>' +
+    '<div class="form-group"><label class="form-label">Qual plano / período?</label>' +
+      '<select class="form-select" id="plano-duracao-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" onchange="salvarPlanoFechado(\'' + a.nome.replace(/'/g,"\\'") + '\',\'duracao\',this.value)">' +
+        '<option value="">Selecione...</option>' +
+        Object.keys(planos).map(function(k){ return '<option value="' + k + '"' + (String(duracaoAtual) === k ? ' selected' : '') + '>' + planos[k] + '</option>'; }).join('') +
+      '</select></div>';
+}
+
+function salvarPlanoFechado(nomeAluna, campo, valor){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  if(campo === 'data') a.dataFechouPlano = valor;
+  if(campo === 'duracao') a.duracaoPlanoDias = parseInt(valor, 10) || null;
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+}
+
+function renderFunilEngajamento(a){
+  let diasNoPrograma, duracaoPlano;
+  if(a.dataFechouPlano && a.duracaoPlanoDias){
+    const inicio = new Date(a.dataFechouPlano + 'T00:00:00');
+    const hoje = new Date();
+    diasNoPrograma = Math.max(0, Math.round((hoje - inicio) / (1000*60*60*24)));
+    duracaoPlano = a.duracaoPlanoDias;
+  } else {
+    if(a.diasNoProgramaFunil == null) a.diasNoProgramaFunil = 1;
+    diasNoPrograma = a.diasNoProgramaFunil;
+    duracaoPlano = DURACAO_PLANO_DIAS;
+  }
+  const info = calcularFaseFunil(diasNoPrograma, duracaoPlano);
+  const avisoSemPlano = (!a.dataFechouPlano || !a.duracaoPlanoDias) ? '<p class="txt" style="color:var(--text-faint);font-size:11px;">Sem plano cadastrado ainda, usando simulação genérica de 180 dias. Preencha "Plano fechado" acima pra ficar preciso.</p>' : '';
+  return '<p class="section-label" style="margin-top:22px;">Funil de engajamento e renovação</p>' +
+    '<div class="badge">' + info.fase + '</div>' +
+    '<p class="txt" style="font-size:12px;color:var(--text-faint);margin:6px 0;">' + info.mensagem + ' (dia ' + info.dias + ' de ' + duracaoPlano + ')</p>' +
+    avisoSemPlano +
+    (!a.dataFechouPlano ? '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="avancarDiasFunil(\'' + a.nome.replace(/'/g,"\\'") + '\', 10)">Simular +10 dias</button>' : '');
+}
+
+function renderDuvidasSinalizadas(a){
+  if(!a.duvidasSinalizadas || a.duvidasSinalizadas.length === 0) return '';
+  const pendentes = a.duvidasSinalizadas.filter(function(d){ return !d.resolvida; });
+  if(pendentes.length === 0) return '';
+  let html = '<p class="section-label" style="margin-top:22px;">Dúvidas que a Sol sinalizou pra você</p>';
+  pendentes.forEach(function(d){
+    const idxReal = a.duvidasSinalizadas.indexOf(d);
+    const mensagemWpp = encodeURIComponent('Oi ' + a.nome.split(' ')[0] + '! Vi sua pergunta: "' + d.pergunta + '". Deixa eu te explicar melhor:');
+    const linkWpp = 'https://wa.me/55' + (a.telefone || '').replace(/\D/g, '') + '?text=' + mensagemWpp;
+    html += '<div class="info-box">' +
+      '<p class="lbl">Pergunta da aluna</p>' +
+      '<p class="txt">"' + d.pergunta + '"</p>' +
+      '<p class="lbl" style="margin-top:8px;">O que a Sol respondeu</p>' +
+      '<p class="txt">' + d.respostaSol + '</p>' +
+      '<div style="display:flex;gap:8px;margin-top:10px;">' +
+        '<a class="btn-gold" style="width:auto;padding:8px 14px;margin:0;font-size:12px;background:#25D366;color:#fff;text-decoration:none;" href="' + linkWpp + '" target="_blank" rel="noopener"><i class="ti ti-brand-whatsapp" style="vertical-align:-2px;margin-right:4px;"></i>Avisar no WhatsApp</a>' +
+        '<button class="btn-gold" style="width:auto;padding:8px 14px;margin:0;font-size:12px;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="marcarDuvidaResolvida(\'' + a.nome.replace(/'/g,"\\'") + '\',' + idxReal + ')">Marcar como resolvida</button>' +
+      '</div>' +
+    '</div>';
+  });
+  return html;
+}
+
+function marcarDuvidaResolvida(nomeAluna, idx){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !a.duvidasSinalizadas || !a.duvidasSinalizadas[idx]) return;
+  a.duvidasSinalizadas[idx].resolvida = true;
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+}
+
+function avancarDiasFunil(nomeAluna, dias){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  a.diasNoProgramaFunil = (a.diasNoProgramaFunil || 1) + dias;
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+}
+
 function renderElegibilidadeFase(a){
   const elegibilidade = calcularElegibilidadeFase(a.nome);
   if(!elegibilidade) return '';
   let html = '<p class="section-label" style="margin-top:22px;">Avaliação de mudança de fase</p>';
   html += elegibilidade.criterios.map(function(c){
-    return '<div class="list-item"><span><i class="ti ti-' + (c.atingido ? 'circle-check' : 'circle-x') + '" style="font-size:13px;color:' + (c.atingido ? 'var(--gold-soft)' : 'var(--text-faint)') + ';vertical-align:-2px;margin-right:6px;"></i>' + c.nome + '</span><span class="tag">' + c.detalhe + '</span></div>';
+    return '<div class="list-item"><span><i class="ti ti-' + (c.atingido ? 'circle-check' : 'circle-x') + '" style="font-size:13px;color:' + (c.atingido ? 'var(--gold-soft)' : '#E2A33D') + ';vertical-align:-2px;margin-right:6px;"></i>' + c.nome + '</span><span class="tag">' + c.detalhe + '</span></div>';
   }).join('');
-  html += '<div class="' + (elegibilidade.elegivel ? 'insight' : 'info-box') + '" style="margin-top:8px;"><p' + (elegibilidade.elegivel ? '' : ' class="txt"') + '>' + (elegibilidade.elegivel ? 'Critérios atendidos — pode avançar de fase quando confirmar.' : 'Ainda faltam critérios — o sistema não sugere avanço de fase até todos serem atingidos.') + '</p></div>';
+  html += '<div class="' + (elegibilidade.elegivel ? 'insight' : 'info-box') + '" style="margin-top:8px;"><p' + (elegibilidade.elegivel ? '' : ' class="txt"') + '>' + (elegibilidade.elegivel ? 'Critérios atendidos, pode avançar de fase quando confirmar.' : 'Ainda faltam critérios, o sistema não sugere avanço de fase até todos serem atingidos.') + '</p></div>';
   return html;
 }
 
+const ferramentasPersonal = [
+  { titulo: 'Alunas', icone: 'ti-users', view: 'alunas' },
+  { titulo: 'Banco de exercícios', icone: 'ti-video', view: 'exercicios' },
+  { titulo: 'Biblioteca de conteúdo', icone: 'ti-library', view: 'conteudo' },
+  { titulo: 'Biblioteca de treinos', icone: 'ti-clipboard-list', view: 'treinos' },
+  { titulo: 'Biblioteca de mobilidade', icone: 'ti-stretching', view: 'mobilidade' },
+  { titulo: 'Grupo de desafio', icone: 'ti-flag', view: 'desafios' },
+  { titulo: 'Banco de patologias', icone: 'ti-first-aid-kit', view: 'patologias' },
+  { titulo: 'Banco de desvios posturais', icone: 'ti-yoga', view: 'desvios' },
+  { titulo: 'Banco de testes de corrida', icone: 'ti-run', view: 'corrida' }
+];
+
+function renderFerramentasPersonal(){
+  const grid = document.getElementById('grid-ferramentas-personal');
+  if(!grid || grid.dataset.rendered) return;
+  grid.dataset.rendered = 'true';
+  ferramentasPersonal.forEach(function(f){
+    const el = document.createElement('div');
+    el.className = 'vposter';
+    el.innerHTML =
+      '<div class="vcover"><i class="ti ' + f.icone + '" style="font-size:30px;"></i></div>' +
+      '<p class="vtitle">' + f.titulo + '</p>';
+    el.onclick = function(){ showPersonalView(f.view); };
+    grid.appendChild(el);
+  });
+}
+
 function showPersonalView(which){
-  ['dashboard','alunas','aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias'].forEach(function(v){
+  renderFerramentasPersonal();
+  ['dashboard','alunas','aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
   });
   if(which === 'alunas'){ renderAlunas(); }
@@ -1492,6 +2910,8 @@ function showPersonalView(which){
   if(which === 'desafios'){ renderDesafios(); populateTreinoSelect(); }
   if(which === 'mobilidade'){ renderMobilidadeBanco(); renderAquecimentoBanco(); }
   if(which === 'patologias'){ renderPatologiaChips(); renderPatologiaList(); }
+  if(which === 'desvios'){ renderDesviosBanco(); }
+  if(which === 'corrida'){ renderCorridaBanco(); }
   if(which === 'exercicios'){
     document.getElementById('ex-video-view').style.display = 'none';
     document.getElementById('ex-lista-view').style.display = 'block';
@@ -1503,6 +2923,7 @@ function showPersonalView(which){
 }
 
 const exerciciosBanco = [
+  {nome:'FLEXÃO NÓRDICA REVERSA', grupo:'Quadríceps', categoria:'Quadríceps', ambiente:'Academia', nivel:'Avançado', metodo:'Nenhum', video:''},
   {nome:'FLEXÃO NO SOLO ADAPTADA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/uY3Y9eF79iw'},
   {nome:'CRUCIFIXO INVERSO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/mtwV9vh1Yrc'},
   {nome:'ELEVAÇÃO FRONTAL ALTERNADA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/kGQP3CIow4s'},
@@ -1555,7 +2976,6 @@ const exerciciosBanco = [
   {nome:'SOBE E DESCE CADEIRA', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Nl9Ehzqqq6Q'},
   {nome:'FLEXÃO FECHADA NO SOLO', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/hDbCcR_vCnY'},
   {nome:'PULLDOWN COM ELÁSTICO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Zg9L-zYE0wI'},
-  {nome:'FACEPULL NA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/nyD-Hl3ReJI'},
   {nome:'ROSCA MARTELO COM HALTERES', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/XX8i5RD3XCQ'},
   {nome:'TRÍCEPS COICE UNI NA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/cQ7TeC_rdlg'},
   {nome:'PRANCHA ALTA', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1L3sIFCFunU'},
@@ -1632,27 +3052,21 @@ const exerciciosBanco = [
   {nome:'REMADA BAIXA NEUTRA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/gvRz36ZV9SQ'},
   {nome:'ELEVAÇÃO LATERAL', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/7CpesOm6Z5U'},
   {nome:'PRANCHA LATERAL DINÂMICA', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Z-V-LAchIn0'},
-  {nome:'MERGULHO NA PARALELA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/f3h0EtJIIhY'},
   {nome:'REMADA BAIXA Y', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/iKW5nXARbMs'},
   {nome:'DESENVOLVIMENTRO FRONTAL COM MOCHILA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/RcHEOOACjHk'},
   {nome:'REMADA CURVADA ABE ELÁSTICO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ZCzFQX8LDJM'},
   {nome:'MANGUITO UNILATERAL', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/286eFOvP_MI'},
   {nome:'TRÍCEPS BARRA NA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Byff4QmSEc8'},
-  {nome:'EXTENSÃO LOMBAR DINÂMICA', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/y_5kPLWzrFQ'},
   {nome:'SUPINO RETO ARTICULAR', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/kn6zOZXNW1Q'},
   {nome:'REMADA CURVADA ABERTA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Je-c5O5DR5c'},
   {nome:'ELEVAÇÃO DIAGONAL H', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/7_9oQNFkqU0'},
-  {nome:'EXTENSÃO LOMBAR GUIADO', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/M7wFYedPnLc'},
   {nome:'REMADA CURVADA COM HALTERES', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ReiU3emM_8o'},
   {nome:'ELEVAÇÃO FRONTAL ELÁSTICO', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/UavSXczA6pI'},
-  {nome:'SUPER MAN', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/lhg93GRGkGQ'},
   {nome:'FLY', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/L4YtdisHldk'},
   {nome:'REMADA CURVADA COM MOCHILA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/7nlABnGxDp0'},
   {nome:'EXTENSÃO HORIZONTAL POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1MHzijrsAOY'},
   {nome:'SUPINO INCLINADO ARTICULAR', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/oJkLYcqaA5E'},
   {nome:'REMADA CURVADA NEUTRA ELÁSTICO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/_kI51Xc7tnE'},
-  {nome:'REMADA UNI AMPLITUDE ELEVADA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/_I2d2Ij0p5E'},
-  {nome:'EXTENSÃO HORIZONTAL NA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1MHzijrsAOY'},
   {nome:'REMADA FECHADA CURVADA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/FeIxXCMuwUI'},
   {nome:'REMADA FECHADA ELÁSTICO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/0xI3hZwo3OA'},
   {nome:'REMADA UNI AMPLITUDE ELEVADA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/_I2d2Ij0p5E'},
@@ -1672,24 +3086,9 @@ const exerciciosBanco = [
   {nome:'CRUCIFIXO INV COM APOIO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/IbhLDWWnGxc'},
   {nome:'REMADA CAVALINHO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/MkfpH3Sl1lY'},
   {nome:'REMADA ABERTA NO TRX', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/KoxP8668V1Y'},
-  {nome:'FLEXÃO NO SOLO ADAPTADA', grupo:'?', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/uY3Y9eF79iw'},
-  {nome:'FLEXÃO ADAPTADA NO SOFÁ', grupo:'?', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/DcOgOamrNVQ'},
-  {nome:'FLEXÃO NO SOLO', grupo:'?', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/PD8IJVrCIF0'},
-  {nome:'CRUCIFIXO DEITADO', grupo:'?', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/Zu_EiENKB-s'},
-  {nome:'AGACHAMENTO FRONTAL', grupo:'Abdômen', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/oMoGcwdus3w'},
-  {nome:'SUPINO RETO COM BARRA', grupo:'?', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/4HRd2iAIZgQ'},
   {nome:'TRÍCEPS FRAN BIL', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/rT5dEQzyZy8'},
   {nome:'PULLDOWN COM CORDA', grupo:'Costas', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/Zg9L-zYE0wI'},
-  {nome:'TRÍCEPS FRANCÊS APOIADO', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/1XNQYUWWr4w'},
-  {nome:'FLEXÃO FECHADA NO SOLO', grupo:'?', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/hDbCcR_vCnY'},
-  {nome:'TRÍCEPS FRA UNIL', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/ZgC9-xF_5Zw'},
-  {nome:'TRÍCEPS CORDA ELÁSTICO', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/8k42fwZDZQk'},
-  {nome:'TRÍCEPS APOIADO', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/1XNQYUWWr4w'},
-  {nome:'TRÍCEPS FRANCÊS ELÁSTICO', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/y9nmjsylNtk'},
-  {nome:'TRÍCEPS SUPINADO', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/uEUz0NsQNjY'},
-  {nome:'TRÍCEPS TESTA', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/bpp_l5Gdv7c'},
   {nome:'REMADA ABERTA SUPINADA', grupo:'Costas', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/3VU_r-9snjg'},
-  {nome:'TRÍCEPS BANCO EM CASA', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/wkaPvUI9VBg'},
   {nome:'EXTENSÃO LOMBAR DINÂMICA', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/y_5kPLWzrFQ'},
   {nome:'EXTENSÃO LOMBAR GUIADO', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/M7wFYedPnLc'},
   {nome:'SUPER MAN', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/lhg93GRGkGQ'},
@@ -1705,20 +3104,16 @@ const exerciciosBanco = [
   {nome:'EDUCATIVO STIFF', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1P03JzjPPOE'},
   {nome:'CADEIRA ABDUTORA( ABRIR )', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/WMx7JeUTXJs'},
   {nome:'AFUNDO C/FLEX DE QUADRIL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/OMQhwRW23ZI'},
-  {nome:'FLEX. DE JOELHOS NO SOLO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/fWW4ASUCi_c'},
   {nome:'ELEVAÇÃO FROG', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/j4_-w9BcarQ'},
   {nome:'CADEIRA ADUTORA ( FECHAR )', grupo:'Panturrilha', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/lzuSEi65_IQ'},
   {nome:'AFUNDO COM ELÁSTICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/YWvy-2OLeJU'},
-  {nome:'FLEX. JOELHOS ADP', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/6bE5P4x36-o'},
   {nome:'ELEVAÇÃO PÉLVICA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/O84nvpikZiU'},
   {nome:'AFUNDO DIN. C FLEX QUADRIL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/OMQhwRW23ZI'},
-  {nome:'FLEXÃO DE JOELHOS COM BOLA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/H0nTtztJK8M'},
   {nome:'ELEVAÇÃO PÉLVICA UNILATERAL', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/WM4Blto4Uq0'},
   {nome:'AFUNDO GUIADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/xMTJPIEVLpo'},
   {nome:'STIFF COM ELÁSTICO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/wzeYDYTKwp0'},
   {nome:'EXTENSÃO DE QUADRIL', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/uhfO-KWURBE'},
   {nome:'AFUNDO NA BARRA GUIADA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/EcvoioUwyH8'},
-  {nome:'STIFF', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/D5sRfuzL0e4'},
   {nome:'EXTENSÃO DE QUADRIL ELÁSTICO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/e_Kf5MpbkUo'},
   {nome:'AGACHAMENTO BÚLGARO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/GGvEWR0Y4Wc'},
   {nome:'STIFF UNILATERAL', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/6oPT1WncH8U'},
@@ -1784,8 +3179,6 @@ const exerciciosBanco = [
   {nome:'EXTENSÃO DE QUADRIL NA MÁQUINA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/0jzdxWcaT5I'},
   {nome:'SENTA E LEVANTA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/iqK9m1CLnQE'},
   {nome:'EXTENSÃO DE QUADRIL COM CANELEIRAS NO BANCO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/5BuJFrdn_AY'},
-  {nome:'TERRA ISOLADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/E7CZQS-PRoo'},
-  {nome:'TERRA ROMENO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/VpjkLAOz8CU'},
   {nome:'ELEVAÇÃO PÉLVICA NA MÁQUINA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/K1QVmQb59rI'},
   {nome:'TERRA ROMÊNO ELÁSTICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/3kVNP8g0xmY'},
   {nome:'extensão de quadril curtinha no alto', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/QXrJE4FF-TM'},
@@ -1825,7 +3218,7 @@ function renderExerciciosChips(){
       renderExerciciosLista();
     };
     if(editMode && cat !== 'Todos'){
-      chip.ondragover = function(ev){ ev.preventDefault(); chip.style.borderColor = 'var(--gold)'; chip.style.background = 'rgba(212,175,55,0.25)'; };
+      chip.ondragover = function(ev){ ev.preventDefault(); chip.style.borderColor = 'var(--gold)'; chip.style.background = 'rgba(217,139,46,0.25)'; };
       chip.ondragleave = function(){ chip.style.borderColor = ''; chip.style.background = cat === filtroExercicio ? '' : ''; renderExerciciosChips(); };
       chip.ondrop = function(ev){
         ev.preventDefault();
@@ -1970,12 +3363,41 @@ const aquecimentoBanco = [
   {nome:'Polichinelo', video:'https://youtu.be/6AIlJkFNrKA'}
 ];
 
+const ARTICULACOES = ['Todos', 'Quadril', 'Joelhos', 'Ombros', 'Tornozelos', 'Cintura Escapular', 'Outros'];
+let filtroArticulacao = 'Todos';
+
+function categorizarPorArticulacao(grupo){
+  const g = (grupo || '').toUpperCase();
+  if(g.indexOf('ILIO PSOAS') !== -1 || g.indexOf('ADUTORES') !== -1 || g.indexOf('PELVE') !== -1 || g.indexOf('PIRIFORME') !== -1 || g.indexOf('GLÚTEO') !== -1 || g.indexOf('FÁSCIA LATA') !== -1 || g.indexOf('QUADRADO LOMBAR') !== -1) return 'Quadril';
+  if(g.indexOf('QUADRÍCEPS') !== -1 || g.indexOf('ISQUI') !== -1) return 'Joelhos';
+  if(g.indexOf('OMBRO') !== -1 || g.indexOf('PEITORAL') !== -1 || g.indexOf('PEITO') !== -1 || g.indexOf('SERRÁTIL') !== -1) return 'Ombros';
+  if(g.indexOf('TORNOZELO') !== -1 || g.indexOf('PANTURRILHA') !== -1) return 'Tornozelos';
+  if(g.indexOf('CINTURA ESCAPULAR') !== -1 || g.indexOf('COSTAS') !== -1) return 'Cintura Escapular';
+  return 'Outros';
+}
+
+function renderArticulacaoChips(){
+  const row = document.getElementById('mob-articulacao-row');
+  if(!row) return;
+  row.innerHTML = '';
+  ARTICULACOES.forEach(function(art){
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (art === filtroArticulacao ? ' active' : '');
+    chip.textContent = art;
+    chip.onclick = function(){ filtroArticulacao = art; renderArticulacaoChips(); renderMobilidadeBanco(); };
+    row.appendChild(chip);
+  });
+}
+
 function renderMobilidadeBanco(){
+  renderArticulacaoChips();
   const list = document.getElementById('mobilidade-list-personal');
   const termo = (document.getElementById('mob-search').value || '').toUpperCase();
   list.innerHTML = '';
   const filtrados = mobilidadeBanco.filter(function(m){
-    return !termo || m.nome.toUpperCase().indexOf(termo) !== -1 || m.grupo.toUpperCase().indexOf(termo) !== -1;
+    const bateArticulacao = filtroArticulacao === 'Todos' || categorizarPorArticulacao(m.grupo) === filtroArticulacao;
+    const bateTermo = !termo || m.nome.toUpperCase().indexOf(termo) !== -1 || m.grupo.toUpperCase().indexOf(termo) !== -1;
+    return bateArticulacao && bateTermo;
   });
   document.getElementById('mob-count-label').textContent = filtrados.length + ' de ' + mobilidadeBanco.length + ' itens';
   filtrados.forEach(function(m){
@@ -2011,6 +3433,39 @@ function populateGrupoSelect(){
     opt.textContent = cat;
     sel.appendChild(opt);
   });
+}
+
+function alternarSubabaExercicios(qual){
+  document.getElementById('subaba-videos-btn').className = 'chip' + (qual === 'videos' ? ' active' : '');
+  document.getElementById('subaba-metodos-btn').className = 'chip' + (qual === 'metodos' ? ' active' : '');
+  document.getElementById('subaba-videos-container').style.display = qual === 'videos' ? 'block' : 'none';
+  document.getElementById('subaba-metodos-view').style.display = qual === 'metodos' ? 'block' : 'none';
+  if(qual === 'metodos') renderMetodosReferencia();
+}
+
+function renderMetodosReferencia(){
+  const view = document.getElementById('subaba-metodos-view');
+  const metodos = conteudos.filter(function(c){ return c.cat === 'Métodos de treino'; });
+  let html = '<p class="page-sub" style="margin-top:-4px;">Referência dos métodos de intensidade, mesmo conteúdo já disponível na Mentoria</p>';
+  metodos.forEach(function(m){
+    html += '<div class="exercicio-item" style="cursor:pointer;" onclick="playConteudoMetodo(\'' + m.n.replace(/'/g,"\\'") + '\')">' +
+      '<p class="ex-name">' + m.n + '</p>' +
+      '<p class="ex-meta">' + m.desc + '</p>' +
+      (m.video ? '<span class="ex-video ok"><i class="ti ti-circle-check" style="font-size:11px;vertical-align:-1px;margin-right:3px;"></i>Assistir</span>' : '<span class="ex-video pending"><i class="ti ti-clock" style="font-size:11px;vertical-align:-1px;margin-right:3px;"></i>Sem vídeo ainda</span>') +
+      '</div>';
+  });
+  view.innerHTML = html;
+}
+
+function playConteudoMetodo(nome){
+  const c = conteudos.find(function(x){ return x.n === nome; });
+  if(!c) return;
+  const embed = getEmbedUrl(c.video);
+  const view = document.getElementById('subaba-metodos-view');
+  view.innerHTML = '<div class="local-back" onclick="renderMetodosReferencia()"><i class="ti ti-arrow-left"></i><span>Voltar</span></div>' +
+    (embed ? '<div class="video-block" style="margin-top:14px;"><iframe src="' + embed + '" title="' + c.n + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>' + ytFallback(c.video) : '<div class="video-block" style="margin-top:14px;"><i class="ti ti-player-play"></i></div>') +
+    '<h1 class="page-title" style="margin-top:10px;">' + c.n + '</h1>' +
+    '<p class="page-sub">' + c.desc + '</p>';
 }
 
 function addExercicio(){
@@ -2103,7 +3558,7 @@ function renderTemplates(){
       '<p class="lbl">' + t.nivel + ' · ' + t.enfase + ' · ' + t.freq + '</p>' +
       '<p class="txt">Volume: ' + t.volume + '</p>' +
       '<p class="txt">Exercícios: ' + t.exercicios.join(', ') + '</p>' +
-      '<p class="txt" style="color:var(--text-faint);font-size:11.5px;">Progressão: teste de 10RM subjetivo por sessão · exercícios evoluem de complexidade básica para avançada conforme o nível da aluna.</p>';
+      '<p class="txt" style="color:var(--text-faint);font-size:12px;">Progressão: teste de 10RM subjetivo por sessão · exercícios evoluem de complexidade básica para avançada conforme o nível da aluna.</p>';
     list.appendChild(el);
   });
 }
@@ -2179,7 +3634,7 @@ function renderDesafios(){
       '<p class="lbl">' + d.nome + '</p>' +
       '<p class="txt">Treino: ' + d.treino + '</p>' +
       '<p class="txt">' + d.inscritas + ' inscritas</p>' +
-      '<div class="list-item" style="margin-top:6px;"><span style="color:var(--gold-soft);">' + d.link + '</span><i class="ti ti-copy" style="font-size:14px;color:var(--text-dim);"></i></div>';
+      '<div class="list-item" style="margin-top:6px;"><span style="color:var(--gold-soft);">' + d.link + '</span><i class="ti ti-copy" style="font-size:13px;color:var(--text-dim);"></i></div>';
     list.appendChild(el);
   });
 }
@@ -2211,6 +3666,102 @@ function criarDesafio(){
   renderDesafios();
 }
 
+function aplicarTransicaoSuave(elId){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  el.classList.remove('fade-content');
+  void el.offsetWidth;
+  el.classList.add('fade-content');
+}
+
+/* ===== LOGIN ===== */
+const EMAIL_PERSONAL = 'thiagofernandesdearaujo22@gmail.com';
+const SENHA_PERSONAL = 'Senhanova22-'; // ⚠️ exposta em texto puro nesse protótipo, troque antes de liberar pra alunas reais
+const ALUNAS_CADASTRADAS_PADRAO = {
+  'andriele@teste.com': 'teste123'
+};
+let sessaoTipo = null; // 'aluna' | 'personal'
+
+function carregarAlunasCadastradas(){
+  try {
+    const raw = localStorage.getItem('musa_alunas_cadastradas');
+    const salvas = raw ? JSON.parse(raw) : {};
+    return Object.assign({}, ALUNAS_CADASTRADAS_PADRAO, salvas);
+  } catch(e){ return Object.assign({}, ALUNAS_CADASTRADAS_PADRAO); }
+}
+function salvarAlunasCadastradas(dados){
+  try { localStorage.setItem('musa_alunas_cadastradas', JSON.stringify(dados)); } catch(e){}
+}
+
+function alternarTipoLogin(tipo){
+  document.getElementById('login-tab-aluna').className = 'chip' + (tipo === 'aluna' ? ' active' : '');
+  document.getElementById('login-tab-personal').className = 'chip' + (tipo === 'personal' ? ' active' : '');
+  document.getElementById('login-form-aluna').style.display = tipo === 'aluna' ? 'block' : 'none';
+  document.getElementById('login-form-personal').style.display = tipo === 'personal' ? 'block' : 'none';
+}
+
+function loginAluna(){
+  const email = document.getElementById('login-aluna-email').value.trim().toLowerCase();
+  const senha = document.getElementById('login-aluna-senha').value;
+  const erroEl = document.getElementById('login-aluna-erro');
+  erroEl.style.display = 'none';
+
+  if(!email || !senha){
+    erroEl.textContent = 'Preencha e-mail e senha.';
+    erroEl.style.display = 'block';
+    return;
+  }
+
+  const cadastradas = carregarAlunasCadastradas();
+  const primeiroAcesso = !cadastradas[email];
+  if(cadastradas[email]){
+    if(cadastradas[email] !== senha){
+      erroEl.textContent = 'Senha incorreta.';
+      erroEl.style.display = 'block';
+      return;
+    }
+  } else {
+    cadastradas[email] = senha; // primeiro acesso: já cadastra
+    salvarAlunasCadastradas(cadastradas);
+  }
+
+  sessaoTipo = 'aluna';
+  document.getElementById('card-personal-launcher').style.display = 'none';
+  if(primeiroAcesso){
+    setActive('intro');
+    setTimeout(function(){ setActive('onboarding'); }, 4000);
+  } else {
+    setActive('launcher');
+  }
+}
+
+function finalizarOnboarding(){
+  setActive('launcher');
+}
+
+function testarIntroNovamente(){
+  sessaoTipo = 'aluna';
+  document.getElementById('card-personal-launcher').style.display = 'none';
+  setActive('intro');
+  setTimeout(function(){ setActive('onboarding'); }, 4000);
+}
+
+function loginPersonal(){
+  const email = document.getElementById('login-personal-email').value.trim().toLowerCase();
+  const senha = document.getElementById('login-personal-senha').value;
+  const erroEl = document.getElementById('login-personal-erro');
+  if(email !== EMAIL_PERSONAL.toLowerCase() || senha !== SENHA_PERSONAL){
+    erroEl.textContent = 'E-mail ou senha incorretos.';
+    erroEl.style.display = 'block';
+    return;
+  }
+  erroEl.style.display = 'none';
+  sessaoTipo = 'personal';
+  document.getElementById('backbar').style.display = 'flex';
+  document.getElementById('backlabel').textContent = 'Sair';
+  openLevel2('personal');
+}
+
 function setActive(name){
   document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
   document.querySelector('[data-view="' + name + '"]').classList.add('active');
@@ -2222,6 +3773,176 @@ function openLevel2(which){
   document.getElementById('backbar').style.display = 'flex';
   document.getElementById('backlabel').textContent = 'Voltar para o início';
   if(which === 'personal'){ showPersonalView('dashboard'); }
+  if(which === 'chatia'){ inicializarChatIA(); }
+}
+
+/* ===== CHAT DE IA REAL ===== */
+const TELEFONE_PERSONAL = '5500000000000'; // ⚠️ SUBSTITUA pelo seu WhatsApp real, formato 55DDDNÚMERO
+let historicoChatIA = [];
+
+function montarContextoAluna(){
+  const nome = 'Andriele Caroline Rubert';
+  const a = alunasPersonal.find(function(x){ return x.nome === nome; });
+  if(!a) return '';
+  const stats = calcularEstatisticasAluna(nome);
+  const prog = getProgressoAluna(nome);
+  let contexto = 'DADOS DA ALUNA ATUAL (use isso pra personalizar, nunca invente dado que não está aqui):\n';
+  contexto += '- Nome: ' + a.nome.split(' ')[0] + '\n';
+  contexto += '- Nível: ' + a.nivel + '\n';
+  contexto += '- Fase atual: ' + (a.treinoAtual ? a.treinoAtual.fase : 'não definida') + '\n';
+  contexto += '- Semana atual do ciclo: ' + prog.semana + '\n';
+  if(stats.temDados){
+    contexto += '- Constância: ' + stats.totalConcluidos + '/' + stats.totalPlanejado + ' treinos\n';
+  } else {
+    contexto += '- Ainda no primeiro dia, DNA MUSA calibrando\n';
+  }
+  if(a.restricoes) contexto += '- Restrição relatada: ' + a.restricoes + '\n';
+  return contexto;
+}
+
+function montarSystemPromptChatIA(){
+  return 'Você é Sol, do time do DNA Musa, extensão do professor Thiago Fernandes. Especialista em treinamento feminino, hipertrofia, fisiologia do exercício, biomecânica e cinesiologia.\n\n' +
+    'IMPORTANTE: nunca se identifique como Inteligência Artificial, IA, robô, chatbot ou assistente virtual, mesmo se a aluna perguntar diretamente. Se ela perguntar "você é uma IA?", responda de forma natural e acolhedora, redirecionando pro seu papel de te ajudar, sem confirmar nem negar de forma técnica.\n\n' +
+    'COMUNICAÇÃO: direta, simples, sem jargão desnecessário, sempre traduzindo ciência pra linguagem acessível. Tom motivador, próximo, humano, sério e profissional. Sempre explique o "porquê" das coisas.\n\n' +
+    'REGRAS DE ESCRITA (inegociáveis):\n' +
+    '- NUNCA use travessões (—) em nenhuma resposta. Use vírgulas e pontos normalmente.\n' +
+    '- Sem gírias de brincadeira, sem emojis, sem exclamações forçadas tipo "Bora lá!". Tom sério, direto, acolhedor, mas nunca "engraçadinho".\n\n' +
+    'REGRAS DE CONTEÚDO (inegociáveis):\n' +
+    '1. Você NUNCA substitui um exercício da prescrição sozinha, nem muda carga/série definitiva. Isso sempre depende da aprovação do personal.\n' +
+    '2. Você PODE sugerir uma variação momentânea pro mesmo grupamento muscular, mas deixe claro que é uma sugestão pontual, não uma mudança definitiva.\n' +
+    '3. NUNCA diga frases como "vou falar com o Thiago" ou "vou perguntar pro personal". Fale de forma natural, como se você mesma fosse parte da equipe.\n' +
+    '4. Nunca diagnostique lesões ou condições médicas. Se a aluna relatar dor, oriente com cautela e sugira avaliação presencial quando fizer sentido, sem alarmismo.\n' +
+    '5. Nunca dê conselho nutricional prescritivo (dieta, macros). Isso é do nutricionista, você pode falar de princípios gerais só.\n' +
+    '6. NUNCA explique que variamos exercícios ou métodos "pra não parecer sempre a mesma coisa", "pra não enjoar da rotina" ou qualquer menção a monotonia/rotina como motivo de uma escolha. Isso nunca deve ser mencionado, em nenhum contexto. Se perguntarem por que o treino mudou, responda apenas que variamos exercícios dentro do mesmo padrão de movimento pra continuar estimulando o corpo da forma adequada, de acordo com a necessidade da aluna e a estratégia do treino, sem qualquer menção a variedade por si só.\n' +
+    '7. NUNCA sugira "carga leve" para exercício nenhum. Sempre carga moderada a pesada. Isso não é fisioterapia (que trabalha sem carga, pra ganhar amplitude e recuperar gestos funcionais), é treinamento pra evoluir, ganhar músculo, força e resistência.\n' +
+    '8. Exercícios que trabalham o mesmo grupo muscular (ex: Cadeira Flexora e Cama Flexora) PODEM aparecer no mesmo treino como exercícios separados. A única restrição é não combiná-los juntos num bi-set/método combinado, nunca sobre coexistirem na mesma sessão.\n' +
+    '9. Ao explicar uma redução de carga sugerida, nunca use a palavra "respirar/respiro". Explique que foi um ajuste inteligente, baseado no que aconteceu na 1ª série daquele exercício, cruzado com os feedbacks e dados que o DNA MUSA reúne.\n' +
+    '10. Nunca use a palavra "fresca" pra descrever a 1ª série de um exercício. Diga que é a "série inicial", a que serve de base pra aplicar a metodologia e calcular a progressão.\n' +
+    '11. Ao explicar bi-set, sempre mencione que ele otimiza o tempo de treino, maximiza os ganhos, e potencializa o gasto calórico.\n' +
+    '12. Ao explicar o Bloco de Choque, nunca mencione "sacudir o estímulo" ou "rotina". Explique que as repetições caem pra permitir mais intensidade e carga, o descanso aumenta pra recuperar os substratos energéticos, e que mesmo não sendo treino de força pura, a força aumenta naturalmente, junto com desempenho, ganho de massa muscular e gasto energético.\n' +
+    '13. Se a pergunta for muito específica, pessoal, exigir avaliação presencial, ou você genuinamente não tiver informação suficiente pra responder com confiança, diga de forma acolhedora que vai confirmar esse detalhe com mais cuidado e retornar em breve. Nunca diga "vou falar com o Thiago" nem "vou perguntar pro personal", apenas "vou confirmar isso com calma e te retorno". Nesses casos, e SOMENTE nesses casos, termine sua resposta com a marcação exata [[SINALIZAR_PERSONAL]] na última linha (isso não aparece pra aluna, é só pro sistema identificar).\n\n' +
+    '14. Se a aluna perguntar especificamente sobre a EXECUÇÃO de um exercício (como fazer, forma certa, passo a passo, não sobre quais músculos ativa), identifique o nome exato do exercício e termine sua resposta com a marcação [[VIDEO: Nome Exato do Exercício]] na última linha. Isso mostra o vídeo real pra ela automaticamente, então sua explicação em texto deve ser breve, só complementando o vídeo, não descrevendo a execução passo a passo por escrito.\n\n' +
+    montarContextoAluna();
+}
+
+function inicializarChatIA(){
+  if(historicoChatIA.length > 0) return; // já tem conversa rolando, não reseta
+  const nomeCurto = 'Andriele';
+  historicoChatIA = [];
+  renderMensagensChatIA();
+  adicionarMensagemChatIA('ia', 'Oi, ' + nomeCurto + '! Eu sou a Sol, aqui do time do DNA Musa. Estou aqui pra te ajudar a entender melhor seu treino, tirar dúvidas sobre exercícios ou o que precisar. Pode perguntar!');
+}
+
+function adicionarMensagemChatIA(autor, texto){
+  historicoChatIA.push({ autor: autor, texto: texto });
+  renderMensagensChatIA();
+}
+
+function renderMensagensChatIA(){
+  const container = document.getElementById('chatia-mensagens');
+  if(!container) return;
+  container.innerHTML = historicoChatIA.map(function(m){
+    const ehAluna = m.autor === 'aluna';
+    return '<div style="align-self:' + (ehAluna ? 'flex-end' : 'flex-start') + ';max-width:80%;background:' + (ehAluna ? 'var(--gold-deep)' : 'var(--card-2)') + ';color:' + (ehAluna ? '#fff' : 'var(--text)') + ';padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.4;">' + m.texto.replace(/\n/g, '<br>') + '</div>';
+  }).join('');
+  container.scrollTop = container.scrollHeight;
+}
+
+async function enviarMensagemChatIA(){
+  const input = document.getElementById('chatia-input');
+  const texto = input.value.trim();
+  if(!texto) return;
+  input.value = '';
+  adicionarMensagemChatIA('aluna', texto);
+
+  const statusEl = document.getElementById('chatia-status');
+  statusEl.textContent = 'Digitando...';
+
+  const mensagensParaAPI = historicoChatIA.map(function(m){
+    return { role: m.autor === 'aluna' ? 'user' : 'assistant', content: m.texto };
+  });
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: montarSystemPromptChatIA(),
+        messages: mensagensParaAPI
+      })
+    });
+    const data = await response.json();
+    let textoResposta = (data.content || []).map(function(c){ return c.text || ''; }).join('\n').trim();
+    statusEl.textContent = '';
+
+    const precisaSinalizar = textoResposta.indexOf('[[SINALIZAR_PERSONAL]]') !== -1;
+    if(precisaSinalizar){
+      textoResposta = textoResposta.replace('[[SINALIZAR_PERSONAL]]', '').trim();
+      registrarDuvidaSinalizada(texto, textoResposta);
+    }
+
+    const matchVideo = textoResposta.match(/\[\[VIDEO:\s*([^\]]+)\]\]/);
+    if(matchVideo){
+      textoResposta = textoResposta.replace(matchVideo[0], '').trim();
+    }
+
+    adicionarMensagemChatIA('ia', textoResposta || 'Desculpa, não consegui responder agora, tenta de novo em instantes.');
+
+    if(matchVideo){
+      const nomeExVideo = matchVideo[1].trim();
+      mostrarVideoNoChatIA(nomeExVideo, texto);
+    }
+  } catch(erro) {
+    statusEl.textContent = '';
+    adicionarMensagemChatIA('ia', 'Tive um problema de conexão agora, tenta novamente daqui a pouco.');
+  }
+}
+
+function mostrarVideoNoChatIA(nomeExercicio, perguntaOriginal){
+  const exBanco = buscarExercicioNoBanco(nomeExercicio);
+  const embed = exBanco ? getEmbedUrl(exBanco.video) : null;
+  const container = document.getElementById('chatia-mensagens');
+  if(!container) return;
+
+  const videoDiv = document.createElement('div');
+  videoDiv.style.cssText = 'align-self:flex-start;max-width:90%;width:100%;';
+  videoDiv.innerHTML = embed
+    ? '<div class="video-block" style="margin:4px 0;"><iframe src="' + embed + '" title="' + nomeExercicio + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>'
+    : '<p style="font-size:12px;color:var(--text-faint);margin:4px 0;">Vídeo desse exercício ainda não está disponível.</p>';
+  container.appendChild(videoDiv);
+
+  setTimeout(function(){
+    const perguntaDiv = document.createElement('div');
+    perguntaDiv.style.cssText = 'align-self:flex-start;max-width:80%;background:var(--card-2);color:var(--text);padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.4;';
+    perguntaDiv.textContent = 'Ficou claro, ou ainda ficou com dúvida?';
+    container.appendChild(perguntaDiv);
+
+    const botoesDiv = document.createElement('div');
+    botoesDiv.style.cssText = 'align-self:flex-start;display:flex;gap:8px;margin-top:-4px;';
+    botoesDiv.innerHTML =
+      '<button class="btn-gold" style="width:auto;padding:8px 14px;margin:0;font-size:12px;" onclick="this.parentElement.remove()">Ficou claro!</button>' +
+      '<button class="btn-gold" style="width:auto;padding:8px 14px;margin:0;font-size:12px;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="escalarParaPersonal(\'' + perguntaOriginal.replace(/'/g,"\\'") + '\', this)">Ainda não entendi</button>';
+    container.appendChild(botoesDiv);
+    container.scrollTop = container.scrollHeight;
+  }, 400);
+}
+
+function escalarParaPersonal(perguntaOriginal, botaoEl){
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+  const nomeCurto = alunaAtual ? alunaAtual.nome.split(' ')[0] : 'aluna';
+  const mensagem = encodeURIComponent('Oi Thiago! A ' + nomeCurto + ' ainda ficou com dúvida sobre: "' + perguntaOriginal + '". Pode dar uma olhada?');
+  const linkWpp = 'https://wa.me/' + TELEFONE_PERSONAL + '?text=' + mensagem;
+  botaoEl.parentElement.innerHTML = '<a class="btn-gold" style="width:auto;padding:8px 14px;margin:0;font-size:12px;background:#25D366;color:#fff;text-decoration:none;" href="' + linkWpp + '" target="_blank" rel="noopener"><i class="ti ti-brand-whatsapp" style="vertical-align:-2px;margin-right:4px;"></i>Chamar no WhatsApp</a>';
+  if(alunaAtual) registrarDuvidaSinalizada(perguntaOriginal, '(dúvida de execução, aluna não entendeu pelo vídeo)');
+}
+
+function registrarDuvidaSinalizada(pergunta, respostaSol){
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+  if(!alunaAtual) return;
+  if(!alunaAtual.duvidasSinalizadas) alunaAtual.duvidasSinalizadas = [];
+  alunaAtual.duvidasSinalizadas.push({ pergunta: pergunta, respostaSol: respostaSol, resolvida: false, data: new Date().toISOString() });
 }
 
 function buscarExercicioNoBanco(nomeEx){
@@ -2251,10 +3972,39 @@ let seriesConcluidas = {};
 function concluirSerie(idx, serieIdx, segundosDescanso){
   if(!seriesConcluidas[idx]) return;
   seriesConcluidas[idx][serieIdx] = !seriesConcluidas[idx][serieIdx];
-  if(seriesConcluidas[idx][serieIdx]){
+  const marcandoAgora = seriesConcluidas[idx][serieIdx];
+  if(marcandoAgora){
     iniciarDescanso(idx, segundosDescanso);
   }
+  const todasFeitas = seriesConcluidas[idx].every(function(v){ return v; });
   openDetail('dia', detailDiaAtual);
+
+  const pill = document.getElementById('serie-pill-' + idx + '-' + serieIdx);
+  if(pill && marcandoAgora){
+    pill.classList.add('pulse');
+    setTimeout(function(){ pill.classList.remove('pulse'); }, 600);
+  }
+  const toastArea = document.getElementById('toast-celebracao-area');
+  if(toastArea && marcandoAgora && todasFeitas){
+    toastArea.innerHTML = '<div class="toast-celebracao">✨ Exercício concluído! Mandou bem.</div>';
+    setTimeout(function(){ if(toastArea) toastArea.innerHTML = ''; }, 2500);
+  }
+}
+
+function concluirSerieBiset(subId, serieIdx, ehUltimoDoPar, segundosDescanso){
+  if(!seriesConcluidas[subId]) return;
+  seriesConcluidas[subId][serieIdx] = !seriesConcluidas[subId][serieIdx];
+  const marcandoAgora = seriesConcluidas[subId][serieIdx];
+  // Só dispara o descanso de verdade se for o segundo exercício do par (o primeiro não descansa)
+  if(marcandoAgora && ehUltimoDoPar){
+    iniciarDescanso(subId, segundosDescanso);
+  }
+  openDetail('dia', detailDiaAtual);
+  const pill = document.getElementById('serie-pill-' + subId + '-' + serieIdx);
+  if(pill && marcandoAgora){
+    pill.classList.add('pulse');
+    setTimeout(function(){ if(pill) pill.classList.remove('pulse'); }, 600);
+  }
 }
 
 function iniciarDescanso(idx, segundosTotais){
@@ -2278,6 +4028,29 @@ function iniciarDescanso(idx, segundosTotais){
     }
   }, 1000);
 }
+
+const PALETA_IDENTIDADE = [
+  { nome: 'Dourado Clássico', c1: '#F0D9A0', c2: '#D98B2E', c3: '#5C3814' },
+  { nome: 'Ouro Rosé', c1: '#F0D9C8', c2: '#C9967A', c3: '#8A5A42' },
+  { nome: 'Champagne', c1: '#F5EBD8', c2: '#D9C08A', c3: '#9C8455' },
+  { nome: 'Ouro Antigo', c1: '#E8D9A0', c2: '#B8942F', c3: '#6E5518' }
+];
+
+function corIdentidadeAluna(nome){
+  let hash = 0;
+  for(let i = 0; i < nome.length; i++){ hash = (hash * 31 + nome.charCodeAt(i)) % 1000; }
+  return PALETA_IDENTIDADE[hash % PALETA_IDENTIDADE.length];
+}
+
+function aplicarIdentidadeVisual(nome){
+  const cor = corIdentidadeAluna(nome);
+  const avatar = document.getElementById('avatar-launcher');
+  if(avatar){
+    avatar.style.background = 'radial-gradient(circle at 30% 25%, ' + cor.c1 + ', ' + cor.c2 + ' 55%, ' + cor.c3 + ' 100%)';
+    avatar.style.boxShadow = '0 8px 30px ' + cor.c2 + '59';
+  }
+}
+aplicarIdentidadeVisual('Andriele Caroline Rubert');
 
 function alternarCronometro(){
   const btn = document.getElementById('cronometro-btn');
@@ -2338,7 +4111,7 @@ function renderPlaylist(){
   const c = currentCursoMeta;
   let itens = '';
   c.aulas.forEach(function(a, i){
-    itens += '<div class="list-item" style="cursor:pointer;" onclick="playAula(' + i + ')"><span>' + (i+1) + '. ' + a.titulo + '</span><i class="ti ti-player-play" style="font-size:14px;color:var(--gold-soft);"></i></div>';
+    itens += '<div class="list-item" style="cursor:pointer;" onclick="playAula(' + i + ')"><span>' + (i+1) + '. ' + a.titulo + '</span><i class="ti ti-player-play" style="font-size:13px;color:var(--gold-soft);"></i></div>';
   });
   el.innerHTML =
     '<p class="page-sub" style="margin-top:14px;">' + c.cat + ' · Grátis</p>' +
@@ -2446,12 +4219,12 @@ function calcularPotencialDefinicao(nome){
 
 function explicacaoIndicador(nome, valor){
   const textos = {
-    'Constância': valor >= 80 ? 'Excelente constância — é a base de tudo, continue assim.' : valor >= 60 ? 'Boa constância. Tente não deixar passar mais de 1 treino por semana.' : 'Tente manter mais dias de treino por semana — é o que mais pesa em todo o sistema.',
-    'Capacidade de progressão': 'Não esqueça de anotar carga e repetições certinho na 1ª série de cada exercício — é isso que faz esse número refletir sua evolução real.',
-    'Capacidade de recuperação': valor >= 70 ? 'Sua recuperação está indo bem — continue priorizando sono e hidratação.' : 'Priorize sono (7-9h por noite) e hidratação essa semana — isso ajuda diretamente esse número a subir.',
+    'Constância': valor >= 80 ? 'Excelente constância, é a base de tudo, continue assim.' : valor >= 60 ? 'Boa constância. Tente não deixar passar mais de 1 treino por semana.' : 'Tente manter mais dias de treino por semana, é o que mais pesa em todo o sistema.',
+    'Capacidade de progressão': 'Não esqueça de anotar carga e repetições certinho na 1ª série de cada exercício, é isso que faz esse número refletir sua evolução real.',
+    'Capacidade de recuperação': valor >= 70 ? 'Sua recuperação está indo bem, continue priorizando sono e hidratação.' : 'Priorize sono (7-9h por noite) e hidratação essa semana, isso ajuda diretamente esse número a subir.',
     'Potencial de hipertrofia': valor >= 60 ? 'Seguir a dieta está ajudando esse potencial a se destravar.' : 'Manter o combinado da dieta, principalmente evitando doces e frituras fora do prescrito, ajuda a destravar esse potencial.',
-    'Resposta nutricional': valor >= 70 ? 'Ótima adesão à dieta — continue assim.' : 'Quanto mais você seguir o combinado, mais esse número sobe — pequenos ajustes já fazem diferença.',
-    'Potencial de ganho de gordura': valor <= 35 ? 'Você está mantendo esse risco baixo — ótimo trabalho.' : 'Fique de olho nas fugas com doces e frituras — elas pesam mais nesse número que "comer um pouco mais" do prescrito.',
+    'Resposta nutricional': valor >= 70 ? 'Ótima adesão à dieta, continue assim.' : 'Quanto mais você seguir o combinado, mais esse número sobe, pequenos ajustes já fazem diferença.',
+    'Potencial de ganho de gordura': valor <= 35 ? 'Você está mantendo esse risco baixo, ótimo trabalho.' : 'Fique de olho nas fugas com doces e frituras, elas pesam mais nesse número que "comer um pouco mais" do prescrito.',
     'Potencial de definição física': valor >= 60 ? 'Sua constância e o cardio estão ajudando bastante esse número.' : 'Manter constância no treino e incluir cardio moderado (até 150min/semana) ajuda a subir esse indicador, sem prejudicar sua hipertrofia.'
   };
   return textos[nome] || '';
@@ -2461,29 +4234,29 @@ let semanaNutricaoPendente = null;
 
 function renderPerguntaNutricao(semanaFechada){
   semanaNutricaoPendente = semanaFechada;
-  return '<div class="info-box" style="margin-top:10px;">' +
+  return '<div class="info-box" id="area-nutricao" style="margin-top:10px;">' +
     '<p class="lbl">Check-in nutricional da semana</p>' +
-    '<p class="txt">Você seguiu a dieta essa semana? Sem julgamento, só queremos calibrar direitinho — quantas vezes você fugiu do planejado?</p>' +
+    '<p class="txt">Você seguiu a dieta essa semana? Sem julgamento, só queremos calibrar direitinho, quantas vezes você fugiu do planejado?</p>' +
     '<div class="form-group"><input class="form-input" id="nutri-fugas" type="number" placeholder="Ex: 0"></div>' +
     '<div class="form-group"><label class="form-label">Se fugiu, foi principalmente sobre o quê? (marque quantas se aplicarem)</label>' +
-      '<div style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;">' +
+      '<div style="display:flex;flex-direction:column;gap:6px;font-size:12px;">' +
         '<label><input type="checkbox" id="nutri-mais"> Comi mais do que o prescrito</label>' +
         '<label><input type="checkbox" id="nutri-menos"> Comi menos do que o prescrito</label>' +
         '<label><input type="checkbox" id="nutri-doce"> Doces, frituras ou lanches fora do prescrito</label>' +
       '</div>' +
     '</div>' +
-    '<p class="txt" style="margin-top:10px;">E sobre álcool essa semana? Pode ser sincera, sem julgamento — é só pra manter nosso perfil o mais assertivo possível.</p>' +
+    '<p class="txt" style="margin-top:10px;">E sobre álcool essa semana? Pode ser sincera, sem julgamento, é só pra manter nosso perfil o mais assertivo possível.</p>' +
     '<div class="form-group"><label class="form-label">Taças de vinho (150ml cada)</label><input class="form-input" id="nutri-alc-taca" type="number" placeholder="0"></div>' +
     '<div class="form-group"><label class="form-label">Garrafas de vinho (750ml cada)</label><input class="form-input" id="nutri-alc-garrafa" type="number" placeholder="0"></div>' +
     '<div class="form-group"><label class="form-label">Litros de vinho</label><input class="form-input" id="nutri-alc-litro" type="number" placeholder="0"></div>' +
     '<div class="form-group"><label class="form-label">Copos de cerveja (chope, 300ml cada)</label><input class="form-input" id="nutri-alc-copo-cerveja" type="number" placeholder="0"></div>' +
     '<div class="form-group"><label class="form-label">Latas de cerveja (350ml cada)</label><input class="form-input" id="nutri-alc-lata-cerveja" type="number" placeholder="0"></div>' +
-    '<p class="txt" style="margin-top:10px;">Por último — em média, quantos litros de água você bebeu por dia essa semana?</p>' +
+    '<p class="txt" style="margin-top:10px;">Por último, em média, quantos litros de água você bebeu por dia essa semana?</p>' +
     '<div class="form-group"><input class="form-input" id="nutri-agua" type="number" step="0.1" placeholder="Ex: 2.5"></div>' +
-    '<p class="txt" style="margin-top:10px;">E cardio essa semana — fez algum?</p>' +
+    '<p class="txt" style="margin-top:10px;">E cardio essa semana, fez algum?</p>' +
     '<div class="form-group"><label class="form-label">Quantos dias de cardio?</label><input class="form-input" id="nutri-cardio-dias" type="number" placeholder="Ex: 2"></div>' +
     '<div class="form-group"><label class="form-label">Tempo total, em minutos, somando todos os dias</label><input class="form-input" id="nutri-cardio-minutos" type="number" placeholder="Ex: 60"></div>' +
-    '<p class="txt" style="margin-top:10px;">Por último — em média, quantas horas você dormiu por noite essa semana?</p>' +
+    '<p class="txt" style="margin-top:10px;">Por último, em média, quantas horas você dormiu por noite essa semana?</p>' +
     '<div class="form-group"><input class="form-input" id="nutri-sono" type="number" step="0.5" placeholder="Ex: 7"></div>' +
     '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="registrarNutricaoSemana()">Enviar</button>' +
     '</div>';
@@ -2540,8 +4313,8 @@ function registrarNutricaoSemana(){
   prog.nutricao[semanaNutricaoPendente] = { fugas: fugas, tipos: tipos, resultado: resultado };
   semanaNutricaoPendente = null;
 
-  const el = document.getElementById('nutri-confirmacao') || document.getElementById('registro-confirmacao') || document.getElementById('prog-reengajamento');
-  if(el) el.innerHTML = '<div class="insight"><p>Obrigada! Isso já ajustou sua Resposta Nutricional, Potencial de Hipertrofia, Potencial de Ganho de Gordura e Retenção Hídrica no DNA MUSA.</p></div>';
+  const el = document.getElementById('area-nutricao') || document.getElementById('nutri-confirmacao');
+  if(el) el.innerHTML = '<p class="txt">Obrigada! Isso já ajustou sua Resposta Nutricional, Potencial de Hipertrofia, Potencial de Ganho de Gordura e Retenção Hídrica no DNA MUSA.</p>';
 }
 
 
@@ -2562,7 +4335,7 @@ function calcularProbabilidadeSucesso(nome){
 
   // Constância pesa mais (é o maior preditor isolado), seguida de progressão e recuperação.
   // Nutrição entra dos dois lados: potencial de hipertrofia/resposta nutricional somam,
-  // potencial de ganho de gordura (invertido) subtrai — "muita coisa errada" puxa a probabilidade pra baixo de verdade.
+  // potencial de ganho de gordura (invertido) subtrai, "muita coisa errada" puxa a probabilidade pra baixo de verdade.
   const bruto =
     0.30 * pctConstancia +
     0.20 * capProgressao +
@@ -2595,7 +4368,7 @@ function validarCombinacaoBiset(nomeEx1, nomeEx2){
   const bloq1 = ehUnilateralBloqueado(n1);
   const bloq2 = ehUnilateralBloqueado(n2);
   if(bloq1 || bloq2){
-    return { valido: false, motivo: 'Não combinamos um exercício bilateral/multiarticular com um unilateral "bloqueado" (uma perna, depois a outra) — desequilibra o ritmo do bi-set. Use a versão alternada, se existir.' };
+    return { valido: false, motivo: 'Não combinamos um exercício bilateral/multiarticular com um unilateral "bloqueado" (uma perna, depois a outra), desequilibra o ritmo do bi-set. Use a versão alternada, se existir.' };
   }
 
   return { valido: true, motivo: '' };
@@ -2634,8 +4407,9 @@ function precisaAprovacaoTecnica(a, nomeExercicio){
   if(!a.tecnicaAprovada) a.tecnicaAprovada = {};
   const status = a.tecnicaAprovada[nomeExercicio];
   if(status === 'aprovado') return false;
+  if(status === 'pendente') return true; // já foi solicitado (inclusive pela exceção de desconforto), sempre mostra até resolver
   if(a.nivel === 'Iniciante') return status !== 'aprovado';
-  // Intermediária/avançada: checagem periódica, não obrigatória — só sinaliza se nunca foi verificado
+  // Intermediária/avançada: checagem periódica, não obrigatória, só sinaliza se nunca foi verificado
   return status === undefined ? 'periodica' : false;
 }
 
@@ -2655,17 +4429,90 @@ function aprovarTecnica(nomeAluna, nomeExercicio){
   openAlunaDetail(i);
 }
 
-/* ===== PERIODIZAÇÃO (Base x Choque) — a partir de intermediária ===== */
+/* ===== PERIODIZAÇÃO (Base x Choque), a partir de intermediária ===== */
+
+function renderExerciciosEstagnados(a){
+  const estagnados = detectarExerciciosEstagnados(a);
+  if(estagnados.length === 0) return '';
+  let html = '<p class="section-label" style="margin-top:22px;">Exercícios estagnados</p>' +
+    '<p class="page-sub" style="margin-top:-4px;">Mesma carga por 3 sessões seguidas, sem progressão. Critério objetivo pra considerar trocar.</p>';
+  estagnados.forEach(function(e){
+    html += '<div class="list-item"><span>' + e.nome + '</span><span class="tag">' + e.carga + 'kg há ' + e.sessoes + ' sessões</span></div>';
+  });
+  return html;
+}
+
+function detectarExerciciosEstagnados(a){
+  const prog = getProgressoAluna(a.nome);
+  const estagnados = [];
+  Object.keys(prog.historico || {}).forEach(function(nomeEx){
+    const registros = prog.historico[nomeEx];
+    if(registros.length < 3) return;
+    const ultimos3 = registros.slice(-3);
+    // O que importa é a carga que ela de fato registrou, não o que o sistema sugeriu no meio do caminho
+    const mesmaCarga = ultimos3.every(function(r){ return r.carga === ultimos3[0].carga; });
+    if(mesmaCarga){
+      estagnados.push({ nome: nomeEx, carga: ultimos3[0].carga, sessoes: ultimos3.length });
+    }
+  });
+  return estagnados;
+}
+
+function avaliarSinaisDeFadiga(a){
+  const prog = getProgressoAluna(a.nome);
+  const motivos = [];
+  let pontos = 0;
+
+  // Sinal 1: feedback pós-treino recente com desconforto alto ou intensidade sempre no limite
+  const feedbacksRecentes = (prog.feedbackTreino || []).slice(-4);
+  const comDesconfortoAlto = feedbacksRecentes.filter(function(f){ return f.desconforto && f.escalaDesconforto >= 6; }).length;
+  if(comDesconfortoAlto >= 2){ motivos.push('Desconforto alto relatado em ' + comDesconfortoAlto + ' dos últimos treinos'); pontos++; }
+
+  // Sinal 2: sono ruim nas semanas recentes
+  const semanasNutricao = Object.keys(prog.nutricao || {}).map(Number).sort(function(x,y){ return y-x; }).slice(0, 3);
+  const semSonoRuim = semanasNutricao.filter(function(s){
+    const r = prog.nutricao[s] && prog.nutricao[s].resultado;
+    return r && r.ajusteRecuperacaoSono != null && r.ajusteRecuperacaoSono < 0;
+  }).length;
+  if(semSonoRuim >= 2){ motivos.push('Sono insuficiente em ' + semSonoRuim + ' das últimas semanas'); pontos++; }
+
+  // Sinal 3: histórico de carga mostrando reduções seguidas em mais de 1 exercício
+  const exerciciosComQuedaConsecutiva = Object.keys(prog.historico || {}).filter(function(ex){
+    const registros = prog.historico[ex].slice(-2);
+    return registros.length === 2 && registros.every(function(r){ return r.sugestao && r.sugestao.texto.indexOf('edução') !== -1; });
+  });
+  if(exerciciosComQuedaConsecutiva.length >= 2){ motivos.push('Queda de carga em 2 sessões seguidas em ' + exerciciosComQuedaConsecutiva.length + ' exercícios'); pontos++; }
+
+  // Sinal 4: baixa aderência recente (constância caindo)
+  const semanasRecentes = Object.keys(prog.diasConcluidos || {}).map(Number).sort(function(x,y){ return y-x; }).slice(0, 2);
+  const totalDias = totalDiasDeTreino();
+  const semanasBaixaAderencia = semanasRecentes.filter(function(s){ return (prog.diasConcluidos[s] || []).length < totalDias * 0.6; }).length;
+  if(semanasBaixaAderencia >= 2){ motivos.push('Baixa aderência nas últimas 2 semanas'); pontos++; }
+
+  if(pontos >= 3) return { nivel: 'alto', motivos: motivos };
+  if(pontos >= 1) return { nivel: 'moderado', motivos: motivos };
+  return { nivel: 'baixo', motivos: [] };
+}
 
 function calcularBlocoAtual(a){
-  if(a.nivel === 'Iniciante') return { bloco: 'Volume único (pirâmide de base)', descricao: 'Foco em progressão contínua de carga e técnica, sem alternância de blocos ainda.' };
+  if(a.nivel === 'Iniciante') return { bloco: 'Volume único (pirâmide de base)', descricao: 'Foco em progressão contínua de carga e técnica, sem alternância de blocos ainda.', blocoTecnico: 'base' };
+  const fadiga = avaliarSinaisDeFadiga(a);
+  if(fadiga.nivel === 'alto'){
+    return { bloco: 'Deload (antecipado por fadiga)', descricao: 'Sinais de fadiga acumulada detectados: ' + fadiga.motivos.join('; ') + '. Volume reduzido nessa semana pra recuperar.', blocoTecnico: 'deload' };
+  }
   const prog = getProgressoAluna(a.nome);
   const ciclosCompletos = Math.floor((prog.semana - 1) / 5); // ciclo de reavaliação ~5 semanas
-  const posicaoNoPadrao = ciclosCompletos % 3;
+  const posicaoNoPadrao = ciclosCompletos % 4;
   if(posicaoNoPadrao === 2){
-    return { bloco: 'Bloco de Choque', descricao: 'Intensidade alta, volume mais baixo (2-3 semanas) — foco em força e quebra de rotina.' };
+    return { bloco: 'Bloco de Choque', descricao: 'Intensidade alta, volume mais baixo (2-3 semanas), foco em força e quebra de rotina.', blocoTecnico: 'choque' };
   }
-  return { bloco: 'Bloco de Base', descricao: 'Volume alto, intensidade moderada (4-6 semanas) — foco em capacidade de trabalho e hipertrofia.' };
+  if(posicaoNoPadrao === 3){
+    return { bloco: 'Deload', descricao: 'Semana de recuperação ativa: volume reduzido, intensidade baixa, longe da falha. Sem métodos combinados.', blocoTecnico: 'deload' };
+  }
+  if(fadiga.nivel === 'moderado'){
+    return { bloco: 'Bloco de Base (volume reduzido por fadiga)', descricao: 'Sinais moderados de fadiga: ' + fadiga.motivos.join('; ') + '. Volume ajustado pra baixo nessa semana.', blocoTecnico: 'base', volumeReduzido: true };
+  }
+  return { bloco: 'Bloco de Base', descricao: 'Volume alto, intensidade moderada (4-6 semanas), foco em capacidade de trabalho e hipertrofia.', blocoTecnico: 'base' };
 }
 
 /* ===== PROMOÇÃO DE NÍVEL (iniciante → intermediário) ===== */
@@ -2692,10 +4539,10 @@ function calcularElegibilidadePromocaoNivel(nome){
 function ajusteRecuperacaoPorIdade(idade){
   if(!idade) return { ajuste: 0, nota: '' };
   if(idade >= 45){
-    return { ajuste: -8, nota: 'Nessa faixa etária, a queda de estrogênio típica da menopausa costuma estreitar a janela de recuperação — treino de força continua sendo uma das melhores ferramentas pra essa fase, só vale dar mais atenção ao descanso entre sessões.' };
+    return { ajuste: -8, nota: 'Nessa faixa etária, a queda de estrogênio típica da menopausa costuma estreitar a janela de recuperação, treino de força continua sendo uma das melhores ferramentas pra essa fase, só vale dar mais atenção ao descanso entre sessões.' };
   }
   if(idade >= 40){
-    return { ajuste: -4, nota: 'A partir dessa faixa etária é comum a perimenopausa começar a influenciar a recuperação — nada preocupante, só um sinal pra observar com mais atenção.' };
+    return { ajuste: -4, nota: 'A partir dessa faixa etária é comum a perimenopausa começar a influenciar a recuperação, nada preocupante, só um sinal pra observar com mais atenção.' };
   }
   return { ajuste: 0, nota: '' };
 }
@@ -2728,18 +4575,18 @@ if(type === 'central'){
           '<svg width="84" height="84" viewBox="0 0 96 96">' +
             '<circle cx="48" cy="48" r="40" fill="none" stroke="#26231C" stroke-width="8"/>' +
             '<circle cx="48" cy="48" r="40" fill="none" stroke="url(#goldring)" stroke-width="8" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="251" transform="rotate(-90 48 48)"/>' +
-            '<defs><linearGradient id="goldring" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F1DE9A"/><stop offset="100%" stop-color="#8A6D1F"/></linearGradient></defs>' +
+            '<defs><linearGradient id="goldring" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FCE8B8"/><stop offset="100%" stop-color="#5C3814"/></linearGradient></defs>' +
           '</svg>' +
           '<div><p class="ring-num" style="font-size:16px;">Calibrando</p><p class="ring-label">seu DNA MUSA está começando a te conhecer</p></div>' +
         '</div>' +
-        '<div class="insight"><p>Hoje é seu primeiro dia — cada treino registrado deixa suas previsões mais precisas.</p></div>';
+        '<div class="insight"><p>Hoje é seu primeiro dia, cada treino registrado deixa suas previsões mais precisas.</p></div>';
     } else {
       const probabilidade = calcularProbabilidadeSucesso('Andriele Caroline Rubert');
       const offset = Math.round(251 - (251 * probabilidade / 100));
       const nutriStatsCentral = calcularNutricaoStats('Andriele Caroline Rubert');
       let insightExtra = '';
       if(nutriStatsCentral.temDados && nutriStatsCentral.potencialGanhoGordura > 55){
-        insightExtra = ' As fugas na dieta e/ou álcool das últimas semanas estão pesando nesse número — reduzir isso tende a acelerar os resultados que você quer ver.';
+        insightExtra = ' As fugas na dieta e/ou álcool das últimas semanas estão pesando nesse número, reduzir isso tende a acelerar os resultados que você quer ver.';
       } else if(nutriStatsCentral.temDados){
         insightExtra = ' Sua adesão à dieta está ajudando bastante nesse número.';
       }
@@ -2750,7 +4597,7 @@ if(type === 'central'){
           '<svg width="84" height="84" viewBox="0 0 96 96">' +
             '<circle cx="48" cy="48" r="40" fill="none" stroke="#26231C" stroke-width="8"/>' +
             '<circle cx="48" cy="48" r="40" fill="none" stroke="url(#goldring)" stroke-width="8" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="' + offset + '" transform="rotate(-90 48 48)"/>' +
-            '<defs><linearGradient id="goldring" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F1DE9A"/><stop offset="100%" stop-color="#8A6D1F"/></linearGradient></defs>' +
+            '<defs><linearGradient id="goldring" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FCE8B8"/><stop offset="100%" stop-color="#5C3814"/></linearGradient></defs>' +
           '</svg>' +
           '<div><p class="ring-num">' + probabilidade + '%</p><p class="ring-label">de probabilidade de sucesso</p></div>' +
         '</div>' +
@@ -2761,7 +4608,7 @@ if(type === 'central'){
     let indsHtml = '';
     if(!stats.temDados){
       ['Potencial de hipertrofia', 'Capacidade de recuperação', 'Constância', 'Resposta nutricional'].forEach(function(nome){
-        indsHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-size:12.5px;color:var(--text-dim);">' + nome + '</span><span style="font-size:10.5px;color:var(--text-faint);border:1px dashed var(--border-strong);padding:3px 8px;border-radius:8px;">Calibrando</span></div>';
+        indsHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-size:12px;color:var(--text-dim);">' + nome + '</span><span style="font-size:11px;color:var(--text-faint);border:1px dashed var(--border-strong);padding:3px 8px;border-radius:8px;">Calibrando</span></div>';
       });
     } else {
       const pctConstancia = Math.round((stats.totalConcluidos / stats.totalPlanejado) * 100);
@@ -2777,23 +4624,23 @@ if(type === 'central'){
         { n: 'Capacidade de recuperação', v: capRecuperacao }
       ];
       indicadoresReais.forEach(function(i){
-        indsHtml += '<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px;"><span style="color:var(--text-dim);">' + i.n + '</span><span style="font-weight:600;">' + i.v + '</span></div><div style="background:#221F18;border-radius:6px;height:6px;overflow:hidden;margin-bottom:5px;"><div style="width:' + i.v + '%;height:100%;background:linear-gradient(90deg,#8A6D1F,#D4AF37);"></div></div><p style="font-size:11px;color:var(--text-faint);margin:0;">' + explicacaoIndicador(i.n, i.v) + (i.n === 'Capacidade de recuperação' && ajusteIdade.nota ? ' ' + ajusteIdade.nota : '') + '</p></div>';
+        indsHtml += '<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--text-dim);">' + i.n + '</span><span style="font-weight:600;">' + i.v + '</span></div><div style="background:#221F18;border-radius:6px;height:6px;overflow:hidden;margin-bottom:5px;"><div style="width:' + i.v + '%;height:100%;background:linear-gradient(90deg,#5C3814,#D98B2E);"></div></div><p style="font-size:11px;color:var(--text-faint);margin:0;">' + explicacaoIndicador(i.n, i.v) + (i.n === 'Capacidade de recuperação' && ajusteIdade.nota ? ' ' + ajusteIdade.nota : '') + '</p></div>';
       });
       const nutriStats = calcularNutricaoStats('Andriele Caroline Rubert');
       if(nutriStats.temDados){
         [{ n: 'Potencial de hipertrofia', v: nutriStats.potencialHipertrofia }, { n: 'Resposta nutricional', v: nutriStats.respostaNutricional }, { n: 'Potencial de ganho de gordura', v: nutriStats.potencialGanhoGordura }, { n: 'Potencial de definição física', v: calcularPotencialDefinicao('Andriele Caroline Rubert') }].forEach(function(i){
-          indsHtml += '<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px;"><span style="color:var(--text-dim);">' + i.n + '</span><span style="font-weight:600;">' + i.v + '</span></div><div style="background:#221F18;border-radius:6px;height:6px;overflow:hidden;margin-bottom:5px;"><div style="width:' + i.v + '%;height:100%;background:linear-gradient(90deg,#8A6D1F,#D4AF37);"></div></div><p style="font-size:11px;color:var(--text-faint);margin:0;">' + explicacaoIndicador(i.n, i.v) + '</p></div>';
+          indsHtml += '<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--text-dim);">' + i.n + '</span><span style="font-weight:600;">' + i.v + '</span></div><div style="background:#221F18;border-radius:6px;height:6px;overflow:hidden;margin-bottom:5px;"><div style="width:' + i.v + '%;height:100%;background:linear-gradient(90deg,#5C3814,#D98B2E);"></div></div><p style="font-size:11px;color:var(--text-faint);margin:0;">' + explicacaoIndicador(i.n, i.v) + '</p></div>';
         });
         if(nutriStats.retencaoHidricaEstimada > 0){
-          indsHtml += '<div class="insight" style="margin-top:6px;"><p><b>Retenção hídrica estimada: ' + nutriStats.retencaoHidricaEstimada + '</b><br>Isso é água, não gordura — geralmente resolve em alguns dias voltando à hidratação normal. ' + (nutriStats.semanasComAlcool > 0 ? 'Parte disso pode estar ligado ao consumo de álcool relatado.' : '') + '</p></div>';
+          indsHtml += '<div class="insight" style="margin-top:6px;"><p><b>Retenção hídrica estimada: ' + nutriStats.retencaoHidricaEstimada + '</b><br>Isso é água, não gordura, geralmente resolve em alguns dias voltando à hidratação normal. ' + (nutriStats.semanasComAlcool > 0 ? 'Parte disso pode estar ligado ao consumo de álcool relatado.' : '') + '</p></div>';
         }
       } else {
         ['Potencial de hipertrofia', 'Resposta nutricional'].forEach(function(nome){
-          indsHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-size:12.5px;color:var(--text-dim);">' + nome + '</span><span style="font-size:10.5px;color:var(--text-faint);border:1px dashed var(--border-strong);padding:3px 8px;border-radius:8px;">Calibrando</span></div>';
+          indsHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-size:12px;color:var(--text-dim);">' + nome + '</span><span style="font-size:11px;color:var(--text-faint);border:1px dashed var(--border-strong);padding:3px 8px;border-radius:8px;">Calibrando</span></div>';
         });
       }
     }
-    const heroTexto = stats.temDados ? calcularProbabilidadeSucesso('Andriele Caroline Rubert') + '%' : 'Calibrando — dia 1';
+    const heroTexto = stats.temDados ? calcularProbabilidadeSucesso('Andriele Caroline Rubert') + '%' : 'Calibrando, dia 1';
     el.innerHTML =
       '<p class="page-sub" style="margin-top:14px;">DNA MUSA</p>' +
       '<h1 class="page-title" style="margin-top:0;">Perfil inteligente da Andriele</h1>' +
@@ -2807,7 +4654,7 @@ if(type === 'central'){
       el.innerHTML =
         '<p class="page-sub" style="margin-top:14px;">DNA MUSA</p>' +
         '<h1 class="page-title" style="margin-top:0;">Evolução mensal</h1>' +
-        '<div class="insight"><p>Ainda não há histórico — assim que você completar seus primeiros treinos, essa tela vai mostrar sua evolução mês a mês.</p></div>' +
+        '<div class="insight"><p>Ainda não há histórico, assim que você completar seus primeiros treinos, essa tela vai mostrar sua evolução mês a mês.</p></div>' +
         '<p class="section-label">Dias de treino por mês</p>' +
         '<div class="info-box"><p class="txt">Julho (mês atual): 0 treinos registrados até agora.</p></div>';
     } else {
@@ -2817,7 +4664,7 @@ if(type === 'central'){
       el.innerHTML =
         '<p class="page-sub" style="margin-top:14px;">DNA MUSA</p>' +
         '<h1 class="page-title" style="margin-top:0;">Evolução mensal</h1>' +
-        '<div class="insight"><p>Você já treinou ' + stats.totalConcluidos + ' dias desde que começou — ' + stats.progressoes + ' exercícios já tiveram aumento de carga.</p></div>' +
+        '<div class="insight"><p>Você já treinou ' + stats.totalConcluidos + ' dias desde que começou, ' + stats.progressoes + ' exercícios já tiveram aumento de carga.</p></div>' +
         '<p class="section-label">Dias de treino por mês (aprox.)</p>' +
         '<div class="info-box">' +
           '<div class="month-row"><span class="month-name">Mês atual (semanas 7-8)</span><div class="month-bar-wrap"><div class="month-bar" style="width:' + Math.round(mes2/10*100) + '%;"></div></div><span class="month-val">' + mes2 + '/10</span></div>' +
@@ -2828,7 +4675,7 @@ if(type === 'central'){
     el.innerHTML =
       '<p class="page-sub" style="margin-top:14px;">DNA MUSA</p>' +
       '<h1 class="page-title" style="margin-top:0;">Indicadores</h1>' +
-      '<div class="insight"><p>A explicação detalhada de cada indicador para a aluna ainda está em desenvolvimento — em breve cada métrica virá com uma leitura em linguagem simples.</p></div>';
+      '<div class="insight"><p>A explicação detalhada de cada indicador para a aluna ainda está em desenvolvimento, em breve cada métrica virá com uma leitura em linguagem simples.</p></div>';
   } else if(type === 'mobilidade'){
     const m = mobilidadeItens[arg];
     const embedMob = getEmbedUrl(m.video);
@@ -2844,15 +4691,21 @@ if(type === 'central'){
     const d = dias[arg];
     if(detailDiaAtual !== arg){ seriesConcluidas = {}; }
     detailDiaAtual = arg;
-    let corpoTreino = '<div class="list-item"><span>Dia de descanso — aproveite para recuperar.</span></div>';
+    let corpoTreino = '<div class="list-item"><span>Dia de descanso, aproveite para recuperar.</span></div>';
     if(!d.descanso){
       const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
       const prog = alunaAtual ? getProgressoAluna(alunaAtual.nome) : null;
       corpoTreino = '<div class="badge">' + faseAtual + '</div>' +
         '<div class="list-item" style="justify-content:space-between;"><span id="cronometro-display" style="font-family:\'Playfair Display\',serif;font-size:18px;font-weight:600;">' + String(Math.floor(cronometroSegundos/60)).padStart(2,'0') + ':' + String(cronometroSegundos%60).padStart(2,'0') + '</span><button class="btn-gold" style="width:auto;margin:0;padding:8px 16px;" id="cronometro-btn" onclick="alternarCronometro()">' + (cronometroRodando ? 'Pausar' : (cronometroSegundos > 0 ? 'Retomar' : 'Iniciar treino')) + '</button></div>' +
+        '<div id="toast-celebracao-area"></div>' +
+        renderBlocoPosturalDia(alunaAtual) +
         '<p class="section-label">Treino do dia</p>' +
-        '<p class="page-sub" style="margin-top:-6px;">Registre a carga e as repetições da <b>1ª série</b> — é isso que ajusta sua progressão</p>';
+        '<p class="page-sub" style="margin-top:-6px;">Registre a carga e as repetições da <b>1ª série</b>, é isso que ajusta sua progressão</p>';
       d.ex.forEach(function(linha, j){
+        if(linha.indexOf('|||') !== -1){
+          corpoTreino += renderCardBiset(linha, j, prog);
+          return;
+        }
         const partes = linha.split(' · ');
         const nomeEx = partes[0];
         let notaSemanaAnterior = '';
@@ -2869,18 +4722,20 @@ if(type === 'central'){
         let pillsSeries = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 8px;">';
         for(let s = 0; s < numSeries; s++){
           const feita = seriesConcluidas[j][s];
-          pillsSeries += '<span class="chip' + (feita ? ' active' : '') + '" style="padding:6px 12px;font-size:11px;cursor:pointer;" onclick="concluirSerie(' + j + ',' + s + ',' + descansoParaSegundos(descanso || '60s') + ')">' + (feita ? '✓ ' : '') + 'Série ' + (s+1) + '</span>';
+          pillsSeries += '<span class="chip' + (feita ? ' active' : '') + '" id="serie-pill-' + j + '-' + s + '" style="padding:6px 12px;font-size:11px;cursor:pointer;" onclick="concluirSerie(' + j + ',' + s + ',' + descansoParaSegundos(descanso || '60s') + ')">' + (feita ? '✓ ' : '') + 'Série ' + (s+1) + '</span>';
         }
         pillsSeries += '</div><span id="descanso-display-' + j + '" style="font-size:13px;font-weight:600;color:var(--gold-soft);"></span>';
 
         const verExecucao = '<p style="font-size:12px;color:var(--gold-soft);margin:2px 0 8px;cursor:pointer;" onclick="toggleVideoExercicioDia(' + j + ')"><i class="ti ti-player-play" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Ver execução</p><div id="video-ex-dia-' + j + '" style="display:none;margin-bottom:8px;"></div>';
 
         const precisaTecnica = precisaAprovacaoTecnica(alunaAtual, nomeEx);
+        const semanaPar = prog ? (prog.semana % 2 === 0) : false;
+        const mostrarAvisoTecnica = precisaTecnica === true || (precisaTecnica === 'periodica' && semanaPar);
         let avisoTecnica = '';
-        if(precisaTecnica === true || precisaTecnica === 'periodica'){
+        if(mostrarAvisoTecnica){
           const jaSolicitado = alunaAtual.tecnicaAprovada && alunaAtual.tecnicaAprovada[nomeEx] === 'pendente';
           avisoTecnica = jaSolicitado
-            ? '<p style="font-size:11px;color:var(--gold-soft);margin:2px 0 8px;">📹 Vídeo enviado — aguardando seu personal analisar.</p>'
+            ? '<p style="font-size:11px;color:var(--gold-soft);margin:2px 0 8px;">📹 Vídeo enviado, aguardando seu personal analisar.</p>'
             : '<p style="font-size:11px;color:var(--gold-soft);margin:2px 0 8px;cursor:pointer;" onclick="pedirVideoTecnicaAluna(\'' + nomeEx.replace(/'/g,"\\'") + '\')">📹 Grave um vídeo desse exercício e envie pro seu personal analisar a técnica</p>';
         }
 
@@ -2925,7 +4780,8 @@ if(type === 'central'){
           : '<div class="video-block"><i class="ti ti-player-play"></i></div>')) +
       '<div class="info-box"><p class="txt">' + c.desc + '</p></div>' +
       (c.locked
-        ? '<div class="list-item"><span><i class="ti ti-lock" style="font-size:13px;vertical-align:-2px;margin-right:6px;color:var(--gold-soft);"></i>Conteúdo bloqueado</span><span class="tag">Desbloquear</span></div>'
+        ? '<div class="list-item"><span><i class="ti ti-lock" style="font-size:13px;vertical-align:-2px;margin-right:6px;color:var(--gold-soft);"></i>Conteúdo bloqueado</span><span class="tag">' + (c.preco || 'Desbloquear') + '</span></div>' +
+          (c.preco ? '<p class="page-sub" style="margin-top:8px;">Pagamentos ainda não estão ativos na plataforma, isso é só uma prévia de como vai aparecer.</p>' : '')
         : '');
   } else {
     el.innerHTML =
@@ -2935,6 +4791,7 @@ if(type === 'central'){
   }
   setActive('detail');
   document.getElementById('backlabel').textContent = 'Voltar';
+  aplicarTransicaoSuave('detail-content');
 }
 
 function pedirVideoTecnicaAluna(nomeEx){
@@ -2965,21 +4822,200 @@ function mostrarAlternativaEmergencia(idx, nomeEx){
   }
 }
 
+function renderCardBiset(linha, j, prog){
+  const partesMetodo = linha.split('|||');
+  const metodoNome = partesMetodo[0].trim(); // ex: "Bi-set"
+  const exercicios = partesMetodo.slice(1); // ["Nome1 · SxR1", "Nome2 · SxR2", ...]
+
+  const descricoes = {
+    'Bi-set': 'Bi-set: execute os dois exercícios em sequência, sem descanso entre eles, descanse só depois do segundo.',
+    'Tri-set': 'Tri-set: execute os três exercícios em sequência, sem descanso entre eles, descanse só depois do último.'
+  };
+
+  let html = '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:6px;border:1px solid var(--gold-deep);">' +
+    '<span class="badge" style="align-self:flex-start;">' + metodoNome + '</span>' +
+    '<p style="font-size:11px;color:var(--text-faint);margin:0 0 4px;">' + (descricoes[metodoNome] || '') + '</p>';
+
+  exercicios.forEach(function(exLinha, sub){
+    const partes = exLinha.trim().split(' · ');
+    const nomeEx = partes[0];
+    const subId = j + '-' + sub;
+    const seriesMatchBiset = (partes[1] || '').match(/^(\d+)x/);
+    const numSeriesBiset = seriesMatchBiset ? parseInt(seriesMatchBiset[1], 10) : 0;
+    const repsMatchBiset = (partes[1] || '').match(/x(\d+)/);
+    const repsAlvoBiset = repsMatchBiset ? parseInt(repsMatchBiset[1], 10) : null;
+    const descansoBiset = calcularDescansoPorReps(repsAlvoBiset);
+    const ehUltimoDoPar = sub === exercicios.length - 1;
+
+    if(!seriesConcluidas[subId]) seriesConcluidas[subId] = new Array(numSeriesBiset).fill(false);
+    let pillsBiset = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 2px;">';
+    for(let s = 0; s < numSeriesBiset; s++){
+      const feita = seriesConcluidas[subId][s];
+      pillsBiset += '<span class="chip' + (feita ? ' active' : '') + '" id="serie-pill-' + subId + '-' + s + '" style="padding:5px 10px;font-size:11px;cursor:pointer;" onclick="concluirSerieBiset(\'' + subId + '\',' + s + ',' + ehUltimoDoPar + ',' + descansoParaSegundos(descansoBiset || '60s') + ')">' + (feita ? '✓ ' : '') + 'Série ' + (s+1) + '</span>';
+    }
+    pillsBiset += '</div>';
+
+    let nota = '';
+    if(prog && prog.historico[nomeEx] && prog.historico[nomeEx].length){
+      const ultimo = prog.historico[nomeEx][prog.historico[nomeEx].length - 1];
+      nota = '<p style="font-size:11px;color:var(--gold-soft);margin:2px 0 6px;">Semana ' + ultimo.semana + ': ' + ultimo.carga + 'kg × ' + ultimo.reps + ' reps → sugestão: ' + ultimo.sugestao.valor + 'kg</p>';
+    }
+    html += '<div style="border-top:1px dashed var(--border);padding-top:8px;margin-top:4px;">' +
+      '<div style="display:flex;justify-content:space-between;"><span>' + nomeEx + '</span><span class="tag">' + (partes[1] || '') + (ehUltimoDoPar && descansoBiset ? ' · ⏱ ' + descansoBiset + ' após o par' : ' · sem descanso →') + '</span></div>' +
+      pillsBiset +
+      (ehUltimoDoPar ? '<span id="descanso-display-' + subId + '" style="font-size:12px;font-weight:600;color:var(--gold-soft);"></span>' : '') +
+      '<p style="font-size:12px;color:var(--gold-soft);margin:2px 0 6px;cursor:pointer;" onclick="toggleVideoExercicioDia(\'' + subId + '\')"><i class="ti ti-player-play" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Ver execução</p>' +
+      '<div id="video-ex-dia-' + subId + '" style="display:none;margin-bottom:6px;"></div>' +
+      nota +
+      '<div style="display:flex;gap:8px;">' +
+        '<input class="form-input" data-carga="' + subId + '" type="number" placeholder="Carga (kg)" style="flex:1;">' +
+        '<input class="form-input" data-reps="' + subId + '" type="number" placeholder="Reps · 1ª série" style="flex:1;">' +
+      '</div>' +
+    '</div>';
+  });
+
+  html += '</div>';
+  return html;
+}
+
+function renderBlocoPosturalDia(alunaAtual){
+  if(!alunaAtual || !alunaAtual.desviosPosturaisConfirmados || alunaAtual.desviosPosturaisConfirmados.length === 0) return '';
+  const bloco = obterBlocoPostural(alunaAtual.desviosPosturaisConfirmados);
+  if(bloco.length === 0) return '';
+  let html = '<p class="section-label">Mobilidade e correção postural</p>' +
+    '<p class="page-sub" style="margin-top:-6px;">Faça antes do treino principal de hoje</p>';
+  bloco.forEach(function(ex, i){
+    const idxPostural = 'postural-' + i;
+    const seriesMatch = ex.volume.match(/^(\d+)x/);
+    const numSeries = seriesMatch ? parseInt(seriesMatch[1], 10) : 0;
+    if(!seriesConcluidas[idxPostural]) seriesConcluidas[idxPostural] = new Array(numSeries).fill(false);
+    const descansoSegundos = descansoParaSegundos(ex.descanso || '30s');
+
+    let pills = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 2px;">';
+    for(let s = 0; s < numSeries; s++){
+      const feita = seriesConcluidas[idxPostural][s];
+      pills += '<span class="chip' + (feita ? ' active' : '') + '" id="serie-pill-' + idxPostural + '-' + s + '" style="padding:5px 10px;font-size:11px;cursor:pointer;" onclick="concluirSerie(\'' + idxPostural + '\',' + s + ',' + descansoSegundos + ')">' + (feita ? '✓ ' : '') + 'Série ' + (s+1) + '</span>';
+    }
+    pills += '</div>';
+
+    html += '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:4px;">' +
+      '<div style="display:flex;justify-content:space-between;"><span>' + ex.nome + '</span><span class="tag">' + ex.volume + ' · ⏱ ' + ex.descanso + '</span></div>' +
+      pills +
+      '<span id="descanso-display-' + idxPostural + '" style="font-size:12px;font-weight:600;color:var(--gold-soft);"></span>' +
+      '<p style="font-size:12px;color:var(--gold-soft);margin:2px 0 4px;cursor:pointer;" onclick="toggleVideoPostural(' + i + ',\'' + ex.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-player-play" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Ver execução</p>' +
+      '<div id="video-postural-' + i + '" style="display:none;"></div>' +
+    '</div>';
+  });
+  return html;
+}
+
+function toggleVideoPostural(idx, nomeExercicio){
+  const container = document.getElementById('video-postural-' + idx);
+  if(!container) return;
+  if(container.style.display === 'none' || !container.innerHTML){
+    let exBanco = buscarExercicioNoBanco(nomeExercicio);
+    if(!exBanco) exBanco = mobilidadeBanco.find(function(m){ return m.nome.toUpperCase() === nomeExercicio.toUpperCase(); });
+    const embed = exBanco ? getEmbedUrl(exBanco.video) : null;
+    container.innerHTML = embed
+      ? '<div class="video-block"><iframe src="' + embed + '" title="' + nomeExercicio + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>' + ytFallback(exBanco.video)
+      : '<div class="video-block" style="flex-direction:column;gap:6px;"><i class="ti ti-video-off" style="font-size:26px;color:var(--text-faint);"></i><p style="font-size:12px;color:var(--text-faint);margin:0;text-align:center;padding:0 20px;">Este vídeo ainda não está disponível, o link será atualizado em breve.</p></div>';
+    container.style.display = 'block';
+  } else {
+    container.style.display = 'none';
+  }
+}
+
 function toggleVideoExercicioDia(idx){
   const container = document.getElementById('video-ex-dia-' + idx);
   if(!container) return;
   if(container.style.display === 'none' || !container.innerHTML){
     const d = dias[detailDiaAtual];
-    const nomeEx = d.ex[idx].split(' · ')[0];
+    let nomeEx;
+    const idxStr = String(idx);
+    if(idxStr.indexOf('-') !== -1){
+      const partesIdx = idxStr.split('-');
+      const linhaBiset = d.ex[parseInt(partesIdx[0], 10)];
+      const exercicios = linhaBiset.split('|||').slice(1);
+      nomeEx = exercicios[parseInt(partesIdx[1], 10)].trim().split(' · ')[0];
+    } else {
+      nomeEx = d.ex[idx].split(' · ')[0];
+    }
     const exBanco = buscarExercicioNoBanco(nomeEx);
     const embed = exBanco ? getEmbedUrl(exBanco.video) : '';
     container.innerHTML = embed
       ? '<div class="video-block"><iframe src="' + embed + '" title="' + nomeEx + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>' + ytFallback(exBanco.video)
-      : '<div class="video-block" style="flex-direction:column;gap:6px;"><i class="ti ti-video-off" style="font-size:26px;color:var(--text-faint);"></i><p style="font-size:12px;color:var(--text-faint);margin:0;text-align:center;padding:0 20px;">Este vídeo ainda não está disponível — o link será atualizado em breve.</p></div>';
+      : '<div class="video-block" style="flex-direction:column;gap:6px;"><i class="ti ti-video-off" style="font-size:26px;color:var(--text-faint);"></i><p style="font-size:12px;color:var(--text-faint);margin:0;text-align:center;padding:0 20px;">Este vídeo ainda não está disponível, o link será atualizado em breve.</p></div>';
     container.style.display = 'block';
   } else {
     container.style.display = 'none';
   }
+}
+
+function renderPerguntaFeedbackTreino(diaIndex){
+  const d = dias[diaIndex];
+  let opcoesExercicios = '<option value="">Selecione...</option>';
+  d.ex.forEach(function(linha){
+    if(linha.indexOf('|||') !== -1){
+      linha.split('|||').slice(1).forEach(function(sub){
+        const nome = sub.trim().split(' · ')[0];
+        opcoesExercicios += '<option value="' + nome + '">' + nome + '</option>';
+      });
+    } else {
+      const nome = linha.split(' · ')[0];
+      opcoesExercicios += '<option value="' + nome + '">' + nome + '</option>';
+    }
+  });
+
+  return '<div class="info-box" id="area-feedback" style="margin-top:10px;">' +
+    '<p class="lbl">Como foi o treino de hoje?</p>' +
+    '<div class="form-group"><label class="form-label">Sentiu desconforto em algum exercício?</label>' +
+      '<select class="form-select" id="feedback-desconforto" onchange="alternarCampoExercicioFeedback()"><option>Não</option><option>Sim</option></select></div>' +
+    '<div class="form-group" id="feedback-exercicio-group" style="display:none;">' +
+      '<label class="form-label">Qual exercício?</label>' +
+      '<select class="form-select" id="feedback-exercicio-desconforto">' + opcoesExercicios + '</select>' +
+    '</div>' +
+    '<div class="form-group" id="feedback-escala-group" style="display:none;"><label class="form-label">Numa escala de 0 a 10, qual a intensidade do desconforto?</label><input class="form-input" id="feedback-escala-desconforto" type="number" min="0" max="10" placeholder="0-10"></div>' +
+    '<div class="form-group"><label class="form-label">E a intensidade geral do treino, de 0 a 10?</label><input class="form-input" id="feedback-intensidade" type="number" min="0" max="10" placeholder="0-10"></div>' +
+    '<button class="btn-gold" onclick="registrarFeedbackTreino(' + diaIndex + ')">Enviar</button>' +
+    '</div>';
+}
+
+function alternarCampoExercicioFeedback(){
+  const val = document.getElementById('feedback-desconforto').value;
+  document.getElementById('feedback-exercicio-group').style.display = val === 'Sim' ? 'block' : 'none';
+  document.getElementById('feedback-escala-group').style.display = val === 'Sim' ? 'block' : 'none';
+}
+
+function registrarFeedbackTreino(diaIndex){
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+  if(!alunaAtual) return;
+  const prog = getProgressoAluna(alunaAtual.nome);
+  const desconforto = document.getElementById('feedback-desconforto').value === 'Sim';
+  const exercicioDesconforto = desconforto ? document.getElementById('feedback-exercicio-desconforto').value : null;
+  const escalaDesconforto = desconforto ? parseInt(document.getElementById('feedback-escala-desconforto').value, 10) : null;
+  const intensidadeInput = parseInt(document.getElementById('feedback-intensidade').value, 10);
+
+  if(!prog.feedbackTreino) prog.feedbackTreino = [];
+  prog.feedbackTreino.push({
+    semana: prog.semana,
+    dia: dias[diaIndex].n,
+    desconforto: desconforto,
+    exercicio: exercicioDesconforto,
+    escalaDesconforto: escalaDesconforto,
+    intensidade: isNaN(intensidadeInput) ? null : intensidadeInput
+  });
+
+  let msg = 'Obrigada pelo feedback! Isso ajuda a calibrar seus próximos treinos.';
+
+  // EXCEÇÃO: desconforto relatado num exercício específico dispara pedido de vídeo NA HORA,
+  // sem esperar a regra de semana sim/semana não
+  if(desconforto && exercicioDesconforto){
+    solicitarVideoTecnica(alunaAtual.nome, exercicioDesconforto);
+    msg += ' Como você relatou desconforto no ' + exercicioDesconforto + ', já pedimos um vídeo desse exercício pra revisar a técnica com você.';
+  }
+
+  const el = document.getElementById('area-feedback');
+  if(el) el.innerHTML = '<p class="txt">' + msg + '</p>';
 }
 
 function registrarTreinoDia(diaIndex){
@@ -2990,17 +5026,26 @@ function registrarTreinoDia(diaIndex){
   let registrados = 0;
   let houveReducao = false;
   d.ex.forEach(function(linha, j){
-    const nomeEx = linha.split(' · ')[0];
-    const cargaEl = document.querySelector('[data-carga="' + j + '"]');
-    const repsEl = document.querySelector('[data-reps="' + j + '"]');
-    const carga = parseFloat(cargaEl.value);
-    const reps = parseInt(repsEl.value, 10);
-    if(isNaN(carga) || isNaN(reps)) return;
-    if(!prog.historico[nomeEx]) prog.historico[nomeEx] = [];
-    const sugestao = sugerirAjusteCarga(carga, reps);
-    prog.historico[nomeEx].push({ semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao });
-    if(sugestao.texto.indexOf('edução') !== -1) houveReducao = true;
-    registrados++;
+    let nomesEIndices = [{ nome: linha.split(' · ')[0], idx: String(j) }];
+    if(linha.indexOf('|||') !== -1){
+      const exercicios = linha.split('|||').slice(1);
+      nomesEIndices = exercicios.map(function(exLinha, sub){
+        return { nome: exLinha.trim().split(' · ')[0], idx: j + '-' + sub };
+      });
+    }
+    nomesEIndices.forEach(function(item){
+      const cargaEl = document.querySelector('[data-carga="' + item.idx + '"]');
+      const repsEl = document.querySelector('[data-reps="' + item.idx + '"]');
+      if(!cargaEl || !repsEl) return;
+      const carga = parseFloat(cargaEl.value);
+      const reps = parseInt(repsEl.value, 10);
+      if(isNaN(carga) || isNaN(reps)) return;
+      if(!prog.historico[item.nome]) prog.historico[item.nome] = [];
+      const sugestao = sugerirAjusteCarga(carga, reps);
+      prog.historico[item.nome].push({ semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao });
+      if(sugestao.texto.indexOf('edução') !== -1) houveReducao = true;
+      registrados++;
+    });
   });
 
   let resultadoSemana = null;
@@ -3019,11 +5064,12 @@ function registrarTreinoDia(diaIndex){
 
   let msg = registrados + ' exercício(s) registrado(s).';
   if(resultadoSemana && resultadoSemana.avancou){
-    msg += ' Semana concluída (' + resultadoSemana.total + '/' + resultadoSemana.total + ') — suas progressões de carga já estão calculadas pra próxima semana! 🎉';
+    msg += ' Semana concluída (' + resultadoSemana.total + '/' + resultadoSemana.total + '), suas progressões de carga já estão calculadas pra próxima semana! 🎉';
   } else if(resultadoSemana){
     msg += ' ' + resultadoSemana.concluidos + ' de ' + resultadoSemana.total + ' treinos concluídos essa semana.';
   }
   conf.innerHTML = '<div class="insight"><p>' + msg + '</p></div>';
+  conf.innerHTML += renderPerguntaFeedbackTreino(diaIndex);
 
   if(resultadoSemana && resultadoSemana.avancou){
     const semanaFechada = prog.semana - 1;
@@ -3042,9 +5088,9 @@ function registrarTreinoDia(diaIndex){
 }
 
 function renderPerguntaCiclo(){
-  return '<div class="info-box" style="margin-top:10px;">' +
+  return '<div class="info-box" id="area-ciclo" style="margin-top:10px;">' +
     '<p class="lbl">Notamos algo</p>' +
-    '<p class="txt">Notamos um desempenho um pouco mais baixo hoje — e tudo bem, isso acontece. Sabemos que o período pode influenciar a força em alguns momentos. Se quiser, pode nos contar há quantos dias foi sua última menstruação? Isso ajuda a deixar nossas análises mais precisas pra você.</p>' +
+    '<p class="txt">Notamos um desempenho um pouco mais baixo hoje, e tudo bem, isso acontece. Sabemos que o período pode influenciar a força em alguns momentos. Se quiser, pode nos contar há quantos dias foi sua última menstruação? Isso ajuda a deixar nossas análises mais precisas pra você.</p>' +
     '<div class="form-group"><input class="form-input" id="ciclo-dias" type="number" placeholder="Ex: 20 dias atrás"></div>' +
     '<div class="form-group"><label class="form-label">Usa algum medicamento/anticoncepcional?</label><select class="form-select" id="ciclo-medicamento"><option>Não</option><option>Sim</option></select></div>' +
     '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="registrarCiclo()">Enviar</button>' +
@@ -3062,13 +5108,15 @@ function registrarCiclo(){
     const semanasAteProximoPeriodo = Math.round((28 - dias_atras) / 7);
     alunaAtual.cicloInfo = { diasAtras: dias_atras, medicamento: medicamento, semanaEstimadaProximoPeriodo: prog.semana + semanasAteProximoPeriodo };
   }
-  document.getElementById('registro-confirmacao').innerHTML = '<div class="insight"><p>Obrigada por compartilhar — isso vai deixar suas análises mais precisas, sem afetar nada além disso.</p></div>';
+  const elCiclo = document.getElementById('area-ciclo');
+  if(elCiclo) elCiclo.innerHTML = '<p class="txt">Obrigada por compartilhar, isso vai deixar suas análises mais precisas, sem afetar nada além disso.</p>';
 }
 
 function pularCiclo(){
   const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
   alunaAtual.cicloPerguntado = true;
-  document.getElementById('registro-confirmacao').innerHTML = '<div class="insight"><p>Sem problemas — pode responder outra hora, se quiser.</p></div>';
+  const elCiclo2 = document.getElementById('area-ciclo');
+  if(elCiclo2) elCiclo2.innerHTML = '<p class="txt">Sem problemas, pode responder outra hora, se quiser.</p>';
 }
 
 function simularHistorico40Dias(){
@@ -3172,21 +5220,21 @@ function exportarRelatorioEvolucao(nome){
   const elegibilidade = calcularElegibilidadeFase(nome);
   const hoje = new Date().toLocaleDateString('pt-BR');
 
-  let html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório de Evolução — ' + a.nome + '</title>';
+  let html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório de Evolução, ' + a.nome + '</title>';
   html += '<style>' +
     'body{font-family:Georgia,serif;background:#fff;color:#1a1a1a;max-width:720px;margin:40px auto;padding:0 24px;}' +
-    'h1{color:#8A6D1F;font-size:26px;margin-bottom:4px;}' +
-    'h2{color:#8A6D1F;font-size:17px;border-bottom:1px solid #D4AF37;padding-bottom:6px;margin-top:32px;}' +
+    'h1{color:#5C3814;font-size:26px;margin-bottom:4px;}' +
+    'h2{color:#5C3814;font-size:17px;border-bottom:1px solid #D98B2E;padding-bottom:6px;margin-top:32px;}' +
     '.meta{color:#666;font-size:13px;margin-bottom:24px;}' +
     'table{width:100%;border-collapse:collapse;margin-top:8px;}' +
     'td,th{padding:6px 8px;border-bottom:1px solid #eee;text-align:left;font-size:13px;}' +
-    'th{color:#8A6D1F;}' +
+    'th{color:#5C3814;}' +
     '.badge{display:inline-block;background:#F1DE9A;color:#5a4a12;padding:3px 10px;border-radius:6px;font-size:12px;}' +
     '.ok{color:#0F6E56;} .pendente{color:#999;}' +
     '@media print{ body{margin:0;} }' +
     '</style></head><body>';
 
-  html += '<h1>MUSA+ — Relatório de Evolução</h1>';
+  html += '<h1>MUSA+, Relatório de Evolução</h1>';
   html += '<p class="meta">' + a.nome + ' · gerado em ' + hoje + '</p>';
 
   html += '<h2>Resumo geral</h2><table>' +
@@ -3242,7 +5290,7 @@ function exportarRelatorioEvolucao(nome){
     elegibilidade.criterios.forEach(function(c){
       html += '<tr><td>' + c.nome + '</td><td class="' + (c.atingido ? 'ok' : 'pendente') + '">' + (c.atingido ? '✓' : '○') + ' ' + c.detalhe + '</td></tr>';
     });
-    html += '</table><p>' + (elegibilidade.elegivel ? '<span class="badge">Elegível para avançar de fase</span>' : 'Ainda não elegível — critérios pendentes acima.') + '</p>';
+    html += '</table><p>' + (elegibilidade.elegivel ? '<span class="badge">Elegível para avançar de fase</span>' : 'Ainda não elegível, critérios pendentes acima.') + '</p>';
   }
 
   html += '<p class="meta" style="margin-top:40px;">Relatório gerado automaticamente pelo MUSA+ com base nos dados registrados no aplicativo.</p>';
