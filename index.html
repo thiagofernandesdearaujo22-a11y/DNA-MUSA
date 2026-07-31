@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --bg: #0A0908;
@@ -212,6 +213,30 @@
 </head>
 <body>
 
+<div id="cronometro-fullscreen-overlay" style="display:none;position:fixed;inset:0;background:#0A0908;z-index:9999;flex-direction:column;align-items:center;justify-content:center;">
+  <div onclick="minimizarCronometro()" style="position:absolute;top:24px;right:24px;width:36px;height:36px;border-radius:50%;background:var(--card-2);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+    <i class="ti ti-minus" style="color:var(--gold-soft);font-size:20px;"></i>
+  </div>
+  <p style="color:var(--text-faint);font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px;">Descanso</p>
+  <div style="position:relative;width:220px;height:220px;display:flex;align-items:center;justify-content:center;">
+    <svg width="220" height="220" viewBox="0 0 220 220" style="position:absolute;top:0;left:0;transform:rotate(-90deg);">
+      <circle cx="110" cy="110" r="98" fill="none" stroke="#26231C" stroke-width="8"/>
+      <circle id="cronometro-fullscreen-ring" cx="110" cy="110" r="98" fill="none" stroke="url(#goldringcronometro)" stroke-width="8" stroke-linecap="round" stroke-dasharray="616" stroke-dashoffset="0"/>
+      <defs><linearGradient id="goldringcronometro" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FCE8B8"/><stop offset="100%" stop-color="#D98B2E"/></linearGradient></defs>
+    </svg>
+    <p id="cronometro-fullscreen-numero" style="font-family:'Playfair Display',serif;font-size:44px;font-weight:600;color:var(--text-main);">60s</p>
+  </div>
+  <div style="display:flex;gap:16px;margin-top:32px;">
+    <button onclick="pausarOuRetomarCronometro()" id="cronometro-fullscreen-btn" class="btn-gold" style="width:auto;padding:12px 28px;margin:0;">Pausar</button>
+    <button onclick="pararCronometroFullscreen()" style="width:auto;padding:12px 28px;background:transparent;border:1px solid var(--border);color:var(--text-faint);border-radius:100px;font-size:14px;cursor:pointer;">Encerrar</button>
+  </div>
+</div>
+
+<div id="cronometro-pill-minimizado" style="display:none;position:fixed;bottom:90px;right:16px;background:var(--card-2);border:1px solid var(--border);border-radius:100px;padding:8px 14px;z-index:9998;cursor:pointer;align-items:center;gap:6px;" onclick="expandirCronometro()">
+  <i class="ti ti-clock" style="color:var(--gold-soft);font-size:14px;"></i>
+  <span id="cronometro-pill-numero" style="font-size:13px;font-weight:600;color:var(--gold-soft);">60s</span>
+</div>
+
 <div class="phone">
   <div class="notch"></div>
   <div class="screen">
@@ -342,7 +367,10 @@
       </div>
 
       <p class="section-label">Treinos da semana</p>
-      <div class="row" id="row-dias"></div>
+      <div class="list-item" style="cursor:pointer;" onclick="abrirListaDeTreinosDaSemana()">
+        <span><i class="ti ti-calendar-week" style="color:var(--gold-soft);margin-right:8px;"></i>Ver treinos da semana</span>
+        <span class="tag" id="resumo-dias-semana"></span>
+      </div>
 
       <div class="stat-grid">
         <div class="stat-card">
@@ -593,6 +621,14 @@
 
     </div>
 
+    <!-- LISTA DE TREINOS DA SEMANA -->
+
+    <div class="view" data-view="semana-treinos">
+      <h1 class="page-title">Treinos da semana</h1>
+      <p class="page-sub">Toque num dia pra abrir o treino completo</p>
+      <div id="lista-dias-semana"></div>
+    </div>
+
     <!-- DETAIL -->
 
     <div class="view" data-view="detail">
@@ -647,10 +683,26 @@ function poster(container, title, sub, onClick, opts){
   container.appendChild(el);
 }
 
-const rowDias = document.getElementById('row-dias');
-dias.forEach(function(d,i){
-  poster(rowDias, d.foco, d.n + (d.hoje ? ' · hoje' : ''), function(){ openDetail('dia', i); }, {done:d.done, pendente:d.pendente});
-});
+function abrirListaDeTreinosDaSemana(){
+  const lista = document.getElementById('lista-dias-semana');
+  lista.innerHTML = dias.map(function(d, i){
+    return '<div class="list-item" style="cursor:pointer;" onclick="abrirDiaDaSemana(' + i + ')">' +
+      '<span>' + d.n + (d.hoje ? ' <span class="tag" style="margin-left:6px;">hoje</span>' : '') + '<br><span style="font-size:12px;color:var(--text-faint);">' + d.foco + '</span></span>' +
+      (d.done ? '<i class="ti ti-circle-check" style="color:var(--gold-soft);font-size:18px;"></i>' : '<i class="ti ti-chevron-right" style="color:var(--text-faint);font-size:18px;"></i>') +
+    '</div>';
+  }).join('');
+  setActive('semana-treinos');
+}
+
+function abrirDiaDaSemana(i){
+  veioDaListaDeTreinosDaSemana = true;
+  setActive('detail');
+  document.getElementById('backlabel').textContent = 'Treinos da semana';
+  openDetail('dia', i);
+}
+
+const resumoDias = document.getElementById('resumo-dias-semana');
+if(resumoDias) resumoDias.textContent = dias.length + ' dias';
 
 const rowDna = document.getElementById('row-dna');
 poster(rowDna, 'Perfil inteligente', 'Score 82%', function(){ openDetail('dna'); });
@@ -1413,7 +1465,7 @@ function renderPerguntaPeso(mes){
 }
 
 function registrarPesoMensal(mes){
-  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
   if(!alunaAtual) return;
   const prog = getProgressoAluna(alunaAtual.nome);
   const peso = parseFloat(document.getElementById('peso-atual-input').value);
@@ -2264,6 +2316,14 @@ function mostrarPreviewMudancaTreino(nomeAluna){
     '<button class="btn-gold" onclick="confirmarGerarTreinoPreview()">Confirmar e gerar esse novo treino</button>';
 }
 
+async function sincronizarTreinoComSupabase(a){
+  if(!supabaseClient) return;
+  if(!a.email) return; // sem e-mail cadastrado, não tem como achar a conta dela no Supabase
+  const { data: alunaRow } = await supabaseClient.from('alunas').select('id').eq('email', a.email).maybeSingle();
+  if(!alunaRow) return; // ela ainda não criou login próprio, sincroniza quando ela entrar
+  await salvarTreinoNoSupabase(alunaRow.id, a.treinoAtual);
+}
+
 function confirmarGerarTreinoPreview(){
   if(!treinoPreviewPendente) return;
   const a = alunasPersonal.find(function(x){ return x.nome === treinoPreviewPendente.nomeAluna; });
@@ -2271,6 +2331,7 @@ function confirmarGerarTreinoPreview(){
   const nomesDias = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
   const semanaComNome = treinoPreviewPendente.semana.map(function(d, i){ return Object.assign({ n: nomesDias[i] }, d); });
   a.treinoAtual = { fase: (a.treinoAtual && a.treinoAtual.fase) || 'A definir', volume: 'Gerado automaticamente, revise antes de confirmar', dias: semanaComNome };
+  sincronizarTreinoComSupabase(a);
   treinoPreviewPendente = null;
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
@@ -2347,6 +2408,7 @@ function gerarTreinoAutomaticoParaAluna(nomeAluna){
   const semanaComNome = semana.map(function(d, i){ return Object.assign({ n: nomesDias[i] }, d); });
 
   a.treinoAtual = { fase: (a.treinoAtual && a.treinoAtual.fase) || 'A definir', volume: 'Gerado automaticamente, revise antes de confirmar', dias: semanaComNome };
+  sincronizarTreinoComSupabase(a);
 
   const resultado = validarPrescricao(perfil, semana);
   const i = alunasPersonal.indexOf(a);
@@ -2362,12 +2424,14 @@ function editarSeriesReps(diaIndex, exIndex, novoValor){
   if(typeof dias !== 'undefined' && dias[diaIndex] && dias[diaIndex].ex[exIndex]){
     dias[diaIndex].ex[exIndex] = nomeAtual + ' · ' + novoValor.trim();
   }
+  sincronizarTreinoComSupabase(a);
 }
 
 function removerExercicioTreino(diaIndex, exIndex){
   const a = alunaAberta;
   a.treinoAtual.dias[diaIndex].ex.splice(exIndex, 1);
   if(typeof dias !== 'undefined' && dias[diaIndex]) dias[diaIndex].ex.splice(exIndex, 1);
+  sincronizarTreinoComSupabase(a);
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
 }
@@ -2398,6 +2462,7 @@ function confirmarAdicionarExercicio(diaIndex){
   const a = alunaAberta;
   a.treinoAtual.dias[diaIndex].ex.push(nomeEscolhido + ' · 3x12');
   if(typeof dias !== 'undefined' && dias[diaIndex]) dias[diaIndex].ex.push(nomeEscolhido + ' · 3x12');
+  sincronizarTreinoComSupabase(a);
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
 }
@@ -2536,6 +2601,8 @@ function openAlunaDetail(i){
     (a.imc ? '<p class="section-label">Composição corporal</p><div class="info-box"><p class="txt">' + a.peso + ' · ' + a.altura + '<br>IMC ' + a.imc + '</p></div>' : '') +
     '<p class="section-label">Contato</p>' +
     '<div class="info-box"><p class="txt">' + (a.email || 'Não informado') + '<br>' + (a.telefone || 'Telefone não informado') + '</p></div>' +
+    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:-4px;" onclick="criarLoginParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-key" style="font-size:14px;vertical-align:-2px;margin-right:6px;"></i>Gerar acesso ao app</button>' +
+    '<div id="acesso-gerado-area"></div>' +
     '<p class="section-label">Pirâmide de prioridade (resposta original)</p>' +
     '<div class="info-box"><p class="txt">' + (a.piramide || 'Não respondida') + '</p></div>' +
     '<p class="section-label">Objetivo com a consultoria</p>' +
@@ -2778,6 +2845,61 @@ function calcularFaseFunil(diasNoPrograma, duracaoPlano){
     return { fase: 'Pré-renovação', mensagem: 'Funil de renovação ativo, ' + diasRestantes + ' dias até vencer', dias: diasNoPrograma };
   }
   return { fase: 'Ritmo reduzido', mensagem: 'Comunicação de manutenção, ritmo reduzido', dias: diasNoPrograma };
+}
+
+function gerarSenhaAleatoria(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+  let senha = '';
+  for(let i = 0; i < 8; i++) senha += chars.charAt(Math.floor(Math.random() * chars.length));
+  return senha;
+}
+
+async function criarLoginParaAluna(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  const areaResultado = document.getElementById('acesso-gerado-area');
+
+  if(!a.email){
+    areaResultado.innerHTML = '<div class="info-box"><p class="txt" style="color:#E2A33D;">Ela não tem e-mail cadastrado na anamnese, não dá pra criar login sem isso.</p></div>';
+    return;
+  }
+  if(!supabaseClient){
+    areaResultado.innerHTML = '<div class="info-box"><p class="txt" style="color:#E2A33D;">Supabase não carregou nesse ambiente agora, tenta de novo.</p></div>';
+    return;
+  }
+
+  areaResultado.innerHTML = '<p class="txt" style="color:var(--text-faint);">Criando acesso...</p>';
+
+  const senha = gerarSenhaAleatoria();
+  // Cliente temporário e isolado, pra não perder a sua sessão de personal ao criar a conta dela
+  const clienteTemp = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } });
+  const { data, error } = await clienteTemp.auth.signUp({ email: a.email, password: senha });
+
+  if(error){
+    areaResultado.innerHTML = '<div class="info-box"><p class="txt" style="color:#E2A33D;">' + (error.message.indexOf('already registered') !== -1 ? 'Já existe uma conta com esse e-mail. Ela já pode logar direto.' : error.message) + '</p></div>';
+    return;
+  }
+
+  // Cria o perfil e os dados dela no banco, usando a sua sessão de personal (tem permissão via RLS)
+  await supabaseClient.from('perfis').insert({ id: data.user.id, tipo: 'aluna', nome: a.nome });
+  await supabaseClient.from('alunas').insert({
+    id: data.user.id, nome: a.nome, email: a.email, telefone: a.telefone || '',
+    nivel: a.nivel || 'Iniciante', freq: a.freq || '3x por semana', piramide: a.piramide || '',
+    objetivo: a.objetivo || '', restricoes: a.restricoes || '', academia: a.academia || '',
+    tempo_disponivel: a.tempoDisponivel || 60
+  });
+
+  const linkApp = window.location.origin + window.location.pathname;
+  const mensagemWpp = encodeURIComponent('Oi ' + a.nome.split(' ')[0] + '! Seu acesso ao MUSA+ já está pronto.\nE-mail: ' + a.email + '\nSenha: ' + senha + '\nEntre aqui: ' + linkApp);
+  const linkWpp = 'https://wa.me/55' + (a.telefone || '').replace(/\D/g, '') + '?text=' + mensagemWpp;
+
+  areaResultado.innerHTML = '<div class="info-box">' +
+    '<p class="txt" style="font-weight:600;">Acesso criado</p>' +
+    '<p class="txt">E-mail: ' + a.email + '<br>Senha: <b>' + senha + '</b></p>' +
+    '<p class="txt" style="font-size:11px;color:var(--text-faint);">Link do app: ' + linkApp + '</p>' +
+    '</div>' +
+    '<a class="btn-gold" style="width:auto;padding:8px 14px;margin:0 8px 0 0;font-size:12px;background:#25D366;color:#fff;text-decoration:none;display:inline-block;" href="' + linkWpp + '" target="_blank" rel="noopener"><i class="ti ti-brand-whatsapp" style="vertical-align:-2px;margin-right:4px;"></i>Mandar por WhatsApp</a>' +
+    '<button class="btn-gold" style="width:auto;padding:8px 14px;margin:0;font-size:12px;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="navigator.clipboard.writeText(\'E-mail: ' + a.email + ' - Senha: ' + senha + ' - Link: ' + linkApp + '\')">Copiar dados</button>';
 }
 
 function renderPlanoFechado(a){
@@ -3700,7 +3822,7 @@ function alternarTipoLogin(tipo){
   document.getElementById('login-form-personal').style.display = tipo === 'personal' ? 'block' : 'none';
 }
 
-function loginAluna(){
+async function loginAluna(){
   const email = document.getElementById('login-aluna-email').value.trim().toLowerCase();
   const senha = document.getElementById('login-aluna-senha').value;
   const erroEl = document.getElementById('login-aluna-erro');
@@ -3712,27 +3834,104 @@ function loginAluna(){
     return;
   }
 
-  const cadastradas = carregarAlunasCadastradas();
-  const primeiroAcesso = !cadastradas[email];
-  if(cadastradas[email]){
-    if(cadastradas[email] !== senha){
-      erroEl.textContent = 'Senha incorreta.';
+  if(!supabaseClient){
+    // Fallback local, só usado se o script do Supabase não carregar por algum motivo
+    sessaoTipo = 'aluna';
+    document.getElementById('card-personal-launcher').style.display = 'none';
+    setActive('launcher');
+    return;
+  }
+
+  let primeiroAcesso = false;
+  let { data, error } = await supabaseClient.auth.signInWithPassword({ email: email, password: senha });
+
+  if(error){
+    // E-mail e senha corretos, mas a conta ainda não foi confirmada (ajuste isso no painel do Supabase: Authentication → Providers → Email → desative "Confirm email")
+    if(error.message.toLowerCase().indexOf('email not confirmed') !== -1){
+      erroEl.textContent = 'Sua conta ainda não foi liberada. Peça pro seu personal confirmar seu acesso.';
       erroEl.style.display = 'block';
       return;
     }
-  } else {
-    cadastradas[email] = senha; // primeiro acesso: já cadastra
-    salvarAlunasCadastradas(cadastradas);
+    // Senha errada numa conta que já existe (não confundir com primeiro acesso)
+    if(error.message.toLowerCase().indexOf('invalid login credentials') !== -1){
+      const jaTemConta = await supabaseClient.from('alunas').select('id').eq('email', email).maybeSingle();
+      if(jaTemConta.data){
+        erroEl.textContent = 'Senha incorreta.';
+        erroEl.style.display = 'block';
+        return;
+      }
+    }
+    // Ainda não existe conta com esse e-mail: cadastra agora (primeiro acesso)
+    const cadastro = await supabaseClient.auth.signUp({ email: email, password: senha });
+    if(cadastro.error){
+      erroEl.textContent = cadastro.error.message.indexOf('Password') !== -1 ? 'Senha precisa ter pelo menos 6 caracteres.' : cadastro.error.message;
+      erroEl.style.display = 'block';
+      return;
+    }
+    data = cadastro.data;
+    primeiroAcesso = true;
+    const nomeNovaAluna = email.split('@')[0];
+    await supabaseClient.from('perfis').insert({ id: data.user.id, tipo: 'aluna', nome: nomeNovaAluna });
+    await supabaseClient.from('alunas').insert({ id: data.user.id, nome: nomeNovaAluna, email: email });
+    // Garante que ela também exista localmente, pra todas as telas já funcionarem
+    alunasPersonal.push({ nome: nomeNovaAluna, status: 'ok', statusLabel: 'Ativa recente', nivel: 'Iniciante', freq: '3x por semana', email: email, telefone: '', piramide: '', objetivo: '', restricoes: '', academia: '', dataAnamnese: new Date().toISOString().slice(0,10) });
   }
+
+  sessaoUsuarioAtual = data.user;
+
+  // Descobre o nome real dela (pode já existir cadastro feito pelo Personal com o mesmo e-mail)
+  const { data: alunaRow } = await supabaseClient.from('alunas').select('nome').eq('id', data.user.id).maybeSingle();
+  if(alunaRow) NOME_ALUNA_LOGADA = alunaRow.nome;
 
   sessaoTipo = 'aluna';
   document.getElementById('card-personal-launcher').style.display = 'none';
+
+  await carregarELigarTreinoDaAluna(data.user.id);
+
   if(primeiroAcesso){
     setActive('intro');
     setTimeout(function(){ setActive('onboarding'); }, 4000);
   } else {
     setActive('launcher');
   }
+}
+
+async function carregarELigarTreinoDaAluna(userId){
+  const { data: treinoData } = await supabaseClient
+    .from('treinos')
+    .select('*')
+    .eq('aluna_id', userId)
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if(treinoData) aplicarTreinoRecebidoDoSupabase(treinoData);
+
+  supabaseClient
+    .channel('treino-da-aluna-' + userId)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'treinos', filter: 'aluna_id=eq.' + userId }, function(payload){
+      if(payload.new) aplicarTreinoRecebidoDoSupabase(payload.new);
+    })
+    .subscribe();
+}
+
+function aplicarTreinoRecebidoDoSupabase(treinoRow){
+  const a = alunasPersonal.find(function(x){ return x.nome === NOME_ALUNA_LOGADA; });
+  if(!a) return;
+  a.treinoAtual = { fase: treinoRow.fase, volume: treinoRow.volume, dias: treinoRow.dias };
+  const viewAtiva = document.querySelector('.view.active');
+  if(viewAtiva && viewAtiva.getAttribute('data-view') === 'home' && typeof renderHome === 'function'){
+    renderHome();
+  }
+}
+
+async function salvarTreinoNoSupabase(alunaId, treinoAtual){
+  await supabaseClient.from('treinos').insert({
+    aluna_id: alunaId,
+    fase: treinoAtual.fase,
+    volume: treinoAtual.volume,
+    dias: treinoAtual.dias
+  });
 }
 
 function finalizarOnboarding(){
@@ -3746,15 +3945,46 @@ function testarIntroNovamente(){
   setTimeout(function(){ setActive('onboarding'); }, 4000);
 }
 
-function loginPersonal(){
+async function loginPersonal(){
   const email = document.getElementById('login-personal-email').value.trim().toLowerCase();
   const senha = document.getElementById('login-personal-senha').value;
   const erroEl = document.getElementById('login-personal-erro');
-  if(email !== EMAIL_PERSONAL.toLowerCase() || senha !== SENHA_PERSONAL){
-    erroEl.textContent = 'E-mail ou senha incorretos.';
-    erroEl.style.display = 'block';
+
+  if(!supabaseClient){
+    if(email !== EMAIL_PERSONAL.toLowerCase() || senha !== SENHA_PERSONAL){
+      erroEl.textContent = 'E-mail ou senha incorretos.';
+      erroEl.style.display = 'block';
+      return;
+    }
+    erroEl.style.display = 'none';
+    sessaoTipo = 'personal';
+    document.getElementById('backbar').style.display = 'flex';
+    document.getElementById('backlabel').textContent = 'Sair';
+    openLevel2('personal');
     return;
   }
+
+  let { data, error } = await supabaseClient.auth.signInWithPassword({ email: email, password: senha });
+
+  if(error){
+    if(email === EMAIL_PERSONAL.toLowerCase() && senha === SENHA_PERSONAL){
+      // Primeira vez logando: cria a conta real do personal agora
+      const cadastro = await supabaseClient.auth.signUp({ email: email, password: senha });
+      if(cadastro.error){
+        erroEl.textContent = cadastro.error.message;
+        erroEl.style.display = 'block';
+        return;
+      }
+      data = cadastro.data;
+      await supabaseClient.from('perfis').insert({ id: data.user.id, tipo: 'personal', nome: 'Thiago' });
+    } else {
+      erroEl.textContent = 'E-mail ou senha incorretos.';
+      erroEl.style.display = 'block';
+      return;
+    }
+  }
+
+  sessaoUsuarioAtual = data.user;
   erroEl.style.display = 'none';
   sessaoTipo = 'personal';
   document.getElementById('backbar').style.display = 'flex';
@@ -3777,11 +4007,18 @@ function openLevel2(which){
 }
 
 /* ===== CHAT DE IA REAL ===== */
+/* ===== SUPABASE — conexão real com o banco de dados ===== */
+const SUPABASE_URL = 'https://vwiaszatrphqitxlefmz.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3aWFzemF0cnBocWl0eGxlZm16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMzgyNzgsImV4cCI6MjEwMDkxNDI3OH0.Cz0tZr0uhS5sWUgkXmNBZCQzZL6pz_j2D7fq0jW1H6Y';
+const supabaseClient = (typeof window.supabase !== 'undefined') ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+let sessaoUsuarioAtual = null; // guarda o usuário logado de verdade (Supabase Auth)
+let NOME_ALUNA_LOGADA = 'Andriele Caroline Rubert'; // padrão pra testes locais; some real, vira dinâmico após login de verdade
+
 const TELEFONE_PERSONAL = '5500000000000'; // ⚠️ SUBSTITUA pelo seu WhatsApp real, formato 55DDDNÚMERO
 let historicoChatIA = [];
 
 function montarContextoAluna(){
-  const nome = 'Andriele Caroline Rubert';
+  const nome = NOME_ALUNA_LOGADA;
   const a = alunasPersonal.find(function(x){ return x.nome === nome; });
   if(!a) return '';
   const stats = calcularEstatisticasAluna(nome);
@@ -3930,7 +4167,7 @@ function mostrarVideoNoChatIA(nomeExercicio, perguntaOriginal){
 }
 
 function escalarParaPersonal(perguntaOriginal, botaoEl){
-  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
   const nomeCurto = alunaAtual ? alunaAtual.nome.split(' ')[0] : 'aluna';
   const mensagem = encodeURIComponent('Oi Thiago! A ' + nomeCurto + ' ainda ficou com dúvida sobre: "' + perguntaOriginal + '". Pode dar uma olhada?');
   const linkWpp = 'https://wa.me/' + TELEFONE_PERSONAL + '?text=' + mensagem;
@@ -3939,7 +4176,7 @@ function escalarParaPersonal(perguntaOriginal, botaoEl){
 }
 
 function registrarDuvidaSinalizada(pergunta, respostaSol){
-  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
   if(!alunaAtual) return;
   if(!alunaAtual.duvidasSinalizadas) alunaAtual.duvidasSinalizadas = [];
   alunaAtual.duvidasSinalizadas.push({ pergunta: pergunta, respostaSol: respostaSol, resolvida: false, data: new Date().toISOString() });
@@ -3968,6 +4205,42 @@ let cronometroRodando = false;
 let descansoIntervals = {};
 
 let seriesConcluidas = {};
+
+function alternarExercicioExpandido(idx){
+  const container = document.getElementById('ex-expandido-' + idx);
+  if(!container) return;
+  container.style.display = container.style.display === 'none' ? 'block' : 'none';
+}
+
+function atualizarBarraProgressoDia(d){
+  d.ex.forEach(function(_, idx){
+    const segmento = document.querySelector('.segmento-progresso[data-idx="' + idx + '"]');
+    if(!segmento) return;
+    const series = seriesConcluidas[idx];
+    const concluido = series && series.length > 0 && series.every(function(v){ return v; });
+    segmento.style.background = concluido ? 'linear-gradient(90deg,#FCE8B8,#D98B2E)' : 'var(--border)';
+  });
+}
+
+function alternarSubstituicoesInline(idx, nomeEx){
+  const container = document.getElementById('subs-inline-' + idx);
+  if(!container) return;
+  if(container.style.display === 'none' || !container.innerHTML){
+    const exAtual = buscarExercicioNoBanco(nomeEx);
+    const grupo = exAtual ? (exAtual.grupo || exAtual.categoria) : null;
+    const opcoes = grupo ? exerciciosBanco.filter(function(e){ return (e.grupo === grupo || e.categoria === grupo) && e.nome.toUpperCase() !== nomeEx.toUpperCase(); }).slice(0, 3) : [];
+    container.innerHTML = opcoes.length === 0
+      ? '<p class="txt" style="font-size:11px;color:var(--text-faint);margin:0 0 6px;">Sem opções parecidas cadastradas ainda.</p>'
+      : '<div class="info-box" style="margin:0 0 8px;padding:10px 12px;">' +
+          '<p class="lbl" style="margin-bottom:6px;">Opções parecidas (mesma região)</p>' +
+          opcoes.map(function(e){ return '<p class="txt" style="margin-bottom:4px;">· ' + capitalizarNomeExercicio(e.nome) + '</p>'; }).join('') +
+          '<p class="txt" style="font-size:10.5px;color:var(--text-faint);margin:6px 0 0;">Isso é só pra referência, seu treino oficial continua o mesmo até seu personal ajustar.</p>' +
+        '</div>';
+    container.style.display = 'block';
+  } else {
+    container.style.display = 'none';
+  }
+}
 
 function concluirSerie(idx, serieIdx, segundosDescanso){
   if(!seriesConcluidas[idx]) return;
@@ -4007,26 +4280,90 @@ function concluirSerieBiset(subId, serieIdx, ehUltimoDoPar, segundosDescanso){
   }
 }
 
+let cronometroDescansoAtivo = null; // { idx, restante, total, pausado }
+
 function iniciarDescanso(idx, segundosTotais){
   if(descansoIntervals[idx]) clearInterval(descansoIntervals[idx]);
-  let restante = segundosTotais;
+  cronometroDescansoAtivo = { idx: idx, restante: segundosTotais, total: segundosTotais, pausado: false };
+
   const display = document.getElementById('descanso-display-' + idx);
-  if(!display) return;
-  display.style.color = 'var(--gold-soft)';
-  display.textContent = restante + 's';
+  if(display){ display.style.color = 'var(--gold-soft)'; display.textContent = segundosTotais + 's'; }
+
+  abrirCronometroFullscreen();
+
   descansoIntervals[idx] = setInterval(function(){
-    restante--;
-    const el = document.getElementById('descanso-display-' + idx);
-    if(!el){ clearInterval(descansoIntervals[idx]); return; }
+    if(!cronometroDescansoAtivo || cronometroDescansoAtivo.pausado) return;
+    cronometroDescansoAtivo.restante--;
+    const restante = cronometroDescansoAtivo.restante;
+
+    const elInline = document.getElementById('descanso-display-' + idx);
+    const elFull = document.getElementById('cronometro-fullscreen-numero');
+    const elPill = document.getElementById('cronometro-pill-numero');
+    const ring = document.getElementById('cronometro-fullscreen-ring');
+
     if(restante > 0){
-      el.textContent = restante + 's';
+      if(elInline) elInline.textContent = restante + 's';
+      if(elFull) elFull.textContent = restante + 's';
+      if(elPill) elPill.textContent = restante + 's';
+      if(ring){
+        const proporcao = restante / cronometroDescansoAtivo.total;
+        ring.setAttribute('stroke-dashoffset', String(616 * (1 - proporcao)));
+      }
     } else {
       clearInterval(descansoIntervals[idx]);
       delete descansoIntervals[idx];
-      el.style.color = '#E2A33D';
-      el.textContent = '🔔 Vai! Próxima série';
+      if(elInline){ elInline.style.color = '#E2A33D'; elInline.textContent = '🔔 Vai! Próxima série'; }
+      if(elFull) elFull.textContent = '🔔 Vai!';
+      fecharCronometroFullscreen();
+      cronometroDescansoAtivo = null;
     }
   }, 1000);
+}
+
+function abrirCronometroFullscreen(){
+  if(!cronometroDescansoAtivo) return;
+  document.getElementById('cronometro-pill-minimizado').style.display = 'none';
+  const overlay = document.getElementById('cronometro-fullscreen-overlay');
+  overlay.style.display = 'flex';
+  document.getElementById('cronometro-fullscreen-numero').textContent = cronometroDescansoAtivo.restante + 's';
+  document.getElementById('cronometro-fullscreen-btn').textContent = 'Pausar';
+}
+
+function minimizarCronometro(){
+  document.getElementById('cronometro-fullscreen-overlay').style.display = 'none';
+  if(!cronometroDescansoAtivo) return;
+  const pill = document.getElementById('cronometro-pill-minimizado');
+  pill.style.display = 'flex';
+  document.getElementById('cronometro-pill-numero').textContent = cronometroDescansoAtivo.restante + 's';
+}
+
+function expandirCronometro(){
+  abrirCronometroFullscreen();
+}
+
+function fecharCronometroFullscreen(){
+  document.getElementById('cronometro-fullscreen-overlay').style.display = 'none';
+  document.getElementById('cronometro-pill-minimizado').style.display = 'none';
+}
+
+function pausarOuRetomarCronometro(){
+  if(!cronometroDescansoAtivo) return;
+  cronometroDescansoAtivo.pausado = !cronometroDescansoAtivo.pausado;
+  document.getElementById('cronometro-fullscreen-btn').textContent = cronometroDescansoAtivo.pausado ? 'Retomar' : 'Pausar';
+}
+
+function pararCronometroFullscreen(){
+  if(cronometroDescansoAtivo && descansoIntervals[cronometroDescansoAtivo.idx]){
+    clearInterval(descansoIntervals[cronometroDescansoAtivo.idx]);
+    delete descansoIntervals[cronometroDescansoAtivo.idx];
+  }
+  const idx = cronometroDescansoAtivo ? cronometroDescansoAtivo.idx : null;
+  cronometroDescansoAtivo = null;
+  fecharCronometroFullscreen();
+  if(idx !== null){
+    const elInline = document.getElementById('descanso-display-' + idx);
+    if(elInline){ elInline.style.color = 'var(--gold-soft)'; elInline.textContent = 'Descanso encerrado'; }
+  }
 }
 
 const PALETA_IDENTIDADE = [
@@ -4050,7 +4387,7 @@ function aplicarIdentidadeVisual(nome){
     avatar.style.boxShadow = '0 8px 30px ' + cor.c2 + '59';
   }
 }
-aplicarIdentidadeVisual('Andriele Caroline Rubert');
+aplicarIdentidadeVisual(NOME_ALUNA_LOGADA);
 
 function alternarCronometro(){
   const btn = document.getElementById('cronometro-btn');
@@ -4285,7 +4622,7 @@ function calcularMetaAguaLitros(pesoTexto){
 }
 
 function registrarNutricaoSemana(){
-  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
   if(!alunaAtual || semanaNutricaoPendente === null) return;
   const prog = getProgressoAluna(alunaAtual.nome);
   const fugas = parseInt(document.getElementById('nutri-fugas').value, 10) || 0;
@@ -4566,7 +4903,7 @@ function openDetail(type, arg){
   const el = document.getElementById('detail-content');
 
 if(type === 'central'){
-    const stats = calcularEstatisticasAluna('Andriele Caroline Rubert');
+    const stats = calcularEstatisticasAluna(NOME_ALUNA_LOGADA);
     if(!stats.temDados){
       el.innerHTML =
         '<p class="page-sub" style="margin-top:14px;">Central de Inteligência</p>' +
@@ -4581,9 +4918,9 @@ if(type === 'central'){
         '</div>' +
         '<div class="insight"><p>Hoje é seu primeiro dia, cada treino registrado deixa suas previsões mais precisas.</p></div>';
     } else {
-      const probabilidade = calcularProbabilidadeSucesso('Andriele Caroline Rubert');
+      const probabilidade = calcularProbabilidadeSucesso(NOME_ALUNA_LOGADA);
       const offset = Math.round(251 - (251 * probabilidade / 100));
-      const nutriStatsCentral = calcularNutricaoStats('Andriele Caroline Rubert');
+      const nutriStatsCentral = calcularNutricaoStats(NOME_ALUNA_LOGADA);
       let insightExtra = '';
       if(nutriStatsCentral.temDados && nutriStatsCentral.potencialGanhoGordura > 55){
         insightExtra = ' As fugas na dieta e/ou álcool das últimas semanas estão pesando nesse número, reduzir isso tende a acelerar os resultados que você quer ver.';
@@ -4604,7 +4941,7 @@ if(type === 'central'){
         '<div class="insight"><p>Você completou ' + stats.totalConcluidos + ' de ' + stats.totalPlanejado + ' treinos planejados, e já teve ' + stats.progressoes + ' aumentos de carga registrados.' + insightExtra + '</p></div>';
     }
   } else if(type === 'dna'){
-    const stats = calcularEstatisticasAluna('Andriele Caroline Rubert');
+    const stats = calcularEstatisticasAluna(NOME_ALUNA_LOGADA);
     let indsHtml = '';
     if(!stats.temDados){
       ['Potencial de hipertrofia', 'Capacidade de recuperação', 'Constância', 'Resposta nutricional'].forEach(function(nome){
@@ -4612,9 +4949,9 @@ if(type === 'central'){
       });
     } else {
       const pctConstancia = Math.round((stats.totalConcluidos / stats.totalPlanejado) * 100);
-      const alunaObj = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+      const alunaObj = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
       const ajusteIdade = ajusteRecuperacaoPorIdade(alunaObj ? alunaObj.idade : null);
-      const nutriStatsPreview = calcularNutricaoStats('Andriele Caroline Rubert');
+      const nutriStatsPreview = calcularNutricaoStats(NOME_ALUNA_LOGADA);
       const ajusteSonoPreview = nutriStatsPreview.temDados ? nutriStatsPreview.ajusteRecuperacaoSono : 0;
       const capRecuperacao = Math.max(20, Math.min(95, (stats.progressoes >= 2 ? 68 : 60) + ajusteIdade.ajuste + ajusteSonoPreview));
       const capProgressao = Math.min(90, 55 + stats.progressoes * 10);
@@ -4626,9 +4963,9 @@ if(type === 'central'){
       indicadoresReais.forEach(function(i){
         indsHtml += '<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--text-dim);">' + i.n + '</span><span style="font-weight:600;">' + i.v + '</span></div><div style="background:#221F18;border-radius:6px;height:6px;overflow:hidden;margin-bottom:5px;"><div style="width:' + i.v + '%;height:100%;background:linear-gradient(90deg,#5C3814,#D98B2E);"></div></div><p style="font-size:11px;color:var(--text-faint);margin:0;">' + explicacaoIndicador(i.n, i.v) + (i.n === 'Capacidade de recuperação' && ajusteIdade.nota ? ' ' + ajusteIdade.nota : '') + '</p></div>';
       });
-      const nutriStats = calcularNutricaoStats('Andriele Caroline Rubert');
+      const nutriStats = calcularNutricaoStats(NOME_ALUNA_LOGADA);
       if(nutriStats.temDados){
-        [{ n: 'Potencial de hipertrofia', v: nutriStats.potencialHipertrofia }, { n: 'Resposta nutricional', v: nutriStats.respostaNutricional }, { n: 'Potencial de ganho de gordura', v: nutriStats.potencialGanhoGordura }, { n: 'Potencial de definição física', v: calcularPotencialDefinicao('Andriele Caroline Rubert') }].forEach(function(i){
+        [{ n: 'Potencial de hipertrofia', v: nutriStats.potencialHipertrofia }, { n: 'Resposta nutricional', v: nutriStats.respostaNutricional }, { n: 'Potencial de ganho de gordura', v: nutriStats.potencialGanhoGordura }, { n: 'Potencial de definição física', v: calcularPotencialDefinicao(NOME_ALUNA_LOGADA) }].forEach(function(i){
           indsHtml += '<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--text-dim);">' + i.n + '</span><span style="font-weight:600;">' + i.v + '</span></div><div style="background:#221F18;border-radius:6px;height:6px;overflow:hidden;margin-bottom:5px;"><div style="width:' + i.v + '%;height:100%;background:linear-gradient(90deg,#5C3814,#D98B2E);"></div></div><p style="font-size:11px;color:var(--text-faint);margin:0;">' + explicacaoIndicador(i.n, i.v) + '</p></div>';
         });
         if(nutriStats.retencaoHidricaEstimada > 0){
@@ -4640,7 +4977,7 @@ if(type === 'central'){
         });
       }
     }
-    const heroTexto = stats.temDados ? calcularProbabilidadeSucesso('Andriele Caroline Rubert') + '%' : 'Calibrando, dia 1';
+    const heroTexto = stats.temDados ? calcularProbabilidadeSucesso(NOME_ALUNA_LOGADA) + '%' : 'Calibrando, dia 1';
     el.innerHTML =
       '<p class="page-sub" style="margin-top:14px;">DNA MUSA</p>' +
       '<h1 class="page-title" style="margin-top:0;">Perfil inteligente da Andriele</h1>' +
@@ -4649,7 +4986,7 @@ if(type === 'central'){
         '<p class="ring-num" style="position:relative;font-size:18px;">' + heroTexto + '</p>' +
       '</div>' + indsHtml;
   } else if(type === 'evolucao'){
-    const stats = calcularEstatisticasAluna('Andriele Caroline Rubert');
+    const stats = calcularEstatisticasAluna(NOME_ALUNA_LOGADA);
     if(!stats.temDados){
       el.innerHTML =
         '<p class="page-sub" style="margin-top:14px;">DNA MUSA</p>' +
@@ -4658,7 +4995,7 @@ if(type === 'central'){
         '<p class="section-label">Dias de treino por mês</p>' +
         '<div class="info-box"><p class="txt">Julho (mês atual): 0 treinos registrados até agora.</p></div>';
     } else {
-      const prog = getProgressoAluna('Andriele Caroline Rubert');
+      const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
       const mes1 = [1,2,3,4,5,6].reduce(function(s,n){ return s + (prog.diasConcluidos[n] ? prog.diasConcluidos[n].length : 0); }, 0);
       const mes2 = [7,8].reduce(function(s,n){ return s + (prog.diasConcluidos[n] ? prog.diasConcluidos[n].length : 0); }, 0);
       el.innerHTML =
@@ -4692,15 +5029,30 @@ if(type === 'central'){
     if(detailDiaAtual !== arg){ seriesConcluidas = {}; }
     detailDiaAtual = arg;
     let corpoTreino = '<div class="list-item"><span>Dia de descanso, aproveite para recuperar.</span></div>';
+    let barraProgresso = '';
     if(!d.descanso){
-      const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+      const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
       const prog = alunaAtual ? getProgressoAluna(alunaAtual.nome) : null;
+
+      // Barra de progresso segmentada: 1 segmento por exercício do dia
+      const totalExerciciosDia = d.ex.length;
+      barraProgresso = '<div style="display:flex;gap:3px;margin:4px 0 14px;" id="barra-progresso-dia">' +
+        d.ex.map(function(_, idx){ return '<div class="segmento-progresso" data-idx="' + idx + '" style="flex:1;height:5px;border-radius:3px;background:var(--border);transition:background .2s;"></div>'; }).join('') +
+        '</div>';
+
+      // Card de metodologia explicada, em texto simples
+      const cardMetodologia = '<div class="info-box" style="margin-bottom:14px;">' +
+        '<p class="lbl" style="margin-bottom:6px;">Como funciona esse treino</p>' +
+        '<p class="txt" style="margin-bottom:0;">Faça as séries de cada exercício na ordem. Registre a carga e as repetições da <b>1ª série</b>, é isso que ajusta sua carga sugerida pra próxima vez. O descanso entre séries já está calculado pra cada exercício, é só seguir o cronômetro.</p>' +
+      '</div>';
+
       corpoTreino = '<div class="badge">' + faseAtual + '</div>' +
         '<div class="list-item" style="justify-content:space-between;"><span id="cronometro-display" style="font-family:\'Playfair Display\',serif;font-size:18px;font-weight:600;">' + String(Math.floor(cronometroSegundos/60)).padStart(2,'0') + ':' + String(cronometroSegundos%60).padStart(2,'0') + '</span><button class="btn-gold" style="width:auto;margin:0;padding:8px 16px;" id="cronometro-btn" onclick="alternarCronometro()">' + (cronometroRodando ? 'Pausar' : (cronometroSegundos > 0 ? 'Retomar' : 'Iniciar treino')) + '</button></div>' +
         '<div id="toast-celebracao-area"></div>' +
         renderBlocoPosturalDia(alunaAtual) +
+        cardMetodologia +
         '<p class="section-label">Treino do dia</p>' +
-        '<p class="page-sub" style="margin-top:-6px;">Registre a carga e as repetições da <b>1ª série</b>, é isso que ajusta sua progressão</p>';
+        barraProgresso;
       d.ex.forEach(function(linha, j){
         if(linha.indexOf('|||') !== -1){
           corpoTreino += renderCardBiset(linha, j, prog);
@@ -4726,7 +5078,10 @@ if(type === 'central'){
         }
         pillsSeries += '</div><span id="descanso-display-' + j + '" style="font-size:13px;font-weight:600;color:var(--gold-soft);"></span>';
 
-        const verExecucao = '<p style="font-size:12px;color:var(--gold-soft);margin:2px 0 8px;cursor:pointer;" onclick="toggleVideoExercicioDia(' + j + ')"><i class="ti ti-player-play" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Ver execução</p><div id="video-ex-dia-' + j + '" style="display:none;margin-bottom:8px;"></div>';
+        const embedVideo = exBanco ? getEmbedUrl(exBanco.video) : null;
+        const playerVideo = embedVideo
+          ? '<div class="video-block" style="margin-bottom:8px;"><iframe src="' + embedVideo + '" title="' + nomeEx + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>'
+          : '';
 
         const precisaTecnica = precisaAprovacaoTecnica(alunaAtual, nomeEx);
         const semanaPar = prog ? (prog.semana % 2 === 0) : false;
@@ -4741,17 +5096,28 @@ if(type === 'central'){
 
         const alternativaHtml = '<p style="font-size:11px;color:var(--text-faint);margin:2px 0 8px;cursor:pointer;" onclick="mostrarAlternativaEmergencia(' + j + ',\'' + nomeEx.replace(/'/g,"\\'") + '\')">Equipamento ocupado? Ver alternativa</p><div id="alt-emergencia-' + j + '" style="display:none;margin-bottom:8px;"></div>';
 
-        corpoTreino += '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:6px;">' +
-          '<div style="display:flex;justify-content:space-between;"><span>' + nomeEx + '</span><span class="tag">' + (partes[1] || '') + (descanso ? ' · ⏱ ' + descanso : '') + '</span></div>' +
+        const conteudoExpandido = playerVideo +
           (descanso ? pillsSeries : '') +
-          verExecucao +
           avisoTecnica +
           alternativaHtml +
           notaSemanaAnterior +
           '<div style="display:flex;gap:8px;">' +
             '<input class="form-input" data-carga="' + j + '" type="number" placeholder="Carga (kg)" style="flex:1;">' +
             '<input class="form-input" data-reps="' + j + '" type="number" placeholder="Reps · 1ª série" style="flex:1;">' +
+          '</div>';
+
+        corpoTreino += '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;">' +
+          '<div style="display:flex;">' +
+            '<div style="flex:1;display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:14px 12px;" onclick="alternarExercicioExpandido(' + j + ')">' +
+              '<span>' + nomeEx + '</span>' +
+              '<span class="tag">' + (partes[1] || '') + (descanso ? ' · ⏱ ' + descanso : '') + '</span>' +
+            '</div>' +
+            '<div style="width:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--card-2);" title="Ver opções parecidas" onclick="event.stopPropagation();alternarSubstituicoesInline(' + j + ',\'' + nomeEx.replace(/'/g,"\\'") + '\')">' +
+              '<div style="width:3px;height:24px;border-radius:2px;background:var(--gold-soft);"></div>' +
+            '</div>' +
           '</div>' +
+          '<div id="subs-inline-' + j + '" style="display:none;padding:0 12px;"></div>' +
+          '<div id="ex-expandido-' + j + '" style="display:none;padding:0 12px 12px;">' + conteudoExpandido + '</div>' +
         '</div>';
       });
       corpoTreino += '<button class="btn-gold" style="margin-top:10px;" onclick="registrarTreinoDia(' + arg + ')">Registrar treino de hoje</button>' +
@@ -4761,6 +5127,7 @@ if(type === 'central'){
       '<p class="page-sub" style="margin-top:14px;">' + d.n + '-feira' + (d.hoje ? ' · hoje' : '') + '</p>' +
       '<h1 class="page-title" style="margin-top:0;">' + d.foco + '</h1>' +
       corpoTreino;
+    if(!d.descanso) atualizarBarraProgressoDia(d);
   } else if(type === 'conteudo'){
     const c = arg;
     if(c.aulas){
@@ -4795,7 +5162,7 @@ if(type === 'central'){
 }
 
 function pedirVideoTecnicaAluna(nomeEx){
-  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
   if(!alunaAtual) return;
   solicitarVideoTecnica(alunaAtual.nome, nomeEx);
   openDetail('dia', detailDiaAtual);
@@ -4987,7 +5354,7 @@ function alternarCampoExercicioFeedback(){
 }
 
 function registrarFeedbackTreino(diaIndex){
-  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
   if(!alunaAtual) return;
   const prog = getProgressoAluna(alunaAtual.nome);
   const desconforto = document.getElementById('feedback-desconforto').value === 'Sim';
@@ -5020,7 +5387,7 @@ function registrarFeedbackTreino(diaIndex){
 
 function registrarTreinoDia(diaIndex){
   const d = dias[diaIndex];
-  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
   if(!alunaAtual) return;
   const prog = getProgressoAluna(alunaAtual.nome);
   let registrados = 0;
@@ -5099,7 +5466,7 @@ function renderPerguntaCiclo(){
 }
 
 function registrarCiclo(){
-  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
   const dias_atras = parseInt(document.getElementById('ciclo-dias').value, 10);
   const medicamento = document.getElementById('ciclo-medicamento').value;
   alunaAtual.cicloPerguntado = true;
@@ -5113,14 +5480,14 @@ function registrarCiclo(){
 }
 
 function pularCiclo(){
-  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === 'Andriele Caroline Rubert'; });
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
   alunaAtual.cicloPerguntado = true;
   const elCiclo2 = document.getElementById('area-ciclo');
   if(elCiclo2) elCiclo2.innerHTML = '<p class="txt">Sem problemas, pode responder outra hora, se quiser.</p>';
 }
 
 function simularHistorico40Dias(){
-  const nome = 'Andriele Caroline Rubert';
+  const nome = NOME_ALUNA_LOGADA;
   const a = alunasPersonal.find(function(x){ return x.nome === nome; });
   if(!a) return;
 
@@ -5193,7 +5560,7 @@ function simularHistorico40Dias(){
 }
 
 function atualizarHomeEstatico(){
-  const stats = calcularEstatisticasAluna('Andriele Caroline Rubert');
+  const stats = calcularEstatisticasAluna(NOME_ALUNA_LOGADA);
   if(!stats.temDados) return;
   const eyebrow = document.getElementById('home-hero-eyebrow');
   const title = document.getElementById('home-hero-title');
@@ -5304,7 +5671,7 @@ function exportarRelatorioEvolucao(nome){
 }
 
 function resetarDadosTeste(){
-  const nome = 'Andriele Caroline Rubert';
+  const nome = NOME_ALUNA_LOGADA;
   const a = alunasPersonal.find(function(x){ return x.nome === nome; });
   progressoesPorAluna[nome] = { semana: 1, historico: {}, diasConcluidos: {}, substituicoes: [] };
   if(a){ a.cicloPerguntado = false; a.cicloInfo = null; }
@@ -5324,9 +5691,14 @@ function resetarDadosTeste(){
   if(alunaAberta){ openAlunaDetail(alunasPersonal.indexOf(alunaAberta)); }
 }
 
+let veioDaListaDeTreinosDaSemana = false;
 function goBack(){
   const detailActive = document.querySelector('[data-view="detail"]').classList.contains('active');
-  if(detailActive){
+  if(detailActive && veioDaListaDeTreinosDaSemana){
+    veioDaListaDeTreinosDaSemana = false;
+    setActive('semana-treinos');
+    document.getElementById('backlabel').textContent = 'Voltar para o início';
+  } else if(detailActive){
     setActive(level2);
     document.getElementById('backlabel').textContent = 'Voltar para o início';
   } else {
