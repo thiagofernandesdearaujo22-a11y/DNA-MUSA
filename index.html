@@ -300,16 +300,16 @@
         </div>
 
         <div id="login-form-aluna">
-          <div class="form-group"><input class="form-input" id="login-aluna-email" type="email" placeholder="Seu e-mail"></div>
-          <div class="form-group"><input class="form-input" id="login-aluna-senha" type="password" placeholder="Crie ou digite sua senha"></div>
+          <div class="form-group"><input class="form-input" id="login-aluna-email" type="email" placeholder="Seu e-mail" autocomplete="username"></div>
+          <div class="form-group"><input class="form-input" id="login-aluna-senha" type="password" placeholder="Crie ou digite sua senha" autocomplete="current-password"></div>
           <p class="page-sub" style="font-size:11px;margin-top:-6px;">Primeira vez? Só digitar e-mail e uma senha já cadastra você.</p>
           <button class="btn-gold" onclick="loginAluna()">Entrar</button>
           <p id="login-aluna-erro" style="color:#E2A33D;font-size:12px;text-align:center;display:none;"></p>
         </div>
 
         <div id="login-form-personal" style="display:none;">
-          <div class="form-group"><input class="form-input" id="login-personal-email" type="email" placeholder="Seu e-mail" value="thiagofernandesdearaujo22@gmail.com"></div>
-          <div class="form-group"><input class="form-input" id="login-personal-senha" type="password" placeholder="Sua senha de personal" value="Senhanova22-"></div>
+          <div class="form-group"><input class="form-input" id="login-personal-email" type="email" placeholder="Seu e-mail" autocomplete="username"></div>
+          <div class="form-group"><input class="form-input" id="login-personal-senha" type="password" placeholder="Sua senha de personal" autocomplete="current-password"></div>
           <button class="btn-gold" onclick="loginPersonal()">Entrar</button>
           <p id="login-personal-erro" style="color:#E2A33D;font-size:12px;text-align:center;display:none;"></p>
         </div>
@@ -4856,6 +4856,7 @@ async function loginAluna(){
       dias = alunaLocal.treinoAtual.dias;
     }
     aplicarIdentidadeVisual(NOME_ALUNA_LOGADA);
+    pedirPermissaoNotificacao();
 
     sessaoTipo = 'aluna';
     document.getElementById('card-personal-launcher').style.display = 'none';
@@ -4882,6 +4883,7 @@ function entrarLocalPorEmail(email){
     dias = encontrada.treinoAtual.dias;
   }
   aplicarIdentidadeVisual(NOME_ALUNA_LOGADA);
+  pedirPermissaoNotificacao();
   sessaoTipo = 'aluna';
   document.getElementById('card-personal-launcher').style.display = 'none';
   setActive('launcher');
@@ -4944,6 +4946,15 @@ function finalizarOnboardingEIr(destino){
 
 let timerIntroAtual = null;
 
+function pedirPermissaoNotificacao(){
+  // Isso só guarda a permissão pro futuro (quando a Camada 2 de notificações reais estiver pronta).
+  // Não envia notificação nenhuma agora — só evita ter que pedir de novo depois.
+  if(typeof Notification === 'undefined') return; // navegador não suporta, não trava nada
+  if(Notification.permission === 'default'){
+    Notification.requestPermission().catch(function(){ /* usuária pode ter negado, sem problema */ });
+  }
+}
+
 function pularIntro(){
   if(timerIntroAtual){ clearTimeout(timerIntroAtual); timerIntroAtual = null; }
   setActive('onboarding');
@@ -4967,6 +4978,7 @@ async function loginPersonal(){
     sessaoTipo = 'personal';
     document.getElementById('backbar').style.display = 'flex';
     document.getElementById('backlabel').textContent = 'Sair';
+    pedirPermissaoNotificacao();
     openLevel2('personal');
     return;
   }
@@ -4981,6 +4993,7 @@ async function loginPersonal(){
     sessaoTipo = 'personal';
     document.getElementById('backbar').style.display = 'flex';
     document.getElementById('backlabel').textContent = 'Sair';
+    pedirPermissaoNotificacao();
     openLevel2('personal');
     return;
   }
@@ -5011,6 +5024,7 @@ async function loginPersonal(){
     sessaoTipo = 'personal';
     document.getElementById('backbar').style.display = 'flex';
     document.getElementById('backlabel').textContent = 'Sair';
+    pedirPermissaoNotificacao();
     openLevel2('personal');
   } catch(erroDeRede){
     // Falha de rede de verdade — se as credenciais batem com as suas, entra local pra você continuar testando
@@ -5020,6 +5034,7 @@ async function loginPersonal(){
       sessaoTipo = 'personal';
       document.getElementById('backbar').style.display = 'flex';
       document.getElementById('backlabel').textContent = 'Sair';
+      pedirPermissaoNotificacao();
       openLevel2('personal');
     } else {
       erroEl.textContent = 'E-mail ou senha incorretos.';
