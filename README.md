@@ -1,3 +1,4 @@
+[README.md](https://github.com/user-attachments/files/30675867/README.md)
 # MUSA+ — Protótipo
 
 Site estático de página única (`index.html`). Sem build, sem dependências — a Vercel só precisa servir o arquivo.
