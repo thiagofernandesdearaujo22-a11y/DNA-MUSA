@@ -731,6 +731,31 @@
   </div>
 </div>
 
+<div id="tela-erro-generica" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:99999;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;">
+  <div style="width:56px;height:56px;border-radius:50%;background:var(--card-2);border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold-soft)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M10.363 3.591l-8.106 13.535a1.914 1.914 0 0 0 1.636 2.874h16.214a1.914 1.914 0 0 0 1.636 -2.874l-8.106 -13.535a1.914 1.914 0 0 0 -3.274 0z"/><path d="M12 16h.01"/></svg>
+  </div>
+  <p style="font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--text);margin:0 0 8px;">Algo não carregou direito</p>
+  <p style="font-size:13px;color:var(--text-dim);margin:0 0 22px;max-width:280px;">Pode ter sido uma queda de internet momentânea. Tenta recarregar — seus dados estão salvos.</p>
+  <button class="btn-gold" style="width:auto;padding:12px 28px;" onclick="window.location.reload()">Recarregar</button>
+</div>
+
+<script>
+window.addEventListener('error', function(evento){
+  // Só reage a erro de JavaScript de verdade (tem stack de erro real).
+  // Erro de carregar fonte/imagem/CDN não deve travar o app inteiro — isso já é tratado visualmente em cada lugar específico.
+  if(!evento.error) return;
+  console.error('[Erro capturado]', evento.error);
+  const tela = document.getElementById('tela-erro-generica');
+  if(tela && tela.style.display !== 'flex') tela.style.display = 'flex';
+});
+window.addEventListener('unhandledrejection', function(evento){
+  console.error('[Promessa rejeitada sem tratamento]', evento.reason);
+  // Erros de rede do Supabase já têm tratamento próprio (try/catch), então aqui só logamos,
+  // não mostramos a tela cheia pra não interromper por uma falha que o próprio código já absorveu.
+});
+</script>
+
 <script>
 let level2 = null;
 
