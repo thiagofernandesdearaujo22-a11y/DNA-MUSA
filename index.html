@@ -300,20 +300,11 @@
         </div>
 
         <div id="login-form-aluna">
-          <div class="form-group"><input class="form-input" id="login-aluna-email" type="email" placeholder="Seu e-mail" value="andrielecarolinerubert@gmail.com"></div>
-          <div class="form-group"><input class="form-input" id="login-aluna-senha" type="password" placeholder="Crie ou digite sua senha" value="teste123"></div>
+          <div class="form-group"><input class="form-input" id="login-aluna-email" type="email" placeholder="Seu e-mail"></div>
+          <div class="form-group"><input class="form-input" id="login-aluna-senha" type="password" placeholder="Crie ou digite sua senha"></div>
           <p class="page-sub" style="font-size:11px;margin-top:-6px;">Primeira vez? Só digitar e-mail e uma senha já cadastra você.</p>
           <button class="btn-gold" onclick="loginAluna()">Entrar</button>
           <p id="login-aluna-erro" style="color:#E2A33D;font-size:12px;text-align:center;display:none;"></p>
-          <div class="info-box" style="margin-top:16px;">
-            <p class="txt" style="font-size:11px;color:var(--gold-soft);font-weight:600;margin-bottom:4px;">Acesso de teste, sempre funciona</p>
-            <p class="txt" style="font-size:11px;">andrielecarolinerubert@gmail.com<br>teste123</p>
-          </div>
-          <p style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:14px;cursor:pointer;" onclick="testarIntroNovamente()">[apenas em teste] Ver intro animada de novo</p>
-          <p style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:6px;cursor:pointer;" onclick="simularNotificacaoCheckIn()">[apenas em teste] Simular notificação de check-in</p>
-          <p style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:6px;cursor:pointer;" onclick="simularCenarioCheckIn('sequenciaBoa')">[teste] Ver reação: sequência boa de "sim"</p>
-          <p style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:6px;cursor:pointer;" onclick="simularCenarioCheckIn('primeiraFalta')">[teste] Ver reação: primeira falta</p>
-          <p style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:6px;cursor:pointer;" onclick="simularCenarioCheckIn('padraoSumiço')">[teste] Ver reação: padrão de sumiço</p>
         </div>
 
         <div id="login-form-personal" style="display:none;">
@@ -321,10 +312,6 @@
           <div class="form-group"><input class="form-input" id="login-personal-senha" type="password" placeholder="Sua senha de personal" value="Senhanova22-"></div>
           <button class="btn-gold" onclick="loginPersonal()">Entrar</button>
           <p id="login-personal-erro" style="color:#E2A33D;font-size:12px;text-align:center;display:none;"></p>
-          <div class="info-box" style="margin-top:16px;">
-            <p class="txt" style="font-size:11px;color:var(--gold-soft);font-weight:600;margin-bottom:4px;">Acesso de teste, sempre funciona</p>
-            <p class="txt" style="font-size:11px;">thiagofernandesdearaujo22@gmail.com<br>Senhanova22-</p>
-          </div>
         </div>
       </div>
     </div>
@@ -1601,7 +1588,7 @@ function renderAlunas(){
     el.style.cssText = 'flex-direction:column;align-items:stretch;gap:6px;';
     el.innerHTML =
       '<div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" data-abrir="1">' +
-        '<div><p class="aluna-name">' + a.nome + '</p><p class="aluna-meta">' + a.nivel + ' · ' + a.freq + (a.statusPlanoManual ? ' · movida manualmente' : '') + '</p></div>' +
+        '<div><p class="aluna-name">' + a.nome + (a.recemChegadaDaAnamnese ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">nova</span>' : '') + '</p><p class="aluna-meta">' + a.nivel + ' · ' + a.freq + (a.statusPlanoManual ? ' · movida manualmente' : '') + '</p></div>' +
         '<span><span class="status-dot ' + a.status + '"></span><span class="status-txt ' + a.status + '">' + a.statusLabel + '</span></span>' +
       '</div>';
     el.querySelector('[data-abrir]').onclick = function(){ openAlunaDetail(i); };
@@ -3860,12 +3847,60 @@ function renderFerramentasPersonal(){
   });
 }
 
+async function sincronizarListaAlunasDoSupabase(){
+  if(!supabaseClient) return { novas: 0, erro: 'sem conexão' };
+  try {
+    const { data: linhas, error } = await supabaseClient.from('alunas').select('*');
+    if(error || !linhas) return { novas: 0, erro: error ? error.message : 'sem dados' };
+
+    let novas = 0;
+    linhas.forEach(function(row){
+      const jaExiste = alunasPersonal.find(function(a){ return a.email && row.email && a.email.toLowerCase() === row.email.toLowerCase(); });
+      if(jaExiste) return; // já está na lista local, não sobrescreve edições que o personal já fez
+
+      alunasPersonal.push({
+        nome: row.nome,
+        email: row.email,
+        telefone: row.telefone || '',
+        nivel: row.nivel || 'Iniciante',
+        freq: row.freq || '3x por semana',
+        piramide: row.piramide || '',
+        objetivo: row.objetivo || '',
+        restricoes: row.restricoes || 'Nenhuma relatada',
+        academia: row.academia || '',
+        idade: row.idade || null,
+        dataAnamnese: row.data_anamnese || new Date().toISOString().slice(0,10),
+        status: 'ok',
+        statusLabel: 'Ativa recente',
+        recemChegadaDaAnamnese: true
+      });
+      novas++;
+    });
+
+    if(novas > 0) renderAlunas();
+    return { novas: novas, erro: null };
+  } catch(erroDeRede){
+    return { novas: 0, erro: 'sem conexão com o Supabase agora' };
+  }
+}
+
 function showPersonalView(which){
   renderFerramentasPersonal();
   ['dashboard','alunas','aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
   });
-  if(which === 'alunas'){ renderAlunas(); }
+  if(which === 'alunas'){
+    renderAlunas();
+    sincronizarListaAlunasDoSupabase().then(function(resultado){
+      if(resultado.novas > 0){
+        const aviso = document.createElement('p');
+        aviso.style.cssText = 'font-size:12px;color:var(--success);text-align:center;margin:-6px 0 10px;';
+        aviso.textContent = resultado.novas + ' aluna(s) nova(s) da anamnese, adicionada(s) agora.';
+        document.getElementById('alunas-count-label').insertAdjacentElement('afterend', aviso);
+        setTimeout(function(){ aviso.remove(); }, 6000);
+      }
+    });
+  }
   if(which === 'treinos'){ renderTemplates(); populateExercicioSelect(); }
   if(which === 'desafios'){ renderDesafios(); populateTreinoSelect(); }
   if(which === 'mobilidade'){ renderArticulacaoChips(); renderAquecimentoBanco(); document.getElementById('mob-articulacoes-view').style.display = 'block'; document.getElementById('mob-lista-view').style.display = 'none'; }
