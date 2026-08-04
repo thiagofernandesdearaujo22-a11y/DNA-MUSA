@@ -1835,6 +1835,7 @@ function registrarRespostaCheckIn(nome, vaiTreinar){
   const prog = getProgressoAluna(nome);
   if(!prog.respostasCheckIn) prog.respostasCheckIn = [];
   prog.respostasCheckIn.push({ vaiTreinar: vaiTreinar, data: new Date().toISOString() });
+  salvarProgressoNoSupabase(nome);
   return prog.respostasCheckIn;
 }
 
@@ -4862,6 +4863,7 @@ async function loginAluna(){
     document.getElementById('card-personal-launcher').style.display = 'none';
 
     await carregarELigarTreinoDaAluna(data.user.id);
+    await carregarProgressoDoSupabase(data.user.id, NOME_ALUNA_LOGADA);
 
     if(primeiroAcesso){
       setActive('intro');
@@ -4931,6 +4933,44 @@ async function salvarTreinoNoSupabase(alunaId, treinoAtual){
     volume: treinoAtual.volume,
     dias: treinoAtual.dias
   });
+}
+
+async function salvarProgressoNoSupabase(nomeAluna){
+  if(!supabaseClient) return;
+  try {
+    const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+    if(!a || !a.email) return;
+    const { data: alunaRow } = await supabaseClient.from('alunas').select('auth_id').eq('email', a.email).maybeSingle();
+    if(!alunaRow || !alunaRow.auth_id) return; // sem login ainda, não tem onde salvar
+
+    const pacote = {
+      prog: getProgressoAluna(nomeAluna),
+      seriesConcluidas: seriesConcluidas,
+      diaDoSeriesConcluidas: detailDiaAtual
+    };
+    await supabaseClient.from('progresso_aluna').upsert({
+      aluna_id: alunaRow.auth_id,
+      dados: pacote,
+      updated_at: new Date().toISOString()
+    });
+  } catch(erroDeRede){
+    console.warn('Sem conexão agora, progresso ficou salvo só localmente por enquanto:', erroDeRede);
+  }
+}
+
+async function carregarProgressoDoSupabase(authId, nomeAluna){
+  if(!supabaseClient || !authId) return;
+  try {
+    const { data: linha } = await supabaseClient.from('progresso_aluna').select('dados').eq('aluna_id', authId).maybeSingle();
+    if(!linha || !linha.dados) return;
+    if(linha.dados.prog) progressoesPorAluna[nomeAluna] = linha.dados.prog;
+    if(linha.dados.seriesConcluidas){
+      seriesConcluidasSalvasNoBanco = linha.dados.seriesConcluidas;
+      diaDasSeriesConcluidasSalvas = linha.dados.diaDoSeriesConcluidas;
+    }
+  } catch(erroDeRede){
+    console.warn('Sem conexão pra carregar progresso salvo, começando com o que tiver localmente:', erroDeRede);
+  }
 }
 
 function finalizarOnboarding(){
@@ -5258,6 +5298,8 @@ let cronometroRodando = false;
 let descansoIntervals = {};
 
 let seriesConcluidas = {};
+let seriesConcluidasSalvasNoBanco = null;
+let diaDasSeriesConcluidasSalvas = null;
 
 function alternarExercicioExpandido(idx){
   const container = document.getElementById('ex-expandido-' + idx);
@@ -5302,6 +5344,7 @@ function concluirSerie(idx, serieIdx, segundosDescanso){
   if(marcandoAgora){
     iniciarDescanso(idx, segundosDescanso);
   }
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
   const todasFeitas = seriesConcluidas[idx].every(function(v){ return v; });
   openDetail('dia', detailDiaAtual);
 
@@ -5325,6 +5368,7 @@ function concluirSerieBiset(subId, serieIdx, ehUltimoDoPar, segundosDescanso){
   if(marcandoAgora && ehUltimoDoPar){
     iniciarDescanso(subId, segundosDescanso);
   }
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
   openDetail('dia', detailDiaAtual);
   const pill = document.getElementById('serie-pill-' + subId + '-' + serieIdx);
   if(pill && marcandoAgora){
@@ -5715,6 +5759,7 @@ function registrarNutricaoSemana(){
   if(!prog.nutricao) prog.nutricao = {};
   prog.nutricao[semanaNutricaoPendente] = { fugas: fugas, tipos: tipos, resultado: resultado };
   semanaNutricaoPendente = null;
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
 
   const el = document.getElementById('area-nutricao') || document.getElementById('nutri-confirmacao');
   if(el) el.innerHTML = '<p class="txt">Obrigada! Isso já ajustou sua Resposta Nutricional, Potencial de Hipertrofia, Potencial de Ganho de Gordura e Retenção Hídrica no DNA MUSA.</p>';
@@ -6092,7 +6137,15 @@ if(type === 'central'){
                 : '<div class="info-box"><p class="txt">' + m.foco + '</p></div>');
   } else if(type === 'dia'){
     const d = dias[arg];
-    if(detailDiaAtual !== arg){ seriesConcluidas = {}; }
+    if(detailDiaAtual !== arg){
+      if(seriesConcluidasSalvasNoBanco && diaDasSeriesConcluidasSalvas === arg){
+        // Tem checklist salvo do banco, e é exatamente o mesmo dia que ela tinha marcado antes de fechar o app
+        seriesConcluidas = seriesConcluidasSalvasNoBanco;
+      } else {
+        seriesConcluidas = {};
+      }
+      seriesConcluidasSalvasNoBanco = null; // já usou (ou não servia), não aplica de novo à toa depois
+    }
     detailDiaAtual = arg;
     let corpoTreino = '<div class="list-item"><span>Dia de descanso, aproveite para recuperar.</span></div>';
     let barraProgresso = '';
@@ -6534,6 +6587,8 @@ function registrarTreinoDia(diaIndex){
     prog.horariosTreino.push({ dia: d.n, hora: agora.getHours(), minuto: agora.getMinutes(), data: agora.toISOString() });
     resultadoSemana = checarConclusaoSemana(alunaAtual.nome);
   }
+
+  if(registrados > 0) salvarProgressoNoSupabase(alunaAtual.nome);
 
   openDetail('dia', diaIndex);
   const conf = document.getElementById('registro-confirmacao');
