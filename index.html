@@ -3877,7 +3877,8 @@ async function sincronizarListaAlunasDoSupabase(){
   if(!supabaseClient) return { novas: 0, erro: 'sem conexão' };
   try {
     const { data: linhas, error } = await supabaseClient.from('alunas').select('*');
-    if(error || !linhas) return { novas: 0, erro: error ? error.message : 'sem dados' };
+    if(error) return { novas: 0, erro: error.message };
+    if(!linhas || linhas.length === 0) return { novas: 0, erro: 'busca retornou vazio (pode ser bloqueio de permissão do banco, não deveria estar vazio)' };
 
     let novas = 0;
     linhas.forEach(function(row){
@@ -3917,13 +3918,26 @@ function showPersonalView(which){
   });
   if(which === 'alunas'){
     renderAlunas();
+    const areaDiagnostico = document.createElement('p');
+    areaDiagnostico.id = 'diagnostico-sync-alunas';
+    areaDiagnostico.style.cssText = 'font-size:11px;color:var(--text-faint);text-align:center;margin:-6px 0 10px;';
+    areaDiagnostico.textContent = 'Verificando anamneses novas...';
+    document.getElementById('alunas-count-label').insertAdjacentElement('afterend', areaDiagnostico);
+
     sincronizarListaAlunasDoSupabase().then(function(resultado){
-      if(resultado.novas > 0){
-        const aviso = document.createElement('p');
-        aviso.style.cssText = 'font-size:12px;color:var(--success);text-align:center;margin:-6px 0 10px;';
-        aviso.textContent = resultado.novas + ' aluna(s) nova(s) da anamnese, adicionada(s) agora.';
-        document.getElementById('alunas-count-label').insertAdjacentElement('afterend', aviso);
-        setTimeout(function(){ aviso.remove(); }, 6000);
+      const el = document.getElementById('diagnostico-sync-alunas');
+      if(!el) return;
+      if(resultado.erro){
+        el.style.color = '#E2A33D';
+        el.textContent = 'Não consegui verificar agora: ' + resultado.erro;
+      } else if(resultado.novas > 0){
+        el.style.color = 'var(--success)';
+        el.textContent = resultado.novas + ' aluna(s) nova(s) da anamnese, adicionada(s) agora.';
+        setTimeout(function(){ el.remove(); }, 8000);
+      } else {
+        el.style.color = 'var(--text-faint)';
+        el.textContent = 'Verificado, nenhuma aluna nova da anamnese no momento.';
+        setTimeout(function(){ el.remove(); }, 5000);
       }
     });
   }
