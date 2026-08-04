@@ -243,7 +243,7 @@
   <div onclick="minimizarCronometro()" style="position:absolute;top:24px;right:24px;width:36px;height:36px;border-radius:50%;background:var(--card-2);display:flex;align-items:center;justify-content:center;cursor:pointer;">
     <i class="ti ti-minus" style="color:var(--gold-soft);font-size:20px;"></i>
   </div>
-  <p style="color:var(--text-faint);font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px;">Descanso</p>
+  <p id="cronometro-fullscreen-label" style="color:var(--text-faint);font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px;">Descanso</p>
   <div style="position:relative;width:220px;height:220px;display:flex;align-items:center;justify-content:center;">
     <svg width="220" height="220" viewBox="0 0 220 220" style="position:absolute;top:0;left:0;transform:rotate(-90deg);">
       <circle cx="110" cy="110" r="98" fill="none" stroke="#26231C" stroke-width="8"/>
@@ -1505,6 +1505,7 @@ function moverAlunaNoFunil(nomeAluna, novoEstagio){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
   a.estagioFunilManual = novoEstagio === 'auto' ? null : novoEstagio;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
   alternarEstagioFunil(estagioFunilAtivo);
 }
 
@@ -1592,6 +1593,7 @@ function moverAlunaDeStatus(nomeAluna, novoStatus){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
   a.statusPlanoManual = novoStatus === 'auto' ? null : novoStatus;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
   renderAlunas();
 }
 
@@ -1777,6 +1779,7 @@ function confirmarPatologia(nomeAluna, patologiaId){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
   a.patologiaConfirmada = patologiaId === 'tecnica' ? 'tecnica' : patologiaId;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
 }
@@ -2999,6 +3002,56 @@ function confirmarGerarTreinoPreview(){
   openAlunaDetail(i);
 }
 
+const timersSalvamentoPerfil = {};
+
+function salvarPerfilAlunaNoSupabase(nomeAluna){
+  // Espera inteligente: se chamar de novo antes de 500ms, cancela o anterior e reinicia a espera.
+  // Isso garante que, mesmo mexendo em várias coisas rápido, só sai UM salvamento por vez, sempre com o estado mais completo e atual.
+  // É independente por aluna (cada uma tem seu próprio temporizador), então mexer em duas alunas ao mesmo tempo não interfere uma na outra.
+  if(timersSalvamentoPerfil[nomeAluna]) clearTimeout(timersSalvamentoPerfil[nomeAluna]);
+  timersSalvamentoPerfil[nomeAluna] = setTimeout(function(){
+    delete timersSalvamentoPerfil[nomeAluna];
+    executarSalvamentoPerfilAluna(nomeAluna);
+  }, 500);
+}
+
+async function executarSalvamentoPerfilAluna(nomeAluna){
+  if(!supabaseClient) return;
+  try {
+    const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+    if(!a || !a.email) return;
+    await supabaseClient.from('alunas').upsert({
+      email: a.email,
+      nome: a.nome,
+      telefone: a.telefone || '',
+      nivel: a.nivel || 'Iniciante',
+      freq: a.freq || '3x por semana',
+      piramide: a.piramide || '',
+      objetivo: a.objetivo || '',
+      restricoes: a.restricoes || '',
+      academia: a.academia || '',
+      idade: a.idade || null,
+      dados_extras: {
+        estagioFunilManual: a.estagioFunilManual || null,
+        statusPlanoManual: a.statusPlanoManual || null,
+        patologiaConfirmada: a.patologiaConfirmada || null,
+        duvidasSinalizadas: a.duvidasSinalizadas || [],
+        diasNoProgramaFunil: a.diasNoProgramaFunil || null,
+        tecnicaAprovada: a.tecnicaAprovada || {},
+        cicloPerguntado: a.cicloPerguntado || false,
+        cicloInfo: a.cicloInfo || null,
+        direcionamentoQuadriceps: a.direcionamentoQuadriceps || null,
+        direcionamentoGluteo: a.direcionamentoGluteo || null,
+        desviosPosturaisConfirmados: a.desviosPosturaisConfirmados || [],
+        dataFechouPlano: a.dataFechouPlano || null,
+        duracaoPlanoDias: a.duracaoPlanoDias || null
+      }
+    }, { onConflict: 'email' });
+  } catch(erroDeRede){
+    console.warn('Sem conexão agora, edição ficou salva só localmente por enquanto:', erroDeRede);
+  }
+}
+
 function editarNivelAluna(nomeAluna, novoNivel){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
@@ -3006,6 +3059,7 @@ function editarNivelAluna(nomeAluna, novoNivel){
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
   mostrarPreviewMudancaTreino(nomeAluna);
+  salvarPerfilAlunaNoSupabase(nomeAluna);
 }
 
 function editarFrequenciaAluna(nomeAluna, novaFreq){
@@ -3015,6 +3069,7 @@ function editarFrequenciaAluna(nomeAluna, novaFreq){
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
   mostrarPreviewMudancaTreino(nomeAluna);
+  salvarPerfilAlunaNoSupabase(nomeAluna);
 }
 
 function renderSecaoColapsavel(titulo, conteudoHtml, idUnico){
@@ -3288,6 +3343,27 @@ async function abrirTreinosArquivados(nomeAluna){
   }
 }
 
+function regerarTabataParaAluna(nomeAluna, di){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !a.treinoAtual || !a.treinoAtual.dias[di]) return;
+  const nomeDia = a.treinoAtual.dias[di].n;
+  const tabataGerado = gerarTreinoTabata(a.nivel, a.restricoes);
+  tabataGerado.n = nomeDia;
+  tabataGerado.foco = 'Tabata de casa · ' + a.nivel;
+  a.treinoAtual.dias[di] = tabataGerado;
+  sincronizarTreinoComSupabase(a);
+  openAlunaDetail(alunasPersonal.indexOf(a));
+}
+
+function removerTabataDoDia(nomeAluna, di){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !a.treinoAtual || !a.treinoAtual.dias[di]) return;
+  const nomeDia = a.treinoAtual.dias[di].n;
+  a.treinoAtual.dias[di] = { n: nomeDia, foco: 'Descanso', descanso: true, ex: [] };
+  sincronizarTreinoComSupabase(a);
+  openAlunaDetail(alunasPersonal.indexOf(a));
+}
+
 function alternarDiaExpandidoPersonal(di){
   const container = document.getElementById('dia-personal-expandido-' + di);
   if(!container) return;
@@ -3347,6 +3423,18 @@ function openAlunaDetail(i){
           '<i class="ti ti-chevron-down" style="color:var(--text-faint);"></i>' +
         '</div>' +
         '<div id="dia-personal-expandido-' + di + '" style="display:none;padding:0 12px 12px;">';
+      if(d.tabata){
+        treinoHtml += '<div class="info-box" style="margin-bottom:8px;">' +
+          '<p class="lbl">Tabata · ' + d.nivel + '</p>' +
+          '<p class="txt">' + d.trabalhoSeg + 's trabalho / ' + d.descansoSeg + 's descanso · ' + d.ciclos + ' ciclos · ' + d.blocos.length + ' bloco(s) · ~' + d.duracaoTotalMin + ' min</p>' +
+          '<p class="txt" style="color:var(--text-faint);font-size:11px;">' + d.descricaoProtocolo + '</p>' +
+        '</div>';
+        d.blocos.forEach(function(bloco, bi){
+          treinoHtml += '<div class="list-item"><span>Bloco ' + (bi+1) + ': ' + bloco.nome + '</span></div>';
+        });
+        treinoHtml += '<p style="font-size:12px;color:var(--gold-soft);margin:6px 0 4px;cursor:pointer;" onclick="regerarTabataParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',' + di + ')"><i class="ti ti-refresh" style="font-size:12px;vertical-align:-2px;margin-right:4px;"></i>Gerar outra combinação</p>' +
+          '<p style="font-size:12px;color:var(--text-faint);margin:2px 0 4px;cursor:pointer;" onclick="removerTabataDoDia(\'' + a.nome.replace(/'/g,"\\'") + '\',' + di + ')">Voltar esse dia pro treino normal</p>';
+      } else {
       d.ex.forEach(function(exLine, ei){
         const partesEdit = exLine.split(' · ');
         const nomeEdit = partesEdit[0];
@@ -3369,7 +3457,9 @@ function openAlunaDetail(i){
       });
       treinoHtml += '<p style="font-size:12px;color:var(--gold-soft);margin:6px 0 4px;cursor:pointer;" onclick="abrirSelecaoGrupoParaAdicionar(' + di + ')"><i class="ti ti-plus" style="font-size:12px;vertical-align:-2px;margin-right:4px;"></i>Adicionar exercício nesse dia</p>' +
         '<div id="add-exercicio-form-' + di + '" style="margin-bottom:6px;"></div>' +
-      '</div></div>';
+        '<p style="font-size:11px;color:var(--text-faint);margin:6px 0 4px;cursor:pointer;" onclick="regerarTabataParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',' + di + ')">Transformar esse dia em treino Tabata de casa</p>';
+      }
+      treinoHtml += '</div></div>';
     });
     treinoHtml += '<div id="substituicao-form"></div>';
   }
@@ -3532,6 +3622,7 @@ function salvarDirecionamento(nomeAluna, tipo, valor){
   if(!a) return;
   if(tipo === 'quadriceps') a.direcionamentoQuadriceps = valor;
   if(tipo === 'gluteo') a.direcionamentoGluteo = valor;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
 }
@@ -3561,6 +3652,7 @@ function alternarDesvioPostural(nomeAluna, desvioId){
   if(!a.desviosPosturaisConfirmados) a.desviosPosturaisConfirmados = [];
   const idx = a.desviosPosturaisConfirmados.indexOf(desvioId);
   if(idx === -1){ a.desviosPosturaisConfirmados.push(desvioId); } else { a.desviosPosturaisConfirmados.splice(idx, 1); }
+  salvarPerfilAlunaNoSupabase(nomeAluna);
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
 }
@@ -3771,6 +3863,7 @@ function salvarPlanoFechado(nomeAluna, campo, valor){
   if(!a) return;
   if(campo === 'data') a.dataFechouPlano = valor;
   if(campo === 'duracao') a.duracaoPlanoDias = parseInt(valor, 10) || null;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
 }
@@ -3823,6 +3916,7 @@ function marcarDuvidaResolvida(nomeAluna, idx){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a || !a.duvidasSinalizadas || !a.duvidasSinalizadas[idx]) return;
   a.duvidasSinalizadas[idx].resolvida = true;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
 }
@@ -3831,6 +3925,7 @@ function avancarDiasFunil(nomeAluna, dias){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
   a.diasNoProgramaFunil = (a.diasNoProgramaFunil || 1) + dias;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
 }
@@ -3881,9 +3976,31 @@ async function sincronizarListaAlunasDoSupabase(){
     if(!linhas || linhas.length === 0) return { novas: 0, erro: 'busca retornou vazio (pode ser bloqueio de permissão do banco, não deveria estar vazio)' };
 
     let novas = 0;
+    let atualizadas = 0;
     linhas.forEach(function(row){
       const jaExiste = alunasPersonal.find(function(a){ return a.email && row.email && a.email.toLowerCase() === row.email.toLowerCase(); });
-      if(jaExiste) return; // já está na lista local, não sobrescreve edições que o personal já fez
+      if(jaExiste){
+        // Já existe localmente: traz de volta os campos que podem ter sido editados e salvos em outro dispositivo/sessão
+        let mudou = false;
+        ['nivel','freq','telefone','objetivo','restricoes','academia'].forEach(function(campo){
+          const valorBanco = row[campo];
+          if(valorBanco != null && valorBanco !== '' && jaExiste[campo] !== valorBanco){
+            jaExiste[campo] = valorBanco;
+            mudou = true;
+          }
+        });
+        if(row.dados_extras && typeof row.dados_extras === 'object'){
+          Object.keys(row.dados_extras).forEach(function(campo){
+            const valorBanco = row.dados_extras[campo];
+            if(valorBanco != null && JSON.stringify(jaExiste[campo]) !== JSON.stringify(valorBanco)){
+              jaExiste[campo] = valorBanco;
+              mudou = true;
+            }
+          });
+        }
+        if(mudou) atualizadas++;
+        return;
+      }
 
       alunasPersonal.push({
         nome: row.nome,
@@ -3904,8 +4021,8 @@ async function sincronizarListaAlunasDoSupabase(){
       novas++;
     });
 
-    if(novas > 0) renderAlunas();
-    return { novas: novas, erro: null };
+    if(novas > 0 || atualizadas > 0) renderAlunas();
+    return { novas: novas, atualizadas: atualizadas, erro: null };
   } catch(erroDeRede){
     return { novas: 0, erro: 'sem conexão com o Supabase agora' };
   }
@@ -3930,13 +4047,16 @@ function showPersonalView(which){
       if(resultado.erro){
         el.style.color = '#E2A33D';
         el.textContent = 'Não consegui verificar agora: ' + resultado.erro;
-      } else if(resultado.novas > 0){
+      } else if(resultado.novas > 0 || resultado.atualizadas > 0){
         el.style.color = 'var(--success)';
-        el.textContent = resultado.novas + ' aluna(s) nova(s) da anamnese, adicionada(s) agora.';
+        const partes = [];
+        if(resultado.novas > 0) partes.push(resultado.novas + ' nova(s) da anamnese');
+        if(resultado.atualizadas > 0) partes.push(resultado.atualizadas + ' atualizada(s)');
+        el.textContent = partes.join(' · ') + '.';
         setTimeout(function(){ el.remove(); }, 8000);
       } else {
         el.style.color = 'var(--text-faint)';
-        el.textContent = 'Verificado, nenhuma aluna nova da anamnese no momento.';
+        el.textContent = 'Verificado, nenhuma novidade da anamnese no momento.';
         setTimeout(function(){ el.remove(); }, 5000);
       }
     });
@@ -4417,6 +4537,71 @@ function fecharVideoExercicio(){
   document.getElementById('ex-lista-view').style.display = 'block';
 }
 
+
+// ===== TABATA · protocolo original de Izumi Tabata (1996): 20s trabalho / 10s descanso, 8 ciclos, 4min =====
+// Adaptado por nível porque a literatura confirma que o protocolo original não é indicado
+// como primeiro contato pra quem está começando (intensidade quase máxima, perto de 170% do VO2máx).
+const protocolosTabata = {
+  'Iniciante': {
+    trabalhoSeg: 20, descansoSeg: 20, ciclos: 6, blocos: 1,
+    descricao: 'Trabalho e descanso iguais (1:1), menos ciclos. Prioriza aprender o ritmo com segurança antes de aumentar a intensidade.'
+  },
+  'Intermediário': {
+    trabalhoSeg: 20, descansoSeg: 15, ciclos: 8, blocos: 1,
+    descricao: 'Já aproxima do padrão clássico, com um pouco mais de descanso que o protocolo original.'
+  },
+  'Avançado': {
+    trabalhoSeg: 20, descansoSeg: 10, ciclos: 8, blocos: 2,
+    descricao: 'Protocolo original de Izumi Tabata (20s/10s, 8 ciclos), em 2 blocos de exercícios diferentes.'
+  }
+};
+
+// Banco de exercícios de peso corporal, sem equipamento, pensados pra treino de casa em formato Tabata
+const bancoTabataExercicios = [
+  { nome: 'Polichinelo', restricao: null, impacto: 'alto' },
+  { nome: 'Agachamento livre', restricao: null, impacto: 'baixo' },
+  { nome: 'Agachamento com salto', restricao: 'joelho', impacto: 'alto' },
+  { nome: 'Mountain climber', restricao: 'punho', impacto: 'moderado' },
+  { nome: 'Prancha com toque no ombro', restricao: 'punho', impacto: 'baixo' },
+  { nome: 'Afundo alternado', restricao: 'joelho', impacto: 'moderado' },
+  { nome: 'Elevação de joelhos no lugar (corrida parada)', restricao: null, impacto: 'moderado' },
+  { nome: 'Burpee sem salto', restricao: 'joelho', impacto: 'moderado' },
+  { nome: 'Abdominal bicicleta', restricao: 'lombar', impacto: 'baixo' },
+  { nome: 'Ponte de glúteo', restricao: null, impacto: 'baixo' },
+  { nome: 'Chute lateral em pé', restricao: null, impacto: 'baixo' },
+  { nome: 'Skater jump (agachamento lateral saltado)', restricao: 'joelho', impacto: 'alto' }
+];
+
+function gerarTreinoTabata(nivel, restricoesTexto){
+  const protocolo = protocolosTabata[nivel] || protocolosTabata['Iniciante'];
+  const restricoesLower = (restricoesTexto || '').toLowerCase();
+
+  // Filtra exercícios que batem com alguma restrição relatada na anamnese, pra não prescrever o que não deveria
+  const exerciciosSeguros = bancoTabataExercicios.filter(function(ex){
+    if(!ex.restricao) return true;
+    return restricoesLower.indexOf(ex.restricao) === -1;
+  });
+
+  // Iniciante: evita impacto alto de propósito, mesmo que ela não tenha restrição relatada
+  const pool = nivel === 'Iniciante' ? exerciciosSeguros.filter(function(ex){ return ex.impacto !== 'alto'; }) : exerciciosSeguros;
+  const poolFinal = pool.length >= 4 ? pool : exerciciosSeguros; // salvaguarda, nunca deixa a lista vazia demais
+
+  // Embaralha e pega exercícios suficientes pra todos os blocos (1 exercício por ciclo dentro de cada bloco, repetindo os 8 ciclos no mesmo exercício, como no protocolo original)
+  const embaralhados = poolFinal.slice().sort(function(){ return Math.random() - 0.5; });
+  const exerciciosEscolhidos = embaralhados.slice(0, protocolo.blocos);
+
+  return {
+    tabata: true,
+    nivel: nivel,
+    trabalhoSeg: protocolo.trabalhoSeg,
+    descansoSeg: protocolo.descansoSeg,
+    ciclos: protocolo.ciclos,
+    descricaoProtocolo: protocolo.descricao,
+    blocos: exerciciosEscolhidos.map(function(ex){ return { nome: ex.nome }; }),
+    duracaoTotalMin: Math.round((protocolo.blocos * protocolo.ciclos * (protocolo.trabalhoSeg + protocolo.descansoSeg)) / 60),
+    ex: [] // mantém compatibilidade com qualquer código que espera todo dia ter essa propriedade
+  };
+}
 
 const mobilidadeBanco = [
   {nome:'Mobilidade Quadril Extensão', trabalho:'Mobilidade /Alongamento', grupo:'Ilio Psoas', video:'https://youtu.be/NrF08RNhKyY'},
@@ -4949,7 +5134,17 @@ async function salvarTreinoNoSupabase(alunaId, treinoAtual){
   });
 }
 
-async function salvarProgressoNoSupabase(nomeAluna){
+const timersSalvamentoProgresso = {};
+
+function salvarProgressoNoSupabase(nomeAluna){
+  if(timersSalvamentoProgresso[nomeAluna]) clearTimeout(timersSalvamentoProgresso[nomeAluna]);
+  timersSalvamentoProgresso[nomeAluna] = setTimeout(function(){
+    delete timersSalvamentoProgresso[nomeAluna];
+    executarSalvamentoProgresso(nomeAluna);
+  }, 500);
+}
+
+async function executarSalvamentoProgresso(nomeAluna){
   if(!supabaseClient) return;
   try {
     const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
@@ -5415,6 +5610,76 @@ function concluirSerieBiset(subId, serieIdx, ehUltimoDoPar, segundosDescanso){
 
 let cronometroDescansoAtivo = null; // { idx, restante, total, pausado }
 
+let tabataAtivo = null;
+let tabataInterval = null;
+
+function iniciarTabata(diaTabata){
+  if(tabataInterval) clearInterval(tabataInterval);
+  tabataAtivo = { dados: diaTabata, blocoIdx: 0, cicloAtual: 1, fase: 'trabalho', restante: diaTabata.trabalhoSeg, pausado: false };
+
+  abrirCronometroFullscreen();
+  atualizarTelaTabata();
+
+  tabataInterval = setInterval(function(){
+    if(!tabataAtivo || tabataAtivo.pausado) return;
+    tabataAtivo.restante--;
+
+    if(tabataAtivo.restante > 0){
+      atualizarTelaTabata();
+      return;
+    }
+
+    // Acabou a fase atual, decide o que vem a seguir
+    const d = tabataAtivo.dados;
+    if(tabataAtivo.fase === 'trabalho'){
+      tabataAtivo.fase = 'descanso';
+      tabataAtivo.restante = d.descansoSeg;
+    } else {
+      if(tabataAtivo.cicloAtual < d.ciclos){
+        tabataAtivo.cicloAtual++;
+        tabataAtivo.fase = 'trabalho';
+        tabataAtivo.restante = d.trabalhoSeg;
+      } else if(tabataAtivo.blocoIdx < d.blocos.length - 1){
+        tabataAtivo.blocoIdx++;
+        tabataAtivo.cicloAtual = 1;
+        tabataAtivo.fase = 'trabalho';
+        tabataAtivo.restante = d.trabalhoSeg;
+      } else {
+        // Tabata inteiro concluído
+        clearInterval(tabataInterval);
+        tabataInterval = null;
+        const label = document.getElementById('cronometro-fullscreen-label');
+        const numero = document.getElementById('cronometro-fullscreen-numero');
+        if(label) label.textContent = 'Tabata concluído!';
+        if(numero) numero.textContent = '🎉';
+        setTimeout(function(){ fecharCronometroFullscreen(); tabataAtivo = null; }, 2500);
+        return;
+      }
+    }
+    atualizarTelaTabata();
+  }, 1000);
+}
+
+function atualizarTelaTabata(){
+  if(!tabataAtivo) return;
+  const d = tabataAtivo.dados;
+  const nomeExercicio = d.blocos[tabataAtivo.blocoIdx].nome;
+  const label = document.getElementById('cronometro-fullscreen-label');
+  const numero = document.getElementById('cronometro-fullscreen-numero');
+  const ring = document.getElementById('cronometro-fullscreen-ring');
+
+  if(label){
+    label.textContent = (tabataAtivo.fase === 'trabalho' ? 'Trabalho' : 'Descanso') + ' · ' + nomeExercicio + ' · Ciclo ' + tabataAtivo.cicloAtual + '/' + d.ciclos;
+    label.style.color = tabataAtivo.fase === 'trabalho' ? 'var(--success)' : 'var(--text-faint)';
+  }
+  if(numero) numero.textContent = tabataAtivo.restante + 's';
+  if(ring){
+    const total = tabataAtivo.fase === 'trabalho' ? d.trabalhoSeg : d.descansoSeg;
+    const proporcao = tabataAtivo.restante / total;
+    ring.style.strokeDashoffset = String(616 - (616 * proporcao));
+  }
+}
+
 function iniciarDescanso(idx, segundosTotais){
   if(descansoIntervals[idx]) clearInterval(descansoIntervals[idx]);
   cronometroDescansoAtivo = { idx: idx, restante: segundosTotais, total: segundosTotais, pausado: false };
@@ -5454,11 +5719,11 @@ function iniciarDescanso(idx, segundosTotais){
 }
 
 function abrirCronometroFullscreen(){
-  if(!cronometroDescansoAtivo) return;
+  if(!cronometroDescansoAtivo && !tabataAtivo) return;
   document.getElementById('cronometro-pill-minimizado').style.display = 'none';
   const overlay = document.getElementById('cronometro-fullscreen-overlay');
   overlay.style.display = 'flex';
-  document.getElementById('cronometro-fullscreen-numero').textContent = cronometroDescansoAtivo.restante + 's';
+  if(cronometroDescansoAtivo) document.getElementById('cronometro-fullscreen-numero').textContent = cronometroDescansoAtivo.restante + 's';
   document.getElementById('cronometro-fullscreen-btn').textContent = 'Pausar';
 }
 
@@ -5480,12 +5745,24 @@ function fecharCronometroFullscreen(){
 }
 
 function pausarOuRetomarCronometro(){
+  if(tabataAtivo){
+    tabataAtivo.pausado = !tabataAtivo.pausado;
+    document.getElementById('cronometro-fullscreen-btn').textContent = tabataAtivo.pausado ? 'Retomar' : 'Pausar';
+    return;
+  }
   if(!cronometroDescansoAtivo) return;
   cronometroDescansoAtivo.pausado = !cronometroDescansoAtivo.pausado;
   document.getElementById('cronometro-fullscreen-btn').textContent = cronometroDescansoAtivo.pausado ? 'Retomar' : 'Pausar';
 }
 
 function pararCronometroFullscreen(){
+  if(tabataAtivo){
+    if(tabataInterval) clearInterval(tabataInterval);
+    tabataInterval = null;
+    tabataAtivo = null;
+    fecharCronometroFullscreen();
+    return;
+  }
   if(cronometroDescansoAtivo && descansoIntervals[cronometroDescansoAtivo.idx]){
     clearInterval(descansoIntervals[cronometroDescansoAtivo.idx]);
     delete descansoIntervals[cronometroDescansoAtivo.idx];
@@ -5902,6 +6179,7 @@ function solicitarVideoTecnica(nomeAluna, nomeExercicio){
   if(!a) return;
   if(!a.tecnicaAprovada) a.tecnicaAprovada = {};
   a.tecnicaAprovada[nomeExercicio] = 'pendente';
+  salvarPerfilAlunaNoSupabase(nomeAluna);
 }
 
 function aprovarTecnica(nomeAluna, nomeExercicio){
@@ -5909,6 +6187,7 @@ function aprovarTecnica(nomeAluna, nomeExercicio){
   if(!a) return;
   if(!a.tecnicaAprovada) a.tecnicaAprovada = {};
   a.tecnicaAprovada[nomeExercicio] = 'aprovado';
+  salvarPerfilAlunaNoSupabase(nomeAluna);
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
 }
@@ -6185,7 +6464,15 @@ if(type === 'central'){
     detailDiaAtual = arg;
     let corpoTreino = '<div class="list-item"><span>Dia de descanso, aproveite para recuperar.</span></div>';
     let barraProgresso = '';
-    if(!d.descanso){
+    if(d.tabata){
+      corpoTreino = '<div class="info-box" style="margin-bottom:14px;">' +
+        '<p class="lbl">Tabata · ' + d.nivel + '</p>' +
+        '<p class="txt">' + d.trabalhoSeg + 's de trabalho, ' + d.descansoSeg + 's de descanso, ' + d.ciclos + ' ciclos por bloco · ~' + d.duracaoTotalMin + ' minutos no total</p>' +
+        '<p class="txt" style="color:var(--text-faint);font-size:11px;">' + d.descricaoProtocolo + '</p>' +
+      '</div>' +
+      d.blocos.map(function(bloco, bi){ return '<div class="list-item"><span>Bloco ' + (bi+1) + ': ' + bloco.nome + '</span></div>'; }).join('') +
+      '<button class="btn-gold" style="margin-top:14px;" onclick="iniciarTabata(' + JSON.stringify(d).replace(/"/g,'&quot;') + ')"><i class="ti ti-player-play" style="margin-right:6px;"></i>Iniciar Tabata</button>';
+    } else if(!d.descanso){
       const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
       const prog = alunaAtual ? getProgressoAluna(alunaAtual.nome) : null;
 
@@ -6681,11 +6968,13 @@ function registrarCiclo(){
   }
   const elCiclo = document.getElementById('area-ciclo');
   if(elCiclo) elCiclo.innerHTML = '<p class="txt">Obrigada por compartilhar, isso vai deixar suas análises mais precisas, sem afetar nada além disso.</p>';
+  salvarPerfilAlunaNoSupabase(alunaAtual.nome);
 }
 
 function pularCiclo(){
   const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
   alunaAtual.cicloPerguntado = true;
+  salvarPerfilAlunaNoSupabase(alunaAtual.nome);
   const elCiclo2 = document.getElementById('area-ciclo');
   if(elCiclo2) elCiclo2.innerHTML = '<p class="txt">Sem problemas, pode responder outra hora, se quiser.</p>';
 }
