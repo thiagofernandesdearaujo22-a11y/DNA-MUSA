@@ -5012,7 +5012,7 @@ async function loginPersonal(){
   const senha = document.getElementById('login-personal-senha').value;
   const erroEl = document.getElementById('login-personal-erro');
 
-  // Acesso de teste garantido: nunca toca na rede, sempre funciona
+  // Acesso de teste garantido: entra na hora, sem esperar rede nenhuma
   if(email === EMAIL_PERSONAL.toLowerCase() && senha === SENHA_PERSONAL){
     erroEl.style.display = 'none';
     sessaoTipo = 'personal';
@@ -5020,6 +5020,11 @@ async function loginPersonal(){
     document.getElementById('backlabel').textContent = 'Sair';
     pedirPermissaoNotificacao();
     openLevel2('personal');
+    // Por trás, sem travar a entrada: tenta estabelecer sessão real no Supabase também,
+    // porque sem isso as regras de segurança do banco (RLS) bloqueiam buscas como "alunas novas da anamnese"
+    if(supabaseClient){
+      supabaseClient.auth.signInWithPassword({ email: email, password: senha }).catch(function(){ /* sem problema, segue com acesso local mesmo */ });
+    }
     return;
   }
 
