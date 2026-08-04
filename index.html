@@ -5026,32 +5026,36 @@ async function loginPersonal(){
   const senha = document.getElementById('login-personal-senha').value;
   const erroEl = document.getElementById('login-personal-erro');
 
-  // Acesso de teste garantido: entra na hora, sem esperar rede nenhuma
+  // Acesso de teste garantido: sempre entra, mas agora ESPERA a sessão real terminar antes,
+  // pra garantir que a busca de alunas novas funcione (isso depende de permissão do banco).
   if(email === EMAIL_PERSONAL.toLowerCase() && senha === SENHA_PERSONAL){
     erroEl.style.display = 'none';
+
+    let statusSessao = 'Sem conexão com o Supabase (modo totalmente offline).';
+    if(supabaseClient){
+      try {
+        const resultado = await supabaseClient.auth.signInWithPassword({ email: email, password: senha });
+        statusSessao = resultado.error
+          ? 'FALHOU: ' + resultado.error.message
+          : 'OK, sessão real estabelecida.';
+      } catch(erroDeRede){
+        statusSessao = 'Erro de rede ao tentar: ' + erroDeRede.message;
+      }
+    }
+
     sessaoTipo = 'personal';
     document.getElementById('backbar').style.display = 'flex';
     document.getElementById('backlabel').textContent = 'Sair';
     pedirPermissaoNotificacao();
     openLevel2('personal');
-    // Por trás, sem travar a entrada: tenta estabelecer sessão real no Supabase também,
-    // porque sem isso as regras de segurança do banco (RLS) bloqueiam buscas como "alunas novas da anamnese"
-    if(supabaseClient){
-      supabaseClient.auth.signInWithPassword({ email: email, password: senha }).then(function(resultado){
-        const marca = document.createElement('p');
-        marca.id = 'diagnostico-sessao-real';
-        marca.style.cssText = 'position:fixed;bottom:8px;left:8px;right:8px;font-size:10px;text-align:center;z-index:99998;padding:4px;border-radius:8px;';
-        if(resultado.error){
-          marca.style.cssText += 'color:#E2A33D;background:rgba(0,0,0,0.7);';
-          marca.textContent = 'Sessão real do Supabase NÃO estabeleceu: ' + resultado.error.message;
-        } else {
-          marca.style.cssText += 'color:var(--success);background:rgba(0,0,0,0.7);';
-          marca.textContent = 'Sessão real do Supabase estabelecida com sucesso.';
-          setTimeout(function(){ marca.remove(); }, 6000);
-        }
-        document.body.appendChild(marca);
-      });
-    }
+
+    // Diagnóstico único, grande, no topo da tela — impossível de não ver
+    const diag = document.createElement('div');
+    diag.id = 'diagnostico-login-completo';
+    diag.style.cssText = 'position:fixed;top:0;left:0;right:0;background:' + (statusSessao.indexOf('OK') === 0 ? '#1a3a1a' : '#3a1a1a') + ';color:#fff;padding:14px;font-size:12px;z-index:999999;text-align:center;border-bottom:2px solid ' + (statusSessao.indexOf('OK') === 0 ? '#4a9;' : '#e55;');
+    diag.innerHTML = '<b>Diagnóstico do login:</b> ' + statusSessao + '<br><span style="font-size:10px;opacity:0.8;cursor:pointer;text-decoration:underline;" onclick="this.parentElement.remove()">Fechar</span>';
+    document.body.appendChild(diag);
+
     return;
   }
 
