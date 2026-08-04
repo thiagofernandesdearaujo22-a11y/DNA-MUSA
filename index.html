@@ -2547,7 +2547,9 @@ function gerarTreinoSemanal(perfil){
           ? (dia.foco.indexOf(perfil.enfase) !== -1 ? perfil.enfase : perfil.secundario)
           : gruposSuperioresPossiveis.find(function(g){ return dia.foco.indexOf(g) !== -1; }) || 'Costas';
         let tentativasAdicionar = 0;
-        while(calcularDuracaoDia(dia) < perfil.tempoDisponivel * 0.9 && tentativasAdicionar < 8){
+        const tetoExerciciosPorNivel = { 'Iniciante': 5, 'Intermediário': 6, 'Avançado': 7 };
+        const tetoExerciciosDoDia = tetoExerciciosPorNivel[perfil.nivel] || 6;
+        while(calcularDuracaoDia(dia) < perfil.tempoDisponivel * 0.9 && tentativasAdicionar < 8 && dia.ex.length < tetoExerciciosDoDia){
           const nomesJaNoDia = dia.ex.map(function(l){ return l.split(' · ')[0].toUpperCase(); });
           const padroesJaNoDia = {};
           nomesJaNoDia.forEach(function(n){ padroesJaNoDia[obterPalavraChaveMovimento(n)] = true; });
@@ -2650,13 +2652,13 @@ function validarPrescricao(perfil, semana){
     checklist.push({ item: 'Glúteo médio incluído em superiores (ênfase é Glúteo)', ok: temAbducao });
   }
 
-  // 7. Duração usa bem o tempo disponível (65-100%, nunca excede)
+  // 7. Duração usa o tempo disponível de forma razoável (nunca excede; pode ficar mais curta quando o teto de exercícios por nível for atingido antes - isso é correto, não é bug)
   if(perfil.tempoDisponivel){
     const duracaoOk = semana.every(function(d){
       const dur = d.duracaoEstimadaMin != null ? d.duracaoEstimadaMin : 0;
-      return dur <= perfil.tempoDisponivel && dur >= perfil.tempoDisponivel * 0.5;
+      return dur <= perfil.tempoDisponivel && dur >= perfil.tempoDisponivel * 0.3;
     });
-    checklist.push({ item: 'Duração usa bem o tempo disponível (65-100%, sem exceder)', ok: duracaoOk, detalhe: semana.map(function(d){ return (d.duracaoEstimadaMin != null ? d.duracaoEstimadaMin : '?') + 'min'; }).join(', ') + ' de ' + perfil.tempoDisponivel + 'min' });
+    checklist.push({ item: 'Duração dentro do tempo disponível, sem exceder', ok: duracaoOk, detalhe: semana.map(function(d){ return (d.duracaoEstimadaMin != null ? d.duracaoEstimadaMin : '?') + 'min'; }).join(', ') + ' de ' + perfil.tempoDisponivel + 'min' });
   }
 
   // 8. Correção postural incluída se houver desvio confirmado
@@ -3152,8 +3154,7 @@ function removerExercicioTreino(diaIndex, exIndex){
   a.treinoAtual.dias[diaIndex].ex.splice(exIndex, 1);
   if(typeof dias !== 'undefined' && dias[diaIndex]) dias[diaIndex].ex.splice(exIndex, 1);
   sincronizarTreinoComSupabase(a);
-  const i = alunasPersonal.indexOf(a);
-  openAlunaDetail(i);
+  atualizarDiaPersonalNaTela(diaIndex);
 }
 
 function abrirSelecaoGrupoParaAdicionar(diaIndex){
@@ -3183,16 +3184,15 @@ function confirmarAdicionarExercicio(diaIndex){
   a.treinoAtual.dias[diaIndex].ex.push(nomeEscolhido + ' · 3x12');
   if(typeof dias !== 'undefined' && dias[diaIndex]) dias[diaIndex].ex.push(nomeEscolhido + ' · 3x12');
   sincronizarTreinoComSupabase(a);
-  const i = alunasPersonal.indexOf(a);
-  openAlunaDetail(i);
+  atualizarDiaPersonalNaTela(diaIndex);
 }
 
 function adicionarExercicioTreino(diaIndex){
   const a = alunaAberta;
   a.treinoAtual.dias[diaIndex].ex.push('Novo exercício · 3x12');
   if(typeof dias !== 'undefined' && dias[diaIndex]) dias[diaIndex].ex.push('Novo exercício · 3x12');
-  const i = alunasPersonal.indexOf(a);
-  openAlunaDetail(i);
+  sincronizarTreinoComSupabase(a);
+  atualizarDiaPersonalNaTela(diaIndex);
 }
 
 function abrirSubstituicao(diaIndex, exIndex){
@@ -3239,8 +3239,9 @@ function confirmarSubstituicao(diaIndex, exIndex){
   const prog = getProgressoAluna(a.nome);
   prog.substituicoes.push({ semana: prog.semana, de: nomeAntigo, para: novoNome, motivo: motivo });
 
-  const i = alunasPersonal.indexOf(a);
-  openAlunaDetail(i);
+  sincronizarTreinoComSupabase(a);
+  salvarProgressoNoSupabase(a.nome);
+  atualizarDiaPersonalNaTela(diaIndex);
 }
 
 function calcularContagemRegressivaAvaliacao(a){
@@ -3352,7 +3353,7 @@ function regerarTabataParaAluna(nomeAluna, di){
   tabataGerado.foco = 'Tabata de casa · ' + a.nivel;
   a.treinoAtual.dias[di] = tabataGerado;
   sincronizarTreinoComSupabase(a);
-  openAlunaDetail(alunasPersonal.indexOf(a));
+  atualizarDiaPersonalNaTela(di);
 }
 
 function removerTabataDoDia(nomeAluna, di){
@@ -3361,7 +3362,55 @@ function removerTabataDoDia(nomeAluna, di){
   const nomeDia = a.treinoAtual.dias[di].n;
   a.treinoAtual.dias[di] = { n: nomeDia, foco: 'Descanso', descanso: true, ex: [] };
   sincronizarTreinoComSupabase(a);
-  openAlunaDetail(alunasPersonal.indexOf(a));
+  atualizarDiaPersonalNaTela(di);
+}
+
+function renderConteudoDiaPersonal(a, di){
+  const d = a.treinoAtual.dias[di];
+  let html = '';
+  if(d.tabata){
+    html += '<div class="info-box" style="margin-bottom:8px;">' +
+      '<p class="lbl">Tabata · ' + d.nivel + '</p>' +
+      '<p class="txt">' + d.trabalhoSeg + 's trabalho / ' + d.descansoSeg + 's descanso · ' + d.ciclos + ' ciclos · ' + d.blocos.length + ' bloco(s) · ~' + d.duracaoTotalMin + ' min</p>' +
+      '<p class="txt" style="color:var(--text-faint);font-size:11px;">' + d.descricaoProtocolo + '</p>' +
+    '</div>';
+    d.blocos.forEach(function(bloco, bi){
+      html += '<div class="list-item"><span>Bloco ' + (bi+1) + ': ' + bloco.nome + '</span></div>';
+    });
+    html += '<p style="font-size:12px;color:var(--gold-soft);margin:6px 0 4px;cursor:pointer;" onclick="regerarTabataParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',' + di + ')"><i class="ti ti-refresh" style="font-size:12px;vertical-align:-2px;margin-right:4px;"></i>Gerar outra combinação</p>' +
+      '<p style="font-size:12px;color:var(--text-faint);margin:2px 0 4px;cursor:pointer;" onclick="removerTabataDoDia(\'' + a.nome.replace(/'/g,"\\'") + '\',' + di + ')">Voltar esse dia pro treino normal</p>';
+  } else {
+    d.ex.forEach(function(exLine, ei){
+      const partesEdit = exLine.split(' · ');
+      const nomeEdit = partesEdit[0];
+      const setsRepsEdit = partesEdit[1] || '';
+      const metodoAplicado = d.metodos && d.metodos[ei];
+      html += '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:4px;padding:8px 12px;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+          '<span id="nome-ex-' + di + '-' + ei + '" style="font-size:12px;">' + nomeEdit + (metodoAplicado ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + metodoAplicado + '</span>' : '') + '</span>' +
+          '<span style="display:flex;gap:6px;">' +
+            '<span class="tag" style="cursor:pointer;" onclick="alternarMetodoExercicio(' + di + ',' + ei + ')">Método</span>' +
+            '<span class="tag" style="cursor:pointer;" onclick="abrirSubstituicao(' + di + ',' + ei + ')">Trocar</span>' +
+          '</span>' +
+        '</div>' +
+        '<div id="metodo-picker-' + di + '-' + ei + '" style="display:none;"></div>' +
+        '<div style="display:flex;gap:6px;">' +
+          '<input class="form-input" style="flex:1;padding:6px 8px;font-size:12px;" value="' + setsRepsEdit + '" onchange="editarSeriesReps(' + di + ',' + ei + ',this.value)" placeholder="ex: 4x12">' +
+          '<button class="btn-gold" style="width:auto;padding:6px 10px;margin:0;font-size:11px;background:#3a1414;color:#E2A33D;" onclick="removerExercicioTreino(' + di + ',' + ei + ')">Remover</button>' +
+        '</div>' +
+      '</div>';
+    });
+    html += '<p style="font-size:12px;color:var(--gold-soft);margin:6px 0 4px;cursor:pointer;" onclick="abrirSelecaoGrupoParaAdicionar(' + di + ')"><i class="ti ti-plus" style="font-size:12px;vertical-align:-2px;margin-right:4px;"></i>Adicionar exercício nesse dia</p>' +
+      '<div id="add-exercicio-form-' + di + '" style="margin-bottom:6px;"></div>' +
+      '<p style="font-size:11px;color:var(--text-faint);margin:6px 0 4px;cursor:pointer;" onclick="regerarTabataParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',' + di + ')">Transformar esse dia em treino Tabata de casa</p>';
+  }
+  return html;
+}
+
+function atualizarDiaPersonalNaTela(di){
+  const container = document.getElementById('dia-personal-expandido-' + di);
+  if(!container || !alunaAberta) return;
+  container.innerHTML = renderConteudoDiaPersonal(alunaAberta, di);
 }
 
 function alternarDiaExpandidoPersonal(di){
@@ -3422,44 +3471,7 @@ function openAlunaDetail(i){
           '<div style="flex:1;"><p style="font-size:13px;font-weight:600;margin:0;">' + d.n + '</p><p style="font-size:11px;color:var(--text-faint);margin:0;">' + (d.foco.indexOf(' · ') !== -1 ? d.foco.split(' · ').slice(1).join(' · ') : d.foco) + '</p></div>' +
           '<i class="ti ti-chevron-down" style="color:var(--text-faint);"></i>' +
         '</div>' +
-        '<div id="dia-personal-expandido-' + di + '" style="display:none;padding:0 12px 12px;">';
-      if(d.tabata){
-        treinoHtml += '<div class="info-box" style="margin-bottom:8px;">' +
-          '<p class="lbl">Tabata · ' + d.nivel + '</p>' +
-          '<p class="txt">' + d.trabalhoSeg + 's trabalho / ' + d.descansoSeg + 's descanso · ' + d.ciclos + ' ciclos · ' + d.blocos.length + ' bloco(s) · ~' + d.duracaoTotalMin + ' min</p>' +
-          '<p class="txt" style="color:var(--text-faint);font-size:11px;">' + d.descricaoProtocolo + '</p>' +
-        '</div>';
-        d.blocos.forEach(function(bloco, bi){
-          treinoHtml += '<div class="list-item"><span>Bloco ' + (bi+1) + ': ' + bloco.nome + '</span></div>';
-        });
-        treinoHtml += '<p style="font-size:12px;color:var(--gold-soft);margin:6px 0 4px;cursor:pointer;" onclick="regerarTabataParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',' + di + ')"><i class="ti ti-refresh" style="font-size:12px;vertical-align:-2px;margin-right:4px;"></i>Gerar outra combinação</p>' +
-          '<p style="font-size:12px;color:var(--text-faint);margin:2px 0 4px;cursor:pointer;" onclick="removerTabataDoDia(\'' + a.nome.replace(/'/g,"\\'") + '\',' + di + ')">Voltar esse dia pro treino normal</p>';
-      } else {
-      d.ex.forEach(function(exLine, ei){
-        const partesEdit = exLine.split(' · ');
-        const nomeEdit = partesEdit[0];
-        const setsRepsEdit = partesEdit[1] || '';
-        const metodoAplicado = d.metodos && d.metodos[ei];
-        treinoHtml += '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:4px;padding:8px 12px;">' +
-          '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-            '<span id="nome-ex-' + di + '-' + ei + '" style="font-size:12px;">' + nomeEdit + (metodoAplicado ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + metodoAplicado + '</span>' : '') + '</span>' +
-            '<span style="display:flex;gap:6px;">' +
-              '<span class="tag" style="cursor:pointer;" onclick="alternarMetodoExercicio(' + di + ',' + ei + ')">Método</span>' +
-              '<span class="tag" style="cursor:pointer;" onclick="abrirSubstituicao(' + di + ',' + ei + ')">Trocar</span>' +
-            '</span>' +
-          '</div>' +
-          '<div id="metodo-picker-' + di + '-' + ei + '" style="display:none;"></div>' +
-          '<div style="display:flex;gap:6px;">' +
-            '<input class="form-input" style="flex:1;padding:6px 8px;font-size:12px;" value="' + setsRepsEdit + '" onchange="editarSeriesReps(' + di + ',' + ei + ',this.value)" placeholder="ex: 4x12">' +
-            '<button class="btn-gold" style="width:auto;padding:6px 10px;margin:0;font-size:11px;background:#3a1414;color:#E2A33D;" onclick="removerExercicioTreino(' + di + ',' + ei + ')">Remover</button>' +
-          '</div>' +
-        '</div>';
-      });
-      treinoHtml += '<p style="font-size:12px;color:var(--gold-soft);margin:6px 0 4px;cursor:pointer;" onclick="abrirSelecaoGrupoParaAdicionar(' + di + ')"><i class="ti ti-plus" style="font-size:12px;vertical-align:-2px;margin-right:4px;"></i>Adicionar exercício nesse dia</p>' +
-        '<div id="add-exercicio-form-' + di + '" style="margin-bottom:6px;"></div>' +
-        '<p style="font-size:11px;color:var(--text-faint);margin:6px 0 4px;cursor:pointer;" onclick="regerarTabataParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',' + di + ')">Transformar esse dia em treino Tabata de casa</p>';
-      }
-      treinoHtml += '</div></div>';
+        '<div id="dia-personal-expandido-' + di + '" style="display:none;padding:0 12px 12px;">' + renderConteudoDiaPersonal(a, di) + '</div></div>';
     });
     treinoHtml += '<div id="substituicao-form"></div>';
   }
@@ -4072,6 +4084,7 @@ function showPersonalView(which){
     document.getElementById('ex-lista-view').style.display = 'block';
     mostrandoFormAdicionar = false;
     renderExerciciosChips();
+    carregarCatalogoPersonal();
     renderExerciciosLista();
     populateGrupoSelect();
   }
@@ -4457,6 +4470,8 @@ function renderExerciciosLista(){
       seletorMover.onchange = function(){
         if(!seletorMover.value) return;
         e.categoria = seletorMover.value;
+        e.grupo = seletorMover.value;
+        salvarCatalogoPersonal('exercicio_movido', e.nome, { nome: e.nome, categoria: e.categoria });
         renderExerciciosLista();
       };
       el.appendChild(seletorMover);
@@ -4754,11 +4769,48 @@ function playConteudoMetodo(nome){
     '<p class="page-sub">' + c.desc + '</p>';
 }
 
+async function salvarCatalogoPersonal(tipo, chave, dados){
+  if(!supabaseClient) return;
+  try {
+    await supabaseClient.from('catalogo_personal').upsert({
+      tipo: tipo,
+      chave: chave,
+      dados: dados,
+      updated_at: new Date().toISOString()
+    });
+  } catch(erroDeRede){
+    console.warn('Sem conexão agora, isso ficou salvo só localmente por enquanto:', erroDeRede);
+  }
+}
+
+let catalogoPersonalJaCarregado = false;
+async function carregarCatalogoPersonal(){
+  if(!supabaseClient || catalogoPersonalJaCarregado) return;
+  try {
+    const { data: linhas } = await supabaseClient.from('catalogo_personal').select('*');
+    if(!linhas) return;
+    catalogoPersonalJaCarregado = true;
+
+    linhas.forEach(function(row){
+      if(row.tipo === 'exercicio_customizado'){
+        const jaExiste = exerciciosBanco.find(function(e){ return e.nome === row.dados.nome; });
+        if(!jaExiste) exerciciosBanco.push(row.dados);
+      } else if(row.tipo === 'exercicio_movido'){
+        const ex = exerciciosBanco.find(function(e){ return e.nome === row.dados.nome; });
+        if(ex){ ex.categoria = row.dados.categoria; ex.grupo = row.dados.categoria; }
+      }
+    });
+    renderExerciciosChips();
+  } catch(erroDeRede){
+    console.warn('Sem conexão pra carregar o catálogo salvo agora:', erroDeRede);
+  }
+}
+
 function addExercicio(){
   const nome = document.getElementById('ex-nome').value.trim();
   if(!nome) return;
   const cat = document.getElementById('ex-grupo').value;
-  exerciciosBanco.push({
+  const novoExercicio = {
     nome: nome,
     grupo: cat,
     categoria: cat,
@@ -4766,7 +4818,9 @@ function addExercicio(){
     nivel: document.getElementById('ex-nivel').value,
     metodo: document.getElementById('ex-metodo').value,
     video: document.getElementById('ex-video').value.trim()
-  });
+  };
+  exerciciosBanco.push(novoExercicio);
+  salvarCatalogoPersonal('exercicio_customizado', nome, novoExercicio);
   document.getElementById('ex-nome').value = '';
   document.getElementById('ex-video').value = '';
   mostrandoFormAdicionar = false;
