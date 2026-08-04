@@ -5037,7 +5037,20 @@ async function loginPersonal(){
     // Por trás, sem travar a entrada: tenta estabelecer sessão real no Supabase também,
     // porque sem isso as regras de segurança do banco (RLS) bloqueiam buscas como "alunas novas da anamnese"
     if(supabaseClient){
-      supabaseClient.auth.signInWithPassword({ email: email, password: senha }).catch(function(){ /* sem problema, segue com acesso local mesmo */ });
+      supabaseClient.auth.signInWithPassword({ email: email, password: senha }).then(function(resultado){
+        const marca = document.createElement('p');
+        marca.id = 'diagnostico-sessao-real';
+        marca.style.cssText = 'position:fixed;bottom:8px;left:8px;right:8px;font-size:10px;text-align:center;z-index:99998;padding:4px;border-radius:8px;';
+        if(resultado.error){
+          marca.style.cssText += 'color:#E2A33D;background:rgba(0,0,0,0.7);';
+          marca.textContent = 'Sessão real do Supabase NÃO estabeleceu: ' + resultado.error.message;
+        } else {
+          marca.style.cssText += 'color:var(--success);background:rgba(0,0,0,0.7);';
+          marca.textContent = 'Sessão real do Supabase estabelecida com sucesso.';
+          setTimeout(function(){ marca.remove(); }, 6000);
+        }
+        document.body.appendChild(marca);
+      });
     }
     return;
   }
