@@ -2570,11 +2570,17 @@ function gerarTreinoSemanal(perfil){
     }
 
     // ITEM: corte automático se exceder o tempo disponível
-    // Protege: 2 primeiros exercícios (Costas em superiores / ênfase principal em inferiores), corta do fim pra início
+    // Protege: 2 primeiros exercícios (Costas em superiores / ênfase principal em inferiores) e a panturrilha, corta do fim pra início
     const minimoProtegido = 2;
     if(perfil.tempoDisponivel){
       while(calcularDuracaoDia(dia) > perfil.tempoDisponivel && dia.ex.length > minimoProtegido){
-        dia.ex.pop();
+        // Acha o último exercício removível (de trás pra frente), pulando a panturrilha de propósito
+        let idxRemover = -1;
+        for(let k = dia.ex.length - 1; k >= minimoProtegido; k--){
+          if(dia.ex[k].toUpperCase().indexOf('PANTURRILHA') === -1){ idxRemover = k; break; }
+        }
+        if(idxRemover === -1) break; // só sobrou panturrilha e os protegidos, para de cortar
+        dia.ex.splice(idxRemover, 1);
         dia.cortadoPorTempo = true;
       }
     }
@@ -2981,8 +2987,13 @@ async function sincronizarTreinoComSupabase(a){
   if(!a.email) return; // sem e-mail cadastrado, não tem como achar a conta dela no Supabase
   try {
     const { data: alunaRow } = await supabaseClient.from('alunas').select('auth_id').eq('email', a.email).maybeSingle();
-    if(!alunaRow || !alunaRow.auth_id) return; // ela ainda não criou login próprio, sincroniza quando ela entrar
-    await salvarTreinoNoSupabase(alunaRow.auth_id, a.treinoAtual);
+    if(alunaRow && alunaRow.auth_id){
+      // Ela já tem login: salva no lugar "oficial" (tabela treinos), que é o que o app dela lê ao entrar
+      await salvarTreinoNoSupabase(alunaRow.auth_id, a.treinoAtual);
+    }
+    // Sempre salva também aqui, pelo e-mail, com ou sem login — assim o treino nunca se perde,
+    // mesmo que você feche o app antes de gerar o acesso dela
+    await supabaseClient.from('alunas').update({ treino_atual_backup: a.treinoAtual }).eq('email', a.email);
   } catch(erroDeRede){
     console.warn('Sem conexão com o Supabase agora, o treino ficou salvo só localmente por enquanto:', erroDeRede);
   }
@@ -3046,7 +3057,8 @@ async function executarSalvamentoPerfilAluna(nomeAluna){
         direcionamentoGluteo: a.direcionamentoGluteo || null,
         desviosPosturaisConfirmados: a.desviosPosturaisConfirmados || [],
         dataFechouPlano: a.dataFechouPlano || null,
-        duracaoPlanoDias: a.duracaoPlanoDias || null
+        duracaoPlanoDias: a.duracaoPlanoDias || null,
+        tabataSugestaoRespondida: a.tabataSugestaoRespondida || false
       }
     }, { onConflict: 'email' });
   } catch(erroDeRede){
@@ -3196,37 +3208,34 @@ function adicionarExercicioTreino(diaIndex){
 }
 
 function abrirSubstituicao(diaIndex, exIndex){
+  const container = document.getElementById('sub-picker-' + diaIndex + '-' + exIndex);
+  if(!container) return;
+  if(container.style.display !== 'none' && container.innerHTML){
+    container.style.display = 'none';
+    return;
+  }
+
   const a = alunaAberta;
   const linhaAtual = a.treinoAtual.dias[diaIndex].ex[exIndex];
   const nomeAtual = linhaAtual.split(' · ')[0];
   const exAtualBanco = exerciciosBanco.find(function(e){ return e.nome.toUpperCase() === nomeAtual.toUpperCase(); });
   const grupo = exAtualBanco ? (exAtualBanco.grupo || exAtualBanco.categoria) : null;
-  const opcoes = exerciciosBanco.filter(function(e){ return !grupo || e.grupo === grupo || e.categoria === grupo; });
+  const opcoes = exerciciosBanco.filter(function(e){
+    const grupoDoEx = e.grupo || e.categoria;
+    return (!grupo || grupoDoEx === grupo) && e.nome.toUpperCase() !== nomeAtual.toUpperCase();
+  }).slice(0, 12); // limita pra não ficar gigante, já são exercícios do mesmo grupo muscular
 
-  const prog = getProgressoAluna(a.nome);
-  const semanasDesdeAtribuicao = prog.semana; // treino atribuído na semana 1
-  const trocaPrecoce = semanasDesdeAtribuicao <= 2; // proxy pra "menos de 10 dias"
-
-  const form = document.getElementById('substituicao-form');
-  form.innerHTML =
-    '<div class="info-box" style="margin-top:10px;">' +
-    '<p class="lbl">Trocando: ' + nomeAtual + '</p>' +
-    '<div class="form-group"><select class="form-select" id="sub-novo-exercicio">' +
-      opcoes.map(function(e){ return '<option value="' + e.nome.replace(/"/g,'') + '">' + e.nome + '</option>'; }).join('') +
-    '</select></div>' +
-    (trocaPrecoce
-      ? '<div class="form-group"><label class="form-label">Motivo da troca (treino atribuído recentemente)</label>' +
-        '<select class="form-select" id="sub-motivo"><option>A máquina não existe na academia</option><option>A máquina está estragada</option></select></div>'
-      : '') +
-    '<button class="btn-gold" onclick="confirmarSubstituicao(' + diaIndex + ',' + exIndex + ')">Confirmar troca</button>' +
+  container.innerHTML = '<p style="font-size:11px;color:var(--text-faint);margin:8px 0 4px;">Trocar "' + nomeAtual + '" por:</p>' +
+    '<div style="display:flex;flex-direction:column;gap:5px;">' +
+    opcoes.map(function(e){
+      return '<div style="background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;font-size:12px;" onclick="confirmarSubstituicao(' + diaIndex + ',' + exIndex + ',\'' + e.nome.replace(/'/g,"\\'") + '\')">' + e.nome + '</div>';
+    }).join('') +
     '</div>';
+  container.style.display = 'block';
 }
 
-function confirmarSubstituicao(diaIndex, exIndex){
+function confirmarSubstituicao(diaIndex, exIndex, novoNome){
   const a = alunaAberta;
-  const novoNome = document.getElementById('sub-novo-exercicio').value;
-  const motivoEl = document.getElementById('sub-motivo');
-  const motivo = motivoEl ? motivoEl.value : null;
   const linhaAtual = a.treinoAtual.dias[diaIndex].ex[exIndex];
   const nomeAntigo = linhaAtual.split(' · ')[0];
   const setsReps = linhaAtual.split(' · ')[1] || '';
@@ -3237,7 +3246,7 @@ function confirmarSubstituicao(diaIndex, exIndex){
   }
 
   const prog = getProgressoAluna(a.nome);
-  prog.substituicoes.push({ semana: prog.semana, de: nomeAntigo, para: novoNome, motivo: motivo });
+  prog.substituicoes.push({ semana: prog.semana, de: nomeAntigo, para: novoNome, motivo: null });
 
   sincronizarTreinoComSupabase(a);
   salvarProgressoNoSupabase(a.nome);
@@ -3278,6 +3287,26 @@ function calcularStatusIMC(a){
     return { elevado: true, texto: 'IMC ' + a.imc + ' (≥25) → aciona Fase Emagrecimento por override automático da nossa metodologia, independente do objetivo declarado.' };
   }
   return { elevado: false, texto: 'IMC ' + a.imc + ' (dentro da faixa normal) → fase decidida pelo objetivo declarado, sem override.' };
+}
+
+function objetivoSugereTabata(a){
+  const texto = ((a.objetivo || '') + ' ' + (a.piramide || '')).toLowerCase();
+  const palavrasChave = ['emagrec', 'definir', 'definição', 'perder peso', 'perdi peso', 'perder gordura', 'secar', 'queimar gordura', 'redução de medida', 'peso', 'gordura'];
+  return palavrasChave.some(function(p){ return texto.indexOf(p) !== -1; });
+}
+
+function responderSugestaoTabata(nomeAluna, quer){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  a.tabataSugestaoRespondida = true;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+  if(quer){
+    setTimeout(function(){
+      alert('Beleza! Desce até "Treino atual", abre o dia que quiser usar, e clica em "Transformar esse dia em treino Tabata de casa".');
+    }, 100);
+  }
 }
 
 function gerarResumoAnamnese(a){
@@ -3394,6 +3423,7 @@ function renderConteudoDiaPersonal(a, di){
           '</span>' +
         '</div>' +
         '<div id="metodo-picker-' + di + '-' + ei + '" style="display:none;"></div>' +
+        '<div id="sub-picker-' + di + '-' + ei + '" style="display:none;"></div>' +
         '<div style="display:flex;gap:6px;">' +
           '<input class="form-input" style="flex:1;padding:6px 8px;font-size:12px;" value="' + setsRepsEdit + '" onchange="editarSeriesReps(' + di + ',' + ei + ',this.value)" placeholder="ex: 4x12">' +
           '<button class="btn-gold" style="width:auto;padding:6px 10px;margin:0;font-size:11px;background:#3a1414;color:#E2A33D;" onclick="removerExercicioTreino(' + di + ',' + ei + ')">Remover</button>' +
@@ -3424,9 +3454,12 @@ function alternarMetodoExercicio(di, ei){
   if(!container) return;
   if(container.style.display === 'none' || !container.innerHTML){
     const metodos = ['Nenhum','Restpause','Dropset','Cluster set','Bi-set','Tri-set','Pirâmide crescente'];
-    container.innerHTML = '<div class="info-box" style="margin:6px 0;padding:10px;">' +
+    container.innerHTML = '<div style="display:flex;flex-direction:column;gap:6px;margin:8px 0;">' +
       metodos.map(function(m){
-        return '<p class="txt" style="cursor:pointer;margin-bottom:6px;" onclick="aplicarMetodoExercicio(' + di + ',' + ei + ',\'' + m + '\')"><b>' + m + '</b>' + (descricoesMetodo[m] ? ' — ' + descricoesMetodo[m] : '') + '</p>';
+        return '<div style="background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;cursor:pointer;" onclick="aplicarMetodoExercicio(' + di + ',' + ei + ',\'' + m + '\')">' +
+          '<p style="font-size:12.5px;font-weight:700;color:var(--gold-soft);margin:0 0 3px;">' + m + '</p>' +
+          (descricoesMetodo[m] ? '<p style="font-size:11px;color:var(--text-faint);margin:0;">' + descricoesMetodo[m] + '</p>' : '') +
+        '</div>';
       }).join('') +
     '</div>';
     container.style.display = 'block';
@@ -3452,10 +3485,38 @@ function aplicarMetodoExercicio(di, ei, metodo){
   if(picker){ picker.style.display = 'none'; picker.innerHTML = ''; }
 }
 
+let treinoJaBuscadoPara = {};
+async function buscarTreinoRealDaAluna(a, i){
+  if(!supabaseClient || !a.email) return;
+  const chaveCache = a.email.toLowerCase();
+  if(treinoJaBuscadoPara[chaveCache]) return; // já buscou nessa sessão, não repete à toa toda vez que reabre
+  try {
+    const { data: alunaRow } = await supabaseClient.from('alunas').select('auth_id, treino_atual_backup').eq('email', a.email).maybeSingle();
+    treinoJaBuscadoPara[chaveCache] = true;
+    if(!alunaRow) return;
+
+    if(alunaRow.auth_id){
+      // Ela já tem login: busca no lugar oficial (tabela treinos)
+      const { data: treinoData } = await supabaseClient.from('treinos').select('*').eq('aluna_id', alunaRow.auth_id).order('updated_at', { ascending: false }).limit(1).maybeSingle();
+      if(treinoData){
+        a.treinoAtual = { fase: treinoData.fase, volume: treinoData.volume, dias: treinoData.dias };
+        if(alunaAberta === a) openAlunaDetail(i);
+      }
+    } else if(alunaRow.treino_atual_backup){
+      // Ela ainda não tem login: usa o backup salvo com o treino que você já montou pra ela
+      a.treinoAtual = alunaRow.treino_atual_backup;
+      if(alunaAberta === a) openAlunaDetail(i);
+    }
+  } catch(erroDeRede){
+    console.warn('Sem conexão pra buscar o treino real dela agora, mostrando o que já está localmente:', erroDeRede);
+  }
+}
+
 function openAlunaDetail(i){
   const a = alunasPersonal[i];
   alunaAberta = a;
   const el = document.getElementById('aluna-detail-content');
+  buscarTreinoRealDaAluna(a, i);
 
   let treinoHtml = '<div class="list-item"><span>Ainda sem treino atribuído</span></div>';
   let treinoAcoesHtml = '';
@@ -3473,7 +3534,6 @@ function openAlunaDetail(i){
         '</div>' +
         '<div id="dia-personal-expandido-' + di + '" style="display:none;padding:0 12px 12px;">' + renderConteudoDiaPersonal(a, di) + '</div></div>';
     });
-    treinoHtml += '<div id="substituicao-form"></div>';
   }
   treinoAcoesHtml = '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:10px;" onclick="gerarTreinoAutomaticoParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-wand" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>' + (a.treinoAtual ? 'Gerar novo treino automaticamente' : 'Prescrever treino automaticamente') + '</button>';
   treinoAcoesHtml += '<div id="validacao-treino-area"></div>';
@@ -3557,6 +3617,16 @@ function openAlunaDetail(i){
     '<p class="section-label">Academia</p>' +
     '<div class="info-box"><p class="txt">' + (a.academia || 'Não informado') + '</p></div>' +
     renderPlanoFechado(a) +
+    (objetivoSugereTabata(a) && !a.tabataSugestaoRespondida ? (
+      '<div class="info-box" style="margin-bottom:12px;border-color:var(--border-strong);">' +
+        '<p class="lbl">💡 Sugestão baseada no objetivo dela</p>' +
+        '<p class="txt">O objetivo relatado por ela menciona emagrecimento/definição. Um protocolo Tabata (circuito intervalado, ' + (a.nivel || 'Iniciante') + ') pode complementar bem o treino resistido nesse caso. Quer que eu já deixe pronto pra você aplicar num dos dias?</p>' +
+        '<div style="display:flex;gap:8px;margin-top:8px;">' +
+          '<span class="chip" style="cursor:pointer;background:var(--success-soft);color:var(--success);" onclick="responderSugestaoTabata(\'' + a.nome.replace(/'/g,"\\'") + '\',true)">Sim, quero ver</span>' +
+          '<span class="chip" style="cursor:pointer;" onclick="responderSugestaoTabata(\'' + a.nome.replace(/'/g,"\\'") + '\',false)">Não, obrigado</span>' +
+        '</div>' +
+      '</div>'
+    ) : '') +
     '<p class="section-label">Treino atual</p>' +
     '<p style="font-size:12px;color:var(--gold-soft);margin:-6px 0 10px;cursor:pointer;" onclick="abrirTreinosArquivados(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-archive" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Ver treinos arquivados (histórico)</p>' +
     '<div id="treinos-arquivados-area"></div>' +
@@ -3567,7 +3637,12 @@ function openAlunaDetail(i){
     renderExerciciosEstagnados(a) +
     renderSecaoColapsavel('Acompanhamento e histórico', renderElegibilidadeFase(a) + renderFunilEngajamento(a) + renderLinhaDoTempo(a) + renderPromocaoNivel(a) + renderBlocoPeriodizacao(a) + renderTecnicaPendente(a) + renderProgressao(a), 'acompanhamento') +
     '<p class="section-label" style="margin-top:22px;">Acesso ao app</p>' +
-    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="criarLoginParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-key" style="font-size:14px;vertical-align:-2px;margin-right:6px;"></i>Gerar acesso ao app</button>' +
+    (a.authId && a.senhaGerada
+      ? '<div class="info-box"><p class="lbl" style="color:var(--success);">✓ Acesso já criado automaticamente</p>' +
+        '<p class="txt">' + a.email + '<br>' + a.senhaGerada + '</p>' +
+        '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:6px;">Pode mandar essas credenciais pra ela direto, é só copiar.</p></div>'
+      : '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="criarLoginParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-key" style="font-size:14px;vertical-align:-2px;margin-right:6px;"></i>Gerar acesso ao app</button>'
+    ) +
     '<div id="acesso-gerado-area"></div>' +
     '<p class="page-sub" style="margin-top:10px;">Anamnese respondida em ' + (a.dataAnamnese || 'data desconhecida') + '</p>';
   showPersonalView('aluna');
@@ -4010,6 +4085,8 @@ async function sincronizarListaAlunasDoSupabase(){
             }
           });
         }
+        if(row.auth_id && jaExiste.authId !== row.auth_id){ jaExiste.authId = row.auth_id; mudou = true; }
+        if(row.senha_gerada && jaExiste.senhaGerada !== row.senha_gerada){ jaExiste.senhaGerada = row.senha_gerada; mudou = true; }
         if(mudou) atualizadas++;
         return;
       }
@@ -4028,7 +4105,9 @@ async function sincronizarListaAlunasDoSupabase(){
         dataAnamnese: row.data_anamnese || new Date().toISOString().slice(0,10),
         status: 'ok',
         statusLabel: 'Ativa recente',
-        recemChegadaDaAnamnese: true
+        recemChegadaDaAnamnese: true,
+        authId: row.auth_id || null,
+        senhaGerada: row.senha_gerada || null
       });
       novas++;
     });
@@ -4798,6 +4877,9 @@ async function carregarCatalogoPersonal(){
       } else if(row.tipo === 'exercicio_movido'){
         const ex = exerciciosBanco.find(function(e){ return e.nome === row.dados.nome; });
         if(ex){ ex.categoria = row.dados.categoria; ex.grupo = row.dados.categoria; }
+      } else if(row.tipo === 'conteudo'){
+        const jaExisteConteudo = conteudos.find(function(c){ return c.n === row.dados.n; });
+        if(!jaExisteConteudo) conteudos.push(row.dados);
       }
     });
     renderExerciciosChips();
@@ -4846,12 +4928,14 @@ renderConteudoPersonal();
 function addConteudo(){
   const titulo = document.getElementById('ct-titulo').value.trim();
   if(!titulo) return;
-  conteudos.push({
+  const novoConteudo = {
     n: titulo,
     cat: document.getElementById('ct-categoria').value,
     locked: document.getElementById('ct-locked').checked,
     desc: document.getElementById('ct-desc').value.trim() || 'Sem descrição ainda.'
-  });
+  };
+  conteudos.push(novoConteudo);
+  salvarCatalogoPersonal('conteudo', titulo, novoConteudo);
   document.getElementById('ct-titulo').value = '';
   document.getElementById('ct-desc').value = '';
   document.getElementById('ct-video').value = '';
@@ -5102,10 +5186,35 @@ async function loginAluna(){
     sessaoUsuarioAtual = data.user;
 
     // Descobre o nome real dela (pode já existir cadastro feito pelo Personal com o mesmo e-mail)
-    const { data: alunaRow } = await supabaseClient.from('alunas').select('nome').eq('auth_id', data.user.id).maybeSingle();
+    const { data: alunaRow } = await supabaseClient.from('alunas').select('*').eq('auth_id', data.user.id).maybeSingle();
     if(alunaRow) NOME_ALUNA_LOGADA = alunaRow.nome;
 
-    const alunaLocal = alunasPersonal.find(function(x){ return x.nome === NOME_ALUNA_LOGADA; });
+    // Se ela ainda não existe na lista local dessa sessão (primeiro login no aparelho dela), cria o registro completo agora,
+    // com os dados reais dela — sem isso, os cálculos de DNA/progresso ficariam usando dados de outra aluna que sobraram por padrão
+    let alunaLocal = alunasPersonal.find(function(x){ return x.nome === NOME_ALUNA_LOGADA; });
+    if(!alunaLocal && alunaRow){
+      alunaLocal = {
+        nome: alunaRow.nome,
+        email: alunaRow.email,
+        telefone: alunaRow.telefone || '',
+        nivel: alunaRow.nivel || 'Iniciante',
+        freq: alunaRow.freq || '3x por semana',
+        piramide: alunaRow.piramide || '',
+        objetivo: alunaRow.objetivo || '',
+        restricoes: alunaRow.restricoes || 'Nenhuma relatada',
+        academia: alunaRow.academia || '',
+        idade: alunaRow.idade || null,
+        dataAnamnese: alunaRow.data_anamnese || new Date().toISOString().slice(0,10),
+        status: 'ok',
+        statusLabel: 'Ativa recente'
+      };
+      if(alunaRow.dados_extras && typeof alunaRow.dados_extras === 'object'){
+        Object.keys(alunaRow.dados_extras).forEach(function(campo){
+          if(alunaRow.dados_extras[campo] != null) alunaLocal[campo] = alunaRow.dados_extras[campo];
+        });
+      }
+      alunasPersonal.push(alunaLocal);
+    }
     if(alunaLocal && alunaLocal.treinoAtual && alunaLocal.treinoAtual.dias){
       dias = alunaLocal.treinoAtual.dias;
     }
@@ -5154,7 +5263,15 @@ async function carregarELigarTreinoDaAluna(userId){
       .limit(1)
       .maybeSingle();
 
-    if(treinoData) aplicarTreinoRecebidoDoSupabase(treinoData);
+    if(treinoData){
+      aplicarTreinoRecebidoDoSupabase(treinoData);
+    } else {
+      // Ainda não tem treino no lugar "oficial" — pode ter sido feito antes dela ter login, verifica o backup
+      const { data: alunaRow } = await supabaseClient.from('alunas').select('treino_atual_backup').eq('auth_id', userId).maybeSingle();
+      if(alunaRow && alunaRow.treino_atual_backup){
+        aplicarTreinoRecebidoDoSupabase({ fase: alunaRow.treino_atual_backup.fase, volume: alunaRow.treino_atual_backup.volume, dias: alunaRow.treino_atual_backup.dias });
+      }
+    }
 
     supabaseClient
       .channel('treino-da-aluna-' + userId)
@@ -5169,8 +5286,12 @@ async function carregarELigarTreinoDaAluna(userId){
 }
 
 function aplicarTreinoRecebidoDoSupabase(treinoRow){
-  const a = alunasPersonal.find(function(x){ return x.nome === NOME_ALUNA_LOGADA; });
-  if(!a) return;
+  let a = alunasPersonal.find(function(x){ return x.nome === NOME_ALUNA_LOGADA; });
+  if(!a){
+    // Ela ainda não existia na lista local dessa sessão (comum no primeiro login dela, no aparelho dela) — cria agora
+    a = { nome: NOME_ALUNA_LOGADA, status: 'ok', statusLabel: 'Ativa recente', nivel: 'Iniciante', freq: '3x por semana' };
+    alunasPersonal.push(a);
+  }
   a.treinoAtual = { fase: treinoRow.fase, volume: treinoRow.volume, dias: treinoRow.dias };
   dias = treinoRow.dias;
   const viewAtiva = document.querySelector('.view.active');
@@ -5378,7 +5499,7 @@ function openLevel2(which){
   setActive(which);
   document.getElementById('backbar').style.display = 'flex';
   document.getElementById('backlabel').textContent = 'Voltar para o início';
-  if(which === 'personal'){ showPersonalView('dashboard'); }
+  if(which === 'personal'){ showPersonalView('dashboard'); carregarCatalogoPersonal(); }
   if(which === 'chatia'){ inicializarChatIA(); }
   if(which === 'home' && typeof renderHome === 'function'){ renderHome(); }
   if(which === 'dados' && typeof renderAvaliacoes === 'function'){ renderAvaliacoes(); }
