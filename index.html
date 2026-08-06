@@ -5553,6 +5553,62 @@ const supabaseClient = (typeof window.supabase !== 'undefined') ? window.supabas
 let sessaoUsuarioAtual = null; // guarda o usuário logado de verdade (Supabase Auth)
 let NOME_ALUNA_LOGADA = 'Andriele Caroline Rubert'; // padrão pra testes locais; some real, vira dinâmico após login de verdade
 
+async function restaurarSessaoAtiva(){
+  if(!supabaseClient) return;
+  try {
+    const { data: sessaoData } = await supabaseClient.auth.getSession();
+    const sessao = sessaoData ? sessaoData.session : null;
+    if(!sessao || !sessao.user) return; // sem sessão salva, mostra a tela de login normal
+
+    sessaoUsuarioAtual = sessao.user;
+    const { data: perfilRow } = await supabaseClient.from('perfis').select('tipo, nome').eq('id', sessao.user.id).maybeSingle();
+    if(!perfilRow) return;
+
+    if(perfilRow.tipo === 'personal'){
+      sessaoTipo = 'personal';
+      const backbar = document.getElementById('backbar');
+      if(backbar) backbar.style.display = 'flex';
+      const backlabel = document.getElementById('backlabel');
+      if(backlabel) backlabel.textContent = 'Sair';
+      pedirPermissaoNotificacao();
+      openLevel2('personal');
+    } else if(perfilRow.tipo === 'aluna'){
+      NOME_ALUNA_LOGADA = perfilRow.nome;
+      const { data: alunaRow } = await supabaseClient.from('alunas').select('*').eq('auth_id', sessao.user.id).maybeSingle();
+      let alunaLocal = alunasPersonal.find(function(x){ return x.nome === NOME_ALUNA_LOGADA; });
+      if(!alunaLocal && alunaRow){
+        alunaLocal = {
+          nome: alunaRow.nome, email: alunaRow.email, telefone: alunaRow.telefone || '',
+          nivel: alunaRow.nivel || 'Iniciante', freq: alunaRow.freq || '3x por semana',
+          piramide: alunaRow.piramide || '', objetivo: alunaRow.objetivo || '',
+          restricoes: alunaRow.restricoes || 'Nenhuma relatada', academia: alunaRow.academia || '',
+          idade: alunaRow.idade || null, dataAnamnese: alunaRow.data_anamnese || new Date().toISOString().slice(0,10),
+          status: 'ok', statusLabel: 'Ativa recente'
+        };
+        if(alunaRow.dados_extras && typeof alunaRow.dados_extras === 'object'){
+          Object.keys(alunaRow.dados_extras).forEach(function(campo){
+            if(alunaRow.dados_extras[campo] != null) alunaLocal[campo] = alunaRow.dados_extras[campo];
+          });
+        }
+        alunasPersonal.push(alunaLocal);
+      }
+      if(alunaLocal && alunaLocal.treinoAtual && alunaLocal.treinoAtual.dias){
+        dias = alunaLocal.treinoAtual.dias;
+      }
+      aplicarIdentidadeVisual(NOME_ALUNA_LOGADA);
+      pedirPermissaoNotificacao();
+      sessaoTipo = 'aluna';
+      const cardPersonal = document.getElementById('card-personal-launcher');
+      if(cardPersonal) cardPersonal.style.display = 'none';
+      await carregarELigarTreinoDaAluna(sessao.user.id);
+      setActive('launcher');
+    }
+  } catch(erroDeRede){
+    console.warn('Sem conexão pra restaurar sessão agora, mostrando tela de login:', erroDeRede);
+  }
+}
+restaurarSessaoAtiva();
+
 const TELEFONE_PERSONAL = '5500000000000'; // ⚠️ SUBSTITUA pelo seu WhatsApp real, formato 55DDDNÚMERO
 let historicoChatIA = [];
 
