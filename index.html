@@ -3513,16 +3513,20 @@ async function buscarTreinoRealDaAluna(a, i){
     if(!alunaRow) return;
 
     if(alunaRow.auth_id){
-      // Ela já tem login: busca no lugar oficial (tabela treinos)
       const { data: treinoData } = await supabaseClient.from('treinos').select('*').eq('aluna_id', alunaRow.auth_id).order('updated_at', { ascending: false }).limit(1).maybeSingle();
       if(treinoData){
         a.treinoAtual = { fase: treinoData.fase, volume: treinoData.volume, dias: treinoData.dias };
         if(alunaAberta === a) openAlunaDetail(i);
+      } else {
+        const statusEl = document.getElementById('treino-status-inicial');
+        if(statusEl) statusEl.textContent = 'Confirmado: ela ainda não tem nenhum treino gerado.';
       }
     } else if(alunaRow.treino_atual_backup){
-      // Ela ainda não tem login: usa o backup salvo com o treino que você já montou pra ela
       a.treinoAtual = alunaRow.treino_atual_backup;
       if(alunaAberta === a) openAlunaDetail(i);
+    } else {
+      const statusEl = document.getElementById('treino-status-inicial');
+      if(statusEl) statusEl.textContent = 'Confirmado: ela ainda não tem nenhum treino gerado.';
     }
   } catch(erroDeRede){
     console.warn('Sem conexão pra buscar o treino real dela agora, mostrando o que já está localmente:', erroDeRede);
@@ -3535,7 +3539,7 @@ function openAlunaDetail(i){
   const el = document.getElementById('aluna-detail-content');
   buscarTreinoRealDaAluna(a, i);
 
-  let treinoHtml = '<div class="list-item"><span>Ainda sem treino atribuído</span></div>';
+  let treinoHtml = '<div class="list-item"><span id="treino-status-inicial">Verificando se já existe um treino salvo pra ela...</span></div>';
   let treinoAcoesHtml = '';
   if(a.treinoAtual){
     treinoHtml = '<div class="badge">' + a.treinoAtual.fase + '</div>' +
