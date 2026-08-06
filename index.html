@@ -5290,12 +5290,31 @@ async function carregarELigarTreinoDaAluna(userId){
       }
     }
 
-    supabaseClient
+    const canalRealtime = supabaseClient
       .channel('treino-da-aluna-' + userId)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'treinos', filter: 'aluna_id=eq.' + userId }, function(payload){
+        console.log('[Tempo real] Evento recebido:', payload);
+        const aviso = document.createElement('div');
+        aviso.style.cssText = 'position:fixed;top:8px;left:8px;right:8px;background:#1a3a1a;color:#8FAE7D;padding:10px;border-radius:10px;font-size:11px;text-align:center;z-index:99999;';
+        aviso.textContent = '[Diagnóstico] Treino atualizado em tempo real, chegou agora.';
+        document.body.appendChild(aviso);
+        setTimeout(function(){ aviso.remove(); }, 6000);
         if(payload.new) aplicarTreinoRecebidoDoSupabase(payload.new);
       })
-      .subscribe();
+      .subscribe(function(status){
+        console.log('[Tempo real] Status da inscrição:', status);
+        const aviso = document.createElement('div');
+        aviso.id = 'diagnostico-realtime-status';
+        aviso.style.cssText = 'position:fixed;bottom:8px;left:8px;right:8px;padding:8px;border-radius:10px;font-size:10px;text-align:center;z-index:99999;';
+        if(status === 'SUBSCRIBED'){
+          aviso.style.cssText += 'background:#1a3a1a;color:#8FAE7D;';
+          aviso.textContent = '[Diagnóstico] Conectado ao tempo real com sucesso.';
+        } else {
+          aviso.style.cssText += 'background:#3a1a1a;color:#E2A33D;';
+          aviso.textContent = '[Diagnóstico] Status da conexão em tempo real: ' + status;
+        }
+        document.body.appendChild(aviso);
+      });
   } catch(erroDeRede){
     // Sem treino sincronizado por enquanto, continua com o que já está carregado localmente
     console.warn('Sem conexão pra buscar o treino sincronizado agora:', erroDeRede);
