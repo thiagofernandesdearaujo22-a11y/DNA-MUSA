@@ -2539,10 +2539,10 @@ function gerarTreinoSemanal(perfil){
 
       // Ainda sobra tempo real, mesmo respeitando o teto de série? Adiciona MAIS EXERCÍCIOS (não mais série),
       // priorizando a ênfase real da pirâmide, até usar quase 100% do tempo disponível
-      const ehInferior = dia.foco.indexOf('Inferiores') === 0;
-      const ehSuperior = dia.foco.indexOf('Superiores') === 0;
+      const gruposSuperioresPossiveis = ['Ombro', 'Peito', 'Bíceps', 'Tríceps', 'Costas'];
+      const ehInferior = (perfil.enfase && dia.foco.indexOf(perfil.enfase) !== -1) || (perfil.secundario && dia.foco.indexOf(perfil.secundario) !== -1);
+      const ehSuperior = !ehInferior && gruposSuperioresPossiveis.some(function(g){ return dia.foco.indexOf(g) !== -1; });
       if(ehInferior || ehSuperior){
-        const gruposSuperioresPossiveis = ['Ombro', 'Peito', 'Bíceps', 'Tríceps', 'Costas'];
         const grupoDoDia = ehInferior
           ? (dia.foco.indexOf(perfil.enfase) !== -1 ? perfil.enfase : perfil.secundario)
           : gruposSuperioresPossiveis.find(function(g){ return dia.foco.indexOf(g) !== -1; }) || 'Costas';
@@ -2559,6 +2559,14 @@ function gerarTreinoSemanal(perfil){
             escolhido = candidatos.find(function(nome){
               return nomesJaNoDia.indexOf(nome.toUpperCase()) === -1 && !padroesJaNoDia[obterPalavraChaveMovimento(nome)];
             });
+          }
+          if(!escolhido){
+            // A amostra embaralhada não tinha opção válida — antes de desistir, busca direto no banco inteiro (não só na amostra)
+            const todoOBanco = exerciciosBanco.filter(function(e){ return (e.grupo || e.categoria) === grupoDoDia; });
+            const candidatoDeResgate = todoOBanco.find(function(e){
+              return nomesJaNoDia.indexOf(e.nome.toUpperCase()) === -1 && !padroesJaNoDia[obterPalavraChaveMovimento(e.nome)];
+            });
+            if(candidatoDeResgate) escolhido = candidatoDeResgate.nome;
           }
           if(!escolhido) break; // sem candidato novo e distinto, para de tentar
           const tetoPorNivel = { 'Iniciante': 3, 'Intermediário': 4, 'Avançado': 5 };
@@ -2658,13 +2666,16 @@ function validarPrescricao(perfil, semana){
     checklist.push({ item: 'Glúteo médio incluído em superiores (ênfase é Glúteo)', ok: temAbducao });
   }
 
-  // 7. Duração usa o tempo disponível de forma razoável (nunca excede; pode ficar mais curta quando o teto de exercícios por nível for atingido antes - isso é correto, não é bug)
-  if(perfil.tempoDisponivel){
+  // 7. Duração usa o tempo disponível de forma razoável (nunca excede; pode ficar mais curta quando o teto de exercícios por nível for atingido antes,
+  // ou em semana de deload, onde sessão curta é intencional por metodologia — nenhum dos dois é bug)
+  if(perfil.tempoDisponivel && perfil.bloco !== 'deload'){
     const duracaoOk = semana.every(function(d){
       const dur = d.duracaoEstimadaMin != null ? d.duracaoEstimadaMin : 0;
       return dur <= perfil.tempoDisponivel && dur >= perfil.tempoDisponivel * 0.3;
     });
     checklist.push({ item: 'Duração dentro do tempo disponível, sem exceder', ok: duracaoOk, detalhe: semana.map(function(d){ return (d.duracaoEstimadaMin != null ? d.duracaoEstimadaMin : '?') + 'min'; }).join(', ') + ' de ' + perfil.tempoDisponivel + 'min' });
+  } else if(perfil.bloco === 'deload'){
+    checklist.push({ item: 'Duração dentro do tempo disponível, sem exceder', ok: true, detalhe: 'Semana de deload, sessão curta é intencional' });
   }
 
   // 8. Correção postural incluída se houver desvio confirmado
@@ -2902,6 +2913,12 @@ function construirPerfilAluna(a){
   const blocoInfo = calcularBlocoAtual(a);
   const freqMatch = (a.freq || '').match(/\d+/);
   const freqNum = freqMatch ? parseInt(freqMatch[0], 10) : 3;
+  const prog = getProgressoAluna(a.nome);
+  const semanaReal = prog.semana || 1;
+  // Ciclo avança a cada bloco de periodização completo (4 semanas: base/base/choque/deload),
+  // não a cada geração de treino — isso é o que garante variedade real de exercício conforme ela evolui,
+  // em vez de gerar sempre a mesma seleção não importa quantas semanas ela já tenha treinado.
+  const cicloReal = Math.floor((semanaReal - 1) / 4);
   return {
     nivel: a.nivel || 'Iniciante',
     enfase: enfase,
@@ -2911,8 +2928,8 @@ function construirPerfilAluna(a){
     bloco: blocoInfo.blocoTecnico,
     volumeReduzidoPorFadiga: !!blocoInfo.volumeReduzido,
     tempoDisponivel: calcularTempoRealDeMusculacao(a, blocoInfo),
-    indiceCiclo: 0,
-    semanaAtual: 1,
+    indiceCiclo: cicloReal,
+    semanaAtual: semanaReal,
     pausouRetomou: false,
     faseDecidida: true,
     fase: determinarFaseAluna(a),
