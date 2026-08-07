@@ -281,6 +281,7 @@
 <div class="phone">
   <div class="notch"></div>
   <div class="screen">
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-08-05-A</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -5554,15 +5555,28 @@ let sessaoUsuarioAtual = null; // guarda o usuário logado de verdade (Supabase 
 let NOME_ALUNA_LOGADA = 'Andriele Caroline Rubert'; // padrão pra testes locais; some real, vira dinâmico após login de verdade
 
 async function restaurarSessaoAtiva(){
-  if(!supabaseClient) return;
-  try {
-    const { data: sessaoData } = await supabaseClient.auth.getSession();
-    const sessao = sessaoData ? sessaoData.session : null;
-    if(!sessao || !sessao.user) return; // sem sessão salva, mostra a tela de login normal
+  function mostrarDiagnostico(texto, ehErro){
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;top:14px;left:8px;right:8px;background:' + (ehErro ? '#3a1a1a' : '#1a2a3a') + ';color:' + (ehErro ? '#E2A33D' : '#9ec5e8') + ';padding:8px;border-radius:8px;font-size:10px;text-align:center;z-index:999998;';
+    el.textContent = '[Sessão] ' + texto;
+    document.body.appendChild(el);
+    setTimeout(function(){ el.remove(); }, 9000);
+  }
 
+  if(!supabaseClient){ mostrarDiagnostico('supabaseClient não existe (CDN não carregou).', true); return; }
+  try {
+    const { data: sessaoData, error: erroSessao } = await supabaseClient.auth.getSession();
+    if(erroSessao){ mostrarDiagnostico('Erro ao buscar sessão: ' + erroSessao.message, true); return; }
+    const sessao = sessaoData ? sessaoData.session : null;
+    if(!sessao || !sessao.user){ mostrarDiagnostico('Nenhuma sessão salva encontrada (normal se for primeiro acesso ou já saiu antes).', false); return; }
+
+    mostrarDiagnostico('Sessão encontrada, usuário: ' + sessao.user.email, false);
     sessaoUsuarioAtual = sessao.user;
-    const { data: perfilRow } = await supabaseClient.from('perfis').select('tipo, nome').eq('id', sessao.user.id).maybeSingle();
-    if(!perfilRow) return;
+    const { data: perfilRow, error: erroPerfil } = await supabaseClient.from('perfis').select('tipo, nome').eq('id', sessao.user.id).maybeSingle();
+    if(erroPerfil){ mostrarDiagnostico('Erro ao buscar perfil: ' + erroPerfil.message, true); return; }
+    if(!perfilRow){ mostrarDiagnostico('Sessão existe, mas não achou linha em "perfis" pra esse usuário.', true); return; }
+
+    mostrarDiagnostico('Perfil encontrado: tipo=' + perfilRow.tipo + ', nome=' + perfilRow.nome, false);
 
     if(perfilRow.tipo === 'personal'){
       sessaoTipo = 'personal';
@@ -5601,10 +5615,11 @@ async function restaurarSessaoAtiva(){
       const cardPersonal = document.getElementById('card-personal-launcher');
       if(cardPersonal) cardPersonal.style.display = 'none';
       await carregarELigarTreinoDaAluna(sessao.user.id);
+      mostrarDiagnostico('Restaurada com sucesso, indo pra tela dela.', false);
       setActive('launcher');
     }
   } catch(erroDeRede){
-    console.warn('Sem conexão pra restaurar sessão agora, mostrando tela de login:', erroDeRede);
+    mostrarDiagnostico('Erro de conexão: ' + erroDeRede.message, true);
   }
 }
 restaurarSessaoAtiva();
