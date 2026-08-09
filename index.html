@@ -190,6 +190,11 @@
   .vcover .lock-icon i{font-size:13px;color:var(--gold-soft);}
   .vtitle{font-size:12px;font-weight:600;text-align:center;margin:0;line-height:1.3;color:var(--text);}
 
+  .ferramenta-compacta{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:border-color .2s ease;}
+  .ferramenta-compacta:hover{border-color:var(--border-strong);}
+  .ferramenta-compacta i{font-size:20px;color:var(--gold-soft);}
+  .ferramenta-compacta p{font-size:11px;font-weight:600;text-align:center;margin:0;line-height:1.25;color:var(--text);}
+
   /* PERSONAL */
   .avatar.dark.admin i{color:var(--text-dim);}
   .alert-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px;}
@@ -4254,12 +4259,11 @@ function renderFerramentasPersonal(){
   const grid = document.getElementById('grid-ferramentas-personal');
   if(!grid || grid.dataset.rendered) return;
   grid.dataset.rendered = 'true';
+  grid.style.gridTemplateColumns = '1fr 1fr 1fr';
   ferramentasPersonal.forEach(function(f){
     const el = document.createElement('div');
-    el.className = 'vposter';
-    el.innerHTML =
-      '<div class="vcover"><i class="ti ' + f.icone + '" style="font-size:30px;"></i></div>' +
-      '<p class="vtitle">' + f.titulo + '</p>';
+    el.className = 'ferramenta-compacta';
+    el.innerHTML = '<i class="ti ' + f.icone + '"></i><p>' + f.titulo + '</p>';
     el.onclick = function(){ showPersonalView(f.view); };
     grid.appendChild(el);
   });
@@ -5346,12 +5350,6 @@ async function loginAluna(){
     return;
   }
 
-  // Acesso de teste garantido: nunca toca na rede, sempre funciona, pra você conseguir ver o app sem depender de conexão
-  if(email === 'andrielecarolinerubert@gmail.com' && senha === 'teste123'){
-    entrarLocalPorEmail(email);
-    return;
-  }
-
   if(!supabaseClient){
     entrarLocalPorEmail(email);
     return;
@@ -5451,6 +5449,7 @@ async function loginAluna(){
 }
 
 function entrarLocalPorEmail(email){
+  if(supabaseClient) supabaseClient.auth.signOut().catch(function(){});
   const encontrada = alunasPersonal.find(function(a){ return (a.email || '').toLowerCase() === email; });
   NOME_ALUNA_LOGADA = encontrada ? encontrada.nome : NOME_ALUNA_LOGADA;
   if(encontrada && encontrada.treinoAtual && encontrada.treinoAtual.dias){
@@ -5746,6 +5745,7 @@ async function loginPersonal(){
 function setActive(name){
   document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
   document.querySelector('[data-view="' + name + '"]').classList.add('active');
+  try { localStorage.setItem('musaUltimaTela', JSON.stringify({ view: name, detailDia: (name === 'detail' ? detailDiaAtual : null) })); } catch(e){}
 }
 
 function openLevel2(which){
@@ -5833,7 +5833,21 @@ async function restaurarSessaoAtiva(){
       if(cardPersonal) cardPersonal.style.display = 'none';
       await carregarELigarTreinoDaAluna(sessao.user.id);
       mostrarDiagnostico('Restaurada com sucesso, indo pra tela dela.', false);
-      setActive('launcher');
+
+      // Volta exatamente pra tela que ela estava, não sempre pro launcher
+      let telaSalva = null;
+      try { telaSalva = JSON.parse(localStorage.getItem('musaUltimaTela') || 'null'); } catch(e){}
+      const telasValidasParaAluna = ['home', 'launcher', 'dados', 'mentoria', 'chatia', 'detail'];
+      if(telaSalva && telasValidasParaAluna.indexOf(telaSalva.view) !== -1){
+        openLevel2('home'); // garante dados/dias carregados antes de qualquer tela específica
+        if(telaSalva.view === 'detail' && telaSalva.detailDia != null && dias[telaSalva.detailDia]){
+          openDetail('dia', telaSalva.detailDia);
+        } else if(telaSalva.view !== 'home'){
+          setActive(telaSalva.view);
+        }
+      } else {
+        setActive('launcher');
+      }
     }
   } catch(erroDeRede){
     mostrarDiagnostico('Erro de conexão: ' + erroDeRede.message, true);
