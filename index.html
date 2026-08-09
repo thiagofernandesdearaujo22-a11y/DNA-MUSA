@@ -5783,6 +5783,10 @@ async function restaurarSessaoAtiva(){
     const sessao = sessaoData ? sessaoData.session : null;
     if(!sessao || !sessao.user){ mostrarDiagnostico('Nenhuma sessão salva encontrada (normal se for primeiro acesso ou já saiu antes).', false); return; }
 
+    // Verificação rígida extra: exige token de acesso real e não expirado, não confia só no objeto de sessão existir
+    if(!sessao.access_token){ mostrarDiagnostico('Sessão sem token de acesso válido, ignorando.', false); return; }
+    if(sessao.expires_at && (sessao.expires_at * 1000) < Date.now()){ mostrarDiagnostico('Sessão salva já expirou, ignorando.', false); return; }
+
     mostrarDiagnostico('Sessão encontrada, usuário: ' + sessao.user.email, false);
     sessaoUsuarioAtual = sessao.user;
     const { data: perfilRow, error: erroPerfil } = await supabaseClient.from('perfis').select('tipo, nome').eq('id', sessao.user.id).maybeSingle();
