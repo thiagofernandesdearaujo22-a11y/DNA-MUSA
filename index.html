@@ -4272,7 +4272,7 @@ function renderFerramentasPersonal(){
 async function sincronizarListaAlunasDoSupabase(){
   if(!supabaseClient) return { novas: 0, erro: 'sem conexão' };
   try {
-    const { data: linhas, error } = await supabaseClient.from('alunas').select('*');
+    const { data: linhas, error } = await supabaseClient.from('alunas').select('nome,email,telefone,nivel,freq,piramide,objetivo,restricoes,academia,idade,data_anamnese,auth_id,senha_gerada,dados_extras,treino_atual_backup');
     if(error) return { novas: 0, erro: error.message };
     if(!linhas || linhas.length === 0) return { novas: 0, erro: 'busca retornou vazio (pode ser bloqueio de permissão do banco, não deveria estar vazio)' };
 
@@ -5315,21 +5315,7 @@ function aplicarTransicaoSuave(elId){
 /* ===== LOGIN ===== */
 const EMAIL_PERSONAL = 'thiagofernandesdearaujo22@gmail.com';
 const SENHA_PERSONAL = 'Senhanova22-'; // ⚠️ exposta em texto puro nesse protótipo, troque antes de liberar pra alunas reais
-const ALUNAS_CADASTRADAS_PADRAO = {
-  'andriele@teste.com': 'teste123'
-};
 let sessaoTipo = null; // 'aluna' | 'personal'
-
-function carregarAlunasCadastradas(){
-  try {
-    const raw = localStorage.getItem('musa_alunas_cadastradas');
-    const salvas = raw ? JSON.parse(raw) : {};
-    return Object.assign({}, ALUNAS_CADASTRADAS_PADRAO, salvas);
-  } catch(e){ return Object.assign({}, ALUNAS_CADASTRADAS_PADRAO); }
-}
-function salvarAlunasCadastradas(dados){
-  try { localStorage.setItem('musa_alunas_cadastradas', JSON.stringify(dados)); } catch(e){}
-}
 
 function alternarTipoLogin(tipo){
   document.getElementById('login-tab-aluna').className = 'chip' + (tipo === 'aluna' ? ' active' : '');
