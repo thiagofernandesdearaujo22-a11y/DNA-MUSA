@@ -3066,8 +3066,47 @@ function mostrarPreviewMudancaTreino(nomeAluna){
     '<button class="btn-gold" onclick="confirmarGerarTreinoPreview()">Confirmar e gerar esse novo treino</button>';
 }
 
+function mostrarAvisoSessaoInvalida(){
+  if(document.getElementById('overlay-sessao-invalida')) return; // já está mostrando, não duplica
+  const overlay = document.createElement('div');
+  overlay.id = 'overlay-sessao-invalida';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;';
+  overlay.innerHTML =
+    '<p style="font-size:17px;font-weight:700;color:#E2A33D;margin-bottom:10px;">Sua sessão não está mais válida</p>' +
+    '<p style="font-size:13px;color:#ccc;max-width:320px;margin-bottom:20px;">Por isso o último ajuste não foi salvo de verdade no banco. Precisa entrar de novo pra continuar editando com segurança.</p>' +
+    '<button class="btn-gold" style="width:auto;padding:12px 28px;" onclick="document.getElementById(\'overlay-sessao-invalida\').remove(); reautenticarComoPersonal();">Entrar de novo</button>';
+  document.body.appendChild(overlay);
+}
+
+async function reautenticarComoPersonal(){
+  document.getElementById('login-personal-email').value = EMAIL_PERSONAL;
+  document.getElementById('login-personal-senha').value = SENHA_PERSONAL;
+  await loginPersonal();
+}
+
+async function garantirSessaoValida(){
+  if(!supabaseClient) return false;
+  try {
+    const { data: sessaoData } = await supabaseClient.auth.getSession();
+    const sessao = sessaoData ? sessaoData.session : null;
+    if(!sessao || !sessao.user){ mostrarAvisoSessaoInvalida(); return false; }
+
+    // Não basta ter sessão — precisa bater como "personal" de verdade na tabela perfis, senão o RLS bloqueia mesmo com sessão válida
+    const { data: perfilRow, error: erroPerfil } = await supabaseClient.from('perfis').select('tipo').eq('id', sessao.user.id).maybeSingle();
+    if(erroPerfil || !perfilRow || perfilRow.tipo !== 'personal'){
+      mostrarAvisoSessaoInvalida();
+      return false;
+    }
+    return true;
+  } catch(erroDeRede){
+    mostrarAvisoSessaoInvalida();
+    return false;
+  }
+}
+
 async function sincronizarTreinoComSupabase(a){
   if(!supabaseClient){ mostrarConfirmacaoSalvamento(false, 'Sem conexão com o Supabase agora.'); return; }
+  if(!(await garantirSessaoValida())){ mostrarConfirmacaoSalvamento(false, 'Sessão inválida — o ajuste não foi salvo. Entra de novo.'); return; }
   if(!a.email){ mostrarConfirmacaoSalvamento(false, 'Essa aluna não tem e-mail cadastrado, não dá pra salvar no banco.'); return; }
   try {
     const { data: alunaRow, error: erroBusca } = await supabaseClient.from('alunas').select('auth_id').eq('email', a.email).maybeSingle();
