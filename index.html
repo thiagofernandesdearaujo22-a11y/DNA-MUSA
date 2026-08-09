@@ -4116,7 +4116,16 @@ async function criarLoginParaAluna(nomeAluna){
     const { data, error } = await clienteTemp.auth.signUp({ email: a.email, password: senha });
 
     if(error){
-      areaResultado.innerHTML = '<div class="info-box"><p class="txt" style="color:#E2A33D;">' + (error.message.indexOf('already registered') !== -1 ? 'Já existe uma conta com esse e-mail. Ela já pode logar direto.' : error.message) + '</p></div>';
+      if(error.message.indexOf('already registered') !== -1){
+        const { data: alunaRow } = await supabaseClient.from('alunas').select('email,senha_gerada,auth_id').eq('email', a.email).maybeSingle();
+        if(alunaRow && alunaRow.senha_gerada){
+          areaResultado.innerHTML = '<div class="info-box"><p class="lbl" style="color:var(--success);">✓ Ela já tem acesso criado</p><p class="txt">' + alunaRow.email + '<br>' + alunaRow.senha_gerada + '</p></div>';
+        } else {
+          areaResultado.innerHTML = '<div class="info-box"><p class="txt" style="color:#E2A33D;">Já existe conta com esse e-mail, mas não achei a senha salva pra mostrar (foi criada de outro jeito, antes desse recurso existir). Ela precisa redefinir a senha pra conseguir entrar.</p></div>';
+        }
+      } else {
+        areaResultado.innerHTML = '<div class="info-box"><p class="txt" style="color:#E2A33D;">' + error.message + '</p></div>';
+      }
       return;
     }
 
@@ -4272,7 +4281,7 @@ function renderFerramentasPersonal(){
 async function sincronizarListaAlunasDoSupabase(){
   if(!supabaseClient) return { novas: 0, erro: 'sem conexão' };
   try {
-    const { data: linhas, error } = await supabaseClient.from('alunas').select('nome,email,telefone,nivel,freq,piramide,objetivo,restricoes,academia,idade,data_anamnese,auth_id,senha_gerada,dados_extras,treino_atual_backup');
+    const { data: linhas, error } = await supabaseClient.from('alunas').select('*');
     if(error) return { novas: 0, erro: error.message };
     if(!linhas || linhas.length === 0) return { novas: 0, erro: 'busca retornou vazio (pode ser bloqueio de permissão do banco, não deveria estar vazio)' };
 
