@@ -2347,6 +2347,30 @@ function obterPalavraChaveMovimento(nomeExercicio){
   return upper.split(' ')[0]; // fallback: primeira palavra do nome
 }
 
+// ===== MOTOR 5: FAMÍLIA BIOMECÂNICA =====
+// Agrupa exercícios pelo padrão de movimento dominante (não só pela palavra no nome).
+// Ex: Hip Thrust, Glúteo 4 Apoios, Ponte de Glúteo e Coice são todos "extensão de quadril isolada" — mesma família.
+const familiasBiomecanicas = {
+  dobradica_de_quadril: ['STIFF', 'TERRA', 'BOM DIA'],
+  agachamento: ['AGACHAMENTO', 'LEG PRESS', 'HACK'],
+  unilateral_avanco: ['AFUNDO', 'PASSADA', 'BULGARO'],
+  extensao_quadril_isolada: ['GLÚTEO', 'PONTE', 'COICE', 'ELEVAÇÃO PÉLVICA', 'HIP THRUST'],
+  joelho_isolado: ['CADEIRA', 'EXTENSÃO', 'FLEXÃO'],
+  abducao_adducao: ['ABDUÇÃO', 'ADUÇÃO']
+};
+
+function obterFamiliaBiomecanica(nomeExercicio){
+  const upper = nomeExercicio.toUpperCase();
+  const familias = Object.keys(familiasBiomecanicas);
+  for(let i = 0; i < familias.length; i++){
+    const palavras = familiasBiomecanicas[familias[i]];
+    for(let j = 0; j < palavras.length; j++){
+      if(upper.indexOf(palavras[j]) !== -1) return familias[i];
+    }
+  }
+  return null; // sem família conhecida (ex: exercícios de superiores) — cai pra agrupamento por grupo muscular só
+}
+
 function selecionarExerciciosVariados(grupoInterno, nomeAluna, quantidade, indiceCiclo, padroesJaUsados){
   const pool = obterPoolRealDoGrupo(grupoInterno);
   if(pool.length === 0) return null;
@@ -2473,7 +2497,8 @@ function gerarTreinoSemanal(perfil){
   const numSuperiores = perfil.frequencia - numInferiores;
 
   const seriesTotais = calcularTetoVolume(perfil.nivel, perfil.semanaAtual || 1, !!perfil.pausouRetomou).teto *
-    (perfil.bloco === 'deload' ? 0.5 : (perfil.bloco === 'choque' ? 0.82 : (perfil.volumeReduzidoPorFadiga ? 0.85 : 1)));
+    (perfil.bloco === 'deload' ? 0.5 : (perfil.bloco === 'choque' ? 0.82 : (perfil.volumeReduzidoPorFadiga ? 0.85 : 1))) *
+    (perfil.estrategiaVolumeMultiplicador || 1);
 
   const diasInf = gerarDiasInferiores(perfil, numInferiores, seriesTotais);
   const diasSup = gerarDiasSuperiores(perfil, numSuperiores);
@@ -2846,6 +2871,43 @@ function baixarFeedbackGerador(){
   URL.revokeObjectURL(url);
 }
 
+// ===== MOTOR 2: CLASSIFICAÇÃO AUTOMÁTICA =====
+// Agrega tudo que já calculávamos separado (teto de volume, fadiga, idade, técnica) num diagnóstico único,
+// que alimenta os motores seguintes (Periodização, Estratégia, Métodos).
+function classificarAluna(a){
+  const prog = getProgressoAluna(a.nome);
+  const fadiga = avaliarSinaisDeFadiga(a);
+  const ajusteIdade = ajusteRecuperacaoPorIdade(a.idade || null);
+  const tecnicasAprovadas = a.tecnicaAprovada ? Object.keys(a.tecnicaAprovada).filter(function(k){ return a.tecnicaAprovada[k] === 'aprovado'; }).length : 0;
+  const stats = calcularEstatisticasAluna(a.nome);
+  const piramideInfo = extrairEnfaseSecundaria(a.piramide);
+  const freqMatch = (a.freq || '').match(/\d+/);
+  const freqDesejada = freqMatch ? parseInt(freqMatch[0], 10) : 3;
+
+  let capacidadeRecuperacao = 'normal';
+  if(ajusteIdade.ajuste < 0 || fadiga.nivel === 'alto') capacidadeRecuperacao = 'reduzida';
+  else if(fadiga.nivel === 'baixo' && prog.semana > 4) capacidadeRecuperacao = 'boa';
+
+  let experienciaTecnica = 'iniciante';
+  if(a.nivel === 'Avançado' || tecnicasAprovadas >= 3) experienciaTecnica = 'avançada';
+  else if(a.nivel === 'Intermediário' || tecnicasAprovadas >= 1) experienciaTecnica = 'intermediária';
+
+  const frequenciaIdeal = capacidadeRecuperacao === 'reduzida' ? Math.max(2, freqDesejada - 1) : freqDesejada;
+
+  return {
+    nivel: a.nivel || 'Iniciante',
+    volumeToleradoSeries: calcularTetoVolume(a.nivel || 'Iniciante', prog.semana, false).teto,
+    capacidadeRecuperacao: capacidadeRecuperacao,
+    experienciaTecnica: experienciaTecnica,
+    frequenciaDesejada: freqDesejada,
+    frequenciaIdeal: frequenciaIdeal,
+    grupoPrioritario: piramideInfo.enfase,
+    grupoSecundario: piramideInfo.secundario,
+    fadiga: fadiga,
+    constanciaPct: stats.temDados ? Math.round((stats.totalConcluidos / stats.totalPlanejado) * 100) : null
+  };
+}
+
 function determinarFaseAluna(a){
   if(a.pesoAtual && a.altura){
     const imc = a.pesoAtual / (a.altura * a.altura);
@@ -2920,6 +2982,7 @@ function construirPerfilAluna(a){
   // não a cada geração de treino — isso é o que garante variedade real de exercício conforme ela evolui,
   // em vez de gerar sempre a mesma seleção não importa quantas semanas ela já tenha treinado.
   const cicloReal = Math.floor((semanaReal - 1) / 4);
+  const estrategia = definirEstrategiaAtual(a);
   return {
     nivel: a.nivel || 'Iniciante',
     enfase: enfase,
@@ -2931,10 +2994,13 @@ function construirPerfilAluna(a){
     tempoDisponivel: calcularTempoRealDeMusculacao(a, blocoInfo),
     indiceCiclo: cicloReal,
     semanaAtual: semanaReal,
-    pausouRetomou: false,
+    pausouRetomou: estrategia.nome === 'Retorno pós-pausa',
     faseDecidida: true,
     fase: determinarFaseAluna(a),
-    temTecnicaAprovada: temTecnicaAprovada(a)
+    temTecnicaAprovada: temTecnicaAprovada(a),
+    estrategiaAtual: estrategia.nome,
+    estrategiaMotivo: estrategia.motivo,
+    estrategiaVolumeMultiplicador: estrategia.volumeMultiplicador
   };
 }
 
@@ -3001,19 +3067,25 @@ function mostrarPreviewMudancaTreino(nomeAluna){
 }
 
 async function sincronizarTreinoComSupabase(a){
-  if(!supabaseClient) return;
-  if(!a.email) return; // sem e-mail cadastrado, não tem como achar a conta dela no Supabase
+  if(!supabaseClient){ mostrarConfirmacaoSalvamento(false, 'Sem conexão com o Supabase agora.'); return; }
+  if(!a.email){ mostrarConfirmacaoSalvamento(false, 'Essa aluna não tem e-mail cadastrado, não dá pra salvar no banco.'); return; }
   try {
-    const { data: alunaRow } = await supabaseClient.from('alunas').select('auth_id').eq('email', a.email).maybeSingle();
-    if(alunaRow && alunaRow.auth_id){
+    const { data: alunaRow, error: erroBusca } = await supabaseClient.from('alunas').select('auth_id').eq('email', a.email).maybeSingle();
+    if(erroBusca){ mostrarConfirmacaoSalvamento(false, 'Erro ao buscar aluna no banco: ' + erroBusca.message); return; }
+    if(!alunaRow){ mostrarConfirmacaoSalvamento(false, 'Não achei essa aluna na tabela "alunas" pelo e-mail ' + a.email + '.'); return; }
+
+    if(alunaRow.auth_id){
       // Ela já tem login: salva no lugar "oficial" (tabela treinos), que é o que o app dela lê ao entrar
       await salvarTreinoNoSupabase(alunaRow.auth_id, a.treinoAtual);
+    } else {
+      // Sempre salva também aqui, pelo e-mail, com ou sem login — assim o treino nunca se perde,
+      // mesmo que você feche o app antes de gerar o acesso dela
+      const { error: erroBackup } = await supabaseClient.from('alunas').update({ treino_atual_backup: a.treinoAtual }).eq('email', a.email);
+      if(erroBackup){ mostrarConfirmacaoSalvamento(false, 'Erro ao salvar backup: ' + erroBackup.message); return; }
+      mostrarConfirmacaoSalvamento(true, 'Salvo no backup (ela ainda não tem login criado).');
     }
-    // Sempre salva também aqui, pelo e-mail, com ou sem login — assim o treino nunca se perde,
-    // mesmo que você feche o app antes de gerar o acesso dela
-    await supabaseClient.from('alunas').update({ treino_atual_backup: a.treinoAtual }).eq('email', a.email);
   } catch(erroDeRede){
-    console.warn('Sem conexão com o Supabase agora, o treino ficou salvo só localmente por enquanto:', erroDeRede);
+    mostrarConfirmacaoSalvamento(false, 'Erro de conexão: ' + erroDeRede.message);
   }
 }
 
@@ -3236,17 +3308,58 @@ function abrirSubstituicao(diaIndex, exIndex){
   const a = alunaAberta;
   const linhaAtual = a.treinoAtual.dias[diaIndex].ex[exIndex];
   const nomeAtual = linhaAtual.split(' · ')[0];
+
+  // Regra: antes de oferecer troca, checa se ainda existe espaço pra progressão de carga nesse exercício
+  const prog = getProgressoAluna(a.nome);
+  const historicoDoExercicio = prog.historico[nomeAtual];
+  const ultimoRegistro = historicoDoExercicio && historicoDoExercicio.length ? historicoDoExercicio[historicoDoExercicio.length - 1] : null;
+  const aindaProgredindo = ultimoRegistro && ultimoRegistro.sugestao && ultimoRegistro.sugestao.texto === 'Aumentar carga';
+
+  if(aindaProgredindo){
+    container.innerHTML = '<div class="info-box" style="margin:8px 0;">' +
+      '<p class="txt" style="color:var(--gold-soft);font-weight:600;margin-bottom:4px;">Ainda tem espaço pra evoluir nesse exercício</p>' +
+      '<p class="txt" style="font-size:11px;">Na última sessão registrada, ela conseguiu aumentar a carga. Trocar agora interromperia essa progressão sem necessidade.</p>' +
+      '<p style="font-size:11px;color:var(--gold-soft);margin-top:8px;cursor:pointer;" onclick="mostrarOpcoesDeTrocaMesmoAssim(' + diaIndex + ',' + exIndex + ')">Trocar mesmo assim (por outro motivo técnico/clínico)</p>' +
+      '</div>';
+    container.style.display = 'block';
+    return;
+  }
+
+  mostrarOpcoesDeTrocaMesmoAssim(diaIndex, exIndex);
+}
+
+function mostrarOpcoesDeTrocaMesmoAssim(diaIndex, exIndex){
+  const container = document.getElementById('sub-picker-' + diaIndex + '-' + exIndex);
+  const a = alunaAberta;
+  const linhaAtual = a.treinoAtual.dias[diaIndex].ex[exIndex];
+  const nomeAtual = linhaAtual.split(' · ')[0];
   const exAtualBanco = exerciciosBanco.find(function(e){ return e.nome.toUpperCase() === nomeAtual.toUpperCase(); });
   const grupo = exAtualBanco ? (exAtualBanco.grupo || exAtualBanco.categoria) : null;
-  const opcoes = exerciciosBanco.filter(function(e){
+  const familiaAtual = obterFamiliaBiomecanica(nomeAtual);
+
+  let opcoes = exerciciosBanco.filter(function(e){
     const grupoDoEx = e.grupo || e.categoria;
     return (!grupo || grupoDoEx === grupo) && e.nome.toUpperCase() !== nomeAtual.toUpperCase();
-  }).slice(0, 12); // limita pra não ficar gigante, já são exercícios do mesmo grupo muscular
+  });
+
+  // Motor 5: prioriza mesma família biomecânica primeiro (troca com justificativa funcional, não aleatória)
+  opcoes.sort(function(x, y){
+    const xMesmaFamilia = familiaAtual && obterFamiliaBiomecanica(x.nome) === familiaAtual;
+    const yMesmaFamilia = familiaAtual && obterFamiliaBiomecanica(y.nome) === familiaAtual;
+    if(xMesmaFamilia && !yMesmaFamilia) return -1;
+    if(!xMesmaFamilia && yMesmaFamilia) return 1;
+    return 0;
+  });
+  opcoes = opcoes.slice(0, 12);
 
   container.innerHTML = '<p style="font-size:11px;color:var(--text-faint);margin:8px 0 4px;">Trocar "' + nomeAtual + '" por:</p>' +
     '<div style="display:flex;flex-direction:column;gap:5px;">' +
     opcoes.map(function(e){
-      return '<div style="background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;font-size:12px;" onclick="confirmarSubstituicao(' + diaIndex + ',' + exIndex + ',\'' + e.nome.replace(/'/g,"\\'") + '\')">' + e.nome + '</div>';
+      const mesmaFamilia = familiaAtual && obterFamiliaBiomecanica(e.nome) === familiaAtual;
+      return '<div style="background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;font-size:12px;display:flex;justify-content:space-between;align-items:center;" onclick="confirmarSubstituicao(' + diaIndex + ',' + exIndex + ',\'' + e.nome.replace(/'/g,"\\'") + '\')">' +
+        '<span>' + e.nome + '</span>' +
+        (mesmaFamilia ? '<span class="tag" style="background:var(--success-soft);color:var(--success);font-size:9px;">mesmo padrão</span>' : '') +
+      '</div>';
     }).join('') +
     '</div>';
   container.style.display = 'block';
@@ -3352,6 +3465,33 @@ const descricoesMetodo = {
   'Tri-set': 'Três exercícios seguidos sem descanso. Mais intenso que o bi-set, usar com cuidado no volume total do dia.',
   'Pirâmide crescente': 'Aumenta a carga e reduz as reps a cada série. Bom pra quem já tem técnica consolidada.'
 };
+
+// ===== MOTOR 6: MÉTODOS — decide automaticamente quais métodos fazem sentido oferecer agora =====
+// Nunca libera método avançado pra quem não tem base técnica/nível pra isso.
+function metodosPermitidosAgora(a){
+  const classificacao = classificarAluna(a);
+  const faseInfo = determinarFaseMacrociclo(a);
+
+  // Deload: nunca combina métodos, é semana de recuperação
+  if(faseInfo.blocoTecnico === 'deload') return ['Nenhum'];
+
+  // Recuperação comprometida: só o básico, não empilha mais fadiga
+  if(classificacao.capacidadeRecuperacao === 'reduzida') return ['Nenhum', 'Bi-set'];
+
+  if(classificacao.nivel === 'Iniciante' || classificacao.experienciaTecnica === 'iniciante'){
+    return ['Nenhum']; // iniciante foca em técnica e progressão de carga simples primeiro
+  }
+
+  if(classificacao.nivel === 'Intermediário'){
+    return ['Nenhum', 'Bi-set', 'Restpause'];
+  }
+
+  // Avançado: libera tudo, mas Cluster/Tri-set só fazem sentido de verdade no bloco de choque
+  if(faseInfo.blocoTecnico === 'choque'){
+    return ['Nenhum', 'Bi-set', 'Restpause', 'Dropset', 'Cluster set', 'Tri-set', 'Pirâmide crescente'];
+  }
+  return ['Nenhum', 'Bi-set', 'Restpause', 'Dropset', 'Pirâmide crescente'];
+}
 
 async function abrirTreinosArquivados(nomeAluna){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
@@ -3471,7 +3611,7 @@ function alternarMetodoExercicio(di, ei){
   const container = document.getElementById('metodo-picker-' + di + '-' + ei);
   if(!container) return;
   if(container.style.display === 'none' || !container.innerHTML){
-    const metodos = ['Nenhum','Restpause','Dropset','Cluster set','Bi-set','Tri-set','Pirâmide crescente'];
+    const metodos = metodosPermitidosAgora(alunaAberta);
     container.innerHTML = '<div style="display:flex;flex-direction:column;gap:6px;margin:8px 0;">' +
       metodos.map(function(m){
         return '<div style="background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;cursor:pointer;" onclick="aplicarMetodoExercicio(' + di + ',' + ei + ',\'' + m + '\')">' +
@@ -3557,7 +3697,16 @@ function openAlunaDetail(i){
         '<div id="dia-personal-expandido-' + di + '" style="display:none;padding:0 12px 12px;">' + renderConteudoDiaPersonal(a, di) + '</div></div>';
     });
   }
-  treinoAcoesHtml = '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:10px;" onclick="gerarTreinoAutomaticoParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-wand" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>' + (a.treinoAtual ? 'Gerar novo treino automaticamente' : 'Prescrever treino automaticamente') + '</button>';
+  const diagnostico = gerarDiagnosticoInterno(a);
+  treinoAcoesHtml = '<div class="info-box" style="margin-top:10px;">' +
+    '<p class="lbl">Diagnóstico antes de gerar</p>' +
+    '<p class="txt"><b>Estratégia agora:</b> ' + diagnostico.estrategiaAtual + '</p>' +
+    '<p class="txt" style="font-size:11px;color:var(--text-faint);">' + diagnostico.justificativaEstrategia + '</p>' +
+    '<p class="txt" style="margin-top:4px;"><b>Fase:</b> ' + diagnostico.faseAtual + '</p>' +
+    (diagnostico.pontosFortes.length ? '<p class="txt" style="font-size:11px;color:var(--success);margin-top:4px;">✓ ' + diagnostico.pontosFortes.join(' · ') + '</p>' : '') +
+    (diagnostico.gargalos.length ? '<p class="txt" style="font-size:11px;color:var(--gold-soft);margin-top:4px;">⚠ ' + diagnostico.gargalos.join(' · ') + '</p>' : '') +
+    '</div>';
+  treinoAcoesHtml += '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:10px;" onclick="gerarTreinoAutomaticoParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-wand" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>' + (a.treinoAtual ? 'Gerar novo treino automaticamente' : 'Prescrever treino automaticamente') + '</button>';
   treinoAcoesHtml += '<div id="validacao-treino-area"></div>';
   treinoAcoesHtml += '<p class="section-label" style="margin-top:18px;">Seu feedback sobre esse treino</p>' +
     '<p class="page-sub" style="margin-top:-4px;">Anote aqui o que achou estranho ou errado, isso fica guardado organizado pra você trazer numa próxima conversa e a gente transformar em regra permanente.</p>' +
@@ -5342,12 +5491,37 @@ function aplicarTreinoRecebidoDoSupabase(treinoRow){
 }
 
 async function salvarTreinoNoSupabase(alunaId, treinoAtual){
-  await supabaseClient.from('treinos').insert({
+  const { data: linhaInserida, error: erroInsert } = await supabaseClient.from('treinos').insert({
     aluna_id: alunaId,
     fase: treinoAtual.fase,
     volume: treinoAtual.volume,
     dias: treinoAtual.dias
-  });
+  }).select().single();
+
+  if(erroInsert){
+    mostrarConfirmacaoSalvamento(false, 'Erro ao salvar no banco: ' + erroInsert.message);
+    return { sucesso: false, erro: erroInsert.message };
+  }
+
+  // Lê de volta do banco (não da memória local) pra confirmar que o dado real gravado bate com o que foi enviado
+  const { data: leituraConfirmada, error: erroLeitura } = await supabaseClient.from('treinos').select('*').eq('id', linhaInserida.id).maybeSingle();
+  if(erroLeitura || !leituraConfirmada){
+    mostrarConfirmacaoSalvamento(false, 'Salvou, mas não consegui confirmar lendo de volta: ' + (erroLeitura ? erroLeitura.message : 'linha não encontrada'));
+    return { sucesso: false, erro: 'falha na confirmação' };
+  }
+
+  const qtdExerciciosSalvos = leituraConfirmada.dias.reduce(function(soma, d){ return soma + (d.ex ? d.ex.length : 0); }, 0);
+  mostrarConfirmacaoSalvamento(true, 'Confirmado no banco: ' + leituraConfirmada.dias.length + ' dias, ' + qtdExerciciosSalvos + ' exercícios, salvo às ' + new Date(leituraConfirmada.updated_at || Date.now()).toLocaleTimeString('pt-BR'));
+  return { sucesso: true, dados: leituraConfirmada };
+}
+
+function mostrarConfirmacaoSalvamento(sucesso, texto){
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;bottom:8px;left:8px;right:8px;padding:10px;border-radius:10px;font-size:11px;text-align:center;z-index:999999;' +
+    (sucesso ? 'background:#1a3a1a;color:#8FAE7D;' : 'background:#3a1a1a;color:#E2A33D;');
+  el.textContent = (sucesso ? '✓ ' : '✗ ') + texto;
+  document.body.appendChild(el);
+  setTimeout(function(){ el.remove(); }, 8000);
 }
 
 const timersSalvamentoProgresso = {};
@@ -6507,6 +6681,60 @@ function detectarExerciciosEstagnados(a){
   return estagnados;
 }
 
+// ===== MOTOR 8: INTELIGÊNCIA ADAPTATIVA — IRT (uso interno, nunca exibido pra aluna) =====
+// Responde: a estratégia atual continua sendo a melhor pra essa aluna?
+function calcularIRT(a){
+  const prog = getProgressoAluna(a.nome);
+  const stats = calcularEstatisticasAluna(a.nome);
+  const fadiga = avaliarSinaisDeFadiga(a);
+  let pontos = 50; // ponto de partida neutro
+
+  // Evolução de carga: cada progressão real puxa pra cima
+  if(stats.temDados) pontos += Math.min(20, stats.progressoes * 4);
+
+  // Aderência: constância puxa proporcionalmente
+  if(stats.temDados){
+    const pctConstancia = stats.totalConcluidos / stats.totalPlanejado;
+    pontos += Math.round((pctConstancia - 0.5) * 40); // 100% constância = +20, 0% = -20
+  }
+
+  // Fadiga acumulada: penaliza
+  if(fadiga.nivel === 'alto') pontos -= 25;
+  else if(fadiga.nivel === 'moderado') pontos -= 10;
+
+  // Regularidade de check-in nutricional, como proxy de engajamento geral
+  const semanasComCheckinNutricao = Object.keys(prog.nutricao || {}).length;
+  if(semanasComCheckinNutricao >= 3) pontos += 5;
+
+  return Math.max(0, Math.min(100, Math.round(pontos)));
+}
+
+function gerarDiagnosticoInterno(a){
+  const irt = calcularIRT(a);
+  const estrategia = definirEstrategiaAtual(a);
+  const classificacao = classificarAluna(a);
+  const faseInfo = determinarFaseMacrociclo(a);
+
+  const pontosFortes = [];
+  const gargalos = [];
+  if(classificacao.constanciaPct != null && classificacao.constanciaPct >= 70) pontosFortes.push('Boa constância (' + classificacao.constanciaPct + '%)');
+  if(classificacao.fadiga.nivel === 'baixo') pontosFortes.push('Sem sinais de fadiga acumulada');
+  if(classificacao.experienciaTecnica !== 'iniciante') pontosFortes.push('Já tem base técnica consolidada');
+  if(classificacao.constanciaPct != null && classificacao.constanciaPct < 60) gargalos.push('Constância abaixo do ideal (' + classificacao.constanciaPct + '%)');
+  if(classificacao.fadiga.nivel !== 'baixo') gargalos.push.apply(gargalos, classificacao.fadiga.motivos);
+
+  return {
+    irt: irt,
+    estrategiaAtual: estrategia.nome,
+    justificativaEstrategia: estrategia.motivo,
+    faseAtual: faseInfo.fase,
+    pontosFortes: pontosFortes,
+    gargalos: gargalos,
+    prioridadeMuscular: classificacao.grupoPrioritario,
+    resumo: 'IRT ' + irt + '/100 · Estratégia: ' + estrategia.nome + ' · Fase: ' + faseInfo.fase
+  };
+}
+
 function avaliarSinaisDeFadiga(a){
   const prog = getProgressoAluna(a.nome);
   const motivos = [];
@@ -6543,6 +6771,58 @@ function avaliarSinaisDeFadiga(a){
   return { nivel: 'baixo', motivos: [] };
 }
 
+// ===== MOTOR 7: ESTRATÉGIA — o cérebro central =====
+// Antes de montar qualquer treino, responde: qual é a melhor estratégia pra essa aluna agora?
+// Usa o que os Motores 2 (Classificação), 3 (Periodização) e a análise de fadiga/aderência já calculam.
+function definirEstrategiaAtual(a){
+  const classificacao = classificarAluna(a);
+  const faseInfo = determinarFaseMacrociclo(a);
+  const prog = getProgressoAluna(a.nome);
+  const objetivoLower = (a.objetivo || '').toLowerCase();
+
+  const semanasComDado = Object.keys(prog.diasConcluidos || {}).map(Number).sort(function(x,y){ return y-x; });
+  const semanaMaisRecente = semanasComDado[0];
+  const teveGapRecente = semanaMaisRecente != null && (prog.semana - semanaMaisRecente) >= 2;
+  if(teveGapRecente){
+    return {
+      nome: 'Retorno pós-pausa',
+      motivo: 'Ficou ' + (prog.semana - semanaMaisRecente) + ' semana(s) sem registro de treino.',
+      volumeMultiplicador: 0.7, intensidadeAlvo: 'baixa', prioridade: 'reconstruir consistência e técnica'
+    };
+  }
+
+  if(classificacao.fadiga.nivel === 'alto' || (classificacao.constanciaPct != null && classificacao.constanciaPct < 50)){
+    return {
+      nome: 'Manutenção',
+      motivo: classificacao.fadiga.nivel === 'alto' ? 'Sinais de fadiga acumulada: ' + classificacao.fadiga.motivos.join('; ') + '.' : 'Aderência abaixo de 50% recentemente.',
+      volumeMultiplicador: 0.85, intensidadeAlvo: 'moderada', prioridade: 'sustentar sem sobrecarregar'
+    };
+  }
+
+  const palavrasEmagrecimento = ['emagrec', 'definir', 'definição', 'perder peso', 'perdi peso', 'gordura', 'secar'];
+  if(palavrasEmagrecimento.some(function(p){ return objetivoLower.indexOf(p) !== -1; })){
+    return {
+      nome: 'Redução de gordura',
+      motivo: 'Objetivo relatado na anamnese inclui emagrecimento/definição.',
+      volumeMultiplicador: 1.0, intensidadeAlvo: 'moderada-alta', prioridade: 'densidade de treino, preservar massa magra'
+    };
+  }
+
+  if(classificacao.nivel === 'Avançado' && faseInfo.blocoTecnico !== 'deload' && classificacao.grupoPrioritario){
+    return {
+      nome: 'Especialização de ' + classificacao.grupoPrioritario,
+      motivo: 'Nível avançado, sem sinais de fadiga, com ênfase clara na anamnese.',
+      volumeMultiplicador: 1.15, intensidadeAlvo: 'alta', prioridade: 'volume extra no grupo prioritário'
+    };
+  }
+
+  return {
+    nome: 'Hipertrofia',
+    motivo: 'Estratégia padrão pro momento atual dela, sem sinal de precisar de ajuste especial.',
+    volumeMultiplicador: 1.0, intensidadeAlvo: 'moderada', prioridade: 'ganho de massa muscular geral'
+  };
+}
+
 function calcularBlocoAtual(a){
   if(a.nivel === 'Iniciante') return { bloco: 'Volume único (pirâmide de base)', descricao: 'Foco em progressão contínua de carga e técnica, sem alternância de blocos ainda.', blocoTecnico: 'base' };
   const fadiga = avaliarSinaisDeFadiga(a);
@@ -6562,6 +6842,31 @@ function calcularBlocoAtual(a){
     return { bloco: 'Bloco de Base (volume reduzido por fadiga)', descricao: 'Sinais moderados de fadiga: ' + fadiga.motivos.join('; ') + '. Volume ajustado pra baixo nessa semana.', blocoTecnico: 'base', volumeReduzido: true };
   }
   return { bloco: 'Bloco de Base', descricao: 'Volume alto, intensidade moderada (4-6 semanas), foco em capacidade de trabalho e hipertrofia.', blocoTecnico: 'base' };
+}
+
+// ===== MOTOR 3: PERIODIZAÇÃO — fases nomeadas do macrociclo =====
+// Não substitui calcularBlocoAtual (que já decide o volume/intensidade técnica corretamente).
+// Isso só adiciona a camada de nome de fase macro, como um treinador pensaria: Adaptação -> Base -> Especialização -> Deload.
+function determinarFaseMacrociclo(a){
+  const prog = getProgressoAluna(a.nome);
+  const blocoInfo = calcularBlocoAtual(a);
+
+  if(prog.semana <= 2){
+    return { fase: 'Adaptação', blocoTecnico: blocoInfo.blocoTecnico, descricao: 'Primeiras semanas: foco em aprendizado técnico e adaptação neuromuscular, volume controlado.', volumeReduzido: true };
+  }
+
+  const nomesPorBlocoTecnico = {
+    'base': 'Base de Hipertrofia',
+    'choque': 'Especialização / Intensificação',
+    'deload': 'Deload'
+  };
+
+  return {
+    fase: nomesPorBlocoTecnico[blocoInfo.blocoTecnico] || 'Base de Hipertrofia',
+    blocoTecnico: blocoInfo.blocoTecnico,
+    descricao: blocoInfo.descricao,
+    volumeReduzido: !!blocoInfo.volumeReduzido
+  };
 }
 
 /* ===== PROMOÇÃO DE NÍVEL (iniciante → intermediário) ===== */
