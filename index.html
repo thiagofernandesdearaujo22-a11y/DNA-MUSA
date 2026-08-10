@@ -3248,18 +3248,42 @@ function renderResumoMetodologiaAutomatica(a){
   const desvios = (a.desviosPosturaisConfirmados || []).length;
   const blocoInfo = calcularBlocoAtual(a);
 
-  return '<p class="section-label" style="margin-top:22px;">Pirâmide de prioridade</p>' +
-    '<div class="info-box"><p class="txt" style="font-weight:600;">' + (a.piramide || 'Não respondida') + '</p></div>' +
-    '<p class="section-label" style="margin-top:16px;">Nossa metodologia, agindo automaticamente</p>' +
-    '<div class="info-box">' +
-      '<p class="txt">✓ Ênfase interpretada da pirâmide: <b>' + enfaseDetectada + '</b> · Secundário: <b>' + secundarioDetectado + '</b></p>' +
-      '<p class="txt">✓ Nível: <b>' + (a.nivel || 'A definir') + '</b> · Frequência: <b>' + (a.freq || 'A definir') + '</b></p>' +
-      '<p class="txt">✓ Bloco atual: <b>' + blocoInfo.bloco + '</b></p>' +
-      (blocoInfo.blocoTecnico === 'deload' || blocoInfo.volumeReduzido ? '<p class="txt" style="color:#E2A33D;">⚠️ ' + blocoInfo.descricao + '</p>' : '') +
-      '<p class="txt">' + (dQuad !== 'nenhum' ? '✓ Direcionamento de quadríceps ativo: <b>' + dQuad + '</b>' : 'Sem direcionamento específico de quadríceps') + '</p>' +
-      '<p class="txt">' + (dGluteo !== 'nenhum' ? '✓ Direcionamento de glúteo ativo: <b>' + dGluteo + '</b>' : 'Sem direcionamento específico de glúteo') + '</p>' +
-      '<p class="txt" style="margin-bottom:0;">' + (desvios > 0 ? '✓ ' + desvios + ' desvio(s) postural(is) confirmado(s), bloco de correção será incluído' : 'Nenhum desvio postural confirmado ainda') + '</p>' +
-    '</div>';
+  return renderSecaoColapsavel('Pirâmide de prioridade', '<div class="info-box"><p class="txt" style="font-weight:600;">' + (a.piramide || 'Não respondida') + '</p></div>', 'piramide-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderSecaoColapsavel('Nossa metodologia, agindo automaticamente',
+      '<div class="info-box">' +
+        '<p class="txt">✓ Ênfase interpretada da pirâmide: <b>' + enfaseDetectada + '</b> · Secundário: <b>' + secundarioDetectado + '</b></p>' +
+        '<p class="txt">✓ Nível: <b>' + (a.nivel || 'A definir') + '</b> · Frequência: <b>' + (a.freq || 'A definir') + '</b></p>' +
+        '<p class="txt">✓ Bloco atual: <b>' + blocoInfo.bloco + '</b></p>' +
+        (blocoInfo.blocoTecnico === 'deload' || blocoInfo.volumeReduzido ? '<p class="txt" style="color:#E2A33D;">⚠️ ' + blocoInfo.descricao + '</p>' : '') +
+        '<p class="txt">' + (dQuad !== 'nenhum' ? '✓ Direcionamento de quadríceps ativo: <b>' + dQuad + '</b>' : 'Sem direcionamento específico de quadríceps') + '</p>' +
+        '<p class="txt">' + (dGluteo !== 'nenhum' ? '✓ Direcionamento de glúteo ativo: <b>' + dGluteo + '</b>' : 'Sem direcionamento específico de glúteo') + '</p>' +
+        '<p class="txt" style="margin-bottom:0;">' + (desvios > 0 ? '✓ ' + desvios + ' desvio(s) postural(is) confirmado(s), bloco de correção será incluído' : 'Nenhum desvio postural confirmado ainda') + '</p>' +
+      '</div>', 'metodologia-' + a.nome.replace(/[^a-zA-Z0-9]/g,''));
+}
+
+function mostrarDiagnosticoParaProgredir(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  const container = document.getElementById('diagnostico-progressao-area');
+  if(!container) return;
+  if(container.innerHTML){ container.innerHTML = ''; return; } // clique de novo fecha
+
+  const diagnostico = gerarDiagnosticoInterno(a);
+  const prog = getProgressoAluna(a.nome);
+  const stats = calcularEstatisticasAluna(a.nome);
+  const treinoAnteriorResumo = a.treinoAtual ? (a.treinoAtual.dias.length + ' dias, fase: ' + (a.treinoAtual.fase || 'não definida')) : 'sem treino anterior';
+
+  container.innerHTML = '<div class="info-box" style="margin-top:10px;">' +
+    '<p class="lbl">Diagnóstico do treino anterior, antes de progredir</p>' +
+    '<p class="txt"><b>Treino atual dela:</b> ' + treinoAnteriorResumo + '</p>' +
+    '<p class="txt"><b>Semana atual (DNA):</b> ' + prog.semana + ' · <b>Frequência real:</b> ' + (stats.temDados ? Math.round((stats.totalConcluidos/stats.totalPlanejado)*100) + '% de constância' : 'ainda sem dados suficientes') + '</p>' +
+    '<p class="txt" style="margin-top:4px;"><b>Estratégia agora:</b> ' + diagnostico.estrategiaAtual + '</p>' +
+    '<p class="txt" style="font-size:11px;color:var(--text-faint);">' + diagnostico.justificativaEstrategia + '</p>' +
+    '<p class="txt" style="margin-top:4px;"><b>Fase:</b> ' + diagnostico.faseAtual + '</p>' +
+    (diagnostico.pontosFortes.length ? '<p class="txt" style="font-size:11px;color:var(--success);margin-top:4px;">✓ ' + diagnostico.pontosFortes.join(' · ') + '</p>' : '') +
+    (diagnostico.gargalos.length ? '<p class="txt" style="font-size:11px;color:var(--gold-soft);margin-top:4px;">⚠ ' + diagnostico.gargalos.join(' · ') + '</p>' : '') +
+    '</div>' +
+    '<button class="btn-gold" style="margin-top:8px;" onclick="gerarTreinoAutomaticoParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Confirmar e progredir o treino</button>';
 }
 
 function gerarTreinoAutomaticoParaAluna(nomeAluna){
@@ -3742,15 +3766,19 @@ function openAlunaDetail(i){
     });
   }
   const diagnostico = gerarDiagnosticoInterno(a);
-  treinoAcoesHtml = '<div class="info-box" style="margin-top:10px;">' +
-    '<p class="lbl">Diagnóstico antes de gerar</p>' +
-    '<p class="txt"><b>Estratégia agora:</b> ' + diagnostico.estrategiaAtual + '</p>' +
-    '<p class="txt" style="font-size:11px;color:var(--text-faint);">' + diagnostico.justificativaEstrategia + '</p>' +
-    '<p class="txt" style="margin-top:4px;"><b>Fase:</b> ' + diagnostico.faseAtual + '</p>' +
-    (diagnostico.pontosFortes.length ? '<p class="txt" style="font-size:11px;color:var(--success);margin-top:4px;">✓ ' + diagnostico.pontosFortes.join(' · ') + '</p>' : '') +
-    (diagnostico.gargalos.length ? '<p class="txt" style="font-size:11px;color:var(--gold-soft);margin-top:4px;">⚠ ' + diagnostico.gargalos.join(' · ') + '</p>' : '') +
-    '</div>';
-  treinoAcoesHtml += '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:10px;" onclick="gerarTreinoAutomaticoParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-wand" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>' + (a.treinoAtual ? 'Gerar novo treino automaticamente' : 'Prescrever treino automaticamente') + '</button>';
+  const prog = getProgressoAluna(a.nome);
+  if(a.treinoAtual){
+    treinoAcoesHtml = '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:10px;" onclick="mostrarDiagnosticoParaProgredir(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-trending-up" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>Progredir treino</button>';
+    treinoAcoesHtml += '<div id="diagnostico-progressao-area"></div>';
+  } else {
+    treinoAcoesHtml = '<div class="info-box" style="margin-top:10px;">' +
+      '<p class="lbl">Diagnóstico antes de gerar</p>' +
+      '<p class="txt"><b>Estratégia agora:</b> ' + diagnostico.estrategiaAtual + '</p>' +
+      '<p class="txt" style="font-size:11px;color:var(--text-faint);">' + diagnostico.justificativaEstrategia + '</p>' +
+      '<p class="txt" style="margin-top:4px;"><b>Fase:</b> ' + diagnostico.faseAtual + '</p>' +
+      '</div>';
+    treinoAcoesHtml += '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:10px;" onclick="gerarTreinoAutomaticoParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-wand" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>Prescrever treino automaticamente</button>';
+  }
   treinoAcoesHtml += '<div id="validacao-treino-area"></div>';
   treinoAcoesHtml += '<p class="section-label" style="margin-top:18px;">Seu feedback sobre esse treino</p>' +
     '<p class="page-sub" style="margin-top:-4px;">Anote aqui o que achou estranho ou errado, isso fica guardado organizado pra você trazer numa próxima conversa e a gente transformar em regra permanente.</p>' +
@@ -3822,16 +3850,11 @@ function openAlunaDetail(i){
     (a.imc ? '<p class="section-label">Composição corporal</p><div class="info-box"><p class="txt">' + a.peso + ' · ' + a.altura + '<br>IMC ' + a.imc + '</p></div>' : '') +
     renderDirecionamentoTecnico(a) +
     renderAvaliacaoPostural(a) +
-    '<p class="section-label">Pirâmide de prioridade (resposta original)</p>' +
-    '<div class="info-box"><p class="txt">' + (a.piramide || 'Não respondida') + '</p></div>' +
-    '<p class="section-label">Objetivo com a consultoria</p>' +
-    '<div class="info-box"><p class="txt">' + (a.objetivo || 'Não informado') + '</p></div>' +
-    '<p class="section-label">Restrições / lesões relatadas</p>' +
-    '<div class="info-box"><p class="txt">' + a.restricoes + '</p></div>' +
-    queixaHtml +
-    '<p class="section-label">Academia</p>' +
-    '<div class="info-box"><p class="txt">' + (a.academia || 'Não informado') + '</p></div>' +
-    renderPlanoFechado(a) +
+    renderSecaoColapsavel('Pirâmide de prioridade (resposta original)', '<div class="info-box"><p class="txt">' + (a.piramide || 'Não respondida') + '</p></div>', 'piramideorig-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderSecaoColapsavel('Objetivo com a consultoria', '<div class="info-box"><p class="txt">' + (a.objetivo || 'Não informado') + '</p></div>', 'objetivo-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderSecaoColapsavel('Restrições / lesões relatadas', '<div class="info-box"><p class="txt">' + a.restricoes + '</p></div>' + queixaHtml, 'restricoes-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderSecaoColapsavel('Academia', '<div class="info-box"><p class="txt">' + (a.academia || 'Não informado') + '</p></div>', 'academia-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderSecaoColapsavel('Plano fechado', renderPlanoFechadoConteudo(a), 'planofechado-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     (objetivoSugereTabata(a) && !a.tabataSugestaoRespondida ? (
       '<div class="info-box" style="margin-bottom:12px;border-color:var(--border-strong);">' +
         '<p class="lbl">💡 Sugestão baseada no objetivo dela</p>' +
@@ -3929,16 +3952,49 @@ function salvarDirecionamento(nomeAluna, tipo, valor){
   openAlunaDetail(i);
 }
 
+const categoriasDesviosPosturais = {
+  'Cervical': ['cabeca_anteriorizada'],
+  'Ombros/Escápula': ['ombros_protrusos', 'escapula_alada', 'aducao_escapular', 'elevacao_escapular', 'deslizamento_anterior_umero', 'rotacao_inferior_escapular'],
+  'Torácica': ['hipercifose', 'escoliose_leve', 'retificacao_toracica'],
+  'Lombar': ['hiperlordose', 'retroversao_pelvica', 'anteversao_pelvica', 'sway_back', 'retificacao_lombar'],
+  'Quadril': ['assimetria_quadril'],
+  'Joelhos': ['geno_valgo', 'geno_varo'],
+  'Tornozelos': ['pe_pronado', 'pe_supinado']
+};
+const categoriasDesvioAbertas = {}; // guarda o estado (aberta/fechada) de cada categoria, sobrevive a recarregar a ficha
+
+function alternarCategoriaDesvioAberta(nomeAluna, categoria){
+  categoriasDesvioAbertas[categoria] = !categoriasDesvioAbertas[categoria];
+  const id = 'categoria-desvio-' + categoria.replace(/[^a-zA-Z0-9]/g, '');
+  const el = document.getElementById(id);
+  if(el) el.style.display = categoriasDesvioAbertas[categoria] ? 'flex' : 'none';
+}
+
 function renderAvaliacaoPostural(a){
   if(!a.desviosPosturaisConfirmados) a.desviosPosturaisConfirmados = [];
   let html = '<p class="section-label" style="margin-top:22px;">Avaliação postural (a partir da anamnese/fotos)</p>' +
-    '<p class="page-sub" style="margin-top:-4px;">Selecione os desvios identificados, o sistema já relaciona a mobilidade e o corretivo certos, direto no treino do dia dela.</p>' +
-    '<div class="chip-list" style="margin-bottom:10px;">';
-  desviosPosturaisCatalogo.forEach(function(d){
-    const ativo = a.desviosPosturaisConfirmados.indexOf(d.id) !== -1;
-    html += '<span class="chip' + (ativo ? ' active' : '') + '" style="cursor:pointer;" onclick="alternarDesvioPostural(\'' + a.nome.replace(/'/g,"\\'") + '\',\'' + d.id + '\')">' + d.nome + '</span>';
+    '<p class="page-sub" style="margin-top:-4px;">Escolhe a região, depois marca os desvios identificados — o sistema já relaciona a mobilidade e o corretivo certos, direto no treino do dia dela.</p>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">';
+
+  Object.keys(categoriasDesviosPosturais).forEach(function(categoria){
+    const idsDaCategoria = categoriasDesviosPosturais[categoria];
+    const qtdAtivosNaCategoria = idsDaCategoria.filter(function(id){ return a.desviosPosturaisConfirmados.indexOf(id) !== -1; }).length;
+    html += '<span class="chip" style="cursor:pointer;' + (qtdAtivosNaCategoria > 0 ? 'background:var(--gold-soft);color:#1A1409;' : '') + '" onclick="alternarCategoriaDesvioAberta(\'' + a.nome.replace(/'/g,"\\'") + '\',\'' + categoria + '\')">' + categoria + (qtdAtivosNaCategoria > 0 ? ' (' + qtdAtivosNaCategoria + ')' : '') + '</span>';
   });
   html += '</div>';
+
+  Object.keys(categoriasDesviosPosturais).forEach(function(categoria){
+    const idDiv = 'categoria-desvio-' + categoria.replace(/[^a-zA-Z0-9]/g, '');
+    html += '<div id="' + idDiv + '" style="display:' + (categoriasDesvioAbertas[categoria] ? 'flex' : 'none') + ';flex-wrap:wrap;gap:6px;margin-bottom:12px;">';
+    categoriasDesviosPosturais[categoria].forEach(function(idDesvio){
+      const d = desviosPosturaisCatalogo.find(function(x){ return x.id === idDesvio; });
+      if(!d) return;
+      const ativo = a.desviosPosturaisConfirmados.indexOf(d.id) !== -1;
+      html += '<span class="chip' + (ativo ? ' active' : '') + '" style="cursor:pointer;font-size:11px;" onclick="alternarDesvioPostural(\'' + a.nome.replace(/'/g,"\\'") + '\',\'' + d.id + '\')">' + d.nome + '</span>';
+    });
+    html += '</div>';
+  });
+
   if(a.desviosPosturaisConfirmados.length > 0){
     const bloco = obterBlocoPostural(a.desviosPosturaisConfirmados);
     html += '<div class="info-box"><p class="lbl">Bloco de mobilidade/correção que vai aparecer no treino dela</p>';
@@ -4161,11 +4217,10 @@ async function criarLoginParaAluna(nomeAluna){
   }
 }
 
-function renderPlanoFechado(a){
+function renderPlanoFechadoConteudo(a){
   const planos = { '30': '30 dias', '90': '90 dias (trimestral)', '180': '180 dias (semestral)', '365': '365 dias (anual)' };
   const duracaoAtual = a.duracaoPlanoDias || '';
-  return '<p class="section-label">Plano fechado</p>' +
-    '<div class="form-group"><label class="form-label">Quando ela fechou o plano?</label>' +
+  return '<div class="form-group"><label class="form-label">Quando ela fechou o plano?</label>' +
       '<input class="form-input" type="date" id="plano-data-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" value="' + (a.dataFechouPlano || '') + '" onchange="salvarPlanoFechado(\'' + a.nome.replace(/'/g,"\\'") + '\',\'data\',this.value)"></div>' +
     '<div class="form-group"><label class="form-label">Qual plano / período?</label>' +
       '<select class="form-select" id="plano-duracao-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" onchange="salvarPlanoFechado(\'' + a.nome.replace(/'/g,"\\'") + '\',\'duracao\',this.value)">' +
@@ -5394,8 +5449,15 @@ async function loginAluna(){
     sessaoUsuarioAtual = data.user;
 
     // Descobre o nome real dela (pode já existir cadastro feito pelo Personal com o mesmo e-mail)
-    const { data: alunaRow } = await supabaseClient.from('alunas').select('*').eq('auth_id', data.user.id).maybeSingle();
-    if(alunaRow) NOME_ALUNA_LOGADA = alunaRow.nome;
+    const { data: alunaRow, error: erroAlunaRow } = await supabaseClient.from('alunas').select('*').eq('auth_id', data.user.id).maybeSingle();
+
+    if(erroAlunaRow || !alunaRow){
+      // NUNCA deixa passar em silêncio — sem isso, o sistema ficaria com o nome padrão travado e mostraria dados de outra pessoa
+      erroEl.textContent = 'Login funcionou, mas não achei seu cadastro completo no banco. Avisa seu personal (erro: cadastro sem auth_id vinculado).';
+      erroEl.style.display = 'block';
+      return;
+    }
+    NOME_ALUNA_LOGADA = alunaRow.nome;
 
     // Se ela ainda não existe na lista local dessa sessão (primeiro login no aparelho dela), cria o registro completo agora,
     // com os dados reais dela — sem isso, os cálculos de DNA/progresso ficariam usando dados de outra aluna que sobraram por padrão
