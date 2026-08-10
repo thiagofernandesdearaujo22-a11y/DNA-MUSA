@@ -5747,7 +5747,7 @@ function openLevel2(which){
   level2 = which;
   setActive(which);
   document.getElementById('backbar').style.display = 'flex';
-  document.getElementById('backlabel').textContent = 'Voltar para o início';
+  document.getElementById('backlabel').textContent = (which === 'personal') ? 'Sair' : 'Voltar para o início';
   if(which === 'personal'){ showPersonalView('dashboard'); carregarCatalogoPersonal(); }
   if(which === 'chatia'){ inicializarChatIA(); }
   if(which === 'home' && typeof renderHome === 'function'){ renderHome(); }
@@ -7845,6 +7845,14 @@ function resetarDadosTeste(){
 }
 
 let veioDaListaDeTreinosDaSemana = false;
+async function sairDeVerdade(){
+  try {
+    if(supabaseClient) await supabaseClient.auth.signOut();
+  } catch(e){}
+  try { localStorage.clear(); sessionStorage.clear(); } catch(e){}
+  window.location.reload();
+}
+
 function goBack(){
   const detailActive = document.querySelector('[data-view="detail"]').classList.contains('active');
   if(detailActive && veioDaListaDeTreinosDaSemana){
@@ -7854,6 +7862,8 @@ function goBack(){
   } else if(detailActive){
     setActive(level2);
     document.getElementById('backlabel').textContent = 'Voltar para o início';
+  } else if(document.getElementById('backlabel').textContent === 'Sair'){
+    sairDeVerdade();
   } else {
     setActive('launcher');
     document.getElementById('backbar').style.display = 'none';
