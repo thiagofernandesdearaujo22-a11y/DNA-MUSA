@@ -4136,8 +4136,13 @@ async function criarLoginParaAluna(nomeAluna){
       email: a.email, auth_id: data.user.id, nome: a.nome, telefone: a.telefone || '',
       nivel: a.nivel || 'Iniciante', freq: a.freq || '3x por semana', piramide: a.piramide || '',
       objetivo: a.objetivo || '', restricoes: a.restricoes || '', academia: a.academia || '',
-      tempo_disponivel: a.tempoDisponivel || 60
+      tempo_disponivel: a.tempoDisponivel || 60,
+      senha_gerada: senha
     }, { onConflict: 'email' });
+
+    // Atualiza a ficha local na hora, sem precisar recarregar a página
+    a.authId = data.user.id;
+    a.senhaGerada = senha;
 
     const linkApp = window.location.origin + window.location.pathname;
     const mensagemWpp = encodeURIComponent('Oi ' + a.nome.split(' ')[0] + '! Seu acesso ao MUSA+ já está pronto.\nE-mail: ' + a.email + '\nSenha: ' + senha + '\nEntre aqui: ' + linkApp);
