@@ -448,33 +448,32 @@
       <i class="ti ti-message-circle-2" style="color:#1A1409;font-size:22px;"></i>
     </div>
 
-    <!-- DADOS (composição / suporte) -->
+    <!-- DADOS (composição corporal) -->
     <div class="view" data-view="dados">
-      <h1 class="page-title">Seus dados</h1>
-      <p class="page-sub">Composição corporal e suporte</p>
+      <h1 class="page-title">Composição corporal</h1>
+      <p class="page-sub">Seus dados de peso e composição, atualizados por você</p>
 
       <div class="stat-grid">
         <div class="stat-card">
           <p class="stat-label">Peso</p>
-          <p class="stat-value">64,2 kg</p>
-          <p class="stat-meta">Atualizado hoje</p>
+          <p class="stat-value" id="stat-peso-atual">--</p>
+          <p class="stat-meta" id="stat-peso-data">Ainda não informado</p>
         </div>
         <div class="stat-card">
           <p class="stat-label">% gordura</p>
-          <p class="stat-value">24,1%</p>
-          <p class="stat-meta gold">Via antropometria</p>
+          <p class="stat-value" id="stat-gordura-atual">--</p>
+          <p class="stat-meta gold" id="stat-gordura-data">Ainda não informado</p>
         </div>
       </div>
 
-      <p class="section-label">Avaliações</p>
+      <button class="btn-gold" style="margin-top:12px;" onclick="iniciarRegistroComposicaoNova()"><i class="ti ti-clipboard-plus" style="margin-right:6px;"></i>Registrar novas informações</button>
+      <div id="area-registro-composicao"></div>
+
+      <p class="section-label" style="margin-top:22px;">Avaliações</p>
       <div class="row" id="row-avaliacao"></div>
 
-      <p class="section-label">Suporte e técnica</p>
-      <p class="page-sub" style="margin-top:-6px;">Sugestões rápidas, a biblioteca completa está na Mentoria</p>
-      <div class="row" id="row-suporte"></div>
-
-      <p class="section-label">Dicas rápidas</p>
-      <div class="row" id="row-dicas"></div>
+      <p class="section-label" style="margin-top:22px;">Minha evolução</p>
+      <div id="area-minha-evolucao"></div>
     </div>
 
     <!-- MENTORIA -->
@@ -482,6 +481,14 @@
       <h1 class="page-title">Mentoria</h1>
       <p class="page-sub">Cursos e conteúdos completos</p>
 
+      <p class="section-label">Suporte e técnica</p>
+      <p class="page-sub" style="margin-top:-6px;">Sugestões rápidas</p>
+      <div class="row" id="row-suporte"></div>
+
+      <p class="section-label" style="margin-top:16px;">Dicas rápidas</p>
+      <div class="row" id="row-dicas"></div>
+
+      <p class="section-label" style="margin-top:16px;">Biblioteca completa</p>
       <div class="filter-row" id="filter-row"></div>
       <div class="poster-grid" id="poster-grid"></div>
     </div>
@@ -996,12 +1003,176 @@ function renderAvaliacoes(){
     n: 'Avaliação física', cat: 'Antes de começar', locked: false, video: null,
     desc: 'A avaliação física é o que garante que o treino é montado pra você de verdade, não um genérico. Medidas, composição corporal e desvios posturais entram direto na sua prescrição. O ideal é repetir a cada 90 dias, pra acompanhar sua evolução real.'
   };
-  const conteudoAnaliseFotos = {
-    n: 'Assimetria muscular', cat: 'Acompanhamento', locked: false, video: null,
-    desc: 'Comparar fotos ao longo do tempo mostra o que a balança não mostra. É a forma mais honesta de ver sua evolução real, e ajuda a identificar cedo qualquer assimetria entre os lados do corpo pra gente ajustar o treino.'
-  };
   poster(rowAval, 'Avaliação física', subAval, function(){ openDetail('conteudo', conteudoAvaliacaoFisica); });
-  poster(rowAval, 'Assimetria muscular', 'Análise de fotos', function(){ openDetail('conteudo', conteudoAnaliseFotos); });
+
+  renderComposicaoAtual(alunaObj);
+  renderMinhaEvolucao(alunaObj);
+}
+
+function renderComposicaoAtual(a){
+  const elPeso = document.getElementById('stat-peso-atual');
+  const elPesoData = document.getElementById('stat-peso-data');
+  const elGordura = document.getElementById('stat-gordura-atual');
+  const elGorduraData = document.getElementById('stat-gordura-data');
+  if(!a || !elPeso) return;
+
+  if(a.composicaoAtual && a.composicaoAtual.peso != null){
+    elPeso.textContent = String(a.composicaoAtual.peso).replace('.', ',') + ' kg';
+    elPesoData.textContent = a.composicaoAtual.data ? 'Atualizado em ' + a.composicaoAtual.data : 'Atualizado';
+  } else {
+    elPeso.textContent = '--';
+    elPesoData.textContent = 'Ainda não informado';
+  }
+
+  if(a.composicaoAtual && a.composicaoAtual.gordura != null){
+    elGordura.textContent = String(a.composicaoAtual.gordura).replace('.', ',') + '%';
+    elGorduraData.textContent = 'Via avaliação física';
+  } else {
+    elGordura.textContent = '--';
+    elGorduraData.textContent = 'Ainda não informado';
+  }
+}
+
+function renderMinhaEvolucao(a){
+  const container = document.getElementById('area-minha-evolucao');
+  if(!container) return;
+  const historico = (a && a.composicaoHistorico) || [];
+  if(historico.length === 0){
+    container.innerHTML = '<p class="txt" style="color:var(--text-faint);">Ainda sem histórico. Assim que você registrar novas informações, os valores anteriores ficam guardados aqui pra comparar.</p>';
+    return;
+  }
+  container.innerHTML = historico.slice().reverse().map(function(reg){
+    let linha = reg.data || ('Semana ' + reg.semana);
+    const partes = [];
+    if(reg.peso != null) partes.push(String(reg.peso).replace('.', ',') + ' kg');
+    if(reg.gordura != null) partes.push(String(reg.gordura).replace('.', ',') + '% gordura');
+    if(reg.massaMagra != null) partes.push(String(reg.massaMagra).replace('.', ',') + ' kg massa magra');
+    if(reg.pesoMuscular != null) partes.push(String(reg.pesoMuscular).replace('.', ',') + ' kg peso muscular');
+    return '<div class="info-box" style="margin-bottom:8px;"><p class="lbl">' + linha + '</p><p class="txt">' + (partes.join(' · ') || 'sem detalhe') + '</p></div>';
+  }).join('');
+}
+
+// ===== Fluxo de registro de novas informações de composição =====
+let registroComposicaoEmAndamento = null;
+
+function iniciarRegistroComposicaoNova(){
+  registroComposicaoEmAndamento = { etapa: 'peso' };
+  const container = document.getElementById('area-registro-composicao');
+  container.innerHTML = '<div class="info-box" style="margin-top:10px;" id="pergunta-composicao">' +
+    '<p class="lbl">Qual o seu peso atual?</p>' +
+    '<div class="form-group"><input class="form-input" id="input-composicao-peso" type="number" step="0.1" placeholder="Ex: 62.5"></div>' +
+    '<button class="btn-gold" onclick="avancarRegistroComposicao()">Continuar</button>' +
+  '</div>';
+}
+
+function avancarRegistroComposicao(){
+  const estado = registroComposicaoEmAndamento;
+  if(!estado) return;
+  const container = document.getElementById('pergunta-composicao');
+
+  if(estado.etapa === 'peso'){
+    const peso = parseFloat(document.getElementById('input-composicao-peso').value);
+    if(isNaN(peso)) return;
+    estado.peso = peso;
+    estado.etapa = 'avaliacao';
+    container.innerHTML = '<p class="lbl">Foi feita alguma avaliação física recentemente?</p>' +
+      '<div style="display:flex;gap:8px;margin-top:8px;">' +
+        '<span class="chip" style="cursor:pointer;" onclick="responderAvaliacaoFeita(true)">Sim</span>' +
+        '<span class="chip" style="cursor:pointer;" onclick="responderAvaliacaoFeita(false)">Não</span>' +
+      '</div>';
+    return;
+  }
+}
+
+function responderAvaliacaoFeita(sim){
+  const estado = registroComposicaoEmAndamento;
+  if(!estado) return;
+  const container = document.getElementById('pergunta-composicao');
+  if(!sim){
+    finalizarRegistroComposicao();
+    return;
+  }
+  estado.etapa = 'gordura';
+  container.innerHTML = '<p class="lbl">Qual foi o seu percentual de gordura?</p>' +
+    '<div class="form-group"><input class="form-input" id="input-composicao-gordura" type="number" step="0.1" placeholder="Ex: 24.5"></div>' +
+    '<button class="btn-gold" onclick="avancarParaMassaMagra()">Continuar</button>';
+}
+
+function avancarParaMassaMagra(){
+  const estado = registroComposicaoEmAndamento;
+  const gorduraVal = parseFloat(document.getElementById('input-composicao-gordura').value);
+  if(!isNaN(gorduraVal)) estado.gordura = gorduraVal;
+  const container = document.getElementById('pergunta-composicao');
+  container.innerHTML = '<p class="lbl">Qual foi a sua massa magra? (tudo menos gordura, em kg)</p>' +
+    '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:-4px;">Se não souber ou a avaliação não trouxe esse dado, pode pular</p>' +
+    '<div class="form-group"><input class="form-input" id="input-composicao-massamagra" type="number" step="0.1" placeholder="Ex: 47.2"></div>' +
+    '<div style="display:flex;gap:8px;">' +
+      '<button class="btn-gold" style="flex:1;" onclick="avancarParaPesoMuscular()">Continuar</button>' +
+      '<button class="btn-gold" style="flex:1;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="pularEIrParaPesoMuscular()">Pular</button>' +
+    '</div>';
+}
+
+function pularEIrParaPesoMuscular(){
+  avancarParaPesoMuscular(true);
+}
+
+function avancarParaPesoMuscular(pulou){
+  const estado = registroComposicaoEmAndamento;
+  if(!pulou){
+    const massaVal = parseFloat(document.getElementById('input-composicao-massamagra').value);
+    if(!isNaN(massaVal)) estado.massaMagra = massaVal;
+  }
+  const container = document.getElementById('pergunta-composicao');
+  container.innerHTML = '<p class="lbl">E o peso muscular específico? (em kg, aparece nas avaliações antropométricas)</p>' +
+    '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:-4px;">Diferente de massa magra — se não souber, pode pular</p>' +
+    '<div class="form-group"><input class="form-input" id="input-composicao-pesomuscular" type="number" step="0.1" placeholder="Ex: 24.8"></div>' +
+    '<div style="display:flex;gap:8px;">' +
+      '<button class="btn-gold" style="flex:1;" onclick="finalizarComGorduraEMassa()">Salvar</button>' +
+      '<button class="btn-gold" style="flex:1;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="finalizarRegistroComposicao()">Pular e salvar</button>' +
+    '</div>';
+}
+
+function finalizarComGorduraEMassa(){
+  const estado = registroComposicaoEmAndamento;
+  const pesoMuscularVal = parseFloat(document.getElementById('input-composicao-pesomuscular').value);
+  if(!isNaN(pesoMuscularVal)) estado.pesoMuscular = pesoMuscularVal;
+  finalizarRegistroComposicao();
+}
+
+function finalizarRegistroComposicao(){
+  const estado = registroComposicaoEmAndamento;
+  if(!estado) return;
+  const a = alunasPersonal.find(function(x){ return x.nome === NOME_ALUNA_LOGADA; });
+  if(!a) return;
+  const prog = getProgressoAluna(a.nome);
+
+  // Joga o valor ANTIGO pro histórico antes de sobrescrever, pra nunca perder a evolução
+  if(!a.composicaoHistorico) a.composicaoHistorico = [];
+  if(a.composicaoAtual && (a.composicaoAtual.peso != null || a.composicaoAtual.gordura != null)){
+    a.composicaoHistorico.push(Object.assign({ semana: prog.semana }, a.composicaoAtual));
+  }
+
+  const hoje = new Date();
+  a.composicaoAtual = {
+    peso: estado.peso != null ? estado.peso : (a.composicaoAtual ? a.composicaoAtual.peso : null),
+    gordura: estado.gordura != null ? estado.gordura : (a.composicaoAtual ? a.composicaoAtual.gordura : null),
+    massaMagra: estado.massaMagra != null ? estado.massaMagra : (a.composicaoAtual ? a.composicaoAtual.massaMagra : null),
+    pesoMuscular: estado.pesoMuscular != null ? estado.pesoMuscular : (a.composicaoAtual ? a.composicaoAtual.pesoMuscular : null),
+    data: hoje.toLocaleDateString('pt-BR')
+  };
+
+  // Cruza com o resto do sistema: mantém a.peso/a.pesoAtual atualizados, usados no cálculo de IMC e DNA
+  a.pesoAtual = estado.peso;
+  if(!a.pesoHistorico) a.pesoHistorico = [];
+  a.pesoHistorico.push({ semana: prog.semana, peso: estado.peso });
+
+  salvarPerfilAlunaNoSupabase(a.nome);
+
+  registroComposicaoEmAndamento = null;
+  const container = document.getElementById('area-registro-composicao');
+  container.innerHTML = '<p class="txt" style="color:var(--success);">Registrado! Isso já entra nos seus cálculos de composição e evolução.</p>';
+  renderComposicaoAtual(a);
+  renderMinhaEvolucao(a);
 }
 
 const rowSuporte = document.getElementById('row-suporte');
@@ -3195,7 +3366,10 @@ async function executarSalvamentoPerfilAluna(nomeAluna){
         desviosPosturaisConfirmados: a.desviosPosturaisConfirmados || [],
         dataFechouPlano: a.dataFechouPlano || null,
         duracaoPlanoDias: a.duracaoPlanoDias || null,
-        tabataSugestaoRespondida: a.tabataSugestaoRespondida || false
+        tabataSugestaoRespondida: a.tabataSugestaoRespondida || false,
+        composicaoAtual: a.composicaoAtual || null,
+        composicaoHistorico: a.composicaoHistorico || [],
+        pesoHistorico: a.pesoHistorico || []
       }
     }, { onConflict: 'email' });
   } catch(erroDeRede){
