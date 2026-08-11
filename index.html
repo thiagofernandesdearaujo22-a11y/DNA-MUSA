@@ -798,17 +798,20 @@ function poster(container, title, sub, onClick, opts){
 function abrirListaDeTreinosDaSemana(){
   const lista = document.getElementById('lista-dias-semana');
   const abreviacoes = { 'Segunda':'SEG', 'Terça':'TER', 'Quarta':'QUA', 'Quinta':'QUI', 'Sexta':'SEX', 'Sábado':'SÁB', 'Domingo':'DOM' };
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const diasRegistradosEssaSemana = prog.diasConcluidos[prog.semana] || [];
   lista.innerHTML = dias.map(function(d, i){
     const abrev = abreviacoes[d.n] || d.n.slice(0,3).toUpperCase();
-    return '<div style="display:flex;align-items:center;gap:14px;padding:16px;margin-bottom:10px;border-radius:16px;background:' + (d.hoje ? 'linear-gradient(135deg,rgba(217,139,46,0.18),rgba(92,56,20,0.12))' : 'var(--card)') + ';border:1px solid ' + (d.hoje ? 'var(--gold-soft)' : 'var(--border)') + ';cursor:pointer;" onclick="abrirDiaDaSemana(' + i + ')">' +
-      '<div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+    const foiRegistrado = diasRegistradosEssaSemana.indexOf(d.n) !== -1;
+    return '<div style="display:flex;align-items:center;gap:14px;padding:16px;margin-bottom:10px;border-radius:16px;background:' + (foiRegistrado ? 'var(--success-soft)' : (d.hoje ? 'linear-gradient(135deg,rgba(217,139,46,0.18),rgba(92,56,20,0.12))' : 'var(--card)')) + ';border:1px solid ' + (foiRegistrado ? 'var(--success)' : (d.hoje ? 'var(--gold-soft)' : 'var(--border)')) + ';cursor:pointer;" onclick="abrirDiaDaSemana(' + i + ')">' +
+      '<div style="width:48px;height:48px;border-radius:14px;background:' + (foiRegistrado ? 'var(--success)' : 'linear-gradient(135deg,#F4D9A5,#E8C58A)') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
         '<span style="font-size:11px;font-weight:700;letter-spacing:0.5px;color:#1A1409;">' + abrev + '</span>' +
       '</div>' +
       '<div style="flex:1;min-width:0;">' +
-        '<p style="font-size:13px;font-weight:600;margin:0 0 2px;">' + d.n + (d.hoje ? ' <span class="tag" style="margin-left:4px;">hoje</span>' : '') + '</p>' +
+        '<p style="font-size:13px;font-weight:600;margin:0 0 2px;">' + d.n + (d.hoje ? ' <span class="tag" style="margin-left:4px;">hoje</span>' : '') + (foiRegistrado ? ' <span class="tag" style="margin-left:4px;background:var(--success-soft);color:var(--success);">registrado</span>' : '') + '</p>' +
         '<p style="font-size:12px;color:var(--text-faint);margin:0;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.foco + '</p>' +
       '</div>' +
-      (d.done ? '<i class="ti ti-circle-check" style="color:var(--gold-soft);font-size:20px;flex-shrink:0;"></i>' : '<i class="ti ti-chevron-right" style="color:var(--text-faint);font-size:18px;flex-shrink:0;"></i>') +
+      (foiRegistrado ? '<i class="ti ti-circle-check" style="color:var(--success);font-size:20px;flex-shrink:0;"></i>' : '<i class="ti ti-chevron-right" style="color:var(--text-faint);font-size:18px;flex-shrink:0;"></i>') +
     '</div>';
   }).join('');
   setActive('semana-treinos');
@@ -3126,7 +3129,7 @@ async function sincronizarTreinoComSupabase(a){
       // mesmo que você feche o app antes de gerar o acesso dela
       const { error: erroBackup } = await supabaseClient.from('alunas').update({ treino_atual_backup: a.treinoAtual }).eq('email', a.email);
       if(erroBackup){ mostrarConfirmacaoSalvamento(false, 'Erro ao salvar backup: ' + erroBackup.message); return; }
-      mostrarConfirmacaoSalvamento(true, 'Salvo no backup (ela ainda não tem login criado).');
+      mostrarConfirmacaoSalvamento(true, 'Salvo no backup (login ainda não está vinculado a essa aluna na tabela).');
     }
   } catch(erroDeRede){
     mostrarConfirmacaoSalvamento(false, 'Erro de conexão: ' + erroDeRede.message);
@@ -7582,76 +7585,84 @@ function registrarFeedbackTreino(diaIndex){
 }
 
 function registrarTreinoDia(diaIndex){
-  const d = dias[diaIndex];
-  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
-  if(!alunaAtual) return;
-  const prog = getProgressoAluna(alunaAtual.nome);
-  let registrados = 0;
-  let houveReducao = false;
-  d.ex.forEach(function(linha, j){
-    let nomesEIndices = [{ nome: linha.split(' · ')[0], idx: String(j) }];
-    if(linha.indexOf('|||') !== -1){
-      const exercicios = linha.split('|||').slice(1);
-      nomesEIndices = exercicios.map(function(exLinha, sub){
-        return { nome: exLinha.trim().split(' · ')[0], idx: j + '-' + sub };
+  try {
+    const d = dias[diaIndex];
+    const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
+    if(!alunaAtual) return;
+    const prog = getProgressoAluna(alunaAtual.nome);
+    let registrados = 0;
+    let houveReducao = false;
+    d.ex.forEach(function(linha, j){
+      let nomesEIndices = [{ nome: linha.split(' · ')[0], idx: String(j) }];
+      if(linha.indexOf('|||') !== -1){
+        const exercicios = linha.split('|||').slice(1);
+        nomesEIndices = exercicios.map(function(exLinha, sub){
+          return { nome: exLinha.trim().split(' · ')[0], idx: j + '-' + sub };
+        });
+      }
+      nomesEIndices.forEach(function(item){
+        const cargaEl = document.querySelector('[data-carga="' + item.idx + '"]');
+        const repsEl = document.querySelector('[data-reps="' + item.idx + '"]');
+        if(!cargaEl || !repsEl) return;
+        const carga = parseFloat(cargaEl.value);
+        const reps = parseInt(repsEl.value, 10);
+        if(isNaN(carga) || isNaN(reps)) return;
+        if(!prog.historico[item.nome]) prog.historico[item.nome] = [];
+        const sugestao = sugerirAjusteCarga(carga, reps);
+        prog.historico[item.nome].push({ semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao });
+        if(sugestao.texto.indexOf('edução') !== -1) houveReducao = true;
+        registrados++;
       });
-    }
-    nomesEIndices.forEach(function(item){
-      const cargaEl = document.querySelector('[data-carga="' + item.idx + '"]');
-      const repsEl = document.querySelector('[data-reps="' + item.idx + '"]');
-      if(!cargaEl || !repsEl) return;
-      const carga = parseFloat(cargaEl.value);
-      const reps = parseInt(repsEl.value, 10);
-      if(isNaN(carga) || isNaN(reps)) return;
-      if(!prog.historico[item.nome]) prog.historico[item.nome] = [];
-      const sugestao = sugerirAjusteCarga(carga, reps);
-      prog.historico[item.nome].push({ semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao });
-      if(sugestao.texto.indexOf('edução') !== -1) houveReducao = true;
-      registrados++;
     });
-  });
 
-  let resultadoSemana = null;
-  if(registrados > 0){
-    if(!prog.diasConcluidos[prog.semana]) prog.diasConcluidos[prog.semana] = [];
-    if(prog.diasConcluidos[prog.semana].indexOf(d.n) === -1) prog.diasConcluidos[prog.semana].push(d.n);
-    if(!prog.horariosTreino) prog.horariosTreino = [];
-    const agora = new Date();
-    prog.horariosTreino.push({ dia: d.n, hora: agora.getHours(), minuto: agora.getMinutes(), data: agora.toISOString() });
-    resultadoSemana = checarConclusaoSemana(alunaAtual.nome);
-  }
-
-  if(registrados > 0) salvarProgressoNoSupabase(alunaAtual.nome);
-
-  openDetail('dia', diaIndex);
-  const conf = document.getElementById('registro-confirmacao');
-  if(registrados === 0){
-    conf.innerHTML = '<div class="insight"><p>Preencha ao menos um exercício com carga e repetições pra registrar.</p></div>';
-    return;
-  }
-
-  let msg = registrados + ' exercício(s) registrado(s).';
-  if(resultadoSemana && resultadoSemana.avancou){
-    msg += ' Semana concluída (' + resultadoSemana.total + '/' + resultadoSemana.total + '), suas progressões de carga já estão calculadas pra próxima semana! 🎉';
-  } else if(resultadoSemana){
-    msg += ' ' + resultadoSemana.concluidos + ' de ' + resultadoSemana.total + ' treinos concluídos essa semana.';
-  }
-  conf.innerHTML = '<div class="insight"><p>' + msg + '</p></div>';
-  conf.innerHTML += renderPerguntaFeedbackTreino(diaIndex);
-
-  if(resultadoSemana && resultadoSemana.avancou){
-    const semanaFechada = prog.semana - 1;
-    if(!prog.nutricao || !prog.nutricao[semanaFechada]){
-      conf.innerHTML += renderPerguntaNutricao(semanaFechada);
+    let resultadoSemana = null;
+    if(registrados > 0){
+      if(!prog.diasConcluidos[prog.semana]) prog.diasConcluidos[prog.semana] = [];
+      if(prog.diasConcluidos[prog.semana].indexOf(d.n) === -1) prog.diasConcluidos[prog.semana].push(d.n);
+      if(!prog.horariosTreino) prog.horariosTreino = [];
+      const agora = new Date();
+      prog.horariosTreino.push({ dia: d.n, hora: agora.getHours(), minuto: agora.getMinutes(), data: agora.toISOString() });
+      resultadoSemana = checarConclusaoSemana(alunaAtual.nome);
     }
-    const mesPendente = verificarCheckinPeso(alunaAtual.nome);
-    if(mesPendente !== null){
-      conf.innerHTML += renderPerguntaPeso(mesPendente);
-    }
-  }
 
-  if(houveReducao && !alunaAtual.cicloPerguntado && !alunaAtual.cicloInfo){
-    conf.innerHTML += renderPerguntaCiclo();
+    if(registrados > 0) salvarProgressoNoSupabase(alunaAtual.nome);
+
+    openDetail('dia', diaIndex);
+    const conf = document.getElementById('registro-confirmacao');
+    if(registrados === 0){
+      if(conf) conf.innerHTML = '<div class="insight"><p>Preencha ao menos um exercício com carga e repetições pra registrar.</p></div>';
+      return;
+    }
+
+    let msg = registrados + ' exercício(s) registrado(s).';
+    if(resultadoSemana && resultadoSemana.avancou){
+      msg += ' Semana concluída (' + resultadoSemana.total + '/' + resultadoSemana.total + '), suas progressões de carga já estão calculadas pra próxima semana! 🎉';
+    } else if(resultadoSemana){
+      msg += ' ' + resultadoSemana.concluidos + ' de ' + resultadoSemana.total + ' treinos concluídos essa semana.';
+    }
+    if(conf){
+      conf.innerHTML = '<div class="insight"><p>' + msg + '</p></div>';
+      conf.innerHTML += renderPerguntaFeedbackTreino(diaIndex);
+
+      if(resultadoSemana && resultadoSemana.avancou){
+        const semanaFechada = prog.semana - 1;
+        if(!prog.nutricao || !prog.nutricao[semanaFechada]){
+          conf.innerHTML += renderPerguntaNutricao(semanaFechada);
+        }
+        const mesPendente = verificarCheckinPeso(alunaAtual.nome);
+        if(mesPendente !== null){
+          conf.innerHTML += renderPerguntaPeso(mesPendente);
+        }
+      }
+
+      if(houveReducao && !alunaAtual.cicloPerguntado && !alunaAtual.cicloInfo){
+        conf.innerHTML += renderPerguntaCiclo();
+      }
+    }
+  } catch(erroInesperado){
+    console.error('[registrarTreinoDia] erro inesperado, mas capturado, nada quebrou:', erroInesperado);
+    const conf = document.getElementById('registro-confirmacao');
+    if(conf) conf.innerHTML = '<div class="insight"><p>Não consegui confirmar agora, mas o que você já preencheu não foi perdido. Tenta de novo em alguns segundos.</p></div>';
   }
 }
 
