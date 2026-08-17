@@ -747,6 +747,10 @@
     <div class="view" data-view="semana-treinos">
       <h1 class="page-title">Treinos da semana</h1>
       <p class="page-sub">Toque num dia pra abrir o treino completo</p>
+      <div class="info-box" style="margin-bottom:14px;">
+        <p class="lbl" style="margin-bottom:6px;">Como funciona esse treino</p>
+        <p class="txt" style="margin-bottom:0;">Faça as séries de cada exercício na ordem. Registre a carga e as repetições da <b>1ª série</b>, é isso que ajusta sua carga sugerida pra próxima vez. O descanso entre séries já está calculado pra cada exercício, é só seguir o cronômetro.</p>
+      </div>
       <div id="lista-dias-semana"></div>
     </div>
 
@@ -7873,17 +7877,10 @@ if(type === 'central'){
         d.ex.map(function(_, idx){ return '<div class="segmento-progresso" data-idx="' + idx + '" style="flex:1;height:5px;border-radius:3px;background:var(--border);transition:background .2s;"></div>'; }).join('') +
         '</div>';
 
-      // Card de metodologia explicada, em texto simples
-      const cardMetodologia = '<div class="info-box" style="margin-bottom:14px;">' +
-        '<p class="lbl" style="margin-bottom:6px;">Como funciona esse treino</p>' +
-        '<p class="txt" style="margin-bottom:0;">Faça as séries de cada exercício na ordem. Registre a carga e as repetições da <b>1ª série</b>, é isso que ajusta sua carga sugerida pra próxima vez. O descanso entre séries já está calculado pra cada exercício, é só seguir o cronômetro.</p>' +
-      '</div>';
-
       corpoTreino = '<div class="badge">' + faseAtual + '</div>' +
         '<div class="list-item" style="justify-content:space-between;"><span id="cronometro-display" style="font-family:\'Playfair Display\',serif;font-size:18px;font-weight:600;">' + String(Math.floor(cronometroSegundos/60)).padStart(2,'0') + ':' + String(cronometroSegundos%60).padStart(2,'0') + '</span><button class="btn-gold" style="width:auto;margin:0;padding:8px 16px;" id="cronometro-btn" onclick="alternarCronometro()">' + (cronometroRodando ? 'Pausar' : (cronometroSegundos > 0 ? 'Retomar' : 'Iniciar treino')) + '</button></div>' +
         '<div id="toast-celebracao-area"></div>' +
         renderBlocoPosturalDia(alunaAtual) +
-        cardMetodologia +
         '<p class="section-label">Treino do dia</p>' +
         barraProgresso;
       d.ex.forEach(function(linha, j){
