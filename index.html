@@ -457,6 +457,11 @@
         <span style="color:#1A1409;font-weight:600;"><i class="ti ti-calendar-week" style="margin-right:8px;"></i>Ver treinos da semana</span>
         <span class="tag" id="resumo-dias-semana" style="background:rgba(0,0,0,0.15);color:#1A1409;"></span>
       </div>
+
+      <div class="list-item" style="cursor:pointer;margin-top:10px;" onclick="openLevel2('progresso')">
+        <span><i class="ti ti-trending-up" style="margin-right:8px;color:var(--gold-soft);"></i>Meu progresso</span>
+        <i class="ti ti-chevron-right" style="color:var(--text-faint);"></i>
+      </div>
     </div>
 
     <div id="botao-flutuante-sol" style="display:none;position:fixed;bottom:90px;right:16px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.4);z-index:500;" onclick="openLevel2('chatia')">
@@ -6361,8 +6366,8 @@ function openLevel2(which){
   setActive(which);
 
   const ehAbaFixaDaAluna = sessaoTipo === 'aluna' && abasFixasAluna.indexOf(which) !== -1;
-  document.getElementById('backbar').style.display = ehAbaFixaDaAluna ? 'none' : 'flex';
-  document.getElementById('top-logo-fixa').style.display = ehAbaFixaDaAluna ? 'flex' : 'none';
+  document.getElementById('backbar').style.display = 'flex';
+  document.getElementById('top-logo-fixa').style.display = 'none';
   document.getElementById('bottom-nav-fixa').style.display = ehAbaFixaDaAluna ? 'flex' : 'none';
   if(ehAbaFixaDaAluna) atualizarNavAtiva(which);
 
@@ -7602,6 +7607,15 @@ function renderMeuProgresso(){
   const a = alunasPersonal.find(function(x){ return x.nome === nome; });
   if(!a){ container.innerHTML = ''; return; }
 
+  try {
+    renderMeuProgressoConteudo(container, nome, a);
+  } catch(erroReal){
+    console.error('[Meu Progresso] erro real, capturado pra não travar a tela:', erroReal);
+    container.innerHTML = '<p class="txt" style="color:var(--text-faint);">Ainda reunindo os dados da sua evolução. Volta aqui em alguns dias, conforme for registrando treinos.</p>';
+  }
+}
+
+function renderMeuProgressoConteudo(container, nome, a){
   const score = calcularProbabilidadeSucesso(nome);
   const comparativoScore = calcularComparativoScore(nome);
   const prog = getProgressoAluna(nome);
