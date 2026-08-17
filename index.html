@@ -47,8 +47,9 @@
   }
   .notch{height:28px;display:flex;align-items:center;justify-content:center;}
   .notch::before{content:'';width:100px;height:14px;background:#000;border-radius:10px;}
-  .screen{height:800px;overflow-y:auto;padding:0 20px 30px;position:relative;}
-  .screen::-webkit-scrollbar{display:none;}
+  .screen{height:800px;padding:0;position:relative;display:flex;flex-direction:column;}
+  .screen-conteudo{flex:1;overflow-y:auto;padding:0 20px 30px;}
+  .screen-conteudo::-webkit-scrollbar{display:none;}
   .view{display:none;}
   .view.active{display:block;animation:fadeIn .35s ease;}
   .fade-content{animation:fadeIn .3s ease;}
@@ -57,7 +58,16 @@
   @keyframes introDnaDraw{to{stroke-dashoffset:0;}}
   @keyframes introMusaFade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 
-  .backbar{display:flex;align-items:center;gap:8px;padding:14px 0 6px;cursor:pointer;color:var(--gold-soft);font-size:13px;}
+  .backbar{display:flex;align-items:center;gap:8px;padding:14px 20px 12px;cursor:pointer;color:var(--gold-soft);font-size:13px;flex-shrink:0;border-bottom:1px solid var(--border);}
+
+  .top-logo-fixa{display:flex;align-items:center;justify-content:center;padding:14px 0 10px;flex-shrink:0;border-bottom:1px solid var(--border);}
+  .top-logo-fixa span{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--gold);letter-spacing:0.5px;}
+
+  .bottom-nav-fixa{display:flex;flex-shrink:0;border-top:1px solid var(--border);background:var(--card);}
+  .bottom-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px 8px;cursor:pointer;}
+  .bottom-nav-item i{font-size:19px;color:var(--text-faint);}
+  .bottom-nav-item span{font-size:9.5px;color:var(--text-faint);}
+  .bottom-nav-item.ativo i, .bottom-nav-item.ativo span{color:var(--gold-soft);}
   .backbar i{font-size:16px;}
 
   /* LAUNCHER */
@@ -293,6 +303,11 @@
       <span id="backlabel">Voltar</span>
     </div>
 
+    <div id="top-logo-fixa" class="top-logo-fixa" style="display:none;">
+      <span>DNA MUSA</span>
+    </div>
+
+    <div class="screen-conteudo">
     <!-- LOGIN -->
     <div class="view active" data-view="login">
       <div class="launcher">
@@ -474,6 +489,13 @@
 
       <p class="section-label" style="margin-top:22px;">Minha evolução</p>
       <div id="area-minha-evolucao"></div>
+    </div>
+
+    <!-- MEU PROGRESSO -->
+    <div class="view" data-view="progresso">
+      <h1 class="page-title">Meu progresso</h1>
+      <p class="page-sub">Sua evolução desde o início</p>
+      <div id="area-progresso-conteudo"></div>
     </div>
 
     <!-- MENTORIA -->
@@ -741,6 +763,22 @@
       </div>
     </div>
 
+    </div>
+
+    <div id="bottom-nav-fixa" class="bottom-nav-fixa" style="display:none;">
+      <div class="bottom-nav-item" data-nav="home" onclick="irParaAbaFixa('home')">
+        <i class="ti ti-barbell"></i><span>Treino</span>
+      </div>
+      <div class="bottom-nav-item" data-nav="dados" onclick="irParaAbaFixa('dados')">
+        <i class="ti ti-chart-bar"></i><span>Composição</span>
+      </div>
+      <div class="bottom-nav-item" data-nav="mentoria" onclick="irParaAbaFixa('mentoria')">
+        <i class="ti ti-video"></i><span>Mentoria</span>
+      </div>
+      <div class="bottom-nav-item" data-nav="progresso" onclick="irParaAbaFixa('progresso')">
+        <i class="ti ti-trending-up"></i><span>Progresso</span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1215,9 +1253,126 @@ const conteudos = [
     {titulo:'Aula 3', video:'https://youtu.be/UjsuO_E2HWI'},
     {titulo:'Aula 4', video:'https://youtu.be/AMS6nbcyk0k'}
   ]}
+,
+  {n:'Alongamento Ilio Psoas', cat:'Alongamentos', locked:false, desc:'', video:'https://www.youtube.com/watch?v=O16dSE_WSFM&sttick=0'},
+  {n:'Alongamento Ilio Psoas', cat:'Alongamentos', locked:false, desc:'', video:'https://www.youtube.com/watch?v=O16dSE_WSFM'},
+  {n:'Alongamento Quadrado Lombar', cat:'Alongamentos', locked:false, desc:'', video:'https://www.youtube.com/watch?v=It8Z4VV037E'},
+  {n:'Alongamento Adutores 4 apoios', cat:'Alongamentos', locked:false, desc:'', video:'https://www.youtube.com/watch?v=YboGYC5A0m4'},
+  {n:'Alongamento de adutores no espaldar', cat:'Alongamentos', locked:false, desc:'', video:'https://www.youtube.com/watch?v=BBj2jjsuyD8'},
+  {n:'Alongamento dinâmico para adutores', cat:'Alongamentos', locked:false, desc:'', video:'https://www.youtube.com/watch?v=pkgH1kU3t2E'},
+  {n:'Alongamento adutores em 4 apoios', cat:'Alongamentos', locked:false, desc:'', video:'https://www.youtube.com/watch?v=fmJeUB5prcE'},
+  {n:'Alongamento de Quadrado lombar', cat:'Alongamentos', locked:false, desc:'', video:'https://www.youtube.com/watch?v=9-n3D4vCy0k'},
+  {n:'Alongamento reto abdômen', cat:'Alongamentos', locked:false, desc:'', video:'https://www.youtube.com/shorts/uw2lrqLXv-I'},
+  {n:'Mob Quadril - Retração', cat:'Mobilidades', locked:false, desc:'', video:'https://www.youtube.com/watch?v=Yb8-QOlWScM&sttick=0'},
+  {n:'Wall Ball Slide', cat:'Mobilidades', locked:false, desc:'', video:'https://www.youtube.com/watch?v=SBaDnfc9SgE'},
+  {n:'Mob.Ombros Deitado', cat:'Mobilidades', locked:false, desc:'', video:'https://www.youtube.com/watch?v=HwDBulMMpcE'},
+  {n:'Flexibilidade, mobilidade, inibição e ativação muscular, e estratégia matadora!!!', cat:'Mobilidades', locked:false, desc:'', video:'https://www.youtube.com/watch?v=Ow2ty_kr0rg'},
+  {n:'Mobilidade de ombros deitado', cat:'Mobilidades', locked:false, desc:'', video:'https://www.youtube.com/watch?v=wVq6N153phA'},
+  {n:'Mobilidade de ombros deitado', cat:'Mobilidades', locked:false, desc:'', video:'https://www.youtube.com/watch?v=wVq6N153phA'},
+  {n:'Mobilidade De quadril em 4 apoios', cat:'Mobilidades', locked:false, desc:'', video:'https://www.youtube.com/watch?v=8K9tohyJpys'},
+  {n:'Mobilidade De tornozelo', cat:'Mobilidades', locked:false, desc:'', video:'https://www.youtube.com/watch?v=0LY22_SNW-I'},
+  {n:'Mobilidade de quadril - ílio psoas', cat:'Mobilidades', locked:false, desc:'', video:'https://www.youtube.com/watch?v=nJhjDIKlNzo'},
+  {n:'MOBILIDADE QUADRIL -EXTENSÃO DIAGONAL', cat:'Mobilidades', locked:false, desc:'', video:'https://www.youtube.com/shorts/t-xiIUGzO3s'},
+  {n:'Mobilidade glúteo médio e máximo', cat:'Mobilidades', locked:false, desc:'', video:'https://www.youtube.com/shorts/H_OAHdhD2Ho'},
+  {n:'Mobilidade tensor da fascia lata', cat:'Mobilidades', locked:false, desc:'', video:'https://www.youtube.com/shorts/HAXkyuefy2c'},
+  {n:'Mobilidade isquiotibiais', cat:'Mobilidades', locked:false, desc:'', video:'https://www.youtube.com/shorts/lmtoMuWbuw4'},
+  {n:'Manobra respiratória - Deitado', cat:'Manobras respiratórias', locked:false, desc:'', video:'https://www.youtube.com/watch?v=7YOwjazURoc&sttick=0'},
+  {n:'Manobra respiratória - 4 apoios', cat:'Manobras respiratórias', locked:false, desc:'', video:'https://www.youtube.com/watch?v=vv_FhqcCkus&sttick=0'},
+  {n:'Manobra respiratória - 4 apoios', cat:'Manobras respiratórias', locked:false, desc:'', video:'https://www.youtube.com/watch?v=vv_FhqcCkus&sttick=0'},
+  {n:'Introdução Manobras respiratórias parte 1- Aprenda a respirar', cat:'Manobras respiratórias', locked:false, desc:'', video:'https://www.youtube.com/watch?v=8ixgAPGj2nE'},
+  {n:'Introdução Manobras respiratórias parte 2 - Liberação da fáscia muscular', cat:'Manobras respiratórias', locked:false, desc:'', video:'https://www.youtube.com/watch?v=wdgyIXsuoG8'},
+  {n:'Introdução Manobras respiratórias parte 3- Manobra Respiratória', cat:'Manobras respiratórias', locked:false, desc:'', video:'https://www.youtube.com/watch?v=xFU5MbneT9E'},
+  {n:'Introdução Manobras respiratórias parte 3- Manobra Respiratória', cat:'Manobras respiratórias', locked:false, desc:'', video:'https://www.youtube.com/watch?v=xFU5MbneT9E'},
+  {n:'Manobras respiratórias -Aula 2', cat:'Manobras respiratórias', locked:false, desc:'', video:'https://www.youtube.com/watch?v=zTavlpabQE0'},
+  {n:'Manobras respiratórias - Aula 3', cat:'Manobras respiratórias', locked:false, desc:'', video:'https://www.youtube.com/watch?v=UjsuO_E2HWI'},
+  {n:'Manobras respiratórias - Aula 4', cat:'Manobras respiratórias', locked:false, desc:'', video:'https://www.youtube.com/watch?v=AMS6nbcyk0k'},
+  {n:'Potência - Hack', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/watch?v=tY21tc4b-Ws'},
+  {n:'Puxada Aberta - Entenda', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/watch?v=jRhXwHjK45w'},
+  {n:'Posição dos pés no Leg', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/watch?v=mOOJlKUEkeg'},
+  {n:'Leg Press 45 Yes ENTENDA', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/watch?v=9KmOJzQU8dk'},
+  {n:'Feedback Elevação Lateral (flexão de cotovelo)', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/watch?v=-vL07cUk4Sw'},
+  {n:'Entenda o Stiff, erros comuns e correções!!', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/watch?v=VQstxP0ZN7A'},
+  {n:'Abdução na polia erros e ajustes', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/watch?v=scncHmltD-c'},
+  {n:'Ajustes Pulldown com barra', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/watch?v=IUJafieBWEk'},
+  {n:'Feedback PUXADA ABERTA', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/watch?v=sEyjNuu6VtM'},
+  {n:'Feedback REMADA BAIXA', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/watch?v=MUSpNCV9q8E'},
+  {n:'Feedback Elevação Lateral (flexão de cotovelo)', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/watch?v=-vL07cUk4Sw'},
+  {n:'Ajustes e métodos que vão POTENCIALIZAR os seus resultados de GLÚTEOS', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/watch?v=xBoTRn0MFs4'},
+  {n:'Ajustes e métodos que vão POTENCIALIZAR os seus resultados de GLÚTEOS', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/watch?v=xBoTRn0MFs4'},
+  {n:'Ajustes e métodos que vai potencializar seus ganhos de glúteos - Parte 2', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/watch?v=vL9j_bUQLXI'},
+  {n:'Ajustes Pulldown com barra', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/watch?v=IUJafieBWEk'},
+  {n:'ENTENDA O SEU MATERIAL DE AERÓBICOS', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/watch?v=fw1rFDDLVe4'},
+  {n:'Ajustes para puxada com triângulo', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/watch?v=lvPyMBpopZg'},
+  {n:'Ajustes para puxada com triângulo', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/watch?v=lvPyMBpopZg'},
+  {n:'Deixe o seu bumbum REDONDINHO com esse ajuste!!! #academia #gluteos #musculação', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/shorts/0G7v5eMpkQk'},
+  {n:'AJUSTE PARA O SEU AGACHAMENTO!! #mulheres #musculação', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/shorts/DOCVUmGNw8Y'},
+  {n:'AJUSTES PARA BOMBAR OS SEUS GLÚTEOS !!🍑', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/shorts/jcqUV372G-o'},
+  {n:'AJUSTES PARA BOMBAR OS SEUS GLÚTEOS !!🍑', cat:'Ajustes e orientações', locked:false, desc:'', video:'https://www.youtube.com/shorts/jcqUV372G-o'},
+  {n:'MÉTODO TRI-SET NA PRÁTICA', cat:'Métodos de treino', locked:false, desc:'', video:'https://www.youtube.com/watch?v=5TpQFCBieDc'},
+  {n:'MÉTODO BI-SET NA PRÁTICA', cat:'Métodos de treino', locked:false, desc:'', video:'https://www.youtube.com/watch?v=Hpo-LSoO3Mk'},
+  {n:'MÉTODO TRI-SET NA PRÁTICA', cat:'Métodos de treino', locked:false, desc:'', video:'https://www.youtube.com/watch?v=XKJn6LO2czE'},
+  {n:'Método circuito', cat:'Métodos de treino', locked:false, desc:'', video:'https://www.youtube.com/watch?v=cXBh3UR03SA'},
+  {n:'Método Pirâmide Crescente', cat:'Métodos de treino', locked:false, desc:'', video:'https://www.youtube.com/watch?v=2lnzLHARO-Y'},
+  {n:'Método Pirâmide Decrescente', cat:'Métodos de treino', locked:false, desc:'', video:'https://www.youtube.com/watch?v=Q1Prp4AE5EM'},
+  {n:'Método tri-set', cat:'Métodos de treino', locked:false, desc:'', video:'https://www.youtube.com/watch?v=-YDqVqmsUg8'},
+  {n:'Método Bi-Set', cat:'Métodos de treino', locked:false, desc:'', video:'https://www.youtube.com/'},
+  {n:'Método Drop-Set', cat:'Métodos de treino', locked:false, desc:'', video:'https://www.youtube.com/watch?v=q07XMVmZ1qk'},
+  {n:'Método Pirâmide Crescente', cat:'Métodos de treino', locked:false, desc:'', video:'https://www.youtube.com/watch?v=2lnzLHARO-Y'},
+  {n:'Método Pirâmide Crescente', cat:'Métodos de treino', locked:false, desc:'', video:'https://www.youtube.com/watch?v=2lnzLHARO-Y'},
+  {n:'Métodos mais utilizados para BOMBAR seus glúteos!!', cat:'Métodos de treino', locked:false, desc:'', video:'https://www.youtube.com/watch?v=EKTHS26kPpU'},
+  {n:'Emagreça Dormindo!!-Fit30', cat:'Curso: Fit 30', locked:false, desc:'', video:'https://www.youtube.com/watch?v=dSA8ATAKF2U'},
+  {n:'Exercícios Multiarticulares -Fit30', cat:'Curso: Fit 30', locked:false, desc:'', video:'https://www.youtube.com/watch?v=Iqp6a7yBHbc'},
+  {n:'O que é Falha/Fadiga MUSCULAR - Fit30', cat:'Curso: Fit 30', locked:false, desc:'', video:'https://www.youtube.com/watch?v=xHJVFAqjHrU'},
+  {n:'O que você vai sentir nos treinos-Fit30', cat:'Curso: Fit 30', locked:false, desc:'', video:'https://www.youtube.com/watch?v=geyjZ_W6wGo'},
+  {n:'Quantas vezes na semana preciso treinar?? e se eu faltar?? -Fit30', cat:'Curso: Fit 30', locked:false, desc:'', video:'https://www.youtube.com/watch?v=2r2tgU5q3Qg'},
+  {n:'Como contrair o Abdômen durante os exercícios?? - Fit30', cat:'Curso: Fit 30', locked:false, desc:'', video:'https://www.youtube.com/watch?v=oB4KB7-Z6zM'},
+  {n:'Avaliação Física -Fit 30', cat:'Curso: Fit 30', locked:false, desc:'', video:'https://www.youtube.com/watch?v=l3zDPKd8HcA'},
+  {n:'Como respirar durante os exercícios? -Fit 30', cat:'Curso: Fit 30', locked:false, desc:'', video:'https://www.youtube.com/watch?v=UJE1CRUEbag'},
+  {n:'Suporte e uso da plataforma -Fit30', cat:'Curso: Fit 30', locked:false, desc:'', video:'https://www.youtube.com/watch?v=3JtvXylu9O0'},
+  {n:'Devo aquecer ou alongar antes do treino?? Fit-30', cat:'Curso: Fit 30', locked:false, desc:'', video:'https://www.youtube.com/watch?v=6abI0QSpg5Q'},
+  {n:'Suporte Corpo de Musa', cat:'Curso: Corpo de Musa', locked:false, desc:'', video:'https://www.youtube.com/watch?v=6GeBeEFuxcw'},
+  {n:'Avaliação Física Corpo de Musa', cat:'Curso: Corpo de Musa', locked:false, desc:'', video:'https://www.youtube.com/watch?v=qsW55xOnZZU'},
+  {n:'Plano alimentar Corpo de musa', cat:'Curso: Corpo de Musa', locked:false, desc:'', video:'https://www.youtube.com/watch?v=wdoTgzTGAdg'},
+  {n:'Balela plano alimentar Corpo de musa', cat:'Curso: Corpo de Musa', locked:false, desc:'', video:'https://www.youtube.com/watch?v=-NwPUIh5jqo'},
+  {n:'Fadiga Muscular Corpo de musa', cat:'Curso: Corpo de Musa', locked:false, desc:'', video:'https://www.youtube.com/watch?v=HlkAQ7ibq4c'},
+  {n:'O que você vai sentir Corpo de musa', cat:'Curso: Corpo de Musa', locked:false, desc:'', video:'https://www.youtube.com/watch?v=g0zab5B5ifg'},
+  {n:'Quantas vezes treinar Corpo de musa', cat:'Curso: Corpo de Musa', locked:false, desc:'', video:'https://www.youtube.com/watch?v=pxT9hQQPrnw'},
+  {n:'Porque você não consegue resultados expressivos com o treinamento!!', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/watch?v=wTOur77mYg0'},
+  {n:'Introdução ao Bracing', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/watch?v=hOISEbyv-bY'},
+  {n:'Como ajustar a cadeira extensora e flexora', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/watch?v=_3wEjxulemk'},
+  {n:'Abdução de quadril com caneleira- Variação para fibras posteriores de gmed', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/watch?v=Qywu4yhMJoo'},
+  {n:'Exercícios que não podem faltar no seu treino de glúteos -Parte 1', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/watch?v=RBq_OBCtK1w'},
+  {n:'Exercícios que não podem faltar no seu treino de glúteos -Parte 2', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/watch?v=GJwkXoLkc08'},
+  {n:'Exercícios que não podem faltar no seu treino de glúteos -Parte 3', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/watch?v=cXz9AiP2-Bo'},
+  {n:'COMO AUMENTAR GLÚTEOS E DEIXAR SEU BUMBUM DURINHO', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/watch?v=RD7gN0IrHJ4'},
+  {n:'Bora diminuir os erros a aumentar os acertos!!?', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/watch?v=EIaWDgiwURM'},
+  {n:'3 exercícios que vão transformar o seu bumbum PP em um bumbum GG', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/watch?v=vkpifTgG_lI'},
+  {n:'AGACHAMENTO OU CANELEIRAS PARA GLÚTEOS? Qual é o melhor?', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/watch?v=gtVli4ygY6c&sttick=0'},
+  {n:'3 exercícios que vão transformar o seu bumbum PP em um bumbum GG', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/watch?v=vkpifTgG_lI'},
+  {n:'Conteúdo do canal Studio', cat:'Conteúdo geral', locked:false, desc:'', video:'https://studio.youtube.com/channel/UCijPQX5Rjqkoi_hCAzLIf7g/videos/short?filter=%5B%5D&sort=%7B%22columnType%22%3A%22date%22%2C%22sortOrder%22%3A%22DESCENDING%22%7D'},
+  {n:'PARA GLÚTEOS MAIS VOLUMOSOS FAÇA ISSO!! 🍑🔥🔥🔥😳#teamthiagofernandes', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/8_w8niILq8Q'},
+  {n:'#gluteospoderosos', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/8_w8niILq8Q'},
+  {n:'PARA GLÚTEOS DE RESPEITO FAÇA ISSO!! #academia #personaltrainer #musculação', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/vQycL-uH9pA'},
+  {n:'#treinofeminino', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/vQycL-uH9pA'},
+  {n:'3 EXERCÍCIOS PODEROSOS PARA DEIXAR AS COSTAS BONITINHAS PARA USAR', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/iwxbMc_YaC4'},
+  {n:'BIQUÍNI NA PRAIA!', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/iwxbMc_YaC4'},
+  {n:'FAÇA ISSO E GANHE ATÉ 10cm DE GLÚTEOS !! #academia #gluteos #musculação', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/XuXB82PcZIc'},
+  {n:'#teamthiagofernandes', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/XuXB82PcZIc'},
+  {n:'#gluteosgrandes', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/0G7v5eMpkQk'},
+  {n:'FAÇA ISSO E GANHE ATÉ 10cm DE GLÚTEOS !! #academia #gluteos #musculação', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/XuXB82PcZIc'},
+  {n:'#teamthiagofernandes', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/XuXB82PcZIc'},
+  {n:'Extensão de quadril na polia com tronco inclinado', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/_Z19zMD6ams'},
+  {n:'Glúteos poderosos com Step up!! Para mais dicas para, deixa o seu like e se inscreva no', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/w2gHltMhrFc'},
+  {n:'canal!💪🏼', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/w2gHltMhrFc'},
+  {n:'DICA INFALÍVEL PARA AUMENTAR O SEU BUMBUM!', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/OjeWNdikcSA'},
+  {n:'#personalthiagofernandes', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/DOCVUmGNw8Y'},
+  {n:'QUANDO USAR STEP NO SEU TREINO???', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/bxh1v8Hmctc'},
+  {n:'Turbine os seus posteriores de coxas!! #fitness #musculação #definiçãomuscular', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/9ziP_10wW2U'},
+  {n:'#academia', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/shorts/9ziP_10wW2U'},
+  {n:'todos! TOP 25 MELHORES CELULARES para COMPRAR no FIM DO ANO! *Não', cat:'Conteúdo geral', locked:false, desc:'', video:'https://www.youtube.com/watch?v=7pjUy5TE6u4'}
 ];
 
-const categorias = ['Todos', 'Cursos completos', 'Introdução', 'Métodos de treino', 'Exercícios de coxa', 'Exercícios de glúteo', 'Nutrição'];
+const categorias = ['Todos', 'Cursos completos', 'Introdução', 'Métodos de treino', 'Exercícios de coxa', 'Exercícios de glúteo', 'Nutrição', 'Alongamentos', 'Mobilidades', 'Manobras respiratórias', 'Ajustes e orientações', 'Curso: Fit 30', 'Curso: Corpo de Musa', 'Curso: Seca barriga', 'Conteúdo geral'];
 let filtroAtivo = 'Todos';
 
 const filterRow = document.getElementById('filter-row');
@@ -2497,11 +2652,14 @@ function dividirVolumeEmDois(nomeExercicio, seriesTotal, repsAlvo){
 
 /* ===== ITEM 13: O GERADOR ===== */
 
-function obterPoolRealDoGrupo(grupoInterno){
+function obterPoolRealDoGrupo(grupoInterno, ambiente){
   const mapaGrupo = { 'Glúteo': 'Glúteos', 'Posterior': 'Isquiotibiais', 'Quadríceps': 'Quadríceps', 'Ombro': 'Ombros', 'Peito': 'Peito', 'Bíceps': 'Bíceps', 'Tríceps': 'Tríceps', 'Costas': 'Costas' };
   const grupoReal = mapaGrupo[grupoInterno] || grupoInterno;
-  const comVideo = exerciciosBanco.filter(function(e){ return e.grupo === grupoReal && e.video; });
-  return comVideo.length >= 3 ? comVideo : exerciciosBanco.filter(function(e){ return e.grupo === grupoReal; });
+  // Regra fixa da metodologia: treino de academia nunca recebe exercício de casa, e vice-versa
+  const ambienteAlvo = ambiente === 'Casa' ? 'Casa' : 'Academia';
+  const baseAmbiente = exerciciosBanco.filter(function(e){ return e.grupo === grupoReal && (e.ambiente || 'Academia') === ambienteAlvo; });
+  const comVideo = baseAmbiente.filter(function(e){ return e.video; });
+  return comVideo.length >= 3 ? comVideo : baseAmbiente;
 }
 
 function hashString(str){
@@ -2550,8 +2708,8 @@ function obterFamiliaBiomecanica(nomeExercicio){
   return null; // sem família conhecida (ex: exercícios de superiores) — cai pra agrupamento por grupo muscular só
 }
 
-function selecionarExerciciosVariados(grupoInterno, nomeAluna, quantidade, indiceCiclo, padroesJaUsados){
-  const pool = obterPoolRealDoGrupo(grupoInterno);
+function selecionarExerciciosVariados(grupoInterno, nomeAluna, quantidade, indiceCiclo, padroesJaUsados, ambiente){
+  const pool = obterPoolRealDoGrupo(grupoInterno, ambiente);
   if(pool.length === 0) return null;
   const seed = hashString(nomeAluna || '') + (indiceCiclo || 0) * 7;
   const selecionados = [];
@@ -2595,8 +2753,13 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
     if(grupo === 'Quadríceps' && perfil.direcionamentoQuadriceps === 'distal'){
       return sugerirExerciciosQuadriceps('distal').prioridade;
     }
-    const variados = selecionarExerciciosVariados(grupo, perfil.nomeAluna, 3, perfil.indiceCiclo, padroesJaUsadosNoDia);
-    return variados || bancoPorGrupo[grupo] || bancoPorGrupo['Pernas'];
+    const variados = selecionarExerciciosVariados(grupo, perfil.nomeAluna, 3, perfil.indiceCiclo, padroesJaUsadosNoDia, perfil.ambienteTreino);
+    if(variados) return variados;
+    // Regra fixa da metodologia: nunca cruza ambiente, nem no fallback de emergência.
+    // Se não achou exercício de Casa suficiente pro grupo, prefere ficar com menos exercícios
+    // a preencher com exercício de academia.
+    if(perfil.ambienteTreino === 'Casa') return [];
+    return bancoPorGrupo[grupo] || bancoPorGrupo['Pernas'];
   }
 
   const dias = [];
@@ -2638,7 +2801,7 @@ function gerarDiasSuperiores(perfil, numDias){
     const padroesUsadosNoDia = {};
 
     // Costas: variedade real do banco (51 opções), sempre protegida com 2-3 exercícios, nunca menos
-    const candidatosCostas = selecionarExerciciosVariados('Costas', (perfil.nomeAluna || '') + '_costas', 3, perfil.indiceCiclo);
+    const candidatosCostas = selecionarExerciciosVariados('Costas', (perfil.nomeAluna || '') + '_costas', 3, perfil.indiceCiclo, null, perfil.ambienteTreino);
     const nomesCostas = candidatosCostas || ['Remada Articular Aberta', 'Remada Articular Fechada', 'Crucifixo Inverso'];
     nomesCostas.forEach(function(n){ padroesUsadosNoDia[obterPalavraChaveMovimento(n.toUpperCase())] = true; });
     let ex = [
@@ -2652,15 +2815,17 @@ function gerarDiasSuperiores(perfil, numDias){
     // Ombro/Peito/Bíceps/Tríceps reais, alternando qual par recebe ênfase a cada dia (garante ≥2x/semana pra cada, em 3+ dias)
     const gruposSecundarios = (d % 2 === 0) ? ['Ombro', 'Peito'] : ['Bíceps', 'Tríceps'];
     gruposSecundarios.forEach(function(grupo){
-      const candidato = selecionarExerciciosVariados(grupo, (perfil.nomeAluna || '') + '_' + grupo, 1, perfil.indiceCiclo);
+      const candidato = selecionarExerciciosVariados(grupo, (perfil.nomeAluna || '') + '_' + grupo, 1, perfil.indiceCiclo, null, perfil.ambienteTreino);
       if(candidato && candidato[0]){
         ex.push(candidato[0] + ' · ' + (perfil.nivel === 'Avançado' ? 3 : 2) + 'x' + reps);
       }
     });
 
-    ex.push('Prancha ventral · 3x30s'); // isométrico de core, sempre por último no bloco de força
-    if(inclureGluteoMedio){
+    ex.push('Prancha ventral · 3x30s'); // isométrico de core, sem equipamento, funciona em qualquer ambiente
+    if(inclureGluteoMedio && perfil.ambienteTreino !== 'Casa'){
       ex.push(sugerirReforcoCruzado('Abdução de quadril na polia'));
+    } else if(inclureGluteoMedio){
+      ex.push('Abdução de quadril elástico · 3x15'); // versão sem polia, pra treino em casa
     }
     if(perfil.frequencia <= 3 || d % 2 === 0 || numDias <= 2){
       ex.push('Panturrilha em pé · 3x15');
@@ -2758,7 +2923,7 @@ function gerarTreinoSemanal(perfil){
           const nomesJaNoDia = dia.ex.map(function(l){ return l.split(' · ')[0].toUpperCase(); });
           const padroesJaNoDia = {};
           nomesJaNoDia.forEach(function(n){ padroesJaNoDia[obterPalavraChaveMovimento(n)] = true; });
-          const candidatos = selecionarExerciciosVariados(grupoDoDia, (perfil.nomeAluna || '') + '_extra' + tentativasAdicionar, 8, perfil.indiceCiclo);
+          const candidatos = selecionarExerciciosVariados(grupoDoDia, (perfil.nomeAluna || '') + '_extra' + tentativasAdicionar, 8, perfil.indiceCiclo, null, perfil.ambienteTreino);
           let escolhido = null;
           if(candidatos){
             escolhido = candidatos.find(function(nome){
@@ -2767,7 +2932,8 @@ function gerarTreinoSemanal(perfil){
           }
           if(!escolhido){
             // A amostra embaralhada não tinha opção válida — antes de desistir, busca direto no banco inteiro (não só na amostra)
-            const todoOBanco = exerciciosBanco.filter(function(e){ return (e.grupo || e.categoria) === grupoDoDia; });
+            const ambienteAlvoResgate = perfil.ambienteTreino === 'Casa' ? 'Casa' : 'Academia';
+            const todoOBanco = exerciciosBanco.filter(function(e){ return (e.grupo || e.categoria) === grupoDoDia && (e.ambiente || 'Academia') === ambienteAlvoResgate; });
             const candidatoDeResgate = todoOBanco.find(function(e){
               return nomesJaNoDia.indexOf(e.nome.toUpperCase()) === -1 && !padroesJaNoDia[obterPalavraChaveMovimento(e.nome)];
             });
@@ -3179,7 +3345,8 @@ function construirPerfilAluna(a){
     temTecnicaAprovada: temTecnicaAprovada(a),
     estrategiaAtual: estrategia.nome,
     estrategiaMotivo: estrategia.motivo,
-    estrategiaVolumeMultiplicador: estrategia.volumeMultiplicador
+    estrategiaVolumeMultiplicador: estrategia.volumeMultiplicador,
+    ambienteTreino: a.ambienteTreino === 'Casa' ? 'Casa' : 'Academia'
   };
 }
 
@@ -3368,6 +3535,7 @@ async function executarSalvamentoPerfilAluna(nomeAluna){
         duracaoPlanoDias: a.duracaoPlanoDias || null,
         tabataSugestaoRespondida: a.tabataSugestaoRespondida || false,
         composicaoAtual: a.composicaoAtual || null,
+        ambienteTreino: a.ambienteTreino || 'Academia',
         composicaoHistorico: a.composicaoHistorico || [],
         pesoHistorico: a.pesoHistorico || []
       }
@@ -3381,6 +3549,16 @@ function editarNivelAluna(nomeAluna, novoNivel){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
   a.nivel = novoNivel;
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+  mostrarPreviewMudancaTreino(nomeAluna);
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+}
+
+function editarAmbienteTreinoAluna(nomeAluna, novoAmbiente){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  a.ambienteTreino = novoAmbiente;
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
   mostrarPreviewMudancaTreino(nomeAluna);
@@ -4021,8 +4199,12 @@ function openAlunaDetail(i){
         '<select class="form-select" style="font-size:13px;padding:6px;margin-top:4px;" onchange="editarFrequenciaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)">' +
           ['2x por semana','3x por semana','4x por semana','5x por semana','6x por semana'].map(function(f){ return '<option value="' + f + '"' + (a.freq === f ? ' selected' : '') + '>' + f + '</option>'; }).join('') +
         '</select></div>' +
+      '<div class="stat-card"><p class="stat-label">Treina em</p>' +
+        '<select class="form-select" style="font-size:13px;padding:6px;margin-top:4px;" onchange="editarAmbienteTreinoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)">' +
+          ['Academia','Casa'].map(function(amb){ return '<option value="' + amb + '"' + ((a.ambienteTreino || 'Academia') === amb ? ' selected' : '') + '>' + amb + '</option>'; }).join('') +
+        '</select></div>' +
     '</div>' +
-    '<p style="font-size:11px;color:var(--text-faint);margin:-8px 0 12px;">Ajustar aqui atualiza automaticamente toda a estrutura de treino gerada</p>' +
+    '<p style="font-size:11px;color:var(--text-faint);margin:-8px 0 12px;">Ajustar aqui atualiza automaticamente toda a estrutura de treino gerada — o gerador nunca mistura exercício de academia com exercício de casa</p>' +
     '<div id="preview-mudanca-area"></div>' +
     (a.imc ? '<p class="section-label">Composição corporal</p><div class="info-box"><p class="txt">' + a.peso + ' · ' + a.altura + '<br>IMC ' + a.imc + '</p></div>' : '') +
     renderDirecionamentoTecnico(a) +
@@ -4630,6 +4812,168 @@ function showPersonalView(which){
 }
 
 const exerciciosBanco = [
+  {nome:'REMADA UNILATERAL COM HALTERES', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=kS0KNWUgU7I'},
+  {nome:'REMADA ABERTA COM HALTERES SUP', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=giQfgYKYrGc'},
+  {nome:'STIFF UNILATERAL COM HALTERES', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=GyDrpYEPWQw'},
+  {nome:'STIFF UNILATERAL SEM APOIO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=E6QF1VWS1qY'},
+  {nome:'DESENVOLVIMENTO FRONTAL COM MOCHILA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=RcHEOOACjHk'},
+  {nome:'FLEXÃO DE COTOVELO MOCHILA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=X42BMTwuPMA'},
+  {nome:'CADEIRA FLEXORA YES', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=ocV8ovygjkM'},
+  {nome:'CADEIRA ABDUTORA INCLINADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=0ICPVbRiqNM'},
+  {nome:'AGACHAMENTO JACK YES', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=jGooGCaCDI8'},
+  {nome:'TRICEPS COM BARRA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=CUCYMqymsZ4'},
+  {nome:'TRICEPS POLIA ALTA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=jHd_qtTZINc'},
+  {nome:'TRÍCEPS COICE POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=2juXdMcTg28'},
+  {nome:'CRUCIFIXO INVERSO COM APOIO', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=5WCO_sbLEAk'},
+  {nome:'CRUCIFIXO INVERSO UNILATERAL NA POLIA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=m85a-zp454s'},
+  {nome:'REMADA ABERTA UNILATERAL NA POLIA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=M-sat6gp-HI'},
+  {nome:'PULLDOWN COM BARRA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=opdOQXj2Qe8'},
+  {nome:'TRICEPS COM BARRA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=Byff4QmSEc8'},
+  {nome:'TRICEPS CORDA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=wOS8UdARevY'},
+  {nome:'PULLDOWN COM CORDA POLIA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=GMonbLwBHqQ'},
+  {nome:'FACEPULL COM', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=j_gbLC6eHXQ'},
+  {nome:'CADEIRA ABDUTORA INCLINADO - YOUTUBE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=NQRcrs2NJ5E'},
+  {nome:'CADEIRA FLEXORA YES - YOUTUBE', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=HxgLLgslej4'},
+  {nome:'CRUCIFIXO INVERSO COM APOIO - YOUTUBE', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=IbhLDWWnGxc'},
+  {nome:'CRUCIFIXO COM HALTERES - YOUTUBE', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=eHUtTovc3Zg'},
+  {nome:'DOUBLE BICEPS - YOUTUBE', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=Sz_DKHXqhBA'},
+  {nome:'EXTENSÃO DE QUADRIL POLIA - YOUTUBE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=uZrno5HI6Cc'},
+  {nome:'EXTENSÃO DE QUADRIL POLIA - YOUTUBE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=uZrno5HI6Cc'},
+  {nome:'MANGUITO DEITADO', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=nDUGYVKYGgI&sttick=0'},
+  {nome:'PULLDOWN COM BARRA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=OaDynv2jISg&sttick=0'},
+  {nome:'REMADA ABERTA COM BARRA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=u51yEma4v3M'},
+  {nome:'REMADA ABERTA POLIA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=-AhBdO6ngdE&sttick=0'},
+  {nome:'REMADA FECHADA UNILATERAL NA POLIA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=6_sUwRdMZNE&sttick=0'},
+  {nome:'PUXADA ABERTA FRONTAL - YOUTUBE', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=QV4WboLAVj0'},
+  {nome:'PUSH UP PLUS - VARIAÇÃO - YOUTUBE', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=pdVvEmF97Rw'},
+  {nome:'PUSH UP COM BARRA - YOUTUBE', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=wlxPLG--5oo'},
+  {nome:'PUSH UP PLUS EM 4 APOIOS', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=87IHSrAHdq8'},
+  {nome:'PUSH UP COM BARRA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=wlxPLG--5oo'},
+  {nome:'CRUCIFIXO NA MÁQUINA -FLY', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=L4YtdisHldk'},
+  {nome:'ROSCA SCOTT NA MÁQUINA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=cgciNALjjT4&sttick=0'},
+  {nome:'CADEIRA ABDUTORA EM PÉ 45º', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=1Kye0sDSAw8'},
+  {nome:'AFUNDO ERROS COMUNS E CORREÇÕES', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=JdwYpX8Qz_k'},
+  {nome:'EXTENSÃO DE QUADRIL NA POLIA - TRONCO INCLINADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=dvsgo4Gj-hA'},
+  {nome:'EXTENSÃO DE QUADRIL NA POLIA - TRONCO INCLINADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=dvsgo4Gj-hA'},
+  {nome:'EXTENSÃO DE QUADRIL COM CANELEIRA NO BANCO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=5BuJFrdn_AY'},
+  {nome:'PULLOVER COM HALTERES', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=LvrEvExCzV8'},
+  {nome:'REMADA ABERTA POLIA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=-AhBdO6ngdE'},
+  {nome:'ROSCA CONCENTRADA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=ROGbtTlxs0Q'},
+  {nome:'ROSCA DIRETA 21', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=l-MktIlWRZg'},
+  {nome:'STIFF NA POLIA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=lBlWY-illWg'},
+  {nome:'TRÍCEPS CORDA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=--sJN_gWRUc'},
+  {nome:'TRICEPS POLIA ALTA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=abdcKPAuyxM'},
+  {nome:'CADEIRA ABDUTORA - VARIAÇÃO TRONCO INCLINADO A FRENTE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=aKzeShloHJs'},
+  {nome:'EXTENSÃO DE QUADRIL COM CANELEIRA NO BANCO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=5BuJFrdn_AY'},
+  {nome:'EXTENSÃO DE QUADRIL NA MÁQUINA - VARIAÇÃO PARA MAIOR AMPLITUDE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=IWpwUAgwnpI'},
+  {nome:'ABDUÇÃO DE QUADRIL COM ROTAÇÃO EXTERNA NA POLIA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=lhw9UXBJ35Q'},
+  {nome:'ABDUÇÃO DE QUADRIL COM CANELEIRA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=fE5qN5-6VUI'},
+  {nome:'4 APOIOS COM CANELEIRA - ALTO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=aOZ5aeoTyX0'},
+  {nome:'EXTENSÃO DE QUADRIL CURTINHAS NO ALTO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=QXrJE4FF-TM'},
+  {nome:'PUXADA ABERTA ARTICULADA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=YCK83Z7iQX8'},
+  {nome:'SUPINO INCLINADO COM BARRA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=Py7wmd4Mw1Y'},
+  {nome:'LEG PRESS 45º', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=qx2g8W6qoaQ'},
+  {nome:'LEG PRESS 45º', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=qx2g8W6qoaQ'},
+  {nome:'TRÍCEPS TESTA COM BARRA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=gANUNaWe8WE'},
+  {nome:'REMADA FECHADA ARTICULAR - YOUTUBE', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=q-jGW3oHTJg'},
+  {nome:'TRÍCEPS FRANCÊS BILATERAL - YOUTUBE', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=zogtbslROLk'},
+  {nome:'STEP UP', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=NOvtICHyccY'},
+  {nome:'CADEIRA EXTENSORA - TRONCO INCLINADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=CpQevcceBhg'},
+  {nome:'POLICHINELO', grupo:'Aeróbico', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=rJbrYLTNymc'},
+  {nome:'AFUNDO COM HALTERES', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=eyhLRHuEjYA'},
+  {nome:'TERRA SUMÔ COM BARRA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=xX3YS6MpyTQ'},
+  {nome:'LEVANTAMENTO TERRA - YOUTUBE', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=w2W-WtAQj2I'},
+  {nome:'AGACHAMENTO SUMÔ COM HALTERES - YOUTUBE', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=6zoYEflTEYM'},
+  {nome:'RETRAÇÃO DE ESCÁPULAS - YOUTUBE', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=T1MvJi_mCAg'},
+  {nome:'VAI E VEM DE FRENTE E COSTAS', grupo:'Aeróbico', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/eQzb92p_lZI'},
+  {nome:'PULDOWN COM BARRA NA POLIA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/shlGmlzAUGE'},
+  {nome:'RETRAÇÃO DE ESCÁPULAS', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/d15LLZ_Uxvo'},
+  {nome:'ROSCA DIRETA ALTERNADA COM ISOMETRIA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/XYOtweuFkzA'},
+  {nome:'ROSCA DIRETA ALTERNADA COM HALTERES', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/Tzz8CUv-LNk'},
+  {nome:'EXTENSÃO HORIZONTAL UNILATERAL NA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/qCQOT8Py038'},
+  {nome:'TRÍCEPS COICE NA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/uFaZr3cSM7A'},
+  {nome:'TRÍCEPS UNILATERAL NA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/udH-RZ2Wb2Y'},
+  {nome:'TRÍCEPS COICE UNILATERAL NA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/cQ7TeC_rdlg'},
+  {nome:'MANGUITO ROTAÇÃO EXTERNA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/MizDY8p0gDY'},
+  {nome:'MANGUITO ROTAÇÃO EXTERNA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/MizDY8p0gDY'},
+  {nome:'DESENVOLVIMENTO FRONTAL COM BARRA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/n0sRwlEbFRY'},
+  {nome:'DESENVOLVIMENTO FRONTAL COM BARRA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/n0sRwlEbFRY'},
+  {nome:'ELEVAÇÃO LATERAL INCLINADA NA ROLDANA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/IVqSmYZ2awM'},
+  {nome:'ELEVAÇÃO LATERAL DECLINADA NA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/RKZcUyuDXB4'},
+  {nome:'ELEVAÇÃO LATERAL NA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/w9ebX7LO9SI'},
+  {nome:'ELEVAÇÃO LATERAL NA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/w9ebX7LO9SI'},
+  {nome:'LEG HORIZONTAL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/0KLrU6JXOUE'},
+  {nome:'PANTURRILHA SENTADO NA MÁQUINA', grupo:'Panturrilha', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/t8vU7HK_wcU'},
+  {nome:'REMADA FECHADA COM APOIO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/6lAxaZwpfDg'},
+  {nome:'REMADA ABERTA COM APOIO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/lmr6pVTTJT0'},
+  {nome:'AFUNDO NO SQUAT', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/4NuNYnr1dbs'},
+  {nome:'AGACHAMENTO FRONTAL NO SQUAT ( ESTÍMULO GLÚTEOS )', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/-WxH7ND9NEg'},
+  {nome:'AGACHAMENTO FRONTAL NO SQUAT ( ESTÍMULO GLÚTEOS )', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/-WxH7ND9NEg'},
+  {nome:'STIFF NA MÁQUINA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/iHJxAoJYGBE'},
+  {nome:'AGACHAMENTO SUMÔ NA MÁQUINA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/vMJLDXo8MDw'},
+  {nome:'TERRA SUMÔ NA MÁQUINA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/nq14XPTvfHs'},
+  {nome:'SUPINO RETO NA MÁQUINA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/ILPmqVVNDfs'},
+  {nome:'SUPINO INCLINADO NA MÁQUINA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/po7Hmy5Lths'},
+  {nome:'SUPINO DECLINADO NA MÁQUINA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/ULZctWY2bas'},
+  {nome:'REMADA FECHADA PRONADA NA MÁQUINA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/aYzUsR5mCY0'},
+  {nome:'CADEIRA FLEXORA UNILATERAL', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/2YEghbjQQwU'},
+  {nome:'AGACHAMENTO PENDULAR', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/zxhM2HGb4tQ'},
+  {nome:'REMADA CURVADA ABERTA NA MÁQUINA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/SdGuFWsi4Wg'},
+  {nome:'REMADA CURVADA FECHADA NA MÁQUINA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/CyFwxuxdD1Y'},
+  {nome:'REMADA ABERTA COM APOIO NA MÁQUINA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/xxhfjVcemrk'},
+  {nome:'REMADA FECHADA COM APOIO NA MÁQUINA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/Krg5OX5fTXA'},
+  {nome:'REMADA ABERTA PRONADA NA MÁQUINA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/2ZLbfQoVBas'},
+  {nome:'PUXADA FRONTAL ABERTA ARTICULADA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/jnSfxuvJ6Lg'},
+  {nome:'ABDUÇÃO DE QUADRIL NA POLIA COM ROTAÇÃO - YOUTUBE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/VrSHOnWrlYQ'},
+  {nome:'EXTENSÃO DE QUADRIL COM APOIO NO BANCO - YOUTUBE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/HmcyJwfM92w'},
+  {nome:'EXTENSÃO DE QUADRIL NA POLIA COM TRONCO INCLINADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/_Z19zMD6ams'},
+  {nome:'REMADA FECHADA NA MAQUINA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/4DyI2sMROzQ'},
+  {nome:'POLICHINELO (variação)', grupo:'Aeróbico', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/RraVgclk9UM'},
+  {nome:'TRÍCEPS FRANCÊS UNILATERAL', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/Nolk5Rqh5SI'},
+  {nome:'BOM DIA EM CASA', grupo:'Isquiotibiais', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/ZG44uKbHK4Q'},
+  {nome:'STIFF UNILATERAL EM CASA', grupo:'Isquiotibiais', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/6oPT1WncH8U'},
+  {nome:'GLÚTEO 4 APOIOS JOELHO FLETIDO EM CASA', grupo:'Glúteos', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/4M4f8ZBLFkA'},
+  {nome:'GLÚTEO 4 APOIOS JOELHO ESTENDIDO EM CASA', grupo:'Glúteos', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/xb_lnHwwZE4'},
+  {nome:'CRUCIFIXO DEITADO EM CASA', grupo:'Peito', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/Zu_EiENKB-s'},
+  {nome:'SUPINO RETO COM BARRA EM CASA', grupo:'Peito', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/4HRd2iAIZgQ'},
+  {nome:'TRÍCEPS SUPINADO EM CASA', grupo:'Tríceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/UNBGmEOLDtA'},
+  {nome:'TRÍCEPS SUPINADO EM CASA', grupo:'Tríceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/UNBGmEOLDtA'},
+  {nome:'TRÍCEPS TESTA EM CASA', grupo:'Tríceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/bpp_l5Gdv7c'},
+  {nome:'TRÍCEPS FRANCÊS BILATERAL EM CASA', grupo:'Tríceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/rT5dEQzyZy8'},
+  {nome:'TRÍCEPS FRANCÊS UNILATERAL EM CASA', grupo:'Tríceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/ZgC9-xF_5Zw'},
+  {nome:'FLEXÃO NO SOLO EM CASA', grupo:'Peito', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/PD8IJVrCIF0'},
+  {nome:'REMADA ABERTA CURVADA COM BARRA EM CASA', grupo:'Costas', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/4rIMCTLueQA'},
+  {nome:'ABDUÇÃO DE QUADRIL CONTRA O SOLO EM CASA', grupo:'Glúteos', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/tTwLVwhe8Bg'},
+  {nome:'BURP ADAPTADO!! EM CASA', grupo:'Abdômen', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/CtnnoxhzD7U'},
+  {nome:'EXTENSÃO DE OMBROS EM CASA', grupo:'Ombros', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/wJCjio_nhjk'},
+  {nome:'AGACHAMENTO FRONTAL EM CASA', grupo:'Quadríceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/oMoGcwdus3w'},
+  {nome:'CADEIRINHA EM CASA', grupo:'Quadríceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/BOHl-YMWFnk'},
+  {nome:'EXERCÍCIO PASSADA EM CASA', grupo:'Quadríceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/XpUCJjVJloI'},
+  {nome:'ELEVAÇÃO FRONTAL PEGADA NEUTRA EM CASA', grupo:'Ombros', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/2KOu-qMUffQ'},
+  {nome:'CRUCIFIXO INVERSO COM PESO EM CASA', grupo:'Peito', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/mtwV9vh1Yrc'},
+  {nome:'REMADA ABERTA COM PESO EM CASA', grupo:'Costas', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/HOD-Um14gFg'},
+  {nome:'REMADA NEUTRA CURVADA EM CASA', grupo:'Costas', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/mdtC-9_avxY'},
+  {nome:'REMADA NEUTRA CURVADA EM CASA', grupo:'Costas', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/mdtC-9_avxY'},
+  {nome:'ELEVAÇÃO FRONTAL COM BARRA EM CASA', grupo:'Ombros', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/dVpeHSXqbis'},
+  {nome:'ELEVAÇÃO LATERAL EM CASA', grupo:'Ombros', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/7CpesOm6Z5U'},
+  {nome:'DESENVOLVIMENTO FRONTAL EM CASA', grupo:'Ombros', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/Giue8EVBUdw'},
+  {nome:'SKIPPING EM CASA', grupo:'Aeróbico', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/6F0ModFWzIg'},
+  {nome:'POLICHINELO EM CASA', grupo:'Aeróbico', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/6AIlJkFNrKA'},
+  {nome:'ROSCA BÍCEPS COM BARRA EM CASA', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/NpnW6BzuNkE'},
+  {nome:'ROSCA BÍCEPS COM BARRA EM CASA', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/NpnW6BzuNkE'},
+  {nome:'ROSCA BÍCEPS ALTERNADA EM CASA', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/VbneTGKw5pE'},
+  {nome:'ELEVAÇÃO FRONTAL ALTERNADA EM CASA', grupo:'Ombros', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/kGQP3CIow4s'},
+  {nome:'ELEVAÇÃO DIAGONAL EM CASA', grupo:'Ombros', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/7_9oQNFkqU0'},
+  {nome:'ELEVAÇÃO DIAGONAL EM CASA', grupo:'Ombros', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/7_9oQNFkqU0'},
+  {nome:'EXTENSÃO HORIZONTAL DE OMBROS COM ELÁSTICO', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'Elástico', video:'https://www.youtube.com/shorts/aVfjcMPZkJ4'},
+  {nome:'REMADA ABERTA ELÁSTICO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'Elástico', video:'https://www.youtube.com/shorts/soytMrqBEBs'},
+  {nome:'PULLDOWN ELÁSTICO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'Elástico', video:'https://www.youtube.com/shorts/Zg9L-zYE0wI'},
+  {nome:'ROTAÇÃO EXTERNA DE OMBROS ELÁSTICO', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'Elástico', video:'https://www.youtube.com/shorts/n6f8dVdeywM'},
+  {nome:'EXTENSÃO HORIZONTAL OMBRO ELÁSTICO', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'Elástico', video:'https://www.youtube.com/shorts/mrNPUA1dmsc'},
+  {nome:'FLEXÃO COTOVELO ELÁSTICO', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'Elástico', video:'https://www.youtube.com/shorts/dlGMepDtjWg'},
+  {nome:'CRUCIFIXO INVERSO CM ELÁSTICO', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'Elástico', video:'https://www.youtube.com/'},
+  {nome:'REMADA CURVADA ABERTA ELÁSTICO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'Elástico', video:'https://www.youtube.com/shorts/ZCzFQX8LDJM'},
+  {nome:'ABDUÇÃO DE QUADRIL COM ELÁSTICO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'Elástico', video:'https://www.youtube.com/shorts/me5FxLpf2LY'},
   {nome:'FLEXÃO NÓRDICA REVERSA', grupo:'Quadríceps', categoria:'Quadríceps', ambiente:'Academia', nivel:'Avançado', metodo:'Nenhum', video:''},
   {nome:'FLEXÃO NO SOLO ADAPTADA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/uY3Y9eF79iw'},
   {nome:'CRUCIFIXO INVERSO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/mtwV9vh1Yrc'},
@@ -5014,6 +5358,12 @@ function renderExerciciosLista(){
         renderExerciciosLista();
       };
       el.appendChild(seletorMover);
+      const btnExcluir = document.createElement('span');
+      btnExcluir.className = 'tag';
+      btnExcluir.style.cssText = 'display:inline-block;margin-top:6px;margin-left:6px;background:rgba(226,163,61,0.15);color:#E2A33D;cursor:pointer;';
+      btnExcluir.textContent = 'Excluir';
+      btnExcluir.onclick = function(ev){ ev.stopPropagation(); excluirExercicioBanco(e.nome); };
+      el.appendChild(btnExcluir);
     } else {
       el.onclick = function(){ playExercicioVideo(e.nome); };
     }
@@ -5308,6 +5658,14 @@ function playConteudoMetodo(nome){
     '<p class="page-sub">' + c.desc + '</p>';
 }
 
+async function excluirExercicioBanco(nome){
+  if(!confirm('Excluir "' + nome + '" do banco de exercícios? Isso não pode ser desfeito, e vale pra sempre (mesmo depois de atualizar a página).')) return;
+  const idx = exerciciosBanco.findIndex(function(e){ return e.nome === nome; });
+  if(idx !== -1) exerciciosBanco.splice(idx, 1);
+  renderExerciciosLista();
+  await salvarCatalogoPersonal('exercicio_excluido', nome, { nome: nome });
+}
+
 async function salvarCatalogoPersonal(tipo, chave, dados){
   if(!supabaseClient) return;
   try {
@@ -5342,6 +5700,15 @@ async function carregarCatalogoPersonal(){
         if(!jaExisteConteudo) conteudos.push(row.dados);
       }
     });
+
+    // Processa exclusões por último, pra garantir que remove mesmo que algo tenha tentado re-adicionar antes
+    linhas.forEach(function(row){
+      if(row.tipo === 'exercicio_excluido'){
+        const idx = exerciciosBanco.findIndex(function(e){ return e.nome === row.dados.nome; });
+        if(idx !== -1) exerciciosBanco.splice(idx, 1);
+      }
+    });
+
     renderExerciciosChips();
   } catch(erroDeRede){
     console.warn('Sem conexão pra carregar o catálogo salvo agora:', erroDeRede);
@@ -5987,15 +6354,34 @@ function setActive(name){
   try { localStorage.setItem('musaUltimaTela', JSON.stringify({ view: name, detailDia: (name === 'detail' ? detailDiaAtual : null) })); } catch(e){}
 }
 
+const abasFixasAluna = ['home', 'dados', 'mentoria', 'progresso'];
+
 function openLevel2(which){
   level2 = which;
   setActive(which);
-  document.getElementById('backbar').style.display = 'flex';
+
+  const ehAbaFixaDaAluna = sessaoTipo === 'aluna' && abasFixasAluna.indexOf(which) !== -1;
+  document.getElementById('backbar').style.display = ehAbaFixaDaAluna ? 'none' : 'flex';
+  document.getElementById('top-logo-fixa').style.display = ehAbaFixaDaAluna ? 'flex' : 'none';
+  document.getElementById('bottom-nav-fixa').style.display = ehAbaFixaDaAluna ? 'flex' : 'none';
+  if(ehAbaFixaDaAluna) atualizarNavAtiva(which);
+
   document.getElementById('backlabel').textContent = (which === 'personal') ? 'Sair' : 'Voltar para o início';
   if(which === 'personal'){ showPersonalView('dashboard'); carregarCatalogoPersonal(); }
   if(which === 'chatia'){ inicializarChatIA(); }
   if(which === 'home' && typeof renderHome === 'function'){ renderHome(); }
   if(which === 'dados' && typeof renderAvaliacoes === 'function'){ renderAvaliacoes(); }
+  if(which === 'progresso' && typeof renderMeuProgresso === 'function'){ renderMeuProgresso(); }
+}
+
+function atualizarNavAtiva(which){
+  document.querySelectorAll('.bottom-nav-item').forEach(function(el){
+    el.classList.toggle('ativo', el.getAttribute('data-nav') === which);
+  });
+}
+
+function irParaAbaFixa(which){
+  openLevel2(which);
 }
 
 /* ===== CHAT DE IA REAL ===== */
@@ -6850,9 +7236,6 @@ function calcularProbabilidadeSucesso(nome){
   const respNutricional = nutriStats.temDados ? nutriStats.respostaNutricional : 50;
   const potGordura = nutriStats.temDados ? nutriStats.potencialGanhoGordura : 30;
 
-  // Constância pesa mais (é o maior preditor isolado), seguida de progressão e recuperação.
-  // Nutrição entra dos dois lados: potencial de hipertrofia/resposta nutricional somam,
-  // potencial de ganho de gordura (invertido) subtrai, "muita coisa errada" puxa a probabilidade pra baixo de verdade.
   const bruto =
     0.30 * pctConstancia +
     0.20 * capProgressao +
@@ -6861,7 +7244,21 @@ function calcularProbabilidadeSucesso(nome){
     0.10 * respNutricional +
     0.10 * (100 - potGordura);
 
-  return Math.max(10, Math.min(97, Math.round(bruto)));
+  const score = Math.max(10, Math.min(97, Math.round(bruto)));
+  registrarHistoricoDnaScore(nome, score);
+  return score;
+}
+
+// Guarda um ponto por semana, sem duplicar, pra poder plotar a evolução em "Meu Progresso"
+function registrarHistoricoDnaScore(nome, score){
+  const prog = getProgressoAluna(nome);
+  if(!prog.dnaScoreHistorico) prog.dnaScoreHistorico = [];
+  const jaTemEssaSemana = prog.dnaScoreHistorico.find(function(r){ return r.semana === prog.semana; });
+  if(jaTemEssaSemana){
+    jaTemEssaSemana.score = score; // atualiza, caso o score tenha mudado dentro da mesma semana
+  } else {
+    prog.dnaScoreHistorico.push({ semana: prog.semana, score: score, data: new Date().toISOString().slice(0,10) });
+  }
 }
 
 /* ===== REGRAS DE COMBINAÇÃO (BI-SET / TRI-SET) ===== */
@@ -7195,6 +7592,99 @@ function ajusteRecuperacaoPorIdade(idade){
     return { ajuste: -4, nota: 'A partir dessa faixa etária é comum a perimenopausa começar a influenciar a recuperação, nada preocupante, só um sinal pra observar com mais atenção.' };
   }
   return { ajuste: 0, nota: '' };
+}
+
+// ===== TELA "MEU PROGRESSO" — cruza dados que já calculamos em outros lugares, numa visão única =====
+function renderMeuProgresso(){
+  const container = document.getElementById('area-progresso-conteudo');
+  if(!container) return;
+  const nome = NOME_ALUNA_LOGADA;
+  const a = alunasPersonal.find(function(x){ return x.nome === nome; });
+  if(!a){ container.innerHTML = ''; return; }
+
+  const score = calcularProbabilidadeSucesso(nome);
+  const comparativoScore = calcularComparativoScore(nome);
+  const prog = getProgressoAluna(nome);
+  const comparativoSemana = calcularComparativoSemanal(nome);
+
+  let html = '';
+
+  // DNA Score + comparativo real
+  html += '<div class="dna-score-card" onclick="openDetail(\'dna\')">' +
+    '<div class="dna-score-left">' +
+      '<p class="dna-score-label">DNA SCORE</p>' +
+      '<p class="dna-score-numero">' + (score != null ? score : '--') + '</p>' +
+      '<p class="dna-score-comparativo" style="color:' + (comparativoScore != null && comparativoScore > 0 ? 'var(--success)' : 'var(--text-faint)') + ';">' +
+        (comparativoScore == null ? 'Aguardando dados suficientes' : (comparativoScore > 0 ? '▲ +' : (comparativoScore < 0 ? '▼ ' : '')) + comparativoScore + '% vs. semana anterior') +
+      '</p>' +
+    '</div>' +
+  '</div>';
+
+  // Linha do tempo de composição (peso/gordura), cruzando com o que já construímos
+  html += '<p class="section-label" style="margin-top:20px;">Linha do tempo</p>';
+  const historico = (a.composicaoHistorico || []).slice();
+  if(a.composicaoAtual) historico.push(Object.assign({ semana: prog.semana, atual: true }, a.composicaoAtual));
+  if(historico.length === 0){
+    html += '<p class="txt" style="color:var(--text-faint);">Ainda sem registros de composição pra montar a linha do tempo. Registra na aba Composição corporal.</p>';
+  } else {
+    html += historico.map(function(reg, i){
+      const label = reg.atual ? 'Hoje' : (reg.data || ('Semana ' + reg.semana));
+      const partes = [];
+      if(reg.peso != null) partes.push(String(reg.peso).replace('.',',') + ' kg');
+      if(reg.gordura != null) partes.push(String(reg.gordura).replace('.',',') + '% gordura');
+      return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">' +
+        '<div style="width:10px;height:10px;border-radius:50%;background:' + (reg.atual ? 'var(--gold-soft)' : 'var(--border-strong)') + ';flex-shrink:0;"></div>' +
+        '<div><p style="font-size:12px;font-weight:600;margin:0;">' + label + '</p><p style="font-size:11px;color:var(--text-faint);margin:0;">' + (partes.join(' · ') || 'sem detalhe') + '</p></div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Evolução por pilares, reaproveitando o comparativo semanal já calculado
+  html += '<p class="section-label" style="margin-top:20px;">Evolução por pilares</p>';
+  const pilares = [
+    { nome: 'Constância', valor: comparativoSemana.constancia },
+    { nome: 'Progressão de carga', valor: comparativoSemana.progressao },
+    { nome: 'Nutrição', valor: comparativoSemana.nutricao },
+    { nome: 'Recuperação', valor: comparativoSemana.recuperacao }
+  ];
+  html += pilares.map(function(p){
+    const semDado = p.valor == null || isNaN(p.valor);
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">' +
+      '<span style="font-size:13px;">' + p.nome + '</span>' +
+      '<span style="font-size:13px;font-weight:600;color:' + (semDado ? 'var(--text-faint)' : (p.valor >= 0 ? 'var(--success)' : 'var(--gold-soft)')) + ';">' +
+        (semDado ? 'sem dado ainda' : (p.valor > 0 ? '▲ +' : (p.valor < 0 ? '▼ ' : '')) + p.valor + '%') +
+      '</span>' +
+    '</div>';
+  }).join('');
+
+  // Gráfico simples de evolução do DNA Score
+  html += '<p class="section-label" style="margin-top:20px;">Evolução do DNA Score</p>';
+  const historicoScore = prog.dnaScoreHistorico || [];
+  if(historicoScore.length < 2){
+    html += '<p class="txt" style="color:var(--text-faint);">Ainda precisa de mais semanas registradas pra montar o gráfico de evolução.</p>';
+  } else {
+    const max = Math.max.apply(null, historicoScore.map(function(r){ return r.score; }));
+    const min = Math.min.apply(null, historicoScore.map(function(r){ return r.score; }));
+    const faixa = Math.max(1, max - min);
+    html += '<div style="display:flex;align-items:flex-end;gap:6px;height:80px;padding:10px 0;">' +
+      historicoScore.map(function(r){
+        const alturaPct = 20 + ((r.score - min) / faixa) * 80;
+        return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">' +
+          '<div style="width:100%;height:' + alturaPct + 'px;background:linear-gradient(180deg,#F4D9A5,#E8C58A);border-radius:4px 4px 0 0;"></div>' +
+          '<span style="font-size:9px;color:var(--text-faint);">S' + r.semana + '</span>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+
+  // Botão pro Shape Analysis, desligado por enquanto
+  html += '<p class="section-label" style="margin-top:20px;">Shape Analysis</p>' +
+    '<div class="info-box" style="opacity:0.6;">' +
+      '<p class="lbl">Em breve</p>' +
+      '<p class="txt">Comparação visual de fotos ao longo do tempo. Estamos preparando esse material — assim que estiver pronto, avisamos por aqui.</p>' +
+    '</div>';
+
+  container.innerHTML = html;
 }
 
 function calcularEstatisticasAluna(nome){
