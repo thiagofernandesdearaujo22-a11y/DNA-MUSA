@@ -628,6 +628,11 @@
         <h1 class="page-title" style="margin-top:0;">Biblioteca de conteúdo</h1>
         <p class="page-sub">Isso alimenta diretamente a Mentoria das alunas</p>
 
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="mostrarFormularioCurso()"><i class="ti ti-school" style="margin-right:6px;"></i>Criar curso</button>
+        <div id="cursos-list-personal"></div>
+        <div id="form-curso-area"></div>
+
+        <p class="section-label" style="margin-top:18px;">Todo o conteúdo (vídeos soltos)</p>
         <div id="conteudo-list-personal"></div>
 
         <p class="section-label" style="margin-top:18px;">Adicionar conteúdo</p>
@@ -823,6 +828,7 @@ window.addEventListener('unhandledrejection', function(evento){
 
 <script>
 let level2 = null;
+let sessaoTipo = null; // 'aluna' | 'personal' — declarado cedo de propósito, é usado logo no primeiro render da tela
 
 const faseAtual = 'Fase 1 · Emagrecimento (override por IMC)';
 let dias = [
@@ -1403,10 +1409,24 @@ categorias.forEach(function(cat){
   filterRow.appendChild(chip);
 });
 
+function alunaTemAcessoAoConteudo(c){
+  if(!c.exclusivoDeCurso) return true; // conteúdo solto normal, sempre visível
+  const cursoDoItem = cursosPersonal.find(function(curso){
+    return (curso.itensIds || []).some(function(idx){ return conteudos[idx] === c; });
+  });
+  if(!cursoDoItem) return true; // exclusivo mas sem curso vinculado ainda, não trava por engano
+  if(cursoDoItem.aberto) return true;
+  return (cursoDoItem.alunasLiberadas || []).indexOf(NOME_ALUNA_LOGADA) !== -1;
+}
+
 function renderGrid(){
   const grid = document.getElementById('poster-grid');
   grid.innerHTML = '';
-  const lista = conteudos.filter(function(c){ return filtroAtivo === 'Todos' || c.cat === filtroAtivo; });
+  const lista = conteudos.filter(function(c){
+    if(filtroAtivo !== 'Todos' && c.cat !== filtroAtivo) return false;
+    if(sessaoTipo === 'aluna' && !alunaTemAcessoAoConteudo(c)) return false;
+    return true;
+  });
   lista.forEach(function(c){
     const el = document.createElement('div');
     el.className = 'vposter';
@@ -5711,7 +5731,14 @@ async function carregarCatalogoPersonal(){
         if(ex){ ex.categoria = row.dados.categoria; ex.grupo = row.dados.categoria; }
       } else if(row.tipo === 'conteudo'){
         const jaExisteConteudo = conteudos.find(function(c){ return c.n === row.dados.n; });
-        if(!jaExisteConteudo) conteudos.push(row.dados);
+        if(!jaExisteConteudo){
+          conteudos.push(row.dados);
+        } else {
+          jaExisteConteudo.exclusivoDeCurso = row.dados.exclusivoDeCurso;
+        }
+      } else if(row.tipo === 'curso'){
+        const jaExisteCurso = cursosPersonal.find(function(c){ return c.id === row.dados.id; });
+        if(!jaExisteCurso) cursosPersonal.push(row.dados);
       }
     });
 
@@ -5724,6 +5751,8 @@ async function carregarCatalogoPersonal(){
     });
 
     renderExerciciosChips();
+    if(document.getElementById('cursos-list-personal')) renderCursosPersonal();
+    if(document.getElementById('conteudo-list-personal')) renderConteudoPersonal();
   } catch(erroDeRede){
     console.warn('Sem conexão pra carregar o catálogo salvo agora:', erroDeRede);
   }
@@ -5752,19 +5781,120 @@ function addExercicio(){
   renderExerciciosLista();
 }
 
+let cursosPersonal = [];
+let cursoEmEdicaoId = null;
+
 function renderConteudoPersonal(){
   const list = document.getElementById('conteudo-list-personal');
   list.innerHTML = '';
-  conteudos.forEach(function(c){
+  conteudos.forEach(function(c, idx){
     const el = document.createElement('div');
     el.className = 'exercicio-item';
     el.innerHTML =
       '<p class="ex-name">' + c.n + (c.locked ? ' <i class="ti ti-lock" style="font-size:11px;color:var(--gold-soft);"></i>' : '') + '</p>' +
-      '<p class="ex-meta">' + c.cat + '</p>';
+      '<p class="ex-meta">' + c.cat + '</p>' +
+      '<label style="display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--text-faint);margin-top:4px;">' +
+        '<input type="checkbox" style="width:13px;height:13px;" ' + (c.exclusivoDeCurso ? 'checked' : '') + ' onchange="alternarExclusividadeItemCurso(' + idx + ')"> Exclusivo de curso (não aparece solto na Mentoria)' +
+      '</label>';
     list.appendChild(el);
   });
 }
 renderConteudoPersonal();
+renderCursosPersonal();
+
+function gerarIdCurso(){ return 'curso_' + Date.now() + '_' + Math.floor(Math.random()*1000); }
+
+function mostrarFormularioCurso(idCurso){
+  cursoEmEdicaoId = idCurso || null;
+  const curso = idCurso ? cursosPersonal.find(function(c){ return c.id === idCurso; }) : null;
+  const area = document.getElementById('form-curso-area');
+
+  area.innerHTML = '<div class="info-box" style="margin-bottom:14px;">' +
+    '<p class="lbl" style="margin-bottom:10px;">' + (curso ? 'Editar curso' : 'Novo curso') + '</p>' +
+    '<div class="form-group"><label class="form-label">Nome do curso</label><input class="form-input" id="curso-nome" value="' + (curso ? curso.nome.replace(/"/g,'&quot;') : '') + '" placeholder="Ex: Corpo de Musa"></div>' +
+    '<div class="form-group"><label class="form-label">Valor (opcional, deixe em branco se for gratuito)</label><input class="form-input" id="curso-preco" value="' + (curso && curso.preco ? curso.preco : '') + '" placeholder="Ex: R$ 97,00"></div>' +
+    '<div class="form-group" style="display:flex;align-items:center;gap:8px;">' +
+      '<input type="checkbox" id="curso-aberto" style="width:16px;height:16px;" ' + (curso && curso.aberto ? 'checked' : '') + '>' +
+      '<label class="form-label" style="margin:0;" for="curso-aberto">Aberto pra todas as alunas (sem precisar liberar uma por uma)</label>' +
+    '</div>' +
+    '<p class="form-label" style="margin-top:10px;">Conteúdo desse curso</p>' +
+    '<div id="curso-itens-picker" style="max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:10px;"></div>' +
+    (curso && !curso.aberto ? '<p class="form-label" style="margin-top:10px;">Liberar manualmente pra alunas específicas</p><div id="curso-alunas-picker" style="max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-bottom:10px;"></div>' : '<div id="curso-alunas-picker"></div>') +
+    '<div style="display:flex;gap:8px;margin-top:10px;">' +
+      '<button class="btn-gold" onclick="salvarCurso()">' + (curso ? 'Salvar alterações' : 'Criar curso') + '</button>' +
+      '<button class="btn-gold" style="background:var(--card-2);color:var(--text-faint);border:1px solid var(--border);" onclick="document.getElementById(\'form-curso-area\').innerHTML=\'\';">Cancelar</button>' +
+    '</div>' +
+  '</div>';
+
+  const pickerItens = document.getElementById('curso-itens-picker');
+  const itensSelecionados = curso ? curso.itensIds || [] : [];
+  pickerItens.innerHTML = conteudos.map(function(c, idx){
+    const marcado = itensSelecionados.indexOf(idx) !== -1;
+    return '<label style="display:flex;align-items:center;gap:8px;font-size:12px;"><input type="checkbox" class="curso-item-check" value="' + idx + '" ' + (marcado ? 'checked' : '') + '> ' + c.n + '</label>';
+  }).join('');
+
+  const pickerAlunas = document.getElementById('curso-alunas-picker');
+  if(pickerAlunas){
+    const alunasLiberadas = curso ? curso.alunasLiberadas || [] : [];
+    pickerAlunas.innerHTML = alunasPersonal.slice(0, 100).map(function(a){
+      const marcado = alunasLiberadas.indexOf(a.nome) !== -1;
+      return '<label style="display:flex;align-items:center;gap:8px;font-size:12px;"><input type="checkbox" class="curso-aluna-check" value="' + a.nome.replace(/"/g,'&quot;') + '" ' + (marcado ? 'checked' : '') + '> ' + a.nome + '</label>';
+    }).join('') + (alunasPersonal.length > 100 ? '<p class="txt" style="font-size:11px;color:var(--text-faint);">Mostrando as 100 primeiras — usa a busca de alunas fora daqui pra liberar outras.</p>' : '');
+  }
+}
+
+function salvarCurso(){
+  const nome = document.getElementById('curso-nome').value.trim();
+  if(!nome){ alert('Dá um nome pro curso primeiro.'); return; }
+  const preco = document.getElementById('curso-preco').value.trim();
+  const aberto = document.getElementById('curso-aberto').checked;
+  const itensIds = Array.from(document.querySelectorAll('.curso-item-check:checked')).map(function(el){ return parseInt(el.value, 10); });
+  const alunasLiberadas = Array.from(document.querySelectorAll('.curso-aluna-check:checked')).map(function(el){ return el.value; });
+
+  let curso = cursoEmEdicaoId ? cursosPersonal.find(function(c){ return c.id === cursoEmEdicaoId; }) : null;
+  if(!curso){
+    curso = { id: gerarIdCurso() };
+    cursosPersonal.push(curso);
+  }
+  curso.nome = nome;
+  curso.preco = preco;
+  curso.aberto = aberto;
+  curso.itensIds = itensIds;
+  curso.alunasLiberadas = alunasLiberadas;
+
+  salvarCatalogoPersonal('curso', curso.id, curso);
+  document.getElementById('form-curso-area').innerHTML = '';
+  cursoEmEdicaoId = null;
+  renderCursosPersonal();
+}
+
+function alternarExclusividadeItemCurso(idxConteudo){
+  const c = conteudos[idxConteudo];
+  if(!c) return;
+  c.exclusivoDeCurso = !c.exclusivoDeCurso;
+  salvarCatalogoPersonal('conteudo', c.n, c);
+  renderCursosPersonal();
+}
+
+function renderCursosPersonal(){
+  const container = document.getElementById('cursos-list-personal');
+  if(!container) return;
+  if(cursosPersonal.length === 0){
+    container.innerHTML = '';
+    return;
+  }
+  container.innerHTML = cursosPersonal.map(function(curso){
+    const qtdItens = (curso.itensIds || []).length;
+    const qtdAlunas = (curso.alunasLiberadas || []).length;
+    return '<div class="info-box" style="margin-bottom:10px;">' +
+      '<p class="lbl">' + curso.nome + (curso.preco ? ' · ' + curso.preco : ' · Gratuito') + '</p>' +
+      '<p class="txt" style="font-size:11px;color:var(--text-faint);">' + qtdItens + ' conteúdo(s) · ' + (curso.aberto ? 'Aberto pra todas' : qtdAlunas + ' aluna(s) liberada(s)') + '</p>' +
+      '<div style="display:flex;gap:8px;margin-top:8px;">' +
+        '<span class="chip" style="cursor:pointer;" onclick="mostrarFormularioCurso(\'' + curso.id + '\')">Editar</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
 
 function addConteudo(){
   const titulo = document.getElementById('ct-titulo').value.trim();
@@ -5942,7 +6072,6 @@ function aplicarTransicaoSuave(elId){
 /* ===== LOGIN ===== */
 const EMAIL_PERSONAL = 'thiagofernandesdearaujo22@gmail.com';
 const SENHA_PERSONAL = 'Senhanova22-'; // ⚠️ exposta em texto puro nesse protótipo, troque antes de liberar pra alunas reais
-let sessaoTipo = null; // 'aluna' | 'personal'
 
 function alternarTipoLogin(tipo){
   document.getElementById('login-tab-aluna').className = 'chip' + (tipo === 'aluna' ? ' active' : '');
