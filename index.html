@@ -2686,12 +2686,26 @@ function dividirVolumeEmDois(nomeExercicio, seriesTotal, repsAlvo){
 
 /* ===== ITEM 13: O GERADOR ===== */
 
+// Um exercício "serve" pra casa se já for marcado ambiente Casa, OU se usar equipamento portátil
+// (barra, halteres, elástico) mesmo estando catalogado como Academia — dá pra levar pra casa.
+function exercicioServeParaCasa(e){
+  if((e.ambiente || 'Academia') === 'Casa') return true;
+  const n = e.nome.toUpperCase();
+  // Mesmo citando barra/halteres/elástico, se também citar equipamento fixo de academia, não serve pra casa
+  const ehEquipamentoFixo = ['POLIA', 'MÁQUINA', 'MAQUINA', 'FIXA', 'SMITH', 'HACK', 'LEG PRESS'].some(function(p){ return n.indexOf(p) !== -1; });
+  if(ehEquipamentoFixo) return false;
+  return n.indexOf('BARRA') !== -1 || n.indexOf('HALTERE') !== -1 || n.indexOf('ELÁSTICO') !== -1 || n.indexOf('ELASTICO') !== -1;
+}
+
 function obterPoolRealDoGrupo(grupoInterno, ambiente){
   const mapaGrupo = { 'Glúteo': 'Glúteos', 'Posterior': 'Isquiotibiais', 'Quadríceps': 'Quadríceps', 'Ombro': 'Ombros', 'Peito': 'Peito', 'Bíceps': 'Bíceps', 'Tríceps': 'Tríceps', 'Costas': 'Costas' };
   const grupoReal = mapaGrupo[grupoInterno] || grupoInterno;
-  // Regra fixa da metodologia: treino de academia nunca recebe exercício de casa, e vice-versa
-  const ambienteAlvo = ambiente === 'Casa' ? 'Casa' : 'Academia';
-  const baseAmbiente = exerciciosBanco.filter(function(e){ return e.grupo === grupoReal && (e.ambiente || 'Academia') === ambienteAlvo; });
+  // Regra fixa da metodologia: treino de academia nunca recebe exercício de casa, e vice-versa —
+  // mas pra Casa, também libera exercício de barra/halteres/elástico, mesmo catalogado como Academia
+  const baseAmbiente = exerciciosBanco.filter(function(e){
+    if(e.grupo !== grupoReal) return false;
+    return ambiente === 'Casa' ? exercicioServeParaCasa(e) : (e.ambiente || 'Academia') === 'Academia';
+  });
   const comVideo = baseAmbiente.filter(function(e){ return e.video; });
   return comVideo.length >= 3 ? comVideo : baseAmbiente;
 }
@@ -2966,8 +2980,10 @@ function gerarTreinoSemanal(perfil){
           }
           if(!escolhido){
             // A amostra embaralhada não tinha opção válida — antes de desistir, busca direto no banco inteiro (não só na amostra)
-            const ambienteAlvoResgate = perfil.ambienteTreino === 'Casa' ? 'Casa' : 'Academia';
-            const todoOBanco = exerciciosBanco.filter(function(e){ return (e.grupo || e.categoria) === grupoDoDia && (e.ambiente || 'Academia') === ambienteAlvoResgate; });
+            const todoOBanco = exerciciosBanco.filter(function(e){
+              if((e.grupo || e.categoria) !== grupoDoDia) return false;
+              return perfil.ambienteTreino === 'Casa' ? exercicioServeParaCasa(e) : (e.ambiente || 'Academia') === 'Academia';
+            });
             const candidatoDeResgate = todoOBanco.find(function(e){
               return nomesJaNoDia.indexOf(e.nome.toUpperCase()) === -1 && !padroesJaNoDia[obterPalavraChaveMovimento(e.nome)];
             });
@@ -3204,14 +3220,32 @@ function salvarListaFeedbackGerador(lista){
   try { localStorage.setItem('musa_feedback_gerador', JSON.stringify(lista)); } catch(e){}
 }
 
-function salvarFeedbackGerador(nomeAluna){
-  const texto = document.getElementById('feedback-gerador-texto').value.trim();
+async function salvarFeedbackGerador(nomeAluna){
+  const textoEl = document.getElementById('feedback-gerador-texto');
+  const texto = textoEl.value.trim();
   if(!texto) return;
+  const registro = { data: new Date().toLocaleDateString('pt-BR'), aluna: nomeAluna, texto: texto };
+
   const lista = carregarFeedbackGerador();
-  lista.push({ data: new Date().toLocaleDateString('pt-BR'), aluna: nomeAluna, texto: texto });
+  lista.push(registro);
   salvarListaFeedbackGerador(lista);
-  document.getElementById('feedback-gerador-texto').value = '';
+  textoEl.value = '';
   renderListaFeedbackGerador();
+
+  // Salva de verdade no banco também, pra não depender só do navegador local
+  const chave = 'feedback_' + Date.now();
+  if(supabaseClient){
+    try {
+      const { error } = await supabaseClient.from('catalogo_personal').upsert({
+        tipo: 'feedback_gerador', chave: chave, dados: registro, updated_at: new Date().toISOString()
+      });
+      mostrarConfirmacaoSalvamento(!error, error ? 'Feedback salvo só localmente por enquanto: ' + error.message : 'Feedback anotado e salvo de verdade.');
+    } catch(erroDeRede){
+      mostrarConfirmacaoSalvamento(false, 'Sem conexão agora — feedback ficou salvo só nesse navegador, tenta de novo com internet.');
+    }
+  } else {
+    mostrarConfirmacaoSalvamento(false, 'Sem conexão com o Supabase — feedback ficou salvo só nesse navegador.');
+  }
 }
 
 function renderListaFeedbackGerador(){
@@ -3360,7 +3394,8 @@ function construirPerfilAluna(a){
   // Ciclo avança a cada bloco de periodização completo (4 semanas: base/base/choque/deload),
   // não a cada geração de treino — isso é o que garante variedade real de exercício conforme ela evolui,
   // em vez de gerar sempre a mesma seleção não importa quantas semanas ela já tenha treinado.
-  const cicloReal = Math.floor((semanaReal - 1) / 4);
+  const progressaoManual = a.progressaoManualForcada || 0;
+  const cicloReal = Math.floor((semanaReal - 1) / 4) + progressaoManual;
   const estrategia = definirEstrategiaAtual(a);
   return {
     nivel: a.nivel || 'Iniciante',
@@ -3379,7 +3414,9 @@ function construirPerfilAluna(a){
     temTecnicaAprovada: temTecnicaAprovada(a),
     estrategiaAtual: estrategia.nome,
     estrategiaMotivo: estrategia.motivo,
-    estrategiaVolumeMultiplicador: estrategia.volumeMultiplicador,
+    // Cada progressão manual soma +8% de volume, além do que a estratégia já calculava —
+    // é o "empurrão" que você decide dar, mesmo sem dado suficiente ainda
+    estrategiaVolumeMultiplicador: estrategia.volumeMultiplicador * (1 + progressaoManual * 0.08),
     ambienteTreino: a.ambienteTreino === 'Casa' ? 'Casa' : 'Academia'
   };
 }
@@ -3570,6 +3607,7 @@ async function executarSalvamentoPerfilAluna(nomeAluna){
         tabataSugestaoRespondida: a.tabataSugestaoRespondida || false,
         composicaoAtual: a.composicaoAtual || null,
         ambienteTreino: a.ambienteTreino || 'Academia',
+        progressaoManualForcada: a.progressaoManualForcada || 0,
         composicaoHistorico: a.composicaoHistorico || [],
         pesoHistorico: a.pesoHistorico || []
       }
@@ -3650,6 +3688,17 @@ function renderResumoMetodologiaAutomatica(a){
       '</div>', 'metodologia-' + a.nome.replace(/[^a-zA-Z0-9]/g,''));
 }
 
+function confirmarProgressaoManual(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  // Progressão manual: você (Personal) decide que está pronta pra evoluir agora, mesmo sem
+  // dado suficiente registrado ainda. Cada clique aqui força uma variação real de exercício e
+  // um degrau a mais de volume, independente da semana/histórico dela.
+  a.progressaoManualForcada = (a.progressaoManualForcada || 0) + 1;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+  gerarTreinoAutomaticoParaAluna(nomeAluna);
+}
+
 function mostrarDiagnosticoParaProgredir(nomeAluna){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
@@ -3672,7 +3721,7 @@ function mostrarDiagnosticoParaProgredir(nomeAluna){
     (diagnostico.pontosFortes.length ? '<p class="txt" style="font-size:11px;color:var(--success);margin-top:4px;">✓ ' + diagnostico.pontosFortes.join(' · ') + '</p>' : '') +
     (diagnostico.gargalos.length ? '<p class="txt" style="font-size:11px;color:var(--gold-soft);margin-top:4px;">⚠ ' + diagnostico.gargalos.join(' · ') + '</p>' : '') +
     '</div>' +
-    '<button class="btn-gold" style="margin-top:8px;" onclick="gerarTreinoAutomaticoParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Confirmar e progredir o treino</button>';
+    '<button class="btn-gold" style="margin-top:8px;" onclick="confirmarProgressaoManual(\'' + a.nome.replace(/'/g,"\\'") + '\')">Confirmar e progredir o treino</button>';
 }
 
 function gerarTreinoAutomaticoParaAluna(nomeAluna){
@@ -5739,6 +5788,10 @@ async function carregarCatalogoPersonal(){
       } else if(row.tipo === 'curso'){
         const jaExisteCurso = cursosPersonal.find(function(c){ return c.id === row.dados.id; });
         if(!jaExisteCurso) cursosPersonal.push(row.dados);
+      } else if(row.tipo === 'feedback_gerador'){
+        const listaLocal = carregarFeedbackGerador();
+        const jaTem = listaLocal.some(function(f){ return f.data === row.dados.data && f.aluna === row.dados.aluna && f.texto === row.dados.texto; });
+        if(!jaTem){ listaLocal.push(row.dados); salvarListaFeedbackGerador(listaLocal); }
       }
     });
 
