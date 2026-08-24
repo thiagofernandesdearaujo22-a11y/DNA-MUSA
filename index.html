@@ -4300,25 +4300,6 @@ function openAlunaDetail(i){
       '</div>' +
     '</div>' +
     '<p class="page-sub"><span class="status-dot ' + a.status + '"></span><span class="status-txt ' + a.status + '">' + a.statusLabel + '</span></p>' +
-    '<p class="section-label">Resumo, conforme a anamnese</p>' +
-    '<div class="info-box"><p class="txt" style="margin-bottom:0;">' + gerarResumoAnamnese(a) + '</p></div>' +
-    (function(){
-      const nivelInfo = calcularNivelEMotivo(a);
-      const imcInfo = calcularStatusIMC(a);
-      return '<div class="insight" style="margin-top:10px;">' +
-        '<p><b>Nível sugerido pela metodologia: ' + nivelInfo.nivel + '</b><br>' + nivelInfo.motivo + '</p>' +
-        (imcInfo ? '<p style="margin-top:8px;' + (imcInfo.elevado ? 'color:#E2A33D;' : '') + '">' + imcInfo.texto + '</p>' : '') +
-        '</div>';
-    })() +
-    (function(){
-      const contagem = calcularContagemRegressivaAvaliacao(a);
-      if(!contagem) return '';
-      const cor = contagem.atrasada ? '#E2A33D' : (contagem.diasRestantes <= 15 ? 'var(--gold-soft)' : 'var(--text-dim)');
-      const texto = contagem.atrasada
-        ? 'Avaliação física atrasada há ' + Math.abs(contagem.diasRestantes) + ' dias'
-        : contagem.diasRestantes + ' dias pra próxima avaliação física sugerida';
-      return '<div class="list-item" style="margin-top:8px;"><span><i class="ti ti-calendar-time" style="color:' + cor + ';margin-right:8px;"></i>' + texto + '</span></div>';
-    })() +
     '<div class="stat-grid">' +
       '<div class="stat-card"><p class="stat-label">Nível</p>' +
         '<select class="form-select" style="font-size:13px;padding:6px;margin-top:4px;" onchange="editarNivelAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)">' +
@@ -4335,8 +4316,23 @@ function openAlunaDetail(i){
     '</div>' +
     '<p style="font-size:11px;color:var(--text-faint);margin:-8px 0 12px;">Ajustar aqui atualiza automaticamente toda a estrutura de treino gerada — o gerador nunca mistura exercício de academia com exercício de casa</p>' +
     '<div id="preview-mudanca-area"></div>' +
-    (a.imc ? '<p class="section-label">Composição corporal</p><div class="info-box"><p class="txt">' + a.peso + ' · ' + a.altura + '<br>IMC ' + a.imc + '</p></div>' : '') +
-    renderDirecionamentoTecnico(a) +
+    renderSecaoColapsavel('📋 Resumo completo (diagnóstico da metodologia)', (function(){
+      const nivelInfo = calcularNivelEMotivo(a);
+      const imcInfo = calcularStatusIMC(a);
+      const contagem = calcularContagemRegressivaAvaliacao(a);
+      let html = '<div class="info-box"><p class="txt" style="margin-bottom:0;">' + gerarResumoAnamnese(a) + '</p></div>' +
+        '<div class="insight" style="margin-top:10px;"><p><b>Nível sugerido pela metodologia: ' + nivelInfo.nivel + '</b><br>' + nivelInfo.motivo + '</p>' +
+        (imcInfo ? '<p style="margin-top:8px;' + (imcInfo.elevado ? 'color:#E2A33D;' : '') + '">' + imcInfo.texto + '</p>' : '') +
+        '</div>';
+      if(contagem){
+        const cor = contagem.atrasada ? '#E2A33D' : (contagem.diasRestantes <= 15 ? 'var(--gold-soft)' : 'var(--text-dim)');
+        const texto = contagem.atrasada ? 'Avaliação física atrasada há ' + Math.abs(contagem.diasRestantes) + ' dias' : contagem.diasRestantes + ' dias pra próxima avaliação física sugerida';
+        html += '<div class="list-item" style="margin-top:8px;"><span><i class="ti ti-calendar-time" style="color:' + cor + ';margin-right:8px;"></i>' + texto + '</span></div>';
+      }
+      if(a.imc) html += '<p class="section-label" style="margin-top:14px;">Composição corporal</p><div class="info-box"><p class="txt">' + a.peso + ' · ' + a.altura + '<br>IMC ' + a.imc + '</p></div>';
+      html += renderDirecionamentoTecnico(a) + renderResumoMetodologiaAutomatica(a) + renderDuvidasSinalizadas(a) + renderExerciciosEstagnados(a);
+      return html;
+    })(), 'resumocompleto-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderAvaliacaoPostural(a) +
     renderSecaoColapsavel('Pirâmide de prioridade (resposta original)', '<div class="info-box"><p class="txt">' + (a.piramide || 'Não respondida') + '</p></div>', 'piramideorig-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Objetivo com a consultoria', '<div class="info-box"><p class="txt">' + (a.objetivo || 'Não informado') + '</p></div>', 'objetivo-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
@@ -4357,10 +4353,7 @@ function openAlunaDetail(i){
     '<p style="font-size:12px;color:var(--gold-soft);margin:6px 0 12px;cursor:pointer;" onclick="abrirTreinosArquivados(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-archive" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Ver treinos arquivados (histórico)</p>' +
     '<div id="treinos-arquivados-area"></div>' +
     treinoHtml +
-    renderResumoMetodologiaAutomatica(a) +
     treinoAcoesHtml +
-    renderDuvidasSinalizadas(a) +
-    renderExerciciosEstagnados(a) +
     renderSecaoColapsavel('Acompanhamento e histórico', renderElegibilidadeFase(a) + renderFunilEngajamento(a) + renderLinhaDoTempo(a) + renderPromocaoNivel(a) + renderBlocoPeriodizacao(a) + renderTecnicaPendente(a) + renderProgressao(a), 'acompanhamento') +
     '<p class="section-label" style="margin-top:22px;">Acesso ao app</p>' +
     (a.authId && a.senhaGerada
