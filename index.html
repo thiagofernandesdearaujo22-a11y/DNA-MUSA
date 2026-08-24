@@ -3830,6 +3830,29 @@ function editarSeriesReps(diaIndex, exIndex, novoValor){
   sincronizarTreinoComSupabase(a);
 }
 
+function moverExercicioTreino(diaIndex, exIndex, direcao){
+  const a = alunaAberta;
+  const diaAtual = a.treinoAtual.dias[diaIndex];
+  const novoIndex = exIndex + direcao;
+  if(novoIndex < 0 || novoIndex >= diaAtual.ex.length) return; // já está na ponta, não faz nada
+
+  function trocarPosicao(arr, i, j){
+    if(!arr) return;
+    const tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+  }
+
+  trocarPosicao(diaAtual.ex, exIndex, novoIndex);
+  trocarPosicao(diaAtual.metodos, exIndex, novoIndex); // o método aplicado acompanha o exercício, não fica preso na posição
+
+  if(typeof dias !== 'undefined' && dias[diaIndex]){
+    trocarPosicao(dias[diaIndex].ex, exIndex, novoIndex);
+    trocarPosicao(dias[diaIndex].metodos, exIndex, novoIndex);
+  }
+
+  sincronizarTreinoComSupabase(a);
+  atualizarDiaPersonalNaTela(diaIndex);
+}
+
 function removerExercicioTreino(diaIndex, exIndex){
   const a = alunaAberta;
   a.treinoAtual.dias[diaIndex].ex.splice(exIndex, 1);
@@ -4158,7 +4181,9 @@ function renderConteudoDiaPersonal(a, di){
       html += '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:4px;padding:8px 12px;">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;">' +
           '<span id="nome-ex-' + di + '-' + ei + '" style="font-size:12px;">' + nomeEdit + (metodoAplicado ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + metodoAplicado + '</span>' : '') + '</span>' +
-          '<span style="display:flex;gap:6px;">' +
+          '<span style="display:flex;gap:6px;align-items:center;">' +
+            (ei > 0 ? '<i class="ti ti-chevron-up" style="cursor:pointer;color:var(--text-faint);font-size:15px;" onclick="moverExercicioTreino(' + di + ',' + ei + ',-1)"></i>' : '') +
+            (ei < d.ex.length - 1 ? '<i class="ti ti-chevron-down" style="cursor:pointer;color:var(--text-faint);font-size:15px;" onclick="moverExercicioTreino(' + di + ',' + ei + ',1)"></i>' : '') +
             '<span class="tag" style="cursor:pointer;" onclick="alternarMetodoExercicio(' + di + ',' + ei + ')">Método</span>' +
             '<span class="tag" style="cursor:pointer;" onclick="abrirSubstituicao(' + di + ',' + ei + ')">Trocar</span>' +
           '</span>' +
@@ -5338,16 +5363,16 @@ const exerciciosBanco = [
   {nome:'EXTENSÃO DE QUADRIL VARIAÇÃO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/2lb69Bohm_8'},
   {nome:'AGACHAMENTO GUIADO P', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/3SXMi9dGQkM'},
   {nome:'FLEXÕ NÓRDICA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/DIRx__DoJqo'},
-  {nome:'FLEX. DE JOELHOS NO SOLO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/fWW4ASUCi_c'},
+  {nome:'FLEX. DE JOELHOS NO SOLO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/fWW4ASUCi_c'},
   {nome:'AGACHAMENTO GUIADO Y', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ajf2fUekZr4'},
   {nome:'FLEXÃO DE JOELHOS COM BOLA ADAPTADO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/DgDD-47bVGk'},
-  {nome:'FLEX. DE JOELHOS DE PÉ', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/-ixMlKa11bA'},
+  {nome:'FLEX. DE JOELHOS DE PÉ', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/-ixMlKa11bA'},
   {nome:'AGACHAMENTO HACK', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/-qYxx4mRjoc'},
   {nome:'STIFF COM HALTERES', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/5rJy8qqQofQ'},
-  {nome:'FLEX. JOELHOS ADP', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/6bE5P4x36-o'},
+  {nome:'FLEX. JOELHOS ADP', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/6bE5P4x36-o'},
   {nome:'AGACHAMENTO HACK Y', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/hqTvBjX4lgY'},
   {nome:'STIFF UNI SEM APOIO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/E6QF1VWS1qY'},
-  {nome:'FLEXÃO DE JOELHOS COM BOLA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/H0nTtztJK8M'},
+  {nome:'FLEXÃO DE JOELHOS COM BOLA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/H0nTtztJK8M'},
   {nome:'AGACHAMENTO LIVRE', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/3Mq1lLgE00g'},
   {nome:'STIFF UNI COM APOIO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/GyDrpYEPWQw'},
   {nome:'FROG NO SOLO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/tWdgdM3B5rA'},
