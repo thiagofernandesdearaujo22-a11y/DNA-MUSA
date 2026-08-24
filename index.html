@@ -2697,14 +2697,33 @@ function exercicioServeParaCasa(e){
   return n.indexOf('BARRA') !== -1 || n.indexOf('HALTERE') !== -1 || n.indexOf('ELÁSTICO') !== -1 || n.indexOf('ELASTICO') !== -1;
 }
 
-function obterPoolRealDoGrupo(grupoInterno, ambiente){
+// Multiarticular = movimento composto, envolve mais de uma articulação principal.
+// Regra da metodologia: elástico é acessório/isolamento em academia — multiarticular com elástico não entra
+// em treino de academia (lá tem equipamento de verdade pra isso). Em casa continua liberado normalmente.
+const padroesMultiarticulares = ['AGACHAMENTO', 'TERRA', 'AFUNDO', 'REMADA', 'PUXADA', 'DESENVOLVIMENTO', 'SUPINO', 'LEVANTAMENTO', 'PASSADA'];
+function ehMultiarticularComElastico(e){
+  const n = e.nome.toUpperCase();
+  const temElastico = n.indexOf('ELÁSTICO') !== -1 || n.indexOf('ELASTICO') !== -1;
+  if(!temElastico) return false;
+  return padroesMultiarticulares.some(function(p){ return n.indexOf(p) !== -1; });
+}
+
+// Pliométrico = salto/impacto/explosão — carga alta e repentina no joelho. Regra da metodologia:
+// quem relata dor no joelho não recebe esse tipo de exercício, seja qual for o grupo muscular.
+function ehExercicioPliometrico(e){
+  const n = e.nome.toUpperCase();
+  return ['SALTO', 'JUMP', 'PULO', 'POLICHINELO', 'SKIPPING', 'VAI E VEM', 'PLIOMÉTRIC', 'PLIOMETRIC'].some(function(p){ return n.indexOf(p) !== -1; });
+}
+
+function obterPoolRealDoGrupo(grupoInterno, ambiente, evitarPliometrico){
   const mapaGrupo = { 'Glúteo': 'Glúteos', 'Posterior': 'Isquiotibiais', 'Quadríceps': 'Quadríceps', 'Ombro': 'Ombros', 'Peito': 'Peito', 'Bíceps': 'Bíceps', 'Tríceps': 'Tríceps', 'Costas': 'Costas' };
   const grupoReal = mapaGrupo[grupoInterno] || grupoInterno;
   // Regra fixa da metodologia: treino de academia nunca recebe exercício de casa, e vice-versa —
   // mas pra Casa, também libera exercício de barra/halteres/elástico, mesmo catalogado como Academia
   const baseAmbiente = exerciciosBanco.filter(function(e){
     if(e.grupo !== grupoReal) return false;
-    return ambiente === 'Casa' ? exercicioServeParaCasa(e) : (e.ambiente || 'Academia') === 'Academia';
+    if(evitarPliometrico && ehExercicioPliometrico(e)) return false;
+    return ambiente === 'Casa' ? exercicioServeParaCasa(e) : ((e.ambiente || 'Academia') === 'Academia' && !ehMultiarticularComElastico(e));
   });
   const comVideo = baseAmbiente.filter(function(e){ return e.video; });
   return comVideo.length >= 3 ? comVideo : baseAmbiente;
@@ -2756,8 +2775,8 @@ function obterFamiliaBiomecanica(nomeExercicio){
   return null; // sem família conhecida (ex: exercícios de superiores) — cai pra agrupamento por grupo muscular só
 }
 
-function selecionarExerciciosVariados(grupoInterno, nomeAluna, quantidade, indiceCiclo, padroesJaUsados, ambiente){
-  const pool = obterPoolRealDoGrupo(grupoInterno, ambiente);
+function selecionarExerciciosVariados(grupoInterno, nomeAluna, quantidade, indiceCiclo, padroesJaUsados, ambiente, evitarPliometrico){
+  const pool = obterPoolRealDoGrupo(grupoInterno, ambiente, evitarPliometrico);
   if(pool.length === 0) return null;
   const seed = hashString(nomeAluna || '') + (indiceCiclo || 0) * 7;
   const selecionados = [];
@@ -2801,7 +2820,7 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
     if(grupo === 'Quadríceps' && perfil.direcionamentoQuadriceps === 'distal'){
       return sugerirExerciciosQuadriceps('distal').prioridade;
     }
-    const variados = selecionarExerciciosVariados(grupo, perfil.nomeAluna, 3, perfil.indiceCiclo, padroesJaUsadosNoDia, perfil.ambienteTreino);
+    const variados = selecionarExerciciosVariados(grupo, perfil.nomeAluna, 3, perfil.indiceCiclo, padroesJaUsadosNoDia, perfil.ambienteTreino, perfil.evitarPliometrico);
     if(variados) return variados;
     // Regra fixa da metodologia: nunca cruza ambiente, nem no fallback de emergência.
     // Se não achou exercício de Casa suficiente pro grupo, prefere ficar com menos exercícios
@@ -2849,7 +2868,7 @@ function gerarDiasSuperiores(perfil, numDias){
     const padroesUsadosNoDia = {};
 
     // Costas: variedade real do banco (51 opções), sempre protegida com 2-3 exercícios, nunca menos
-    const candidatosCostas = selecionarExerciciosVariados('Costas', (perfil.nomeAluna || '') + '_costas', 3, perfil.indiceCiclo, null, perfil.ambienteTreino);
+    const candidatosCostas = selecionarExerciciosVariados('Costas', (perfil.nomeAluna || '') + '_costas', 3, perfil.indiceCiclo, null, perfil.ambienteTreino, perfil.evitarPliometrico);
     const nomesCostas = candidatosCostas || ['Remada Articular Aberta', 'Remada Articular Fechada', 'Crucifixo Inverso'];
     nomesCostas.forEach(function(n){ padroesUsadosNoDia[obterPalavraChaveMovimento(n.toUpperCase())] = true; });
     let ex = [
@@ -2863,7 +2882,7 @@ function gerarDiasSuperiores(perfil, numDias){
     // Ombro/Peito/Bíceps/Tríceps reais, alternando qual par recebe ênfase a cada dia (garante ≥2x/semana pra cada, em 3+ dias)
     const gruposSecundarios = (d % 2 === 0) ? ['Ombro', 'Peito'] : ['Bíceps', 'Tríceps'];
     gruposSecundarios.forEach(function(grupo){
-      const candidato = selecionarExerciciosVariados(grupo, (perfil.nomeAluna || '') + '_' + grupo, 1, perfil.indiceCiclo, null, perfil.ambienteTreino);
+      const candidato = selecionarExerciciosVariados(grupo, (perfil.nomeAluna || '') + '_' + grupo, 1, perfil.indiceCiclo, null, perfil.ambienteTreino, perfil.evitarPliometrico);
       if(candidato && candidato[0]){
         ex.push(candidato[0] + ' · ' + (perfil.nivel === 'Avançado' ? 3 : 2) + 'x' + reps);
       }
@@ -2971,7 +2990,7 @@ function gerarTreinoSemanal(perfil){
           const nomesJaNoDia = dia.ex.map(function(l){ return l.split(' · ')[0].toUpperCase(); });
           const padroesJaNoDia = {};
           nomesJaNoDia.forEach(function(n){ padroesJaNoDia[obterPalavraChaveMovimento(n)] = true; });
-          const candidatos = selecionarExerciciosVariados(grupoDoDia, (perfil.nomeAluna || '') + '_extra' + tentativasAdicionar, 8, perfil.indiceCiclo, null, perfil.ambienteTreino);
+          const candidatos = selecionarExerciciosVariados(grupoDoDia, (perfil.nomeAluna || '') + '_extra' + tentativasAdicionar, 8, perfil.indiceCiclo, null, perfil.ambienteTreino, perfil.evitarPliometrico);
           let escolhido = null;
           if(candidatos){
             escolhido = candidatos.find(function(nome){
@@ -2982,7 +3001,8 @@ function gerarTreinoSemanal(perfil){
             // A amostra embaralhada não tinha opção válida — antes de desistir, busca direto no banco inteiro (não só na amostra)
             const todoOBanco = exerciciosBanco.filter(function(e){
               if((e.grupo || e.categoria) !== grupoDoDia) return false;
-              return perfil.ambienteTreino === 'Casa' ? exercicioServeParaCasa(e) : (e.ambiente || 'Academia') === 'Academia';
+              if(perfil.evitarPliometrico && ehExercicioPliometrico(e)) return false;
+              return perfil.ambienteTreino === 'Casa' ? exercicioServeParaCasa(e) : ((e.ambiente || 'Academia') === 'Academia' && !ehMultiarticularComElastico(e));
             });
             const candidatoDeResgate = todoOBanco.find(function(e){
               return nomesJaNoDia.indexOf(e.nome.toUpperCase()) === -1 && !padroesJaNoDia[obterPalavraChaveMovimento(e.nome)];
@@ -3420,7 +3440,9 @@ function construirPerfilAluna(a){
     // Cada progressão manual soma +8% de volume, além do que a estratégia já calculava —
     // é o "empurrão" que você decide dar, mesmo sem dado suficiente ainda
     estrategiaVolumeMultiplicador: estrategia.volumeMultiplicador * (1 + progressaoManual * 0.08),
-    ambienteTreino: a.ambienteTreino === 'Casa' ? 'Casa' : 'Academia'
+    ambienteTreino: a.ambienteTreino === 'Casa' ? 'Casa' : 'Academia',
+    // Regra da metodologia: dor no joelho relatada (confirmada ou só no texto de restrições) tira pliométrico do treino
+    evitarPliometrico: a.regiaoQueixa === 'Joelho' || (a.restricoes && a.restricoes.toLowerCase().indexOf('joelho') !== -1)
   };
 }
 
@@ -3650,13 +3672,16 @@ function editarFrequenciaAluna(nomeAluna, novaFreq){
   salvarPerfilAlunaNoSupabase(nomeAluna);
 }
 
+const secoesColapsaveisAbertas = {}; // guarda estado (aberta/fechada) de cada seção, sobrevive a recarregar a ficha
+
 function renderSecaoColapsavel(titulo, conteudoHtml, idUnico){
+  const estaAberta = !!secoesColapsaveisAbertas[idUnico];
   return '<div class="section-colapsavel" style="margin-top:22px;">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="alternarSecaoColapsavel(\'' + idUnico + '\')">' +
       '<p class="section-label" style="margin:0;">' + titulo + '</p>' +
-      '<i class="ti ti-chevron-down" id="chevron-' + idUnico + '" style="color:var(--gold-soft);font-size:16px;transition:transform .2s;"></i>' +
+      '<i class="ti ti-chevron-down" id="chevron-' + idUnico + '" style="color:var(--gold-soft);font-size:16px;transition:transform .2s;' + (estaAberta ? 'transform:rotate(180deg);' : '') + '"></i>' +
     '</div>' +
-    '<div id="conteudo-' + idUnico + '" style="display:none;margin-top:8px;">' + conteudoHtml + '</div>' +
+    '<div id="conteudo-' + idUnico + '" style="display:' + (estaAberta ? 'block' : 'none') + ';margin-top:8px;">' + conteudoHtml + '</div>' +
   '</div>';
 }
 
@@ -3666,6 +3691,7 @@ function alternarSecaoColapsavel(idUnico){
   if(!conteudo) return;
   const abrindo = conteudo.style.display === 'none';
   conteudo.style.display = abrindo ? 'block' : 'none';
+  secoesColapsaveisAbertas[idUnico] = abrindo;
   if(chevron) chevron.style.transform = abrindo ? 'rotate(180deg)' : 'rotate(0deg)';
 }
 
@@ -4349,7 +4375,7 @@ function openAlunaDetail(i){
         '</div>' +
       '</div>'
     ) : '') +
-    '<p class="section-label">Treino atual</p>' +
+    '<p class="section-label" style="margin-top:24px;">Treino atual</p>' +
     '<p style="font-size:12px;color:var(--gold-soft);margin:6px 0 12px;cursor:pointer;" onclick="abrirTreinosArquivados(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-archive" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Ver treinos arquivados (histórico)</p>' +
     '<div id="treinos-arquivados-area"></div>' +
     treinoHtml +
@@ -4453,36 +4479,41 @@ function alternarCategoriaDesvioAberta(nomeAluna, categoria){
 
 function renderAvaliacaoPostural(a){
   if(!a.desviosPosturaisConfirmados) a.desviosPosturaisConfirmados = [];
-  let html = '<p class="section-label" style="margin-top:22px;">Avaliação postural (a partir da anamnese/fotos)</p>' +
-    '<p class="page-sub" style="margin-top:-4px;">Escolhe a região, depois marca os desvios identificados — o sistema já relaciona a mobilidade e o corretivo certos, direto no treino do dia dela.</p>' +
+
+  let conteudoInterno = '<p class="page-sub" style="margin-top:-4px;">Escolhe a região, depois marca os desvios identificados — o sistema já relaciona a mobilidade e o corretivo certos, direto no treino do dia dela.</p>' +
     '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">';
 
   Object.keys(categoriasDesviosPosturais).forEach(function(categoria){
     const idsDaCategoria = categoriasDesviosPosturais[categoria];
     const qtdAtivosNaCategoria = idsDaCategoria.filter(function(id){ return a.desviosPosturaisConfirmados.indexOf(id) !== -1; }).length;
-    html += '<span class="chip" style="cursor:pointer;' + (qtdAtivosNaCategoria > 0 ? 'background:var(--gold-soft);color:#1A1409;' : '') + '" onclick="alternarCategoriaDesvioAberta(\'' + a.nome.replace(/'/g,"\\'") + '\',\'' + categoria + '\')">' + categoria + (qtdAtivosNaCategoria > 0 ? ' (' + qtdAtivosNaCategoria + ')' : '') + '</span>';
+    conteudoInterno += '<span class="chip" style="cursor:pointer;' + (qtdAtivosNaCategoria > 0 ? 'background:var(--gold-soft);color:#1A1409;' : '') + '" onclick="alternarCategoriaDesvioAberta(\'' + a.nome.replace(/'/g,"\\'") + '\',\'' + categoria + '\')">' + categoria + (qtdAtivosNaCategoria > 0 ? ' (' + qtdAtivosNaCategoria + ')' : '') + '</span>';
   });
-  html += '</div>';
+  conteudoInterno += '</div>';
 
   Object.keys(categoriasDesviosPosturais).forEach(function(categoria){
     const idDiv = 'categoria-desvio-' + categoria.replace(/[^a-zA-Z0-9]/g, '');
-    html += '<div id="' + idDiv + '" style="display:' + (categoriasDesvioAbertas[categoria] ? 'flex' : 'none') + ';flex-wrap:wrap;gap:6px;margin-bottom:12px;">';
+    conteudoInterno += '<div id="' + idDiv + '" style="display:' + (categoriasDesvioAbertas[categoria] ? 'flex' : 'none') + ';flex-direction:column;gap:5px;margin-bottom:12px;">';
     categoriasDesviosPosturais[categoria].forEach(function(idDesvio){
       const d = desviosPosturaisCatalogo.find(function(x){ return x.id === idDesvio; });
       if(!d) return;
       const ativo = a.desviosPosturaisConfirmados.indexOf(d.id) !== -1;
-      html += '<span class="chip' + (ativo ? ' active' : '') + '" style="cursor:pointer;font-size:11px;" onclick="alternarDesvioPostural(\'' + a.nome.replace(/'/g,"\\'") + '\',\'' + d.id + '\')">' + d.nome + '</span>';
+      conteudoInterno += '<div style="background:' + (ativo ? 'var(--success-soft)' : 'var(--card-2)') + ';border:1px solid ' + (ativo ? 'var(--success)' : 'var(--border)') + ';border-radius:10px;padding:8px 10px;cursor:pointer;font-size:12px;display:flex;justify-content:space-between;align-items:center;" onclick="alternarDesvioPostural(\'' + a.nome.replace(/'/g,"\\'") + '\',\'' + d.id + '\')">' +
+        '<span>' + d.nome + '</span>' +
+        (ativo ? '<i class="ti ti-check" style="color:var(--success);font-size:14px;"></i>' : '') +
+      '</div>';
     });
-    html += '</div>';
+    conteudoInterno += '</div>';
   });
 
   if(a.desviosPosturaisConfirmados.length > 0){
     const bloco = obterBlocoPostural(a.desviosPosturaisConfirmados);
-    html += '<div class="info-box"><p class="lbl">Bloco de mobilidade/correção que vai aparecer no treino dela</p>';
-    bloco.forEach(function(ex){ html += '<p class="txt">• ' + ex.nome + ', ' + ex.volume + ' · descanso ' + ex.descanso + '</p>'; });
-    html += '</div>';
+    conteudoInterno += '<div class="info-box"><p class="lbl">Bloco de mobilidade/correção que vai aparecer no treino dela</p>';
+    bloco.forEach(function(ex){ conteudoInterno += '<p class="txt">• ' + ex.nome + ', ' + ex.volume + ' · descanso ' + ex.descanso + '</p>'; });
+    conteudoInterno += '</div>';
   }
-  return html;
+
+  const rotulo = a.desviosPosturaisConfirmados.length > 0 ? 'Avaliação postural (' + a.desviosPosturaisConfirmados.length + ' confirmado(s))' : 'Avaliação postural (a partir da anamnese/fotos)';
+  return renderSecaoColapsavel(rotulo, conteudoInterno, 'avaliacaopostural-' + a.nome.replace(/[^a-zA-Z0-9]/g,''));
 }
 
 function alternarDesvioPostural(nomeAluna, desvioId){
