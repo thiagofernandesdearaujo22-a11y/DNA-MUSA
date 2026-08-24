@@ -3230,7 +3230,7 @@ async function salvarFeedbackGerador(nomeAluna){
   lista.push(registro);
   salvarListaFeedbackGerador(lista);
   textoEl.value = '';
-  renderListaFeedbackGerador();
+  renderListaFeedbackGerador(nomeAluna);
 
   // Salva de verdade no banco também, pra não depender só do navegador local
   const chave = 'feedback_' + Date.now();
@@ -3248,36 +3248,39 @@ async function salvarFeedbackGerador(nomeAluna){
   }
 }
 
-function renderListaFeedbackGerador(){
+function renderListaFeedbackGerador(nomeAluna){
   const container = document.getElementById('lista-feedback-gerador');
   if(!container) return;
-  const lista = carregarFeedbackGerador();
+  const listaCompleta = carregarFeedbackGerador();
+  const lista = nomeAluna ? listaCompleta.filter(function(f){ return f.aluna === nomeAluna; }) : listaCompleta;
   if(lista.length === 0){ container.innerHTML = ''; return; }
-  let html = '<p class="lbl" style="margin-top:14px;">Feedbacks guardados (' + lista.length + ')</p>';
+  let html = '<p class="lbl" style="margin-top:14px;">Feedbacks guardados dessa aluna (' + lista.length + ')</p>';
   lista.slice().reverse().forEach(function(f){
     html += '<div class="info-box" style="margin-bottom:8px;"><p class="txt" style="margin-bottom:2px;">' + f.texto + '</p><p style="font-size:11px;color:var(--text-faint);margin:0;">' + f.aluna + ' · ' + f.data + '</p></div>';
   });
   html += '<div style="display:flex;gap:8px;">' +
-    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);font-size:12px;width:auto;flex:1;" onclick="copiarFeedbackGerador()">Copiar tudo</button>' +
-    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);font-size:12px;width:auto;flex:1;" onclick="baixarFeedbackGerador()"><i class="ti ti-download" style="font-size:12px;vertical-align:-2px;margin-right:4px;"></i>Baixar arquivo</button>' +
+    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);font-size:12px;width:auto;flex:1;" onclick="copiarFeedbackGerador(\'' + (nomeAluna || '').replace(/'/g,"\\'") + '\')">Copiar tudo</button>' +
+    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);font-size:12px;width:auto;flex:1;" onclick="baixarFeedbackGerador(\'' + (nomeAluna || '').replace(/'/g,"\\'") + '\')"><i class="ti ti-download" style="font-size:12px;vertical-align:-2px;margin-right:4px;"></i>Baixar arquivo</button>' +
   '</div>';
   container.innerHTML = html;
 }
 
-function copiarFeedbackGerador(){
-  const lista = carregarFeedbackGerador();
+function copiarFeedbackGerador(nomeAluna){
+  const listaCompleta = carregarFeedbackGerador();
+  const lista = nomeAluna ? listaCompleta.filter(function(f){ return f.aluna === nomeAluna; }) : listaCompleta;
   const texto = lista.map(function(f){ return '[' + f.data + ' · ' + f.aluna + '] ' + f.texto; }).join('\n');
   if(navigator.clipboard) navigator.clipboard.writeText(texto);
 }
 
-function baixarFeedbackGerador(){
-  const lista = carregarFeedbackGerador();
+function baixarFeedbackGerador(nomeAluna){
+  const listaCompleta = carregarFeedbackGerador();
+  const lista = nomeAluna ? listaCompleta.filter(function(f){ return f.aluna === nomeAluna; }) : listaCompleta;
   const texto = lista.map(function(f){ return '[' + f.data + ' · ' + f.aluna + '] ' + f.texto; }).join('\n');
   const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'musa_feedbacks_gerador_' + new Date().toISOString().slice(0,10) + '.txt';
+  link.download = 'musa_feedbacks_' + (nomeAluna ? nomeAluna.replace(/[^a-zA-Z0-9]/g,'_') + '_' : '') + new Date().toISOString().slice(0,10) + '.txt';
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -4370,7 +4373,7 @@ function openAlunaDetail(i){
     '<p class="page-sub" style="margin-top:10px;">Anamnese respondida em ' + (a.dataAnamnese || 'data desconhecida') + '</p>';
   showPersonalView('aluna');
   aplicarTransicaoSuave('aluna-detail-content');
-  renderListaFeedbackGerador();
+  renderListaFeedbackGerador(a.nome);
 }
 
 function renderPromocaoNivel(a){
