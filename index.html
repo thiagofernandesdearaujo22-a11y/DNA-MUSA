@@ -3439,7 +3439,10 @@ function construirPerfilAluna(a){
     estrategiaMotivo: estrategia.motivo,
     // Cada progressão manual soma +8% de volume, além do que a estratégia já calculava —
     // é o "empurrão" que você decide dar, mesmo sem dado suficiente ainda
-    estrategiaVolumeMultiplicador: estrategia.volumeMultiplicador * (1 + progressaoManual * 0.08),
+    // Risco de abandono (3 semanas seguidas com constância baixa) reduz volume mais um pouco,
+    // pra facilitar ela voltar a conseguir cumprir — além da própria estratégia já ter caído pra "Manutenção"
+    estrategiaVolumeMultiplicador: estrategia.volumeMultiplicador * (1 + progressaoManual * 0.08) * (detectarRiscoAbandonoPorConstancia(a.nome) ? 0.85 : 1),
+    riscoAbandonoPorConstancia: detectarRiscoAbandonoPorConstancia(a.nome),
     ambienteTreino: a.ambienteTreino === 'Casa' ? 'Casa' : 'Academia',
     // Regra da metodologia: dor no joelho relatada (confirmada ou só no texto de restrições) tira pliométrico do treino
     evitarPliometrico: a.regiaoQueixa === 'Joelho' || (a.restricoes && a.restricoes.toLowerCase().indexOf('joelho') !== -1)
@@ -4375,6 +4378,13 @@ function openAlunaDetail(i){
           '<span class="chip" style="cursor:pointer;background:var(--success-soft);color:var(--success);" onclick="responderSugestaoTabata(\'' + a.nome.replace(/'/g,"\\'") + '\',true)">Sim, quero ver</span>' +
           '<span class="chip" style="cursor:pointer;" onclick="responderSugestaoTabata(\'' + a.nome.replace(/'/g,"\\'") + '\',false)">Não, obrigado</span>' +
         '</div>' +
+      '</div>'
+    ) : '') +
+    (detectarRiscoAbandonoPorConstancia(a.nome) ? (
+      '<div class="info-box" style="margin-top:14px;border-color:#E2A33D;">' +
+        '<p class="lbl" style="color:#E2A33D;">⚠ Risco de abandono</p>' +
+        '<p class="txt">3 semanas seguidas com constância abaixo de 40%. O volume do próximo treino já foi reduzido automaticamente pra facilitar ela voltar. Vale puxar ela de volta com uma mensagem agora.</p>' +
+        (a.telefone ? '<a href="https://wa.me/55' + a.telefone.replace(/\D/g,'') + '" target="_blank" rel="noopener" class="btn-gold" style="display:inline-block;text-decoration:none;text-align:center;margin-top:8px;padding:10px 16px;width:auto;"><i class="ti ti-brand-whatsapp" style="margin-right:6px;"></i>Chamar no WhatsApp</a>' : '') +
       '</div>'
     ) : '') +
     '<p class="section-label" style="margin-top:24px;">Treino atual</p>' +
@@ -7745,6 +7755,23 @@ function avaliarSinaisDeFadiga(a){
 // ===== MOTOR 7: ESTRATÉGIA — o cérebro central =====
 // Antes de montar qualquer treino, responde: qual é a melhor estratégia pra essa aluna agora?
 // Usa o que os Motores 2 (Classificação), 3 (Periodização) e a análise de fadiga/aderência já calculam.
+// Regra nova: 3 semanas seguidas com constância abaixo de 40% é sinal real de risco de abandono —
+// diferente de fadiga (que é sobre estar treinando mas cansada). Aqui ela simplesmente não está indo.
+function detectarRiscoAbandonoPorConstancia(nomeAluna){
+  const prog = getProgressoAluna(nomeAluna);
+  const semanaAtual = prog.semana;
+  if(semanaAtual < 3) return false; // não dá pra avaliar "3 semanas seguidas" antes da 3ª semana
+  const totalPlanejadoPorSemana = totalDiasDeTreino();
+  if(totalPlanejadoPorSemana === 0) return false;
+
+  for(let s = semanaAtual - 2; s <= semanaAtual; s++){
+    const concluidosNaSemana = (prog.diasConcluidos[s] || []).length;
+    const pctNaSemana = concluidosNaSemana / totalPlanejadoPorSemana;
+    if(pctNaSemana >= 0.4) return false; // uma semana boa no meio já quebra o padrão de "3 seguidas"
+  }
+  return true;
+}
+
 function definirEstrategiaAtual(a){
   const classificacao = classificarAluna(a);
   const faseInfo = determinarFaseMacrociclo(a);
