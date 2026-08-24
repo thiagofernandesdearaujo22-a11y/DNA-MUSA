@@ -3699,6 +3699,19 @@ function confirmarProgressaoManual(nomeAluna){
   gerarTreinoAutomaticoParaAluna(nomeAluna);
 }
 
+function calcularVolumeTotalDoTreino(diasTreino){
+  if(!diasTreino) return { series: 0, exercicios: 0 };
+  let series = 0, exercicios = 0;
+  diasTreino.forEach(function(d){
+    (d.ex || []).forEach(function(linha){
+      exercicios++;
+      const match = linha.match(/(\d+)\s*x\s*\d+/i);
+      series += match ? parseInt(match[1], 10) : 1;
+    });
+  });
+  return { series: series, exercicios: exercicios };
+}
+
 function mostrarDiagnosticoParaProgredir(nomeAluna){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
@@ -3709,12 +3722,38 @@ function mostrarDiagnosticoParaProgredir(nomeAluna){
   const diagnostico = gerarDiagnosticoInterno(a);
   const prog = getProgressoAluna(a.nome);
   const stats = calcularEstatisticasAluna(a.nome);
-  const treinoAnteriorResumo = a.treinoAtual ? (a.treinoAtual.dias.length + ' dias, fase: ' + (a.treinoAtual.fase || 'não definida')) : 'sem treino anterior';
+
+  const volumeAtual = calcularVolumeTotalDoTreino(a.treinoAtual ? a.treinoAtual.dias : null);
+
+  // Simula o treino novo (sem salvar/aplicar ainda) só pra comparar volume, exatamente como ficaria progredindo
+  const progressaoSimulada = (a.progressaoManualForcada || 0) + 1;
+  const aluna_simulada = Object.assign({}, a, { progressaoManualForcada: progressaoSimulada });
+  const perfilNovo = construirPerfilAluna(aluna_simulada);
+  const treinoNovoSimulado = gerarTreinoSemanal(perfilNovo);
+  const volumeNovo = calcularVolumeTotalDoTreino(treinoNovoSimulado);
+
+  const diffSeries = volumeNovo.series - volumeAtual.series;
+  const progressoesRegistradas = stats.temDados ? stats.progressoes : 0;
+  const totalExerciciosComHistorico = Object.keys(prog.historico || {}).length;
 
   container.innerHTML = '<div class="info-box" style="margin-top:10px;">' +
-    '<p class="lbl">Diagnóstico do treino anterior, antes de progredir</p>' +
-    '<p class="txt"><b>Treino atual dela:</b> ' + treinoAnteriorResumo + '</p>' +
+    '<p class="lbl">Comparativo — treino atual vs. treino progredido</p>' +
+    '<div style="display:flex;gap:10px;margin:8px 0;">' +
+      '<div style="flex:1;background:var(--card-2);border-radius:10px;padding:10px;text-align:center;">' +
+        '<p style="font-size:10px;color:var(--text-faint);margin:0 0 4px;">ATUAL</p>' +
+        '<p style="font-size:20px;font-weight:700;margin:0;">' + volumeAtual.series + '</p>' +
+        '<p style="font-size:10px;color:var(--text-faint);margin:2px 0 0;">séries · ' + volumeAtual.exercicios + ' exercícios</p>' +
+      '</div>' +
+      '<div style="flex:1;background:var(--card-2);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--border-strong);">' +
+        '<p style="font-size:10px;color:var(--gold-soft);margin:0 0 4px;">PROGREDIDO</p>' +
+        '<p style="font-size:20px;font-weight:700;color:var(--gold-soft);margin:0;">' + volumeNovo.series + '</p>' +
+        '<p style="font-size:10px;color:var(--text-faint);margin:2px 0 0;">séries · ' + volumeNovo.exercicios + ' exercícios</p>' +
+      '</div>' +
+    '</div>' +
+    '<p class="txt" style="text-align:center;font-size:11px;color:' + (diffSeries > 0 ? 'var(--success)' : 'var(--text-faint)') + ';">' + (diffSeries > 0 ? '▲ +' + diffSeries + ' séries' : (diffSeries < 0 ? diffSeries + ' séries' : 'mesmo volume, foco em variedade')) + ' em relação ao atual</p>' +
+    '<p class="section-label" style="margin-top:12px;font-size:11px;">Scout dela até agora</p>' +
     '<p class="txt"><b>Semana atual (DNA):</b> ' + prog.semana + ' · <b>Frequência real:</b> ' + (stats.temDados ? Math.round((stats.totalConcluidos/stats.totalPlanejado)*100) + '% de constância' : 'ainda sem dados suficientes') + '</p>' +
+    '<p class="txt"><b>Progressões de carga registradas:</b> ' + progressoesRegistradas + ' · <b>Exercícios com histórico:</b> ' + totalExerciciosComHistorico + '</p>' +
     '<p class="txt" style="margin-top:4px;"><b>Estratégia agora:</b> ' + diagnostico.estrategiaAtual + '</p>' +
     '<p class="txt" style="font-size:11px;color:var(--text-faint);">' + diagnostico.justificativaEstrategia + '</p>' +
     '<p class="txt" style="margin-top:4px;"><b>Fase:</b> ' + diagnostico.faseAtual + '</p>' +
@@ -4004,6 +4043,9 @@ async function abrirTreinosArquivados(nomeAluna){
   const area = document.getElementById('treinos-arquivados-area');
   if(!a || !area) return;
 
+  // Funciona como liga/desliga: clicar de novo fecha, sem precisar buscar tudo outra vez
+  if(area.innerHTML){ area.innerHTML = ''; return; }
+
   if(!supabaseClient || !a.email){
     area.innerHTML = '<div class="info-box"><p class="txt">Sem conexão com o histórico agora, ou ela ainda não tem e-mail cadastrado.</p></div>';
     return;
@@ -4024,7 +4066,8 @@ async function abrirTreinosArquivados(nomeAluna){
       return;
     }
 
-    area.innerHTML = historico.map(function(t, idx){
+    area.innerHTML = '<p class="txt" style="color:var(--gold-soft);cursor:pointer;margin-bottom:8px;" onclick="document.getElementById(\'treinos-arquivados-area\').innerHTML=\'\';"><i class="ti ti-x" style="font-size:11px;margin-right:4px;"></i>Fechar histórico</p>' +
+      historico.map(function(t, idx){
       const data = new Date(t.updated_at).toLocaleDateString('pt-BR');
       const rotulo = idx === 0 ? 'Atual' : 'Arquivado';
       return '<div class="list-item" style="flex-direction:column;align-items:stretch;">' +
@@ -4308,7 +4351,7 @@ function openAlunaDetail(i){
       '</div>'
     ) : '') +
     '<p class="section-label">Treino atual</p>' +
-    '<p style="font-size:12px;color:var(--gold-soft);margin:-6px 0 10px;cursor:pointer;" onclick="abrirTreinosArquivados(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-archive" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Ver treinos arquivados (histórico)</p>' +
+    '<p style="font-size:12px;color:var(--gold-soft);margin:6px 0 12px;cursor:pointer;" onclick="abrirTreinosArquivados(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-archive" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Ver treinos arquivados (histórico)</p>' +
     '<div id="treinos-arquivados-area"></div>' +
     treinoHtml +
     renderResumoMetodologiaAutomatica(a) +
@@ -4894,6 +4937,7 @@ function showPersonalView(which){
   }
 }
 
+const palavrasNaoSaoExercicio = ['ERRO', 'CORREÇÃO', 'CORREÇÕES', 'CORRECAO', 'CORRECOES', 'AJUSTE', 'FEEDBACK', 'ENTENDA', 'DICA', 'INTRODUÇÃO', 'INTRODUCAO', 'SUPORTE'];
 const exerciciosBanco = [
   {nome:'REMADA UNILATERAL COM HALTERES', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=kS0KNWUgU7I'},
   {nome:'REMADA ABERTA COM HALTERES SUP', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=giQfgYKYrGc'},
@@ -4935,7 +4979,6 @@ const exerciciosBanco = [
   {nome:'CRUCIFIXO NA MÁQUINA -FLY', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=L4YtdisHldk'},
   {nome:'ROSCA SCOTT NA MÁQUINA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=cgciNALjjT4&sttick=0'},
   {nome:'CADEIRA ABDUTORA EM PÉ 45º', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=1Kye0sDSAw8'},
-  {nome:'AFUNDO ERROS COMUNS E CORREÇÕES', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=JdwYpX8Qz_k'},
   {nome:'EXTENSÃO DE QUADRIL NA POLIA - TRONCO INCLINADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=dvsgo4Gj-hA'},
   {nome:'EXTENSÃO DE QUADRIL NA POLIA - TRONCO INCLINADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=dvsgo4Gj-hA'},
   {nome:'EXTENSÃO DE QUADRIL COM CANELEIRA NO BANCO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=5BuJFrdn_AY'},
@@ -5321,6 +5364,16 @@ const exerciciosBanco = [
   {nome:'AGACHAMENTO SQUAT', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=I3RAHGIS92I'},
   {nome:'AGACHAMENTO BÚLGARO COM PESO CONTRALATERAL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/RSULENERtug'}
 ];
+
+// Blindagem permanente: remove qualquer item que tenha entrado por engano no banco de exercícios
+// mas que na verdade é vídeo de ajuste/correção/dica, não um exercício de treino de verdade.
+// Roda toda vez que a página carrega, então protege mesmo se alguém adicionar errado no futuro.
+for(let __i = exerciciosBanco.length - 1; __i >= 0; __i--){
+  const __nomeUpper = exerciciosBanco[__i].nome.toUpperCase();
+  if(palavrasNaoSaoExercicio.some(function(p){ return __nomeUpper.indexOf(p) !== -1; })){
+    exerciciosBanco.splice(__i, 1);
+  }
+}
 
 const categoriasMusculo = ['Quadríceps', 'Posterior de Coxa', 'Glúteos', 'Panturrilha', 'Abdômen', 'Peito', 'Ombros', 'Costas', 'Bíceps', 'Tríceps', 'Sem categoria'];
 
