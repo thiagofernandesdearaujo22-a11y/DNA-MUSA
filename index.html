@@ -537,6 +537,9 @@
           <div class="alert-stat"><p class="num">1</p><p class="lbl2">Plano vencendo em breve</p></div>
         </div>
 
+        <button class="btn-gold" style="margin-bottom:14px;" onclick="iniciarGeracaoEmMassa()"><i class="ti ti-bolt" style="margin-right:6px;"></i>Gerar/progredir treino de todas</button>
+        <div id="geracao-massa-area"></div>
+
         <p class="section-label">Ferramentas</p>
         <div class="poster-grid" id="grid-ferramentas-personal"></div>
       </div>
@@ -3797,12 +3800,13 @@ function mostrarDiagnosticoParaProgredir(nomeAluna){
     '<button class="btn-gold" style="margin-top:8px;" onclick="confirmarProgressaoManual(\'' + a.nome.replace(/'/g,"\\'") + '\')">Confirmar e progredir o treino</button>';
 }
 
-function gerarTreinoAutomaticoParaAluna(nomeAluna){
+// Núcleo reaproveitável: calcula e atribui o treino, sem nenhum efeito de navegação/tela —
+// usado tanto pelo botão individual quanto pela geração em massa.
+async function construirEAtribuirTreino(nomeAluna){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
-  if(!a) return;
+  if(!a) return { ok: false, motivo: 'aluna não encontrada' };
 
   const perfil = construirPerfilAluna(a);
-
   const semana = gerarTreinoSemanal(perfil);
   const nomesDias = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
   const semanaComNome = nomesDias.map(function(nome, i){
@@ -3811,13 +3815,50 @@ function gerarTreinoAutomaticoParaAluna(nomeAluna){
   });
 
   a.treinoAtual = { fase: (a.treinoAtual && a.treinoAtual.fase) || 'A definir', volume: 'Gerado automaticamente, revise antes de confirmar', dias: semanaComNome };
-  sincronizarTreinoComSupabase(a);
+  await sincronizarTreinoComSupabase(a);
 
   const resultado = validarPrescricao(perfil, semana);
-  const i = alunasPersonal.indexOf(a);
-  openAlunaDetail(i);
-  const areaValidacao = document.getElementById('validacao-treino-area');
-  if(areaValidacao) areaValidacao.innerHTML = renderChecklistPrescricao(resultado);
+  return { ok: true, resultado: resultado };
+}
+
+function gerarTreinoAutomaticoParaAluna(nomeAluna){
+  construirEAtribuirTreino(nomeAluna).then(function(saida){
+    if(!saida.ok) return;
+    const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+    const i = alunasPersonal.indexOf(a);
+    openAlunaDetail(i);
+    const areaValidacao = document.getElementById('validacao-treino-area');
+    if(areaValidacao) areaValidacao.innerHTML = renderChecklistPrescricao(saida.resultado);
+  });
+}
+
+// ===== GERAÇÃO EM MASSA =====
+async function iniciarGeracaoEmMassa(){
+  const elegiveis = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.email; });
+  if(!confirm('Isso vai gerar ou progredir o treino de ' + elegiveis.length + ' aluna(s) de uma vez, seguindo a metodologia individual de cada uma. Pode levar alguns minutos. Continuar?')) return;
+
+  const area = document.getElementById('geracao-massa-area');
+  const resultados = { geradas: 0, progredidas: 0, erros: [] };
+
+  for(let idx = 0; idx < elegiveis.length; idx++){
+    const a = elegiveis[idx];
+    area.innerHTML = '<div class="info-box"><p class="lbl">Processando ' + (idx+1) + ' de ' + elegiveis.length + '...</p><p class="txt">' + a.nome + '</p></div>';
+    try {
+      const jaTinhaTreino = !!a.treinoAtual;
+      if(jaTinhaTreino) a.progressaoManualForcada = (a.progressaoManualForcada || 0) + 1;
+      const saida = await construirEAtribuirTreino(a.nome);
+      if(!saida.ok){ resultados.erros.push({ nome: a.nome, motivo: saida.motivo }); continue; }
+      if(jaTinhaTreino) resultados.progredidas++; else resultados.geradas++;
+    } catch(erro){
+      resultados.erros.push({ nome: a.nome, motivo: erro.message });
+    }
+  }
+
+  area.innerHTML = '<div class="info-box" style="border-color:var(--success);">' +
+    '<p class="lbl" style="color:var(--success);">✓ Concluído</p>' +
+    '<p class="txt">' + resultados.geradas + ' geradas pela primeira vez · ' + resultados.progredidas + ' progredidas · ' + resultados.erros.length + ' com erro</p>' +
+    (resultados.erros.length > 0 ? '<p class="txt" style="font-size:11px;color:#E2A33D;margin-top:6px;">Erros: ' + resultados.erros.map(function(e){ return e.nome + ' (' + e.motivo + ')'; }).join(', ') + '</p>' : '') +
+  '</div>';
 }
 
 function editarSeriesReps(diaIndex, exIndex, novoValor){
