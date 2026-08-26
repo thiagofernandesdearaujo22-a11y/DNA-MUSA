@@ -386,26 +386,33 @@
         <p class="brand" id="launcher-brand" style="opacity:0;animation:introMusaFade 1s ease forwards;">DNA MUSA</p>
         <p class="brand-sub" style="animation:introMusaFade 1s ease forwards .2s;opacity:0;">Team Fernandes</p>
         <p class="sub">Escolha uma opção</p>
-        <div class="profiles">
-          <div class="profile-card" onclick="openLevel2('home')">
-            <div class="avatar gold" id="avatar-launcher"><span>A</span></div>
+        <div class="profiles" style="flex-direction:column;align-items:center;gap:20px;">
+          <div class="profile-card" onclick="openLevel2('home')" style="width:120px;">
+            <div class="avatar gold" id="avatar-launcher" style="width:76px;height:76px;"><span style="font-size:26px;">A</span></div>
             <p class="profile-name">Andriele</p>
             <p class="profile-desc">Treino, DNA e conteúdos</p>
           </div>
-          <div class="profile-card" onclick="openLevel2('dados')">
-            <div class="avatar gold" id="avatar-composicao" style="background:radial-gradient(circle at 30% 25%, #F4D9A5, #E8C58A 55%, #4C3E25 100%);"><span style="font-size:15px;font-weight:700;">--</span></div>
-            <p class="profile-name">Composição corporal</p>
-            <p class="profile-desc">Seus dados e avaliações</p>
-          </div>
-          <div class="profile-card" onclick="openLevel2('mentoria')">
-            <div class="avatar gold" style="background:radial-gradient(circle at 30% 25%, #F4D9A5, #E8C58A 55%, #4C3E25 100%);"><span>M</span></div>
-            <p class="profile-name">Mentoria</p>
-            <p class="profile-desc">Cursos e conteúdos</p>
-          </div>
-          <div class="profile-card" onclick="openLevel2('progresso')">
-            <div class="avatar gold" style="background:radial-gradient(circle at 30% 25%, #F4D9A5, #E8C58A 55%, #4C3E25 100%);"><i class="ti ti-trending-up" style="font-size:20px;color:#1A1409;"></i></div>
-            <p class="profile-name">Meu progresso</p>
-            <p class="profile-desc">Sua evolução completa</p>
+          <div style="display:flex;gap:18px;flex-wrap:wrap;justify-content:center;">
+            <div class="profile-card" onclick="openLevel2('dados')">
+              <div class="avatar gold" id="avatar-composicao" style="background:radial-gradient(circle at 30% 25%, #F4D9A5, #E8C58A 55%, #4C3E25 100%);"><span style="font-size:15px;font-weight:700;">--</span></div>
+              <p class="profile-name">Composição corporal</p>
+              <p class="profile-desc">Seus dados e avaliações</p>
+            </div>
+            <div class="profile-card" onclick="openLevel2('mentoria')">
+              <div class="avatar gold" style="background:radial-gradient(circle at 30% 25%, #F4D9A5, #E8C58A 55%, #4C3E25 100%);"><span>M</span></div>
+              <p class="profile-name">Mentoria</p>
+              <p class="profile-desc">Cursos e conteúdos</p>
+            </div>
+            <div class="profile-card" onclick="openLevel2('progresso')">
+              <div class="avatar gold" style="background:radial-gradient(circle at 30% 25%, #F4D9A5, #E8C58A 55%, #4C3E25 100%);"><i class="ti ti-trending-up" style="font-size:20px;color:#1A1409;"></i></div>
+              <p class="profile-name">Meu progresso</p>
+              <p class="profile-desc">Sua evolução completa</p>
+            </div>
+            <div class="profile-card" onclick="openLevel2('ranking')">
+              <div class="avatar gold" style="background:radial-gradient(circle at 30% 25%, #F4D9A5, #E8C58A 55%, #4C3E25 100%);"><i class="ti ti-trophy" style="font-size:20px;color:#1A1409;"></i></div>
+              <p class="profile-name">Ranking</p>
+              <p class="profile-desc">Pontos da comunidade</p>
+            </div>
           </div>
           <div class="profile-card" id="card-personal-launcher" onclick="openLevel2('personal')">
             <div class="avatar dark admin"><i class="ti ti-user-cog"></i></div>
@@ -508,6 +515,13 @@
       <div id="area-progresso-conteudo"></div>
     </div>
 
+    <!-- RANKING -->
+    <div class="view" data-view="ranking">
+      <h1 class="page-title">Ranking da comunidade</h1>
+      <p class="page-sub">Todo mundo junto, evoluindo junto</p>
+      <div id="area-ranking-conteudo"></div>
+    </div>
+
     <!-- MENTORIA -->
     <div class="view" data-view="mentoria">
       <h1 class="page-title">Mentoria</h1>
@@ -538,6 +552,11 @@
         </div>
 
         <button class="btn-gold" style="margin-bottom:14px;" onclick="iniciarGeracaoEmMassa()"><i class="ti ti-bolt" style="margin-right:6px;"></i>Gerar/progredir treino de todas</button>
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="verificarReplicasDeTreino()"><i class="ti ti-copy-check" style="margin-right:6px;"></i>Verificar réplicas de treino</button>
+        <div id="replicas-treino-area"></div>
+
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="mostrarConfigRanking()"><i class="ti ti-trophy" style="margin-right:6px;"></i>Configurar meta do Ranking</button>
+        <div id="config-ranking-area"></div>
         <div id="geracao-massa-area"></div>
 
         <p class="section-label">Ferramentas</p>
@@ -803,6 +822,9 @@
       </div>
       <div class="bottom-nav-item" data-nav="progresso" onclick="irParaAbaFixa('progresso')">
         <i class="ti ti-trending-up"></i><span>Progresso</span>
+      </div>
+      <div class="bottom-nav-item" data-nav="ranking" onclick="irParaAbaFixa('ranking')">
+        <i class="ti ti-trophy"></i><span>Ranking</span>
       </div>
     </div>
   </div>
@@ -3878,6 +3900,56 @@ function gerarTreinoAutomaticoParaAluna(nomeAluna){
 }
 
 // ===== GERAÇÃO EM MASSA =====
+function mostrarConfigRanking(){
+  const area = document.getElementById('config-ranking-area');
+  if(area.innerHTML){ area.innerHTML = ''; return; }
+  area.innerHTML = '<div class="info-box">' +
+    '<div class="form-group"><label class="form-label">Meta de pontos da comunidade</label><input class="form-input" id="input-meta-pontos" type="number" value="' + metaComunidadePontos + '"></div>' +
+    '<div class="form-group"><label class="form-label">O que desbloqueia ao bater a meta?</label><input class="form-input" id="input-meta-recompensa" value="' + metaComunidadeRecompensa.replace(/"/g,'&quot;') + '"></div>' +
+    '<button class="btn-gold" onclick="salvarConfigRanking()">Salvar</button>' +
+  '</div>';
+}
+
+async function salvarConfigRanking(){
+  metaComunidadePontos = parseInt(document.getElementById('input-meta-pontos').value, 10) || metaComunidadePontos;
+  metaComunidadeRecompensa = document.getElementById('input-meta-recompensa').value.trim() || metaComunidadeRecompensa;
+  await salvarCatalogoPersonal('config_ranking', 'meta', { meta: metaComunidadePontos, recompensa: metaComunidadeRecompensa });
+  document.getElementById('config-ranking-area').innerHTML = '<p class="txt" style="color:var(--success);">✓ Meta atualizada.</p>';
+}
+
+async function verificarReplicasDeTreino(){
+  const area = document.getElementById('replicas-treino-area');
+  area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Cruzando os treinos de todas as alunas...</p>';
+
+  const comTreino = alunasPersonal.filter(function(a){ return a.treinoAtual && a.treinoAtual.dias; });
+  const fingerprints = {};
+
+  comTreino.forEach(function(a){
+    const assinatura = a.treinoAtual.dias.map(function(d){
+      return (d.ex || []).map(function(linha){ return linha.split(' · ')[0].trim().toUpperCase(); }).join('|');
+    }).join('||');
+    if(!fingerprints[assinatura]) fingerprints[assinatura] = [];
+    fingerprints[assinatura].push(a.nome);
+  });
+
+  const replicasEncontradas = Object.values(fingerprints).filter(function(grupo){ return grupo.length > 1; });
+
+  if(replicasEncontradas.length === 0){
+    area.innerHTML = '<div class="info-box" style="border-color:var(--success);"><p class="lbl" style="color:var(--success);">✓ Nenhuma réplica encontrada</p><p class="txt">Cruzei ' + comTreino.length + ' treinos — todos são únicos, exercício por exercício, dia por dia.</p></div>';
+    return;
+  }
+
+  let html = '<div class="info-box" style="border-color:#E2A33D;"><p class="lbl" style="color:#E2A33D;">⚠ ' + replicasEncontradas.length + ' grupo(s) de réplica encontrado(s)</p>' +
+    '<p class="txt" style="font-size:11px;color:var(--text-faint);">Essas alunas têm o treino idêntico, exercício por exercício, em todos os dias — vale progredir uma delas manualmente pra diferenciar.</p></div>';
+  replicasEncontradas.forEach(function(grupo){
+    html += '<div class="list-item" style="flex-direction:column;align-items:stretch;margin-top:8px;">' +
+      '<p style="font-size:12px;font-weight:600;margin:0 0 4px;">' + grupo.length + ' alunas com o mesmo treino:</p>' +
+      '<p style="font-size:12px;color:var(--text-faint);margin:0;">' + grupo.join(', ') + '</p>' +
+    '</div>';
+  });
+  area.innerHTML = html;
+}
+
 async function iniciarGeracaoEmMassa(){
   const elegiveis = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.email; });
   if(!confirm('Isso vai gerar ou progredir o treino de ' + elegiveis.length + ' aluna(s) de uma vez, seguindo a metodologia individual de cada uma. Pode levar alguns minutos. Continuar?')) return;
@@ -6005,6 +6077,9 @@ async function carregarCatalogoPersonal(){
         const listaLocal = carregarFeedbackGerador();
         const jaTem = listaLocal.some(function(f){ return f.data === row.dados.data && f.aluna === row.dados.aluna && f.texto === row.dados.texto; });
         if(!jaTem){ listaLocal.push(row.dados); salvarListaFeedbackGerador(listaLocal); }
+      } else if(row.tipo === 'config_ranking'){
+        if(row.dados.meta) metaComunidadePontos = row.dados.meta;
+        if(row.dados.recompensa) metaComunidadeRecompensa = row.dados.recompensa;
       }
     });
 
@@ -6763,7 +6838,7 @@ function setActive(name){
   try { localStorage.setItem('musaUltimaTela', JSON.stringify({ view: name, detailDia: (name === 'detail' ? detailDiaAtual : null) })); } catch(e){}
 }
 
-const abasFixasAluna = ['home', 'dados', 'mentoria', 'progresso'];
+const abasFixasAluna = ['home', 'dados', 'mentoria', 'progresso', 'ranking'];
 
 function openLevel2(which){
   level2 = which;
@@ -6781,6 +6856,7 @@ function openLevel2(which){
   if(which === 'home' && typeof renderHome === 'function'){ renderHome(); }
   if(which === 'dados' && typeof renderAvaliacoes === 'function'){ renderAvaliacoes(); }
   if(which === 'progresso' && typeof renderMeuProgresso === 'function'){ renderMeuProgresso(); }
+  if(which === 'ranking' && typeof renderRanking === 'function'){ renderRanking(); }
 }
 
 function atualizarNavAtiva(which){
@@ -8021,6 +8097,54 @@ function ajusteRecuperacaoPorIdade(idade){
 }
 
 // ===== TELA "MEU PROGRESSO" — cruza dados que já calculamos em outros lugares, numa visão única =====
+// ===== RANKING DA COMUNIDADE (pontos coletivos) =====
+let metaComunidadePontos = 50000; // meta padrão, Personal pode mudar
+let metaComunidadeRecompensa = 'Em breve — a Personal vai definir o que desbloqueia quando a comunidade bater a meta';
+
+function calcularPontosAluna(nome){
+  const prog = getProgressoAluna(nome);
+  const historico = prog.dnaScoreHistorico || [];
+  return historico.reduce(function(soma, r){ return soma + (r.score || 0); }, 0);
+}
+
+function calcularRankingComunidade(){
+  const pontosTodas = alunasPersonal
+    .filter(function(a){ return a.status !== 'lead'; })
+    .map(function(a){ return { nome: a.nome, pontos: calcularPontosAluna(a.nome) }; })
+    .filter(function(p){ return p.pontos > 0; });
+
+  const totalComunidade = pontosTodas.reduce(function(soma, p){ return soma + p.pontos; }, 0);
+  const pontosDela = calcularPontosAluna(NOME_ALUNA_LOGADA);
+  const posicaoDela = pontosTodas.filter(function(p){ return p.pontos > pontosDela; }).length + 1;
+  const totalComPontos = pontosTodas.length;
+  const percentil = totalComPontos > 0 ? Math.round((1 - (posicaoDela - 1) / totalComPontos) * 100) : null;
+
+  return { pontosDela: pontosDela, posicaoDela: posicaoDela, totalComPontos: totalComPontos, percentil: percentil, totalComunidade: totalComunidade };
+}
+
+function renderRanking(){
+  const container = document.getElementById('area-ranking-conteudo');
+  if(!container) return;
+  const r = calcularRankingComunidade();
+  const pctMeta = Math.min(100, Math.round((r.totalComunidade / metaComunidadePontos) * 100));
+
+  let html = '<div class="dna-score-card"><div class="dna-score-left">' +
+    '<p class="dna-score-label">SEUS PONTOS</p>' +
+    '<p class="dna-score-numero">' + r.pontosDela + '</p>' +
+    '<p class="dna-score-comparativo" style="color:var(--gold-soft);">' + (r.percentil != null ? '▲ Top ' + (100 - r.percentil + 1) + '% da consultoria' : 'Ainda calculando sua posição') + '</p>' +
+  '</div></div>';
+
+  html += '<p class="section-label" style="margin-top:20px;">Meta da comunidade</p>' +
+    '<div class="info-box">' +
+      '<p class="txt"><b>' + r.totalComunidade.toLocaleString('pt-BR') + '</b> de ' + metaComunidadePontos.toLocaleString('pt-BR') + ' pontos</p>' +
+      '<div style="background:var(--card-2);border-radius:8px;height:10px;margin:8px 0;overflow:hidden;"><div style="background:linear-gradient(90deg,#F4D9A5,#E8C58A);height:100%;width:' + pctMeta + '%;"></div></div>' +
+      '<p class="txt" style="font-size:11px;color:var(--text-faint);">' + pctMeta + '% da meta · quando bater 100%: ' + metaComunidadeRecompensa + '</p>' +
+    '</div>' +
+    '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:10px;">Seus pontos somam junto com as outras alunas da consultoria — a gente não mostra nome nem posição de ninguém além da sua, mas cada treino registrado ajuda a comunidade toda a chegar mais perto.</p>';
+
+  container.innerHTML = html;
+}
+
 function renderMeuProgresso(){
   const container = document.getElementById('area-progresso-conteudo');
   if(!container) return;
