@@ -65,9 +65,9 @@
 
   .bottom-nav-fixa{display:flex;flex-shrink:0;border-top:1px solid var(--border);background:var(--card);}
   .bottom-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px 8px;cursor:pointer;}
-  .bottom-nav-item i{font-size:19px;color:var(--text-faint);}
+  .bottom-nav-item .nav-icon-svg{fill:var(--text-faint);}
   .bottom-nav-item span{font-size:9.5px;color:var(--text-faint);}
-  .bottom-nav-item.ativo i, .bottom-nav-item.ativo span{color:var(--gold-soft);}
+  .bottom-nav-item.ativo .nav-icon-svg, .bottom-nav-item.ativo span{fill:var(--gold-soft);color:var(--gold-soft);}
   .backbar i{font-size:16px;}
 
   /* LAUNCHER */
@@ -812,19 +812,19 @@
 
     <div id="bottom-nav-fixa" class="bottom-nav-fixa" style="display:none;">
       <div class="bottom-nav-item" data-nav="home" onclick="irParaAbaFixa('home')">
-        <i class="ti ti-barbell"></i><span>Treino</span>
+        <svg class="nav-icon-svg" width="22" height="22" viewBox="0 0 24 24"><path d="M2 9h2v6H2zm3-2h2v10H5zm3-1h8v14H8zm9 1h2v10h-2zm3 2h2v6h-2z"/></svg><span>Treino</span>
       </div>
       <div class="bottom-nav-item" data-nav="dados" onclick="irParaAbaFixa('dados')">
-        <i class="ti ti-chart-bar"></i><span>Composição</span>
+        <svg class="nav-icon-svg" width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="12" width="4" height="8" rx="1"/><rect x="10" y="7" width="4" height="13" rx="1"/><rect x="17" y="3" width="4" height="17" rx="1"/></svg><span>Composição</span>
       </div>
       <div class="bottom-nav-item" data-nav="mentoria" onclick="irParaAbaFixa('mentoria')">
-        <i class="ti ti-video"></i><span>Mentoria</span>
+        <svg class="nav-icon-svg" width="22" height="22" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 8.5v7l6-3.5z" fill="var(--bg)"/></svg><span>Mentoria</span>
       </div>
       <div class="bottom-nav-item" data-nav="progresso" onclick="irParaAbaFixa('progresso')">
-        <i class="ti ti-trending-up"></i><span>Progresso</span>
+        <svg class="nav-icon-svg" width="22" height="22" viewBox="0 0 24 24"><path d="M3 17l5-6 4 3 6-8 3 3v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg><span>Progresso</span>
       </div>
       <div class="bottom-nav-item" data-nav="ranking" onclick="irParaAbaFixa('ranking')">
-        <i class="ti ti-trophy"></i><span>Ranking</span>
+        <svg class="nav-icon-svg" width="22" height="22" viewBox="0 0 24 24"><path d="M6 3h12v4a6 6 0 0 1-5 5.92V15h3v2H8v-2h3v-2.08A6 6 0 0 1 6 7zm-4 1h3v3a4 4 0 0 1-3-3zm17 0h3a4 4 0 0 1-3 3z"/></svg><span>Ranking</span>
       </div>
     </div>
   </div>
