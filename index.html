@@ -4118,10 +4118,9 @@ function mostrarOpcoesDeTrocaMesmoAssim(diaIndex, exIndex){
     if(!xMesmaFamilia && yMesmaFamilia) return 1;
     return 0;
   });
-  opcoes = opcoes.slice(0, 12);
-
-  container.innerHTML = '<p style="font-size:11px;color:var(--text-faint);margin:8px 0 4px;">Trocar "' + nomeAtual + '" por:</p>' +
-    '<div style="display:flex;flex-direction:column;gap:5px;">' +
+  // Mostra TODOS os exercícios do grupo (sem cortar em 12) — só ordena pra priorizar mesma família primeiro
+  container.innerHTML = '<p style="font-size:11px;color:var(--text-faint);margin:8px 0 4px;">Trocar "' + nomeAtual + '" por (' + opcoes.length + ' opções):</p>' +
+    '<div style="display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto;">' +
     opcoes.map(function(e){
       const mesmaFamilia = familiaAtual && obterFamiliaBiomecanica(e.nome) === familiaAtual;
       return '<div style="background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;font-size:12px;display:flex;justify-content:space-between;align-items:center;" onclick="confirmarSubstituicao(' + diaIndex + ',' + exIndex + ',\'' + e.nome.replace(/'/g,"\\'") + '\')">' +
@@ -4347,9 +4346,9 @@ function renderConteudoDiaPersonal(a, di){
       html += '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:4px;padding:8px 12px;">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;">' +
           '<span id="nome-ex-' + di + '-' + ei + '" style="font-size:12px;">' + nomeEdit + (metodoAplicado ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + metodoAplicado + '</span>' : '') + '</span>' +
-          '<span style="display:flex;gap:6px;align-items:center;">' +
-            (ei > 0 ? '<i class="ti ti-chevron-up" style="cursor:pointer;color:var(--text-faint);font-size:15px;" onclick="moverExercicioTreino(' + di + ',' + ei + ',-1)"></i>' : '') +
-            (ei < d.ex.length - 1 ? '<i class="ti ti-chevron-down" style="cursor:pointer;color:var(--text-faint);font-size:15px;" onclick="moverExercicioTreino(' + di + ',' + ei + ',1)"></i>' : '') +
+          '<span style="display:flex;gap:4px;align-items:center;">' +
+            (ei > 0 ? '<span style="cursor:pointer;width:22px;height:22px;border-radius:50%;background:var(--card-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;" onclick="moverExercicioTreino(' + di + ',' + ei + ',-1)"><i class="ti ti-chevron-up" style="color:var(--gold-soft);font-size:14px;"></i></span>' : '<span style="width:22px;"></span>') +
+            (ei < d.ex.length - 1 ? '<span style="cursor:pointer;width:22px;height:22px;border-radius:50%;background:var(--card-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;" onclick="moverExercicioTreino(' + di + ',' + ei + ',1)"><i class="ti ti-chevron-down" style="color:var(--gold-soft);font-size:14px;"></i></span>' : '<span style="width:22px;"></span>') +
             '<span class="tag" style="cursor:pointer;" onclick="alternarMetodoExercicio(' + di + ',' + ei + ')">Método</span>' +
             '<span class="tag" style="cursor:pointer;" onclick="abrirSubstituicao(' + di + ',' + ei + ')">Trocar</span>' +
           '</span>' +
