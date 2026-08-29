@@ -7161,14 +7161,16 @@ async function enviarMensagemChatIA(){
   try {
     const response = await fetch(SUPABASE_URL + '/functions/v1/chat-sol', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
       body: JSON.stringify({
         system: montarSystemPromptChatIA(),
         messages: mensagensParaAPI
       })
     });
     const data = await response.json();
-    if(data.error) throw new Error(data.error);
+    if(!response.ok || data.error){
+      throw new Error('HTTP ' + response.status + ': ' + (data.error && data.error.message ? data.error.message : JSON.stringify(data)));
+    }
     let textoResposta = (data.content || []).map(function(c){ return c.text || ''; }).join('\n').trim();
     statusEl.textContent = '';
 
@@ -7192,7 +7194,7 @@ async function enviarMensagemChatIA(){
   } catch(erro) {
     statusEl.textContent = '';
     console.error('[Chat Sol] erro real, nao eh problema de internet:', erro);
-    adicionarMensagemChatIA('ia', 'Não consegui responder agora. Enquanto isso, manda sua dúvida direto pro seu personal, ele te responde rapidinho.');
+    adicionarMensagemChatIA('ia', '[Diagnóstico temporário] Erro real: ' + erro.message);
   }
 }
 
