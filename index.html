@@ -209,10 +209,10 @@
   .vcover .lock-icon i{font-size:13px;color:var(--gold-soft);}
   .vtitle{font-size:12px;font-weight:600;text-align:center;margin:0;line-height:1.3;color:var(--text);}
 
-  .ferramenta-compacta{background:linear-gradient(155deg,var(--card) 0%,var(--card-2) 100%);border:1px solid var(--border);border-radius:16px;padding:14px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;transition:border-color .2s ease,transform .2s ease;}
+  .ferramenta-compacta{background:linear-gradient(155deg,var(--card) 0%,var(--card-2) 100%);border:1px solid var(--border);border-radius:16px;padding:14px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;transition:border-color .2s ease,transform .2s ease,box-shadow .2s ease;}
   .ferramenta-compacta:active{transform:scale(0.96);}
-  .ferramenta-compacta:hover{border-color:var(--border-strong);}
-  .ferramenta-compacta i{background:linear-gradient(135deg,#F4D9A5,#E8C58A);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-size:22px;}
+  .ferramenta-compacta:hover{border-color:var(--border-strong);box-shadow:0 4px 16px rgba(232,197,138,0.12);}
+  .ferramenta-compacta i{color:var(--gold-soft);font-size:22px;}
   .ferramenta-compacta p{font-weight:500;}
   .ferramenta-compacta:hover{border-color:var(--border-strong);}
   .ferramenta-compacta i{font-size:20px;color:var(--gold-soft);}
@@ -1896,6 +1896,26 @@ const alunasPersonal = [
        {n:'Domingo', foco:'Descanso', descanso:true, ex:[]}
      ]}}
 ];
+
+// Blindagem: quando a mesma pessoa preencheu a anamnese mais de uma vez ao longo do tempo,
+// mantém só a anamnese mais recente, remove as antigas — evita nome duplicado na lista de alunas.
+(function removerAlunasDuplicadasPorNome(){
+  const maisRecentePorNome = {};
+  alunasPersonal.forEach(function(a){
+    const chave = a.nome.trim().toUpperCase();
+    const dataA = a.dataAnamnese || '0000-00-00';
+    if(!maisRecentePorNome[chave] || dataA > maisRecentePorNome[chave].dataAnamnese){
+      maisRecentePorNome[chave] = a;
+    }
+  });
+  for(let i = alunasPersonal.length - 1; i >= 0; i--){
+    const a = alunasPersonal[i];
+    const chave = a.nome.trim().toUpperCase();
+    if(maisRecentePorNome[chave] !== a){
+      alunasPersonal.splice(i, 1);
+    }
+  }
+})();
 
 let estagioFunilAtivo = 'inicio';
 const mensagensExemploFunil = {
@@ -7139,17 +7159,16 @@ async function enviarMensagemChatIA(){
   });
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch(SUPABASE_URL + '/functions/v1/chat-sol', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
         system: montarSystemPromptChatIA(),
         messages: mensagensParaAPI
       })
     });
     const data = await response.json();
+    if(data.error) throw new Error(data.error);
     let textoResposta = (data.content || []).map(function(c){ return c.text || ''; }).join('\n').trim();
     statusEl.textContent = '';
 
@@ -7172,7 +7191,8 @@ async function enviarMensagemChatIA(){
     }
   } catch(erro) {
     statusEl.textContent = '';
-    adicionarMensagemChatIA('ia', 'Tive um problema de conexão agora, tenta novamente daqui a pouco.');
+    console.error('[Chat Sol] erro real, nao eh problema de internet:', erro);
+    adicionarMensagemChatIA('ia', 'Não consegui responder agora. Enquanto isso, manda sua dúvida direto pro seu personal, ele te responde rapidinho.');
   }
 }
 
