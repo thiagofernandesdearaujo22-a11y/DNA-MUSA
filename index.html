@@ -7193,8 +7193,8 @@ async function enviarMensagemChatIA(){
     }
   } catch(erro) {
     statusEl.textContent = '';
-    console.error('[Chat Sol] erro real, nao eh problema de internet:', erro);
-    adicionarMensagemChatIA('ia', '[Diagnóstico temporário] Erro real: ' + erro.message);
+    console.error('[Chat Sol] erro real:', erro);
+    adicionarMensagemChatIA('ia', 'Não consegui responder agora. Enquanto isso, manda sua dúvida direto pro seu personal, ele te responde rapidinho.');
   }
 }
 
