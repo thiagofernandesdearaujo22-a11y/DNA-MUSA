@@ -8755,14 +8755,15 @@ async function avisarDataEspecial(tipo){
   const elegiveis = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.telefone; });
   if(!confirm('Vai avisar ' + elegiveis.length + ' aluna(s) sobre essa data. Continuar?')) return;
   const area = document.getElementById('resultado-avisos-lote');
-  let enviadas = 0;
+  let enviadas = 0, erros = [];
   for(let i = 0; i < elegiveis.length; i++){
     area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Enviando ' + (i+1) + ' de ' + elegiveis.length + '...</p>';
     const saida = await enviarWhatsApp(elegiveis[i].telefone, templatesAvisos[tipo](elegiveis[i]));
-    if(saida.sucesso) enviadas++;
+    if(saida.sucesso) enviadas++; else erros.push({ nome: elegiveis[i].nome, motivo: saida.motivo });
     await new Promise(function(r){ setTimeout(r, 400); });
   }
-  area.innerHTML = '<div class="info-box" style="border-color:var(--success);"><p class="txt">✓ ' + enviadas + ' avisada(s).</p></div>';
+  const listaErros = erros.length ? '<ul style="margin:8px 0 0;padding-left:18px;font-size:11px;color:var(--text-faint);">' + erros.map(function(e){ return '<li>' + e.nome + ': ' + (e.motivo || 'motivo não informado') + '</li>'; }).join('') + '</ul>' : '';
+  area.innerHTML = '<div class="info-box" style="border-color:' + (erros.length ? '#C9784A' : 'var(--success)') + ';"><p class="txt">' + (erros.length ? '' : '✓ ') + enviadas + ' avisada(s)' + (erros.length ? ' · ' + erros.length + ' com erro' : '.') + '</p>' + listaErros + '</div>';
 }
 
 async function avisarMetaComunidadeBatida(){
@@ -8796,7 +8797,8 @@ async function enviarAvisosEmLote(tipo){
     if(saida.sucesso) enviadas++; else erros.push({ nome: a.nome, motivo: saida.motivo });
     await new Promise(function(r){ setTimeout(r, 400); }); // pequena pausa entre envios, evita parecer spam
   }
-  resultadoArea.innerHTML = '<div class="info-box" style="border-color:var(--success);margin-top:8px;"><p class="txt">✓ ' + enviadas + ' enviada(s)' + (erros.length ? ' · ' + erros.length + ' com erro' : '') + '</p></div>';
+  const listaErros = erros.length ? '<ul style="margin:8px 0 0;padding-left:18px;font-size:11px;color:var(--text-faint);">' + erros.map(function(e){ return '<li>' + e.nome + ': ' + (e.motivo || 'motivo não informado') + '</li>'; }).join('') + '</ul>' : '';
+  resultadoArea.innerHTML = '<div class="info-box" style="border-color:' + (erros.length ? '#C9784A' : 'var(--success)') + ';margin-top:8px;"><p class="txt">' + (erros.length ? '' : '✓ ') + enviadas + ' enviada(s)' + (erros.length ? ' · ' + erros.length + ' com erro' : '') + '</p>' + listaErros + '</div>';
 }
 
 function mostrarFormularioMensagemEmMassa(){
@@ -8840,7 +8842,7 @@ async function confirmarMensagemEmMassa(){
     if(saida.sucesso) enviadas++; else erros.push({ nome: a.nome, motivo: saida.motivo });
     await new Promise(function(r){ setTimeout(r, 400); });
   }
-  area.innerHTML = '<div class="info-box" style="border-color:var(--success);"><p class="lbl" style="color:var(--success);">✓ Concluído</p><p class="txt">' + enviadas + ' enviada(s)' + (erros.length ? ' · ' + erros.length + ' com erro' : '') + '</p></div>';
+  area.innerHTML = '<div class="info-box" style="border-color:' + (erros.length ? '#C9784A' : 'var(--success)') + ';"><p class="lbl" style="color:' + (erros.length ? '#C9784A' : 'var(--success)') + ';">' + (erros.length ? 'Concluído com erros' : '✓ Concluído') + '</p><p class="txt">' + enviadas + ' enviada(s)' + (erros.length ? ' · ' + erros.length + ' com erro' : '') + '</p>' + (erros.length ? '<ul style="margin:8px 0 0;padding-left:18px;font-size:11px;color:var(--text-faint);">' + erros.map(function(e){ return '<li>' + e.nome + ': ' + (e.motivo || 'motivo não informado') + '</li>'; }).join('') + '</ul>' : '') + '</div>';
 }
 
 // ===== ENVIO DE WHATSAPP (via porteiro seguro no Supabase) =====
