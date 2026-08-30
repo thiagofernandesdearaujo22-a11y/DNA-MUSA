@@ -561,6 +561,8 @@
         <h1 class="page-title">Painel do Personal</h1>
         <p class="page-sub">Visão geral das suas alunas</p>
 
+        <div id="metricas-negocio-area"></div>
+
         <div class="alert-row">
           <div class="alert-stat"><p class="num">1</p><p class="lbl2">Aluna com faltas</p></div>
           <div class="alert-stat"><p class="num">1</p><p class="lbl2">Plano vencendo em breve</p></div>
@@ -580,6 +582,11 @@
         <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;margin-top:10px;" onclick="mostrarFormularioMensagemEmMassa()"><i class="ti ti-speakerphone" style="margin-right:6px;"></i>Mandar mensagem pra todas</button>
         <div id="mensagem-massa-area"></div>
 
+        <p class="section-label" style="margin-top:22px;">Inteligência de mercado</p>
+        <p class="page-sub" style="margin-top:-6px;">O que está bombando agora no nicho de estética feminina/fitness</p>
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:12px;" onclick="gerarRelatorioTendencias()"><i class="ti ti-trending-up" style="margin-right:6px;"></i>🔎 Gerar novo relatório de tendências</button>
+        <div id="relatorio-tendencias-area"></div>
+
         <p class="section-label">Ferramentas</p>
         <div class="poster-grid" id="grid-ferramentas-personal"></div>
       </div>
@@ -588,6 +595,7 @@
         <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
         <h1 class="page-title" style="margin-top:0;">Alunas</h1>
         <p class="page-sub" id="alunas-count-label" style="margin-top:-6px;"></p>
+        <div id="alertas-risco-emocional-area"></div>
         <div id="aviso-modo-antigas" style="display:none;background:var(--card-2);border:1px solid var(--border-strong);border-radius:10px;padding:10px 12px;margin-bottom:12px;align-items:center;justify-content:space-between;">
           <span style="font-size:12px;color:var(--gold-soft);">Mostrando só alunas antigas (anamnese de 2024 ou antes)</span>
           <span class="chip" style="cursor:pointer;" onclick="voltarParaTodasAlunas()">Ver todas</span>
@@ -2066,6 +2074,7 @@ function renderAlunas(){
   const list = document.getElementById('alunas-list');
   const termo = (document.getElementById('aluna-search') ? document.getElementById('aluna-search').value : '').toUpperCase();
   list.innerHTML = '';
+  renderAlertasRiscoEmocional();
 
   const avisoAntigas = document.getElementById('aviso-modo-antigas');
   if(avisoAntigas){
@@ -2085,10 +2094,14 @@ function renderAlunas(){
     const el = document.createElement('div');
     el.className = 'aluna-card';
     el.style.cssText = 'flex-direction:column;align-items:stretch;gap:6px;';
+    const financeiro = statusFinanceiroAluna(a);
     el.innerHTML =
       '<div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" data-abrir="1">' +
-        '<div><p class="aluna-name">' + a.nome + (a.recemChegadaDaAnamnese ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">nova</span>' : '') + (!ehAlunaAntiga(a) && a.dataAnamnese ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">2025</span>' : '') + '</p><p class="aluna-meta">' + a.nivel + ' · ' + a.freq + (a.statusPlanoManual ? ' · movida manualmente' : '') + '</p></div>' +
-        '<span><span class="status-dot ' + a.status + '"></span><span class="status-txt ' + a.status + '">' + a.statusLabel + '</span></span>' +
+        '<div><p class="aluna-name">' + a.nome + (a.recemChegadaDaAnamnese ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">nova</span>' : '') + (!ehAlunaAntiga(a) && a.dataAnamnese ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">2025</span>' : '') + '</p><p class="aluna-meta">' + a.nivel + ' · ' + a.freq + (a.statusPlanoManual ? ' · movida manualmente' : '') + (a.valorPlano != null ? ' · R$ ' + a.valorPlano.toFixed(2).replace('.', ',') : '') + '</p></div>' +
+        '<span style="display:flex;align-items:center;gap:6px;">' +
+          '<span class="tag" style="background:' + financeiro.corSuave + ';color:' + financeiro.cor + ';">' + financeiro.label + '</span>' +
+          '<span class="status-dot ' + a.status + '"></span><span class="status-txt ' + a.status + '">' + a.statusLabel + '</span>' +
+        '</span>' +
       '</div>';
     el.querySelector('[data-abrir]').onclick = function(){ openAlunaDetail(i); };
 
@@ -2321,6 +2334,93 @@ function calcularSequenciaCheckIn(respostas){
     else break;
   }
   return seq;
+}
+
+// ===== CHECK-IN EMOCIONAL DIÁRIO + HÁBITOS COM PONTUAÇÃO =====
+const CATALOGO_HABITOS_DIARIOS = [
+  { id: 'treino', label: 'Treino concluído', icone: 'ti-barbell', pontos: 10 },
+  { id: 'hidratacao', label: 'Hidratação em dia', icone: 'ti-droplet', pontos: 5 },
+  { id: 'alimentacao', label: 'Alimentação registrada', icone: 'ti-salad', pontos: 5 },
+  { id: 'sono', label: 'Sono de qualidade (7h+)', icone: 'ti-moon', pontos: 5 },
+  { id: 'autocuidado', label: 'Momento de autocuidado', icone: 'ti-flower', pontos: 5 },
+  { id: 'meditou', label: 'Meditou', icone: 'ti-yoga', pontos: 10 }
+];
+
+function getDataHojeISO(){
+  return new Date().toISOString().slice(0,10);
+}
+
+function getCheckInHoje(nome){
+  const prog = getProgressoAluna(nome);
+  if(!prog.checkinsEmocionais) prog.checkinsEmocionais = {};
+  const hoje = getDataHojeISO();
+  if(!prog.checkinsEmocionais[hoje]) prog.checkinsEmocionais[hoje] = { data: hoje };
+  return prog.checkinsEmocionais[hoje];
+}
+
+function salvarCampoCheckInEmocional(nome, campo, valor){
+  const checkin = getCheckInHoje(nome);
+  checkin[campo] = valor;
+  salvarProgressoNoSupabase(nome);
+  renderCheckInEHabitos(nome);
+}
+
+function getHabitosHojeAluna(nome){
+  const prog = getProgressoAluna(nome);
+  if(!prog.habitosDoDia) prog.habitosDoDia = {};
+  const hoje = getDataHojeISO();
+  if(!prog.habitosDoDia[hoje]) prog.habitosDoDia[hoje] = {};
+  return prog.habitosDoDia[hoje];
+}
+
+function alternarHabitoDoDia(nome, habitoId){
+  const habitosHoje = getHabitosHojeAluna(nome);
+  habitosHoje[habitoId] = !habitosHoje[habitoId];
+  salvarProgressoNoSupabase(nome);
+  renderCheckInEHabitos(nome);
+}
+
+function calcularPontosHabitosHoje(nome){
+  const habitosHoje = getHabitosHojeAluna(nome);
+  return CATALOGO_HABITOS_DIARIOS.reduce(function(soma, h){ return soma + (habitosHoje[h.id] ? h.pontos : 0); }, 0);
+}
+
+function renderCheckInEHabitos(nome){
+  const el = document.getElementById('checkin-habitos-area');
+  if(!el) return;
+  const checkin = getCheckInHoje(nome);
+  const habitosHoje = getHabitosHojeAluna(nome);
+  const pontosHoje = calcularPontosHabitosHoje(nome);
+  const totalConcluidos = CATALOGO_HABITOS_DIARIOS.filter(function(h){ return habitosHoje[h.id]; }).length;
+
+  function botaoEscala(campo, valorAtual){
+    return [1,2,3,4,5].map(function(n){
+      return '<span class="chip" style="' + (valorAtual === n ? 'background:var(--gold-soft);color:#1A1409;border-color:var(--gold-soft);' : '') + '" onclick="salvarCampoCheckInEmocional(\'' + nome.replace(/'/g,"\\'") + '\',\'' + campo + '\',' + n + ')">' + n + '</span>';
+    }).join('');
+  }
+
+  let html = '<p class="section-label" style="margin-top:0;">Como você está hoje?</p>' +
+    '<div class="info-box" style="margin-bottom:14px;">' +
+      '<p class="txt" style="font-size:12px;margin-bottom:4px;">Humor</p><div class="row" style="gap:6px;margin-bottom:10px;">' + botaoEscala('humor', checkin.humor) + '</div>' +
+      '<p class="txt" style="font-size:12px;margin-bottom:4px;">Ansiedade</p><div class="row" style="gap:6px;margin-bottom:10px;">' + botaoEscala('ansiedade', checkin.ansiedade) + '</div>' +
+      '<p class="txt" style="font-size:12px;margin-bottom:4px;">Disposição</p><div class="row" style="gap:6px;">' + botaoEscala('disposicao', checkin.disposicao) + '</div>' +
+    '</div>' +
+    '<div class="info-box" style="margin-bottom:14px;">' +
+      '<p class="txt" style="font-size:12px;margin-bottom:4px;">Quantas horas você dormiu?</p>' +
+      '<input class="form-input" type="number" step="0.5" min="0" max="14" placeholder="Ex: 7.5" value="' + (checkin.sonoHoras != null ? checkin.sonoHoras : '') + '" onchange="salvarCampoCheckInEmocional(\'' + nome.replace(/'/g,"\\'") + '\',\'sonoHoras\',this.value === \'\' ? null : parseFloat(this.value))" style="margin-bottom:10px;">' +
+      '<p class="txt" style="font-size:12px;margin-bottom:4px;">Qualidade do sono</p><div class="row" style="gap:6px;">' + botaoEscala('sonoQualidade', checkin.sonoQualidade) + '</div>' +
+    '</div>' +
+    '<p class="section-label">Hábitos do dia <span class="tag">' + totalConcluidos + ' de ' + CATALOGO_HABITOS_DIARIOS.length + ' · ' + pontosHoje + ' pts</span></p>';
+
+  CATALOGO_HABITOS_DIARIOS.forEach(function(h){
+    const marcado = !!habitosHoje[h.id];
+    html += '<div class="list-item" style="margin-bottom:6px;cursor:pointer;' + (marcado ? 'background:var(--success-soft);border-color:var(--success);' : '') + '" onclick="alternarHabitoDoDia(\'' + nome.replace(/'/g,"\\'") + '\',\'' + h.id + '\')">' +
+      '<span><i class="ti ' + h.icone + '" style="margin-right:8px;color:' + (marcado ? 'var(--success)' : 'var(--gold-soft)') + ';"></i>' + h.label + '</span>' +
+      '<span class="tag" style="' + (marcado ? 'background:var(--success-soft);color:var(--success);' : '') + '">' + (marcado ? '✓ ' : '+') + h.pontos + '</span>' +
+    '</div>';
+  });
+
+  el.innerHTML = html;
 }
 
 function escolherSemRepetirUltima(lista, prog, chave){
@@ -3749,11 +3849,15 @@ async function executarSalvamentoPerfilAluna(nomeAluna){
         desviosPosturaisConfirmados: a.desviosPosturaisConfirmados || [],
         dataFechouPlano: a.dataFechouPlano || null,
         duracaoPlanoDias: a.duracaoPlanoDias || null,
+        valorPlano: a.valorPlano != null ? a.valorPlano : null,
+        statusPagamento: a.statusPagamento || null,
         tabataSugestaoRespondida: a.tabataSugestaoRespondida || false,
         composicaoAtual: a.composicaoAtual || null,
         queixaDor: a.queixaDor || false,
         regiaoQueixa: a.regiaoQueixa || null,
         ambienteTreino: a.ambienteTreino || 'Academia',
+        dataNascimento: a.dataNascimento || null,
+        sinalRiscoEmocional: a.sinalRiscoEmocional || null,
         progressaoManualForcada: a.progressaoManualForcada || 0,
         composicaoHistorico: a.composicaoHistorico || [],
         pesoHistorico: a.pesoHistorico || []
@@ -3792,6 +3896,14 @@ function editarFrequenciaAluna(nomeAluna, novaFreq){
   openAlunaDetail(i);
   mostrarPreviewMudancaTreino(nomeAluna);
   salvarPerfilAlunaNoSupabase(nomeAluna);
+}
+
+function editarDataNascimentoAluna(nomeAluna, novaData){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  a.dataNascimento = novaData;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+  renderCentralDeAvisos();
 }
 
 const secoesColapsaveisAbertas = {}; // guarda estado (aberta/fechada) de cada seção, sobrevive a recarregar a ficha
@@ -4724,10 +4836,14 @@ function openAlunaDetail(i){
         '<select class="form-select" style="font-size:13px;padding:6px;margin-top:4px;" onchange="editarAmbienteTreinoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)">' +
           ['Academia','Casa'].map(function(amb){ return '<option value="' + amb + '"' + ((a.ambienteTreino || 'Academia') === amb ? ' selected' : '') + '>' + amb + '</option>'; }).join('') +
         '</select></div>' +
+      '<div class="stat-card"><p class="stat-label">Data de nascimento</p>' +
+        '<input type="date" class="form-input" style="font-size:13px;padding:6px;margin-top:4px;" value="' + (a.dataNascimento || '') + '" onchange="editarDataNascimentoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)"></div>' +
     '</div>' +
     '<p style="font-size:11px;color:var(--text-faint);margin:-8px 0 12px;">Ajustar aqui atualiza automaticamente toda a estrutura de treino gerada — o gerador nunca mistura exercício de academia com exercício de casa</p>' +
     '<div id="preview-mudanca-area"></div>' +
     '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:18px;" onclick="abrirResumoCompletoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-file-description" style="margin-right:6px;"></i>📋 Resumo completo (diagnóstico, avaliação, plano)</button>' +
+    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:8px;" onclick="gerarResumoPerformanceAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-sparkles" style="margin-right:6px;"></i>🤖 Resumir performance com IA</button>' +
+    '<div id="resumo-ia-area" style="margin-bottom:18px;"></div>' +
     (objetivoSugereTabata(a) && !a.tabataSugestaoRespondida ? (
       '<div class="info-box" style="margin-bottom:12px;border-color:var(--border-strong);">' +
         '<p class="lbl">💡 Sugestão baseada no objetivo dela</p>' +
@@ -5108,6 +5224,13 @@ function renderPlanoFechadoConteudo(a){
       '<select class="form-select" id="plano-duracao-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" onchange="salvarPlanoFechado(\'' + a.nome.replace(/'/g,"\\'") + '\',\'duracao\',this.value)">' +
         '<option value="">Selecione...</option>' +
         Object.keys(planos).map(function(k){ return '<option value="' + k + '"' + (String(duracaoAtual) === k ? ' selected' : '') + '>' + planos[k] + '</option>'; }).join('') +
+      '</select></div>' +
+    '<div class="form-group"><label class="form-label">Valor do plano (R$)</label>' +
+      '<input class="form-input" type="number" step="0.01" min="0" placeholder="Ex: 350.00" id="plano-valor-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" value="' + (a.valorPlano != null ? a.valorPlano : '') + '" onchange="salvarPlanoFechado(\'' + a.nome.replace(/'/g,"\\'") + '\',\'valor\',this.value)"></div>' +
+    '<div class="form-group"><label class="form-label">Pagamento</label>' +
+      '<select class="form-select" id="plano-pagamento-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" onchange="salvarPlanoFechado(\'' + a.nome.replace(/'/g,"\\'") + '\',\'pagamento\',this.value)">' +
+        '<option value="pago"' + ((a.statusPagamento || 'pago') === 'pago' ? ' selected' : '') + '>Pago</option>' +
+        '<option value="pendente"' + (a.statusPagamento === 'pendente' ? ' selected' : '') + '>Pendente</option>' +
       '</select></div>';
 }
 
@@ -5116,9 +5239,19 @@ function salvarPlanoFechado(nomeAluna, campo, valor){
   if(!a) return;
   if(campo === 'data') a.dataFechouPlano = valor;
   if(campo === 'duracao') a.duracaoPlanoDias = parseInt(valor, 10) || null;
+  if(campo === 'valor') a.valorPlano = valor === '' ? null : parseFloat(valor);
+  if(campo === 'pagamento') a.statusPagamento = valor;
   salvarPerfilAlunaNoSupabase(nomeAluna);
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
+  renderAlunas();
+}
+
+// ===== STATUS FINANCEIRO (vencimento + pagamento combinados) =====
+function statusFinanceiroAluna(a){
+  if(statusDoPlano(a) === 'vencidas') return { label: 'Atrasado', cor: '#C9784A', corSuave: 'rgba(201,120,74,0.15)' };
+  if(a.statusPagamento === 'pendente') return { label: 'Pendente', cor: '#E2A33D', corSuave: 'rgba(226,163,61,0.15)' };
+  return { label: 'Ativo', cor: 'var(--success)', corSuave: 'var(--success-soft)' };
 }
 
 function renderFunilEngajamento(a){
@@ -5291,7 +5424,7 @@ function showPersonalView(which){
   ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
   });
-  if(which === 'dashboard') renderCentralDeAvisos();
+  if(which === 'dashboard'){ renderCentralDeAvisos(); renderMetricasNegocio(); renderRelatoriosTendencias(); }
   if(which === 'alunas'){
     renderAlunas();
     const areaDiagnostico = document.createElement('p');
@@ -6288,6 +6421,11 @@ async function carregarCatalogoPersonal(){
       } else if(row.tipo === 'config_ranking'){
         if(row.dados.meta) metaComunidadePontos = row.dados.meta;
         if(row.dados.recompensa) metaComunidadeRecompensa = row.dados.recompensa;
+      } else if(row.tipo === 'config_meta_financeira'){
+        if(row.dados.meta != null) metaFaturamentoMensal = row.dados.meta;
+      } else if(row.tipo === 'relatorio_tendencias'){
+        const jaExisteRelatorio = relatoriosTendencias.find(function(r){ return r.data === row.dados.data; });
+        if(!jaExisteRelatorio) relatoriosTendencias.push(row.dados);
       }
     });
 
@@ -6332,6 +6470,50 @@ function addExercicio(){
 
 let cursosPersonal = [];
 let cursoEmEdicaoId = null;
+let relatoriosTendencias = [];
+
+// ===== RELATÓRIO DE TENDÊNCIAS DO NICHO (inteligência de mercado) =====
+async function gerarRelatorioTendencias(){
+  const area = document.getElementById('relatorio-tendencias-area');
+  if(!area) return;
+  area.innerHTML = '<div class="info-box"><p class="txt" style="color:var(--text-faint);">Pesquisando o que está em alta no nicho agora...</p></div>';
+
+  const temasJaCobertos = relatoriosTendencias.slice(-5).map(function(r){ return r.temasPrincipais || ''; }).filter(Boolean).join(' | ');
+
+  try {
+    const response = await fetch(SUPABASE_URL + '/functions/v1/pesquisar-tendencias', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+      body: JSON.stringify({ temasJaCobertos: temasJaCobertos })
+    });
+    const data = await response.json();
+    if(!response.ok || data.error){
+      throw new Error('HTTP ' + response.status + ': ' + (data.error || JSON.stringify(data)));
+    }
+    // A própria Edge Function já salva no Supabase (funciona também quando chamada pelo cron, sem navegador aberto).
+    // Aqui só guardamos localmente pra atualizar a tela na hora, usando a mesma data que o servidor usou pra salvar.
+    const registro = { data: data.data || new Date().toISOString(), texto: data.relatorio || 'Não consegui gerar o relatório agora.', temasPrincipais: data.temasPrincipais || '' };
+    relatoriosTendencias.push(registro);
+    renderRelatoriosTendencias();
+  } catch(erro){
+    console.error('[Relatório de tendências] erro real:', erro);
+    area.innerHTML = '<div class="info-box"><p class="txt" style="color:#E2A33D;">Não consegui gerar o relatório agora. Tenta de novo em instantes.</p></div>';
+  }
+}
+
+function renderRelatoriosTendencias(){
+  const area = document.getElementById('relatorio-tendencias-area');
+  if(!area) return;
+  if(relatoriosTendencias.length === 0){ area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Nenhum relatório gerado ainda.</p>'; return; }
+  const ordenados = relatoriosTendencias.slice().sort(function(a,b){ return new Date(b.data) - new Date(a.data); });
+  area.innerHTML = ordenados.map(function(r, i){
+    const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    return '<div class="info-box" style="margin-bottom:10px;">' +
+      '<p class="lbl" style="margin-bottom:6px;">' + dataFormatada + (i === 0 ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">mais recente</span>' : '') + '</p>' +
+      '<p class="txt" style="white-space:pre-wrap;">' + r.texto + '</p>' +
+    '</div>';
+  }).join('');
+}
 
 function renderConteudoPersonal(){
   const list = document.getElementById('conteudo-list-personal');
@@ -7218,6 +7400,7 @@ function montarSystemPromptChatIA(){
     '12. Ao explicar o Bloco de Choque, nunca mencione "sacudir o estímulo" ou "rotina". Explique que as repetições caem pra permitir mais intensidade e carga, o descanso aumenta pra recuperar os substratos energéticos, e que mesmo não sendo treino de força pura, a força aumenta naturalmente, junto com desempenho, ganho de massa muscular e gasto energético.\n' +
     '13. Se a pergunta for muito específica, pessoal, exigir avaliação presencial, ou você genuinamente não tiver informação suficiente pra responder com confiança, diga de forma acolhedora que vai confirmar esse detalhe com mais cuidado e retornar em breve. Nunca diga "vou falar com o Thiago" nem "vou perguntar pro personal", apenas "vou confirmar isso com calma e te retorno". Nesses casos, e SOMENTE nesses casos, termine sua resposta com a marcação exata [[SINALIZAR_PERSONAL]] na última linha (isso não aparece pra aluna, é só pro sistema identificar).\n\n' +
     '14. Se a aluna perguntar especificamente sobre a EXECUÇÃO de um exercício (como fazer, forma certa, passo a passo, não sobre quais músculos ativa), identifique o nome exato do exercício e termine sua resposta com a marcação [[VIDEO: Nome Exato do Exercício]] na última linha. Isso mostra o vídeo real pra ela automaticamente, então sua explicação em texto deve ser breve, só complementando o vídeo, não descrevendo a execução passo a passo por escrito.\n\n' +
+    '15. Se a aluna relatar sinais reais de sofrimento emocional significativo (tristeza profunda, desesperança, ansiedade muito intensa, menções de desistir de tudo, isolamento, ou qualquer sinal de risco à própria segurança), responda sempre com acolhimento genuíno primeiro, nunca ignore o que ela disse pra falar só de treino. Não tente diagnosticar nem fazer terapia. Depois de responder com acolhimento, termine sua resposta com a marcação exata [[RISCO_EMOCIONAL]] na última linha (isso não aparece pra aluna, é só pro sistema identificar e avisar o personal, sem revelar o conteúdo da conversa pra ele). Não use essa marcação pra reclamações comuns de cansaço, desânimo pontual com o treino ou frustração passageira, só pra sinais reais de sofrimento.\n\n' +
     montarContextoAluna();
 }
 
@@ -7278,6 +7461,12 @@ async function enviarMensagemChatIA(){
     if(precisaSinalizar){
       textoResposta = textoResposta.replace('[[SINALIZAR_PERSONAL]]', '').trim();
       registrarDuvidaSinalizada(texto, textoResposta);
+    }
+
+    const precisaSinalizarRisco = textoResposta.indexOf('[[RISCO_EMOCIONAL]]') !== -1;
+    if(precisaSinalizarRisco){
+      textoResposta = textoResposta.replace('[[RISCO_EMOCIONAL]]', '').trim();
+      sinalizarRiscoEmocional(NOME_ALUNA_LOGADA);
     }
 
     const matchVideo = textoResposta.match(/\[\[VIDEO:\s*([^\]]+)\]\]/);
@@ -7341,6 +7530,125 @@ function registrarDuvidaSinalizada(pergunta, respostaSol){
   if(!alunaAtual) return;
   if(!alunaAtual.duvidasSinalizadas) alunaAtual.duvidasSinalizadas = [];
   alunaAtual.duvidasSinalizadas.push({ pergunta: pergunta, respostaSol: respostaSol, resolvida: false, data: new Date().toISOString() });
+}
+
+// ===== ALERTA DE RISCO EMOCIONAL (via Sol) =====
+// Guarda só a data do sinal e se o personal já viu. NUNCA guarda o conteúdo da conversa aqui,
+// a conversa com a Sol é privada da aluna, só o sinal de "preciso de atenção" chega pro personal.
+function sinalizarRiscoEmocional(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  a.sinalRiscoEmocional = { data: new Date().toISOString(), visto: false };
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+}
+
+function marcarSinalRiscoComoVisto(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !a.sinalRiscoEmocional) return;
+  a.sinalRiscoEmocional.visto = true;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+  renderAlunas();
+}
+
+function renderAlertasRiscoEmocional(){
+  const el = document.getElementById('alertas-risco-emocional-area');
+  if(!el) return;
+  const alunasComSinal = alunasPersonal.filter(function(a){ return a.sinalRiscoEmocional && !a.sinalRiscoEmocional.visto; });
+  if(alunasComSinal.length === 0){ el.innerHTML = ''; return; }
+  el.innerHTML = alunasComSinal.map(function(a){
+    return '<div class="info-box" style="border-color:var(--gold-soft);margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
+      '<div><p class="lbl" style="margin-bottom:4px;">💛 Identificamos sinais de que ' + a.nome + ' pode estar passando por um momento difícil.</p>' +
+      '<p class="txt" style="font-size:11px;color:var(--text-faint);">Considere entrar em contato para oferecer apoio. Por privacidade, o conteúdo da conversa com a Sol não é compartilhado.</p></div>' +
+      '<span class="acao-pill" style="flex-shrink:0;" onclick="marcarSinalRiscoComoVisto(\'' + a.nome.replace(/'/g,"\\'") + '\')">Marcar como visto</span>' +
+    '</div>';
+  }).join('');
+}
+
+// ===== RESUMO DE PERFORMANCE POR ALUNA, GERADO POR IA (painel do Personal) =====
+function montarDadosParaResumoIA(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return '';
+  const prog = getProgressoAluna(nomeAluna);
+
+  const totalDiasSemana = totalDiasDeTreino();
+  const concluidosSemana = (prog.diasConcluidos[prog.semana] || []).length;
+
+  const hoje = new Date();
+  const seteDiasAtras = new Date(hoje); seteDiasAtras.setDate(hoje.getDate() - 7);
+  const checkins = Object.values(prog.checkinsEmocionais || {}).filter(function(c){ return new Date(c.data + 'T00:00:00') >= seteDiasAtras; });
+  function media(campo){
+    const valores = checkins.map(function(c){ return c[campo]; }).filter(function(v){ return v != null; });
+    if(valores.length === 0) return null;
+    return Math.round((valores.reduce(function(s,v){ return s+v; }, 0) / valores.length) * 10) / 10;
+  }
+  const humorMedio = media('humor'), ansiedadeMedia = media('ansiedade'), disposicaoMedia = media('disposicao'), sonoMedioHoras = media('sonoHoras');
+
+  const diasComHabitosNoPeriodo = Object.keys(prog.habitosDoDia || {}).filter(function(d){ return new Date(d + 'T00:00:00') >= seteDiasAtras; });
+  const totalHabitosMarcados = diasComHabitosNoPeriodo.reduce(function(soma, d){
+    return soma + CATALOGO_HABITOS_DIARIOS.filter(function(h){ return prog.habitosDoDia[d][h.id]; }).length;
+  }, 0);
+
+  let texto = 'Dados da aluna ' + a.nome + ' para gerar o resumo de performance:\n\n';
+  texto += '- Status do plano: ' + statusDoPlano(a) + '\n';
+  texto += '- Nível: ' + (a.nivel || 'não informado') + ', frequência desejada: ' + (a.freq || 'não informada') + '\n';
+  texto += '- Treinos concluídos essa semana: ' + concluidosSemana + ' de ' + totalDiasSemana + ' planejados\n';
+  texto += '- Check-ins de bem-estar nos últimos 7 dias: ' + checkins.length + ' registrados\n';
+  if(humorMedio != null) texto += '  - Humor médio: ' + humorMedio + '/5\n';
+  if(ansiedadeMedia != null) texto += '  - Ansiedade média: ' + ansiedadeMedia + '/5\n';
+  if(disposicaoMedia != null) texto += '  - Disposição média: ' + disposicaoMedia + '/5\n';
+  if(sonoMedioHoras != null) texto += '  - Sono médio: ' + sonoMedioHoras + 'h por noite\n';
+  texto += '- Hábitos diários marcados nos últimos 7 dias: ' + totalHabitosMarcados + ' de ' + (diasComHabitosNoPeriodo.length * CATALOGO_HABITOS_DIARIOS.length) + ' possíveis\n';
+  if(a.composicaoAtual && a.composicaoAtual.peso != null) texto += '- Peso atual: ' + a.composicaoAtual.peso + 'kg' + (a.composicaoAtual.gordura != null ? ', percentual de gordura: ' + a.composicaoAtual.gordura + '%' : '') + '\n';
+  if(a.restricoes) texto += '- Restrições relatadas: ' + a.restricoes + '\n';
+
+  return texto;
+}
+
+async function gerarResumoPerformanceAluna(nomeAluna){
+  const area = document.getElementById('resumo-ia-area');
+  if(!area) return;
+  area.innerHTML = '<div class="info-box"><p class="txt" style="color:var(--text-faint);">Gerando resumo com IA...</p></div>';
+
+  const dados = montarDadosParaResumoIA(nomeAluna);
+  const systemPrompt = 'Você ajuda um personal trainer a entender rapidamente a performance de uma aluna, a partir dos dados que ele te passar. ' +
+    'Escreva em português, tom profissional e direto, sem travessões (use vírgulas e pontos), sem emojis. ' +
+    'Estruture a resposta em markdown com estes títulos, nessa ordem: **Panorama**, **Pontos fortes**, **Pontos de atenção**, **Sugestão de conduta para a próxima semana**. ' +
+    'Use apenas os dados fornecidos, não invente números. Se um dado não foi informado, não mencione ele.';
+
+  try {
+    const response = await fetch(SUPABASE_URL + '/functions/v1/chat-sol', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+      body: JSON.stringify({
+        system: systemPrompt,
+        messages: [{ role: 'user', content: dados }]
+      })
+    });
+    const data = await response.json();
+    if(!response.ok || data.error){
+      throw new Error('HTTP ' + response.status + ': ' + (data.error && data.error.message ? data.error.message : JSON.stringify(data)));
+    }
+    const textoResumo = (data.content || []).map(function(c){ return c.text || ''; }).join('\n').trim();
+    const idTextoEscapado = 'resumo-ia-texto-' + nomeAluna.replace(/[^a-zA-Z0-9]/g,'');
+    area.innerHTML = '<div class="info-box">' +
+      '<p id="' + idTextoEscapado + '" class="txt" style="white-space:pre-wrap;">' + (textoResumo || 'Não consegui gerar o resumo agora, tenta de novo.') + '</p>' +
+      '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:8px;" onclick="copiarResumoIA(\'' + idTextoEscapado + '\')">Copiar texto</button>' +
+    '</div>';
+  } catch(erro){
+    console.error('[Resumo IA] erro real:', erro);
+    area.innerHTML = '<div class="info-box"><p class="txt" style="color:#E2A33D;">Não consegui gerar o resumo agora. Tenta de novo em instantes.</p></div>';
+  }
+}
+
+function copiarResumoIA(idTexto){
+  const el = document.getElementById(idTexto);
+  if(!el) return;
+  navigator.clipboard.writeText(el.textContent).then(function(){
+    const btn = event.target;
+    const textoOriginal = btn.textContent;
+    btn.textContent = 'Copiado!';
+    setTimeout(function(){ btn.textContent = textoOriginal; }, 1500);
+  });
 }
 
 function buscarExercicioNoBanco(nomeEx){
@@ -8171,15 +8479,149 @@ const templatesAvisos = {
   planoVencendo: function(a){ return 'Oi ' + a.nome.split(' ')[0] + '! Seu plano está perto de vencer. Vamos conversar sobre a renovação?'; },
   planoVencido: function(a){ return 'Oi ' + a.nome.split(' ')[0] + '! Seu plano venceu. Sentimos sua falta — vamos renovar?'; },
   treinoProgredido: function(a){ return 'Oi ' + a.nome.split(' ')[0] + '! Seu treino acabou de ser atualizado no app, com evolução de carga/variedade. Já pode conferir! 💪'; },
-  metaComunidade: function(pontos){ return '🎉 A comunidade bateu a meta de ' + pontos.toLocaleString('pt-BR') + ' pontos! Obrigada por fazer parte disso — em breve mais novidades.'; }
+  metaComunidade: function(pontos){ return '🎉 A comunidade bateu a meta de ' + pontos.toLocaleString('pt-BR') + ' pontos! Obrigada por fazer parte disso — em breve mais novidades.'; },
+  aniversario: function(a){ return '🎂 Feliz aniversário, ' + a.nome.split(' ')[0] + '! Que seu novo ano seja repleto de saúde, força e conquistas. Muito feliz de fazer parte dessa jornada com você! 💛'; },
+  diaDaMulher: function(a){ return 'Feliz Dia da Mulher, ' + a.nome.split(' ')[0] + '! Que você continue se superando e se cuidando cada dia mais. Você merece todo o reconhecimento. 💐'; },
+  diaDasMaes: function(a){ return 'Feliz Dia das Mães, ' + a.nome.split(' ')[0] + '! Que esse dia seja tão especial quanto você é para quem te ama. 💐'; }
 };
+
+// ===== DATAS ESPECIAIS (aniversário, Dia da Mulher, Dia das Mães) =====
+function alunasAniversarioHoje(){
+  const hoje = new Date();
+  const mesHoje = hoje.getMonth() + 1, diaHoje = hoje.getDate();
+  return alunasPersonal.filter(function(a){
+    if(a.status === 'lead' || !a.telefone || !a.dataNascimento) return false;
+    const partes = a.dataNascimento.split('-'); // formato YYYY-MM-DD
+    if(partes.length < 3) return false;
+    return parseInt(partes[1], 10) === mesHoje && parseInt(partes[2], 10) === diaHoje;
+  });
+}
+
+function segundoDomingoDeMaio(ano){
+  const primeiro = new Date(ano, 4, 1); // maio = índice 4
+  const diaSemanaPrimeiro = primeiro.getDay(); // 0 = domingo
+  const primeiroDomingo = diaSemanaPrimeiro === 0 ? 1 : (8 - diaSemanaPrimeiro);
+  return primeiroDomingo + 7;
+}
+
+function isDiaDaMulherHoje(){
+  const hoje = new Date();
+  return hoje.getMonth() === 2 && hoje.getDate() === 8; // 8 de março
+}
+
+function isDiaDasMaesHoje(){
+  const hoje = new Date();
+  return hoje.getMonth() === 4 && hoje.getDate() === segundoDomingoDeMaio(hoje.getFullYear());
+}
+
+// ===== MÉTRICAS DE NEGÓCIO (painel do Personal) =====
+// Faturamento do mês é calculado a partir dos planos fechados dentro do mês corrente,
+// já que ainda não existe um livro-caixa separado no sistema. Reflete fechamentos reais, não um valor inventado.
+function calcularMetricasNegocio(){
+  const naoLead = alunasPersonal.filter(function(a){ return a.status !== 'lead'; });
+  const clientesAtivos = naoLead.filter(function(a){ return statusDoPlano(a) === 'ativas' || statusDoPlano(a) === 'porvencer'; }).length;
+
+  const hoje = new Date();
+  const mesAtual = hoje.getMonth(), anoAtual = hoje.getFullYear();
+  const faturamentoMes = naoLead.reduce(function(soma, a){
+    if(!a.dataFechouPlano || a.valorPlano == null) return soma;
+    const dataFechou = new Date(a.dataFechouPlano + 'T00:00:00');
+    if(dataFechou.getMonth() === mesAtual && dataFechou.getFullYear() === anoAtual) return soma + a.valorPlano;
+    return soma;
+  }, 0);
+
+  const taxaRetencao = naoLead.length > 0 ? Math.round((clientesAtivos / naoLead.length) * 100) : 0;
+
+  return { clientesAtivos: clientesAtivos, faturamentoMes: faturamentoMes, taxaRetencao: taxaRetencao };
+}
+
+function renderMetricasNegocio(){
+  const area = document.getElementById('metricas-negocio-area');
+  if(!area) return;
+  const m = calcularMetricasNegocio();
+  const faturamentoFormatado = m.faturamentoMes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  area.innerHTML =
+    '<div class="alert-row" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:14px;">' +
+      '<div class="alert-stat"><p class="num">' + m.clientesAtivos + '</p><p class="lbl2">Clientes ativos</p></div>' +
+      '<div class="alert-stat"><p class="num">R$ ' + faturamentoFormatado + '</p><p class="lbl2">Faturamento do mês</p></div>' +
+      '<div class="alert-stat"><p class="num">' + m.taxaRetencao + '%</p><p class="lbl2">Taxa de retenção</p></div>' +
+    '</div>' +
+    renderMetaFinanceiraConteudo(m);
+}
+
+function renderMetaFinanceiraConteudo(m){
+  if(!metaFaturamentoMensal || metaFaturamentoMensal <= 0){
+    return '<div class="info-box" style="margin-bottom:14px;">' +
+      '<p class="lbl" style="margin-bottom:8px;">Meta do mês</p>' +
+      '<div class="form-group"><input class="form-input" id="input-meta-faturamento" type="number" step="0.01" placeholder="Quanto você quer faturar esse mês?"></div>' +
+      '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="salvarMetaFaturamento()">Definir meta</button>' +
+    '</div>';
+  }
+
+  const hoje = new Date();
+  const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
+  const diasRestantes = Math.max(0, ultimoDiaMes - hoje.getDate());
+  const pct = Math.min(100, Math.round((m.faturamentoMes / metaFaturamentoMensal) * 100));
+  const faltam = Math.max(0, metaFaturamentoMensal - m.faturamentoMes);
+  const porDia = diasRestantes > 0 ? (faltam / diasRestantes) : faltam;
+
+  const sugestoes = [];
+  if(pct < 30 && diasRestantes > 15){
+    sugestoes.push({ titulo: 'Hora de acelerar!', texto: 'Você está no início do mês. Foque em fechar novos clientes pra ganhar momentum.', impacto: 'Alto', esforco: 'Médio' });
+  }
+  if(diasRestantes <= 10 && pct < 100){
+    sugestoes.push({ titulo: 'Sprint final!', texto: 'Restam ' + diasRestantes + ' dias. Considere promoções de última hora.', impacto: 'Alto', esforco: 'Baixo' });
+  }
+  const dadosAvisos = calcularCentralDeAvisos();
+  if(dadosAvisos.planoVencido.length > 0){
+    sugestoes.push({ titulo: 'Prospecção ativa', texto: 'Entre em contato com as ' + dadosAvisos.planoVencido.length + ' aluna(s) com plano vencido que ainda não renovaram.', impacto: 'Alto', esforco: 'Médio' });
+  }
+  if(m.clientesAtivos > 0 && pct < 100){
+    sugestoes.push({ titulo: 'Upsell pra clientes atuais', texto: 'Ofereça serviços adicionais ou planos premium pra base ativa que você já tem.', impacto: 'Alto', esforco: 'Baixo' });
+  }
+
+  return '<div class="info-box" style="margin-bottom:14px;">' +
+    '<p class="lbl" style="margin-bottom:2px;">Meta do mês</p>' +
+    '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-bottom:10px;">R$ ' + m.faturamentoMes.toLocaleString('pt-BR',{minimumFractionDigits:2}) + ' de R$ ' + metaFaturamentoMensal.toLocaleString('pt-BR',{minimumFractionDigits:2}) + '</p>' +
+    '<div style="background:var(--card-2);border-radius:8px;height:10px;overflow:hidden;margin-bottom:10px;"><div style="background:linear-gradient(90deg,#F4D9A5,#E8C58A);height:100%;width:' + pct + '%;"></div></div>' +
+    '<div class="row" style="gap:8px;margin-bottom:8px;">' +
+      '<span class="tag">' + pct + '% da meta</span>' +
+      '<span class="tag">' + diasRestantes + ' dias restantes</span>' +
+      '<span class="tag">R$ ' + porDia.toLocaleString('pt-BR',{maximumFractionDigits:0}) + '/dia pra bater</span>' +
+    '</div>' +
+    '<span class="chip" style="cursor:pointer;" onclick="editarMetaFaturamento()">Editar meta</span>' +
+  '</div>' +
+  (sugestoes.length > 0 ? '<p class="section-label">Sugestões pra bater a meta</p>' +
+    sugestoes.map(function(s){
+      return '<div class="info-box" style="margin-bottom:8px;">' +
+        '<p class="lbl" style="margin-bottom:2px;">' + s.titulo + '</p>' +
+        '<p class="txt" style="font-size:12px;margin-bottom:6px;">' + s.texto + '</p>' +
+        '<span class="tag" style="margin-right:6px;">Impacto ' + s.impacto + '</span><span class="tag">Esforço ' + s.esforco + '</span>' +
+      '</div>';
+    }).join('') : '');
+}
+
+async function salvarMetaFaturamento(){
+  const input = document.getElementById('input-meta-faturamento');
+  const valor = parseFloat(input.value);
+  if(!valor || valor <= 0){ alert('Digita um valor de meta válido.'); return; }
+  metaFaturamentoMensal = valor;
+  await salvarCatalogoPersonal('config_meta_financeira', 'meta', { meta: metaFaturamentoMensal });
+  renderMetricasNegocio();
+}
+
+function editarMetaFaturamento(){
+  metaFaturamentoMensal = 0; // volta pro formulário de definir meta
+  renderMetricasNegocio();
+}
 
 function calcularCentralDeAvisos(){
   const risco = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.telefone && detectarRiscoAbandonoPorConstancia(a.nome); });
   const avaliacaoAtrasada = alunasPersonal.filter(function(a){ const c = calcularContagemRegressivaAvaliacao(a); return a.status !== 'lead' && a.telefone && c && c.atrasada; });
   const planoVencendo = alunasPersonal.filter(function(a){ return a.telefone && statusDoPlano(a) === 'porvencer'; });
   const planoVencido = alunasPersonal.filter(function(a){ return a.telefone && statusDoPlano(a) === 'vencidas'; });
-  return { risco: risco, avaliacaoAtrasada: avaliacaoAtrasada, planoVencendo: planoVencendo, planoVencido: planoVencido };
+  const aniversario = alunasAniversarioHoje();
+  return { risco: risco, avaliacaoAtrasada: avaliacaoAtrasada, planoVencendo: planoVencendo, planoVencido: planoVencido, aniversario: aniversario };
 }
 
 function renderCentralDeAvisos(){
@@ -8196,14 +8638,34 @@ function renderCentralDeAvisos(){
 
   const rankingAtual = calcularRankingComunidade();
   const metaBatida = rankingAtual.totalComunidade >= metaComunidadePontos;
+  const eDiaDaMulher = isDiaDaMulherHoje();
+  const eDiaDasMaes = isDiaDasMaesHoje();
+  const totalComTelefone = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.telefone; }).length;
 
   area.innerHTML =
     linhaAviso('Risco de abandono', dados.risco, 'riscoAbandono') +
     linhaAviso('Avaliação física atrasada', dados.avaliacaoAtrasada, 'avaliacaoAtrasada') +
     linhaAviso('Plano vencendo em breve', dados.planoVencendo, 'planoVencendo') +
     linhaAviso('Plano já vencido', dados.planoVencido, 'planoVencido') +
+    linhaAviso('Aniversário hoje', dados.aniversario, 'aniversario') +
     (metaBatida ? '<div class="list-item" style="margin-bottom:6px;background:var(--success-soft);"><span>🎉 Meta da comunidade batida!</span><span class="acao-pill" onclick="avisarMetaComunidadeBatida()">Avisar todas</span></div>' : '') +
+    (eDiaDaMulher ? '<div class="list-item" style="margin-bottom:6px;background:var(--success-soft);"><span>💐 Hoje é Dia da Mulher <span class="tag">' + totalComTelefone + '</span></span><span class="acao-pill" onclick="avisarDataEspecial(\'diaDaMulher\')">Avisar todas</span></div>' : '') +
+    (eDiaDasMaes ? '<div class="list-item" style="margin-bottom:6px;background:var(--success-soft);"><span>💐 Hoje é Dia das Mães <span class="tag">' + totalComTelefone + '</span></span><span class="acao-pill" onclick="avisarDataEspecial(\'diaDasMaes\')">Avisar todas</span></div>' : '') +
     '<div id="resultado-avisos-lote"></div>';
+}
+
+async function avisarDataEspecial(tipo){
+  const elegiveis = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.telefone; });
+  if(!confirm('Vai avisar ' + elegiveis.length + ' aluna(s) sobre essa data. Continuar?')) return;
+  const area = document.getElementById('resultado-avisos-lote');
+  let enviadas = 0;
+  for(let i = 0; i < elegiveis.length; i++){
+    area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Enviando ' + (i+1) + ' de ' + elegiveis.length + '...</p>';
+    const saida = await enviarWhatsApp(elegiveis[i].telefone, templatesAvisos[tipo](elegiveis[i]));
+    if(saida.sucesso) enviadas++;
+    await new Promise(function(r){ setTimeout(r, 400); });
+  }
+  area.innerHTML = '<div class="info-box" style="border-color:var(--success);"><p class="txt">✓ ' + enviadas + ' avisada(s).</p></div>';
 }
 
 async function avisarMetaComunidadeBatida(){
@@ -8222,7 +8684,7 @@ async function avisarMetaComunidadeBatida(){
 
 async function enviarAvisosEmLote(tipo){
   const dados = calcularCentralDeAvisos();
-  const mapaLista = { riscoAbandono: dados.risco, avaliacaoAtrasada: dados.avaliacaoAtrasada, planoVencendo: dados.planoVencendo, planoVencido: dados.planoVencido };
+  const mapaLista = { riscoAbandono: dados.risco, avaliacaoAtrasada: dados.avaliacaoAtrasada, planoVencendo: dados.planoVencendo, planoVencido: dados.planoVencido, aniversario: dados.aniversario };
   const lista = mapaLista[tipo];
   if(!lista || lista.length === 0) return;
   if(!confirm('Vai mandar mensagem no WhatsApp de ' + lista.length + ' aluna(s) agora. Continuar?')) return;
@@ -8447,6 +8909,7 @@ function ajusteRecuperacaoPorIdade(idade){
 // ===== RANKING DA COMUNIDADE (pontos coletivos) =====
 let metaComunidadePontos = 50000; // meta padrão, Personal pode mudar
 let metaComunidadeRecompensa = 'Em breve — a Personal vai definir o que desbloqueia quando a comunidade bater a meta';
+let metaFaturamentoMensal = 0; // 0 = sem meta definida ainda
 
 function calcularPontosAluna(nome){
   const prog = getProgressoAluna(nome);
@@ -8514,6 +8977,9 @@ function renderMeuProgressoConteudo(container, nome, a){
   const comparativoSemana = calcularComparativoSemanal(nome);
 
   let html = '';
+
+  // Check-in emocional do dia + hábitos com pontuação
+  html += '<div id="checkin-habitos-area"></div>';
 
   // DNA Score + comparativo real
   html += '<div class="dna-score-card" onclick="openDetail(\'dna\')">' +
@@ -8591,6 +9057,7 @@ function renderMeuProgressoConteudo(container, nome, a){
     '</div>';
 
   container.innerHTML = html;
+  renderCheckInEHabitos(nome);
 }
 
 function calcularEstatisticasAluna(nome){
