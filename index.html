@@ -70,6 +70,41 @@
   .bottom-nav-item.ativo .nav-icon-svg, .bottom-nav-item.ativo span{fill:var(--gold-soft);color:var(--gold-soft);}
   .backbar i{font-size:16px;}
 
+  /* ===== LAYOUT DESKTOP DO PERSONAL (sidebar), só entra em telas largas ===== */
+  .sidebar-personal{ display:none; }
+  .sidebar-personal .side-logo{ font-family:'Playfair Display',serif; font-size:17px; font-weight:600; color:var(--gold-soft); padding:6px 10px 22px; letter-spacing:0.5px; }
+  .sidebar-personal .side-grupo-label{ font-size:10px; text-transform:uppercase; letter-spacing:0.6px; color:var(--text-faint); padding:14px 10px 6px; }
+  .sidebar-personal .side-item{ display:flex; align-items:center; gap:10px; padding:10px 10px; border-radius:10px; cursor:pointer; font-size:13px; color:var(--text-dim); margin-bottom:2px; }
+  .sidebar-personal .side-item i{ font-size:16px; width:18px; text-align:center; color:var(--text-faint); }
+  .sidebar-personal .side-item:hover{ background:var(--card-2); }
+  .sidebar-personal .side-item.ativo{ background:var(--gold-deep); color:var(--gold-soft); }
+  .sidebar-personal .side-item.ativo i{ color:var(--gold-soft); }
+  .sidebar-personal .side-sair{ margin-top:auto; }
+
+  @media (min-width: 1024px){
+    body{ padding:28px; align-items:flex-start; }
+    .phone.modo-personal{
+      width:100%; max-width:1240px; border-radius:16px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.5);
+      display:flex; flex-direction:row; align-items:stretch;
+    }
+    .phone.modo-personal .notch{ display:none; }
+    .phone.modo-personal .sidebar-personal{
+      display:flex; flex-direction:column; width:230px; flex-shrink:0;
+      background:var(--card); border-right:1px solid var(--border);
+      padding:20px 12px; height:calc(100vh - 56px); max-height:900px; overflow-y:auto;
+    }
+    .phone.modo-personal .screen{ flex:1; height:calc(100vh - 56px); max-height:900px; min-width:0; }
+    .phone.modo-personal .screen-conteudo{ padding:28px 44px 60px; max-width:1000px; }
+    .phone.modo-personal .backbar{ display:none !important; }
+    .phone.modo-personal .top-logo-fixa{ display:none !important; }
+    .phone.modo-personal #alunas-list{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; align-content:start; }
+    .phone.modo-personal .stat-grid{ grid-template-columns:repeat(4,1fr); }
+    .phone.modo-personal #label-ferramentas-dashboard,
+    .phone.modo-personal #grid-ferramentas-personal{ display:none; }
+    .phone.modo-personal #ex-lista{ display:grid !important; grid-template-columns:repeat(2,1fr); gap:8px; }
+  }
+
   /* LAUNCHER */
   .launcher{padding-top:56px;text-align:center;}
   .brand{
@@ -313,8 +348,9 @@
   <span id="cronometro-pill-numero" style="font-size:13px;font-weight:600;color:var(--gold-soft);">60s</span>
 </div>
 
-<div class="phone">
+<div class="phone" id="phone-container">
   <div class="notch"></div>
+  <div class="sidebar-personal" id="sidebar-personal"></div>
   <div class="screen">
     <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-08-05-A</p>
 
@@ -594,7 +630,7 @@
         <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:12px;" onclick="gerarRelatorioTendencias()"><i class="ti ti-trending-up" style="margin-right:6px;"></i>🔎 Gerar novo relatório de tendências</button>
         <div id="relatorio-tendencias-area"></div>
 
-        <p class="section-label">Ferramentas</p>
+        <p class="section-label" id="label-ferramentas-dashboard">Ferramentas</p>
         <div class="poster-grid" id="grid-ferramentas-personal"></div>
       </div>
 
@@ -5383,6 +5419,32 @@ function renderFerramentasPersonal(){
     el.onclick = function(){ f.acaoEspecial ? window[f.acaoEspecial]() : showPersonalView(f.view); };
     grid.appendChild(el);
   });
+  renderSidebarPersonal();
+}
+
+function renderSidebarPersonal(){
+  const sidebar = document.getElementById('sidebar-personal');
+  if(!sidebar || sidebar.dataset.rendered) return;
+  sidebar.dataset.rendered = 'true';
+
+  let html = '<div class="side-logo">DNA MUSA</div>';
+  html += '<div class="side-item" data-side-view="dashboard" onclick="showPersonalView(\'dashboard\')"><i class="ti ti-layout-dashboard"></i>Dashboard</div>';
+  html += '<div class="side-item" data-side-view="alunas" onclick="showPersonalView(\'alunas\')"><i class="ti ti-users"></i>Alunas</div>';
+  html += '<div class="side-grupo-label">Ferramentas</div>';
+  ferramentasPersonal.forEach(function(f){
+    html += '<div class="side-item" data-side-view="' + f.view + '" onclick="' + (f.acaoEspecial ? f.acaoEspecial + '()' : "showPersonalView('" + f.view + "')") + '"><i class="ti ' + f.icone + '"></i>' + f.titulo + '</div>';
+  });
+  html += '<div class="side-item side-sair" onclick="goBack()"><i class="ti ti-logout"></i>Sair</div>';
+
+  sidebar.innerHTML = html;
+}
+
+function atualizarSidebarAtiva(which){
+  const sidebar = document.getElementById('sidebar-personal');
+  if(!sidebar) return;
+  sidebar.querySelectorAll('.side-item').forEach(function(el){
+    el.classList.toggle('ativo', el.getAttribute('data-side-view') === which);
+  });
 }
 
 async function sincronizarListaAlunasDoSupabase(){
@@ -5451,6 +5513,7 @@ async function sincronizarListaAlunasDoSupabase(){
 
 function showPersonalView(which){
   renderFerramentasPersonal();
+  atualizarSidebarAtiva(which);
   mostrarSoAlunasAntigas = false; // reseta por padrão sempre — quem quer o modo antigas, define depois de chamar essa função
   ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
@@ -7272,6 +7335,8 @@ function openLevel2(which){
   if(ehAbaFixaDaAluna) atualizarNavAtiva(which);
 
   document.getElementById('backlabel').textContent = (which === 'personal') ? 'Sair' : 'Voltar para o início';
+  const phoneEl = document.getElementById('phone-container');
+  if(phoneEl) phoneEl.classList.toggle('modo-personal', which === 'personal');
   if(which === 'personal'){ showPersonalView('dashboard'); carregarCatalogoPersonal(); }
   if(which === 'chatia'){ inicializarChatIA(); }
   if(which === 'home' && typeof renderHome === 'function'){ renderHome(); }
