@@ -574,6 +574,12 @@
         <div id="config-ranking-area"></div>
         <div id="geracao-massa-area"></div>
 
+        <p class="section-label" style="margin-top:22px;">Central de avisos (WhatsApp)</p>
+        <div id="central-avisos-area"></div>
+
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;margin-top:10px;" onclick="mostrarFormularioMensagemEmMassa()"><i class="ti ti-speakerphone" style="margin-right:6px;"></i>Mandar mensagem pra todas</button>
+        <div id="mensagem-massa-area"></div>
+
         <p class="section-label">Ferramentas</p>
         <div class="poster-grid" id="grid-ferramentas-personal"></div>
       </div>
@@ -3842,6 +3848,7 @@ function confirmarProgressaoManual(nomeAluna){
   a.progressaoManualForcada = (a.progressaoManualForcada || 0) + 1;
   salvarPerfilAlunaNoSupabase(nomeAluna);
   gerarTreinoAutomaticoParaAluna(nomeAluna);
+  if(a.telefone) enviarWhatsApp(a.telefone, templatesAvisos.treinoProgredido(a));
 }
 
 function calcularVolumeTotalDoTreino(diasTreino){
@@ -5284,6 +5291,7 @@ function showPersonalView(which){
   ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
   });
+  if(which === 'dashboard') renderCentralDeAvisos();
   if(which === 'alunas'){
     renderAlunas();
     const areaDiagnostico = document.createElement('p');
@@ -8156,6 +8164,143 @@ function avaliarSinaisDeFadiga(a){
 // Usa o que os Motores 2 (Classificação), 3 (Periodização) e a análise de fadiga/aderência já calculam.
 // Regra nova: 3 semanas seguidas com constância abaixo de 40% é sinal real de risco de abandono —
 // diferente de fadiga (que é sobre estar treinando mas cansada). Aqui ela simplesmente não está indo.
+// ===== CENTRAL DE AVISOS =====
+const templatesAvisos = {
+  riscoAbandono: function(a){ return 'Oi ' + a.nome.split(' ')[0] + '! Notei que você deu uma pausa nos treinos essas últimas semanas. Reduzi um pouco o volume pra facilitar a volta — bora retomar juntas? 💛'; },
+  avaliacaoAtrasada: function(a){ return 'Oi ' + a.nome.split(' ')[0] + '! Já faz um tempo desde sua última avaliação física. Vamos agendar uma nova pra acompanhar sua evolução direitinho?'; },
+  planoVencendo: function(a){ return 'Oi ' + a.nome.split(' ')[0] + '! Seu plano está perto de vencer. Vamos conversar sobre a renovação?'; },
+  planoVencido: function(a){ return 'Oi ' + a.nome.split(' ')[0] + '! Seu plano venceu. Sentimos sua falta — vamos renovar?'; },
+  treinoProgredido: function(a){ return 'Oi ' + a.nome.split(' ')[0] + '! Seu treino acabou de ser atualizado no app, com evolução de carga/variedade. Já pode conferir! 💪'; },
+  metaComunidade: function(pontos){ return '🎉 A comunidade bateu a meta de ' + pontos.toLocaleString('pt-BR') + ' pontos! Obrigada por fazer parte disso — em breve mais novidades.'; }
+};
+
+function calcularCentralDeAvisos(){
+  const risco = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.telefone && detectarRiscoAbandonoPorConstancia(a.nome); });
+  const avaliacaoAtrasada = alunasPersonal.filter(function(a){ const c = calcularContagemRegressivaAvaliacao(a); return a.status !== 'lead' && a.telefone && c && c.atrasada; });
+  const planoVencendo = alunasPersonal.filter(function(a){ return a.telefone && statusDoPlano(a) === 'porvencer'; });
+  const planoVencido = alunasPersonal.filter(function(a){ return a.telefone && statusDoPlano(a) === 'vencidas'; });
+  return { risco: risco, avaliacaoAtrasada: avaliacaoAtrasada, planoVencendo: planoVencendo, planoVencido: planoVencido };
+}
+
+function renderCentralDeAvisos(){
+  const area = document.getElementById('central-avisos-area');
+  if(!area) return;
+  const dados = calcularCentralDeAvisos();
+
+  function linhaAviso(titulo, lista, tipo){
+    return '<div class="list-item" style="margin-bottom:6px;">' +
+      '<span>' + titulo + ' <span class="tag">' + lista.length + '</span></span>' +
+      (lista.length > 0 ? '<span class="acao-pill" onclick="enviarAvisosEmLote(\'' + tipo + '\')">Enviar avisos</span>' : '') +
+    '</div>';
+  }
+
+  const rankingAtual = calcularRankingComunidade();
+  const metaBatida = rankingAtual.totalComunidade >= metaComunidadePontos;
+
+  area.innerHTML =
+    linhaAviso('Risco de abandono', dados.risco, 'riscoAbandono') +
+    linhaAviso('Avaliação física atrasada', dados.avaliacaoAtrasada, 'avaliacaoAtrasada') +
+    linhaAviso('Plano vencendo em breve', dados.planoVencendo, 'planoVencendo') +
+    linhaAviso('Plano já vencido', dados.planoVencido, 'planoVencido') +
+    (metaBatida ? '<div class="list-item" style="margin-bottom:6px;background:var(--success-soft);"><span>🎉 Meta da comunidade batida!</span><span class="acao-pill" onclick="avisarMetaComunidadeBatida()">Avisar todas</span></div>' : '') +
+    '<div id="resultado-avisos-lote"></div>';
+}
+
+async function avisarMetaComunidadeBatida(){
+  const elegiveis = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.telefone; });
+  if(!confirm('Vai avisar ' + elegiveis.length + ' aluna(s) que a meta foi batida. Continuar?')) return;
+  const area = document.getElementById('resultado-avisos-lote');
+  let enviadas = 0;
+  for(let i = 0; i < elegiveis.length; i++){
+    area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Enviando ' + (i+1) + ' de ' + elegiveis.length + '...</p>';
+    const saida = await enviarWhatsApp(elegiveis[i].telefone, templatesAvisos.metaComunidade(metaComunidadePontos));
+    if(saida.sucesso) enviadas++;
+    await new Promise(function(r){ setTimeout(r, 400); });
+  }
+  area.innerHTML = '<div class="info-box" style="border-color:var(--success);"><p class="txt">✓ ' + enviadas + ' avisada(s) sobre a meta batida.</p></div>';
+}
+
+async function enviarAvisosEmLote(tipo){
+  const dados = calcularCentralDeAvisos();
+  const mapaLista = { riscoAbandono: dados.risco, avaliacaoAtrasada: dados.avaliacaoAtrasada, planoVencendo: dados.planoVencendo, planoVencido: dados.planoVencido };
+  const lista = mapaLista[tipo];
+  if(!lista || lista.length === 0) return;
+  if(!confirm('Vai mandar mensagem no WhatsApp de ' + lista.length + ' aluna(s) agora. Continuar?')) return;
+
+  const resultadoArea = document.getElementById('resultado-avisos-lote');
+  let enviadas = 0, erros = [];
+  for(let i = 0; i < lista.length; i++){
+    const a = lista[i];
+    resultadoArea.innerHTML = '<p class="txt" style="color:var(--text-faint);">Enviando ' + (i+1) + ' de ' + lista.length + '...</p>';
+    const mensagem = templatesAvisos[tipo](a);
+    const saida = await enviarWhatsApp(a.telefone, mensagem);
+    if(saida.sucesso) enviadas++; else erros.push({ nome: a.nome, motivo: saida.motivo });
+    await new Promise(function(r){ setTimeout(r, 400); }); // pequena pausa entre envios, evita parecer spam
+  }
+  resultadoArea.innerHTML = '<div class="info-box" style="border-color:var(--success);margin-top:8px;"><p class="txt">✓ ' + enviadas + ' enviada(s)' + (erros.length ? ' · ' + erros.length + ' com erro' : '') + '</p></div>';
+}
+
+function mostrarFormularioMensagemEmMassa(){
+  const area = document.getElementById('mensagem-massa-area');
+  if(area.innerHTML){ area.innerHTML = ''; return; }
+  area.innerHTML = '<div class="info-box">' +
+    '<div class="form-group"><label class="form-label">Quem recebe?</label>' +
+      '<select class="form-select" id="massa-publico">' +
+        '<option value="todas">Todas as alunas</option>' +
+        '<option value="ativas">Só as ativas</option>' +
+        '<option value="porvencer">Só com plano vencendo</option>' +
+        '<option value="vencidas">Só com plano vencido</option>' +
+        '<option value="risco">Só em risco de abandono</option>' +
+      '</select>' +
+    '</div>' +
+    '<div class="form-group"><label class="form-label">Mensagem</label><textarea class="form-input" id="massa-texto" rows="4" placeholder="Escreve aqui... pode usar {nome} que substitui pelo primeiro nome de cada aluna"></textarea></div>' +
+    '<button class="btn-gold" onclick="confirmarMensagemEmMassa()">Enviar pra todas</button>' +
+  '</div>';
+}
+
+async function confirmarMensagemEmMassa(){
+  const publico = document.getElementById('massa-publico').value;
+  const texto = document.getElementById('massa-texto').value.trim();
+  if(!texto){ alert('Escreve a mensagem primeiro.'); return; }
+
+  let destinatarias = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.telefone; });
+  if(publico === 'ativas') destinatarias = destinatarias.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  else if(publico === 'porvencer') destinatarias = destinatarias.filter(function(a){ return statusDoPlano(a) === 'porvencer'; });
+  else if(publico === 'vencidas') destinatarias = destinatarias.filter(function(a){ return statusDoPlano(a) === 'vencidas'; });
+  else if(publico === 'risco') destinatarias = destinatarias.filter(function(a){ return detectarRiscoAbandonoPorConstancia(a.nome); });
+
+  if(!confirm('Vai mandar essa mensagem pra ' + destinatarias.length + ' aluna(s), pelo WhatsApp. Continuar?')) return;
+
+  const area = document.getElementById('mensagem-massa-area');
+  let enviadas = 0, erros = [];
+  for(let i = 0; i < destinatarias.length; i++){
+    const a = destinatarias[i];
+    area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Enviando ' + (i+1) + ' de ' + destinatarias.length + '...</p>';
+    const mensagemPersonalizada = texto.replace(/\{nome\}/g, a.nome.split(' ')[0]);
+    const saida = await enviarWhatsApp(a.telefone, mensagemPersonalizada);
+    if(saida.sucesso) enviadas++; else erros.push({ nome: a.nome, motivo: saida.motivo });
+    await new Promise(function(r){ setTimeout(r, 400); });
+  }
+  area.innerHTML = '<div class="info-box" style="border-color:var(--success);"><p class="lbl" style="color:var(--success);">✓ Concluído</p><p class="txt">' + enviadas + ' enviada(s)' + (erros.length ? ' · ' + erros.length + ' com erro' : '') + '</p></div>';
+}
+
+// ===== ENVIO DE WHATSAPP (via porteiro seguro no Supabase) =====
+async function enviarWhatsApp(telefone, mensagem){
+  if(!telefone) return { sucesso: false, motivo: 'sem telefone cadastrado' };
+  try {
+    const resposta = await fetch(SUPABASE_URL + '/functions/v1/enviar-whatsapp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+      body: JSON.stringify({ telefone: telefone, mensagem: mensagem })
+    });
+    const dados = await resposta.json();
+    if(!resposta.ok || dados.error) return { sucesso: false, motivo: dados.error || ('HTTP ' + resposta.status) };
+    return { sucesso: true };
+  } catch(erro){
+    return { sucesso: false, motivo: erro.message };
+  }
+}
+
 function detectarRiscoAbandonoPorConstancia(nomeAluna){
   const prog = getProgressoAluna(nomeAluna);
   const semanaAtual = prog.semana;
