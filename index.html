@@ -616,6 +616,11 @@
         <div id="aluna-detail-content"></div>
       </div>
 
+      <div id="personal-resumo-aluna" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('aluna')"><i class="ti ti-arrow-left"></i><span>Voltar pra ficha</span></div>
+        <div id="resumo-aluna-content"></div>
+      </div>
+
       <div id="personal-exercicios" style="display:none;">
         <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
         <h1 class="page-title" style="margin-top:0;">Banco de exercícios</h1>
@@ -657,6 +662,7 @@
             <div class="form-group"><label class="form-label">Link do vídeo (opcional por enquanto)</label><input class="form-input" id="ex-video" placeholder="Cole o link quando tiver disponível"></div>
             <button class="btn-gold" onclick="addExercicio()">Adicionar ao banco</button>
           </div>
+          <input class="form-input" id="ex-busca-input" style="margin-bottom:10px;" placeholder="Buscar exercício nesse grupo..." oninput="buscarExerciciosNoGrupo(this.value)">
           <div id="ex-lista"></div>
           <div id="ex-paginacao" style="display:flex;gap:6px;justify-content:center;margin-top:14px;"></div>
         </div>
@@ -4226,18 +4232,33 @@ function mostrarOpcoesDeTrocaMesmoAssim(diaIndex, exIndex){
     if(!xMesmaFamilia && yMesmaFamilia) return 1;
     return 0;
   });
-  // Mostra TODOS os exercícios do grupo (sem cortar em 12) — só ordena pra priorizar mesma família primeiro
+  window.__opcoesTrocaAtual = opcoes;
+  window.__contextoTrocaAtual = { diaIndex: diaIndex, exIndex: exIndex, familiaAtual: familiaAtual };
+
   container.innerHTML = '<p style="font-size:11px;color:var(--text-faint);margin:8px 0 4px;">Trocar "' + nomeAtual + '" por (' + opcoes.length + ' opções):</p>' +
-    '<div style="display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto;">' +
-    opcoes.map(function(e){
-      const mesmaFamilia = familiaAtual && obterFamiliaBiomecanica(e.nome) === familiaAtual;
-      return '<div style="background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;font-size:12px;display:flex;justify-content:space-between;align-items:center;" onclick="confirmarSubstituicao(' + diaIndex + ',' + exIndex + ',\'' + e.nome.replace(/'/g,"\\'") + '\')">' +
-        '<span>' + e.nome + '</span>' +
-        (mesmaFamilia ? '<span class="tag" style="background:var(--success-soft);color:var(--success);font-size:9px;">mesmo padrão</span>' : '') +
-      '</div>';
-    }).join('') +
-    '</div>';
+    '<input class="form-input" style="margin-bottom:6px;padding:8px 10px;font-size:12px;" placeholder="Buscar exercício..." oninput="filtrarOpcoesTroca(this.value)">' +
+    '<div id="lista-opcoes-troca" style="display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto;"></div>';
   container.style.display = 'block';
+  renderizarOpcoesTrocaFiltradas(opcoes);
+}
+
+function renderizarOpcoesTrocaFiltradas(opcoes){
+  const lista = document.getElementById('lista-opcoes-troca');
+  if(!lista) return;
+  const ctx = window.__contextoTrocaAtual;
+  lista.innerHTML = opcoes.map(function(e){
+    const mesmaFamilia = ctx.familiaAtual && obterFamiliaBiomecanica(e.nome) === ctx.familiaAtual;
+    return '<div style="background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;font-size:12px;display:flex;justify-content:space-between;align-items:center;" onclick="confirmarSubstituicao(' + ctx.diaIndex + ',' + ctx.exIndex + ',\'' + e.nome.replace(/'/g,"\\'") + '\')">' +
+      '<span>' + e.nome + '</span>' +
+      (mesmaFamilia ? '<span class="tag" style="background:var(--success-soft);color:var(--success);font-size:9px;">mesmo padrão</span>' : '') +
+    '</div>';
+  }).join('') || '<p class="txt" style="font-size:11px;color:var(--text-faint);">Nenhum exercício encontrado com esse nome.</p>';
+}
+
+function filtrarOpcoesTroca(termo){
+  const termoUpper = termo.trim().toUpperCase();
+  const filtradas = !termoUpper ? window.__opcoesTrocaAtual : window.__opcoesTrocaAtual.filter(function(e){ return e.nome.toUpperCase().indexOf(termoUpper) !== -1; });
+  renderizarOpcoesTrocaFiltradas(filtradas);
 }
 
 function confirmarSubstituicao(diaIndex, exIndex, novoNome){
@@ -4455,7 +4476,7 @@ function renderConteudoDiaPersonal(a, di){
         '<div style="display:flex;justify-content:space-between;align-items:center;">' +
           '<div style="display:flex;align-items:center;gap:8px;min-width:0;">' +
             '<span class="alca-arrastar" data-dia="' + di + '" data-ex="' + ei + '" onpointerdown="iniciarArrastarExercicio(event)" style="cursor:grab;color:var(--text-faint);touch-action:none;flex-shrink:0;"><i class="ti ti-grip-vertical" style="font-size:16px;"></i></span>' +
-            '<span id="nome-ex-' + di + '-' + ei + '" style="font-size:12px;">' + nomeEdit + (metodoAplicado ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + metodoAplicado + '</span>' : '') + '</span>' +
+            '<span id="nome-ex-' + di + '-' + ei + '" style="font-size:12px;cursor:pointer;" onclick="abrirSubstituicao(' + di + ',' + ei + ')">' + nomeEdit + (metodoAplicado ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + metodoAplicado + '</span>' : '') + '</span>' +
           '</div>' +
           '<span style="display:flex;gap:4px;align-items:center;flex-shrink:0;">' +
             '<span class="acao-pill" onclick="alternarMetodoExercicio(' + di + ',' + ei + ')">Método</span>' +
@@ -4556,6 +4577,59 @@ async function buscarTreinoRealDaAluna(a, i){
   }
 }
 
+function abrirResumoCompletoAluna(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  showPersonalView('resumo-aluna');
+
+  let queixaHtml = '';
+  if(a.queixaDor && !a.patologiaConfirmada){
+    const candidatas = patologiasCatalogo.filter(function(p){ return p.regiao === a.regiaoQueixa; });
+    queixaHtml = '<p class="section-label">IA identificou uma queixa</p>' +
+      '<div class="insight"><p>A aluna relatou dor ("' + a.restricoes + '"). Isso pode ser só ajuste de técnica, mas também pode indicar uma das patologias abaixo. Confirme se for o caso:</p></div>' +
+      '<div class="chip-list" style="margin-bottom:14px;">' +
+        candidatas.map(function(p){ return '<span class="desvio-chip" onclick="confirmarPatologia(\'' + a.nome.replace(/'/g,"\\'") + '\',\'' + p.id + '\')">' + p.nome + '</span>'; }).join('') +
+        '<span class="desvio-chip" onclick="confirmarPatologia(\'' + a.nome.replace(/'/g,"\\'") + '\',\'tecnica\')">Não é patologia, só ajuste de técnica</span>' +
+      '</div>';
+  } else if(a.patologiaConfirmada === 'tecnica'){
+    queixaHtml = '<p class="section-label">Queixa avaliada</p>' +
+      '<div class="insight"><p>Confirmado como ajuste de técnica, não patologia. Exercícios podem voltar à prescrição normal quando o personal achar adequado.</p></div>';
+  } else if(a.patologiaConfirmada){
+    const p = patologiasCatalogo.find(function(x){ return x.id === a.patologiaConfirmada; });
+    queixaHtml = '<p class="section-label">Patologia confirmada</p>' +
+      '<div class="info-box"><p style="font-size:13px;font-weight:600;margin:0 0 8px;">' + p.nome + '</p>' +
+      '<p class="txt"><b>Evitar:</b> ' + p.evitar + '</p>' +
+      '<p class="txt"><b>Permitido:</b> ' + p.permitido + '</p>' +
+      '<p class="txt" style="margin-bottom:0;"><b>Conduta:</b> ' + p.conduta + '</p></div>';
+  }
+
+  const nivelInfo = calcularNivelEMotivo(a);
+  const imcInfo = calcularStatusIMC(a);
+  const contagem = calcularContagemRegressivaAvaliacao(a);
+  let htmlDiagnostico = '<div class="info-box"><p class="txt" style="margin-bottom:0;">' + gerarResumoAnamnese(a) + '</p></div>' +
+    '<div class="insight" style="margin-top:10px;"><p><b>Nível sugerido pela metodologia: ' + nivelInfo.nivel + '</b><br>' + nivelInfo.motivo + '</p>' +
+    (imcInfo ? '<p style="margin-top:8px;' + (imcInfo.elevado ? 'color:#E2A33D;' : '') + '">' + imcInfo.texto + '</p>' : '') +
+    '</div>';
+  if(contagem){
+    const cor = contagem.atrasada ? '#E2A33D' : (contagem.diasRestantes <= 15 ? 'var(--gold-soft)' : 'var(--text-dim)');
+    const texto = contagem.atrasada ? 'Avaliação física atrasada há ' + Math.abs(contagem.diasRestantes) + ' dias' : contagem.diasRestantes + ' dias pra próxima avaliação física sugerida';
+    htmlDiagnostico += '<div class="list-item" style="margin-top:8px;"><span><i class="ti ti-calendar-time" style="color:' + cor + ';margin-right:8px;"></i>' + texto + '</span></div>';
+  }
+  if(a.imc) htmlDiagnostico += '<p class="section-label" style="margin-top:14px;">Composição corporal</p><div class="info-box"><p class="txt">' + a.peso + ' · ' + a.altura + '<br>IMC ' + a.imc + '</p></div>';
+  htmlDiagnostico += renderDirecionamentoTecnico(a) + renderResumoMetodologiaAutomatica(a) + renderDuvidasSinalizadas(a) + renderExerciciosEstagnados(a);
+
+  document.getElementById('resumo-aluna-content').innerHTML =
+    '<h1 class="page-title" style="margin-top:0;">Resumo completo</h1>' +
+    '<p class="page-sub" style="margin-top:-6px;">' + a.nome + '</p>' +
+    renderSecaoColapsavel('Diagnóstico da metodologia', htmlDiagnostico, 'resumocompleto-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderAvaliacaoPostural(a) +
+    renderSecaoColapsavel('Pirâmide de prioridade (resposta original)', '<div class="info-box"><p class="txt">' + (a.piramide || 'Não respondida') + '</p></div>', 'piramideorig-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderSecaoColapsavel('Objetivo com a consultoria', '<div class="info-box"><p class="txt">' + (a.objetivo || 'Não informado') + '</p></div>', 'objetivo-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderSecaoColapsavel('Restrições / lesões relatadas', '<div class="info-box"><p class="txt">' + a.restricoes + '</p></div>' + queixaHtml, 'restricoes-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderSecaoColapsavel('Academia', '<div class="info-box"><p class="txt">' + (a.academia || 'Não informado') + '</p></div>', 'academia-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderSecaoColapsavel('Plano fechado', renderPlanoFechadoConteudo(a), 'planofechado-' + a.nome.replace(/[^a-zA-Z0-9]/g,''));
+}
+
 function openAlunaDetail(i){
   const a = alunasPersonal[i];
   alunaAberta = a;
@@ -4646,29 +4720,7 @@ function openAlunaDetail(i){
     '</div>' +
     '<p style="font-size:11px;color:var(--text-faint);margin:-8px 0 12px;">Ajustar aqui atualiza automaticamente toda a estrutura de treino gerada — o gerador nunca mistura exercício de academia com exercício de casa</p>' +
     '<div id="preview-mudanca-area"></div>' +
-    renderSecaoColapsavel('📋 Resumo completo (diagnóstico da metodologia)', (function(){
-      const nivelInfo = calcularNivelEMotivo(a);
-      const imcInfo = calcularStatusIMC(a);
-      const contagem = calcularContagemRegressivaAvaliacao(a);
-      let html = '<div class="info-box"><p class="txt" style="margin-bottom:0;">' + gerarResumoAnamnese(a) + '</p></div>' +
-        '<div class="insight" style="margin-top:10px;"><p><b>Nível sugerido pela metodologia: ' + nivelInfo.nivel + '</b><br>' + nivelInfo.motivo + '</p>' +
-        (imcInfo ? '<p style="margin-top:8px;' + (imcInfo.elevado ? 'color:#E2A33D;' : '') + '">' + imcInfo.texto + '</p>' : '') +
-        '</div>';
-      if(contagem){
-        const cor = contagem.atrasada ? '#E2A33D' : (contagem.diasRestantes <= 15 ? 'var(--gold-soft)' : 'var(--text-dim)');
-        const texto = contagem.atrasada ? 'Avaliação física atrasada há ' + Math.abs(contagem.diasRestantes) + ' dias' : contagem.diasRestantes + ' dias pra próxima avaliação física sugerida';
-        html += '<div class="list-item" style="margin-top:8px;"><span><i class="ti ti-calendar-time" style="color:' + cor + ';margin-right:8px;"></i>' + texto + '</span></div>';
-      }
-      if(a.imc) html += '<p class="section-label" style="margin-top:14px;">Composição corporal</p><div class="info-box"><p class="txt">' + a.peso + ' · ' + a.altura + '<br>IMC ' + a.imc + '</p></div>';
-      html += renderDirecionamentoTecnico(a) + renderResumoMetodologiaAutomatica(a) + renderDuvidasSinalizadas(a) + renderExerciciosEstagnados(a);
-      return html;
-    })(), 'resumocompleto-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
-    renderAvaliacaoPostural(a) +
-    renderSecaoColapsavel('Pirâmide de prioridade (resposta original)', '<div class="info-box"><p class="txt">' + (a.piramide || 'Não respondida') + '</p></div>', 'piramideorig-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
-    renderSecaoColapsavel('Objetivo com a consultoria', '<div class="info-box"><p class="txt">' + (a.objetivo || 'Não informado') + '</p></div>', 'objetivo-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
-    renderSecaoColapsavel('Restrições / lesões relatadas', '<div class="info-box"><p class="txt">' + a.restricoes + '</p></div>' + queixaHtml, 'restricoes-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
-    renderSecaoColapsavel('Academia', '<div class="info-box"><p class="txt">' + (a.academia || 'Não informado') + '</p></div>', 'academia-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
-    renderSecaoColapsavel('Plano fechado', renderPlanoFechadoConteudo(a), 'planofechado-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:18px;" onclick="abrirResumoCompletoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-file-description" style="margin-right:6px;"></i>📋 Resumo completo (diagnóstico, avaliação, plano)</button>' +
     (objetivoSugereTabata(a) && !a.tabataSugestaoRespondida ? (
       '<div class="info-box" style="margin-bottom:12px;border-color:var(--border-strong);">' +
         '<p class="lbl">💡 Sugestão baseada no objetivo dela</p>' +
@@ -5229,7 +5281,7 @@ async function sincronizarListaAlunasDoSupabase(){
 function showPersonalView(which){
   renderFerramentasPersonal();
   mostrarSoAlunasAntigas = false; // reseta por padrão sempre — quem quer o modo antigas, define depois de chamar essa função
-  ['dashboard','alunas','aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil'].forEach(function(v){
+  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
   });
   if(which === 'alunas'){
@@ -5789,6 +5841,14 @@ function voltarParaGruposExercicios(){
   renderExerciciosChips();
 }
 
+let termoBuscaExercicios = '';
+
+function buscarExerciciosNoGrupo(termo){
+  termoBuscaExercicios = termo;
+  paginaAtualExercicios = 1;
+  renderExerciciosLista();
+}
+
 function renderExerciciosLista(){
   document.getElementById('ex-add-form').style.display = 'none';
   const list = document.getElementById('ex-lista');
@@ -5796,9 +5856,13 @@ function renderExerciciosLista(){
   list.innerHTML = '';
   let itens = filtroExercicio === 'Todos' ? exerciciosBanco.slice() : exerciciosBanco.filter(function(e){ return e.categoria === filtroExercicio; });
   if(filtroAmbienteCasa) itens = itens.filter(function(e){ return e.ambiente === 'Casa'; });
+  if(termoBuscaExercicios.trim()){
+    const termoUpper = termoBuscaExercicios.trim().toUpperCase();
+    itens = itens.filter(function(e){ return e.nome.toUpperCase().indexOf(termoUpper) !== -1; });
+  }
 
   if(itens.length === 0){
-    list.innerHTML = '<div class="info-box"><p class="txt">Nenhum exercício aqui ainda.</p></div>';
+    list.innerHTML = '<div class="info-box"><p class="txt">Nenhum exercício encontrado' + (termoBuscaExercicios.trim() ? ' com esse nome' : ' aqui ainda') + '.</p></div>';
     document.getElementById('ex-paginacao').innerHTML = '';
     return;
   }
@@ -5811,16 +5875,19 @@ function renderExerciciosLista(){
   itensDaPagina.forEach(function(e){
     const el = document.createElement('div');
     el.className = 'exercicio-item';
-    el.style.cursor = 'pointer';
-    const grip = editMode ? '<i class="ti ti-grip-vertical" style="font-size:12px;color:var(--text-faint);margin-right:5px;"></i>' : '';
     const videoHtml = e.video
       ? '<span class="ex-video ok"><i class="ti ti-circle-check" style="font-size:11px;vertical-align:-1px;margin-right:3px;"></i>Assistir no app</span>'
       : '<span class="ex-video pending"><i class="ti ti-clock" style="font-size:11px;vertical-align:-1px;margin-right:3px;"></i>Sem vídeo ainda</span>';
-    el.innerHTML =
-      '<p class="ex-name">' + grip + e.nome + '</p>' +
-      '<p class="ex-meta">' + e.categoria + (e.ambiente ? ' · ' + e.ambiente : '') + (e.nivel ? ' · ' + e.nivel : '') + '</p>' +
-      videoHtml;
+
     if(editMode){
+      el.style.cursor = 'default';
+      el.style.cssText += 'flex-direction:column;align-items:stretch;gap:6px;';
+      const idSeguro = e.nome.replace(/[^a-zA-Z0-9]/g,'');
+      el.innerHTML =
+        '<div class="form-group" style="margin-bottom:4px;"><label class="form-label">Nome do exercício</label><input class="form-input" id="edit-nome-' + idSeguro + '" value="' + e.nome.replace(/"/g,'&quot;') + '" style="font-size:13px;padding:8px;"></div>' +
+        '<div class="form-group" style="margin-bottom:4px;"><label class="form-label">Link do vídeo</label><input class="form-input" id="edit-video-' + idSeguro + '" value="' + (e.video || '').replace(/"/g,'&quot;') + '" placeholder="Cole o link do YouTube" style="font-size:13px;padding:8px;"></div>' +
+        videoHtml;
+
       const seletorMover = document.createElement('select');
       seletorMover.className = 'form-select';
       seletorMover.style.cssText = 'font-size:11px;padding:4px 6px;margin-top:6px;width:auto;';
@@ -5834,13 +5901,35 @@ function renderExerciciosLista(){
         renderExerciciosLista();
       };
       el.appendChild(seletorMover);
+
+      const btnSalvar = document.createElement('span');
+      btnSalvar.className = 'acao-pill';
+      btnSalvar.style.cssText = 'display:inline-block;margin-top:6px;margin-left:6px;';
+      btnSalvar.textContent = 'Salvar alterações';
+      btnSalvar.onclick = function(){
+        const novoNome = document.getElementById('edit-nome-' + idSeguro).value.trim();
+        const novoVideo = document.getElementById('edit-video-' + idSeguro).value.trim();
+        if(!novoNome){ alert('O nome não pode ficar vazio.'); return; }
+        const nomeAntigo = e.nome;
+        e.nome = novoNome;
+        e.video = novoVideo;
+        salvarCatalogoPersonal('exercicio_editado', nomeAntigo, { nomeAntigo: nomeAntigo, nome: e.nome, video: e.video, categoria: e.categoria, grupo: e.grupo });
+        renderExerciciosLista();
+      };
+      el.appendChild(btnSalvar);
+
       const btnExcluir = document.createElement('span');
       btnExcluir.className = 'acao-pill destrutiva';
       btnExcluir.style.cssText = 'display:inline-block;margin-top:6px;margin-left:6px;';
       btnExcluir.textContent = 'Excluir';
-      btnExcluir.onclick = function(ev){ ev.stopPropagation(); excluirExercicioBanco(e.nome); };
+      btnExcluir.onclick = function(){ excluirExercicioBanco(e.nome); };
       el.appendChild(btnExcluir);
     } else {
+      el.style.cursor = 'pointer';
+      el.innerHTML =
+        '<p class="ex-name">' + e.nome + '</p>' +
+        '<p class="ex-meta">' + e.categoria + (e.ambiente ? ' · ' + e.ambiente : '') + (e.nivel ? ' · ' + e.nivel : '') + '</p>' +
+        videoHtml;
       el.onclick = function(){ playExercicioVideo(e.nome); };
     }
     list.appendChild(el);
@@ -6171,6 +6260,9 @@ async function carregarCatalogoPersonal(){
       } else if(row.tipo === 'exercicio_movido'){
         const ex = exerciciosBanco.find(function(e){ return e.nome === row.dados.nome; });
         if(ex){ ex.categoria = row.dados.categoria; ex.grupo = row.dados.categoria; }
+      } else if(row.tipo === 'exercicio_editado'){
+        const ex = exerciciosBanco.find(function(e){ return e.nome === row.dados.nomeAntigo; });
+        if(ex){ ex.nome = row.dados.nome; ex.video = row.dados.video; }
       } else if(row.tipo === 'conteudo'){
         const jaExisteConteudo = conteudos.find(function(c){ return c.n === row.dados.n; });
         if(!jaExisteConteudo){
