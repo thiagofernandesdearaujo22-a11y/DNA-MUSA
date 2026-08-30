@@ -537,6 +537,13 @@
       <div id="area-ranking-conteudo"></div>
     </div>
 
+    <!-- RODA DA VIDA -->
+    <div class="view" data-view="rodadavida">
+      <h1 class="page-title">Roda da vida</h1>
+      <p class="page-sub">Avalie 10 áreas da sua vida, uma vez por mês</p>
+      <div id="area-rodadavida-conteudo"></div>
+    </div>
+
     <!-- MENTORIA -->
     <div class="view" data-view="mentoria">
       <h1 class="page-title">Mentoria</h1>
@@ -860,6 +867,9 @@
       </div>
       <div class="bottom-nav-item" data-nav="ranking" onclick="irParaAbaFixa('ranking')">
         <svg class="nav-icon-svg" width="22" height="22" viewBox="0 0 24 24"><path d="M6 3h12v4a6 6 0 0 1-5 5.92V15h3v2H8v-2h3v-2.08A6 6 0 0 1 6 7zm-4 1h3v3a4 4 0 0 1-3-3zm17 0h3a4 4 0 0 1-3 3z"/></svg><span>Ranking</span>
+      </div>
+      <div class="bottom-nav-item" data-nav="rodadavida" onclick="irParaAbaFixa('rodadavida')">
+        <svg class="nav-icon-svg" width="22" height="22" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10h-2a8 8 0 1 1-8-8z"/><path d="M12 6a6 6 0 1 0 6 6h-2a4 4 0 1 1-4-4z"/><circle cx="12" cy="12" r="2"/></svg><span>Roda da vida</span>
       </div>
     </div>
   </div>
@@ -4746,7 +4756,8 @@ function abrirResumoCompletoAluna(nomeAluna){
     renderSecaoColapsavel('Objetivo com a consultoria', '<div class="info-box"><p class="txt">' + (a.objetivo || 'Não informado') + '</p></div>', 'objetivo-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Restrições / lesões relatadas', '<div class="info-box"><p class="txt">' + a.restricoes + '</p></div>' + queixaHtml, 'restricoes-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Academia', '<div class="info-box"><p class="txt">' + (a.academia || 'Não informado') + '</p></div>', 'academia-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
-    renderSecaoColapsavel('Plano fechado', renderPlanoFechadoConteudo(a), 'planofechado-' + a.nome.replace(/[^a-zA-Z0-9]/g,''));
+    renderSecaoColapsavel('Plano fechado', renderPlanoFechadoConteudo(a), 'planofechado-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderSecaoColapsavel('Roda da vida', renderRodaDaVidaNaFicha(a.nome), 'rodadavida-' + a.nome.replace(/[^a-zA-Z0-9]/g,''));
 }
 
 function openAlunaDetail(i){
@@ -5232,6 +5243,26 @@ function renderPlanoFechadoConteudo(a){
         '<option value="pago"' + ((a.statusPagamento || 'pago') === 'pago' ? ' selected' : '') + '>Pago</option>' +
         '<option value="pendente"' + (a.statusPagamento === 'pendente' ? ' selected' : '') + '>Pendente</option>' +
       '</select></div>';
+}
+
+function renderRodaDaVidaNaFicha(nomeAluna){
+  const registro = getUltimaRodaDaVidaPreenchida(nomeAluna);
+  if(!registro || Object.keys(registro.areas).length === 0){
+    return '<div class="info-box"><p class="txt" style="color:var(--text-faint);">A aluna ainda não preencheu a Roda da Vida.</p></div>';
+  }
+  const nomeDoMes = new Date(registro.mes + '-01T00:00:00').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  const resumo = calcularPontoForteEAreaFraca(registro.areas);
+  let html = '<div class="info-box" style="margin-bottom:10px;">' +
+    '<p class="lbl" style="margin-bottom:8px;">Última avaliação: ' + nomeDoMes.charAt(0).toUpperCase() + nomeDoMes.slice(1) + '</p>' +
+    gerarSvgRadar(registro.areas, 220) +
+  '</div>';
+  if(resumo){
+    html += '<div class="row" style="gap:8px;">' +
+      '<div class="info-box" style="flex:1;background:var(--success-soft);border-color:var(--success);"><p class="lbl" style="font-size:11px;">Ponto forte</p><p class="txt" style="font-size:12px;">' + resumo.forte.label + ' (' + resumo.forte.valor + '/5)</p></div>' +
+      '<div class="info-box" style="flex:1;"><p class="lbl" style="font-size:11px;">Área pra focar</p><p class="txt" style="font-size:12px;">' + resumo.fraca.label + ' (' + resumo.fraca.valor + '/5)</p></div>' +
+    '</div>';
+  }
+  return html;
 }
 
 function salvarPlanoFechado(nomeAluna, campo, valor){
@@ -7228,7 +7259,7 @@ function setActive(name){
   try { localStorage.setItem('musaUltimaTela', JSON.stringify({ view: name, detailDia: (name === 'detail' ? detailDiaAtual : null) })); } catch(e){}
 }
 
-const abasFixasAluna = ['home', 'dados', 'mentoria', 'progresso', 'ranking'];
+const abasFixasAluna = ['home', 'dados', 'mentoria', 'progresso', 'ranking', 'rodadavida'];
 
 function openLevel2(which){
   level2 = which;
@@ -7247,6 +7278,7 @@ function openLevel2(which){
   if(which === 'dados' && typeof renderAvaliacoes === 'function'){ renderAvaliacoes(); }
   if(which === 'progresso' && typeof renderMeuProgresso === 'function'){ renderMeuProgresso(); }
   if(which === 'ranking' && typeof renderRanking === 'function'){ renderRanking(); }
+  if(which === 'rodadavida'){ renderRodaDaVidaAluna(); }
 }
 
 function atualizarNavAtiva(which){
@@ -8968,6 +9000,129 @@ function renderMeuProgresso(){
     console.error('[Meu Progresso] erro real, capturado pra não travar a tela:', erroReal);
     container.innerHTML = '<p class="txt" style="color:var(--text-faint);">Ainda reunindo os dados da sua evolução. Volta aqui em alguns dias, conforme for registrando treinos.</p>';
   }
+}
+
+// ===== RODA DA VIDA (autoavaliação mensal em 10 áreas) =====
+const AREAS_RODA_DA_VIDA = [
+  { id: 'saude', label: 'Saúde e corpo', icone: 'ti-heartbeat' },
+  { id: 'trabalho', label: 'Trabalho e carreira', icone: 'ti-briefcase' },
+  { id: 'financeiro', label: 'Financeiro', icone: 'ti-coin' },
+  { id: 'amoroso', label: 'Relacionamento amoroso', icone: 'ti-heart' },
+  { id: 'familia', label: 'Família', icone: 'ti-home' },
+  { id: 'amigos', label: 'Amigos e vida social', icone: 'ti-users' },
+  { id: 'mente', label: 'Mente e aprendizado', icone: 'ti-bulb' },
+  { id: 'espiritualidade', label: 'Espiritualidade e propósito', icone: 'ti-flower' },
+  { id: 'realizacao', label: 'Realização pessoal', icone: 'ti-trophy' },
+  { id: 'descanso', label: 'Descanso e lazer', icone: 'ti-beach' }
+];
+
+function getMesAtualISO(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+
+function getRodaDaVidaMes(nome, mesISO){
+  const prog = getProgressoAluna(nome);
+  if(!prog.rodaDaVida) prog.rodaDaVida = {};
+  if(!prog.rodaDaVida[mesISO]) prog.rodaDaVida[mesISO] = { mes: mesISO, areas: {} };
+  return prog.rodaDaVida[mesISO];
+}
+
+function getUltimaRodaDaVidaPreenchida(nome){
+  const prog = getProgressoAluna(nome);
+  if(!prog.rodaDaVida) return null;
+  const meses = Object.keys(prog.rodaDaVida).sort();
+  if(meses.length === 0) return null;
+  return prog.rodaDaVida[meses[meses.length - 1]];
+}
+
+function salvarCampoRodaDaVida(nome, areaId, valor){
+  const mesISO = getMesAtualISO();
+  const registro = getRodaDaVidaMes(nome, mesISO);
+  registro.areas[areaId] = valor;
+  salvarProgressoNoSupabase(nome);
+  renderRodaDaVidaAluna();
+}
+
+function calcularPontoForteEAreaFraca(areasObj){
+  const preenchidas = AREAS_RODA_DA_VIDA.filter(function(a){ return areasObj[a.id] != null; });
+  if(preenchidas.length === 0) return null;
+  let forte = preenchidas[0], fraca = preenchidas[0];
+  preenchidas.forEach(function(a){
+    if(areasObj[a.id] > areasObj[forte.id]) forte = a;
+    if(areasObj[a.id] < areasObj[fraca.id]) fraca = a;
+  });
+  return { forte: { label: forte.label, valor: areasObj[forte.id] }, fraca: { label: fraca.label, valor: areasObj[fraca.id] } };
+}
+
+function gerarSvgRadar(areasObj, tamanho){
+  tamanho = tamanho || 260;
+  const cx = tamanho / 2, cy = tamanho / 2, raioMax = tamanho / 2 - 34;
+  const n = AREAS_RODA_DA_VIDA.length;
+  function pontoNoAngulo(indice, raio){
+    const angulo = (indice * (2 * Math.PI / n)) - (Math.PI / 2);
+    return { x: cx + raio * Math.cos(angulo), y: cy + raio * Math.sin(angulo) };
+  }
+
+  let grades = '';
+  [0.25, 0.5, 0.75, 1].forEach(function(fracao){
+    const pontosGrade = AREAS_RODA_DA_VIDA.map(function(a, i){ const p = pontoNoAngulo(i, raioMax * fracao); return p.x + ',' + p.y; }).join(' ');
+    grades += '<polygon points="' + pontosGrade + '" fill="none" stroke="var(--border)" stroke-width="1"></polygon>';
+  });
+
+  const pontosValor = AREAS_RODA_DA_VIDA.map(function(a, i){
+    const valor = areasObj[a.id] != null ? areasObj[a.id] : 0;
+    const p = pontoNoAngulo(i, raioMax * (valor / 5));
+    return p.x + ',' + p.y;
+  }).join(' ');
+
+  const labels = AREAS_RODA_DA_VIDA.map(function(a, i){
+    const p = pontoNoAngulo(i, raioMax + 16);
+    return '<circle cx="' + p.x + '" cy="' + p.y + '" r="3" fill="var(--gold-soft)"></circle>';
+  }).join('');
+
+  return '<svg viewBox="0 0 ' + tamanho + ' ' + tamanho + '" width="100%" style="max-width:280px;display:block;margin:0 auto;">' +
+    grades +
+    '<polygon points="' + pontosValor + '" fill="rgba(232,197,138,0.28)" stroke="var(--gold-soft)" stroke-width="2"></polygon>' +
+    labels +
+    '</svg>';
+}
+
+function renderRodaDaVidaAluna(){
+  const container = document.getElementById('area-rodadavida-conteudo');
+  if(!container) return;
+  const nome = NOME_ALUNA_LOGADA;
+  const mesISO = getMesAtualISO();
+  const registro = getRodaDaVidaMes(nome, mesISO);
+  const nomeDoMes = new Date(mesISO + '-01T00:00:00').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  const totalPreenchido = AREAS_RODA_DA_VIDA.filter(function(a){ return registro.areas[a.id] != null; }).length;
+
+  let html = '<p class="section-label" style="margin-top:0;">' + nomeDoMes.charAt(0).toUpperCase() + nomeDoMes.slice(1) + ' <span class="tag">' + totalPreenchido + ' de ' + AREAS_RODA_DA_VIDA.length + '</span></p>';
+
+  if(totalPreenchido > 0){
+    html += '<div class="info-box" style="margin-bottom:16px;">' + gerarSvgRadar(registro.areas) + '</div>';
+    const resumo = calcularPontoForteEAreaFraca(registro.areas);
+    if(resumo){
+      html += '<div class="row" style="gap:8px;margin-bottom:16px;">' +
+        '<div class="info-box" style="flex:1;background:var(--success-soft);border-color:var(--success);"><p class="lbl" style="font-size:11px;">Ponto forte</p><p class="txt" style="font-size:12px;">' + resumo.forte.label + ' (' + resumo.forte.valor + '/5)</p></div>' +
+        '<div class="info-box" style="flex:1;"><p class="lbl" style="font-size:11px;">Área pra focar</p><p class="txt" style="font-size:12px;">' + resumo.fraca.label + ' (' + resumo.fraca.valor + '/5)</p></div>' +
+      '</div>';
+    }
+  }
+
+  AREAS_RODA_DA_VIDA.forEach(function(a){
+    const valorAtual = registro.areas[a.id];
+    html += '<div class="info-box" style="margin-bottom:8px;">' +
+      '<p class="txt" style="font-size:12px;margin-bottom:6px;"><i class="ti ' + a.icone + '" style="margin-right:6px;color:var(--gold-soft);"></i>' + a.label + '</p>' +
+      '<div class="row" style="gap:6px;">' +
+        [0,1,2,3,4,5].map(function(n){
+          return '<span class="chip" style="' + (valorAtual === n ? 'background:var(--gold-soft);color:#1A1409;border-color:var(--gold-soft);' : '') + '" onclick="salvarCampoRodaDaVida(\'' + nome.replace(/'/g,"\\'") + '\',\'' + a.id + '\',' + n + ')">' + n + '</span>';
+        }).join('') +
+      '</div>' +
+    '</div>';
+  });
+
+  container.innerHTML = html;
 }
 
 function renderMeuProgressoConteudo(container, nome, a){
