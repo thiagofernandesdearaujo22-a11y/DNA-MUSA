@@ -620,6 +620,8 @@
         <div id="geracao-massa-area"></div>
 
         <p class="section-label" style="margin-top:22px;">Central de avisos (WhatsApp)</p>
+        <button class="chip" style="cursor:pointer;margin-bottom:10px;" onclick="testarConexaoWhatsApp()"><i class="ti ti-plug-connected" style="margin-right:4px;"></i>Testar conexão do WhatsApp</button>
+        <div id="resultado-teste-whatsapp"></div>
         <div id="central-avisos-area"></div>
 
         <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;margin-top:10px;" onclick="mostrarFormularioMensagemEmMassa()"><i class="ti ti-speakerphone" style="margin-right:6px;"></i>Mandar mensagem pra todas</button>
@@ -8846,7 +8848,7 @@ async function confirmarMensagemEmMassa(){
 }
 
 // ===== ENVIO DE WHATSAPP (via porteiro seguro no Supabase) =====
-async function enviarWhatsApp(telefone, mensagem){
+async function enviarWhatsApp(telefone, mensagem, jaTentouDeNovo){
   if(!telefone) return { sucesso: false, motivo: 'sem telefone cadastrado' };
   try {
     const resposta = await fetch(SUPABASE_URL + '/functions/v1/enviar-whatsapp', {
@@ -8858,7 +8860,37 @@ async function enviarWhatsApp(telefone, mensagem){
     if(!resposta.ok || dados.error) return { sucesso: false, motivo: dados.error || ('HTTP ' + resposta.status) };
     return { sucesso: true };
   } catch(erro){
+    // Instabilidade passageira de rede: tenta mais uma vez antes de desistir de vez
+    if(!jaTentouDeNovo){
+      await new Promise(function(r){ setTimeout(r, 1500); });
+      return enviarWhatsApp(telefone, mensagem, true);
+    }
     return { sucesso: false, motivo: erro.message };
+  }
+}
+
+async function testarConexaoWhatsApp(){
+  const area = document.getElementById('resultado-teste-whatsapp');
+  if(!area) return;
+  area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Verificando conexão com o Z-API...</p>';
+  try {
+    const resposta = await fetch(SUPABASE_URL + '/functions/v1/enviar-whatsapp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+      body: JSON.stringify({ verificarStatus: true })
+    });
+    const dados = await resposta.json();
+    if(!resposta.ok || dados.error){
+      area.innerHTML = '<div class="info-box" style="border-color:#C9784A;"><p class="txt" style="color:#C9784A;">Não consegui nem falar com o servidor: ' + (dados.error || ('HTTP ' + resposta.status)) + '</p></div>';
+      return;
+    }
+    if(dados.conectado){
+      area.innerHTML = '<div class="info-box" style="border-color:var(--success);"><p class="txt" style="color:var(--success);">✓ WhatsApp conectado e pronto pra enviar.</p></div>';
+    } else {
+      area.innerHTML = '<div class="info-box" style="border-color:#C9784A;"><p class="txt" style="color:#C9784A;">WhatsApp desconectado: ' + (dados.detalhe || 'precisa reconectar o número no painel da Z-API (escanear o QR code de novo).') + '</p></div>';
+    }
+  } catch(erro){
+    area.innerHTML = '<div class="info-box" style="border-color:#C9784A;"><p class="txt" style="color:#C9784A;">Não consegui nem falar com o servidor: ' + erro.message + ' (provavelmente a Edge Function não está publicada, ou o link do Supabase no arquivo está errado).</p></div>';
   }
 }
 
