@@ -81,6 +81,14 @@
   .sidebar-personal .side-item.ativo i{ color:var(--gold-soft); }
   .sidebar-personal .side-sair{ margin-top:auto; }
 
+  .modal-overlay-avisos{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.72); z-index:200; align-items:center; justify-content:center; padding:24px; }
+  .modal-overlay-avisos .modal-card{ background:var(--card); border:1px solid var(--border-strong); border-radius:18px; padding:24px 20px; max-width:340px; width:100%; text-align:center; }
+  .modal-overlay-avisos .modal-card h3{ font-family:'Playfair Display',serif; font-size:18px; color:var(--gold-soft); margin:0 0 10px; }
+  .modal-overlay-avisos .modal-card p{ font-size:13px; color:var(--text-dim); margin:0 0 20px; line-height:1.5; }
+  .modal-overlay-avisos .modal-botoes{ display:flex; gap:10px; }
+  .modal-overlay-avisos .modal-botoes button{ flex:1; border-radius:12px; padding:11px; font-size:13px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--card-2); color:var(--text-dim); font-family:inherit; }
+  .modal-overlay-avisos .modal-botoes button.btn-aceitar{ background:linear-gradient(135deg,var(--gold-soft),var(--gold)); color:#1A1409; border:none; }
+
   @media (min-width: 1024px){
     body{ padding:28px; align-items:flex-start; }
     .phone.modo-personal{
@@ -351,6 +359,16 @@
 <div class="phone" id="phone-container">
   <div class="notch"></div>
   <div class="sidebar-personal" id="sidebar-personal"></div>
+  <div class="modal-overlay-avisos" id="modal-aceitar-avisos">
+    <div class="modal-card">
+      <h3>Avisos do seu personal</h3>
+      <p>Quer receber aqui no app avisos importantes do seu personal, tipo ajustes no treino e comunicados? Você pode mudar isso depois, quando quiser.</p>
+      <div class="modal-botoes">
+        <button onclick="responderAceiteAvisos(false)">Agora não</button>
+        <button class="btn-aceitar" onclick="responderAceiteAvisos(true)">Aceitar</button>
+      </div>
+    </div>
+  </div>
   <div class="screen">
     <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-08-05-A</p>
 
@@ -481,8 +499,15 @@
           <p style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold);margin:0;letter-spacing:0.5px;">DNA MUSA</p>
           <p style="font-size:9.5px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin:2px 0 0;">Team Fernandes</p>
         </div>
-        <div style="width:36px;height:36px;border-radius:50%;background:var(--card-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;" onclick="openLevel2('launcher')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold-soft)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0 -4 -4h-8a4 4 0 0 0 -4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <div style="display:flex;gap:8px;align-items:center;position:relative;">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--card-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;position:relative;" onclick="togglePainelAvisos()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold-soft)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5a2 2 0 0 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg>
+            <span id="badge-avisos" style="display:none;position:absolute;top:-2px;right:-2px;background:var(--gold-soft);color:#1A1409;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;"></span>
+          </div>
+          <div id="painel-avisos-aluna" style="display:none;position:absolute;top:44px;right:0;width:280px;max-height:320px;overflow-y:auto;background:var(--card);border:1px solid var(--border-strong);border-radius:14px;padding:10px;z-index:50;box-shadow:0 10px 30px rgba(0,0,0,0.5);"></div>
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--card-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;" onclick="openLevel2('launcher')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold-soft)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0 -4 -4h-8a4 4 0 0 0 -4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
         </div>
       </div>
       <h1 class="page-title">Olá, Andriele</h1>
@@ -623,6 +648,11 @@
         <button class="chip" style="cursor:pointer;margin-bottom:10px;" onclick="testarConexaoWhatsApp()"><i class="ti ti-plug-connected" style="margin-right:4px;"></i>Testar conexão do WhatsApp</button>
         <div id="resultado-teste-whatsapp"></div>
         <div id="central-avisos-area"></div>
+
+        <p class="section-label" style="margin-top:22px;">Avisos dentro do app</p>
+        <p class="page-sub" style="margin-top:-6px;">Não depende de WhatsApp nem de nenhum serviço externo</p>
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:10px;" onclick="mostrarFormularioAvisoEmMassa()"><i class="ti ti-bell" style="margin-right:6px;"></i>Mandar aviso pra todas (in-app)</button>
+        <div id="aviso-massa-inapp-area"></div>
 
         <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;margin-top:10px;" onclick="mostrarFormularioMensagemEmMassa()"><i class="ti ti-speakerphone" style="margin-right:6px;"></i>Mandar mensagem pra todas</button>
         <div id="mensagem-massa-area"></div>
@@ -2471,6 +2501,136 @@ function renderCheckInEHabitos(nome){
   el.innerHTML = html;
 }
 
+// ===== CENTRAL DE AVISOS IN-APP (substitui o WhatsApp por enquanto, sem depender de nenhum serviço externo) =====
+function getAvisosInApp(nome){
+  const prog = getProgressoAluna(nome);
+  if(!prog.avisosInApp) prog.avisosInApp = [];
+  return prog.avisosInApp;
+}
+
+function enviarAvisoInApp(nomeAluna, texto, tipo){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return false;
+  if(a.aceitaAvisos === false) return false; // respeita quem recusou receber
+  const avisos = getAvisosInApp(nomeAluna);
+  avisos.unshift({ id: Date.now() + '-' + Math.random().toString(36).slice(2,7), texto: texto, data: new Date().toISOString(), lida: false, tipo: tipo || 'individual' });
+  if(avisos.length > 100) avisos.length = 100; // não deixa crescer pra sempre
+  salvarProgressoNoSupabase(nomeAluna);
+  return true;
+}
+
+function contarAvisosNaoLidos(nome){
+  return getAvisosInApp(nome).filter(function(av){ return !av.lida; }).length;
+}
+
+function renderBadgeAvisos(){
+  const badge = document.getElementById('badge-avisos');
+  if(!badge) return;
+  const naoLidos = contarAvisosNaoLidos(NOME_ALUNA_LOGADA);
+  if(naoLidos > 0){ badge.style.display = 'flex'; badge.textContent = naoLidos > 9 ? '9+' : String(naoLidos); }
+  else { badge.style.display = 'none'; }
+}
+
+function togglePainelAvisos(){
+  const painel = document.getElementById('painel-avisos-aluna');
+  if(!painel) return;
+  const abrindo = painel.style.display === 'none' || !painel.style.display;
+  painel.style.display = abrindo ? 'block' : 'none';
+  if(abrindo) renderCentralAvisosAluna();
+}
+
+function renderCentralAvisosAluna(){
+  const painel = document.getElementById('painel-avisos-aluna');
+  if(!painel) return;
+  const avisos = getAvisosInApp(NOME_ALUNA_LOGADA);
+  if(avisos.length === 0){
+    painel.innerHTML = '<p class="txt" style="color:var(--text-faint);padding:10px;text-align:center;">Nenhum aviso por aqui ainda.</p>';
+    return;
+  }
+  let html = avisos.length > 1 ? '<div style="text-align:right;margin-bottom:6px;"><span class="chip" style="cursor:pointer;font-size:10px;" onclick="marcarTodosAvisosComoLidos()">Marcar tudo como lido</span></div>' : '';
+  html += avisos.map(function(av){
+    const dataFormatada = new Date(av.data).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+    return '<div class="list-item" style="margin-bottom:6px;flex-direction:column;align-items:flex-start;cursor:pointer;' + (!av.lida ? 'border-color:var(--gold-soft);' : '') + '" onclick="marcarAvisoComoLido(\'' + av.id + '\')">' +
+      '<p class="txt" style="font-size:12px;margin:0 0 4px;">' + (!av.lida ? '● ' : '') + av.texto + '</p>' +
+      '<p class="txt" style="font-size:10px;color:var(--text-faint);margin:0;">' + dataFormatada + '</p>' +
+    '</div>';
+  }).join('');
+  painel.innerHTML = html;
+}
+
+function marcarAvisoComoLido(id){
+  const avisos = getAvisosInApp(NOME_ALUNA_LOGADA);
+  const aviso = avisos.find(function(av){ return av.id === id; });
+  if(aviso) aviso.lida = true;
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  renderCentralAvisosAluna();
+  renderBadgeAvisos();
+}
+
+function marcarTodosAvisosComoLidos(){
+  getAvisosInApp(NOME_ALUNA_LOGADA).forEach(function(av){ av.lida = true; });
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  renderCentralAvisosAluna();
+  renderBadgeAvisos();
+}
+
+// ===== CONSENTIMENTO DE AVISOS (perguntado uma vez, no primeiro acesso) =====
+function verificarPerguntarSobreAvisos(){
+  const a = alunasPersonal.find(function(x){ return x.nome === NOME_ALUNA_LOGADA; });
+  if(!a) return;
+  if(a.aceitaAvisos === undefined || a.aceitaAvisos === null){
+    const modal = document.getElementById('modal-aceitar-avisos');
+    if(modal) modal.style.display = 'flex';
+  }
+}
+
+function responderAceiteAvisos(aceita){
+  const a = alunasPersonal.find(function(x){ return x.nome === NOME_ALUNA_LOGADA; });
+  if(a){ a.aceitaAvisos = aceita; salvarPerfilAlunaNoSupabase(a.nome); }
+  const modal = document.getElementById('modal-aceitar-avisos');
+  if(modal) modal.style.display = 'none';
+  renderBadgeAvisos();
+}
+
+// ===== ENVIO EM MASSA PELO PERSONAL (in-app, sem depender de WhatsApp/Z-API) =====
+function mostrarFormularioAvisoEmMassa(){
+  const area = document.getElementById('aviso-massa-inapp-area');
+  if(!area) return;
+  area.innerHTML =
+    '<div class="form-group"><textarea class="form-input" id="texto-aviso-massa-inapp" rows="3" placeholder="Escreva o aviso..."></textarea></div>' +
+    '<div class="form-group"><label class="form-label">Pra quem?</label>' +
+      '<select class="form-select" id="publico-aviso-massa-inapp">' +
+        '<option value="todas">Todas as alunas</option>' +
+        '<option value="ativas">Só ativas</option>' +
+        '<option value="porvencer">Plano vencendo</option>' +
+        '<option value="vencidas">Plano vencido</option>' +
+      '</select></div>' +
+    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="confirmarAvisoEmMassaInApp()">Enviar aviso</button>' +
+    '<div id="resultado-aviso-massa-inapp" style="margin-top:10px;"></div>';
+}
+
+function confirmarAvisoEmMassaInApp(){
+  const texto = document.getElementById('texto-aviso-massa-inapp').value.trim();
+  const publico = document.getElementById('publico-aviso-massa-inapp').value;
+  if(!texto){ alert('Escreve o aviso antes de enviar.'); return; }
+
+  let elegiveis = alunasPersonal.filter(function(a){ return a.status !== 'lead'; });
+  if(publico === 'ativas') elegiveis = elegiveis.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  if(publico === 'porvencer') elegiveis = elegiveis.filter(function(a){ return statusDoPlano(a) === 'porvencer'; });
+  if(publico === 'vencidas') elegiveis = elegiveis.filter(function(a){ return statusDoPlano(a) === 'vencidas'; });
+
+  if(!confirm('Vai mandar esse aviso pra ' + elegiveis.length + ' aluna(s). Continuar?')) return;
+
+  let enviados = 0, recusaram = 0;
+  elegiveis.forEach(function(a){
+    if(enviarAvisoInApp(a.nome, texto, 'massa')) enviados++; else recusaram++;
+  });
+
+  const area = document.getElementById('resultado-aviso-massa-inapp');
+  area.innerHTML = '<div class="info-box" style="border-color:var(--success);"><p class="txt">✓ ' + enviados + ' recebida(s)' + (recusaram > 0 ? ' · ' + recusaram + ' não recebem avisos (recusaram no primeiro acesso)' : '') + '</p></div>';
+  document.getElementById('texto-aviso-massa-inapp').value = '';
+}
+
 function escolherSemRepetirUltima(lista, prog, chave){
   if(!prog.ultimaFraseUsada) prog.ultimaFraseUsada = {};
   const ultimaIdx = prog.ultimaFraseUsada[chave];
@@ -3905,6 +4065,7 @@ async function executarSalvamentoPerfilAluna(nomeAluna){
         regiaoQueixa: a.regiaoQueixa || null,
         ambienteTreino: a.ambienteTreino || 'Academia',
         dataNascimento: a.dataNascimento || null,
+        aceitaAvisos: a.aceitaAvisos != null ? a.aceitaAvisos : null,
         sinalRiscoEmocional: a.sinalRiscoEmocional || null,
         progressaoManualForcada: a.progressaoManualForcada || 0,
         composicaoHistorico: a.composicaoHistorico || [],
@@ -4009,6 +4170,7 @@ function confirmarProgressaoManual(nomeAluna){
   salvarPerfilAlunaNoSupabase(nomeAluna);
   gerarTreinoAutomaticoParaAluna(nomeAluna);
   if(a.telefone) enviarWhatsApp(a.telefone, templatesAvisos.treinoProgredido(a));
+  enviarAvisoInApp(nomeAluna, 'Seu treino acabou de ser atualizado, com evolução de carga/variedade. Já pode conferir! 💪', 'ajuste_treino');
 }
 
 function calcularVolumeTotalDoTreino(diasTreino){
@@ -7004,12 +7166,14 @@ async function loginAluna(){
     }
     aplicarIdentidadeVisual(NOME_ALUNA_LOGADA);
     pedirPermissaoNotificacao();
+    verificarPerguntarSobreAvisos();
 
     sessaoTipo = 'aluna';
     document.getElementById('card-personal-launcher').style.display = 'none';
 
     await carregarELigarTreinoDaAluna(data.user.id);
     await carregarProgressoDoSupabase(data.user.id, NOME_ALUNA_LOGADA);
+    renderBadgeAvisos(); // só depois do progresso carregado, senão mostra 0 avisos por engano
 
     if(primeiroAcesso){
       setActive('intro');
@@ -7033,6 +7197,8 @@ function entrarLocalPorEmail(email){
   }
   aplicarIdentidadeVisual(NOME_ALUNA_LOGADA);
   pedirPermissaoNotificacao();
+  verificarPerguntarSobreAvisos();
+  renderBadgeAvisos();
   sessaoTipo = 'aluna';
   document.getElementById('card-personal-launcher').style.display = 'none';
   setActive('launcher');
