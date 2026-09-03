@@ -2706,21 +2706,40 @@ function mostrarFormularioAvisarTreinoAjustado(){
   const elegiveis = alunasPersonal.filter(function(a){ return a.status !== 'lead'; });
 
   let html = '<div class="form-group"><textarea class="form-input" id="texto-treino-ajustado" rows="3">' + MENSAGEM_PADRAO_TREINO_AJUSTADO + '</textarea></div>';
+  html += '<div class="form-group"><input class="form-input" id="busca-treino-ajustado" placeholder="Buscar aluna por nome..." oninput="filtrarListaTreinoAjustado()"></div>';
   html += '<div class="row" style="gap:8px;margin-bottom:8px;"><span class="chip" style="cursor:pointer;" onclick="marcarTodasTreinoAjustado(true)">Selecionar todas</span><span class="chip" style="cursor:pointer;" onclick="marcarTodasTreinoAjustado(false)">Limpar seleção</span></div>';
   html += '<div style="max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:10px;">';
   html += elegiveis.map(function(a){
-    return '<label style="display:flex;align-items:center;gap:8px;padding:6px 4px;font-size:13px;cursor:pointer;">' +
+    return '<label class="linha-treino-ajustado" data-nome-busca="' + a.nome.toUpperCase().replace(/"/g,'&quot;') + '" style="display:flex;align-items:center;gap:8px;padding:6px 4px;font-size:13px;cursor:pointer;">' +
       '<input type="checkbox" class="checkbox-treino-ajustado" value="' + a.nome.replace(/"/g,'&quot;') + '"> ' + a.nome +
     '</label>';
   }).join('');
+  html += '<p id="sem-resultado-treino-ajustado" class="txt" style="display:none;color:var(--text-faint);text-align:center;padding:8px;">Nenhuma aluna encontrada.</p>';
   html += '</div>';
   html += '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="confirmarAvisarTreinoAjustado()">Enviar (WhatsApp + app)</button>';
   html += '<div id="resultado-treino-ajustado" style="margin-top:10px;"></div>';
   area.innerHTML = html;
 }
 
+function filtrarListaTreinoAjustado(){
+  const termo = (document.getElementById('busca-treino-ajustado').value || '').toUpperCase().trim();
+  let visiveis = 0;
+  document.querySelectorAll('.linha-treino-ajustado').forEach(function(linha){
+    const bate = !termo || linha.getAttribute('data-nome-busca').indexOf(termo) !== -1;
+    linha.style.display = bate ? 'flex' : 'none';
+    if(bate) visiveis++;
+  });
+  const semResultado = document.getElementById('sem-resultado-treino-ajustado');
+  if(semResultado) semResultado.style.display = visiveis === 0 ? 'block' : 'none';
+}
+
 function marcarTodasTreinoAjustado(marcar){
-  document.querySelectorAll('.checkbox-treino-ajustado').forEach(function(chk){ chk.checked = marcar; });
+  // Só marca/desmarca quem está visível na busca atual, pra não mexer sem querer em quem está escondido pelo filtro
+  document.querySelectorAll('.linha-treino-ajustado').forEach(function(linha){
+    if(linha.style.display === 'none') return;
+    const chk = linha.querySelector('.checkbox-treino-ajustado');
+    if(chk) chk.checked = marcar;
+  });
 }
 
 async function confirmarAvisarTreinoAjustado(){
