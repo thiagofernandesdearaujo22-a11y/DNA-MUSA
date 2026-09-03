@@ -1,4 +1,4 @@
-[musa_plus_prototipo_21.html](https://github.com/user-attachments/files/31764987/musa_plus_prototipo_21.html)
+[Uploading musa_plus_prototipo_22.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5269,10 +5269,10 @@ function openAlunaDetail(i){
     '<p class="section-label" style="margin-top:22px;">Acesso ao app</p>' +
     (a.authId && a.senhaGerada
       ? '<div class="info-box"><p class="lbl" style="color:var(--success);">✓ Acesso já criado automaticamente</p>' +
-        '<p class="txt">E-mail: ' + a.email + '<br>Senha: <b>' + a.senhaGerada + '</b><br>Link do app: ' + (window.location.origin + window.location.pathname) + '</p>' +
+        '<p class="txt">E-mail: ' + a.email + '<br>Senha: <b>' + a.senhaGerada + '</b><br>Link do app: ' + (LINK_DO_APP) + '</p>' +
         '</div>' +
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 8px 0 0;font-size:13px;background:#25D366;color:#fff;border:none;" onclick="enviarCredenciaisPorWhatsApp(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-brand-whatsapp" style="vertical-align:-2px;margin-right:6px;"></i>Mandar login e senha por WhatsApp</button>' +
-        '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 0 0;font-size:13px;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="navigator.clipboard.writeText(\'E-mail: ' + a.email + ' - Senha: ' + a.senhaGerada + ' - Link: ' + (window.location.origin + window.location.pathname) + '\')">Copiar dados</button>'
+        '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 0 0;font-size:13px;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="navigator.clipboard.writeText(\'E-mail: ' + a.email + ' - Senha: ' + a.senhaGerada + ' - Link: ' + (LINK_DO_APP) + '\')">Copiar dados</button>'
       : '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="criarLoginParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-key" style="font-size:14px;vertical-align:-2px;margin-right:6px;"></i>Gerar acesso ao app</button>'
     ) +
     '<div id="acesso-gerado-area"></div>' +
@@ -5599,7 +5599,7 @@ async function criarLoginParaAluna(nomeAluna){
     a.authId = data.user.id;
     a.senhaGerada = senha;
 
-    const linkApp = window.location.origin + window.location.pathname;
+    const linkApp = LINK_DO_APP;
 
     areaResultado.innerHTML = '<div class="info-box">' +
       '<p class="txt" style="font-weight:600;">Acesso criado</p>' +
@@ -5621,7 +5621,7 @@ async function enviarCredenciaisPorWhatsApp(nomeAluna){
   if(!a.telefone){ if(area) area.innerHTML = '<div class="info-box"><p class="txt" style="color:#C9784A;">Essa aluna não tem telefone cadastrado, não dá pra mandar por WhatsApp.</p></div>'; return; }
 
   if(area) area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Enviando...</p>';
-  const linkApp = window.location.origin + window.location.pathname;
+  const linkApp = LINK_DO_APP;
   const mensagem = 'Oi ' + a.nome.split(' ')[0] + '! Seu acesso ao MUSA+ já está pronto.\nE-mail: ' + a.email + '\nSenha: ' + a.senhaGerada + '\nEntre aqui: ' + linkApp;
   const saida = await enviarWhatsApp(a.telefone, mensagem);
 
@@ -7781,6 +7781,7 @@ function irParaAbaFixa(which){
 /* ===== CHAT DE IA REAL ===== */
 /* ===== SUPABASE — conexão real com o banco de dados ===== */
 const SUPABASE_URL = 'https://vwiaszatrphqitxlefmz.supabase.co';
+const LINK_DO_APP = 'https://dna-musa-teamfernandes.vercel.app/'; // domínio fixo real, não depende de onde o app está rodando (evita link errado ao testar localmente)
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3aWFzemF0cnBocWl0eGxlZm16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMzgyNzgsImV4cCI6MjEwMDkxNDI3OH0.Cz0tZr0uhS5sWUgkXmNBZCQzZL6pz_j2D7fq0jW1H6Y';
 const supabaseClient = (typeof window.supabase !== 'undefined') ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 let sessaoUsuarioAtual = null; // guarda o usuário logado de verdade (Supabase Auth)
