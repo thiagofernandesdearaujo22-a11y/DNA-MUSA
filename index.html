@@ -1276,6 +1276,26 @@ function renderComposicaoAtual(a){
   }
 }
 
+// ===== GRÁFICO SIMPLES DE EVOLUÇÃO (peso / gordura ao longo do tempo, sem depender de biblioteca externa) =====
+function gerarSvgLinhaEvolucao(pontos, largura, altura, cor){
+  if(pontos.length < 2) return ''; // precisa de pelo menos 2 pontos pra desenhar uma linha
+  const min = Math.min.apply(null, pontos), max = Math.max.apply(null, pontos);
+  const faixa = (max - min) || 1; // evita divisão por zero quando todos os valores são iguais
+  const paddingX = 12, paddingY = 16;
+  const areaLargura = largura - paddingX * 2, areaAltura = altura - paddingY * 2;
+  const coordenadas = pontos.map(function(v, i){
+    const x = paddingX + (pontos.length === 1 ? 0 : (i / (pontos.length - 1)) * areaLargura);
+    const y = paddingY + areaAltura - ((v - min) / faixa) * areaAltura;
+    return { x: x, y: y };
+  });
+  const linhaPath = coordenadas.map(function(p, i){ return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
+  const pontosCirculos = coordenadas.map(function(p){ return '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="2.5" fill="' + cor + '"></circle>'; }).join('');
+  return '<svg viewBox="0 0 ' + largura + ' ' + altura + '" width="100%" height="' + altura + '" style="display:block;">' +
+    '<path d="' + linhaPath + '" fill="none" stroke="' + cor + '" stroke-width="2"></path>' +
+    pontosCirculos +
+  '</svg>';
+}
+
 function renderMinhaEvolucao(a){
   const container = document.getElementById('area-minha-evolucao');
   if(!container) return;
@@ -1284,7 +1304,20 @@ function renderMinhaEvolucao(a){
     container.innerHTML = '<p class="txt" style="color:var(--text-faint);">Ainda sem histórico. Assim que você registrar novas informações, os valores anteriores ficam guardados aqui pra comparar.</p>';
     return;
   }
-  container.innerHTML = historico.slice().reverse().map(function(reg){
+
+  let html = '';
+  const pesos = historico.filter(function(r){ return r.peso != null; }).map(function(r){ return parseFloat(r.peso); });
+  const gorduras = historico.filter(function(r){ return r.gordura != null; }).map(function(r){ return parseFloat(r.gordura); });
+  const graficoPeso = gerarSvgLinhaEvolucao(pesos, 300, 70, '#E8C58A');
+  const graficoGordura = gerarSvgLinhaEvolucao(gorduras, 300, 70, '#F4D9A5');
+  if(graficoPeso || graficoGordura){
+    html += '<div class="row" style="gap:8px;margin-bottom:10px;">';
+    if(graficoPeso) html += '<div class="info-box" style="flex:1;"><p class="lbl" style="font-size:11px;margin-bottom:4px;">Peso (kg)</p>' + graficoPeso + '</div>';
+    if(graficoGordura) html += '<div class="info-box" style="flex:1;"><p class="lbl" style="font-size:11px;margin-bottom:4px;">% Gordura</p>' + graficoGordura + '</div>';
+    html += '</div>';
+  }
+
+  html += historico.slice().reverse().map(function(reg){
     let linha = reg.data || ('Semana ' + reg.semana);
     const partes = [];
     if(reg.peso != null) partes.push(String(reg.peso).replace('.', ',') + ' kg');
@@ -1293,6 +1326,7 @@ function renderMinhaEvolucao(a){
     if(reg.pesoMuscular != null) partes.push(String(reg.pesoMuscular).replace('.', ',') + ' kg peso muscular');
     return '<div class="info-box" style="margin-bottom:8px;"><p class="lbl">' + linha + '</p><p class="txt">' + (partes.join(' · ') || 'sem detalhe') + '</p></div>';
   }).join('');
+  container.innerHTML = html;
 }
 
 // ===== Fluxo de registro de novas informações de composição =====
@@ -9583,6 +9617,11 @@ function renderRodaDaVidaAluna(){
 
   let html = '<p class="section-label" style="margin-top:0;">' + nomeDoMes.charAt(0).toUpperCase() + nomeDoMes.slice(1) + ' <span class="tag">' + totalPreenchido + ' de ' + AREAS_RODA_DA_VIDA.length + '</span></p>';
 
+  const jaPreencheuAlgumaVez = !!getUltimaRodaDaVidaPreenchida(nome);
+  if(!jaPreencheuAlgumaVez){
+    html += '<div class="info-box" style="margin-bottom:16px;background:var(--success-soft);border-color:var(--success);"><p class="txt" style="font-size:12px;">A Roda da Vida avalia como está sua vida além do treino, saúde, trabalho, família, financeiro e mais. Isso ajuda seu personal a te entender melhor como um todo, não só o que acontece na academia. Leva menos de 2 minutos, uma vez por mês.</p></div>';
+  }
+
   if(totalPreenchido > 0){
     html += '<div class="info-box" style="margin-bottom:16px;">' + gerarSvgRadar(registro.areas) + '</div>';
     const resumo = calcularPontoForteEAreaFraca(registro.areas);
@@ -9617,10 +9656,7 @@ function renderMeuProgressoConteudo(container, nome, a){
 
   let html = '';
 
-  // Check-in emocional do dia + hábitos com pontuação
-  html += '<div id="checkin-habitos-area"></div>';
-
-  // DNA Score + comparativo real
+  // DNA Score + comparativo real (o que ela quer ver primeiro, ao abrir a tela)
   html += '<div class="dna-score-card" onclick="openDetail(\'dna\')">' +
     '<div class="dna-score-left">' +
       '<p class="dna-score-label">DNA SCORE</p>' +
@@ -9630,6 +9666,9 @@ function renderMeuProgressoConteudo(container, nome, a){
       '</p>' +
     '</div>' +
   '</div>';
+
+  // Check-in emocional do dia + hábitos com pontuação (o que ela preenche, vem depois do que ela olha)
+  html += '<div id="checkin-habitos-area"></div>';
 
   // Linha do tempo de composição (peso/gordura), cruzando com o que já construímos
   html += '<p class="section-label" style="margin-top:20px;">Linha do tempo</p>';
