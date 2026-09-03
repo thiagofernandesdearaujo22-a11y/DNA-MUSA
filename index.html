@@ -4209,6 +4209,7 @@ async function executarSalvamentoPerfilAluna(nomeAluna){
         ambienteTreino: a.ambienteTreino || 'Academia',
         dataNascimento: a.dataNascimento || null,
         aceitaAvisos: a.aceitaAvisos != null ? a.aceitaAvisos : null,
+        contadorAberturas: a.contadorAberturas || 0,
         sinalRiscoEmocional: a.sinalRiscoEmocional || null,
         progressaoManualForcada: a.progressaoManualForcada || 0,
         composicaoHistorico: a.composicaoHistorico || [],
@@ -7318,9 +7319,13 @@ async function loginAluna(){
     await carregarProgressoDoSupabase(data.user.id, NOME_ALUNA_LOGADA);
     renderBadgeAvisos(); // só depois do progresso carregado, senão mostra 0 avisos por engano
 
+    const dentroDoLimiteDeIntro = deveExibirEEIncrementarIntro(NOME_ALUNA_LOGADA);
     if(primeiroAcesso){
       setActive('intro');
       timerIntroAtual = setTimeout(function(){ setActive('onboarding'); }, 4000);
+    } else if(dentroDoLimiteDeIntro){
+      setActive('intro');
+      timerIntroAtual = setTimeout(function(){ setActive('launcher'); }, 4000);
     } else {
       setActive('launcher');
     }
@@ -7548,6 +7553,17 @@ function confirmarSairDaConta(){
 function pularIntro(){
   if(timerIntroAtual){ clearTimeout(timerIntroAtual); timerIntroAtual = null; }
   setActive('onboarding');
+}
+
+// ===== INTRO DO DNA (mostra nas 10 primeiras vezes que a aluna abre o app, não só na primeira) =====
+const LIMITE_ABERTURAS_COM_INTRO = 10;
+
+function deveExibirEEIncrementarIntro(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return false;
+  a.contadorAberturas = (a.contadorAberturas || 0) + 1;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+  return a.contadorAberturas <= LIMITE_ABERTURAS_COM_INTRO;
 }
 
 function testarIntroNovamente(){
@@ -7783,6 +7799,14 @@ async function restaurarSessaoAtiva(){
       if(cardPersonal) cardPersonal.style.display = 'none';
       await carregarELigarTreinoDaAluna(sessao.user.id);
       mostrarDiagnostico('Restaurada com sucesso, indo pra tela dela.', false);
+
+      const dentroDoLimiteDeIntroRestaurada = deveExibirEEIncrementarIntro(NOME_ALUNA_LOGADA);
+      if(dentroDoLimiteDeIntroRestaurada){
+        setActive('intro');
+        timerIntroAtual = setTimeout(function(){ setActive('launcher'); }, 4000);
+        perguntarSeQuerLembrarLogin();
+        return;
+      }
 
       // Volta exatamente pra tela que ela estava, não sempre pro launcher
       let telaSalva = null;
