@@ -369,6 +369,16 @@
       </div>
     </div>
   </div>
+  <div class="modal-overlay-avisos" id="modal-lembrar-login">
+    <div class="modal-card">
+      <h3>Salvar esse login?</h3>
+      <p>Quer que esse aparelho entre direto nessa conta da próxima vez que abrir o app? Se preferir escolher o login toda vez (bom quando o aparelho é compartilhado), pode dizer não.</p>
+      <div class="modal-botoes">
+        <button onclick="responderLembrarLogin(false)">Não salvar</button>
+        <button class="btn-aceitar" onclick="responderLembrarLogin(true)">Salvar login</button>
+      </div>
+    </div>
+  </div>
   <div class="screen">
     <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-08-05-A</p>
 
@@ -488,6 +498,7 @@
             <p class="profile-name">Personal</p>
             <p class="profile-desc">Painel administrativo</p>
           </div>
+          <p style="font-size:11px;color:var(--text-faint);cursor:pointer;margin-top:6px;" onclick="confirmarSairDaConta()"><i class="ti ti-logout" style="margin-right:4px;"></i>Sair da conta</p>
         </div>
       </div>
     </div>
@@ -657,6 +668,9 @@
         <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;margin-top:10px;" onclick="mostrarFormularioMensagemEmMassa()"><i class="ti ti-speakerphone" style="margin-right:6px;"></i>Mandar mensagem pra todas</button>
         <div id="mensagem-massa-area"></div>
 
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="mostrarFormularioAvisarTreinoAjustado()"><i class="ti ti-barbell" style="margin-right:6px;"></i>Avisar treino ajustado (escolher alunas)</button>
+        <div id="avisar-treino-ajustado-area"></div>
+
         <p class="section-label" style="margin-top:22px;">Inteligência de mercado</p>
         <p class="page-sub" style="margin-top:-6px;">O que está bombando agora no nicho de estética feminina/fitness</p>
         <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:12px;" onclick="gerarRelatorioTendencias()"><i class="ti ti-trending-up" style="margin-right:6px;"></i>🔎 Gerar novo relatório de tendências</button>
@@ -680,6 +694,17 @@
           <div class="chip" id="filtro-tab-porvencer" onclick="alternarFiltroAlunas('porvencer')">Por vencer</div>
           <div class="chip" id="filtro-tab-vencidas" onclick="alternarFiltroAlunas('vencidas')">Vencidas</div>
           <div class="chip" style="background:var(--card-2);color:var(--gold-soft);" onclick="abrirTelaFunil()"><i class="ti ti-filter-cog" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Funil</div>
+          <div class="chip" id="chip-modo-selecao" style="background:var(--card-2);color:var(--gold-soft);" onclick="alternarModoSelecaoAlunas()"><i class="ti ti-checkbox" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Marcar</div>
+        </div>
+        <div id="barra-selecao-alunas" style="display:none;background:var(--card);border:1px solid var(--border-strong);border-radius:12px;padding:10px 12px;margin-bottom:12px;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span id="contagem-selecao-alunas" style="font-size:12px;color:var(--gold-soft);flex-shrink:0;">0 selecionada(s)</span>
+          <select class="form-select" id="destino-mover-alunas" style="flex:1;min-width:140px;font-size:12px;padding:6px;">
+            <option value="ativas">Mover pra Ativas</option>
+            <option value="porvencer">Mover pra Por vencer</option>
+            <option value="vencidas">Mover pra Vencidas</option>
+          </select>
+          <span class="chip" style="cursor:pointer;background:var(--gold-soft);color:#1A1409;" onclick="confirmarMoverAlunasSelecionadas()">Mover</span>
+          <span class="chip" style="cursor:pointer;" onclick="alternarModoSelecaoAlunas()">Cancelar</span>
         </div>
         <div class="form-group"><input class="form-input" id="aluna-search" placeholder="Buscar aluna por nome..." oninput="renderAlunas()"></div>
         <div id="alunas-list"></div>
@@ -2128,6 +2153,39 @@ function moverAlunaDeStatus(nomeAluna, novoStatus){
   renderAlunas();
 }
 
+// ===== SELEÇÃO MÚLTIPLA DE ALUNAS (marcar várias e mover todas de uma vez) =====
+let modoSelecaoAlunasAtivo = false;
+let alunasSelecionadas = new Set();
+
+function alternarModoSelecaoAlunas(){
+  modoSelecaoAlunasAtivo = !modoSelecaoAlunasAtivo;
+  alunasSelecionadas.clear();
+  const chip = document.getElementById('chip-modo-selecao');
+  if(chip) chip.classList.toggle('active', modoSelecaoAlunasAtivo);
+  const barra = document.getElementById('barra-selecao-alunas');
+  if(barra) barra.style.display = modoSelecaoAlunasAtivo ? 'flex' : 'none';
+  renderAlunas();
+}
+
+function alternarSelecaoAluna(nome){
+  if(alunasSelecionadas.has(nome)) alunasSelecionadas.delete(nome); else alunasSelecionadas.add(nome);
+  const contagem = document.getElementById('contagem-selecao-alunas');
+  if(contagem) contagem.textContent = alunasSelecionadas.size + ' selecionada(s)';
+  renderAlunas();
+}
+
+function confirmarMoverAlunasSelecionadas(){
+  if(alunasSelecionadas.size === 0){ alert('Marca pelo menos uma aluna antes de mover.'); return; }
+  const destino = document.getElementById('destino-mover-alunas').value;
+  const rotulos = { ativas: 'Ativas', porvencer: 'Por vencer', vencidas: 'Vencidas' };
+  if(!confirm('Mover ' + alunasSelecionadas.size + ' aluna(s) pra "' + rotulos[destino] + '"?')) return;
+  alunasSelecionadas.forEach(function(nome){
+    const a = alunasPersonal.find(function(x){ return x.nome === nome; });
+    if(a){ a.statusPlanoManual = destino; salvarPerfilAlunaNoSupabase(nome); }
+  });
+  alternarModoSelecaoAlunas(); // já limpa a seleção, esconde a barra e re-renderiza
+}
+
 function ehAlunaAntiga(a){
   if(!a.dataAnamnese) return false;
   const ano = parseInt(String(a.dataAnamnese).slice(0, 4), 10);
@@ -2173,27 +2231,35 @@ function renderAlunas(){
     el.className = 'aluna-card';
     el.style.cssText = 'flex-direction:column;align-items:stretch;gap:6px;';
     const financeiro = statusFinanceiroAluna(a);
+    const marcada = alunasSelecionadas.has(a.nome);
     el.innerHTML =
-      '<div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" data-abrir="1">' +
-        '<div><p class="aluna-name">' + a.nome + (a.recemChegadaDaAnamnese ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">nova</span>' : '') + (!ehAlunaAntiga(a) && a.dataAnamnese ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">2025</span>' : '') + '</p><p class="aluna-meta">' + a.nivel + ' · ' + a.freq + (a.statusPlanoManual ? ' · movida manualmente' : '') + (a.valorPlano != null ? ' · R$ ' + a.valorPlano.toFixed(2).replace('.', ',') : '') + '</p></div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:8px;" data-abrir="1">' +
+        (modoSelecaoAlunasAtivo ? '<input type="checkbox" class="checkbox-selecao-aluna" ' + (marcada ? 'checked' : '') + ' style="flex-shrink:0;width:18px;height:18px;">' : '') +
+        '<div style="flex:1;"><p class="aluna-name">' + a.nome + (a.recemChegadaDaAnamnese ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">nova</span>' : '') + (!ehAlunaAntiga(a) && a.dataAnamnese ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">2025</span>' : '') + '</p><p class="aluna-meta">' + a.nivel + ' · ' + a.freq + (a.statusPlanoManual ? ' · movida manualmente' : '') + (a.valorPlano != null ? ' · R$ ' + a.valorPlano.toFixed(2).replace('.', ',') : '') + '</p></div>' +
         '<span style="display:flex;align-items:center;gap:6px;">' +
           '<span class="tag" style="background:' + financeiro.corSuave + ';color:' + financeiro.cor + ';">' + financeiro.label + '</span>' +
           '<span class="status-dot ' + a.status + '"></span><span class="status-txt ' + a.status + '">' + a.statusLabel + '</span>' +
         '</span>' +
       '</div>';
-    el.querySelector('[data-abrir]').onclick = function(){ openAlunaDetail(i); };
+    if(modoSelecaoAlunasAtivo){
+      el.querySelector('[data-abrir]').onclick = function(){ alternarSelecaoAluna(a.nome); };
+    } else {
+      el.querySelector('[data-abrir]').onclick = function(){ openAlunaDetail(i); };
+    }
 
-    const seletor = document.createElement('select');
-    seletor.className = 'form-select';
-    seletor.style.cssText = 'font-size:11px;padding:4px 6px;';
-    seletor.innerHTML = '<option value="">Mover pra outra aba...</option>' +
-      ['ativas','porvencer','vencidas'].filter(function(s){ return s !== filtroAlunasAtivo; }).map(function(s){
-        const rotulos = { ativas: 'Ativas', porvencer: 'Por vencer', vencidas: 'Vencidas' };
-        return '<option value="' + s + '">' + rotulos[s] + '</option>';
-      }).join('') +
-      (a.statusPlanoManual ? '<option value="auto">Voltar ao automático</option>' : '');
-    seletor.onchange = function(){ moverAlunaDeStatus(a.nome, seletor.value); };
-    el.appendChild(seletor);
+    if(!modoSelecaoAlunasAtivo){
+      const seletor = document.createElement('select');
+      seletor.className = 'form-select';
+      seletor.style.cssText = 'font-size:11px;padding:4px 6px;';
+      seletor.innerHTML = '<option value="">Mover pra outra aba...</option>' +
+        ['ativas','porvencer','vencidas'].filter(function(s){ return s !== filtroAlunasAtivo; }).map(function(s){
+          const rotulos = { ativas: 'Ativas', porvencer: 'Por vencer', vencidas: 'Vencidas' };
+          return '<option value="' + s + '">' + rotulos[s] + '</option>';
+        }).join('') +
+        (a.statusPlanoManual ? '<option value="auto">Voltar ao automático</option>' : '');
+      seletor.onchange = function(){ moverAlunaDeStatus(a.nome, seletor.value); };
+      el.appendChild(seletor);
+    }
 
     list.appendChild(el);
   });
@@ -2629,6 +2695,64 @@ function confirmarAvisoEmMassaInApp(){
   const area = document.getElementById('resultado-aviso-massa-inapp');
   area.innerHTML = '<div class="info-box" style="border-color:var(--success);"><p class="txt">✓ ' + enviados + ' recebida(s)' + (recusaram > 0 ? ' · ' + recusaram + ' não recebem avisos (recusaram no primeiro acesso)' : '') + '</p></div>';
   document.getElementById('texto-aviso-massa-inapp').value = '';
+}
+
+// ===== AVISAR TREINO AJUSTADO — mensagem pronta, escolhendo alunas específicas, manda por WhatsApp + in-app juntos =====
+const MENSAGEM_PADRAO_TREINO_AJUSTADO = 'Oi! Passando pra avisar que seu treino passou por ajustes e progressões, já está tudo atualizado no app. Dá uma conferida quando puder! 💪';
+
+function mostrarFormularioAvisarTreinoAjustado(){
+  const area = document.getElementById('avisar-treino-ajustado-area');
+  if(!area) return;
+  const elegiveis = alunasPersonal.filter(function(a){ return a.status !== 'lead'; });
+
+  let html = '<div class="form-group"><textarea class="form-input" id="texto-treino-ajustado" rows="3">' + MENSAGEM_PADRAO_TREINO_AJUSTADO + '</textarea></div>';
+  html += '<div class="row" style="gap:8px;margin-bottom:8px;"><span class="chip" style="cursor:pointer;" onclick="marcarTodasTreinoAjustado(true)">Selecionar todas</span><span class="chip" style="cursor:pointer;" onclick="marcarTodasTreinoAjustado(false)">Limpar seleção</span></div>';
+  html += '<div style="max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:10px;">';
+  html += elegiveis.map(function(a){
+    return '<label style="display:flex;align-items:center;gap:8px;padding:6px 4px;font-size:13px;cursor:pointer;">' +
+      '<input type="checkbox" class="checkbox-treino-ajustado" value="' + a.nome.replace(/"/g,'&quot;') + '"> ' + a.nome +
+    '</label>';
+  }).join('');
+  html += '</div>';
+  html += '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="confirmarAvisarTreinoAjustado()">Enviar (WhatsApp + app)</button>';
+  html += '<div id="resultado-treino-ajustado" style="margin-top:10px;"></div>';
+  area.innerHTML = html;
+}
+
+function marcarTodasTreinoAjustado(marcar){
+  document.querySelectorAll('.checkbox-treino-ajustado').forEach(function(chk){ chk.checked = marcar; });
+}
+
+async function confirmarAvisarTreinoAjustado(){
+  const texto = document.getElementById('texto-treino-ajustado').value.trim();
+  if(!texto){ alert('Escreve a mensagem antes de enviar.'); return; }
+  const nomesMarcados = Array.from(document.querySelectorAll('.checkbox-treino-ajustado:checked')).map(function(el){ return el.value; });
+  if(nomesMarcados.length === 0){ alert('Marca pelo menos uma aluna.'); return; }
+  if(!confirm('Vai mandar essa mensagem por WhatsApp e pelo app pra ' + nomesMarcados.length + ' aluna(s). Continuar?')) return;
+
+  const area = document.getElementById('resultado-treino-ajustado');
+  let enviadosWhats = 0, errosWhats = [], enviadosApp = 0;
+
+  for(let i = 0; i < nomesMarcados.length; i++){
+    const nome = nomesMarcados[i];
+    const a = alunasPersonal.find(function(x){ return x.nome === nome; });
+    if(!a) continue;
+    area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Enviando ' + (i+1) + ' de ' + nomesMarcados.length + '...</p>';
+    if(enviarAvisoInApp(a.nome, texto, 'ajuste_treino')) enviadosApp++;
+    if(a.telefone){
+      const saida = await enviarWhatsApp(a.telefone, texto);
+      if(saida.sucesso) enviadosWhats++; else errosWhats.push({ nome: a.nome, motivo: saida.motivo });
+    } else {
+      errosWhats.push({ nome: a.nome, motivo: 'sem telefone cadastrado' });
+    }
+    await new Promise(function(r){ setTimeout(r, 150); });
+  }
+
+  const listaErros = errosWhats.length ? '<ul style="margin:8px 0 0;padding-left:18px;font-size:11px;color:var(--text-faint);">' + errosWhats.map(function(e){ return '<li>' + e.nome + ': ' + (e.motivo || 'motivo não informado') + '</li>'; }).join('') + '</ul>' : '';
+  area.innerHTML = '<div class="info-box" style="border-color:' + (errosWhats.length ? '#C9784A' : 'var(--success)') + ';">' +
+    '<p class="txt">✓ ' + enviadosApp + ' recebida(s) no app · ' + enviadosWhats + ' recebida(s) no WhatsApp' + (errosWhats.length ? ' · ' + errosWhats.length + ' com erro no WhatsApp' : '') + '</p>' +
+    listaErros +
+  '</div>';
 }
 
 function escolherSemRepetirUltima(lista, prog, chave){
@@ -7181,6 +7305,7 @@ async function loginAluna(){
     } else {
       setActive('launcher');
     }
+    perguntarSeQuerLembrarLogin();
   } catch(erroDeRede){
     // Falha de rede de verdade (ex: "Failed to fetch") — nunca trava o teste aqui, entra local
     console.warn('Sem conexão com o Supabase agora, entrando localmente pra você continuar testando:', erroDeRede);
@@ -7374,6 +7499,33 @@ function pedirPermissaoNotificacao(){
   }
 }
 
+// ===== LEMBRAR LOGIN (opt-in, pra não ficar entrando sozinho na conta errada) =====
+function getPreferenciaLembrarLogin(){
+  try { return localStorage.getItem('musa_lembrar_login'); } catch(e){ return null; }
+}
+
+function salvarPreferenciaLembrarLogin(valor){
+  try { localStorage.setItem('musa_lembrar_login', valor); } catch(e){}
+}
+
+function perguntarSeQuerLembrarLogin(){
+  if(getPreferenciaLembrarLogin() !== null) return; // já respondeu antes, não pergunta de novo
+  const modal = document.getElementById('modal-lembrar-login');
+  if(modal) modal.style.display = 'flex';
+}
+
+async function responderLembrarLogin(salvar){
+  salvarPreferenciaLembrarLogin(salvar ? 'sim' : 'nao');
+  const modal = document.getElementById('modal-lembrar-login');
+  if(modal) modal.style.display = 'none';
+  // Se ela disse "não salvar", a sessão atual continua funcionando normalmente até ela sair ou fechar.
+  // O que muda é só a PRÓXIMA vez que o app abrir: aí sim não vai entrar sozinho de novo (ver restaurarSessaoAtiva).
+}
+
+function confirmarSairDaConta(){
+  if(confirm('Sair dessa conta? Você pode entrar de novo com outro login depois.')) sairDeVerdade();
+}
+
 function pularIntro(){
   if(timerIntroAtual){ clearTimeout(timerIntroAtual); timerIntroAtual = null; }
   setActive('onboarding');
@@ -7413,6 +7565,7 @@ async function loginPersonal(){
     document.getElementById('backlabel').textContent = 'Sair';
     pedirPermissaoNotificacao();
     openLevel2('personal');
+    perguntarSeQuerLembrarLogin();
 
     // Diagnóstico único, grande, no topo da tela — impossível de não ver
     const diag = document.createElement('div');
@@ -7436,6 +7589,7 @@ async function loginPersonal(){
     document.getElementById('backlabel').textContent = 'Sair';
     pedirPermissaoNotificacao();
     openLevel2('personal');
+    perguntarSeQuerLembrarLogin();
     return;
   }
 
@@ -7467,6 +7621,7 @@ async function loginPersonal(){
     document.getElementById('backlabel').textContent = 'Sair';
     pedirPermissaoNotificacao();
     openLevel2('personal');
+    perguntarSeQuerLembrarLogin();
   } catch(erroDeRede){
     // Falha de rede de verdade — se as credenciais batem com as suas, entra local pra você continuar testando
     console.warn('Sem conexão com o Supabase agora, entrando localmente pra você continuar testando:', erroDeRede);
@@ -7477,6 +7632,7 @@ async function loginPersonal(){
       document.getElementById('backlabel').textContent = 'Sair';
       pedirPermissaoNotificacao();
       openLevel2('personal');
+      perguntarSeQuerLembrarLogin();
     } else {
       erroEl.textContent = 'E-mail ou senha incorretos.';
       erroEl.style.display = 'block';
@@ -7542,6 +7698,15 @@ async function restaurarSessaoAtiva(){
   }
 
   if(!supabaseClient){ mostrarDiagnostico('supabaseClient não existe (CDN não carregou).', true); return; }
+
+  // Se ela já disse explicitamente que não quer login salvo, desloga e mostra a tela normal,
+  // mesmo que o Supabase ainda tenha uma sessão guardada no navegador.
+  if(getPreferenciaLembrarLogin() === 'nao'){
+    try { await supabaseClient.auth.signOut(); } catch(e){}
+    mostrarDiagnostico('Login não fica salvo nesse aparelho (preferência da usuária). Mostrando tela normal.', false);
+    return;
+  }
+
   try {
     const { data: sessaoData, error: erroSessao } = await supabaseClient.auth.getSession();
     if(erroSessao){ mostrarDiagnostico('Erro ao buscar sessão: ' + erroSessao.message, true); return; }
@@ -7568,6 +7733,7 @@ async function restaurarSessaoAtiva(){
       if(backlabel) backlabel.textContent = 'Sair';
       pedirPermissaoNotificacao();
       openLevel2('personal');
+      perguntarSeQuerLembrarLogin();
     } else if(perfilRow.tipo === 'aluna'){
       NOME_ALUNA_LOGADA = perfilRow.nome;
       const { data: alunaRow } = await supabaseClient.from('alunas').select('*').eq('auth_id', sessao.user.id).maybeSingle();
@@ -7613,6 +7779,7 @@ async function restaurarSessaoAtiva(){
       } else {
         setActive('launcher');
       }
+      perguntarSeQuerLembrarLogin();
     }
   } catch(erroDeRede){
     mostrarDiagnostico('Erro de conexão: ' + erroDeRede.message, true);
