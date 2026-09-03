@@ -5265,16 +5265,13 @@ function openAlunaDetail(i){
     treinoHtml +
     treinoAcoesHtml +
     renderSecaoColapsavel('Acompanhamento e histórico', renderElegibilidadeFase(a) + renderFunilEngajamento(a) + renderLinhaDoTempo(a) + renderPromocaoNivel(a) + renderBlocoPeriodizacao(a) + renderTecnicaPendente(a) + renderProgressao(a), 'acompanhamento') +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:22px;">' +
-      '<p class="section-label" style="margin:0;">Acesso ao app</p>' +
-      (a.authId && a.senhaGerada
-        ? '<span class="acao-pill" style="cursor:pointer;" onclick="enviarCredenciaisPorWhatsApp(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-brand-whatsapp" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Enviar</span>'
-        : '') +
-    '</div>' +
+    '<p class="section-label" style="margin-top:22px;">Acesso ao app</p>' +
     (a.authId && a.senhaGerada
       ? '<div class="info-box"><p class="lbl" style="color:var(--success);">✓ Acesso já criado automaticamente</p>' +
-        '<p class="txt">' + a.email + '<br>' + a.senhaGerada + '</p>' +
-        '<span class="chip" style="cursor:pointer;margin-top:6px;display:inline-block;" onclick="navigator.clipboard.writeText(\'E-mail: ' + a.email + ' - Senha: ' + a.senhaGerada + ' - Link: ' + (window.location.origin + window.location.pathname) + '\')">Copiar dados</span></div>'
+        '<p class="txt">E-mail: ' + a.email + '<br>Senha: <b>' + a.senhaGerada + '</b><br>Link do app: ' + (window.location.origin + window.location.pathname) + '</p>' +
+        '</div>' +
+        '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 8px 0 0;font-size:13px;background:#25D366;color:#fff;border:none;" onclick="enviarCredenciaisPorWhatsApp(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-brand-whatsapp" style="vertical-align:-2px;margin-right:6px;"></i>Mandar login e senha por WhatsApp</button>' +
+        '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 0 0;font-size:13px;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="navigator.clipboard.writeText(\'E-mail: ' + a.email + ' - Senha: ' + a.senhaGerada + ' - Link: ' + (window.location.origin + window.location.pathname) + '\')">Copiar dados</button>'
       : '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="criarLoginParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-key" style="font-size:14px;vertical-align:-2px;margin-right:6px;"></i>Gerar acesso ao app</button>'
     ) +
     '<div id="acesso-gerado-area"></div>' +
