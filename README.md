@@ -1,4 +1,4 @@
-[Uploading musa_plus_prototipo_22.html…]()
+[musa_plus_prototipo_23.html](https://github.com/user-attachments/files/31816868/musa_plus_prototipo_23.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -679,6 +679,8 @@
           </div>
           <div id="conteudo-dash-ferramentas-treino" style="display:none;margin-top:8px;">
             <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="verificarReplicasDeTreino()"><i class="ti ti-copy-check" style="margin-right:6px;"></i>Verificar réplicas de treino</button>
+            <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="auditarVolumePosteriores()"><i class="ti ti-clipboard-check" style="margin-right:6px;"></i>Auditar volume mínimo de posteriores</button>
+            <div id="auditoria-posteriores-area"></div>
             <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="mostrarConfigRanking()"><i class="ti ti-trophy" style="margin-right:6px;"></i>Configurar meta do Ranking</button>
           </div>
         </div>
@@ -3306,11 +3308,28 @@ function ehMultiarticularComElastico(e){
   return padroesMultiarticulares.some(function(p){ return n.indexOf(p) !== -1; });
 }
 
+// Elástico nunca entra em treino de Academia (lá tem equipamento de verdade pra isso), com uma única
+// exceção: o bloco de mobilidade/correção postural, que é gerado por uma lógica totalmente separada
+// (obterBlocoPostural) e não passa por aqui. Em treino de Casa, elástico continua liberado normalmente.
+function linhaUsaElastico(linha){
+  const upper = linha.toUpperCase();
+  return upper.indexOf('ELÁSTICO') !== -1 || upper.indexOf('ELASTICO') !== -1;
+}
+
 // Pliométrico = salto/impacto/explosão — carga alta e repentina no joelho. Regra da metodologia:
 // quem relata dor no joelho não recebe esse tipo de exercício, seja qual for o grupo muscular.
 function ehExercicioPliometrico(e){
   const n = e.nome.toUpperCase();
   return ['SALTO', 'JUMP', 'PULO', 'POLICHINELO', 'SKIPPING', 'VAI E VEM', 'PLIOMÉTRIC', 'PLIOMETRIC'].some(function(p){ return n.indexOf(p) !== -1; });
+}
+
+// Elástico é sempre isolamento/acessório, próprio pra treino em Casa (onde não tem equipamento de
+// verdade). Em Academia nunca entra, seja isolado ou multiarticular — lá tem equipamento de verdade
+// pra cada estímulo. Única exceção real: o bloco de mobilidade/correção postural (obterBlocoPostural),
+// que é uma lógica totalmente separada e não passa por aqui.
+function ehExercicioElastico(e){
+  const n = e.nome.toUpperCase();
+  return e.metodo === 'Elástico' || n.indexOf('ELÁSTICO') !== -1 || n.indexOf('ELASTICO') !== -1;
 }
 
 function obterPoolRealDoGrupo(grupoInterno, ambiente, evitarPliometrico){
@@ -3321,7 +3340,7 @@ function obterPoolRealDoGrupo(grupoInterno, ambiente, evitarPliometrico){
   const baseAmbiente = exerciciosBanco.filter(function(e){
     if(e.grupo !== grupoReal) return false;
     if(evitarPliometrico && ehExercicioPliometrico(e)) return false;
-    return ambiente === 'Casa' ? exercicioServeParaCasa(e) : ((e.ambiente || 'Academia') === 'Academia' && !ehMultiarticularComElastico(e));
+    return ambiente === 'Casa' ? exercicioServeParaCasa(e) : ((e.ambiente || 'Academia') === 'Academia' && !ehExercicioElastico(e));
   });
   const comVideo = baseAmbiente.filter(function(e){ return e.video; });
   return comVideo.length >= 3 ? comVideo : baseAmbiente;
@@ -3428,6 +3447,7 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
   }
 
   const dias = [];
+  const posteriorJaContemplado = enfase === 'Posterior' || secundario === 'Posterior';
 
   for(let d = 0; d < numDias; d++){
     const ehDiaEnfase = d % 2 === 0; // dias pares = ênfase, ímpares = secundário (padrão validado com a Michele/Andriele)
@@ -3452,6 +3472,19 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
       metodo: metodo
     });
   }
+
+  // Regra de volume mínimo de posteriores: se a pirâmide da aluna não tem Posterior como ênfase
+  // nem secundário, ele nunca apareceria em nenhum dia. Garante pelo menos 1 exercício no último
+  // dia de inferiores, com volume moderado (nem o volume de ênfase, nem tão baixo quanto panturrilha).
+  if(!posteriorJaContemplado && dias.length > 0){
+    const ultimoDia = dias[dias.length - 1];
+    const opcoesPosterior = exerciciosDoGrupo('Posterior', {});
+    if(opcoesPosterior && opcoesPosterior[0]){
+      const seriesMinimas = perfil.bloco === 'deload' ? 2 : 3;
+      ultimoDia.ex.push(opcoesPosterior[0] + ' · ' + seriesMinimas + 'x' + (reps + 2) + ' (volume mínimo de posteriores, garantido pela metodologia)');
+    }
+  }
+
   return dias;
 }
 
@@ -3600,7 +3633,7 @@ function gerarTreinoSemanal(perfil){
             const todoOBanco = exerciciosBanco.filter(function(e){
               if((e.grupo || e.categoria) !== grupoDoDia) return false;
               if(perfil.evitarPliometrico && ehExercicioPliometrico(e)) return false;
-              return perfil.ambienteTreino === 'Casa' ? exercicioServeParaCasa(e) : ((e.ambiente || 'Academia') === 'Academia' && !ehMultiarticularComElastico(e));
+              return perfil.ambienteTreino === 'Casa' ? exercicioServeParaCasa(e) : ((e.ambiente || 'Academia') === 'Academia' && !ehExercicioElastico(e));
             });
             const candidatoDeResgate = todoOBanco.find(function(e){
               return nomesJaNoDia.indexOf(e.nome.toUpperCase()) === -1 && !padroesJaNoDia[obterPalavraChaveMovimento(e.nome)];
@@ -4475,6 +4508,41 @@ async function salvarConfigRanking(){
   document.getElementById('config-ranking-area').innerHTML = '<p class="txt" style="color:var(--success);">✓ Meta atualizada.</p>';
 }
 
+// Auditoria de volume mínimo de posteriores: revisa treinos já existentes (gerados antes da regra
+// entrar em vigor) e aponta quais alunas ainda não têm nenhum exercício de posterior no treino atual.
+async function auditarVolumePosteriores(){
+  const area = document.getElementById('auditoria-posteriores-area');
+  if(!area) return;
+  area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Revisando treinos de todas as alunas...</p>';
+
+  const comTreino = alunasPersonal.filter(function(a){ return a.treinoAtual && a.treinoAtual.dias; });
+  const semPosterior = [];
+
+  comTreino.forEach(function(a){
+    const temPosterior = a.treinoAtual.dias.some(function(d){
+      return (d.ex || []).some(function(linhaOriginal){
+        const linhas = linhaOriginal.indexOf('|||') !== -1 ? linhaOriginal.split('|||').slice(1).map(function(l){ return l.trim(); }) : [linhaOriginal];
+        return linhas.some(function(linha){
+          const nomeEx = linha.split(' · ')[0];
+          const exBanco = buscarExercicioNoBanco(nomeEx);
+          return exBanco && exBanco.grupo === 'Isquiotibiais';
+        });
+      });
+    });
+    if(!temPosterior) semPosterior.push(a.nome);
+  });
+
+  if(semPosterior.length === 0){
+    area.innerHTML = '<div class="info-box" style="border-color:var(--success);"><p class="lbl" style="color:var(--success);">✓ Nenhum problema encontrado</p><p class="txt">Revisei ' + comTreino.length + ' treino(s) — todas têm pelo menos 1 exercício de posterior.</p></div>';
+    return;
+  }
+
+  area.innerHTML = '<div class="info-box" style="border-color:#E2A33D;"><p class="lbl" style="color:#E2A33D;">⚠ ' + semPosterior.length + ' aluna(s) sem posterior no treino atual</p>' +
+    '<p class="txt" style="font-size:11px;color:var(--text-faint);">' + semPosterior.join(', ') + '</p>' +
+    '<p class="txt" style="font-size:11px;margin-top:8px;">Isso são treinos gerados antes da regra de volume mínimo entrar em vigor. Use "Gerar/progredir treino de todas" no Dashboard pra corrigir todas de uma vez, já com a regra nova aplicada.</p>' +
+  '</div>';
+}
+
 async function verificarReplicasDeTreino(){
   const area = document.getElementById('replicas-treino-area');
   area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Cruzando os treinos de todas as alunas...</p>';
@@ -4759,15 +4827,29 @@ function mostrarOpcoesDeTrocaMesmoAssim(diaIndex, exIndex){
   renderizarOpcoesTrocaFiltradas(opcoes);
 }
 
+function abrirVideoApenasExercicio(nomeExercicio, ev){
+  if(ev) ev.stopPropagation(); // nunca deixa o clique no nome também disparar a troca do exercício
+  const exBanco = buscarExercicioNoBanco(nomeExercicio);
+  const embed = exBanco ? getEmbedUrl(exBanco.video) : '';
+  const overlay = document.createElement('div');
+  overlay.id = 'overlay-video-apenas';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;';
+  overlay.innerHTML = (embed
+    ? '<div class="video-block" style="width:100%;max-width:400px;margin-bottom:16px;"><iframe src="' + embed + '" title="' + nomeExercicio + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>'
+    : '<p style="color:#fff;font-size:13px;margin-bottom:16px;text-align:center;">Vídeo ainda não disponível pra esse exercício.</p>') +
+    '<button class="btn-gold" style="width:auto;padding:10px 24px;margin:0;" onclick="document.getElementById(\'overlay-video-apenas\').remove()">Fechar</button>';
+  document.body.appendChild(overlay);
+}
+
 function renderizarOpcoesTrocaFiltradas(opcoes){
   const lista = document.getElementById('lista-opcoes-troca');
   if(!lista) return;
   const ctx = window.__contextoTrocaAtual;
   lista.innerHTML = opcoes.map(function(e){
     const mesmaFamilia = ctx.familiaAtual && obterFamiliaBiomecanica(e.nome) === ctx.familiaAtual;
-    return '<div style="background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;font-size:12px;display:flex;justify-content:space-between;align-items:center;" onclick="confirmarSubstituicao(' + ctx.diaIndex + ',' + ctx.exIndex + ',\'' + e.nome.replace(/'/g,"\\'") + '\')">' +
-      '<span>' + e.nome + '</span>' +
-      (mesmaFamilia ? '<span class="tag" style="background:var(--success-soft);color:var(--success);font-size:9px;">mesmo padrão</span>' : '') +
+    return '<div style="background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;" onclick="confirmarSubstituicao(' + ctx.diaIndex + ',' + ctx.exIndex + ',\'' + e.nome.replace(/'/g,"\\'") + '\')">' +
+      '<span style="text-decoration:underline;text-decoration-color:var(--gold-soft);text-underline-offset:2px;" onclick="abrirVideoApenasExercicio(\'' + e.nome.replace(/'/g,"\\'") + '\', event)">' + e.nome + '</span>' +
+      (mesmaFamilia ? '<span class="tag" style="background:var(--success-soft);color:var(--success);font-size:9px;flex-shrink:0;">mesmo padrão</span>' : '') +
     '</div>';
   }).join('') || '<p class="txt" style="font-size:11px;color:var(--text-faint);">Nenhum exercício encontrado com esse nome.</p>';
 }
