@@ -1,4 +1,4 @@
-[musa_plus_prototipo_23.html](https://github.com/user-attachments/files/31816868/musa_plus_prototipo_23.html)
+[musa_plus_prototipo_24.html](https://github.com/user-attachments/files/31817118/musa_plus_prototipo_24.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1082,6 +1082,7 @@ if(resumoDias) resumoDias.textContent = dias.length + ' dias';
 
 function calcularComparativoSemanal(nome){
   const prog = getProgressoAluna(nome);
+  if(!prog.nutricao) prog.nutricao = {}; // protege alunas com progresso salvo antigo, de antes desse campo existir
   const semanaAtual = prog.semana;
   const semanaAnterior = semanaAtual - 1;
   const resultado = {};
@@ -2465,7 +2466,7 @@ let detailDiaAtual = null;
 
 function getProgressoAluna(nome){
   if(!progressoesPorAluna[nome]){
-    progressoesPorAluna[nome] = { semana: 1, historico: {}, diasConcluidos: {}, substituicoes: [] };
+    progressoesPorAluna[nome] = { semana: 1, historico: {}, diasConcluidos: {}, substituicoes: [], nutricao: {} };
   }
   return progressoesPorAluna[nome];
 }
