@@ -3669,11 +3669,12 @@ function gerarTreinoSemanal(perfil){
     dia.excedeTempo = perfil.tempoDisponivel ? duracaoFinal > perfil.tempoDisponivel : false;
   });
 
-  // Renomeia sequencialmente na ordem da semana: Treino A, Treino B, Treino C... sem distinguir Inferiores/Superiores no nome
+  // Renomeia sequencialmente: Treino A, Treino B, Treino C... e a descrição vem da análise real
+  // de volume por grupo muscular prescrito nesse dia (motor de nomenclatura dinâmica), não do que
+  // foi planejado inicialmente pela pirâmide.
   let letraTreino = 0;
   semana.forEach(function(dia){
-    const descricao = dia.foco.indexOf(' · ') !== -1 ? dia.foco.split(' · ').slice(1).join(' · ') : dia.foco;
-    dia.foco = 'Treino ' + String.fromCharCode(65 + letraTreino) + ' · ' + descricao;
+    dia.foco = 'Treino ' + String.fromCharCode(65 + letraTreino) + ' · ' + gerarDescricaoTreinoPorVolume(dia.ex);
     letraTreino++;
   });
 
@@ -4078,6 +4079,66 @@ function construirPerfilAluna(a){
     // Regra da metodologia: dor no joelho relatada (confirmada ou só no texto de restrições) tira pliométrico do treino
     evitarPliometrico: a.regiaoQueixa === 'Joelho' || (a.restricoes && a.restricoes.toLowerCase().indexOf('joelho') !== -1)
   };
+}
+
+// ===== MOTOR DE NOMENCLATURA DINÂMICA (nome do treino calculado pelo volume real prescrito, não fixo) =====
+// Sempre que o treino é gerado OU reajustado manualmente (adicionar/remover/trocar exercício,
+// mudar séries), o nome é recalculado do zero a partir do que está de fato no dia, nunca fica preso
+// ao que foi planejado inicialmente pela ênfase/secundário da pirâmide.
+const GRUPOS_RELEVANTES_PARA_NOME_TREINO = ['Glúteos', 'Isquiotibiais', 'Quadríceps', 'Costas', 'Ombros', 'Peito', 'Bíceps', 'Tríceps'];
+const LABEL_GRUPO_NOME_TREINO = { 'Glúteos': 'Glúteos', 'Isquiotibiais': 'Posteriores', 'Quadríceps': 'Quadríceps', 'Costas': 'Costas', 'Ombros': 'Ombro', 'Peito': 'Peito', 'Bíceps': 'Bíceps', 'Tríceps': 'Tríceps' };
+
+function calcularVolumePorGrupoNoDia(diaEx){
+  const totais = {};
+  (diaEx || []).forEach(function(linhaOriginal){
+    const linhas = linhaOriginal.indexOf('|||') !== -1 ? linhaOriginal.split('|||').slice(1).map(function(l){ return l.trim(); }) : [linhaOriginal];
+    linhas.forEach(function(linha){
+      const partes = linha.split(' · ');
+      const nomeEx = partes[0];
+      const seriesMatch = (partes[1] || '').match(/^(\d+)x/);
+      const series = seriesMatch ? parseInt(seriesMatch[1], 10) : 0;
+      if(series === 0) return;
+      const exBanco = buscarExercicioNoBanco(nomeEx);
+      if(!exBanco) return;
+      const grupo = exBanco.grupo || exBanco.categoria;
+      // Panturrilha e Abdômen são sempre acessórios de baixo volume, nunca definem a identidade do dia
+      if(GRUPOS_RELEVANTES_PARA_NOME_TREINO.indexOf(grupo) === -1) return;
+      totais[grupo] = (totais[grupo] || 0) + series;
+    });
+  });
+  return totais;
+}
+
+function juntarNomesComE(lista){
+  if(lista.length === 0) return '';
+  if(lista.length === 1) return lista[0];
+  return lista.slice(0, -1).join(', ') + ' e ' + lista[lista.length - 1];
+}
+
+function gerarDescricaoTreinoPorVolume(diaEx){
+  const totais = calcularVolumePorGrupoNoDia(diaEx);
+  const gruposOrdenados = Object.keys(totais).sort(function(g1, g2){ return totais[g2] - totais[g1]; });
+  if(gruposOrdenados.length === 0) return 'Treino do dia'; // salvaguarda, não deveria acontecer com um dia de treino de verdade
+  const enfaseLabel = LABEL_GRUPO_NOME_TREINO[gruposOrdenados[0]] || gruposOrdenados[0];
+  const restantes = gruposOrdenados.slice(1).map(function(g){ return LABEL_GRUPO_NOME_TREINO[g] || g; });
+  if(restantes.length === 0) return enfaseLabel;
+  const palavraEstimulo = restantes.length === 1 ? 'estímulo' : 'estímulos';
+  return enfaseLabel + ' com ' + palavraEstimulo + ' em ' + juntarNomesComE(restantes);
+}
+
+function extrairLetraDoTreino(foco){
+  const m = (foco || '').match(/^Treino\s+(\S+)/);
+  return m ? m[1] : null;
+}
+
+// Recalcula o nome de um dia específico a partir do treino que está de fato prescrito agora,
+// preservando a letra do treino (Treino A, B, C...) já atribuída. Chame isso sempre que
+// adicionar, remover, trocar exercício, ou mudar séries/reps de um dia já existente.
+function recalcularNomeDoTreinoPorVolume(dia){
+  if(dia.descanso || dia.tabata) return; // dia de descanso ou Tabata não segue essa lógica de nome
+  const letra = extrairLetraDoTreino(dia.foco);
+  const descricao = gerarDescricaoTreinoPorVolume(dia.ex);
+  dia.foco = (letra ? 'Treino ' + letra + ' · ' : '') + descricao;
 }
 
 function calcularSnapshotVolume(diasSemana){
@@ -4620,6 +4681,7 @@ function editarSeriesReps(diaIndex, exIndex, novoValor){
     dias[diaIndex].ex[exIndex] = nomeAtual + ' · ' + novoValor.trim();
   }
   sincronizarTreinoComSupabase(a);
+  recalcularEAtualizarNomeDoDia(diaIndex);
 }
 
 // ===== ARRASTAR PRA REORDENAR (funciona com toque e mouse, sem depender de "drag and drop" nativo) =====
@@ -4724,6 +4786,7 @@ function removerExercicioTreino(diaIndex, exIndex){
   if(typeof dias !== 'undefined' && dias[diaIndex]) dias[diaIndex].ex.splice(exIndex, 1);
   sincronizarTreinoComSupabase(a);
   atualizarDiaPersonalNaTela(diaIndex);
+  recalcularEAtualizarNomeDoDia(diaIndex);
 }
 
 function abrirSelecaoGrupoParaAdicionar(diaIndex){
@@ -4754,6 +4817,7 @@ function confirmarAdicionarExercicio(diaIndex){
   if(typeof dias !== 'undefined' && dias[diaIndex]) dias[diaIndex].ex.push(nomeEscolhido + ' · 3x12');
   sincronizarTreinoComSupabase(a);
   atualizarDiaPersonalNaTela(diaIndex);
+  recalcularEAtualizarNomeDoDia(diaIndex);
 }
 
 function adicionarExercicioTreino(diaIndex){
@@ -4877,6 +4941,7 @@ function confirmarSubstituicao(diaIndex, exIndex, novoNome){
   sincronizarTreinoComSupabase(a);
   salvarProgressoNoSupabase(a.nome);
   atualizarDiaPersonalNaTela(diaIndex);
+  recalcularEAtualizarNomeDoDia(diaIndex);
 }
 
 function calcularContagemRegressivaAvaliacao(a){
@@ -5103,6 +5168,16 @@ function atualizarDiaPersonalNaTela(di){
   container.innerHTML = renderConteudoDiaPersonal(alunaAberta, di);
 }
 
+// Recalcula o nome do dia pela metodologia de volume real e já atualiza o título na tela,
+// sem precisar recarregar a ficha inteira (que perderia o dia aberto e a rolagem da tela).
+function recalcularEAtualizarNomeDoDia(di){
+  if(!alunaAberta || !alunaAberta.treinoAtual || !alunaAberta.treinoAtual.dias[di]) return;
+  const dia = alunaAberta.treinoAtual.dias[di];
+  recalcularNomeDoTreinoPorVolume(dia);
+  const tituloEl = document.getElementById('dia-titulo-' + di);
+  if(tituloEl) tituloEl.textContent = dia.foco.indexOf(' · ') !== -1 ? dia.foco.split(' · ').slice(1).join(' · ') : dia.foco;
+}
+
 function alternarDiaExpandidoPersonal(di){
   const container = document.getElementById('dia-personal-expandido-' + di);
   if(!container) return;
@@ -5247,7 +5322,7 @@ function openAlunaDetail(i){
       treinoHtml += '<div style="border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;">' +
         '<div style="display:flex;align-items:center;gap:12px;padding:12px;cursor:pointer;" onclick="alternarDiaExpandidoPersonal(' + di + ')">' +
           '<div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="font-family:\'Playfair Display\',serif;font-size:16px;font-weight:700;color:#1A1409;">' + letra + '</span></div>' +
-          '<div style="flex:1;"><p style="font-size:13px;font-weight:600;margin:0;">' + d.n + '</p><p style="font-size:11px;color:var(--text-faint);margin:0;">' + (d.foco.indexOf(' · ') !== -1 ? d.foco.split(' · ').slice(1).join(' · ') : d.foco) + '</p></div>' +
+          '<div style="flex:1;"><p style="font-size:13px;font-weight:600;margin:0;">' + d.n + '</p><p id="dia-titulo-' + di + '" style="font-size:11px;color:var(--text-faint);margin:0;">' + (d.foco.indexOf(' · ') !== -1 ? d.foco.split(' · ').slice(1).join(' · ') : d.foco) + '</p></div>' +
           '<i class="ti ti-chevron-down" style="color:var(--text-faint);"></i>' +
         '</div>' +
         '<div id="dia-personal-expandido-' + di + '" style="display:none;padding:0 12px 12px;">' + renderConteudoDiaPersonal(a, di) + '</div></div>';
