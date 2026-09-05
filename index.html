@@ -2540,34 +2540,68 @@ function getDataHojeISO(){
   return new Date().toISOString().slice(0,10);
 }
 
+let dataEmEdicaoCheckIn = null; // null = editando hoje; senão, uma data ISO específica (ex: preenchendo ontem, esquecido)
+
+function getDataEmEdicaoCheckIn(){
+  return dataEmEdicaoCheckIn || getDataHojeISO();
+}
+
 function getCheckInHoje(nome){
   const prog = getProgressoAluna(nome);
   if(!prog.checkinsEmocionais) prog.checkinsEmocionais = {};
-  const hoje = getDataHojeISO();
-  if(!prog.checkinsEmocionais[hoje]) prog.checkinsEmocionais[hoje] = { data: hoje };
-  return prog.checkinsEmocionais[hoje];
+  const data = getDataEmEdicaoCheckIn();
+  if(!prog.checkinsEmocionais[data]) prog.checkinsEmocionais[data] = { data: data };
+  return prog.checkinsEmocionais[data];
 }
 
 function salvarCampoCheckInEmocional(nome, campo, valor){
   const checkin = getCheckInHoje(nome);
   checkin[campo] = valor;
-  salvarProgressoNoSupabase(nome);
   renderCheckInEHabitos(nome);
 }
 
 function getHabitosHojeAluna(nome){
   const prog = getProgressoAluna(nome);
   if(!prog.habitosDoDia) prog.habitosDoDia = {};
-  const hoje = getDataHojeISO();
-  if(!prog.habitosDoDia[hoje]) prog.habitosDoDia[hoje] = {};
-  return prog.habitosDoDia[hoje];
+  const data = getDataEmEdicaoCheckIn();
+  if(!prog.habitosDoDia[data]) prog.habitosDoDia[data] = {};
+  return prog.habitosDoDia[data];
 }
 
 function alternarHabitoDoDia(nome, habitoId){
   const habitosHoje = getHabitosHojeAluna(nome);
   habitosHoje[habitoId] = !habitosHoje[habitoId];
-  salvarProgressoNoSupabase(nome);
   renderCheckInEHabitos(nome);
+}
+
+function getDataOntemISO(){
+  const ontem = new Date();
+  ontem.setDate(ontem.getDate() - 1);
+  return ontem.toISOString().slice(0,10);
+}
+
+// Troca pra editar o dia de ONTEM (caso ela tenha esquecido de preencher), sem tocar no de hoje.
+// É um registro totalmente separado, guardado na própria data de ontem.
+function abrirPreenchimentoDeOntem(nome){
+  dataEmEdicaoCheckIn = getDataOntemISO();
+  renderCheckInEHabitos(nome);
+}
+
+function voltarParaPreenchimentoDeHoje(nome){
+  dataEmEdicaoCheckIn = null;
+  renderCheckInEHabitos(nome);
+}
+
+// Só aqui que salva de verdade no banco — os cliques nos campos acima só mexem na memória,
+// pra dar tempo dela ajustar tudo antes de confirmar.
+function salvarProgressoDoDiaAgora(nome){
+  salvarProgressoNoSupabase(nome);
+  const el = document.getElementById('confirmacao-salvar-progresso-dia');
+  if(el){
+    el.textContent = '✓ Salvo!';
+    el.style.color = 'var(--success)';
+    setTimeout(function(){ if(el) el.textContent = ''; }, 2500);
+  }
 }
 
 function calcularPontosHabitosHoje(nome){
@@ -2589,7 +2623,13 @@ function renderCheckInEHabitos(nome){
     }).join('');
   }
 
-  let html = '<p class="section-label" style="margin-top:0;">Como você está hoje?</p>' +
+  const editandoOntem = !!dataEmEdicaoCheckIn;
+  const dataFormatadaEmEdicao = new Date(getDataEmEdicaoCheckIn() + 'T00:00:00').toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
+
+  let html = '<p class="section-label" style="margin-top:0;">' + (editandoOntem ? 'Preenchendo o dia de ontem (' + dataFormatadaEmEdicao + ')' : 'Meu progresso hoje') + '</p>' +
+    (editandoOntem
+      ? '<span class="chip" style="cursor:pointer;margin-bottom:12px;display:inline-block;" onclick="voltarParaPreenchimentoDeHoje(\'' + nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-arrow-back" style="font-size:11px;vertical-align:-1px;margin-right:4px;"></i>Voltar pra hoje</span>'
+      : '<span class="chip" style="cursor:pointer;margin-bottom:12px;display:inline-block;" onclick="abrirPreenchimentoDeOntem(\'' + nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-calendar-time" style="font-size:11px;vertical-align:-1px;margin-right:4px;"></i>Esqueci de preencher ontem</span>') +
     '<div class="info-box" style="margin-bottom:14px;">' +
       '<p class="txt" style="font-size:12px;margin-bottom:4px;">Humor</p><div class="row" style="gap:6px;margin-bottom:10px;">' + botaoEscala('humor', checkin.humor) + '</div>' +
       '<p class="txt" style="font-size:12px;margin-bottom:4px;">Ansiedade</p><div class="row" style="gap:6px;margin-bottom:10px;">' + botaoEscala('ansiedade', checkin.ansiedade) + '</div>' +
@@ -2609,6 +2649,9 @@ function renderCheckInEHabitos(nome){
       '<span class="tag" style="' + (marcado ? 'background:var(--success-soft);color:var(--success);' : '') + '">' + (marcado ? '✓ ' : '+') + h.pontos + '</span>' +
     '</div>';
   });
+
+  html += '<button class="btn-gold" style="margin-top:12px;" onclick="salvarProgressoDoDiaAgora(\'' + nome.replace(/'/g,"\\'") + '\')">' + (editandoOntem ? 'Salvar informações de ontem' : 'Salvar informações de hoje') + '</button>' +
+    '<p id="confirmacao-salvar-progresso-dia" style="text-align:center;font-size:12px;margin-top:6px;height:16px;"></p>';
 
   el.innerHTML = html;
 }
@@ -5140,7 +5183,7 @@ function renderConteudoDiaPersonal(a, di){
         '<div style="display:flex;justify-content:space-between;align-items:center;">' +
           '<div style="display:flex;align-items:center;gap:8px;min-width:0;">' +
             '<span class="alca-arrastar" data-dia="' + di + '" data-ex="' + ei + '" onpointerdown="iniciarArrastarExercicio(event)" style="cursor:grab;color:var(--text-faint);touch-action:none;flex-shrink:0;"><i class="ti ti-grip-vertical" style="font-size:16px;"></i></span>' +
-            '<span id="nome-ex-' + di + '-' + ei + '" style="font-size:12px;cursor:pointer;" onclick="abrirSubstituicao(' + di + ',' + ei + ')">' + nomeEdit + (metodoAplicado ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + metodoAplicado + '</span>' : '') + '</span>' +
+            '<span id="nome-ex-' + di + '-' + ei + '" style="font-size:12px;cursor:pointer;text-decoration:underline;text-decoration-color:var(--gold-soft);text-underline-offset:2px;" onclick="abrirVideoApenasExercicio(\'' + nomeEdit.replace(/'/g,"\\'") + '\', event)">' + nomeEdit + (metodoAplicado ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + metodoAplicado + '</span>' : '') + '</span>' +
           '</div>' +
           '<span style="display:flex;gap:4px;align-items:center;flex-shrink:0;">' +
             '<span class="acao-pill" onclick="alternarMetodoExercicio(' + di + ',' + ei + ')">Método</span>' +
@@ -6480,7 +6523,7 @@ const exerciciosBanco = [
   {nome:'TERRA ISOLADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/E7CZQS-PRoo'},
   {nome:'AGACHAMENTO SUMÔ ELÁSTICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ubzfIt524k8'},
   {nome:'LEVANTAMENTO TERRA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/EscCinkCoBI'},
-  {nome:'AJOELHA E LEVANTA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/0Zgh3NIsMfc'},
+  {nome:'AJOELHA E LEVANTA', grupo:'Quadríceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/0Zgh3NIsMfc'},
   {nome:'ABDUÇÃO QUADRIL DEITADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/yBAkhqWLmYE'},
   {nome:'AVANÇO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/l957uDIyzX0'},
   {nome:'ELEVAÇÃO PÉLVICA COM BARRA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/bkLj_jbodUE'},
@@ -6730,7 +6773,7 @@ function playExercicioVideo(nome){
       : '<div class="video-block"><i class="ti ti-player-play"></i></div>') +
     '<h1 class="page-title" style="margin-top:0;">' + e.nome + '</h1>' +
     '<p class="page-sub">' + e.categoria + (e.nivel ? ' · ' + e.nivel : '') + '</p>' +
-    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="abrirEdicaoExercicio(\'' + nome.replace(/'/g,"\\'") + '\')">Ativar modo de edição</button>' +
+    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="abrirEdicaoExercicio(\'' + nome.replace(/'/g,"\\'") + '\')">Editar</button>' +
     '<div id="ex-edicao-form"></div>';
   document.getElementById('ex-lista-view').style.display = 'none';
   document.getElementById('ex-video-view').style.display = 'block';
@@ -6739,22 +6782,34 @@ function playExercicioVideo(nome){
 function abrirEdicaoExercicio(nome){
   const e = exerciciosBanco.find(function(x){ return x.nome === nome; });
   if(!e) return;
-  const metodos = ['Nenhum','Restpause','Dropset','Cluster set','Bi-set','Tri-set','Pirâmide crescente'];
-  const opcoesMetodo = metodos.map(function(m){ return '<option' + (e.metodo === m ? ' selected' : '') + '>' + m + '</option>'; }).join('');
   document.getElementById('ex-edicao-form').innerHTML =
     '<div class="info-box" style="margin-top:10px;">' +
-      '<div class="form-group"><label class="form-label">Método padrão (opcional)</label><select class="form-select" id="edicao-metodo">' + opcoesMetodo + '</select></div>' +
-      '<div class="form-group"><label class="form-label">Link do vídeo (opcional)</label><input class="form-input" id="edicao-video" value="' + (e.video || '') + '" placeholder="Cole o link"></div>' +
-      '<button class="btn-gold" onclick="confirmarEdicaoExercicio(\'' + nome.replace(/'/g,"\\'") + '\')">Confirmar</button>' +
+      '<div class="form-group"><label class="form-label">Nome do exercício</label><input class="form-input" id="edicao-nome" value="' + e.nome.replace(/"/g,'&quot;') + '"></div>' +
+      '<div class="form-group"><label class="form-label">Link do vídeo</label><input class="form-input" id="edicao-video" value="' + (e.video || '') + '" placeholder="Cole o link"></div>' +
+      '<button class="btn-gold" onclick="confirmarEdicaoExercicio(\'' + nome.replace(/'/g,"\\'") + '\')">Salvar alterações</button>' +
+      '<button class="btn-gold" style="background:var(--card-2);color:#C9784A;border:1px solid var(--border);margin-top:8px;" onclick="excluirEVoltarParaLista(\'' + nome.replace(/'/g,"\\'") + '\')">Excluir exercício</button>' +
     '</div>';
 }
 
 function confirmarEdicaoExercicio(nome){
   const e = exerciciosBanco.find(function(x){ return x.nome === nome; });
   if(!e) return;
-  e.metodo = document.getElementById('edicao-metodo').value;
+  const novoNome = document.getElementById('edicao-nome').value.trim();
+  if(!novoNome){ alert('O nome não pode ficar vazio.'); return; }
+  const nomeAntigo = e.nome;
+  e.nome = novoNome;
   e.video = document.getElementById('edicao-video').value.trim();
-  playExercicioVideo(nome);
+  salvarCatalogoPersonal('exercicio_editado', nomeAntigo, { nomeAntigo: nomeAntigo, nome: e.nome, video: e.video, categoria: e.categoria, grupo: e.grupo });
+  playExercicioVideo(e.nome);
+}
+
+async function excluirEVoltarParaLista(nome){
+  if(!confirm('Excluir "' + nome + '" do banco de exercícios? Isso não pode ser desfeito, e vale pra sempre (mesmo depois de atualizar a página).')) return;
+  const idx = exerciciosBanco.findIndex(function(e){ return e.nome === nome; });
+  if(idx !== -1) exerciciosBanco.splice(idx, 1);
+  await salvarCatalogoPersonal('exercicio_excluido', nome, { nome: nome });
+  fecharVideoExercicio();
+  renderExerciciosLista();
 }
 
 function toggleEditMode(){
@@ -8019,6 +8074,7 @@ async function restaurarSessaoAtiva(){
       const cardPersonal = document.getElementById('card-personal-launcher');
       if(cardPersonal) cardPersonal.style.display = 'none';
       await carregarELigarTreinoDaAluna(sessao.user.id);
+      await carregarProgressoDoSupabase(sessao.user.id, NOME_ALUNA_LOGADA);
       mostrarDiagnostico('Restaurada com sucesso, indo pra tela dela.', false);
 
       const dentroDoLimiteDeIntroRestaurada = deveExibirEEIncrementarIntro(NOME_ALUNA_LOGADA);
@@ -8400,7 +8456,7 @@ function alternarSubstituicoesInline(idx, nomeEx){
       ? '<p class="txt" style="font-size:11px;color:var(--text-faint);margin:0 0 6px;">Sem opções parecidas cadastradas ainda.</p>'
       : '<div class="info-box" style="margin:0 0 8px;padding:10px 12px;">' +
           '<p class="lbl" style="margin-bottom:6px;">Opções parecidas (mesma região)</p>' +
-          opcoes.map(function(e){ return '<p class="txt" style="margin-bottom:4px;">· ' + capitalizarNomeExercicio(e.nome) + '</p>'; }).join('') +
+          opcoes.map(function(e){ return '<p class="txt" style="margin-bottom:4px;cursor:pointer;text-decoration:underline;text-decoration-color:var(--gold-soft);text-underline-offset:2px;" onclick="abrirVideoApenasExercicio(\'' + e.nome.replace(/'/g,"\\'") + '\', event)">· ' + capitalizarNomeExercicio(e.nome) + '</p>'; }).join('') +
           '<p class="txt" style="font-size:10.5px;color:var(--text-faint);margin:6px 0 0;">Isso é só pra referência, seu treino oficial continua o mesmo até seu personal ajustar.</p>' +
         '</div>';
     container.style.display = 'block';
@@ -9689,6 +9745,7 @@ function renderMeuProgresso(){
   const nome = NOME_ALUNA_LOGADA;
   const a = alunasPersonal.find(function(x){ return x.nome === nome; });
   if(!a){ container.innerHTML = ''; return; }
+  dataEmEdicaoCheckIn = null; // toda vez que reabre a aba, volta pro modo "hoje" por padrão
 
   try {
     renderMeuProgressoConteudo(container, nome, a);
@@ -9720,7 +9777,7 @@ function getMesAtualISO(){
 function getRodaDaVidaMes(nome, mesISO){
   const prog = getProgressoAluna(nome);
   if(!prog.rodaDaVida) prog.rodaDaVida = {};
-  if(!prog.rodaDaVida[mesISO]) prog.rodaDaVida[mesISO] = { mes: mesISO, areas: {} };
+  if(!prog.rodaDaVida[mesISO]) prog.rodaDaVida[mesISO] = { mes: mesISO, areas: {}, finalizado: false, dataFinalizacao: null };
   return prog.rodaDaVida[mesISO];
 }
 
@@ -9732,10 +9789,42 @@ function getUltimaRodaDaVidaPreenchida(nome){
   return prog.rodaDaVida[meses[meses.length - 1]];
 }
 
+// Acha a finalização mais recente (não importa o mês-calendário em que caiu), pra calcular
+// os 30 dias a partir de quando ela realmente preencheu, não do calendário fixo.
+function getUltimaFinalizacaoRodaDaVida(nome){
+  const prog = getProgressoAluna(nome);
+  if(!prog.rodaDaVida) return null;
+  const finalizados = Object.values(prog.rodaDaVida).filter(function(r){ return r.finalizado && r.dataFinalizacao; });
+  if(finalizados.length === 0) return null;
+  finalizados.sort(function(a, b){ return new Date(b.dataFinalizacao) - new Date(a.dataFinalizacao); });
+  return finalizados[0];
+}
+
+// Retorna quantos dias faltam pra liberar um novo preenchimento (0 ou negativo = já liberado)
+function diasParaProximaRodaDaVida(nome){
+  const ultima = getUltimaFinalizacaoRodaDaVida(nome);
+  if(!ultima) return 0;
+  const dataBase = new Date(ultima.dataFinalizacao + 'T00:00:00');
+  const hoje = new Date();
+  const diasPassados = Math.floor((hoje - dataBase) / (1000*60*60*24));
+  return Math.max(0, 30 - diasPassados);
+}
+
 function salvarCampoRodaDaVida(nome, areaId, valor){
   const mesISO = getMesAtualISO();
   const registro = getRodaDaVidaMes(nome, mesISO);
   registro.areas[areaId] = valor;
+  salvarProgressoNoSupabase(nome);
+  renderRodaDaVidaAluna();
+}
+
+// Finaliza o preenchimento do mês atual: trava edição e inicia a contagem real de 30 dias
+// a partir de hoje, não do calendário.
+function finalizarRodaDaVida(nome){
+  const mesISO = getMesAtualISO();
+  const registro = getRodaDaVidaMes(nome, mesISO);
+  registro.finalizado = true;
+  registro.dataFinalizacao = getDataHojeISO();
   salvarProgressoNoSupabase(nome);
   renderRodaDaVidaAluna();
 }
@@ -9784,10 +9873,69 @@ function gerarSvgRadar(areasObj, tamanho){
     '</svg>';
 }
 
+let mostrandoHistoricoRodaDaVida = false;
+let mesHistoricoRodaDaVidaAberto = null;
+
+function alternarHistoricoRodaDaVida(){
+  mostrandoHistoricoRodaDaVida = !mostrandoHistoricoRodaDaVida;
+  mesHistoricoRodaDaVidaAberto = null;
+  renderRodaDaVidaAluna();
+}
+
+function abrirMesHistoricoRodaDaVida(mesISO){
+  mesHistoricoRodaDaVidaAberto = mesISO;
+  renderRodaDaVidaAluna();
+}
+
 function renderRodaDaVidaAluna(){
   const container = document.getElementById('area-rodadavida-conteudo');
   if(!container) return;
   const nome = NOME_ALUNA_LOGADA;
+  const prog = getProgressoAluna(nome);
+  const jaPreencheuAlgumaVez = !!getUltimaRodaDaVidaPreenchida(nome);
+  const diasRestantes = diasParaProximaRodaDaVida(nome);
+
+  // Vendo o histórico de meses anteriores (lista ou um mês específico aberto)
+  if(mostrandoHistoricoRodaDaVida){
+    const mesesFinalizados = Object.keys(prog.rodaDaVida || {}).filter(function(m){ return prog.rodaDaVida[m].finalizado; }).sort();
+    let html = '<p class="section-label" style="margin-top:0;cursor:pointer;" onclick="alternarHistoricoRodaDaVida()"><i class="ti ti-arrow-left" style="font-size:14px;vertical-align:-2px;margin-right:6px;"></i>Voltar</p>';
+    if(mesHistoricoRodaDaVidaAberto && prog.rodaDaVida[mesHistoricoRodaDaVidaAberto]){
+      const registro = prog.rodaDaVida[mesHistoricoRodaDaVidaAberto];
+      const nomeDoMes = new Date(mesHistoricoRodaDaVidaAberto + '-01T00:00:00').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+      html += '<p class="lbl" style="margin-bottom:8px;">' + nomeDoMes.charAt(0).toUpperCase() + nomeDoMes.slice(1) + '</p>' +
+        '<div class="info-box">' + gerarSvgRadar(registro.areas) + '</div>';
+    } else if(mesesFinalizados.length === 0){
+      html += '<p class="txt" style="color:var(--text-faint);">Ainda não tem nenhum mês anterior salvo.</p>';
+    } else {
+      html += '<p class="lbl" style="margin-bottom:8px;">Escolha um mês</p>';
+      mesesFinalizados.slice().reverse().forEach(function(m, i){
+        const nomeDoMes = new Date(m + '-01T00:00:00').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+        html += '<div class="list-item" style="cursor:pointer;margin-bottom:6px;" onclick="abrirMesHistoricoRodaDaVida(\'' + m + '\')"><span>' + (nomeDoMes.charAt(0).toUpperCase() + nomeDoMes.slice(1)) + '</span><i class="ti ti-chevron-right" style="color:var(--text-faint);"></i></div>';
+      });
+    }
+    container.innerHTML = html;
+    return;
+  }
+
+  // Trava de 30 dias: mostra só o resumo do último preenchimento, sem permitir editar
+  if(diasRestantes > 0){
+    const ultima = getUltimaFinalizacaoRodaDaVida(nome);
+    const resumo = ultima ? calcularPontoForteEAreaFraca(ultima.areas) : null;
+    let html = '<p class="section-label" style="margin-top:0;">Sua última Roda da Vida</p>' +
+      '<div class="info-box" style="margin-bottom:12px;">' + gerarSvgRadar(ultima.areas) + '</div>';
+    if(resumo){
+      html += '<div class="row" style="gap:8px;margin-bottom:16px;">' +
+        '<div class="info-box" style="flex:1;background:var(--success-soft);border-color:var(--success);"><p class="lbl" style="font-size:11px;">Ponto forte</p><p class="txt" style="font-size:12px;">' + resumo.forte.label + ' (' + resumo.forte.valor + '/5)</p></div>' +
+        '<div class="info-box" style="flex:1;"><p class="lbl" style="font-size:11px;">Área pra focar</p><p class="txt" style="font-size:12px;">' + resumo.fraca.label + ' (' + resumo.fraca.valor + '/5)</p></div>' +
+      '</div>';
+    }
+    html += '<div class="info-box" style="text-align:center;margin-bottom:12px;"><p class="txt" style="font-size:12px;color:var(--text-faint);">Um novo preenchimento libera em <b style="color:var(--gold-soft);">' + diasRestantes + ' dia(s)</b></p></div>' +
+      '<span class="chip" style="cursor:pointer;" onclick="alternarHistoricoRodaDaVida()">Ver meses anteriores</span>';
+    container.innerHTML = html;
+    return;
+  }
+
+  // Liberado pra preencher (primeira vez, ou já passaram os 30 dias)
   const mesISO = getMesAtualISO();
   const registro = getRodaDaVidaMes(nome, mesISO);
   const nomeDoMes = new Date(mesISO + '-01T00:00:00').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
@@ -9795,9 +9943,10 @@ function renderRodaDaVidaAluna(){
 
   let html = '<p class="section-label" style="margin-top:0;">' + nomeDoMes.charAt(0).toUpperCase() + nomeDoMes.slice(1) + ' <span class="tag">' + totalPreenchido + ' de ' + AREAS_RODA_DA_VIDA.length + '</span></p>';
 
-  const jaPreencheuAlgumaVez = !!getUltimaRodaDaVidaPreenchida(nome);
   if(!jaPreencheuAlgumaVez){
     html += '<div class="info-box" style="margin-bottom:16px;background:var(--success-soft);border-color:var(--success);"><p class="txt" style="font-size:12px;">A Roda da Vida avalia como está sua vida além do treino, saúde, trabalho, família, financeiro e mais. Isso ajuda seu personal a te entender melhor como um todo, não só o que acontece na academia. Leva menos de 2 minutos, uma vez por mês.</p></div>';
+  } else {
+    html += '<div class="info-box" style="margin-bottom:16px;"><p class="txt" style="font-size:12px;color:var(--text-faint);">Já passaram os 30 dias, pode preencher de novo. <span style="color:var(--gold-soft);cursor:pointer;text-decoration:underline;" onclick="alternarHistoricoRodaDaVida()">Ver meses anteriores</span></p></div>';
   }
 
   if(totalPreenchido > 0){
@@ -9822,6 +9971,9 @@ function renderRodaDaVidaAluna(){
       '</div>' +
     '</div>';
   });
+
+  html += '<button class="btn-gold" style="margin-top:10px;" onclick="finalizarRodaDaVida(\'' + nome.replace(/'/g,"\\'") + '\')">Salvar e concluir esse mês</button>' +
+    '<p class="txt" style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:6px;">Depois de salvar, um novo preenchimento só libera em 30 dias.</p>';
 
   container.innerHTML = html;
 }
@@ -10089,7 +10241,9 @@ if(type === 'central'){
         '</div>';
 
       corpoTreino = '<div class="badge">' + faseAtual + '</div>' +
-        '<div class="list-item" style="justify-content:space-between;"><span id="cronometro-display" style="font-family:\'Playfair Display\',serif;font-size:18px;font-weight:600;">' + String(Math.floor(cronometroSegundos/60)).padStart(2,'0') + ':' + String(cronometroSegundos%60).padStart(2,'0') + '</span><button class="btn-gold" style="width:auto;margin:0;padding:8px 16px;" id="cronometro-btn" onclick="alternarCronometro()">' + (cronometroRodando ? 'Pausar' : (cronometroSegundos > 0 ? 'Retomar' : 'Iniciar treino')) + '</button></div>' +
+        '<button class="btn-gold" style="padding:16px;font-size:15px;margin:10px 0 4px;" id="cronometro-btn" onclick="alternarCronometro()">' + (cronometroRodando ? 'Pausar' : (cronometroSegundos > 0 ? 'Retomar' : 'Iniciar treino')) + '</button>' +
+        '<p style="text-align:center;font-size:11px;color:var(--text-faint);margin:0 0 4px;" id="cronometro-display" data-modo-cronometro="1">' + String(Math.floor(cronometroSegundos/60)).padStart(2,'0') + ':' + String(cronometroSegundos%60).padStart(2,'0') + '</p>' +
+        '<p style="text-align:center;font-size:11.5px;color:var(--text-faint);margin:0 0 14px;">Clique no nome de cada exercício pra ver o vídeo de execução</p>' +
         '<div id="toast-celebracao-area"></div>' +
         renderBlocoPosturalDia(alunaAtual) +
         '<p class="section-label">Treino do dia</p>' +
@@ -10180,7 +10334,6 @@ if(type === 'central'){
     }
     el.innerHTML =
       '<p class="page-sub" style="margin-top:14px;">' + d.n + '-feira' + (d.hoje ? ' · hoje' : '') + '</p>' +
-      '<h1 class="page-title" style="margin-top:0;">' + d.foco + '</h1>' +
       corpoTreino;
     if(!d.descanso) atualizarBarraProgressoDia(d);
   } else if(type === 'conteudo'){
