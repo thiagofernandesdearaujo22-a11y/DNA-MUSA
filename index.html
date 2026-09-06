@@ -642,17 +642,29 @@
 
         <div id="metricas-negocio-area"></div>
 
-        <button class="btn-gold" style="margin-bottom:14px;margin-top:10px;" onclick="iniciarGeracaoEmMassa()"><i class="ti ti-bolt" style="margin-right:6px;"></i>Gerar/progredir treino de todas</button>
+        <div style="background:linear-gradient(135deg,rgba(217,139,46,0.14),rgba(92,56,20,0.08));border:1px solid var(--border-strong);border-radius:16px;padding:16px;margin:10px 0 14px;cursor:pointer;" onclick="iniciarGeracaoEmMassa()">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-bolt" style="font-size:20px;color:#1A1409;"></i></div>
+            <div style="flex:1;">
+              <p style="font-size:14px;font-weight:700;margin:0;">Gerar/progredir treino de todas</p>
+              <p id="dash-info-gerar-treino" style="font-size:11.5px;color:var(--text-faint);margin:2px 0 0;">Calculando quantas alunas ativas...</p>
+            </div>
+            <i class="ti ti-chevron-right" style="color:var(--gold-soft);font-size:18px;"></i>
+          </div>
+        </div>
         <div id="replicas-treino-area"></div>
         <div id="config-ranking-area"></div>
         <div id="geracao-massa-area"></div>
 
-        <div class="section-colapsavel" style="margin-top:22px;">
+        <div class="section-colapsavel" style="margin-top:22px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;">
           <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="alternarSecaoColapsavel('dash-comunicacao')">
-            <p class="section-label" style="margin:0;">Comunicação com as alunas</p>
+            <span style="display:flex;align-items:center;gap:10px;">
+              <span style="width:32px;height:32px;border-radius:9px;background:var(--card-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-message-circle" style="font-size:15px;color:var(--gold-soft);"></i></span>
+              <p class="section-label" style="margin:0;">Comunicação com as alunas</p>
+            </span>
             <i class="ti ti-chevron-down" id="chevron-dash-comunicacao" style="color:var(--gold-soft);font-size:16px;transition:transform .2s;"></i>
           </div>
-          <div id="conteudo-dash-comunicacao" style="display:none;margin-top:8px;">
+          <div id="conteudo-dash-comunicacao" style="display:none;margin-top:12px;">
             <p class="section-label" style="margin-top:0;">Central de avisos (WhatsApp)</p>
             <button class="chip" style="cursor:pointer;margin-bottom:10px;" onclick="testarConexaoWhatsApp()"><i class="ti ti-plug-connected" style="margin-right:4px;"></i>Testar conexão do WhatsApp</button>
             <div id="resultado-teste-whatsapp"></div>
@@ -671,12 +683,15 @@
           </div>
         </div>
 
-        <div class="section-colapsavel" style="margin-top:14px;">
+        <div class="section-colapsavel" style="margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;">
           <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="alternarSecaoColapsavel('dash-ferramentas-treino')">
-            <p class="section-label" style="margin:0;">Ferramentas de treino</p>
+            <span style="display:flex;align-items:center;gap:10px;">
+              <span style="width:32px;height:32px;border-radius:9px;background:var(--card-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-barbell" style="font-size:15px;color:var(--gold-soft);"></i></span>
+              <p class="section-label" style="margin:0;">Ferramentas de treino</p>
+            </span>
             <i class="ti ti-chevron-down" id="chevron-dash-ferramentas-treino" style="color:var(--gold-soft);font-size:16px;transition:transform .2s;"></i>
           </div>
-          <div id="conteudo-dash-ferramentas-treino" style="display:none;margin-top:8px;">
+          <div id="conteudo-dash-ferramentas-treino" style="display:none;margin-top:12px;">
             <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="verificarReplicasDeTreino()"><i class="ti ti-copy-check" style="margin-right:6px;"></i>Verificar réplicas de treino</button>
             <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="auditarVolumePosteriores()"><i class="ti ti-clipboard-check" style="margin-right:6px;"></i>Auditar volume mínimo de posteriores</button>
             <div id="auditoria-posteriores-area"></div>
@@ -684,12 +699,15 @@
           </div>
         </div>
 
-        <div class="section-colapsavel" style="margin-top:14px;">
+        <div class="section-colapsavel" style="margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;">
           <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="alternarSecaoColapsavel('dash-inteligencia')">
-            <p class="section-label" style="margin:0;">Inteligência de mercado</p>
+            <span style="display:flex;align-items:center;gap:10px;">
+              <span style="width:32px;height:32px;border-radius:9px;background:var(--card-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-trending-up" style="font-size:15px;color:var(--gold-soft);"></i></span>
+              <p class="section-label" style="margin:0;">Inteligência de mercado</p>
+            </span>
             <i class="ti ti-chevron-down" id="chevron-dash-inteligencia" style="color:var(--gold-soft);font-size:16px;transition:transform .2s;"></i>
           </div>
-          <div id="conteudo-dash-inteligencia" style="display:none;margin-top:8px;">
+          <div id="conteudo-dash-inteligencia" style="display:none;margin-top:12px;">
             <p class="page-sub" style="margin-top:-6px;">O que está bombando agora no nicho de estética feminina/fitness</p>
             <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:12px;" onclick="gerarRelatorioTendencias()"><i class="ti ti-trending-up" style="margin-right:6px;"></i>🔎 Gerar novo relatório de tendências</button>
             <div id="relatorio-tendencias-area"></div>
@@ -6096,7 +6114,7 @@ function showPersonalView(which){
   ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
   });
-  if(which === 'dashboard'){ renderCentralDeAvisos(); renderMetricasNegocio(); renderRelatoriosTendencias(); }
+  if(which === 'dashboard'){ renderCentralDeAvisos(); renderMetricasNegocio(); renderRelatoriosTendencias(); renderInfoCardGerarTreino(); }
   if(which === 'alunas'){
     renderAlunas();
     const areaDiagnostico = document.createElement('p');
@@ -9276,6 +9294,13 @@ function isDiaDasMaesHoje(){
 // ===== MÉTRICAS DE NEGÓCIO (painel do Personal) =====
 // Faturamento do mês é calculado a partir dos planos fechados dentro do mês corrente,
 // já que ainda não existe um livro-caixa separado no sistema. Reflete fechamentos reais, não um valor inventado.
+function renderInfoCardGerarTreino(){
+  const el = document.getElementById('dash-info-gerar-treino');
+  if(!el) return;
+  const qtd = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.email && statusDoPlano(a) === 'ativas'; }).length;
+  el.textContent = qtd + ' aluna(s) ativa(s) prontas pra gerar ou progredir agora';
+}
+
 function calcularMetricasNegocio(){
   // Não filtra mais pelo campo antigo "status" (lead/ok), que é de antes de existir a classificação
   // real Ativa/Vencida/Por vencer. Hoje quem manda é statusPlanoManual (via statusDoPlano), sempre.
