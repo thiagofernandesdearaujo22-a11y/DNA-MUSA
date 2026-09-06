@@ -1,4 +1,4 @@
-[Uploading musa_plus_prototipo_12.html…]()
+[musa_plus_prototipo_14.html](https://github.com/user-attachments/files/31890573/musa_plus_prototipo_14.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -482,11 +482,11 @@
               <p class="profile-name">Mentoria</p>
             </div>
             <div class="satelite satelite-direita" onclick="openLevel2('progresso')">
-              <div class="avatar gold"><i class="ti ti-trending-up" style="font-size:20px;color:var(--text-dim);"></i></div>
+              <div class="avatar gold"><span style="font-size:22px;">📊</span></div>
               <p class="profile-name">Progresso</p>
             </div>
             <div class="satelite satelite-baixo" onclick="openLevel2('ranking')">
-              <div class="avatar gold"><i class="ti ti-trophy" style="font-size:20px;color:var(--text-dim);"></i></div>
+              <div class="avatar gold"><span style="font-size:22px;">🏆</span></div>
               <p class="profile-name">Ranking</p>
             </div>
             <div class="satelite-centro" onclick="openLevel2('home')">
