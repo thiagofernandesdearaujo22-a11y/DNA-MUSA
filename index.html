@@ -9451,7 +9451,7 @@ function calcularCentralDeAvisos(){
   return { risco: risco, avaliacaoAtrasada: avaliacaoAtrasada, planoVencendo: planoVencendo, planoVencido: planoVencido, aniversario: aniversario };
 }
 
-function renderCentralDeAvisos(){
+async function renderCentralDeAvisos(){
   const area = document.getElementById('central-avisos-area');
   if(!area) return;
   const dados = calcularCentralDeAvisos();
@@ -9463,7 +9463,7 @@ function renderCentralDeAvisos(){
     '</div>';
   }
 
-  const rankingAtual = calcularRankingComunidade();
+  const rankingAtual = await calcularRankingComunidade();
   const metaBatida = rankingAtual.totalComunidade >= metaComunidadePontos;
   const eDiaDaMulher = isDiaDaMulherHoje();
   const eDiaDasMaes = isDiaDasMaesHoje();
@@ -9776,25 +9776,48 @@ function calcularPontosAluna(nome){
   return historico.reduce(function(soma, r){ return soma + (r.score || 0); }, 0);
 }
 
-function calcularRankingComunidade(){
-  const pontosTodas = alunasPersonal
-    .filter(function(a){ return a.status !== 'lead'; })
-    .map(function(a){ return { nome: a.nome, pontos: calcularPontosAluna(a.nome) }; })
-    .filter(function(p){ return p.pontos > 0; });
-
-  const totalComunidade = pontosTodas.reduce(function(soma, p){ return soma + p.pontos; }, 0);
+// Busca de verdade os pontos de TODAS as alunas (não só a que está logada), através de uma função
+// no banco que soma os pontos sem expor nenhum dado sensível de ninguém pra fora do Supabase.
+async function calcularRankingComunidade(){
   const pontosDela = calcularPontosAluna(NOME_ALUNA_LOGADA);
-  const posicaoDela = pontosTodas.filter(function(p){ return p.pontos > pontosDela; }).length + 1;
+  let pontosTodas = [pontosDela]; // se a busca da comunidade falhar, mostra pelo menos o dela mesma
+
+  if(supabaseClient && sessaoUsuarioAtual){
+    try {
+      const { data, error } = await supabaseClient.rpc('obter_ranking_comunidade');
+      if(!error && data){
+        pontosTodas = data
+          .filter(function(r){ return r.aluna_id !== sessaoUsuarioAtual.id; }) // tira a linha dela, evita contar 2x
+          .map(function(r){ return r.pontos; })
+          .filter(function(p){ return p > 0; });
+        pontosTodas.push(pontosDela); // usa sempre o valor local dela, o mais atualizado possível
+      }
+    } catch(erroDeRede){
+      console.warn('Não consegui buscar o ranking real da comunidade agora, mostrando só o que sei localmente:', erroDeRede);
+    }
+  }
+
+  const totalComunidade = pontosTodas.reduce(function(soma, p){ return soma + p; }, 0);
+  const posicaoDela = pontosTodas.filter(function(p){ return p > pontosDela; }).length + 1;
   const totalComPontos = pontosTodas.length;
   const percentil = totalComPontos > 0 ? Math.round((1 - (posicaoDela - 1) / totalComPontos) * 100) : null;
 
   return { pontosDela: pontosDela, posicaoDela: posicaoDela, totalComPontos: totalComPontos, percentil: percentil, totalComunidade: totalComunidade };
 }
 
-function renderRanking(){
+async function renderRanking(){
   const container = document.getElementById('area-ranking-conteudo');
   if(!container) return;
-  const r = calcularRankingComunidade();
+
+  // Mostra na hora com o que já sabe localmente, enquanto busca o resto da comunidade de verdade
+  const pontosDelaAgora = calcularPontosAluna(NOME_ALUNA_LOGADA);
+  container.innerHTML = '<div class="dna-score-card"><div class="dna-score-left">' +
+    '<p class="dna-score-label">SEUS PONTOS</p>' +
+    '<p class="dna-score-numero">' + pontosDelaAgora + '</p>' +
+    '<p class="dna-score-comparativo" style="color:var(--text-faint);">Calculando sua posição na comunidade...</p>' +
+  '</div></div>';
+
+  const r = await calcularRankingComunidade();
   const pctMeta = Math.min(100, Math.round((r.totalComunidade / metaComunidadePontos) * 100));
 
   let html = '<div class="dna-score-card"><div class="dna-score-left">' +
