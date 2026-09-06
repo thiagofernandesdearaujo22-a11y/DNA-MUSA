@@ -724,6 +724,31 @@
           </div>
         </div>
 
+        <div class="section-colapsavel" style="margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="alternarSecaoColapsavel('dash-relatorios')">
+            <span style="display:flex;align-items:center;gap:10px;">
+              <span style="width:32px;height:32px;border-radius:9px;background:var(--card-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-report" style="font-size:15px;color:var(--gold-soft);"></i></span>
+              <p class="section-label" style="margin:0;">Relatórios da semana</p>
+            </span>
+            <i class="ti ti-chevron-down" id="chevron-dash-relatorios" style="color:var(--gold-soft);font-size:16px;transition:transform .2s;"></i>
+          </div>
+          <div id="conteudo-dash-relatorios" style="display:none;margin-top:12px;">
+            <p class="page-sub" style="margin-top:-6px;">Só considera alunas Ativas. Bom pra fechar a semana, toda sexta-feira</p>
+
+            <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:8px;" onclick="gerarRelatorioFrequenciaSemanal()"><i class="ti ti-calendar-stats" style="margin-right:6px;"></i>Relatório de frequência de treino</button>
+            <div id="relatorio-frequencia-area" style="margin-bottom:14px;"></div>
+
+            <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:8px;" onclick="gerarRelatorioRespostas()"><i class="ti ti-message-2" style="margin-right:6px;"></i>Relatório de respostas e comentários</button>
+            <div id="relatorio-respostas-area" style="margin-bottom:14px;"></div>
+
+            <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:8px;" onclick="gerarResumoFechamentoSemana()"><i class="ti ti-clipboard-text" style="margin-right:6px;"></i>Resumo de fechamento da semana</button>
+            <div id="resumo-fechamento-area" style="margin-bottom:14px;"></div>
+
+            <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="gerarEPublicarDestaquesSemana()"><i class="ti ti-sparkles" style="margin-right:6px;"></i>Publicar destaques da semana (Ranking)</button>
+            <div id="destaques-semana-area"></div>
+          </div>
+        </div>
+
         <p class="section-label" id="label-ferramentas-dashboard" style="margin-top:22px;">Ferramentas</p>
         <div class="poster-grid" id="grid-ferramentas-personal"></div>
       </div>
@@ -7281,9 +7306,233 @@ function addExercicio(){
   renderExerciciosLista();
 }
 
+// ===== RELATÓRIOS DA SEMANA (frequência, respostas/comentários, resumo de fechamento) =====
+
+function converterDataBrParaDate(dataBr){
+  if(!dataBr) return null;
+  const partes = dataBr.split('/');
+  if(partes.length !== 3) return null;
+  return new Date(parseInt(partes[2],10), parseInt(partes[1],10) - 1, parseInt(partes[0],10));
+}
+
+// --- 1) Frequência de treino da semana ---
+function calcularRelatorioFrequenciaSemanal(){
+  const ativas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  const totalDiasSemana = totalDiasDeTreino();
+  const linhas = ativas.map(function(a){
+    const prog = getProgressoAluna(a.nome);
+    const concluidos = (prog.diasConcluidos[prog.semana] || []).length;
+    return { nome: a.nome, concluidos: concluidos, total: totalDiasSemana };
+  }).sort(function(x,y){ return x.concluidos - y.concluidos; }); // menor constância primeiro, chama mais atenção
+
+  const totalConcluidos = linhas.reduce(function(s,l){ return s + l.concluidos; }, 0);
+  const totalPossivel = linhas.length * totalDiasSemana;
+  const pctGeral = totalPossivel > 0 ? Math.round((totalConcluidos / totalPossivel) * 100) : 0;
+
+  return { linhas: linhas, totalConcluidos: totalConcluidos, totalPossivel: totalPossivel, pctGeral: pctGeral, dataGeracao: new Date().toISOString() };
+}
+
+function montarTextoRelatorioFrequencia(r){
+  let texto = '📋 Relatório de frequência da semana\n\n';
+  texto += 'Total geral: ' + r.totalConcluidos + ' de ' + r.totalPossivel + ' treinos (' + r.pctGeral + '%)\n\n';
+  r.linhas.forEach(function(l){ texto += l.nome + ': ' + l.concluidos + '/' + l.total + '\n'; });
+  return texto;
+}
+
+async function gerarRelatorioFrequenciaSemanal(){
+  const area = document.getElementById('relatorio-frequencia-area');
+  if(!area) return;
+  area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Calculando...</p>';
+  const r = calcularRelatorioFrequenciaSemanal();
+  window.__textoRelatorioFrequencia = montarTextoRelatorioFrequencia(r);
+  await salvarCatalogoPersonal('relatorio_frequencia', r.dataGeracao, r);
+  area.innerHTML = '<div class="info-box"><p class="txt" style="white-space:pre-wrap;font-size:12px;">' + window.__textoRelatorioFrequencia.replace(/\n/g,'<br>') + '</p></div>' +
+    '<button class="btn-gold" style="background:#25D366;color:#fff;border:none;margin-top:8px;" onclick="enviarRelatorioWhatsApp(\'__textoRelatorioFrequencia\',\'resultado-envio-frequencia\')"><i class="ti ti-brand-whatsapp" style="margin-right:6px;"></i>Mandar pro meu WhatsApp</button>' +
+    '<div id="resultado-envio-frequencia" style="margin-top:6px;"></div>';
+}
+
+// --- 2) Respostas e comentários (dúvidas pendentes + desconforto relatado) ---
+function calcularRelatorioRespostas(){
+  const ativas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  const duvidas = [], feedbacksComDesconforto = [];
+  ativas.forEach(function(a){
+    const prog = getProgressoAluna(a.nome);
+    (a.duvidasSinalizadas || []).filter(function(d){ return !d.resolvida; }).forEach(function(d){
+      duvidas.push({ nome: a.nome, pergunta: d.pergunta });
+    });
+    (prog.feedbackTreino || []).slice(-3).forEach(function(f){
+      if(f.desconforto) feedbacksComDesconforto.push({ nome: a.nome, dia: f.dia, exercicio: f.exercicio, escala: f.escalaDesconforto });
+    });
+  });
+  return { duvidas: duvidas, feedbacksComDesconforto: feedbacksComDesconforto, dataGeracao: new Date().toISOString() };
+}
+
+function montarTextoRelatorioRespostas(r){
+  let texto = '💬 Relatório de respostas e comentários\n\n';
+  texto += r.duvidas.length > 0
+    ? '❓ Dúvidas pendentes (' + r.duvidas.length + '):\n' + r.duvidas.map(function(d){ return '- ' + d.nome + ': "' + d.pergunta + '"'; }).join('\n')
+    : '❓ Nenhuma dúvida pendente no momento.';
+  texto += '\n\n';
+  texto += r.feedbacksComDesconforto.length > 0
+    ? '⚠️ Desconforto relatado (' + r.feedbacksComDesconforto.length + '):\n' + r.feedbacksComDesconforto.map(function(f){ return '- ' + f.nome + ' (' + f.dia + '): ' + f.exercicio + ' · intensidade ' + (f.escala != null ? f.escala + '/10' : 'não informada'); }).join('\n')
+    : '⚠️ Nenhum desconforto relatado recentemente.';
+  return texto;
+}
+
+async function gerarRelatorioRespostas(){
+  const area = document.getElementById('relatorio-respostas-area');
+  if(!area) return;
+  area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Reunindo respostas e comentários...</p>';
+  const r = calcularRelatorioRespostas();
+  window.__textoRelatorioRespostas = montarTextoRelatorioRespostas(r);
+  await salvarCatalogoPersonal('relatorio_respostas', r.dataGeracao, r);
+  area.innerHTML = '<div class="info-box"><p class="txt" style="white-space:pre-wrap;font-size:12px;">' + window.__textoRelatorioRespostas.replace(/\n/g,'<br>') + '</p></div>' +
+    '<button class="btn-gold" style="background:#25D366;color:#fff;border:none;margin-top:8px;" onclick="enviarRelatorioWhatsApp(\'__textoRelatorioRespostas\',\'resultado-envio-respostas\')"><i class="ti ti-brand-whatsapp" style="margin-right:6px;"></i>Mandar pro meu WhatsApp</button>' +
+    '<div id="resultado-envio-respostas" style="margin-top:6px;"></div>';
+}
+
+// --- 3) Resumo de fechamento da semana ---
+function calcularResumoFechamentoSemana(){
+  const ativas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  const totalDiasSemana = totalDiasDeTreino();
+  let precisamAtencao = 0, precisamThiago = 0;
+  const problemas = { frequencia: 0, exercicio: 0, alimentacao: 0, revisarTreino: 0 };
+  const nomesAtencao = [], nomesThiago = [];
+
+  ativas.forEach(function(a){
+    const prog = getProgressoAluna(a.nome);
+    const concluidos = (prog.diasConcluidos[prog.semana] || []).length;
+    const pct = totalDiasSemana > 0 ? concluidos / totalDiasSemana : 1;
+    let precisaAtencao = false;
+
+    if(pct < 0.5){ precisaAtencao = true; problemas.frequencia++; }
+    if(detectarRiscoAbandonoPorConstancia(a.nome)) precisaAtencao = true;
+
+    const duvidasPendentes = (a.duvidasSinalizadas || []).filter(function(d){ return !d.resolvida; });
+    if(duvidasPendentes.length > 0){ precisaAtencao = true; problemas.revisarTreino++; }
+
+    const feedbacksRecentes = (prog.feedbackTreino || []).slice(-3);
+    if(feedbacksRecentes.some(function(f){ return f.desconforto; })){ precisaAtencao = true; problemas.exercicio++; }
+
+    const semanaAtualNutri = prog.nutricao && prog.nutricao[prog.semana];
+    if(semanaAtualNutri && semanaAtualNutri.fugas >= 3){ precisaAtencao = true; problemas.alimentacao++; }
+
+    let precisaThiago = false;
+    if(a.sinalRiscoEmocional && !a.sinalRiscoEmocional.visto) precisaThiago = true;
+    if(duvidasPendentes.length >= 2) precisaThiago = true;
+
+    if(precisaThiago){ precisamThiago++; nomesThiago.push(a.nome); }
+    else if(precisaAtencao){ precisamAtencao++; nomesAtencao.push(a.nome); }
+  });
+
+  return {
+    totalAtivas: ativas.length, precisamAtencao: precisamAtencao, precisamThiago: precisamThiago,
+    nomesAtencao: nomesAtencao, nomesThiago: nomesThiago, problemas: problemas, dataGeracao: new Date().toISOString()
+  };
+}
+
+function montarTextoResumoFechamentoSemana(r){
+  let texto = '📅 Fechamento da semana\n\n';
+  texto += r.totalAtivas + ' alunas acompanhadas normalmente\n';
+  texto += r.precisamAtencao + ' precisam de atenção\n';
+  texto += r.precisamThiago + ' precisam falar com você\n\n';
+  if(r.nomesThiago.length > 0) texto += '🔴 Precisam de você: ' + r.nomesThiago.join(', ') + '\n\n';
+  if(r.nomesAtencao.length > 0) texto += '🟡 Precisam de atenção: ' + r.nomesAtencao.join(', ') + '\n\n';
+  texto += 'Principais problemas relatados:\n';
+  texto += '- ' + r.problemas.frequencia + ' aluna(s) com dificuldade na frequência\n';
+  texto += '- ' + r.problemas.exercicio + ' aluna(s) relataram desconforto em exercício\n';
+  texto += '- ' + r.problemas.alimentacao + ' aluna(s) com dificuldade na alimentação\n';
+  texto += '- ' + r.problemas.revisarTreino + ' aluna(s) com dúvida pendente pra revisar';
+  return texto;
+}
+
+async function gerarResumoFechamentoSemana(){
+  const area = document.getElementById('resumo-fechamento-area');
+  if(!area) return;
+  area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Fechando a semana...</p>';
+  const r = calcularResumoFechamentoSemana();
+  window.__textoResumoFechamento = montarTextoResumoFechamentoSemana(r);
+  await salvarCatalogoPersonal('resumo_fechamento_semana', r.dataGeracao, r);
+  area.innerHTML = '<div class="info-box"><p class="txt" style="white-space:pre-wrap;font-size:12px;">' + window.__textoResumoFechamento.replace(/\n/g,'<br>') + '</p></div>' +
+    '<button class="btn-gold" style="background:#25D366;color:#fff;border:none;margin-top:8px;" onclick="enviarRelatorioWhatsApp(\'__textoResumoFechamento\',\'resultado-envio-resumo\')"><i class="ti ti-brand-whatsapp" style="margin-right:6px;"></i>Mandar pro meu WhatsApp</button>' +
+    '<div id="resultado-envio-resumo" style="margin-top:6px;"></div>';
+}
+
+// Compartilhado pelos 3 relatórios acima, manda pro WhatsApp do próprio Thiago (TELEFONE_PERSONAL)
+async function enviarRelatorioWhatsApp(chaveTexto, idResultado){
+  const area = document.getElementById(idResultado);
+  const texto = window[chaveTexto];
+  if(!texto) return;
+  if(area) area.innerHTML = '<p class="txt" style="font-size:11px;color:var(--text-faint);">Enviando...</p>';
+  const saida = await enviarWhatsApp(TELEFONE_PERSONAL, texto);
+  if(area) area.innerHTML = saida.sucesso
+    ? '<p class="txt" style="font-size:11px;color:var(--success);">✓ Enviado.</p>'
+    : '<p class="txt" style="font-size:11px;color:#C9784A;">Não consegui enviar: ' + (saida.motivo || 'motivo não informado') + '</p>';
+}
+
+// ===== DESTAQUES DA SEMANA (conquistas visíveis pra todas no Ranking) =====
+function detectarDestaquesSemana(){
+  const ativas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  const totalDiasSemana = totalDiasDeTreino();
+  const destaques = [];
+
+  ativas.forEach(function(a){
+    const prog = getProgressoAluna(a.nome);
+    const primeiroNome = a.nome.split(' ')[0];
+
+    // Progressão de carga essa semana
+    const exerciciosComProgressao = [];
+    Object.keys(prog.historico || {}).forEach(function(ex){
+      prog.historico[ex].forEach(function(r){
+        if(r.semana === prog.semana && r.sugestao && r.sugestao.texto === 'Aumentar carga') exerciciosComProgressao.push(ex);
+      });
+    });
+    if(exerciciosComProgressao.length > 0){
+      destaques.push(primeiroNome + ' aumentou carga em ' + exerciciosComProgressao.slice(0,2).join(' e ') + (exerciciosComProgressao.length > 2 ? ' e outros exercícios' : '') + ' essa semana! 💪');
+    }
+
+    // Consistência de semanas seguidas completas
+    let semanasSeguidasCompletas = 0;
+    for(let s = prog.semana; s >= 1; s--){
+      const concluidos = (prog.diasConcluidos[s] || []).length;
+      if(totalDiasSemana > 0 && concluidos >= totalDiasSemana) semanasSeguidasCompletas++; else break;
+    }
+    if(semanasSeguidasCompletas >= 4){
+      destaques.push(primeiroNome + ' completou ' + semanasSeguidasCompletas + ' semanas seguidas de consistência! 🔥');
+    }
+
+    // Composição corporal atualizada recentemente (últimos 7 dias)
+    if(a.composicaoAtual && a.composicaoAtual.data){
+      const dataAtualizacao = converterDataBrParaDate(a.composicaoAtual.data);
+      if(dataAtualizacao && (new Date() - dataAtualizacao) < 7*24*60*60*1000){
+        destaques.push(primeiroNome + ' registrou nova composição corporal essa semana! 📸');
+      }
+    }
+  });
+
+  return destaques;
+}
+
+async function gerarEPublicarDestaquesSemana(){
+  const area = document.getElementById('destaques-semana-area');
+  if(!area) return;
+  area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Procurando conquistas da semana...</p>';
+  const destaques = detectarDestaquesSemana();
+  if(destaques.length === 0){
+    area.innerHTML = '<div class="info-box"><p class="txt">Nenhuma conquista nova detectada essa semana ainda.</p></div>';
+    return;
+  }
+  await salvarCatalogoPersonal('destaques_semana', new Date().toISOString(), { destaques: destaques, dataGeracao: new Date().toISOString() });
+  destaquesSemanaAtual = destaques;
+  area.innerHTML = '<div class="info-box"><p class="lbl" style="color:var(--success);">✓ ' + destaques.length + ' publicado(s) no Ranking</p>' +
+    destaques.map(function(d){ return '<p class="txt" style="margin-bottom:4px;">• ' + d + '</p>'; }).join('') +
+  '</div>';
+}
+
 let cursosPersonal = [];
 let cursoEmEdicaoId = null;
 let relatoriosTendencias = [];
+let destaquesSemanaAtual = [];
 
 // ===== RELATÓRIO DE TENDÊNCIAS DO NICHO (inteligência de mercado) =====
 async function gerarRelatorioTendencias(){
@@ -9876,6 +10125,18 @@ async function calcularRankingComunidade(){
   return { pontosDela: pontosDela, posicaoDela: posicaoDela, totalComPontos: totalComPontos, percentil: percentil, totalComunidade: totalComunidade };
 }
 
+async function carregarDestaquesSemanaRecentes(){
+  if(!supabaseClient) return [];
+  try {
+    const { data, error } = await supabaseClient.from('catalogo_personal').select('dados').eq('tipo', 'destaques_semana').order('updated_at', { ascending: false }).limit(1).maybeSingle();
+    if(error || !data || !data.dados) return [];
+    return data.dados.destaques || [];
+  } catch(erroDeRede){
+    console.warn('Não consegui buscar os destaques da semana agora:', erroDeRede);
+    return [];
+  }
+}
+
 async function renderRanking(){
   const container = document.getElementById('area-ranking-conteudo');
   if(!container) return;
@@ -9888,7 +10149,7 @@ async function renderRanking(){
     '<p class="dna-score-comparativo" style="color:var(--text-faint);">Calculando sua posição na comunidade...</p>' +
   '</div></div>';
 
-  const r = await calcularRankingComunidade();
+  const [r, destaques] = await Promise.all([calcularRankingComunidade(), carregarDestaquesSemanaRecentes()]);
   const pctMeta = Math.min(100, Math.round((r.totalComunidade / metaComunidadePontos) * 100));
 
   let html = '<div class="dna-score-card"><div class="dna-score-left">' +
@@ -9896,6 +10157,11 @@ async function renderRanking(){
     '<p class="dna-score-numero">' + r.pontosDela + '</p>' +
     '<p class="dna-score-comparativo" style="color:var(--gold-soft);">' + (r.percentil != null ? '▲ Top ' + (100 - r.percentil + 1) + '% da consultoria' : 'Ainda calculando sua posição') + '</p>' +
   '</div></div>';
+
+  if(destaques.length > 0){
+    html += '<p class="section-label" style="margin-top:20px;">Destaques da semana</p>' +
+      destaques.map(function(d){ return '<div class="info-box" style="margin-bottom:8px;"><p class="txt" style="margin-bottom:0;">✨ ' + d + '</p></div>'; }).join('');
+  }
 
   html += '<p class="section-label" style="margin-top:20px;">Meta da comunidade</p>' +
     '<div class="info-box">' +
