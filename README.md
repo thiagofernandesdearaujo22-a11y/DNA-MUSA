@@ -1,4 +1,4 @@
-[Uploading musa_plus_prototipo_9.html…]()
+[Uploading musa_plus_prototipo_10.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -643,18 +643,26 @@
 
         <div id="metricas-negocio-area"></div>
 
-        <div style="background:linear-gradient(135deg,rgba(217,139,46,0.14),rgba(92,56,20,0.08));border:1px solid var(--border-strong);border-radius:16px;padding:16px;margin:10px 0 14px;cursor:pointer;" onclick="iniciarGeracaoEmMassa()">
+        <div style="background:linear-gradient(135deg,rgba(217,139,46,0.14),rgba(92,56,20,0.08));border:1px solid var(--border-strong);border-radius:16px;padding:16px;margin:10px 0 10px;cursor:pointer;" onclick="iniciarGeracaoParaSemTreino()">
           <div style="display:flex;align-items:center;gap:12px;">
-            <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-bolt" style="font-size:20px;color:#1A1409;"></i></div>
+            <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-wand" style="font-size:20px;color:#1A1409;"></i></div>
             <div style="flex:1;">
-              <p style="font-size:14px;font-weight:700;margin:0;">Gerar/progredir treino de todas</p>
-              <p id="dash-info-gerar-treino" style="font-size:11.5px;color:var(--text-faint);margin:2px 0 0;">Calculando quantas alunas ativas...</p>
+              <p style="font-size:14px;font-weight:700;margin:0;">Gerar treino (quem ainda não tem)</p>
+              <p id="dash-info-gerar-sem-treino" style="font-size:11.5px;color:var(--text-faint);margin:2px 0 0;">Calculando...</p>
             </div>
             <i class="ti ti-chevron-right" style="color:var(--gold-soft);font-size:18px;"></i>
           </div>
         </div>
-        <div id="replicas-treino-area"></div>
-        <div id="config-ranking-area"></div>
+        <div style="background:linear-gradient(135deg,rgba(217,139,46,0.14),rgba(92,56,20,0.08));border:1px solid var(--border-strong);border-radius:16px;padding:16px;margin:0 0 14px;cursor:pointer;" onclick="iniciarProgressaoParaComTreino()">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-trending-up" style="font-size:20px;color:#1A1409;"></i></div>
+            <div style="flex:1;">
+              <p style="font-size:14px;font-weight:700;margin:0;">Progredir treino (quem já tem)</p>
+              <p id="dash-info-progredir-com-treino" style="font-size:11.5px;color:var(--text-faint);margin:2px 0 0;">Calculando...</p>
+            </div>
+            <i class="ti ti-chevron-right" style="color:var(--gold-soft);font-size:18px;"></i>
+          </div>
+        </div>
         <div id="geracao-massa-area"></div>
 
         <div class="section-colapsavel" style="margin-top:22px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;">
@@ -694,9 +702,11 @@
           </div>
           <div id="conteudo-dash-ferramentas-treino" style="display:none;margin-top:12px;">
             <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="verificarReplicasDeTreino()"><i class="ti ti-copy-check" style="margin-right:6px;"></i>Verificar réplicas de treino</button>
+            <div id="replicas-treino-area"></div>
             <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="auditarVolumePosteriores()"><i class="ti ti-clipboard-check" style="margin-right:6px;"></i>Auditar volume mínimo de posteriores</button>
             <div id="auditoria-posteriores-area"></div>
             <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="mostrarConfigRanking()"><i class="ti ti-trophy" style="margin-right:6px;"></i>Configurar meta do Ranking</button>
+            <div id="config-ranking-area"></div>
           </div>
         </div>
 
@@ -4706,10 +4716,7 @@ async function verificarReplicasDeTreino(){
   area.innerHTML = html;
 }
 
-async function iniciarGeracaoEmMassa(){
-  const elegiveis = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.email && statusDoPlano(a) === 'ativas'; });
-  if(!confirm('Isso vai gerar ou progredir o treino de ' + elegiveis.length + ' aluna(s) ATIVA(S) agora, seguindo a metodologia individual de cada uma. Quem está vencida ou por vencer não entra nessa leva. Pode levar alguns minutos. Continuar?')) return;
-
+async function executarGeracaoEmMassa(elegiveis, rotuloAcao){
   const area = document.getElementById('geracao-massa-area');
   const resultados = { geradas: 0, progredidas: 0, verificadas: 0, apenasBackup: 0, erros: [] };
 
@@ -4733,13 +4740,33 @@ async function iniciarGeracaoEmMassa(){
   }
 
   area.innerHTML = '<div class="info-box" style="border-color:var(--success);">' +
-    '<p class="lbl" style="color:var(--success);">✓ Concluído</p>' +
+    '<p class="lbl" style="color:var(--success);">✓ ' + rotuloAcao + ' concluído</p>' +
     '<p class="txt">' + resultados.geradas + ' geradas pela primeira vez · ' + resultados.progredidas + ' progredidas</p>' +
     '<p class="txt" style="font-size:11px;color:var(--success);margin-top:4px;">✓ ' + resultados.verificadas + ' confirmadas de verdade (lidas de volta do banco)</p>' +
     (resultados.apenasBackup > 0 ? '<p class="txt" style="font-size:11px;color:var(--gold-soft);margin-top:2px;">⚠ ' + resultados.apenasBackup + ' salvas só no backup (login ainda não vinculado a essas)</p>' : '') +
     '<p class="txt" style="font-size:11px;color:' + (resultados.erros.length > 0 ? '#E2A33D' : 'var(--text-faint)') + ';margin-top:4px;">' + resultados.erros.length + ' com erro real</p>' +
     (resultados.erros.length > 0 ? '<p class="txt" style="font-size:11px;color:#E2A33D;margin-top:6px;">' + resultados.erros.map(function(e){ return e.nome + ' (' + e.motivo + ')'; }).join('<br>') + '</p>' : '') +
   '</div>';
+}
+
+// Alunas ativas SEM e-mail nunca entram (não tem como salvar login nem vincular treino), sempre
+// pelo status real (statusPlanoManual), nunca mais pelo campo antigo "status" (lead/ok).
+function alunasAtivasElegiveis(){
+  return alunasPersonal.filter(function(a){ return a.email && statusDoPlano(a) === 'ativas'; });
+}
+
+async function iniciarGeracaoParaSemTreino(){
+  const elegiveis = alunasAtivasElegiveis().filter(function(a){ return !a.treinoAtual; });
+  if(elegiveis.length === 0){ alert('Todas as alunas ativas já têm treino. Use "Progredir treino" pra evoluir quem já tem.'); return; }
+  if(!confirm('Isso vai GERAR o primeiro treino de ' + elegiveis.length + ' aluna(s) ativa(s) que ainda não têm nenhum. Continuar?')) return;
+  await executarGeracaoEmMassa(elegiveis, 'Geração');
+}
+
+async function iniciarProgressaoParaComTreino(){
+  const elegiveis = alunasAtivasElegiveis().filter(function(a){ return !!a.treinoAtual; });
+  if(elegiveis.length === 0){ alert('Nenhuma aluna ativa com treino já existente pra progredir agora.'); return; }
+  if(!confirm('Isso vai PROGREDIR o treino de ' + elegiveis.length + ' aluna(s) ativa(s) que já têm treino. Continuar?')) return;
+  await executarGeracaoEmMassa(elegiveis, 'Progressão');
 }
 
 function editarSeriesReps(diaIndex, exIndex, novoValor){
@@ -6115,7 +6142,18 @@ function showPersonalView(which){
   ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
   });
-  if(which === 'dashboard'){ renderCentralDeAvisos(); renderMetricasNegocio(); renderRelatoriosTendencias(); renderInfoCardGerarTreino(); }
+  if(which === 'dashboard'){
+    renderCentralDeAvisos(); renderMetricasNegocio(); renderRelatoriosTendencias(); renderInfoCardGerarTreino();
+    // A sincronização de anamneses novas também precisa rodar aqui, não só na aba Alunas — senão o
+    // Dashboard mostra números desatualizados até a próxima vez que alguém visitar Alunas e voltar.
+    sincronizarListaAlunasDoSupabase().then(function(resultado){
+      if(resultado.novas > 0 || resultado.atualizadas > 0){
+        renderMetricasNegocio();
+        renderInfoCardGerarTreino();
+        renderCentralDeAvisos();
+      }
+    });
+  }
   if(which === 'alunas'){
     renderAlunas();
     const areaDiagnostico = document.createElement('p');
@@ -7141,6 +7179,8 @@ async function carregarCatalogoPersonal(){
     });
 
     renderExerciciosChips();
+    const listaEstaVisivel = document.getElementById('ex-lista-view') && document.getElementById('ex-lista-view').style.display !== 'none' && document.getElementById('ex-lista') && document.getElementById('ex-lista').style.display !== 'none';
+    if(listaEstaVisivel) renderExerciciosLista();
     if(document.getElementById('cursos-list-personal')) renderCursosPersonal();
     if(document.getElementById('conteudo-list-personal')) renderConteudoPersonal();
   } catch(erroDeRede){
@@ -9296,10 +9336,11 @@ function isDiaDasMaesHoje(){
 // Faturamento do mês é calculado a partir dos planos fechados dentro do mês corrente,
 // já que ainda não existe um livro-caixa separado no sistema. Reflete fechamentos reais, não um valor inventado.
 function renderInfoCardGerarTreino(){
-  const el = document.getElementById('dash-info-gerar-treino');
-  if(!el) return;
-  const qtd = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.email && statusDoPlano(a) === 'ativas'; }).length;
-  el.textContent = qtd + ' aluna(s) ativa(s) prontas pra gerar ou progredir agora';
+  const elSemTreino = document.getElementById('dash-info-gerar-sem-treino');
+  const elComTreino = document.getElementById('dash-info-progredir-com-treino');
+  const ativasElegiveis = alunasAtivasElegiveis();
+  if(elSemTreino) elSemTreino.textContent = ativasElegiveis.filter(function(a){ return !a.treinoAtual; }).length + ' aluna(s) ativa(s) ainda sem treino';
+  if(elComTreino) elComTreino.textContent = ativasElegiveis.filter(function(a){ return !!a.treinoAtual; }).length + ' aluna(s) ativa(s) com treino pra progredir';
 }
 
 function calcularMetricasNegocio(){
