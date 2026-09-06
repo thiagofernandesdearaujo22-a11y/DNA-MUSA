@@ -1,4 +1,4 @@
-[musa_plus_prototipo_6.html](https://github.com/user-attachments/files/31874576/musa_plus_prototipo_6.html)
+[Uploading musa_plus_prototipo_8.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -4689,8 +4689,8 @@ async function verificarReplicasDeTreino(){
 }
 
 async function iniciarGeracaoEmMassa(){
-  const elegiveis = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.email; });
-  if(!confirm('Isso vai gerar ou progredir o treino de ' + elegiveis.length + ' aluna(s) de uma vez, seguindo a metodologia individual de cada uma. Pode levar alguns minutos. Continuar?')) return;
+  const elegiveis = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.email && statusDoPlano(a) === 'ativas'; });
+  if(!confirm('Isso vai gerar ou progredir o treino de ' + elegiveis.length + ' aluna(s) ATIVA(S) agora, seguindo a metodologia individual de cada uma. Quem está vencida ou por vencer não entra nessa leva. Pode levar alguns minutos. Continuar?')) return;
 
   const area = document.getElementById('geracao-massa-area');
   const resultados = { geradas: 0, progredidas: 0, verificadas: 0, apenasBackup: 0, erros: [] };
@@ -9278,19 +9278,21 @@ function isDiaDasMaesHoje(){
 // Faturamento do mês é calculado a partir dos planos fechados dentro do mês corrente,
 // já que ainda não existe um livro-caixa separado no sistema. Reflete fechamentos reais, não um valor inventado.
 function calcularMetricasNegocio(){
-  const naoLead = alunasPersonal.filter(function(a){ return a.status !== 'lead'; });
-  const clientesAtivos = naoLead.filter(function(a){ return statusDoPlano(a) === 'ativas' || statusDoPlano(a) === 'porvencer'; }).length;
+  // Não filtra mais pelo campo antigo "status" (lead/ok), que é de antes de existir a classificação
+  // real Ativa/Vencida/Por vencer. Hoje quem manda é statusPlanoManual (via statusDoPlano), sempre.
+  const clientesAtivos = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas' || statusDoPlano(a) === 'porvencer'; }).length;
 
   const hoje = new Date();
   const mesAtual = hoje.getMonth(), anoAtual = hoje.getFullYear();
-  const faturamentoMes = naoLead.reduce(function(soma, a){
+  const faturamentoMes = alunasPersonal.reduce(function(soma, a){
     if(!a.dataFechouPlano || a.valorPlano == null) return soma;
     const dataFechou = new Date(a.dataFechouPlano + 'T00:00:00');
     if(dataFechou.getMonth() === mesAtual && dataFechou.getFullYear() === anoAtual) return soma + a.valorPlano;
     return soma;
   }, 0);
 
-  const taxaRetencao = naoLead.length > 0 ? Math.round((clientesAtivos / naoLead.length) * 100) : 0;
+  const totalComPlanoDefinido = alunasPersonal.length;
+  const taxaRetencao = totalComPlanoDefinido > 0 ? Math.round((clientesAtivos / totalComPlanoDefinido) * 100) : 0;
 
   return { clientesAtivos: clientesAtivos, faturamentoMes: faturamentoMes, taxaRetencao: taxaRetencao };
 }
