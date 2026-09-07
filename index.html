@@ -3506,7 +3506,19 @@ function ehExercicioElastico(e){
   return e.metodo === 'Elástico' || n.indexOf('ELÁSTICO') !== -1 || n.indexOf('ELASTICO') !== -1;
 }
 
-function obterPoolRealDoGrupo(grupoInterno, ambiente, evitarPliometrico){
+const ORDEM_NIVEL_TREINO = { 'Iniciante': 1, 'Intermediário': 2, 'Avançado': 3 };
+
+// Nível mínimo é um PISO, não uma trava exata: quem já está no nível dele ou acima sempre pode receber
+// o exercício. Exercício sem classificação ainda (nivelMinimo não preenchido) fica liberado pra todo
+// mundo, pra nunca travar a geração de treino de grupos que ainda não foram classificados.
+function nivelPermiteExercicio(nivelAluna, e){
+  if(!e.nivelMinimo) return true;
+  const nivelAlunaNum = ORDEM_NIVEL_TREINO[nivelAluna] || 1;
+  const nivelMinimoNum = ORDEM_NIVEL_TREINO[e.nivelMinimo] || 1;
+  return nivelAlunaNum >= nivelMinimoNum;
+}
+
+function obterPoolRealDoGrupo(grupoInterno, ambiente, evitarPliometrico, nivelAluna){
   const mapaGrupo = { 'Glúteo': 'Glúteos', 'Posterior': 'Isquiotibiais', 'Quadríceps': 'Quadríceps', 'Ombro': 'Ombros', 'Peito': 'Peito', 'Bíceps': 'Bíceps', 'Tríceps': 'Tríceps', 'Costas': 'Costas' };
   const grupoReal = mapaGrupo[grupoInterno] || grupoInterno;
   // Regra fixa da metodologia: treino de academia nunca recebe exercício de casa, e vice-versa —
@@ -3514,6 +3526,7 @@ function obterPoolRealDoGrupo(grupoInterno, ambiente, evitarPliometrico){
   const baseAmbiente = exerciciosBanco.filter(function(e){
     if(e.grupo !== grupoReal) return false;
     if(evitarPliometrico && ehExercicioPliometrico(e)) return false;
+    if(!nivelPermiteExercicio(nivelAluna, e)) return false;
     return ambiente === 'Casa' ? exercicioServeParaCasa(e) : ((e.ambiente || 'Academia') === 'Academia' && !ehExercicioElastico(e));
   });
   const comVideo = baseAmbiente.filter(function(e){ return e.video; });
@@ -3566,8 +3579,8 @@ function obterFamiliaBiomecanica(nomeExercicio){
   return null; // sem família conhecida (ex: exercícios de superiores) — cai pra agrupamento por grupo muscular só
 }
 
-function selecionarExerciciosVariados(grupoInterno, nomeAluna, quantidade, indiceCiclo, padroesJaUsados, ambiente, evitarPliometrico){
-  const pool = obterPoolRealDoGrupo(grupoInterno, ambiente, evitarPliometrico);
+function selecionarExerciciosVariados(grupoInterno, nomeAluna, quantidade, indiceCiclo, padroesJaUsados, ambiente, evitarPliometrico, nivelAluna){
+  const pool = obterPoolRealDoGrupo(grupoInterno, ambiente, evitarPliometrico, nivelAluna);
   if(pool.length === 0) return null;
   const seed = hashString(nomeAluna || '') + (indiceCiclo || 0) * 7;
   const selecionados = [];
@@ -3611,7 +3624,7 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
     if(grupo === 'Quadríceps' && perfil.direcionamentoQuadriceps === 'distal'){
       return sugerirExerciciosQuadriceps('distal').prioridade;
     }
-    const variados = selecionarExerciciosVariados(grupo, perfil.nomeAluna, 3, perfil.indiceCiclo, padroesJaUsadosNoDia, perfil.ambienteTreino, perfil.evitarPliometrico);
+    const variados = selecionarExerciciosVariados(grupo, perfil.nomeAluna, 3, perfil.indiceCiclo, padroesJaUsadosNoDia, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
     if(variados) return variados;
     // Regra fixa da metodologia: nunca cruza ambiente, nem no fallback de emergência.
     // Se não achou exercício de Casa suficiente pro grupo, prefere ficar com menos exercícios
@@ -3673,7 +3686,7 @@ function gerarDiasSuperiores(perfil, numDias){
     const padroesUsadosNoDia = {};
 
     // Costas: variedade real do banco (51 opções), sempre protegida com 2-3 exercícios, nunca menos
-    const candidatosCostas = selecionarExerciciosVariados('Costas', (perfil.nomeAluna || '') + '_costas', 3, perfil.indiceCiclo, null, perfil.ambienteTreino, perfil.evitarPliometrico);
+    const candidatosCostas = selecionarExerciciosVariados('Costas', (perfil.nomeAluna || '') + '_costas', 3, perfil.indiceCiclo, null, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
     const nomesCostas = candidatosCostas || ['Remada Articular Aberta', 'Remada Articular Fechada', 'Crucifixo Inverso'];
     nomesCostas.forEach(function(n){ padroesUsadosNoDia[obterPalavraChaveMovimento(n.toUpperCase())] = true; });
     let ex = [
@@ -3687,7 +3700,7 @@ function gerarDiasSuperiores(perfil, numDias){
     // Ombro/Peito/Bíceps/Tríceps reais, alternando qual par recebe ênfase a cada dia (garante ≥2x/semana pra cada, em 3+ dias)
     const gruposSecundarios = (d % 2 === 0) ? ['Ombro', 'Peito'] : ['Bíceps', 'Tríceps'];
     gruposSecundarios.forEach(function(grupo){
-      const candidato = selecionarExerciciosVariados(grupo, (perfil.nomeAluna || '') + '_' + grupo, 1, perfil.indiceCiclo, null, perfil.ambienteTreino, perfil.evitarPliometrico);
+      const candidato = selecionarExerciciosVariados(grupo, (perfil.nomeAluna || '') + '_' + grupo, 1, perfil.indiceCiclo, null, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
       if(candidato && candidato[0]){
         ex.push(candidato[0] + ' · ' + (perfil.nivel === 'Avançado' ? 3 : 2) + 'x' + reps);
       }
@@ -3795,7 +3808,7 @@ function gerarTreinoSemanal(perfil){
           const nomesJaNoDia = dia.ex.map(function(l){ return l.split(' · ')[0].toUpperCase(); });
           const padroesJaNoDia = {};
           nomesJaNoDia.forEach(function(n){ padroesJaNoDia[obterPalavraChaveMovimento(n)] = true; });
-          const candidatos = selecionarExerciciosVariados(grupoDoDia, (perfil.nomeAluna || '') + '_extra' + tentativasAdicionar, 8, perfil.indiceCiclo, null, perfil.ambienteTreino, perfil.evitarPliometrico);
+          const candidatos = selecionarExerciciosVariados(grupoDoDia, (perfil.nomeAluna || '') + '_extra' + tentativasAdicionar, 8, perfil.indiceCiclo, null, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
           let escolhido = null;
           if(candidatos){
             escolhido = candidatos.find(function(nome){
@@ -3807,6 +3820,7 @@ function gerarTreinoSemanal(perfil){
             const todoOBanco = exerciciosBanco.filter(function(e){
               if((e.grupo || e.categoria) !== grupoDoDia) return false;
               if(perfil.evitarPliometrico && ehExercicioPliometrico(e)) return false;
+              if(!nivelPermiteExercicio(perfil.nivel, e)) return false;
               return perfil.ambienteTreino === 'Casa' ? exercicioServeParaCasa(e) : ((e.ambiente || 'Academia') === 'Academia' && !ehExercicioElastico(e));
             });
             const candidatoDeResgate = todoOBanco.find(function(e){
@@ -6298,13 +6312,13 @@ const palavrasNaoSaoExercicio = ['ERRO', 'CORREÇÃO', 'CORREÇÕES', 'CORRECAO'
 const exerciciosBanco = [
   {nome:'REMADA UNILATERAL COM HALTERES', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=kS0KNWUgU7I'},
   {nome:'REMADA ABERTA COM HALTERES SUP', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=giQfgYKYrGc'},
-  {nome:'STIFF UNILATERAL COM HALTERES', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=GyDrpYEPWQw'},
-  {nome:'STIFF UNILATERAL SEM APOIO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=E6QF1VWS1qY'},
+  {nome:'STIFF UNILATERAL COM HALTERES', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=GyDrpYEPWQw', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'STIFF UNILATERAL SEM APOIO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=E6QF1VWS1qY', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'DESENVOLVIMENTO FRONTAL COM MOCHILA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=RcHEOOACjHk'},
   {nome:'FLEXÃO DE COTOVELO MOCHILA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=X42BMTwuPMA'},
-  {nome:'CADEIRA FLEXORA YES', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=ocV8ovygjkM'},
-  {nome:'CADEIRA ABDUTORA INCLINADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=0ICPVbRiqNM'},
-  {nome:'AGACHAMENTO JACK YES', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=jGooGCaCDI8'},
+  {nome:'CADEIRA FLEXORA YES', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=ocV8ovygjkM', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'CADEIRA ABDUTORA INCLINADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=0ICPVbRiqNM', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'AGACHAMENTO JACK YES', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=jGooGCaCDI8', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'TRICEPS COM BARRA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=CUCYMqymsZ4'},
   {nome:'TRICEPS POLIA ALTA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=jHd_qtTZINc'},
   {nome:'TRÍCEPS COICE POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=2juXdMcTg28'},
@@ -6316,13 +6330,13 @@ const exerciciosBanco = [
   {nome:'TRICEPS CORDA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=wOS8UdARevY'},
   {nome:'PULLDOWN COM CORDA POLIA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=GMonbLwBHqQ'},
   {nome:'FACEPULL COM', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=j_gbLC6eHXQ'},
-  {nome:'CADEIRA ABDUTORA INCLINADO - YOUTUBE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=NQRcrs2NJ5E'},
-  {nome:'CADEIRA FLEXORA YES - YOUTUBE', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=HxgLLgslej4'},
+  {nome:'CADEIRA ABDUTORA INCLINADO - YOUTUBE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=NQRcrs2NJ5E', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'CADEIRA FLEXORA YES - YOUTUBE', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=HxgLLgslej4', camada:'base', nivelMinimo:'Iniciante'},
   {nome:'CRUCIFIXO INVERSO COM APOIO - YOUTUBE', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=IbhLDWWnGxc'},
   {nome:'CRUCIFIXO COM HALTERES - YOUTUBE', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=eHUtTovc3Zg'},
   {nome:'DOUBLE BICEPS - YOUTUBE', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=Sz_DKHXqhBA'},
-  {nome:'EXTENSÃO DE QUADRIL POLIA - YOUTUBE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=uZrno5HI6Cc'},
-  {nome:'EXTENSÃO DE QUADRIL POLIA - YOUTUBE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=uZrno5HI6Cc'},
+  {nome:'EXTENSÃO DE QUADRIL POLIA - YOUTUBE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=uZrno5HI6Cc', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'EXTENSÃO DE QUADRIL POLIA - YOUTUBE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=uZrno5HI6Cc', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'MANGUITO DEITADO', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=nDUGYVKYGgI&sttick=0'},
   {nome:'PULLDOWN COM BARRA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=OaDynv2jISg&sttick=0'},
   {nome:'REMADA ABERTA COM BARRA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=u51yEma4v3M'},
@@ -6335,38 +6349,38 @@ const exerciciosBanco = [
   {nome:'PUSH UP COM BARRA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=wlxPLG--5oo'},
   {nome:'CRUCIFIXO NA MÁQUINA -FLY', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=L4YtdisHldk'},
   {nome:'ROSCA SCOTT NA MÁQUINA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=cgciNALjjT4&sttick=0'},
-  {nome:'CADEIRA ABDUTORA EM PÉ 45º', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=1Kye0sDSAw8'},
-  {nome:'EXTENSÃO DE QUADRIL NA POLIA - TRONCO INCLINADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=dvsgo4Gj-hA'},
-  {nome:'EXTENSÃO DE QUADRIL NA POLIA - TRONCO INCLINADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=dvsgo4Gj-hA'},
-  {nome:'EXTENSÃO DE QUADRIL COM CANELEIRA NO BANCO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=5BuJFrdn_AY'},
+  {nome:'CADEIRA ABDUTORA EM PÉ 45º', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=1Kye0sDSAw8', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'EXTENSÃO DE QUADRIL NA POLIA - TRONCO INCLINADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=dvsgo4Gj-hA', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'EXTENSÃO DE QUADRIL NA POLIA - TRONCO INCLINADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=dvsgo4Gj-hA', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'EXTENSÃO DE QUADRIL COM CANELEIRA NO BANCO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=5BuJFrdn_AY', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'PULLOVER COM HALTERES', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=LvrEvExCzV8'},
   {nome:'REMADA ABERTA POLIA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=-AhBdO6ngdE'},
   {nome:'ROSCA CONCENTRADA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=ROGbtTlxs0Q'},
   {nome:'ROSCA DIRETA 21', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=l-MktIlWRZg'},
-  {nome:'STIFF NA POLIA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=lBlWY-illWg'},
+  {nome:'STIFF NA POLIA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=lBlWY-illWg', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'TRÍCEPS CORDA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=--sJN_gWRUc'},
   {nome:'TRICEPS POLIA ALTA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=abdcKPAuyxM'},
-  {nome:'CADEIRA ABDUTORA - VARIAÇÃO TRONCO INCLINADO A FRENTE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=aKzeShloHJs'},
-  {nome:'EXTENSÃO DE QUADRIL COM CANELEIRA NO BANCO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=5BuJFrdn_AY'},
-  {nome:'EXTENSÃO DE QUADRIL NA MÁQUINA - VARIAÇÃO PARA MAIOR AMPLITUDE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=IWpwUAgwnpI'},
-  {nome:'ABDUÇÃO DE QUADRIL COM ROTAÇÃO EXTERNA NA POLIA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=lhw9UXBJ35Q'},
-  {nome:'ABDUÇÃO DE QUADRIL COM CANELEIRA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=fE5qN5-6VUI'},
-  {nome:'4 APOIOS COM CANELEIRA - ALTO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=aOZ5aeoTyX0'},
-  {nome:'EXTENSÃO DE QUADRIL CURTINHAS NO ALTO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=QXrJE4FF-TM'},
+  {nome:'CADEIRA ABDUTORA - VARIAÇÃO TRONCO INCLINADO A FRENTE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=aKzeShloHJs', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'EXTENSÃO DE QUADRIL COM CANELEIRA NO BANCO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=5BuJFrdn_AY', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'EXTENSÃO DE QUADRIL NA MÁQUINA - VARIAÇÃO PARA MAIOR AMPLITUDE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=IWpwUAgwnpI', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'ABDUÇÃO DE QUADRIL COM ROTAÇÃO EXTERNA NA POLIA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=lhw9UXBJ35Q', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'ABDUÇÃO DE QUADRIL COM CANELEIRA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=fE5qN5-6VUI', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'4 APOIOS COM CANELEIRA - ALTO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=aOZ5aeoTyX0', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'EXTENSÃO DE QUADRIL CURTINHAS NO ALTO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=QXrJE4FF-TM', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'PUXADA ABERTA ARTICULADA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=YCK83Z7iQX8'},
   {nome:'SUPINO INCLINADO COM BARRA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=Py7wmd4Mw1Y'},
-  {nome:'LEG PRESS 45º', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=qx2g8W6qoaQ'},
-  {nome:'LEG PRESS 45º', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=qx2g8W6qoaQ'},
+  {nome:'LEG PRESS 45º', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=qx2g8W6qoaQ', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'LEG PRESS 45º', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=qx2g8W6qoaQ', camada:'base', nivelMinimo:'Iniciante'},
   {nome:'TRÍCEPS TESTA COM BARRA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=gANUNaWe8WE'},
   {nome:'REMADA FECHADA ARTICULAR - YOUTUBE', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=q-jGW3oHTJg'},
   {nome:'TRÍCEPS FRANCÊS BILATERAL - YOUTUBE', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=zogtbslROLk'},
-  {nome:'STEP UP', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=NOvtICHyccY'},
-  {nome:'CADEIRA EXTENSORA - TRONCO INCLINADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=CpQevcceBhg'},
+  {nome:'STEP UP', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=NOvtICHyccY', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'CADEIRA EXTENSORA - TRONCO INCLINADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=CpQevcceBhg', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'POLICHINELO', grupo:'Aeróbico', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=rJbrYLTNymc'},
-  {nome:'AFUNDO COM HALTERES', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=eyhLRHuEjYA'},
-  {nome:'TERRA SUMÔ COM BARRA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=xX3YS6MpyTQ'},
-  {nome:'LEVANTAMENTO TERRA - YOUTUBE', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=w2W-WtAQj2I'},
-  {nome:'AGACHAMENTO SUMÔ COM HALTERES - YOUTUBE', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=6zoYEflTEYM'},
+  {nome:'AFUNDO COM HALTERES', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=eyhLRHuEjYA', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'TERRA SUMÔ COM BARRA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=xX3YS6MpyTQ', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'LEVANTAMENTO TERRA - YOUTUBE', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=w2W-WtAQj2I', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'AGACHAMENTO SUMÔ COM HALTERES - YOUTUBE', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=6zoYEflTEYM', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'RETRAÇÃO DE ESCÁPULAS - YOUTUBE', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=T1MvJi_mCAg'},
   {nome:'VAI E VEM DE FRENTE E COSTAS', grupo:'Aeróbico', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/eQzb92p_lZI'},
   {nome:'PULDOWN COM BARRA NA POLIA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/shlGmlzAUGE'},
@@ -6385,38 +6399,38 @@ const exerciciosBanco = [
   {nome:'ELEVAÇÃO LATERAL DECLINADA NA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/RKZcUyuDXB4'},
   {nome:'ELEVAÇÃO LATERAL NA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/w9ebX7LO9SI'},
   {nome:'ELEVAÇÃO LATERAL NA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/w9ebX7LO9SI'},
-  {nome:'LEG HORIZONTAL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/0KLrU6JXOUE'},
+  {nome:'LEG HORIZONTAL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/0KLrU6JXOUE', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'PANTURRILHA SENTADO NA MÁQUINA', grupo:'Panturrilha', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/t8vU7HK_wcU'},
   {nome:'REMADA FECHADA COM APOIO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/6lAxaZwpfDg'},
   {nome:'REMADA ABERTA COM APOIO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/lmr6pVTTJT0'},
-  {nome:'AFUNDO NO SQUAT', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/4NuNYnr1dbs'},
+  {nome:'AFUNDO NO SQUAT', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/4NuNYnr1dbs', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'AGACHAMENTO FRONTAL NO SQUAT ( ESTÍMULO GLÚTEOS )', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/-WxH7ND9NEg'},
   {nome:'AGACHAMENTO FRONTAL NO SQUAT ( ESTÍMULO GLÚTEOS )', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/-WxH7ND9NEg'},
-  {nome:'STIFF NA MÁQUINA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/iHJxAoJYGBE'},
-  {nome:'AGACHAMENTO SUMÔ NA MÁQUINA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/vMJLDXo8MDw'},
-  {nome:'TERRA SUMÔ NA MÁQUINA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/nq14XPTvfHs'},
+  {nome:'STIFF NA MÁQUINA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/iHJxAoJYGBE', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'AGACHAMENTO SUMÔ NA MÁQUINA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/vMJLDXo8MDw', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'TERRA SUMÔ NA MÁQUINA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/nq14XPTvfHs', camada:'base', nivelMinimo:'Iniciante'},
   {nome:'SUPINO RETO NA MÁQUINA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/ILPmqVVNDfs'},
   {nome:'SUPINO INCLINADO NA MÁQUINA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/po7Hmy5Lths'},
   {nome:'SUPINO DECLINADO NA MÁQUINA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/ULZctWY2bas'},
   {nome:'REMADA FECHADA PRONADA NA MÁQUINA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/aYzUsR5mCY0'},
-  {nome:'CADEIRA FLEXORA UNILATERAL', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/2YEghbjQQwU'},
-  {nome:'AGACHAMENTO PENDULAR', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/zxhM2HGb4tQ'},
+  {nome:'CADEIRA FLEXORA UNILATERAL', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/2YEghbjQQwU', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'AGACHAMENTO PENDULAR', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/zxhM2HGb4tQ', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'REMADA CURVADA ABERTA NA MÁQUINA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/SdGuFWsi4Wg'},
   {nome:'REMADA CURVADA FECHADA NA MÁQUINA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/CyFwxuxdD1Y'},
   {nome:'REMADA ABERTA COM APOIO NA MÁQUINA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/xxhfjVcemrk'},
   {nome:'REMADA FECHADA COM APOIO NA MÁQUINA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/Krg5OX5fTXA'},
   {nome:'REMADA ABERTA PRONADA NA MÁQUINA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/2ZLbfQoVBas'},
   {nome:'PUXADA FRONTAL ABERTA ARTICULADA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/jnSfxuvJ6Lg'},
-  {nome:'ABDUÇÃO DE QUADRIL NA POLIA COM ROTAÇÃO - YOUTUBE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/VrSHOnWrlYQ'},
-  {nome:'EXTENSÃO DE QUADRIL COM APOIO NO BANCO - YOUTUBE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/HmcyJwfM92w'},
-  {nome:'EXTENSÃO DE QUADRIL NA POLIA COM TRONCO INCLINADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/_Z19zMD6ams'},
+  {nome:'ABDUÇÃO DE QUADRIL NA POLIA COM ROTAÇÃO - YOUTUBE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/VrSHOnWrlYQ', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'EXTENSÃO DE QUADRIL COM APOIO NO BANCO - YOUTUBE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/HmcyJwfM92w', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'EXTENSÃO DE QUADRIL NA POLIA COM TRONCO INCLINADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/_Z19zMD6ams', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'REMADA FECHADA NA MAQUINA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/4DyI2sMROzQ'},
   {nome:'POLICHINELO (variação)', grupo:'Aeróbico', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/RraVgclk9UM'},
   {nome:'TRÍCEPS FRANCÊS UNILATERAL', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/Nolk5Rqh5SI'},
-  {nome:'BOM DIA EM CASA', grupo:'Isquiotibiais', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/ZG44uKbHK4Q'},
-  {nome:'STIFF UNILATERAL EM CASA', grupo:'Isquiotibiais', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/6oPT1WncH8U'},
-  {nome:'GLÚTEO 4 APOIOS JOELHO FLETIDO EM CASA', grupo:'Glúteos', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/4M4f8ZBLFkA'},
-  {nome:'GLÚTEO 4 APOIOS JOELHO ESTENDIDO EM CASA', grupo:'Glúteos', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/xb_lnHwwZE4'},
+  {nome:'BOM DIA EM CASA', grupo:'Isquiotibiais', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/ZG44uKbHK4Q', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'STIFF UNILATERAL EM CASA', grupo:'Isquiotibiais', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/6oPT1WncH8U', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'GLÚTEO 4 APOIOS JOELHO FLETIDO EM CASA', grupo:'Glúteos', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/4M4f8ZBLFkA', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'GLÚTEO 4 APOIOS JOELHO ESTENDIDO EM CASA', grupo:'Glúteos', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/xb_lnHwwZE4', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'CRUCIFIXO DEITADO EM CASA', grupo:'Peito', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/Zu_EiENKB-s'},
   {nome:'SUPINO RETO COM BARRA EM CASA', grupo:'Peito', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/4HRd2iAIZgQ'},
   {nome:'TRÍCEPS SUPINADO EM CASA', grupo:'Tríceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/UNBGmEOLDtA'},
@@ -6426,12 +6440,12 @@ const exerciciosBanco = [
   {nome:'TRÍCEPS FRANCÊS UNILATERAL EM CASA', grupo:'Tríceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/ZgC9-xF_5Zw'},
   {nome:'FLEXÃO NO SOLO EM CASA', grupo:'Peito', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/PD8IJVrCIF0'},
   {nome:'REMADA ABERTA CURVADA COM BARRA EM CASA', grupo:'Costas', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/4rIMCTLueQA'},
-  {nome:'ABDUÇÃO DE QUADRIL CONTRA O SOLO EM CASA', grupo:'Glúteos', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/tTwLVwhe8Bg'},
+  {nome:'ABDUÇÃO DE QUADRIL CONTRA O SOLO EM CASA', grupo:'Glúteos', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/tTwLVwhe8Bg', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'BURP ADAPTADO!! EM CASA', grupo:'Abdômen', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/CtnnoxhzD7U'},
   {nome:'EXTENSÃO DE OMBROS EM CASA', grupo:'Ombros', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/wJCjio_nhjk'},
-  {nome:'AGACHAMENTO FRONTAL EM CASA', grupo:'Quadríceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/oMoGcwdus3w'},
-  {nome:'CADEIRINHA EM CASA', grupo:'Quadríceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/BOHl-YMWFnk'},
-  {nome:'EXERCÍCIO PASSADA EM CASA', grupo:'Quadríceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/XpUCJjVJloI'},
+  {nome:'AGACHAMENTO FRONTAL EM CASA', grupo:'Quadríceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/oMoGcwdus3w', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'CADEIRINHA EM CASA', grupo:'Quadríceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/BOHl-YMWFnk', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'EXERCÍCIO PASSADA EM CASA', grupo:'Quadríceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/XpUCJjVJloI', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'ELEVAÇÃO FRONTAL PEGADA NEUTRA EM CASA', grupo:'Ombros', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/2KOu-qMUffQ'},
   {nome:'CRUCIFIXO INVERSO COM PESO EM CASA', grupo:'Peito', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/mtwV9vh1Yrc'},
   {nome:'REMADA ABERTA COM PESO EM CASA', grupo:'Costas', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/HOD-Um14gFg'},
@@ -6456,8 +6470,8 @@ const exerciciosBanco = [
   {nome:'FLEXÃO COTOVELO ELÁSTICO', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'Elástico', video:'https://www.youtube.com/shorts/dlGMepDtjWg'},
   {nome:'CRUCIFIXO INVERSO CM ELÁSTICO', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'Elástico', video:'https://www.youtube.com/'},
   {nome:'REMADA CURVADA ABERTA ELÁSTICO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'Elástico', video:'https://www.youtube.com/shorts/ZCzFQX8LDJM'},
-  {nome:'ABDUÇÃO DE QUADRIL COM ELÁSTICO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'Elástico', video:'https://www.youtube.com/shorts/me5FxLpf2LY'},
-  {nome:'FLEXÃO NÓRDICA REVERSA', grupo:'Quadríceps', categoria:'Quadríceps', ambiente:'Academia', nivel:'Avançado', metodo:'Nenhum', video:''},
+  {nome:'ABDUÇÃO DE QUADRIL COM ELÁSTICO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'Elástico', video:'https://www.youtube.com/shorts/me5FxLpf2LY', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'FLEXÃO NÓRDICA REVERSA', grupo:'Quadríceps', categoria:'Quadríceps', ambiente:'Academia', nivel:'Avançado', metodo:'Nenhum', video:'', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'FLEXÃO NO SOLO ADAPTADA', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/uY3Y9eF79iw'},
   {nome:'CRUCIFIXO INVERSO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/mtwV9vh1Yrc'},
   {nome:'ELEVAÇÃO FRONTAL ALTERNADA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/kGQP3CIow4s'},
@@ -6626,100 +6640,100 @@ const exerciciosBanco = [
   {nome:'EXTENSÃO LOMBAR DINÂMICA', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/y_5kPLWzrFQ'},
   {nome:'EXTENSÃO LOMBAR GUIADO', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/M7wFYedPnLc'},
   {nome:'SUPER MAN', grupo:'Bíceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/lhg93GRGkGQ'},
-  {nome:'AFUNDO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/JM5sJCb1lsI'},
-  {nome:'BOM DIA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ZG44uKbHK4Q'},
-  {nome:'ABDUÇÃO DE QUADRIL NA POLIA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/NOkHTTQNqSk'},
+  {nome:'AFUNDO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/JM5sJCb1lsI', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'BOM DIA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ZG44uKbHK4Q', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'ABDUÇÃO DE QUADRIL NA POLIA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/NOkHTTQNqSk', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'FLEXÃO PLANTAR', grupo:'Panturrilha', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/bc12xKf4-9A'},
-  {nome:'AFUNDO ALT. PLIOMÉTRICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1tY7QZwhpGU'},
-  {nome:'CADEIRA FLEXORA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Ve2BanEgCqY'},
-  {nome:'ABDUÇÃO DE QUADRIL ELÁSTICO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/e0M1vNL15sE'},
+  {nome:'AFUNDO ALT. PLIOMÉTRICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1tY7QZwhpGU', camada:'base', nivelMinimo:'Avançado'},
+  {nome:'CADEIRA FLEXORA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Ve2BanEgCqY', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'ABDUÇÃO DE QUADRIL ELÁSTICO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/e0M1vNL15sE', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'FLEXÃO PLANTAR NA MÁQUINA', grupo:'Panturrilha', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/bs3NdonHzhs'},
-  {nome:'AFUNDO ALTERNADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/oY_nnRig9J4'},
-  {nome:'EDUCATIVO STIFF', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1P03JzjPPOE'},
-  {nome:'CADEIRA ABDUTORA( ABRIR )', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/WMx7JeUTXJs'},
-  {nome:'AFUNDO C/FLEX DE QUADRIL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/OMQhwRW23ZI'},
-  {nome:'ELEVAÇÃO FROG', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/j4_-w9BcarQ'},
+  {nome:'AFUNDO ALTERNADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/oY_nnRig9J4', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'EDUCATIVO STIFF', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1P03JzjPPOE', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'CADEIRA ABDUTORA( ABRIR )', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/WMx7JeUTXJs', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'AFUNDO C/FLEX DE QUADRIL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/OMQhwRW23ZI', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'ELEVAÇÃO FROG', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/j4_-w9BcarQ', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'CADEIRA ADUTORA ( FECHAR )', grupo:'Panturrilha', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/lzuSEi65_IQ'},
-  {nome:'AFUNDO COM ELÁSTICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/YWvy-2OLeJU'},
-  {nome:'ELEVAÇÃO PÉLVICA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/O84nvpikZiU'},
-  {nome:'AFUNDO DIN. C FLEX QUADRIL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/OMQhwRW23ZI'},
-  {nome:'ELEVAÇÃO PÉLVICA UNILATERAL', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/WM4Blto4Uq0'},
-  {nome:'AFUNDO GUIADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/xMTJPIEVLpo'},
-  {nome:'STIFF COM ELÁSTICO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/wzeYDYTKwp0'},
-  {nome:'EXTENSÃO DE QUADRIL', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/uhfO-KWURBE'},
-  {nome:'AFUNDO NA BARRA GUIADA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/EcvoioUwyH8'},
-  {nome:'EXTENSÃO DE QUADRIL ELÁSTICO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/e_Kf5MpbkUo'},
-  {nome:'AGACHAMENTO BÚLGARO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/GGvEWR0Y4Wc'},
-  {nome:'STIFF UNILATERAL', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/6oPT1WncH8U'},
-  {nome:'AGACHAMENTO FRONTAL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/oMoGcwdus3w'},
-  {nome:'CAMA FLEXORA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ByKiWoif3iA'},
-  {nome:'EXTENSÃO DE QUADRIL VARIAÇÃO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/2lb69Bohm_8'},
-  {nome:'AGACHAMENTO GUIADO P', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/3SXMi9dGQkM'},
-  {nome:'FLEXÕ NÓRDICA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/DIRx__DoJqo'},
-  {nome:'FLEX. DE JOELHOS NO SOLO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/fWW4ASUCi_c'},
-  {nome:'AGACHAMENTO GUIADO Y', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ajf2fUekZr4'},
-  {nome:'FLEXÃO DE JOELHOS COM BOLA ADAPTADO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/DgDD-47bVGk'},
-  {nome:'FLEX. DE JOELHOS DE PÉ', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/-ixMlKa11bA'},
-  {nome:'AGACHAMENTO HACK', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/-qYxx4mRjoc'},
-  {nome:'STIFF COM HALTERES', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/5rJy8qqQofQ'},
-  {nome:'FLEX. JOELHOS ADP', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/6bE5P4x36-o'},
-  {nome:'AGACHAMENTO HACK Y', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/hqTvBjX4lgY'},
-  {nome:'STIFF UNI SEM APOIO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/E6QF1VWS1qY'},
-  {nome:'FLEXÃO DE JOELHOS COM BOLA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/H0nTtztJK8M'},
-  {nome:'AGACHAMENTO LIVRE', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/3Mq1lLgE00g'},
-  {nome:'STIFF UNI COM APOIO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/GyDrpYEPWQw'},
-  {nome:'FROG NO SOLO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/tWdgdM3B5rA'},
-  {nome:'AGACHAMENTO PC', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/pcfm6MBXeMg'},
-  {nome:'FLEXÃO DE JOELHOS EM PÉ', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/7H6O9-WYZ74'},
-  {nome:'GLÚT. 4 APOIOS JOE. ESTENDIDO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/xb_lnHwwZE4'},
-  {nome:'AGACHAMENTO PLIOM. ALTERNADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1tY7QZwhpGU'},
-  {nome:'GLÚT. 4 APOIOS JOE. FLETIDO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/4M4f8ZBLFkA'},
-  {nome:'AGACHAMENTO PLIOMÉTRICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/jg5y0pyv3Xo'},
-  {nome:'STIFF', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/D5sRfuzL0e4'},
-  {nome:'AGACHAMENTO SUMÔ COM PESO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/l_t_84gmZQQ'},
-  {nome:'TERRA ROMENO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/VpjkLAOz8CU'},
-  {nome:'AGACHAMENTO SUMÔ', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/4Gm4RDvDSNk'},
-  {nome:'TERRA ISOLADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/E7CZQS-PRoo'},
-  {nome:'AGACHAMENTO SUMÔ ELÁSTICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ubzfIt524k8'},
-  {nome:'LEVANTAMENTO TERRA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/EscCinkCoBI'},
+  {nome:'AFUNDO COM ELÁSTICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/YWvy-2OLeJU', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'ELEVAÇÃO PÉLVICA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/O84nvpikZiU', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'AFUNDO DIN. C FLEX QUADRIL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/OMQhwRW23ZI', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'ELEVAÇÃO PÉLVICA UNILATERAL', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/WM4Blto4Uq0', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'AFUNDO GUIADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/xMTJPIEVLpo', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'STIFF COM ELÁSTICO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/wzeYDYTKwp0', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'EXTENSÃO DE QUADRIL', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/uhfO-KWURBE', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'AFUNDO NA BARRA GUIADA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/EcvoioUwyH8', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'EXTENSÃO DE QUADRIL ELÁSTICO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/e_Kf5MpbkUo', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'AGACHAMENTO BÚLGARO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/GGvEWR0Y4Wc', camada:'base', nivelMinimo:'Avançado'},
+  {nome:'STIFF UNILATERAL', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/6oPT1WncH8U', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'AGACHAMENTO FRONTAL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/oMoGcwdus3w', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'CAMA FLEXORA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ByKiWoif3iA', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'EXTENSÃO DE QUADRIL VARIAÇÃO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/2lb69Bohm_8', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'AGACHAMENTO GUIADO P', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/3SXMi9dGQkM', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'FLEXÕ NÓRDICA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/DIRx__DoJqo', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'FLEX. DE JOELHOS NO SOLO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/fWW4ASUCi_c', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'AGACHAMENTO GUIADO Y', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ajf2fUekZr4', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'FLEXÃO DE JOELHOS COM BOLA ADAPTADO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/DgDD-47bVGk', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'FLEX. DE JOELHOS DE PÉ', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/-ixMlKa11bA', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'AGACHAMENTO HACK', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/-qYxx4mRjoc', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'STIFF COM HALTERES', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/5rJy8qqQofQ', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'FLEX. JOELHOS ADP', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/6bE5P4x36-o', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'AGACHAMENTO HACK Y', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/hqTvBjX4lgY', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'STIFF UNI SEM APOIO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/E6QF1VWS1qY', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'FLEXÃO DE JOELHOS COM BOLA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/H0nTtztJK8M', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'AGACHAMENTO LIVRE', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/3Mq1lLgE00g', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'STIFF UNI COM APOIO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/GyDrpYEPWQw', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'FROG NO SOLO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/tWdgdM3B5rA', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'AGACHAMENTO PC', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/pcfm6MBXeMg', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'FLEXÃO DE JOELHOS EM PÉ', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/7H6O9-WYZ74', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'GLÚT. 4 APOIOS JOE. ESTENDIDO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/xb_lnHwwZE4', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'AGACHAMENTO PLIOM. ALTERNADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1tY7QZwhpGU', camada:'base', nivelMinimo:'Avançado'},
+  {nome:'GLÚT. 4 APOIOS JOE. FLETIDO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/4M4f8ZBLFkA', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'AGACHAMENTO PLIOMÉTRICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/jg5y0pyv3Xo', camada:'base', nivelMinimo:'Avançado'},
+  {nome:'STIFF', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/D5sRfuzL0e4', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'AGACHAMENTO SUMÔ COM PESO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/l_t_84gmZQQ', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'TERRA ROMENO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/VpjkLAOz8CU', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'AGACHAMENTO SUMÔ', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/4Gm4RDvDSNk', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'TERRA ISOLADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/E7CZQS-PRoo', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'AGACHAMENTO SUMÔ ELÁSTICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ubzfIt524k8', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'LEVANTAMENTO TERRA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/EscCinkCoBI', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'AJOELHA E LEVANTA', grupo:'Quadríceps', ambiente:'Casa', nivel:'A definir', metodo:'', video:'https://youtu.be/0Zgh3NIsMfc'},
-  {nome:'ABDUÇÃO QUADRIL DEITADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/yBAkhqWLmYE'},
+  {nome:'ABDUÇÃO QUADRIL DEITADO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/yBAkhqWLmYE', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'AVANÇO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/l957uDIyzX0'},
-  {nome:'ELEVAÇÃO PÉLVICA COM BARRA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/bkLj_jbodUE'},
-  {nome:'BURP ADAPTADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/CtnnoxhzD7U'},
-  {nome:'ABD QUADRIL SENTADO ELÁSTICO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/58bn5r9XEcI'},
-  {nome:'CADEIRA EXTENSORA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Ox4ZtBUAGo4'},
-  {nome:'ABDUÇÃO QUADRIL NO SOLO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=tTwLVwhe8Bg'},
-  {nome:'CADEIRA EXTENSORA UNI', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/HRjzMl7a-IY'},
-  {nome:'Glúteo 4 apoios com caneleiras', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/JmnIUWP5gno'},
-  {nome:'CADEIRINHA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/BOHl-YMWFnk'},
-  {nome:'EDUCATIVO AGACHAMENTO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/WP-gDofgT8c'},
-  {nome:'Extensão de quadril  na polia com tronco inclinado', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/dvsgo4Gj-hA'},
-  {nome:'FLEXÃO DE QUADRIL DEITADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/GJ4DAuWxuVU'},
-  {nome:'Extensão de quadril no banco romano', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/6ODl8JFyyYA'},
-  {nome:'FLEXÃO DE QUADRIL EM PÉ', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Cj7FbWvklPE'},
-  {nome:'Abdução de quadril na polia com tronco inclinado', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtube.com/shorts/MpTUBFeZya8'},
-  {nome:'LEG PRESS 45', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/HHYpoJ1l4Z0'},
-  {nome:'Abdução de quadril na polia com rotação', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtube.com/shorts/HmcyJwfM92w'},
-  {nome:'LEG PRESS 45 Y', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/V5Y0w8nbmdU'},
-  {nome:'LEG PRESS HORIZONTAL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/0KLrU6JXOUE'},
-  {nome:'CADEIRA ABDUTORA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/L0L9s4OTbOU'},
-  {nome:'LEVANTAMENO TERRA EM CASA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Hgas-jdhnEQ'},
-  {nome:'CADEIRA ABDUTORA-TRONCO A FRENTE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/aKzeShloHJs'},
-  {nome:'LEVANTAMENTO TERRA COM BARRA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/EscCinkCoBI'},
-  {nome:'PASSADA COM HALTERES', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1sbNNUMstns'},
-  {nome:'extensão de quadril na máquina - variação', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/IWpwUAgwnpI'},
-  {nome:'PASSADA LIVRE', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/4UIJPNFNHG0'},
-  {nome:'EXTENSÃO DE QUADRIL NA MÁQUINA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/0jzdxWcaT5I'},
-  {nome:'SENTA E LEVANTA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/iqK9m1CLnQE'},
-  {nome:'EXTENSÃO DE QUADRIL COM CANELEIRAS NO BANCO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/5BuJFrdn_AY'},
-  {nome:'ELEVAÇÃO PÉLVICA NA MÁQUINA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/K1QVmQb59rI'},
-  {nome:'TERRA ROMÊNO ELÁSTICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/3kVNP8g0xmY'},
-  {nome:'extensão de quadril curtinha no alto', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/QXrJE4FF-TM'},
-  {nome:'TERRA SUMÔ ELÁSTICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/k7O5CZGwrh4'},
-  {nome:'TERRA SUMÔ Y', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ofnXsX-8aU8'},
-  {nome:'AGACHAMENTO SQUAT', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=I3RAHGIS92I'},
-  {nome:'AGACHAMENTO BÚLGARO COM PESO CONTRALATERAL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/RSULENERtug'}
+  {nome:'ELEVAÇÃO PÉLVICA COM BARRA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/bkLj_jbodUE', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'BURP ADAPTADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/CtnnoxhzD7U', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'ABD QUADRIL SENTADO ELÁSTICO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/58bn5r9XEcI', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'CADEIRA EXTENSORA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Ox4ZtBUAGo4', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'ABDUÇÃO QUADRIL NO SOLO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=tTwLVwhe8Bg', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'CADEIRA EXTENSORA UNI', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/HRjzMl7a-IY', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'Glúteo 4 apoios com caneleiras', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/JmnIUWP5gno', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'CADEIRINHA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/BOHl-YMWFnk', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'EDUCATIVO AGACHAMENTO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/WP-gDofgT8c', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'Extensão de quadril  na polia com tronco inclinado', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/dvsgo4Gj-hA', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'FLEXÃO DE QUADRIL DEITADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/GJ4DAuWxuVU', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'Extensão de quadril no banco romano', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/6ODl8JFyyYA', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'FLEXÃO DE QUADRIL EM PÉ', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Cj7FbWvklPE', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'Abdução de quadril na polia com tronco inclinado', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtube.com/shorts/MpTUBFeZya8', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'LEG PRESS 45', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/HHYpoJ1l4Z0', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'Abdução de quadril na polia com rotação', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtube.com/shorts/HmcyJwfM92w', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'LEG PRESS 45 Y', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/V5Y0w8nbmdU', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'LEG PRESS HORIZONTAL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/0KLrU6JXOUE', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'CADEIRA ABDUTORA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/L0L9s4OTbOU', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'LEVANTAMENO TERRA EM CASA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Hgas-jdhnEQ', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'CADEIRA ABDUTORA-TRONCO A FRENTE', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/aKzeShloHJs', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'LEVANTAMENTO TERRA COM BARRA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/EscCinkCoBI', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'PASSADA COM HALTERES', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1sbNNUMstns', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'extensão de quadril na máquina - variação', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/IWpwUAgwnpI', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'PASSADA LIVRE', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/4UIJPNFNHG0', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'EXTENSÃO DE QUADRIL NA MÁQUINA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/0jzdxWcaT5I', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'SENTA E LEVANTA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/iqK9m1CLnQE', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'EXTENSÃO DE QUADRIL COM CANELEIRAS NO BANCO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/5BuJFrdn_AY', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'ELEVAÇÃO PÉLVICA NA MÁQUINA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/K1QVmQb59rI', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'TERRA ROMÊNO ELÁSTICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/3kVNP8g0xmY', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'extensão de quadril curtinha no alto', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/QXrJE4FF-TM', camada:'acessorio', nivelMinimo:'Iniciante'},
+  {nome:'TERRA SUMÔ ELÁSTICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/k7O5CZGwrh4', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'TERRA SUMÔ Y', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ofnXsX-8aU8', camada:'base', nivelMinimo:'Intermediário'},
+  {nome:'AGACHAMENTO SQUAT', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=I3RAHGIS92I', camada:'base', nivelMinimo:'Iniciante'},
+  {nome:'AGACHAMENTO BÚLGARO COM PESO CONTRALATERAL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/RSULENERtug', camada:'base', nivelMinimo:'Avançado'}
 ];
 
 // Blindagem permanente: remove qualquer item que tenha entrado por engano no banco de exercícios
