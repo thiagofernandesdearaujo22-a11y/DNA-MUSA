@@ -3506,6 +3506,19 @@ function ehExercicioElastico(e){
   return e.metodo === 'Elástico' || n.indexOf('ELÁSTICO') !== -1 || n.indexOf('ELASTICO') !== -1;
 }
 
+// Regra fixa da metodologia: nunca dois exercícios de Afundo (nem variações dele) no mesmo treino.
+// Essa é uma trava final, roda depois de tudo pronto, garantindo isso não importa por qual caminho
+// um segundo Afundo tenha entrado no dia (reforço de tempo, bi-set, etc.)
+function removerVariacoesDuplicadasDeAfundo(dia){
+  let jaTemAfundo = false;
+  dia.ex = dia.ex.filter(function(linha){
+    if(linha.toUpperCase().indexOf('AFUNDO') === -1) return true;
+    if(jaTemAfundo) return false;
+    jaTemAfundo = true;
+    return true;
+  });
+}
+
 const ORDEM_NIVEL_TREINO = { 'Iniciante': 1, 'Intermediário': 2, 'Avançado': 3 };
 
 // Nível mínimo é um PISO, não uma trava exata: quem já está no nível dele ou acima sempre pode receber
@@ -3852,6 +3865,7 @@ function gerarTreinoSemanal(perfil){
         dia.cortadoPorTempo = true;
       }
     }
+    removerVariacoesDuplicadasDeAfundo(dia);
     const duracaoFinal = calcularDuracaoDia(dia);
     dia.duracaoEstimadaMin = Math.round(duracaoFinal);
     dia.excedeTempo = perfil.tempoDisponivel ? duracaoFinal > perfil.tempoDisponivel : false;
@@ -5345,6 +5359,10 @@ function renderConteudoDiaPersonal(a, di){
         '<div style="display:flex;justify-content:space-between;align-items:center;">' +
           '<div style="display:flex;align-items:center;gap:8px;min-width:0;">' +
             '<span class="alca-arrastar" data-dia="' + di + '" data-ex="' + ei + '" onpointerdown="iniciarArrastarExercicio(event)" style="cursor:grab;color:var(--text-faint);touch-action:none;flex-shrink:0;"><i class="ti ti-grip-vertical" style="font-size:16px;"></i></span>' +
+            '<span style="display:flex;flex-direction:column;flex-shrink:0;">' +
+              '<i class="ti ti-chevron-up" style="font-size:13px;cursor:pointer;color:' + (ei === 0 ? 'var(--border)' : 'var(--gold-soft)') + ';" onclick="' + (ei === 0 ? '' : 'moverExercicioTreino(' + di + ',' + ei + ',-1)') + '"></i>' +
+              '<i class="ti ti-chevron-down" style="font-size:13px;cursor:pointer;color:' + (ei === d.ex.length - 1 ? 'var(--border)' : 'var(--gold-soft)') + ';" onclick="' + (ei === d.ex.length - 1 ? '' : 'moverExercicioTreino(' + di + ',' + ei + ',1)') + '"></i>' +
+            '</span>' +
             '<span id="nome-ex-' + di + '-' + ei + '" style="font-size:12px;cursor:pointer;text-decoration:underline;text-decoration-color:var(--gold-soft);text-underline-offset:2px;" onclick="abrirVideoApenasExercicio(\'' + nomeEdit.replace(/'/g,"\\'") + '\', event)">' + nomeEdit + (metodoAplicado ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + metodoAplicado + '</span>' : '') + '</span>' +
           '</div>' +
           '<span style="display:flex;gap:4px;align-items:center;flex-shrink:0;">' +
