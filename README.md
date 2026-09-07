@@ -1,4 +1,4 @@
-[musa_plus_prototipo_18.html](https://github.com/user-attachments/files/31930130/musa_plus_prototipo_18.html)
+[musa_plus_prototipo_19.html](https://github.com/user-attachments/files/31930149/musa_plus_prototipo_19.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -482,11 +482,11 @@
               <p class="profile-name">Mentoria</p>
             </div>
             <div class="satelite satelite-direita" onclick="openLevel2('progresso')">
-              <div class="avatar gold"><span style="font-size:22px;">📊</span></div>
+              <div class="avatar gold"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:var(--text-dim);"><path d="M3 17l5-6 4 3 6-8 3 3v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg></div>
               <p class="profile-name">Progresso</p>
             </div>
             <div class="satelite satelite-baixo" onclick="openLevel2('ranking')">
-              <div class="avatar gold"><span style="font-size:22px;">🏆</span></div>
+              <div class="avatar gold"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:var(--text-dim);"><path d="M6 3h12v4a6 6 0 0 1-5 5.92V15h3v2H8v-2h3v-2.08A6 6 0 0 1 6 7zm-4 1h3v3a4 4 0 0 1-3-3zm17 0h3a4 4 0 0 1-3 3z"/></svg></div>
               <p class="profile-name">Ranking</p>
             </div>
             <div class="satelite-centro" onclick="openLevel2('home')">
