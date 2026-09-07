@@ -1,4 +1,4 @@
-[musa_plus_prototipo_16.html](https://github.com/user-attachments/files/31890865/musa_plus_prototipo_16.html)
+[Uploading musa_plus_prototipo_17.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -7959,12 +7959,15 @@ async function loginAluna(){
         status: 'ok',
         statusLabel: 'Ativa recente'
       };
-      if(alunaRow.dados_extras && typeof alunaRow.dados_extras === 'object'){
-        Object.keys(alunaRow.dados_extras).forEach(function(campo){
-          if(alunaRow.dados_extras[campo] != null) alunaLocal[campo] = alunaRow.dados_extras[campo];
-        });
-      }
       alunasPersonal.push(alunaLocal);
+    }
+    // Sempre traz o que o Personal ajustou depois (postura, patologia, direcionamento, etc.), mesmo
+    // pra aluna que já existia antes — antes só acontecia pra aluna totalmente nova, e por isso os
+    // ajustes feitos na ficha nunca chegavam em quem já estava cadastrada.
+    if(alunaLocal && alunaRow && alunaRow.dados_extras && typeof alunaRow.dados_extras === 'object'){
+      Object.keys(alunaRow.dados_extras).forEach(function(campo){
+        if(alunaRow.dados_extras[campo] != null) alunaLocal[campo] = alunaRow.dados_extras[campo];
+      });
     }
     if(alunaLocal && alunaLocal.treinoAtual && alunaLocal.treinoAtual.dias){
       dias = alunaLocal.treinoAtual.dias;
@@ -8444,12 +8447,14 @@ async function restaurarSessaoAtiva(){
           idade: alunaRow.idade || null, dataAnamnese: alunaRow.data_anamnese || new Date().toISOString().slice(0,10),
           status: 'ok', statusLabel: 'Ativa recente'
         };
-        if(alunaRow.dados_extras && typeof alunaRow.dados_extras === 'object'){
-          Object.keys(alunaRow.dados_extras).forEach(function(campo){
-            if(alunaRow.dados_extras[campo] != null) alunaLocal[campo] = alunaRow.dados_extras[campo];
-          });
-        }
         alunasPersonal.push(alunaLocal);
+      }
+      // Mesma correção do login normal: sempre traz os ajustes mais recentes do Personal, mesmo pra
+      // aluna que já existia antes de logar.
+      if(alunaLocal && alunaRow && alunaRow.dados_extras && typeof alunaRow.dados_extras === 'object'){
+        Object.keys(alunaRow.dados_extras).forEach(function(campo){
+          if(alunaRow.dados_extras[campo] != null) alunaLocal[campo] = alunaRow.dados_extras[campo];
+        });
       }
       if(alunaLocal && alunaLocal.treinoAtual && alunaLocal.treinoAtual.dias){
         dias = alunaLocal.treinoAtual.dias;
