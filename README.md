@@ -1,4 +1,4 @@
-[Uploading musa_plus_prototipo_22.html…]()
+[musa_plus_prototipo_23.html](https://github.com/user-attachments/files/31932370/musa_plus_prototipo_23.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -2217,6 +2217,7 @@ async function enviarMensagemFunilParaAluna(nomeAluna, estagio, indice){
 }
 
 async function enviarMensagemFunilEmMassa(estagio, indice){
+  await sincronizarListaAlunasDoSupabase(); // sempre busca a lista mais nova antes de decidir quem recebe, nunca manda com dado velho
   const template = mensagensExemploFunil[estagio][indice];
   if(!template) return;
   const alunasNoEstagio = alunasPersonal.filter(function(a){ return alunaNoEstagioFunil(a, estagio) && a.telefone; });
@@ -2896,7 +2897,8 @@ function mostrarFormularioAvisoEmMassa(){
     '<div id="resultado-aviso-massa-inapp" style="margin-top:10px;"></div>';
 }
 
-function confirmarAvisoEmMassaInApp(){
+async function confirmarAvisoEmMassaInApp(){
+  await sincronizarListaAlunasDoSupabase(); // sempre busca a lista mais nova antes de decidir quem recebe, nunca manda com dado velho
   const texto = document.getElementById('texto-aviso-massa-inapp').value.trim();
   const publico = document.getElementById('publico-aviso-massa-inapp').value;
   if(!texto){ alert('Escreve o aviso antes de enviar.'); return; }
@@ -2964,6 +2966,7 @@ function marcarTodasTreinoAjustado(marcar){
 }
 
 async function confirmarAvisarTreinoAjustado(){
+  await sincronizarListaAlunasDoSupabase(); // sempre busca a lista mais nova antes de decidir quem recebe, nunca manda com dado velho
   const texto = document.getElementById('texto-treino-ajustado').value.trim();
   if(!texto){ alert('Escreve a mensagem antes de enviar.'); return; }
   const nomesMarcados = Array.from(document.querySelectorAll('.checkbox-treino-ajustado:checked')).map(function(el){ return el.value; });
@@ -9840,6 +9843,7 @@ async function renderCentralDeAvisos(){
 }
 
 async function avisarDataEspecial(tipo){
+  await sincronizarListaAlunasDoSupabase(); // sempre busca a lista mais nova antes de decidir quem recebe, nunca manda com dado velho
   const elegiveis = alunasPersonal.filter(function(a){ return a.telefone; });
   if(!confirm('Vai avisar ' + elegiveis.length + ' aluna(s) sobre essa data. Continuar?')) return;
   const area = document.getElementById('resultado-avisos-lote');
@@ -9855,6 +9859,7 @@ async function avisarDataEspecial(tipo){
 }
 
 async function avisarMetaComunidadeBatida(){
+  await sincronizarListaAlunasDoSupabase(); // sempre busca a lista mais nova antes de decidir quem recebe, nunca manda com dado velho
   const elegiveis = alunasPersonal.filter(function(a){ return a.telefone; });
   if(!confirm('Vai avisar ' + elegiveis.length + ' aluna(s) que a meta foi batida. Continuar?')) return;
   const area = document.getElementById('resultado-avisos-lote');
@@ -9869,6 +9874,7 @@ async function avisarMetaComunidadeBatida(){
 }
 
 async function enviarAvisosEmLote(tipo){
+  await sincronizarListaAlunasDoSupabase(); // sempre busca a lista mais nova antes de decidir quem recebe, nunca manda com dado velho
   const dados = calcularCentralDeAvisos();
   const mapaLista = { riscoAbandono: dados.risco, avaliacaoAtrasada: dados.avaliacaoAtrasada, planoVencendo: dados.planoVencendo, planoVencido: dados.planoVencido, aniversario: dados.aniversario };
   const lista = mapaLista[tipo];
@@ -9908,6 +9914,7 @@ function mostrarFormularioMensagemEmMassa(){
 }
 
 async function confirmarMensagemEmMassa(){
+  await sincronizarListaAlunasDoSupabase(); // sempre busca a lista mais nova antes de decidir quem recebe, nunca manda com dado velho
   const publico = document.getElementById('massa-publico').value;
   const texto = document.getElementById('massa-texto').value.trim();
   if(!texto){ alert('Escreve a mensagem primeiro.'); return; }
