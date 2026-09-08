@@ -1,4 +1,4 @@
-[musa_plus_prototipo_20.html](https://github.com/user-attachments/files/31930351/musa_plus_prototipo_20.html)
+[Uploading musa_plus_prototipo_22.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -2901,7 +2901,7 @@ function confirmarAvisoEmMassaInApp(){
   const publico = document.getElementById('publico-aviso-massa-inapp').value;
   if(!texto){ alert('Escreve o aviso antes de enviar.'); return; }
 
-  let elegiveis = alunasPersonal.filter(function(a){ return a.status !== 'lead'; });
+  let elegiveis = alunasPersonal.filter(function(a){ return true; });
   if(publico === 'ativas') elegiveis = elegiveis.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
   if(publico === 'porvencer') elegiveis = elegiveis.filter(function(a){ return statusDoPlano(a) === 'porvencer'; });
   if(publico === 'vencidas') elegiveis = elegiveis.filter(function(a){ return statusDoPlano(a) === 'vencidas'; });
@@ -2924,7 +2924,7 @@ const MENSAGEM_PADRAO_TREINO_AJUSTADO = 'Oi! Passando pra avisar que seu treino 
 function mostrarFormularioAvisarTreinoAjustado(){
   const area = document.getElementById('avisar-treino-ajustado-area');
   if(!area) return;
-  const elegiveis = alunasPersonal.filter(function(a){ return a.status !== 'lead'; });
+  const elegiveis = alunasPersonal.filter(function(a){ return true; });
 
   let html = '<div class="form-group"><textarea class="form-input" id="texto-treino-ajustado" rows="3">' + MENSAGEM_PADRAO_TREINO_AJUSTADO + '</textarea></div>';
   html += '<div class="form-group"><input class="form-input" id="busca-treino-ajustado" placeholder="Buscar aluna por nome..." oninput="filtrarListaTreinoAjustado()"></div>';
@@ -9801,8 +9801,8 @@ function editarMetaFaturamento(){
 }
 
 function calcularCentralDeAvisos(){
-  const risco = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.telefone && detectarRiscoAbandonoPorConstancia(a.nome); });
-  const avaliacaoAtrasada = alunasPersonal.filter(function(a){ const c = calcularContagemRegressivaAvaliacao(a); return a.status !== 'lead' && a.telefone && c && c.atrasada; });
+  const risco = alunasPersonal.filter(function(a){ return a.telefone && detectarRiscoAbandonoPorConstancia(a.nome); });
+  const avaliacaoAtrasada = alunasPersonal.filter(function(a){ const c = calcularContagemRegressivaAvaliacao(a); return a.telefone && c && c.atrasada; });
   const planoVencendo = alunasPersonal.filter(function(a){ return a.telefone && statusDoPlano(a) === 'porvencer'; });
   const planoVencido = alunasPersonal.filter(function(a){ return a.telefone && statusDoPlano(a) === 'vencidas'; });
   const aniversario = alunasAniversarioHoje();
@@ -9825,7 +9825,7 @@ async function renderCentralDeAvisos(){
   const metaBatida = rankingAtual.totalComunidade >= metaComunidadePontos;
   const eDiaDaMulher = isDiaDaMulherHoje();
   const eDiaDasMaes = isDiaDasMaesHoje();
-  const totalComTelefone = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.telefone; }).length;
+  const totalComTelefone = alunasPersonal.filter(function(a){ return a.telefone; }).length;
 
   area.innerHTML =
     linhaAviso('Risco de abandono', dados.risco, 'riscoAbandono') +
@@ -9840,7 +9840,7 @@ async function renderCentralDeAvisos(){
 }
 
 async function avisarDataEspecial(tipo){
-  const elegiveis = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.telefone; });
+  const elegiveis = alunasPersonal.filter(function(a){ return a.telefone; });
   if(!confirm('Vai avisar ' + elegiveis.length + ' aluna(s) sobre essa data. Continuar?')) return;
   const area = document.getElementById('resultado-avisos-lote');
   let enviadas = 0, erros = [];
@@ -9855,7 +9855,7 @@ async function avisarDataEspecial(tipo){
 }
 
 async function avisarMetaComunidadeBatida(){
-  const elegiveis = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.telefone; });
+  const elegiveis = alunasPersonal.filter(function(a){ return a.telefone; });
   if(!confirm('Vai avisar ' + elegiveis.length + ' aluna(s) que a meta foi batida. Continuar?')) return;
   const area = document.getElementById('resultado-avisos-lote');
   let enviadas = 0;
@@ -9912,7 +9912,7 @@ async function confirmarMensagemEmMassa(){
   const texto = document.getElementById('massa-texto').value.trim();
   if(!texto){ alert('Escreve a mensagem primeiro.'); return; }
 
-  let destinatarias = alunasPersonal.filter(function(a){ return a.status !== 'lead' && a.telefone; });
+  let destinatarias = alunasPersonal.filter(function(a){ return a.telefone; });
   if(publico === 'ativas') destinatarias = destinatarias.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
   else if(publico === 'porvencer') destinatarias = destinatarias.filter(function(a){ return statusDoPlano(a) === 'porvencer'; });
   else if(publico === 'vencidas') destinatarias = destinatarias.filter(function(a){ return statusDoPlano(a) === 'vencidas'; });
