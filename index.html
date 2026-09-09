@@ -498,6 +498,7 @@
             <p class="profile-name">Personal</p>
             <p class="profile-desc">Painel administrativo</p>
           </div>
+          <p style="font-size:11px;color:var(--text-faint);cursor:pointer;margin-top:6px;" onclick="alternarPreferenciaLembrarLogin()"><i class="ti ti-key" style="margin-right:4px;"></i>Lembrar login neste aparelho</p>
           <p style="font-size:11px;color:var(--text-faint);cursor:pointer;margin-top:6px;" onclick="confirmarSairDaConta()"><i class="ti ti-logout" style="margin-right:4px;"></i>Sair da conta</p>
         </div>
       </div>
@@ -8244,6 +8245,17 @@ async function responderLembrarLogin(salvar){
   // O que muda é só a PRÓXIMA vez que o app abrir: aí sim não vai entrar sozinho de novo (ver restaurarSessaoAtiva).
 }
 
+// Antes, quem respondia "não salvar" ficava presa nessa escolha pra sempre, sem jeito de mudar de
+// ideia depois. Esse botão (perto de "Sair da conta") deixa ativar ou desativar isso quando quiser.
+function alternarPreferenciaLembrarLogin(){
+  const atual = getPreferenciaLembrarLogin();
+  const novoValor = atual === 'sim' ? 'nao' : 'sim';
+  salvarPreferenciaLembrarLogin(novoValor);
+  alert(novoValor === 'sim'
+    ? 'Pronto! Da próxima vez que você abrir o app nesse aparelho, não vai precisar digitar a senha de novo.'
+    : 'Pronto, a partir de agora vai pedir sua senha toda vez que você abrir o app.');
+}
+
 function confirmarSairDaConta(){
   if(confirm('Sair dessa conta? Você pode entrar de novo com outro login depois.')) sairDeVerdade();
 }
@@ -9958,7 +9970,17 @@ async function enviarWhatsApp(telefone, mensagem, jaTentouDeNovo){
       body: JSON.stringify({ telefone: telefone, mensagem: mensagem })
     });
     const dados = await resposta.json();
-    if(!resposta.ok || dados.error) return { sucesso: false, motivo: dados.error || ('HTTP ' + resposta.status) };
+    if(!resposta.ok || dados.error){
+      const motivo = dados.error || ('HTTP ' + resposta.status);
+      // Antes só tentava de novo se caísse a conexão. Mas o WhatsApp também pode recusar por excesso
+      // de velocidade (limite de taxa) e isso não é exceção de rede, é uma resposta "normal" com erro
+      // — então também merece uma segunda chance, com uma pausa maior, antes de desistir de vez.
+      if(!jaTentouDeNovo){
+        await new Promise(function(r){ setTimeout(r, 6000); });
+        return enviarWhatsApp(telefone, mensagem, true);
+      }
+      return { sucesso: false, motivo: motivo };
+    }
     return { sucesso: true };
   } catch(erro){
     // Instabilidade passageira de rede: tenta mais uma vez antes de desistir de vez
@@ -10801,7 +10823,9 @@ if(type === 'central'){
           '<div style="display:flex;gap:8px;">' +
             '<input class="form-input" data-carga="' + j + '" type="number" placeholder="Carga (kg)" style="flex:1;">' +
             '<input class="form-input" data-reps="' + j + '" type="number" placeholder="Reps · 1ª série" style="flex:1;">' +
-          '</div>';
+          '</div>' +
+          '<button class="btn-gold" style="margin-top:8px;padding:8px;font-size:12px;" onclick="confirmarSerieExercicio(\'' + j + '\',\'' + nomeEx.replace(/'/g,"\\'") + '\')">Confirmar</button>' +
+          '<div id="confirmado-serie-' + j + '"></div>';
 
         corpoTreino += '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;">' +
           '<div style="display:flex;">' +
@@ -10951,6 +10975,8 @@ function renderCardBiset(linha, j, prog){
         '<input class="form-input" data-carga="' + subId + '" type="number" placeholder="Carga (kg)" style="flex:1;">' +
         '<input class="form-input" data-reps="' + subId + '" type="number" placeholder="Reps · 1ª série" style="flex:1;">' +
       '</div>' +
+      '<button class="btn-gold" style="margin-top:8px;padding:8px;font-size:12px;" onclick="confirmarSerieExercicio(\'' + subId + '\',\'' + nomeEx.replace(/'/g,"\\'") + '\')">Confirmar</button>' +
+      '<div id="confirmado-serie-' + subId + '"></div>' +
     '</div>';
   });
 
@@ -11111,6 +11137,38 @@ function registrarFeedbackTreino(diaIndex){
   if(el) el.innerHTML = '<p class="txt">' + msg + '</p>';
 }
 
+// Salva CADA exercício assim que ela confirma, ao invés de só juntar tudo no final. Isso resolve o
+// problema de perder tudo se a tela recarregar no meio do treino — o que já foi confirmado fica
+// salvo de verdade, só o que ainda não foi confirmado é que corre risco.
+function confirmarSerieExercicio(idx, nomeExercicio){
+  const cargaEl = document.querySelector('[data-carga="' + idx + '"]');
+  const repsEl = document.querySelector('[data-reps="' + idx + '"]');
+  if(!cargaEl || !repsEl) return;
+  const carga = parseFloat(cargaEl.value);
+  const reps = parseInt(repsEl.value, 10);
+  if(isNaN(carga) || isNaN(reps)){ alert('Preenche o peso e as repetições antes de confirmar.'); return; }
+
+  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
+  if(!alunaAtual) return;
+  const prog = getProgressoAluna(alunaAtual.nome);
+  if(!prog.historico[nomeExercicio]) prog.historico[nomeExercicio] = [];
+
+  // Se ela confirmar de novo o mesmo exercício na mesma semana (por engano ou pra corrigir), substitui
+  // o registro em vez de duplicar.
+  const sugestao = sugerirAjusteCarga(carga, reps);
+  const registro = { semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao };
+  const idxExistente = prog.historico[nomeExercicio].findIndex(function(r){ return r.semana === prog.semana; });
+  if(idxExistente !== -1) prog.historico[nomeExercicio][idxExistente] = registro;
+  else prog.historico[nomeExercicio].push(registro);
+
+  salvarProgressoNoSupabase(alunaAtual.nome);
+
+  cargaEl.disabled = true;
+  repsEl.disabled = true;
+  const elResultado = document.getElementById('confirmado-serie-' + idx);
+  if(elResultado) elResultado.innerHTML = '<p style="font-size:11px;color:var(--success);margin-top:4px;">✓ Salvo — sugestão pra próxima: ' + sugestao.valor + 'kg</p>';
+}
+
 function registrarTreinoDia(diaIndex){
   try {
     const d = dias[diaIndex];
@@ -11136,7 +11194,10 @@ function registrarTreinoDia(diaIndex){
         if(isNaN(carga) || isNaN(reps)) return;
         if(!prog.historico[item.nome]) prog.historico[item.nome] = [];
         const sugestao = sugerirAjusteCarga(carga, reps);
-        prog.historico[item.nome].push({ semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao });
+        const registro = { semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao };
+        const idxExistente = prog.historico[item.nome].findIndex(function(r){ return r.semana === prog.semana; });
+        if(idxExistente !== -1) prog.historico[item.nome][idxExistente] = registro; // já tinha confirmado esse exercício antes, substitui em vez de duplicar
+        else prog.historico[item.nome].push(registro);
         if(sugestao.texto.indexOf('edução') !== -1) houveReducao = true;
         registrados++;
       });
