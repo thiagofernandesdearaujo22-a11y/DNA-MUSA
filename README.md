@@ -1,4 +1,4 @@
-[Uploading musa_plus_prototipo_26.html…]()
+[musa_plus_prototipo_27.html](https://github.com/user-attachments/files/32024946/musa_plus_prototipo_27.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5372,7 +5372,7 @@ function renderConteudoDiaPersonal(a, di){
           '</div>' +
           '<span style="display:flex;gap:4px;align-items:center;flex-shrink:0;">' +
             '<span class="acao-pill" onclick="alternarMetodoExercicio(' + di + ',' + ei + ')">Método</span>' +
-            '<span class="acao-pill" onclick="abrirSubstituicao(' + di + ',' + ei + ')">Trocar</span>' +
+            '<span onclick="abrirSubstituicao(' + di + ',' + ei + ')" style="cursor:pointer;color:var(--text-faint);padding:4px;" title="Trocar exercício"><i class="ti ti-replace" style="font-size:16px;"></i></span>' +
           '</span>' +
         '</div>' +
         '<div id="metodo-picker-' + di + '-' + ei + '" style="display:none;"></div>' +
