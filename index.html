@@ -6202,6 +6202,31 @@ function atualizarSidebarAtiva(which){
   });
 }
 
+// A anamnese guarda a data em formato brasileiro (dd/mm/aaaa, às vezes com pontos, dois pontos, ou
+// colada sem separador). O app precisa em formato aaaa-mm-dd. Se não conseguir reconhecer o formato
+// com segurança, devolve null — prefere deixar vazio a guardar uma data errada.
+function converterDataNascimentoParaISO(valor){
+  if(!valor) return null;
+  const texto = String(valor).trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(texto)) return texto;
+  const comSeparador = texto.match(/^(\d{1,2})[\/\.\-:](\d{1,2})[\/\.\-:](\d{2,4})$/);
+  if(comSeparador){
+    let dia = comSeparador[1], mes = comSeparador[2], ano = comSeparador[3];
+    if(ano.length === 2) ano = (parseInt(ano,10) > 30 ? '19' : '20') + ano;
+    dia = dia.padStart(2,'0'); mes = mes.padStart(2,'0');
+    if(parseInt(mes,10) < 1 || parseInt(mes,10) > 12) return null;
+    if(parseInt(dia,10) < 1 || parseInt(dia,10) > 31) return null;
+    return ano + '-' + mes + '-' + dia;
+  }
+  const colado = texto.match(/^(\d{2})(\d{2})(\d{4})$/);
+  if(colado){
+    const dia = colado[1], mes = colado[2], ano = colado[3];
+    if(parseInt(mes,10) < 1 || parseInt(mes,10) > 12) return null;
+    return ano + '-' + mes + '-' + dia;
+  }
+  return null;
+}
+
 async function sincronizarListaAlunasDoSupabase(){
   if(!supabaseClient) return { novas: 0, erro: 'sem conexão' };
   try {
@@ -6216,13 +6241,18 @@ async function sincronizarListaAlunasDoSupabase(){
       if(jaExiste){
         // Já existe localmente: traz de volta os campos que podem ter sido editados e salvos em outro dispositivo/sessão
         let mudou = false;
-        ['nivel','freq','telefone','objetivo','restricoes','academia'].forEach(function(campo){
+        ['nivel','freq','telefone','objetivo','restricoes','academia','idade'].forEach(function(campo){
           const valorBanco = row[campo];
           if(valorBanco != null && valorBanco !== '' && jaExiste[campo] !== valorBanco){
             jaExiste[campo] = valorBanco;
             mudou = true;
           }
         });
+        const dataNascConvertida = converterDataNascimentoParaISO(row.data_nascimento);
+        if(dataNascConvertida && jaExiste.dataNascimento !== dataNascConvertida){
+          jaExiste.dataNascimento = dataNascConvertida;
+          mudou = true;
+        }
         if(row.dados_extras && typeof row.dados_extras === 'object'){
           Object.keys(row.dados_extras).forEach(function(campo){
             const valorBanco = row.dados_extras[campo];
@@ -6249,6 +6279,7 @@ async function sincronizarListaAlunasDoSupabase(){
         restricoes: row.restricoes || 'Nenhuma relatada',
         academia: row.academia || '',
         idade: row.idade || null,
+        dataNascimento: converterDataNascimentoParaISO(row.data_nascimento),
         dataAnamnese: row.data_anamnese || new Date().toISOString().slice(0,10),
         status: 'ok',
         statusLabel: 'Ativa recente',
@@ -9679,7 +9710,7 @@ function alunasAniversarioHoje(){
   const hoje = new Date();
   const mesHoje = hoje.getMonth() + 1, diaHoje = hoje.getDate();
   return alunasPersonal.filter(function(a){
-    if(a.status === 'lead' || !a.telefone || !a.dataNascimento) return false;
+    if(!a.telefone || !a.dataNascimento) return false;
     const partes = a.dataNascimento.split('-'); // formato YYYY-MM-DD
     if(partes.length < 3) return false;
     return parseInt(partes[1], 10) === mesHoje && parseInt(partes[2], 10) === diaHoje;
