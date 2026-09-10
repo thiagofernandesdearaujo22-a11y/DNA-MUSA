@@ -1,4 +1,4 @@
-[musa_plus_prototipo_30.html](https://github.com/user-attachments/files/32032848/musa_plus_prototipo_30.html)
+[Uploading musa_plus_prototipo_31.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5052,6 +5052,25 @@ function adicionarExercicioTreino(diaIndex){
   atualizarDiaPersonalNaTela(diaIndex);
 }
 
+// Uma linha normal é "Nome · 3x12". Um bi-set é "Bi-set|||Nome1 · 3x12|||Nome2 · 3x12" — sem essa
+// função, pegar só o primeiro pedaço antes de " · " dava um nome quebrado tipo "Bi-set|||Nome1"
+// pra qualquer bi-set, fazendo trocar/vídeo falhar exatamente nesses exercícios.
+function extrairNomeExercicioDeLinha(linha){
+  if(linha.indexOf('|||') !== -1){
+    const partes = linha.split('|||');
+    return (partes[1] || '').split(' · ')[0];
+  }
+  return linha.split(' · ')[0];
+}
+
+function extrairRepsDeLinha(linha){
+  if(linha.indexOf('|||') !== -1){
+    const partes = linha.split('|||');
+    return (partes[1] || '').split(' · ')[1] || '';
+  }
+  return linha.split(' · ')[1] || '';
+}
+
 function abrirSubstituicao(diaIndex, exIndex){
   const container = document.getElementById('sub-picker-' + diaIndex + '-' + exIndex);
   if(!container) return;
@@ -5062,7 +5081,7 @@ function abrirSubstituicao(diaIndex, exIndex){
 
   const a = alunaAberta;
   const linhaAtual = a.treinoAtual.dias[diaIndex].ex[exIndex];
-  const nomeAtual = linhaAtual.split(' · ')[0];
+  const nomeAtual = extrairNomeExercicioDeLinha(linhaAtual);
 
   // Regra: antes de oferecer troca, checa se ainda existe espaço pra progressão de carga nesse exercício
   const prog = getProgressoAluna(a.nome);
@@ -5087,7 +5106,7 @@ function mostrarOpcoesDeTrocaMesmoAssim(diaIndex, exIndex){
   const container = document.getElementById('sub-picker-' + diaIndex + '-' + exIndex);
   const a = alunaAberta;
   const linhaAtual = a.treinoAtual.dias[diaIndex].ex[exIndex];
-  const nomeAtual = linhaAtual.split(' · ')[0];
+  const nomeAtual = extrairNomeExercicioDeLinha(linhaAtual);
   const exAtualBanco = exerciciosBanco.find(function(e){ return e.nome.toUpperCase() === nomeAtual.toUpperCase(); });
   const grupo = exAtualBanco ? (exAtualBanco.grupo || exAtualBanco.categoria) : null;
   const familiaAtual = obterFamiliaBiomecanica(nomeAtual);
@@ -5105,14 +5124,16 @@ function mostrarOpcoesDeTrocaMesmoAssim(diaIndex, exIndex){
     if(!xMesmaFamilia && yMesmaFamilia) return 1;
     return 0;
   });
-  window.__opcoesTrocaAtual = opcoes;
-  window.__contextoTrocaAtual = { diaIndex: diaIndex, exIndex: exIndex, familiaAtual: familiaAtual };
+  window.__opcoesTrocaPorExercicio = window.__opcoesTrocaPorExercicio || {};
+  window.__opcoesTrocaPorExercicio[diaIndex + '_' + exIndex] = opcoes;
+  window.__contextoTrocaPorExercicio = window.__contextoTrocaPorExercicio || {};
+  window.__contextoTrocaPorExercicio[diaIndex + '_' + exIndex] = { diaIndex: diaIndex, exIndex: exIndex, familiaAtual: familiaAtual };
 
   container.innerHTML = '<p style="font-size:11px;color:var(--text-faint);margin:8px 0 4px;">Trocar "' + nomeAtual + '" por (' + opcoes.length + ' opções):</p>' +
-    '<input class="form-input" style="margin-bottom:6px;padding:8px 10px;font-size:12px;" placeholder="Buscar exercício..." oninput="filtrarOpcoesTroca(this.value)">' +
-    '<div id="lista-opcoes-troca" style="display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto;"></div>';
+    '<input class="form-input" style="margin-bottom:6px;padding:8px 10px;font-size:12px;" placeholder="Buscar exercício..." oninput="filtrarOpcoesTroca(this.value, ' + diaIndex + ',' + exIndex + ')">' +
+    '<div id="lista-opcoes-troca-' + diaIndex + '-' + exIndex + '" style="display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto;"></div>';
   container.style.display = 'block';
-  renderizarOpcoesTrocaFiltradas(opcoes);
+  renderizarOpcoesTrocaFiltradas(opcoes, diaIndex, exIndex);
 }
 
 function abrirVideoApenasExercicio(nomeExercicio, ev){
@@ -5129,10 +5150,10 @@ function abrirVideoApenasExercicio(nomeExercicio, ev){
   document.body.appendChild(overlay);
 }
 
-function renderizarOpcoesTrocaFiltradas(opcoes){
-  const lista = document.getElementById('lista-opcoes-troca');
+function renderizarOpcoesTrocaFiltradas(opcoes, diaIndex, exIndex){
+  const lista = document.getElementById('lista-opcoes-troca-' + diaIndex + '-' + exIndex);
   if(!lista) return;
-  const ctx = window.__contextoTrocaAtual;
+  const ctx = window.__contextoTrocaPorExercicio[diaIndex + '_' + exIndex];
   lista.innerHTML = opcoes.map(function(e){
     const mesmaFamilia = ctx.familiaAtual && obterFamiliaBiomecanica(e.nome) === ctx.familiaAtual;
     return '<div style="background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;" onclick="confirmarSubstituicao(' + ctx.diaIndex + ',' + ctx.exIndex + ',\'' + e.nome.replace(/'/g,"\\'") + '\')">' +
@@ -5142,16 +5163,17 @@ function renderizarOpcoesTrocaFiltradas(opcoes){
   }).join('') || '<p class="txt" style="font-size:11px;color:var(--text-faint);">Nenhum exercício encontrado com esse nome.</p>';
 }
 
-function filtrarOpcoesTroca(termo){
+function filtrarOpcoesTroca(termo, diaIndex, exIndex){
   const termoUpper = termo.trim().toUpperCase();
-  const filtradas = !termoUpper ? window.__opcoesTrocaAtual : window.__opcoesTrocaAtual.filter(function(e){ return e.nome.toUpperCase().indexOf(termoUpper) !== -1; });
-  renderizarOpcoesTrocaFiltradas(filtradas);
+  const opcoesDesseExercicio = window.__opcoesTrocaPorExercicio[diaIndex + '_' + exIndex];
+  const filtradas = !termoUpper ? opcoesDesseExercicio : opcoesDesseExercicio.filter(function(e){ return e.nome.toUpperCase().indexOf(termoUpper) !== -1; });
+  renderizarOpcoesTrocaFiltradas(filtradas, diaIndex, exIndex);
 }
 
 function confirmarSubstituicao(diaIndex, exIndex, novoNome){
   const a = alunaAberta;
   const linhaAtual = a.treinoAtual.dias[diaIndex].ex[exIndex];
-  const nomeAntigo = linhaAtual.split(' · ')[0];
+  const nomeAntigo = extrairNomeExercicioDeLinha(linhaAtual);
   const setsReps = linhaAtual.split(' · ')[1] || '';
 
   a.treinoAtual.dias[diaIndex].ex[exIndex] = novoNome + ' · ' + setsReps;
@@ -5356,9 +5378,8 @@ function renderConteudoDiaPersonal(a, di){
       '<p style="font-size:12px;color:var(--text-faint);margin:2px 0 4px;cursor:pointer;" onclick="removerTabataDoDia(\'' + a.nome.replace(/'/g,"\\'") + '\',' + di + ')">Voltar esse dia pro treino normal</p>';
   } else {
     d.ex.forEach(function(exLine, ei){
-      const partesEdit = exLine.split(' · ');
-      const nomeEdit = partesEdit[0];
-      const setsRepsEdit = partesEdit[1] || '';
+      const nomeEdit = extrairNomeExercicioDeLinha(exLine);
+      const setsRepsEdit = extrairRepsDeLinha(exLine);
       const metodoAplicado = d.metodos && d.metodos[ei];
       html += '<div class="list-item exercicio-linha" data-dia="' + di + '" data-ex="' + ei + '" style="flex-direction:column;align-items:stretch;gap:4px;padding:8px 12px;">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;">' +
