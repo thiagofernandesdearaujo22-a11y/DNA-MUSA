@@ -800,6 +800,13 @@
         <div id="funil-notificacoes"></div>
       </div>
 
+      <div id="personal-controle" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Dashboard</span></div>
+        <h1 class="page-title" style="margin-top:0;">Controle de Treinos</h1>
+        <p class="page-sub" style="margin-top:-6px;">⚪ pendente · 🟡 treino gerado/progredido · 🟢 já enviado. Quando todo mundo ficar verde, reseta sozinho pro próximo ciclo, com rodízio justo (quem terminou por último começa em primeiro).</p>
+        <div id="area-controle-treinos"></div>
+      </div>
+
       <div id="personal-aluna" style="display:none;">
         <div class="local-back" onclick="showPersonalView('alunas')"><i class="ti ti-arrow-left"></i><span>Alunas</span></div>
         <div id="aluna-detail-content"></div>
@@ -2330,6 +2337,7 @@ function moverAlunaDeStatus(nomeAluna, novoStatus){
   a.statusPlanoManual = novoStatus === 'auto' ? null : novoStatus;
   salvarPerfilAlunaNoSupabase(nomeAluna);
   renderAlunas();
+  renderControleTreinos(); // se essa aluna virou Ativa (ou deixou de ser), a lista de Controle de Treinos já reflete na hora
 }
 
 // ===== SELEÇÃO MÚLTIPLA DE ALUNAS (marcar várias e mover todas de uma vez) =====
@@ -2362,6 +2370,7 @@ function confirmarMoverAlunasSelecionadas(){
     const a = alunasPersonal.find(function(x){ return x.nome === nome; });
     if(a){ a.statusPlanoManual = destino; salvarPerfilAlunaNoSupabase(nome); }
   });
+  renderControleTreinos();
   alternarModoSelecaoAlunas(); // já limpa a seleção, esconde a barra e re-renderiza
 }
 
@@ -4557,7 +4566,11 @@ async function executarSalvamentoPerfilAluna(nomeAluna){
         sinalRiscoEmocional: a.sinalRiscoEmocional || null,
         progressaoManualForcada: a.progressaoManualForcada || 0,
         composicaoHistorico: a.composicaoHistorico || [],
-        pesoHistorico: a.pesoHistorico || []
+        pesoHistorico: a.pesoHistorico || [],
+        statusControleCiclo: a.statusControleCiclo || null,
+        dataFicouVerde: a.dataFicouVerde || null,
+        ordemConclusaoCicloAtual: a.ordemConclusaoCicloAtual || null,
+        ordemUltimoCiclo: a.ordemUltimoCiclo || null
       }
     }, { onConflict: 'email' });
   } catch(erroDeRede){
@@ -4861,6 +4874,7 @@ async function executarGeracaoEmMassa(elegiveis, rotuloAcao){
       }
       if(jaTinhaTreino) resultados.progredidas++; else resultados.geradas++;
       if(saida.salvamento.verificado) resultados.verificadas++; else resultados.apenasBackup++;
+      marcarStatusControleCiclo(a.nome, 'amarelo');
     } catch(erro){
       resultados.erros.push({ nome: a.nome, motivo: erro.message });
     }
@@ -6019,6 +6033,73 @@ async function criarLoginParaAluna(nomeAluna){
   }
 }
 
+// ===== CONTROLE DE CICLO (aba visual: amarelo = gerado/progredido, verde = enviado) =====
+// Quando todo mundo que está Ativa fica verde, o ciclo fecha sozinho: registra a ordem de quem
+// terminou por último (pra ela começar em primeiro no ciclo seguinte, rodízio justo) e reseta tudo.
+function marcarStatusControleCiclo(nomeAluna, novoStatus){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  a.statusControleCiclo = novoStatus;
+  if(novoStatus === 'verde'){
+    a.dataFicouVerde = new Date().toISOString();
+    const maiorOrdemAtual = alunasPersonal.reduce(function(max, x){ return Math.max(max, x.ordemConclusaoCicloAtual || 0); }, 0);
+    a.ordemConclusaoCicloAtual = maiorOrdemAtual + 1;
+  }
+  salvarPerfilAlunaNoSupabase(a.nome);
+  verificarEResetarCicloSeCompleto();
+  renderControleTreinos();
+}
+
+function verificarEResetarCicloSeCompleto(){
+  const ativas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  if(ativas.length === 0) return;
+  const todasVerdes = ativas.every(function(a){ return a.statusControleCiclo === 'verde'; });
+  if(!todasVerdes) return;
+
+  ativas.forEach(function(a){
+    a.ordemUltimoCiclo = a.ordemConclusaoCicloAtual || null;
+    a.statusControleCiclo = null;
+    a.dataFicouVerde = null;
+    a.ordemConclusaoCicloAtual = null;
+    salvarPerfilAlunaNoSupabase(a.nome);
+  });
+}
+
+function renderControleTreinos(){
+  const container = document.getElementById('area-controle-treinos');
+  if(!container) return;
+  const ativas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+
+  const verdes = ativas.filter(function(a){ return a.statusControleCiclo === 'verde'; })
+    .sort(function(x, y){ return new Date(y.dataFicouVerde) - new Date(x.dataFicouVerde); });
+  const amarelos = ativas.filter(function(a){ return a.statusControleCiclo === 'amarelo'; });
+  const incolores = ativas.filter(function(a){ return !a.statusControleCiclo; })
+    .sort(function(x, y){ return (y.ordemUltimoCiclo || 0) - (x.ordemUltimoCiclo || 0); });
+
+  const linhas = verdes.concat(amarelos).concat(incolores);
+
+  const cor = function(a){
+    if(a.statusControleCiclo === 'verde') return 'var(--success)';
+    if(a.statusControleCiclo === 'amarelo') return '#E2C13D';
+    return 'var(--text)';
+  };
+
+  let html = '<div class="info-box" style="text-align:center;margin-bottom:12px;">' +
+    '<p class="txt" style="font-size:12px;color:var(--text-faint);">🟡 ' + amarelos.length + ' geradas · 🟢 ' + verdes.length + ' enviadas · ⚪ ' + incolores.length + ' pendentes de ' + ativas.length + '</p>' +
+  '</div>';
+
+  html += linhas.map(function(a){
+    const i = alunasPersonal.indexOf(a);
+    const dataFormatada = a.dataFicouVerde ? new Date(a.dataFicouVerde).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
+    return '<div class="list-item" style="cursor:pointer;margin-bottom:6px;" onclick="openAlunaDetail(' + i + ')">' +
+      '<span style="color:' + cor(a) + ';font-weight:600;">' + a.nome + '</span>' +
+      (dataFormatada ? '<span class="tag" style="font-size:10px;">' + dataFormatada + '</span>' : '') +
+    '</div>';
+  }).join('');
+
+  container.innerHTML = html;
+}
+
 async function enviarCredenciaisPorWhatsApp(nomeAluna){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   const area = document.getElementById('acesso-gerado-area');
@@ -6033,6 +6114,7 @@ async function enviarCredenciaisPorWhatsApp(nomeAluna){
   if(!area) return;
   if(saida.sucesso){
     area.innerHTML = '<div class="info-box" style="border-color:var(--success);"><p class="txt" style="color:var(--success);">✓ Enviado pro WhatsApp dela.</p></div>';
+    marcarStatusControleCiclo(a.nome, 'verde');
   } else {
     area.innerHTML = '<div class="info-box" style="border-color:#C9784A;"><p class="txt" style="color:#C9784A;">Não consegui enviar: ' + (saida.motivo || 'motivo não informado') + '</p></div>';
   }
@@ -6172,6 +6254,7 @@ function renderElegibilidadeFase(a){
 
 const ferramentasPersonal = [
   { titulo: 'Alunas', icone: 'ti-users', view: 'alunas' },
+  { titulo: 'Controle de Treinos', icone: 'ti-list-check', view: 'controle' },
   { titulo: 'Alunas antigas (2024-)', icone: 'ti-history', view: 'alunas', acaoEspecial: 'abrirAlunasAntigas' },
   { titulo: 'Banco de exercícios', icone: 'ti-video', view: 'exercicios' },
   { titulo: 'Biblioteca de conteúdo', icone: 'ti-library', view: 'conteudo' },
@@ -6322,9 +6405,17 @@ function showPersonalView(which){
   renderFerramentasPersonal();
   atualizarSidebarAtiva(which);
   mostrarSoAlunasAntigas = false; // reseta por padrão sempre — quem quer o modo antigas, define depois de chamar essa função
-  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil'].forEach(function(v){
+  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
   });
+  if(which === 'controle'){
+    renderControleTreinos();
+    // Mesma lógica do Dashboard: sincroniza com o que há de mais recente (inclusive quem acabou de
+    // virar Ativa) antes de mostrar a lista, pra nunca ficar com dado desatualizado nessa tela.
+    sincronizarListaAlunasDoSupabase().then(function(){
+      renderControleTreinos();
+    });
+  }
   if(which === 'dashboard'){
     renderCentralDeAvisos(); renderMetricasNegocio(); renderRelatoriosTendencias(); renderInfoCardGerarTreino();
     // A sincronização de anamneses novas também precisa rodar aqui, não só na aba Alunas — senão o
