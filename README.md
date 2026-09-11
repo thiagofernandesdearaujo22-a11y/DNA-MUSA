@@ -1,4 +1,4 @@
-[musa_plus_prototipo_32.html](https://github.com/user-attachments/files/32082563/musa_plus_prototipo_32.html)
+[Uploading dna_musa.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1731,6 +1731,7 @@ renderGrid();
 /* ===== PERSONAL ===== */
 
 const alunasPersonal = [
+  {nome:'Thiago fernandes de araújo', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'thiagofernandesdearaujo22@gmail.com', telefone:'51986396740', piramide:'1- coxas, 2- costas', objetivo:'Melhorar hábitos', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2026-08-30', idade:33, dataNascimento:'1993-03-07', senhaGerada:'Gkgrjf958!', statusPlanoManual:'ativas'},
   {nome:'Michelle Cristiane Ferreira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'', telefone:'00000000000', piramide:'Abdômen, pernas, cintura e braços', objetivo:'Perder peso e definir', restricoes:'Na adolescência fraturei Clavícula e tornozelo direito.', academia:'', dataAnamnese:'2022-03-09', statusPlanoManual:'vencidas'},
   {nome:'Luana Lenz', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'', telefone:'00000000000', piramide:'1 Barriga, 2 glúteos, 3 coxas, 4 costas', objetivo:'Emagrecer e definir', restricoes:'Nenhuma relatada', academia:'', dataAnamnese:'2022-03-09', statusPlanoManual:'vencidas'},
   {nome:'Evelline Lindenau', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'00000000000', piramide:'1° glúteos 2° coxas/pernas 3° abdômen 4° superiores', objetivo:'Ter um treino acertivo, manter a constância e assim alcançar resultados', restricoes:'Nenhuma relatada', academia:'Yes', dataAnamnese:'2022-03-14', statusPlanoManual:'vencidas'},
@@ -8043,8 +8044,18 @@ function aplicarTransicaoSuave(elId){
 }
 
 /* ===== LOGIN ===== */
-const EMAIL_PERSONAL = 'thiagofernandesdearaujo22@gmail.com';
-const SENHA_PERSONAL = 'Senhanova22-'; // ⚠️ exposta em texto puro nesse protótipo, troque antes de liberar pra alunas reais
+// Lista de contas com acesso à área do Personal. Pra adicionar alguém novo, só acrescenta um item
+// aqui — no primeiro login dessa pessoa, a conta de verdade é criada sozinha no Supabase.
+const CONTAS_PERSONAL = [
+  { email: 'thiagofernandesdearaujo22@gmail.com', senha: 'Senhanova22-', nome: 'Thiago' },
+  { email: 'biancavmelu5@icloud.com', senha: 'Vgqfiz436!', nome: 'Bianca' }
+];
+const EMAIL_PERSONAL = CONTAS_PERSONAL[0].email; // mantido só pra não quebrar o autopreenchimento do formulário
+const SENHA_PERSONAL = CONTAS_PERSONAL[0].senha;
+
+function encontrarContaPersonal(email, senha){
+  return CONTAS_PERSONAL.find(function(c){ return c.email.toLowerCase() === email.toLowerCase() && c.senha === senha; });
+}
 
 function alternarTipoLogin(tipo){
   document.getElementById('login-tab-aluna').className = 'chip' + (tipo === 'aluna' ? ' active' : '');
@@ -8434,7 +8445,7 @@ async function loginPersonal(){
 
   // Acesso de teste garantido: sempre entra, mas agora ESPERA a sessão real terminar antes,
   // pra garantir que a busca de alunas novas funcione (isso depende de permissão do banco).
-  if(email === EMAIL_PERSONAL.toLowerCase() && senha === SENHA_PERSONAL){
+  if(encontrarContaPersonal(email, senha)){
     erroEl.style.display = 'none';
 
     let statusSessao = 'Sem conexão com o Supabase (modo totalmente offline).';
@@ -8467,7 +8478,7 @@ async function loginPersonal(){
   }
 
   if(!supabaseClient){
-    if(email !== EMAIL_PERSONAL.toLowerCase() || senha !== SENHA_PERSONAL){
+    if(!encontrarContaPersonal(email, senha)){
       erroEl.textContent = 'E-mail ou senha incorretos.';
       erroEl.style.display = 'block';
       return;
@@ -8486,7 +8497,8 @@ async function loginPersonal(){
     let { data, error } = await supabaseClient.auth.signInWithPassword({ email: email, password: senha });
 
     if(error){
-      if(email === EMAIL_PERSONAL.toLowerCase() && senha === SENHA_PERSONAL){
+      const contaValida = encontrarContaPersonal(email, senha);
+      if(contaValida){
         // Primeira vez logando: cria a conta real do personal agora
         const cadastro = await supabaseClient.auth.signUp({ email: email, password: senha });
         if(cadastro.error){
@@ -8495,7 +8507,7 @@ async function loginPersonal(){
           return;
         }
         data = cadastro.data;
-        await supabaseClient.from('perfis').insert({ id: data.user.id, tipo: 'personal', nome: 'Thiago' });
+        await supabaseClient.from('perfis').insert({ id: data.user.id, tipo: 'personal', nome: contaValida.nome });
       } else {
         erroEl.textContent = 'E-mail ou senha incorretos.';
         erroEl.style.display = 'block';
@@ -8514,7 +8526,7 @@ async function loginPersonal(){
   } catch(erroDeRede){
     // Falha de rede de verdade — se as credenciais batem com as suas, entra local pra você continuar testando
     console.warn('Sem conexão com o Supabase agora, entrando localmente pra você continuar testando:', erroDeRede);
-    if(email === EMAIL_PERSONAL.toLowerCase() && senha === SENHA_PERSONAL){
+    if(encontrarContaPersonal(email, senha)){
       erroEl.style.display = 'none';
       sessaoTipo = 'personal';
       document.getElementById('backbar').style.display = 'flex';
