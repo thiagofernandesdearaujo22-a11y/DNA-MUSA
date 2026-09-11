@@ -1730,7 +1730,7 @@ renderGrid();
 /* ===== PERSONAL ===== */
 
 const alunasPersonal = [
-  {nome:'Thiago fernandes de araújo', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'thiagofernandesdearaujo22@gmail.com', telefone:'51986396740', piramide:'1- coxas, 2- costas', objetivo:'Melhorar hábitos', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2026-08-30', idade:33, dataNascimento:'1993-03-07', senhaGerada:'Gkgrjf958!', statusPlanoManual:'ativas'},
+  {nome:'Thiago fernandes de araújo', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'thiagofernandesdearaujo22+aluno@gmail.com', telefone:'51986396740', piramide:'1- coxas, 2- costas', objetivo:'Melhorar hábitos', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2026-08-30', idade:33, dataNascimento:'1993-03-07', senhaGerada:'Gkgrjf958!', statusPlanoManual:'ativas'},
   {nome:'Michelle Cristiane Ferreira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'', telefone:'00000000000', piramide:'Abdômen, pernas, cintura e braços', objetivo:'Perder peso e definir', restricoes:'Na adolescência fraturei Clavícula e tornozelo direito.', academia:'', dataAnamnese:'2022-03-09', statusPlanoManual:'vencidas'},
   {nome:'Luana Lenz', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'', telefone:'00000000000', piramide:'1 Barriga, 2 glúteos, 3 coxas, 4 costas', objetivo:'Emagrecer e definir', restricoes:'Nenhuma relatada', academia:'', dataAnamnese:'2022-03-09', statusPlanoManual:'vencidas'},
   {nome:'Evelline Lindenau', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'5x por semana', email:'', telefone:'00000000000', piramide:'1° glúteos 2° coxas/pernas 3° abdômen 4° superiores', objetivo:'Ter um treino acertivo, manter a constância e assim alcançar resultados', restricoes:'Nenhuma relatada', academia:'Yes', dataAnamnese:'2022-03-14', statusPlanoManual:'vencidas'},
@@ -8450,10 +8450,23 @@ async function loginPersonal(){
     let statusSessao = 'Sem conexão com o Supabase (modo totalmente offline).';
     if(supabaseClient){
       try {
-        const resultado = await supabaseClient.auth.signInWithPassword({ email: email, password: senha });
-        statusSessao = resultado.error
-          ? 'FALHOU: ' + resultado.error.message
-          : 'OK, sessão real estabelecida.';
+        let resultado = await supabaseClient.auth.signInWithPassword({ email: email, password: senha });
+        if(resultado.error){
+          // Conta ainda não existe de verdade no Supabase (ex: acesso novo, nunca logado antes) —
+          // cria agora, com o nome certo dessa conta específica, em vez de deixar entrar sem sessão real.
+          const contaValida = encontrarContaPersonal(email, senha);
+          const cadastro = await supabaseClient.auth.signUp({ email: email, password: senha });
+          if(!cadastro.error){
+            await supabaseClient.from('perfis').insert({ id: cadastro.data.user.id, tipo: 'personal', nome: contaValida.nome });
+            resultado = cadastro;
+            statusSessao = 'OK, conta criada agora e sessão real estabelecida.';
+          } else {
+            statusSessao = 'FALHOU ao criar conta: ' + cadastro.error.message;
+          }
+        } else {
+          statusSessao = 'OK, sessão real estabelecida.';
+        }
+        if(resultado.data && resultado.data.user) sessaoUsuarioAtual = resultado.data.user;
       } catch(erroDeRede){
         statusSessao = 'Erro de rede ao tentar: ' + erroDeRede.message;
       }
