@@ -1,4 +1,4 @@
-[dna_musa_4.html](https://github.com/user-attachments/files/32146785/dna_musa_4.html)
+[dna_musa_5.html](https://github.com/user-attachments/files/32148454/dna_musa_5.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -799,6 +799,14 @@
         <p class="section-label" style="margin-top:22px;">Notificações de mensagens desse estágio</p>
         <p class="page-sub" style="margin-top:-6px;">Confira se o conteúdo bate com a metodologia antes de considerar disparado de verdade</p>
         <div id="funil-notificacoes"></div>
+      </div>
+
+      <div id="personal-sinalizacoes" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Dashboard</span></div>
+        <h1 class="page-title" style="margin-top:0;">Sinalizações</h1>
+        <p class="page-sub" style="margin-top:-6px;">Sempre que a Sol identificar, numa conversa, sinais de que uma aluna pode estar passando por um momento difícil, aparece aqui — com um resumo gerado por IA pra te dar contexto antes de você entrar em contato.</p>
+        <div id="area-lista-sinalizacoes"></div>
+        <div id="area-detalhe-sinalizacao"></div>
       </div>
 
       <div id="personal-controle" style="display:none;">
@@ -4573,7 +4581,8 @@ async function executarSalvamentoPerfilAluna(nomeAluna){
         statusControleCiclo: a.statusControleCiclo || null,
         dataFicouVerde: a.dataFicouVerde || null,
         ordemConclusaoCicloAtual: a.ordemConclusaoCicloAtual || null,
-        ordemUltimoCiclo: a.ordemUltimoCiclo || null
+        ordemUltimoCiclo: a.ordemUltimoCiclo || null,
+        sinalRiscoEmocional: a.sinalRiscoEmocional || null
       }
     }, { onConflict: 'email' });
   } catch(erroDeRede){
@@ -4617,6 +4626,8 @@ function editarDataNascimentoAluna(nomeAluna, novaData){
   a.dataNascimento = novaData;
   salvarPerfilAlunaNoSupabase(nomeAluna);
   renderCentralDeAvisos();
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
 }
 
 const secoesColapsaveisAbertas = {}; // guarda estado (aberta/fechada) de cada seção, sobrevive a recarregar a ficha
@@ -4645,7 +4656,9 @@ function relatarNovaRestricao(nomeAluna, idFormulario){
   a.restricoes = (restricaoAtual ? restricaoAtual + '; ' : '') + '[' + dataHoje + '] ' + textoRelatado;
 
   salvarPerfilAlunaNoSupabase(nomeAluna);
-  abrirResumoCompletoAluna(nomeAluna); // re-renderiza a tela já com o novo relato somado, e o motor de treino já passa a considerar isso
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i); // atualiza a ficha principal por trás (o diagnóstico já fica pronto pra quando você voltar pra lá)
+  abrirResumoCompletoAluna(nomeAluna); // e mantém você aqui, já mostrando o relato novo somado
   mostrarConfirmacaoSalvamento(true, 'Relato salvo. O motor de treino já vai considerar essa informação nas próximas gerações/ajustes.');
 }
 
@@ -6285,6 +6298,7 @@ function renderElegibilidadeFase(a){
 
 const ferramentasPersonal = [
   { titulo: 'Alunas', icone: 'ti-users', view: 'alunas' },
+  { titulo: 'Sinalizações', icone: 'ti-heart-handshake', view: 'sinalizacoes' },
   { titulo: 'Controle de Treinos', icone: 'ti-list-check', view: 'controle' },
   { titulo: 'Alunas antigas (2024-)', icone: 'ti-history', view: 'alunas', acaoEspecial: 'abrirAlunasAntigas' },
   { titulo: 'Banco de exercícios', icone: 'ti-video', view: 'exercicios' },
@@ -6436,9 +6450,10 @@ function showPersonalView(which){
   renderFerramentasPersonal();
   atualizarSidebarAtiva(which);
   mostrarSoAlunasAntigas = false; // reseta por padrão sempre — quem quer o modo antigas, define depois de chamar essa função
-  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle'].forEach(function(v){
+  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
   });
+  if(which === 'sinalizacoes'){ renderSinalizacoes(); }
   if(which === 'controle'){
     renderControleTreinos();
     // Mesma lógica do Dashboard: sincroniza com o que há de mais recente (inclusive quem acabou de
@@ -8895,7 +8910,7 @@ async function enviarMensagemChatIA(){
     const precisaSinalizarRisco = textoResposta.indexOf('[[RISCO_EMOCIONAL]]') !== -1;
     if(precisaSinalizarRisco){
       textoResposta = textoResposta.replace('[[RISCO_EMOCIONAL]]', '').trim();
-      sinalizarRiscoEmocional(NOME_ALUNA_LOGADA);
+      sinalizarRiscoEmocional(NOME_ALUNA_LOGADA, historicoChatIA.slice());
     }
 
     const matchVideo = textoResposta.match(/\[\[VIDEO:\s*([^\]]+)\]\]/);
@@ -8962,21 +8977,122 @@ function registrarDuvidaSinalizada(pergunta, respostaSol){
 }
 
 // ===== ALERTA DE RISCO EMOCIONAL (via Sol) =====
-// Guarda só a data do sinal e se o personal já viu. NUNCA guarda o conteúdo da conversa aqui,
-// a conversa com a Sol é privada da aluna, só o sinal de "preciso de atenção" chega pro personal.
-function sinalizarRiscoEmocional(nomeAluna){
+// Guarda a data, se o personal já viu, e a transcrição da conversa que originou o sinal — pra
+// permitir gerar um resumo com contexto de verdade (decisão do Thiago: como o app é parte do
+// próprio suporte dele às alunas, faz sentido ele ver o contexto, não só saber que algo aconteceu).
+function sinalizarRiscoEmocional(nomeAluna, transcricaoConversa){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
-  a.sinalRiscoEmocional = { data: new Date().toISOString(), visto: false };
+  a.sinalRiscoEmocional = { data: new Date().toISOString(), visto: false, transcricao: transcricaoConversa || [], analise: null };
   salvarPerfilAlunaNoSupabase(nomeAluna);
+  renderSinalizacoes();
 }
 
 function marcarSinalRiscoComoVisto(nomeAluna){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a || !a.sinalRiscoEmocional) return;
-  a.sinalRiscoEmocional.visto = true;
+  a.sinalRiscoEmocional.visto = !a.sinalRiscoEmocional.visto;
   salvarPerfilAlunaNoSupabase(nomeAluna);
   renderAlunas();
+  renderSinalizacoes();
+}
+
+function renderSinalizacoes(){
+  const el = document.getElementById('area-lista-sinalizacoes');
+  if(!el) return;
+  document.getElementById('area-detalhe-sinalizacao').innerHTML = ''; // fecha qualquer detalhe aberto ao atualizar a lista
+
+  const alunasComSinal = alunasPersonal.filter(function(a){ return a.sinalRiscoEmocional; })
+    .sort(function(x, y){ return new Date(y.sinalRiscoEmocional.data) - new Date(x.sinalRiscoEmocional.data); });
+
+  if(alunasComSinal.length === 0){
+    el.innerHTML = '<div class="info-box"><p class="txt" style="color:var(--text-faint);">Nenhuma sinalização até agora.</p></div>';
+    return;
+  }
+
+  el.innerHTML = alunasComSinal.map(function(a){
+    const dataHora = new Date(a.sinalRiscoEmocional.data).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    return '<div class="list-item" style="cursor:pointer;" onclick="abrirDetalheSinalizacao(\'' + a.nome.replace(/'/g,"\\'") + '\')">' +
+      '<div><span style="font-weight:600;">' + a.nome + '</span><p class="txt" style="font-size:11px;color:var(--text-faint);margin:2px 0 0;">' + dataHora + '</p></div>' +
+      (a.sinalRiscoEmocional.visto ? '<span class="tag">Visto</span>' : '<span class="tag" style="background:var(--gold-soft);color:#1A1409;">Novo</span>') +
+    '</div>';
+  }).join('');
+}
+
+function abrirDetalheSinalizacao(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !a.sinalRiscoEmocional) return;
+  const el = document.getElementById('area-detalhe-sinalizacao');
+  const sinal = a.sinalRiscoEmocional;
+  const dataHora = new Date(sinal.data).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+  let htmlAnalise;
+  if(sinal.analise){
+    htmlAnalise = '<p class="section-label" style="margin-top:14px;">Resumo</p><div class="info-box"><p class="txt">' + sinal.analise.resumo + '</p></div>' +
+      '<p class="section-label" style="margin-top:14px;">Possível causa</p><div class="info-box"><p class="txt">' + sinal.analise.causa + '</p></div>' +
+      '<p class="section-label" style="margin-top:14px;">Possível abordagem</p><div class="info-box"><p class="txt">' + sinal.analise.solucao + '</p></div>';
+  } else if(!sinal.transcricao || sinal.transcricao.length === 0){
+    htmlAnalise = '<div class="info-box" style="margin-top:14px;"><p class="txt" style="color:var(--text-faint);">Essa sinalização é de antes da gente guardar a conversa — não tem transcrição disponível pra gerar a análise.</p></div>';
+  } else {
+    htmlAnalise = '<button class="btn-gold" id="btn-gerar-analise-risco" style="margin-top:14px;" onclick="gerarAnaliseRiscoEmocional(\'' + nomeAluna.replace(/'/g,"\\'") + '\')"><i class="ti ti-sparkles" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>Gerar análise com IA</button>';
+  }
+
+  el.innerHTML = '<div style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+      '<div><p class="lbl" style="margin:0;">' + a.nome + '</p><p class="txt" style="font-size:11px;color:var(--text-faint);margin:2px 0 0;">' + dataHora + '</p></div>' +
+      '<span class="acao-pill" onclick="marcarSinalRiscoComoVisto(\'' + nomeAluna.replace(/'/g,"\\'") + '\')">' + (sinal.visto ? 'Marcar como não visto' : 'Marcar como visto') + '</span>' +
+    '</div>' +
+    '<div id="area-analise-risco-conteudo">' + htmlAnalise + '</div>' +
+  '</div>';
+}
+
+async function gerarAnaliseRiscoEmocional(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !a.sinalRiscoEmocional) return;
+  const botao = document.getElementById('btn-gerar-analise-risco');
+  if(botao){ botao.disabled = true; botao.textContent = 'Gerando...'; }
+
+  const transcricaoTexto = a.sinalRiscoEmocional.transcricao.map(function(m){
+    return (m.autor === 'aluna' ? 'Aluna' : 'Sol') + ': ' + m.texto;
+  }).join('\n');
+
+  const systemPrompt = 'Você é uma assistente que ajuda um personal trainer a entender o contexto de uma conversa entre uma aluna e a IA de suporte (Sol), na qual foram identificados sinais de que a aluna pode estar passando por um momento difícil.\n' +
+    'Você NÃO é terapeuta nem está fazendo diagnóstico clínico. Escreva sempre como hipótese/sugestão, nunca como afirmação certa.\n' +
+    'Responda EXATAMENTE nesse formato, uma seção por linha, sem nada antes ou depois:\n' +
+    'RESUMO: (2-3 frases resumindo o que foi conversado e o que chamou atenção)\n' +
+    'CAUSA: (uma hipótese possível do que pode estar por trás, com linguagem cautelosa: "pode estar relacionado a...")\n' +
+    'SOLUCAO: (uma sugestão prática de como o personal pode abrir essa conversa com a aluna, com empatia)';
+
+  try {
+    const response = await fetch(SUPABASE_URL + '/functions/v1/chat-sol', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+      body: JSON.stringify({
+        system: systemPrompt,
+        messages: [{ role: 'user', content: 'Conversa:\n' + transcricaoTexto }]
+      })
+    });
+    const data = await response.json();
+    if(!response.ok || data.error){
+      throw new Error('HTTP ' + response.status + ': ' + (data.error && data.error.message ? data.error.message : JSON.stringify(data)));
+    }
+    const textoResposta = (data.content || []).map(function(c){ return c.text || ''; }).join('\n').trim();
+
+    const matchResumo = textoResposta.match(/RESUMO:\s*([\s\S]*?)(?=\nCAUSA:|$)/);
+    const matchCausa = textoResposta.match(/CAUSA:\s*([\s\S]*?)(?=\nSOLUCAO:|$)/);
+    const matchSolucao = textoResposta.match(/SOLUCAO:\s*([\s\S]*)$/);
+
+    a.sinalRiscoEmocional.analise = {
+      resumo: matchResumo ? matchResumo[1].trim() : 'Não consegui identificar um resumo claro nessa resposta.',
+      causa: matchCausa ? matchCausa[1].trim() : 'Não identificada.',
+      solucao: matchSolucao ? matchSolucao[1].trim() : 'Considere conversar diretamente com ela pra entender melhor.'
+    };
+    salvarPerfilAlunaNoSupabase(nomeAluna);
+    abrirDetalheSinalizacao(nomeAluna);
+  } catch(erro){
+    if(botao){ botao.disabled = false; botao.textContent = 'Tentar de novo'; }
+    console.error('Erro ao gerar análise de risco emocional:', erro);
+  }
 }
 
 function renderAlertasRiscoEmocional(){
@@ -8984,13 +9100,10 @@ function renderAlertasRiscoEmocional(){
   if(!el) return;
   const alunasComSinal = alunasPersonal.filter(function(a){ return a.sinalRiscoEmocional && !a.sinalRiscoEmocional.visto; });
   if(alunasComSinal.length === 0){ el.innerHTML = ''; return; }
-  el.innerHTML = alunasComSinal.map(function(a){
-    return '<div class="info-box" style="border-color:var(--gold-soft);margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
-      '<div><p class="lbl" style="margin-bottom:4px;">💛 Identificamos sinais de que ' + a.nome + ' pode estar passando por um momento difícil.</p>' +
-      '<p class="txt" style="font-size:11px;color:var(--text-faint);">Considere entrar em contato para oferecer apoio. Por privacidade, o conteúdo da conversa com a Sol não é compartilhado.</p></div>' +
-      '<span class="acao-pill" style="flex-shrink:0;" onclick="marcarSinalRiscoComoVisto(\'' + a.nome.replace(/'/g,"\\'") + '\')">Marcar como visto</span>' +
-    '</div>';
-  }).join('');
+  el.innerHTML = '<div class="info-box" style="border-color:var(--gold-soft);margin-bottom:10px;cursor:pointer;" onclick="showPersonalView(\'sinalizacoes\')">' +
+    '<p class="lbl" style="margin:0;">💛 ' + alunasComSinal.length + ' sinalização' + (alunasComSinal.length > 1 ? 'ões' : '') + ' pendente' + (alunasComSinal.length > 1 ? 's' : '') + ' de revisão</p>' +
+    '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:2px;">Toque pra ver o resumo e decidir como agir</p>' +
+  '</div>';
 }
 
 // ===== RESUMO DE PERFORMANCE POR ALUNA, GERADO POR IA (painel do Personal) =====
