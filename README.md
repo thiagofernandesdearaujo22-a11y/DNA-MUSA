@@ -1,4 +1,4 @@
-[Uploading dna_musa_2.html…]()
+[dna_musa_3.html](https://github.com/user-attachments/files/32146765/dna_musa_3.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1731,6 +1731,7 @@ renderGrid();
 /* ===== PERSONAL ===== */
 
 const alunasPersonal = [
+  {nome:'Bianca', status:'ok', statusLabel:'Ativa recente', nivel:'A definir', freq:'A definir', email:'biancavmelu5+aluna@icloud.com', telefone:'51989999669', piramide:'A definir (aguardando anamnese real)', objetivo:'A definir (aguardando anamnese real)', restricoes:'A definir', academia:'A definir', dataAnamnese:'2026-09-12', idade:null, dataNascimento:null, senhaGerada:'Hbzjpd177!', statusPlanoManual:'ativas'},
   {nome:'Thiago fernandes de araújo', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'thiagofernandesdearaujo22+aluno@gmail.com', telefone:'51986396740', piramide:'1- coxas, 2- costas', objetivo:'Melhorar hábitos', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2026-08-30', idade:33, dataNascimento:'1993-03-07', senhaGerada:'Gkgrjf958!', statusPlanoManual:'ativas'},
   {nome:'Michelle Cristiane Ferreira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'', telefone:'00000000000', piramide:'Abdômen, pernas, cintura e braços', objetivo:'Perder peso e definir', restricoes:'Na adolescência fraturei Clavícula e tornozelo direito.', academia:'', dataAnamnese:'2022-03-09', statusPlanoManual:'vencidas'},
   {nome:'Luana Lenz', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'', telefone:'00000000000', piramide:'1 Barriga, 2 glúteos, 3 coxas, 4 costas', objetivo:'Emagrecer e definir', restricoes:'Nenhuma relatada', academia:'', dataAnamnese:'2022-03-09', statusPlanoManual:'vencidas'},
@@ -5344,10 +5345,10 @@ async function abrirTreinosArquivados(nomeAluna){
 
     area.innerHTML = '<p class="txt" style="color:var(--gold-soft);cursor:pointer;margin-bottom:8px;" onclick="document.getElementById(\'treinos-arquivados-area\').innerHTML=\'\';"><i class="ti ti-x" style="font-size:11px;margin-right:4px;"></i>Fechar histórico</p>' +
       historico.map(function(t, idx){
-      const data = new Date(t.updated_at).toLocaleDateString('pt-BR');
-      const rotulo = idx === 0 ? 'Atual' : 'Arquivado';
+      const dataHora = new Date(t.updated_at).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+      const rotulo = idx === 0 ? 'Atual' : 'Ajuste anterior';
       return '<div class="list-item" style="flex-direction:column;align-items:stretch;">' +
-        '<div style="display:flex;justify-content:space-between;"><span>' + data + '</span><span class="tag">' + rotulo + ' · ' + t.fase + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;"><span>' + dataHora + '</span><span class="tag">' + rotulo + ' · ' + t.fase + '</span></div>' +
         '<p style="font-size:11px;color:var(--text-faint);margin:4px 0 0;">' + t.dias.length + ' dias de treino</p>' +
       '</div>';
     }).join('');
@@ -8273,13 +8274,50 @@ function aplicarTreinoRecebidoDoSupabase(treinoRow){
   }
 }
 
+// Compara o treino de antes com o de agora e conta quantos exercícios realmente mudaram (trocados,
+// adicionados ou removidos) em cada dia. Reordenar não conta como mudança, só troca de verdade conta.
+function contarExerciciosMudados(diasAntigos, diasNovos){
+  let totalMudancas = 0;
+  const maxDias = Math.max(diasAntigos.length, diasNovos.length);
+  for(let i = 0; i < maxDias; i++){
+    const nomesAntigos = (diasAntigos[i] && diasAntigos[i].ex ? diasAntigos[i].ex : []).map(function(e){ return e.nome; });
+    const nomesNovos = (diasNovos[i] && diasNovos[i].ex ? diasNovos[i].ex : []).map(function(e){ return e.nome; });
+    const antigosRestantes = nomesAntigos.slice();
+    const novosRestantes = [];
+    nomesNovos.forEach(function(nome){
+      const idx = antigosRestantes.indexOf(nome);
+      if(idx === -1){ novosRestantes.push(nome); } else { antigosRestantes.splice(idx, 1); }
+    });
+    // O que sobrou de cada lado são substituições (1 saiu, 1 entrou = 1 mudança, não 2)
+    totalMudancas += Math.max(antigosRestantes.length, novosRestantes.length);
+  }
+  return totalMudancas;
+}
+
 async function salvarTreinoNoSupabase(alunaId, treinoAtual){
-  const { data: linhaInserida, error: erroInsert } = await supabaseClient.from('treinos').insert({
-    aluna_id: alunaId,
-    fase: treinoAtual.fase,
-    volume: treinoAtual.volume,
-    dias: treinoAtual.dias
-  }).select().single();
+  // Busca o treino atual (o mais recente salvo) pra comparar e decidir: isso é um ajuste grande
+  // (3+ exercícios mudaram — vira uma entrada nova no histórico) ou um ajuste pequeno (só atualiza
+  // o registro atual, sem empilhar histórico)?
+  const { data: treinoAnterior } = await supabaseClient.from('treinos').select('*').eq('aluna_id', alunaId).order('updated_at', { ascending: false }).limit(1).maybeSingle();
+  const qtdExerciciosMudados = treinoAnterior ? contarExerciciosMudados(treinoAnterior.dias, treinoAtual.dias) : 999;
+  const ehAjusteGrande = qtdExerciciosMudados >= 3;
+
+  let linhaInserida, erroInsert;
+  if(treinoAnterior && !ehAjusteGrande){
+    const resultado = await supabaseClient.from('treinos').update({
+      fase: treinoAtual.fase, volume: treinoAtual.volume, dias: treinoAtual.dias, updated_at: new Date().toISOString()
+    }).eq('id', treinoAnterior.id).select().single();
+    linhaInserida = resultado.data; erroInsert = resultado.error;
+  } else {
+    const resultado = await supabaseClient.from('treinos').insert({
+      aluna_id: alunaId,
+      fase: treinoAtual.fase,
+      volume: treinoAtual.volume,
+      dias: treinoAtual.dias,
+      updated_at: new Date().toISOString()
+    }).select().single();
+    linhaInserida = resultado.data; erroInsert = resultado.error;
+  }
 
   if(erroInsert){
     mostrarConfirmacaoSalvamento(false, 'Erro ao salvar no banco: ' + erroInsert.message);
@@ -8478,6 +8516,7 @@ async function loginPersonal(){
     document.getElementById('backlabel').textContent = 'Sair';
     pedirPermissaoNotificacao();
     openLevel2('personal');
+    sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
     perguntarSeQuerLembrarLogin();
 
     // Diagnóstico único, grande, no topo da tela — impossível de não ver
@@ -8502,6 +8541,7 @@ async function loginPersonal(){
     document.getElementById('backlabel').textContent = 'Sair';
     pedirPermissaoNotificacao();
     openLevel2('personal');
+    sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
     perguntarSeQuerLembrarLogin();
     return;
   }
@@ -8535,6 +8575,7 @@ async function loginPersonal(){
     document.getElementById('backlabel').textContent = 'Sair';
     pedirPermissaoNotificacao();
     openLevel2('personal');
+    sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
     perguntarSeQuerLembrarLogin();
   } catch(erroDeRede){
     // Falha de rede de verdade — se as credenciais batem com as suas, entra local pra você continuar testando
@@ -8546,6 +8587,7 @@ async function loginPersonal(){
       document.getElementById('backlabel').textContent = 'Sair';
       pedirPermissaoNotificacao();
       openLevel2('personal');
+      sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
       perguntarSeQuerLembrarLogin();
     } else {
       erroEl.textContent = 'E-mail ou senha incorretos.';
@@ -8648,6 +8690,7 @@ async function restaurarSessaoAtiva(){
       if(backlabel) backlabel.textContent = 'Sair';
       pedirPermissaoNotificacao();
       openLevel2('personal');
+      sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
       perguntarSeQuerLembrarLogin();
     } else if(perfilRow.tipo === 'aluna'){
       NOME_ALUNA_LOGADA = perfilRow.nome;
