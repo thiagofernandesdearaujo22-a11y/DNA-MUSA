@@ -1,4 +1,4 @@
-[dna_musa_3.html](https://github.com/user-attachments/files/32146765/dna_musa_3.html)
+[dna_musa_4.html](https://github.com/user-attachments/files/32146785/dna_musa_4.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -4621,6 +4621,34 @@ function editarDataNascimentoAluna(nomeAluna, novaData){
 
 const secoesColapsaveisAbertas = {}; // guarda estado (aberta/fechada) de cada seção, sobrevive a recarregar a ficha
 
+function renderFormularioRelatarRestricao(nomeAluna){
+  const idFormulario = 'form-relatar-restricao-' + nomeAluna.replace(/[^a-zA-Z0-9]/g,'');
+  return '<p style="font-size:12px;color:var(--gold-soft);cursor:pointer;margin-top:10px;" onclick="document.getElementById(\'' + idFormulario + '\').style.display = document.getElementById(\'' + idFormulario + '\').style.display === \'block\' ? \'none\' : \'block\';">' +
+    '<i class="ti ti-plus" style="font-size:11px;margin-right:4px;"></i>Relatar nova restrição/lesão não mencionada</p>' +
+  '<div id="' + idFormulario + '" style="display:none;margin-top:6px;">' +
+    '<textarea class="form-input" id="texto-' + idFormulario + '" placeholder="Ex: sentiu dor no ombro direito ao fazer desenvolvimento, a partir de hoje" style="min-height:60px;font-size:13px;"></textarea>' +
+    '<button class="btn-gold" style="width:auto;padding:8px 16px;margin-top:6px;font-size:12px;" onclick="relatarNovaRestricao(\'' + nomeAluna.replace(/'/g,"\\'") + '\', \'' + idFormulario + '\')">Salvar relato</button>' +
+  '</div>';
+}
+
+function relatarNovaRestricao(nomeAluna, idFormulario){
+  const campoTexto = document.getElementById('texto-' + idFormulario);
+  const textoRelatado = campoTexto.value.trim();
+  if(!textoRelatado) return;
+
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+
+  // Guarda com data, empilhando em cima do que já existia — nunca apaga o que já estava relatado antes
+  const dataHoje = new Date().toLocaleDateString('pt-BR');
+  const restricaoAtual = (a.restricoes && a.restricoes.toLowerCase() !== 'nenhuma relatada') ? a.restricoes : '';
+  a.restricoes = (restricaoAtual ? restricaoAtual + '; ' : '') + '[' + dataHoje + '] ' + textoRelatado;
+
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+  abrirResumoCompletoAluna(nomeAluna); // re-renderiza a tela já com o novo relato somado, e o motor de treino já passa a considerar isso
+  mostrarConfirmacaoSalvamento(true, 'Relato salvo. O motor de treino já vai considerar essa informação nas próximas gerações/ajustes.');
+}
+
 function renderSecaoColapsavel(titulo, conteudoHtml, idUnico){
   const estaAberta = !!secoesColapsaveisAbertas[idUnico];
   return '<div class="section-colapsavel" style="margin-top:22px;">' +
@@ -5564,7 +5592,7 @@ function abrirResumoCompletoAluna(nomeAluna){
     renderAvaliacaoPostural(a) +
     renderSecaoColapsavel('Pirâmide de prioridade (resposta original)', '<div class="info-box"><p class="txt">' + (a.piramide || 'Não respondida') + '</p></div>', 'piramideorig-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Objetivo com a consultoria', '<div class="info-box"><p class="txt">' + (a.objetivo || 'Não informado') + '</p></div>', 'objetivo-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
-    renderSecaoColapsavel('Restrições / lesões relatadas', '<div class="info-box"><p class="txt">' + a.restricoes + '</p></div>' + queixaHtml, 'restricoes-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderSecaoColapsavel('Restrições / lesões relatadas', '<div class="info-box"><p class="txt">' + a.restricoes + '</p></div>' + queixaHtml + renderFormularioRelatarRestricao(a.nome), 'restricoes-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Academia', '<div class="info-box"><p class="txt">' + (a.academia || 'Não informado') + '</p></div>', 'academia-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Plano fechado', renderPlanoFechadoConteudo(a), 'planofechado-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Roda da vida', renderRodaDaVidaNaFicha(a.nome), 'rodadavida-' + a.nome.replace(/[^a-zA-Z0-9]/g,''));
