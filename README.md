@@ -1,4 +1,4 @@
-[dna_musa_5.html](https://github.com/user-attachments/files/32148454/dna_musa_5.html)
+[dna_musa_6.html](https://github.com/user-attachments/files/32151500/dna_musa_6.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -4516,6 +4516,7 @@ function confirmarGerarTreinoPreview(){
   });
   a.treinoAtual = { fase: (a.treinoAtual && a.treinoAtual.fase) || 'A definir', volume: 'Gerado automaticamente, revise antes de confirmar', dias: semanaComNome };
   sincronizarTreinoComSupabase(a);
+  marcarStatusControleCiclo(a.nome, 'amarelo');
   treinoPreviewPendente = null;
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
@@ -4808,6 +4809,7 @@ function gerarTreinoAutomaticoParaAluna(nomeAluna){
     if(!saida.ok) return;
     const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
     const i = alunasPersonal.indexOf(a);
+    marcarStatusControleCiclo(nomeAluna, 'amarelo');
     openAlunaDetail(i);
     const areaValidacao = document.getElementById('validacao-treino-area');
     if(areaValidacao) areaValidacao.innerHTML = renderChecklistPrescricao(saida.resultado);
@@ -5735,6 +5737,7 @@ function openAlunaDetail(i){
         '<p class="txt">E-mail: ' + a.email + '<br>Senha: <b>' + a.senhaGerada + '</b><br>Link do app: ' + (LINK_DO_APP) + '</p>' +
         '</div>' +
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 8px 0 0;font-size:13px;background:#25D366;color:#fff;border:none;" onclick="enviarCredenciaisPorWhatsApp(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-brand-whatsapp" style="vertical-align:-2px;margin-right:6px;"></i>Mandar login e senha por WhatsApp</button>' +
+        '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 8px 0 0;font-size:13px;background:var(--success);color:#fff;border:none;" onclick="marcarTreinoFeitoManualmente(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-check" style="vertical-align:-2px;margin-right:6px;"></i>Treino feito</button>' +
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 0 0;font-size:13px;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="navigator.clipboard.writeText(\'E-mail: ' + a.email + ' - Senha: ' + a.senhaGerada + ' - Link: ' + (LINK_DO_APP) + '\')">Copiar dados</button>'
       : '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="criarLoginParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-key" style="font-size:14px;vertical-align:-2px;margin-right:6px;"></i>Gerar acesso ao app</button>'
     ) +
@@ -6070,6 +6073,7 @@ async function criarLoginParaAluna(nomeAluna){
       '<p class="txt" style="font-size:11px;color:var(--text-faint);">Link do app: ' + linkApp + '</p>' +
       '</div>' +
       '<button class="btn-gold" style="width:auto;padding:8px 14px;margin:0 8px 0 0;font-size:12px;background:#25D366;color:#fff;border:none;" onclick="enviarCredenciaisPorWhatsApp(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-brand-whatsapp" style="vertical-align:-2px;margin-right:4px;"></i>Mandar por WhatsApp</button>' +
+    '<button class="btn-gold" style="width:auto;padding:8px 14px;margin:0 8px 0 0;font-size:12px;background:var(--success);color:#fff;border:none;" onclick="marcarTreinoFeitoManualmente(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-check" style="vertical-align:-2px;margin-right:4px;"></i>Treino feito</button>' +
     '<button class="btn-gold" style="width:auto;padding:8px 14px;margin:0;font-size:12px;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="navigator.clipboard.writeText(\'E-mail: ' + a.email + ' - Senha: ' + senha + ' - Link: ' + linkApp + '\')">Copiar dados</button>';
   } catch(erroDeRede){
     console.warn('Sem conexão com o Supabase agora:', erroDeRede);
@@ -6080,6 +6084,11 @@ async function criarLoginParaAluna(nomeAluna){
 // ===== CONTROLE DE CICLO (aba visual: amarelo = gerado/progredido, verde = enviado) =====
 // Quando todo mundo que está Ativa fica verde, o ciclo fecha sozinho: registra a ordem de quem
 // terminou por último (pra ela começar em primeiro no ciclo seguinte, rodízio justo) e reseta tudo.
+function marcarTreinoFeitoManualmente(nomeAluna){
+  marcarStatusControleCiclo(nomeAluna, 'verde');
+  mostrarConfirmacaoSalvamento(true, 'Marcado como feito. ' + nomeAluna + ' já aparece verde no Controle de Treinos.');
+}
+
 function marcarStatusControleCiclo(nomeAluna, novoStatus){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
