@@ -3670,7 +3670,6 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
   }
 
   const dias = [];
-  const posteriorJaContemplado = enfase === 'Posterior' || secundario === 'Posterior';
 
   for(let d = 0; d < numDias; d++){
     const ehDiaEnfase = d % 2 === 0; // dias pares = ênfase, ímpares = secundário (padrão validado com a Michele/Andriele)
@@ -3696,15 +3695,31 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
     });
   }
 
-  // Regra de volume mínimo de posteriores: se a pirâmide da aluna não tem Posterior como ênfase
-  // nem secundário, ele nunca apareceria em nenhum dia. Garante pelo menos 1 exercício no último
-  // dia de inferiores, com volume moderado (nem o volume de ênfase, nem tão baixo quanto panturrilha).
-  if(!posteriorJaContemplado && dias.length > 0){
-    const ultimoDia = dias[dias.length - 1];
-    const opcoesPosterior = exerciciosDoGrupo('Posterior', {});
-    if(opcoesPosterior && opcoesPosterior[0]){
-      const seriesMinimas = perfil.bloco === 'deload' ? 2 : 3;
-      ultimoDia.ex.push(opcoesPosterior[0] + ' · ' + seriesMinimas + 'x' + (reps + 2) + ' (volume mínimo de posteriores, garantido pela metodologia)');
+  // Regra de volume mínimo de posteriores: o volume semanal de posterior precisa ser pelo menos
+  // 50% do volume semanal de quadríceps (em séries de verdade, contadas em todos os dias de inferiores
+  // já montados) — não um número fixo desconectado do quanto de quadríceps a aluna está recebendo.
+  // Roda sempre, mesmo quando Posterior já é ênfase/secundário, como uma trava de segurança real.
+  if(dias.length > 0){
+    const totaisSemana = {};
+    dias.forEach(function(d){
+      const totaisDia = calcularVolumePorGrupoNoDia(d.ex);
+      Object.keys(totaisDia).forEach(function(grupo){
+        totaisSemana[grupo] = (totaisSemana[grupo] || 0) + totaisDia[grupo];
+      });
+    });
+    const seriesQuadriceps = totaisSemana['Quadríceps'] || 0;
+    const seriesPosterior = totaisSemana['Isquiotibiais'] || 0;
+    const minimoNecessario = Math.ceil(seriesQuadriceps * 0.5);
+
+    if(seriesQuadriceps > 0 && seriesPosterior < minimoNecessario){
+      const ultimoDia = dias[dias.length - 1];
+      const opcoesPosterior = exerciciosDoGrupo('Posterior', {});
+      if(opcoesPosterior && opcoesPosterior[0]){
+        const seriesMinimas = perfil.bloco === 'deload' ? 2 : 3;
+        const faltam = minimoNecessario - seriesPosterior;
+        const seriesDoExercicio = Math.max(seriesMinimas, faltam);
+        ultimoDia.ex.push(opcoesPosterior[0] + ' · ' + seriesDoExercicio + 'x' + (reps + 2) + ' (volume mínimo de posteriores: 50% do volume de quadríceps, garantido pela metodologia)');
+      }
     }
   }
 
@@ -4842,30 +4857,42 @@ async function auditarVolumePosteriores(){
 
   const comTreino = alunasPersonal.filter(function(a){ return a.treinoAtual && a.treinoAtual.dias; });
   const semPosterior = [];
+  const abaixoDoMinimo = []; // tem posterior, mas abaixo de 50% do volume semanal de quadríceps
 
   comTreino.forEach(function(a){
-    const temPosterior = a.treinoAtual.dias.some(function(d){
-      return (d.ex || []).some(function(linhaOriginal){
-        const linhas = linhaOriginal.indexOf('|||') !== -1 ? linhaOriginal.split('|||').slice(1).map(function(l){ return l.trim(); }) : [linhaOriginal];
-        return linhas.some(function(linha){
-          const nomeEx = linha.split(' · ')[0];
-          const exBanco = buscarExercicioNoBanco(nomeEx);
-          return exBanco && exBanco.grupo === 'Isquiotibiais';
-        });
+    const totaisSemana = {};
+    a.treinoAtual.dias.forEach(function(d){
+      const totaisDia = calcularVolumePorGrupoNoDia(d.ex);
+      Object.keys(totaisDia).forEach(function(grupo){
+        totaisSemana[grupo] = (totaisSemana[grupo] || 0) + totaisDia[grupo];
       });
     });
-    if(!temPosterior) semPosterior.push(a.nome);
+    const seriesQuadriceps = totaisSemana['Quadríceps'] || 0;
+    const seriesPosterior = totaisSemana['Isquiotibiais'] || 0;
+
+    if(seriesPosterior === 0){
+      semPosterior.push(a.nome);
+    } else if(seriesQuadriceps > 0 && seriesPosterior < seriesQuadriceps * 0.5){
+      abaixoDoMinimo.push(a.nome + ' (posterior: ' + seriesPosterior + ' séries · quadríceps: ' + seriesQuadriceps + ' séries · mínimo esperado: ' + Math.ceil(seriesQuadriceps * 0.5) + ')');
+    }
   });
 
-  if(semPosterior.length === 0){
-    area.innerHTML = '<div class="info-box" style="border-color:var(--success);"><p class="lbl" style="color:var(--success);">✓ Nenhum problema encontrado</p><p class="txt">Revisei ' + comTreino.length + ' treino(s) — todas têm pelo menos 1 exercício de posterior.</p></div>';
+  if(semPosterior.length === 0 && abaixoDoMinimo.length === 0){
+    area.innerHTML = '<div class="info-box" style="border-color:var(--success);"><p class="lbl" style="color:var(--success);">✓ Nenhum problema encontrado</p><p class="txt">Revisei ' + comTreino.length + ' treino(s) — todas com pelo menos 50% do volume de quadríceps em posteriores.</p></div>';
     return;
   }
 
-  area.innerHTML = '<div class="info-box" style="border-color:#E2A33D;"><p class="lbl" style="color:#E2A33D;">⚠ ' + semPosterior.length + ' aluna(s) sem posterior no treino atual</p>' +
-    '<p class="txt" style="font-size:11px;color:var(--text-faint);">' + semPosterior.join(', ') + '</p>' +
-    '<p class="txt" style="font-size:11px;margin-top:8px;">Isso são treinos gerados antes da regra de volume mínimo entrar em vigor. Use "Gerar/progredir treino de todas" no Dashboard pra corrigir todas de uma vez, já com a regra nova aplicada.</p>' +
-  '</div>';
+  let html = '';
+  if(semPosterior.length > 0){
+    html += '<div class="info-box" style="border-color:#E2A33D;margin-bottom:8px;"><p class="lbl" style="color:#E2A33D;">⚠ ' + semPosterior.length + ' aluna(s) sem NENHUM posterior no treino atual</p>' +
+      '<p class="txt" style="font-size:11px;color:var(--text-faint);">' + semPosterior.join(', ') + '</p></div>';
+  }
+  if(abaixoDoMinimo.length > 0){
+    html += '<div class="info-box" style="border-color:#E2A33D;"><p class="lbl" style="color:#E2A33D;">⚠ ' + abaixoDoMinimo.length + ' aluna(s) com posterior abaixo de 50% do volume de quadríceps</p>' +
+      '<p class="txt" style="font-size:11px;color:var(--text-faint);">' + abaixoDoMinimo.join('; ') + '</p></div>';
+  }
+  html += '<p class="txt" style="font-size:11px;margin-top:8px;color:var(--text-faint);">Esses são treinos gerados antes dessa regra dos 50% entrar em vigor no motor. A auditoria já identifica certo — mas o motor de geração ainda precisa ser atualizado numa próxima etapa pra já nascer respeitando essa proporção (por enquanto ele só garante 1 exercício fixo, sem relação com o volume de quadríceps).</p>';
+  area.innerHTML = html;
 }
 
 async function verificarReplicasDeTreino(){
