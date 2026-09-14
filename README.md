@@ -1,4 +1,4 @@
-[dna_musa_14.html](https://github.com/user-attachments/files/32177121/dna_musa_14.html)
+[dna_musa_15.html](https://github.com/user-attachments/files/32177422/dna_musa_15.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -10286,23 +10286,30 @@ async function carregarTreinosDeTodasAtivas(){
   if(semTreinoCarregado.length === 0) return;
   try {
     // Passo 1: quem ainda não tem o authId carregado localmente, busca em bloco por e-mail agora
-    // (muitas alunas migradas antigas nunca tiveram esse campo sincronizado direito até aqui)
+    // (muitas alunas migradas antigas nunca tiveram esse campo sincronizado direito até aqui).
+    // Já aproveita e traz o "backup" do treino também — pra quem nunca teve login de verdade
+    // criado (auth_id nulo), o treino é guardado direto nessa coluna, como plano B.
     const semAuthId = semTreinoCarregado.filter(function(a){ return !a.authId; });
     if(semAuthId.length > 0){
       const emailsParaBuscar = semAuthId.map(function(a){ return a.email; });
-      const { data: linhasAlunas } = await supabaseClient.from('alunas').select('email, auth_id').in('email', emailsParaBuscar);
+      const { data: linhasAlunas } = await supabaseClient.from('alunas').select('email, auth_id, treino_atual_backup').in('email', emailsParaBuscar);
       if(linhasAlunas){
-        const authIdPorEmail = {};
-        linhasAlunas.forEach(function(l){ if(l.auth_id && l.email) authIdPorEmail[l.email.toLowerCase()] = l.auth_id; });
+        const infoPorEmail = {};
+        linhasAlunas.forEach(function(l){ if(l.email) infoPorEmail[l.email.toLowerCase()] = l; });
         semAuthId.forEach(function(a){
-          const encontrado = authIdPorEmail[a.email.toLowerCase()];
-          if(encontrado) a.authId = encontrado;
+          const info = infoPorEmail[a.email.toLowerCase()];
+          if(!info) return;
+          if(info.auth_id){
+            a.authId = info.auth_id;
+          } else if(info.treino_atual_backup){
+            a.treinoAtual = info.treino_atual_backup; // plano B: sem login de verdade, mas com treino salvo no backup
+          }
         });
       }
     }
 
-    // Passo 2: busca o treino mais recente de quem já tem authId (o que já tinha + o que acabou de achar)
-    const comAuthId = semTreinoCarregado.filter(function(a){ return a.authId; });
+    // Passo 2: busca o treino mais recente de quem tem authId (pulando quem já resolveu pelo backup acima)
+    const comAuthId = semTreinoCarregado.filter(function(a){ return a.authId && !a.treinoAtual; });
     if(comAuthId.length === 0) return;
     const idsParaBuscar = comAuthId.map(function(a){ return a.authId; });
     const { data: linhas } = await supabaseClient.from('treinos').select('*').in('aluna_id', idsParaBuscar).order('updated_at', { ascending: false });
