@@ -1,4 +1,4 @@
-[dna_musa_13.html](https://github.com/user-attachments/files/32176982/dna_musa_13.html)
+[dna_musa_14.html](https://github.com/user-attachments/files/32177121/dna_musa_14.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -381,7 +381,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-08-05-A</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-13-CORRECAO-TREINOS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
