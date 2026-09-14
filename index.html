@@ -10280,18 +10280,37 @@ function isDiaDasMaesHoje(){
 async function carregarTreinosDeTodasAtivas(){
   if(!supabaseClient) return;
   const semTreinoCarregado = alunasPersonal.filter(function(a){
-    return statusDoPlano(a) === 'ativas' && !a.treinoAtual && a.authId;
+    return statusDoPlano(a) === 'ativas' && !a.treinoAtual && a.email;
   });
   if(semTreinoCarregado.length === 0) return;
-  const idsParaBuscar = semTreinoCarregado.map(function(a){ return a.authId; });
   try {
+    // Passo 1: quem ainda não tem o authId carregado localmente, busca em bloco por e-mail agora
+    // (muitas alunas migradas antigas nunca tiveram esse campo sincronizado direito até aqui)
+    const semAuthId = semTreinoCarregado.filter(function(a){ return !a.authId; });
+    if(semAuthId.length > 0){
+      const emailsParaBuscar = semAuthId.map(function(a){ return a.email; });
+      const { data: linhasAlunas } = await supabaseClient.from('alunas').select('email, auth_id').in('email', emailsParaBuscar);
+      if(linhasAlunas){
+        const authIdPorEmail = {};
+        linhasAlunas.forEach(function(l){ if(l.auth_id && l.email) authIdPorEmail[l.email.toLowerCase()] = l.auth_id; });
+        semAuthId.forEach(function(a){
+          const encontrado = authIdPorEmail[a.email.toLowerCase()];
+          if(encontrado) a.authId = encontrado;
+        });
+      }
+    }
+
+    // Passo 2: busca o treino mais recente de quem já tem authId (o que já tinha + o que acabou de achar)
+    const comAuthId = semTreinoCarregado.filter(function(a){ return a.authId; });
+    if(comAuthId.length === 0) return;
+    const idsParaBuscar = comAuthId.map(function(a){ return a.authId; });
     const { data: linhas } = await supabaseClient.from('treinos').select('*').in('aluna_id', idsParaBuscar).order('updated_at', { ascending: false });
     if(!linhas) return;
     const maisRecentePorAluna = {};
     linhas.forEach(function(linha){
       if(!maisRecentePorAluna[linha.aluna_id]) maisRecentePorAluna[linha.aluna_id] = linha; // já vem do mais novo pro mais velho
     });
-    semTreinoCarregado.forEach(function(a){
+    comAuthId.forEach(function(a){
       const treinoRow = maisRecentePorAluna[a.authId];
       if(treinoRow) a.treinoAtual = { fase: treinoRow.fase, volume: treinoRow.volume, dias: treinoRow.dias };
     });
