@@ -1,4 +1,4 @@
-[dna_musa_11.html](https://github.com/user-attachments/files/32175776/dna_musa_11.html)
+[dna_musa_12.html](https://github.com/user-attachments/files/32176531/dna_musa_12.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6571,6 +6571,14 @@ async function sincronizarListaAlunasDoSupabase(){
             mudou = true;
           }
         });
+        if(row.data_fechou_plano && jaExiste.dataFechouPlano !== row.data_fechou_plano){
+          jaExiste.dataFechouPlano = row.data_fechou_plano;
+          mudou = true;
+        }
+        if(row.duracao_plano_dias != null && jaExiste.duracaoPlanoDias !== row.duracao_plano_dias){
+          jaExiste.duracaoPlanoDias = row.duracao_plano_dias;
+          mudou = true;
+        }
         const dataNascConvertida = converterDataNascimentoParaISO(row.data_nascimento);
         if(dataNascConvertida && jaExiste.dataNascimento !== dataNascConvertida){
           jaExiste.dataNascimento = dataNascConvertida;
@@ -6603,6 +6611,8 @@ async function sincronizarListaAlunasDoSupabase(){
         academia: row.academia || '',
         idade: row.idade || null,
         dataNascimento: converterDataNascimentoParaISO(row.data_nascimento),
+        dataFechouPlano: row.data_fechou_plano || null,
+        duracaoPlanoDias: row.duracao_plano_dias || null,
         dataAnamnese: row.data_anamnese || new Date().toISOString().slice(0,10),
         status: 'ok',
         statusLabel: 'Ativa recente',
@@ -10265,7 +10275,34 @@ function isDiaDasMaesHoje(){
 // ===== MÉTRICAS DE NEGÓCIO (painel do Personal) =====
 // Faturamento do mês é calculado a partir dos planos fechados dentro do mês corrente,
 // já que ainda não existe um livro-caixa separado no sistema. Reflete fechamentos reais, não um valor inventado.
-function renderInfoCardGerarTreino(){
+// Busca o treino mais recente de TODAS as ativas que ainda não têm carregado, numa única consulta em
+// bloco (muito mais rápido que buscar uma por uma) — corrige o mesmo problema de fundo do relatório de
+// frequência: a.treinoAtual só carregava quando a ficha dela era aberta manualmente, nunca em conjunto.
+async function carregarTreinosDeTodasAtivas(){
+  if(!supabaseClient) return;
+  const semTreinoCarregado = alunasPersonal.filter(function(a){
+    return statusDoPlano(a) === 'ativas' && !a.treinoAtual && a.authId;
+  });
+  if(semTreinoCarregado.length === 0) return;
+  const idsParaBuscar = semTreinoCarregado.map(function(a){ return a.authId; });
+  try {
+    const { data: linhas } = await supabaseClient.from('treinos').select('*').in('aluna_id', idsParaBuscar).order('updated_at', { ascending: false });
+    if(!linhas) return;
+    const maisRecentePorAluna = {};
+    linhas.forEach(function(linha){
+      if(!maisRecentePorAluna[linha.aluna_id]) maisRecentePorAluna[linha.aluna_id] = linha; // já vem do mais novo pro mais velho
+    });
+    semTreinoCarregado.forEach(function(a){
+      const treinoRow = maisRecentePorAluna[a.authId];
+      if(treinoRow) a.treinoAtual = { fase: treinoRow.fase, volume: treinoRow.volume, dias: treinoRow.dias };
+    });
+  } catch(erroDeRede){
+    console.warn('Sem conexão pra buscar treinos em bloco agora:', erroDeRede);
+  }
+}
+
+async function renderInfoCardGerarTreino(){
+  await carregarTreinosDeTodasAtivas();
   const elSemTreino = document.getElementById('dash-info-gerar-sem-treino');
   const elComTreino = document.getElementById('dash-info-progredir-com-treino');
   // Usa a MESMA base do Controle de Treinos (todas as Ativas, sem exigir e-mail aqui), pra os números
