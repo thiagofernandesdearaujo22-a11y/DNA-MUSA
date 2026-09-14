@@ -1,4 +1,4 @@
-[Uploading dna_musa_8.html…]()
+[dna_musa_10.html](https://github.com/user-attachments/files/32175663/dna_musa_10.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1739,7 +1739,7 @@ renderGrid();
 /* ===== PERSONAL ===== */
 
 const alunasPersonal = [
-  {nome:'Bianca', status:'ok', statusLabel:'Ativa recente', nivel:'A definir', freq:'A definir', email:'biancavmelu5+aluna@icloud.com', telefone:'51989999669', piramide:'A definir (aguardando anamnese real)', objetivo:'A definir (aguardando anamnese real)', restricoes:'A definir', academia:'A definir', dataAnamnese:'2026-09-12', idade:null, dataNascimento:null, senhaGerada:'Hbzjpd177!', statusPlanoManual:'ativas'},
+  {nome:'Bianca (colaboradora)', status:'ok', statusLabel:'Ativa recente', nivel:'A definir', freq:'A definir', email:'biancavmelu5+aluna@icloud.com', telefone:'51989999669', piramide:'A definir (aguardando anamnese real)', objetivo:'A definir (aguardando anamnese real)', restricoes:'A definir', academia:'A definir', dataAnamnese:'2026-09-12', idade:null, dataNascimento:null, senhaGerada:'Hbzjpd177!', statusPlanoManual:'ativas'},
   {nome:'Thiago fernandes de araújo', status:'ok', statusLabel:'Ativa recente', nivel:'Avançado', freq:'5x por semana', email:'thiagofernandesdearaujo22+aluno@gmail.com', telefone:'51986396740', piramide:'1- coxas, 2- costas', objetivo:'Melhorar hábitos', restricoes:'Nenhuma relatada', academia:'Performance', dataAnamnese:'2026-08-30', idade:33, dataNascimento:'1993-03-07', senhaGerada:'Gkgrjf958!', statusPlanoManual:'ativas'},
   {nome:'Michelle Cristiane Ferreira', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'', telefone:'00000000000', piramide:'Abdômen, pernas, cintura e braços', objetivo:'Perder peso e definir', restricoes:'Na adolescência fraturei Clavícula e tornozelo direito.', academia:'', dataAnamnese:'2022-03-09', statusPlanoManual:'vencidas'},
   {nome:'Luana Lenz', status:'lead', statusLabel:'Lead antigo · a confirmar', nivel:'Iniciante', freq:'A definir', email:'', telefone:'00000000000', piramide:'1 Barriga, 2 glúteos, 3 coxas, 4 costas', objetivo:'Emagrecer e definir', restricoes:'Nenhuma relatada', academia:'', dataAnamnese:'2022-03-09', statusPlanoManual:'vencidas'},
@@ -4678,6 +4678,100 @@ function relatarNovaRestricao(nomeAluna, idFormulario){
   mostrarConfirmacaoSalvamento(true, 'Relato salvo. O motor de treino já vai considerar essa informação nas próximas gerações/ajustes.');
 }
 
+// ===== CALENDÁRIO DE TREINOS (mês a mês, usando as datas reais de horariosTreino) =====
+window.__mesCalendarioVisualizado = window.__mesCalendarioVisualizado || {};
+
+function renderCalendarioTreinos(nomeAluna){
+  const idArea = 'calendario-treinos-' + nomeAluna.replace(/[^a-zA-Z0-9]/g,'');
+  // Carrega o progresso de verdade do banco antes de desenhar (mesma correção do relatório de frequência)
+  carregarProgressoParaCalendario(nomeAluna, idArea);
+  return '<div id="' + idArea + '"><p class="txt" style="color:var(--text-faint);">Carregando calendário...</p></div>';
+}
+
+async function carregarProgressoParaCalendario(nomeAluna, idArea){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(a && a.authId){ await carregarProgressoDoSupabase(a.authId, nomeAluna); }
+  if(!window.__mesCalendarioVisualizado[nomeAluna]){
+    const hoje = new Date();
+    window.__mesCalendarioVisualizado[nomeAluna] = { ano: hoje.getFullYear(), mes: hoje.getMonth() };
+  }
+  desenharCalendarioTreinos(nomeAluna, idArea);
+}
+
+function navegarMesCalendario(nomeAluna, direcao){
+  const idArea = 'calendario-treinos-' + nomeAluna.replace(/[^a-zA-Z0-9]/g,'');
+  const atual = window.__mesCalendarioVisualizado[nomeAluna];
+  let novoMes = atual.mes + direcao;
+  let novoAno = atual.ano;
+  if(novoMes < 0){ novoMes = 11; novoAno--; }
+  if(novoMes > 11){ novoMes = 0; novoAno++; }
+  window.__mesCalendarioVisualizado[nomeAluna] = { ano: novoAno, mes: novoMes };
+  desenharCalendarioTreinos(nomeAluna, idArea);
+}
+
+function desenharCalendarioTreinos(nomeAluna, idArea){
+  const el = document.getElementById(idArea);
+  if(!el) return;
+  const { ano, mes } = window.__mesCalendarioVisualizado[nomeAluna];
+  const prog = getProgressoAluna(nomeAluna);
+  const horarios = prog.horariosTreino || [];
+
+  // Agrupa por data (só dia/mês/ano, ignorando hora) pra saber quais dias do mês tiveram treino
+  const diasComTreino = {};
+  horarios.forEach(function(h){
+    if(!h.data) return;
+    const d = new Date(h.data);
+    if(d.getFullYear() === ano && d.getMonth() === mes) diasComTreino[d.getDate()] = true;
+  });
+
+  const nomesMes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const primeiroDiaSemana = new Date(ano, mes, 1).getDay(); // 0=domingo
+  const totalDiasMes = new Date(ano, mes + 1, 0).getDate();
+  const hoje = new Date();
+  const ehMesAtual = hoje.getFullYear() === ano && hoje.getMonth() === mes;
+
+  let celulas = '';
+  for(let i = 0; i < primeiroDiaSemana; i++){ celulas += '<div></div>'; }
+  for(let dia = 1; dia <= totalDiasMes; dia++){
+    const treinou = diasComTreino[dia];
+    const ehHoje = ehMesAtual && hoje.getDate() === dia;
+    const ehFuturo = new Date(ano, mes, dia) > hoje;
+    const corBolinha = treinou ? 'var(--success)' : (ehFuturo ? 'transparent' : 'var(--border)');
+    celulas += '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;' + (ehHoje ? 'background:rgba(212,175,110,0.12);border-radius:8px;' : '') + '">' +
+      '<span style="font-size:11px;color:' + (ehHoje ? 'var(--gold-soft)' : 'var(--text-faint)') + ';">' + dia + '</span>' +
+      '<span style="width:7px;height:7px;border-radius:50%;background:' + corBolinha + ';"></span>' +
+    '</div>';
+  }
+
+  const totalTreinosNoMes = Object.keys(diasComTreino).length;
+
+  el.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+      '<span onclick="navegarMesCalendario(\'' + nomeAluna.replace(/'/g,"\\'") + '\',-1)" style="cursor:pointer;padding:6px 10px;font-size:16px;color:var(--gold-soft);">‹</span>' +
+      '<p class="lbl" style="margin:0;">' + nomesMes[mes] + ' de ' + ano + '</p>' +
+      '<span onclick="navegarMesCalendario(\'' + nomeAluna.replace(/'/g,"\\'") + '\',1)" style="cursor:pointer;padding:6px 10px;font-size:16px;color:var(--gold-soft);">›</span>' +
+    '</div>' +
+    '<div id="grid-touch-' + idArea + '" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;">' +
+      ['D','S','T','Q','Q','S','S'].map(function(l){ return '<div style="font-size:10px;color:var(--text-faint);padding-bottom:4px;">' + l + '</div>'; }).join('') +
+      celulas +
+    '</div>' +
+    '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:8px;">🟢 ' + totalTreinosNoMes + ' dia(s) treinado(s) nesse mês</p>';
+
+  // Suporte a arrastar o dedo (esquerda/direita) além dos botões ‹ ›
+  const grid = document.getElementById('grid-touch-' + idArea);
+  if(grid && !grid.__swipeConectado){
+    grid.__swipeConectado = true;
+    let xInicial = null;
+    grid.addEventListener('touchstart', function(e){ xInicial = e.touches[0].clientX; }, { passive: true });
+    grid.addEventListener('touchend', function(e){
+      if(xInicial === null) return;
+      const diffX = e.changedTouches[0].clientX - xInicial;
+      if(Math.abs(diffX) > 40){ navegarMesCalendario(nomeAluna, diffX > 0 ? -1 : 1); }
+      xInicial = null;
+    }, { passive: true });
+  }
+}
+
 function renderSecaoColapsavel(titulo, conteudoHtml, idUnico){
   const estaAberta = !!secoesColapsaveisAbertas[idUnico];
   return '<div class="section-colapsavel" style="margin-top:22px;">' +
@@ -4970,16 +5064,30 @@ function alunasAtivasElegiveis(){
 }
 
 async function iniciarGeracaoParaSemTreino(){
-  const elegiveis = alunasAtivasElegiveis().filter(function(a){ return !a.treinoAtual; });
-  if(elegiveis.length === 0){ alert('Todas as alunas ativas já têm treino. Use "Progredir treino" pra evoluir quem já tem.'); return; }
-  if(!confirm('Isso vai GERAR o primeiro treino de ' + elegiveis.length + ' aluna(s) ativa(s) que ainda não têm nenhum. Continuar?')) return;
+  const todasAtivasSemTreino = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas' && !a.treinoAtual; });
+  const elegiveis = todasAtivasSemTreino.filter(function(a){ return a.email; });
+  const semEmail = todasAtivasSemTreino.length - elegiveis.length;
+  if(elegiveis.length === 0){
+    alert(semEmail > 0
+      ? 'Todas as ' + semEmail + ' aluna(s) ativa(s) sem treino estão sem e-mail cadastrado, então nenhuma pode ser processada agora. Cadastra o e-mail delas primeiro.'
+      : 'Todas as alunas ativas já têm treino. Use "Progredir treino" pra evoluir quem já tem.');
+    return;
+  }
+  if(!confirm('Isso vai GERAR o primeiro treino de ' + elegiveis.length + ' aluna(s) ativa(s) que ainda não têm nenhum.' + (semEmail > 0 ? ' (' + semEmail + ' outra(s) ficaram de fora por não ter e-mail cadastrado.)' : '') + ' Continuar?')) return;
   await executarGeracaoEmMassa(elegiveis, 'Geração');
 }
 
 async function iniciarProgressaoParaComTreino(){
-  const elegiveis = alunasAtivasElegiveis().filter(function(a){ return !!a.treinoAtual; });
-  if(elegiveis.length === 0){ alert('Nenhuma aluna ativa com treino já existente pra progredir agora.'); return; }
-  if(!confirm('Isso vai PROGREDIR o treino de ' + elegiveis.length + ' aluna(s) ativa(s) que já têm treino. Continuar?')) return;
+  const todasAtivasComTreino = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas' && !!a.treinoAtual; });
+  const elegiveis = todasAtivasComTreino.filter(function(a){ return a.email; });
+  const semEmail = todasAtivasComTreino.length - elegiveis.length;
+  if(elegiveis.length === 0){
+    alert(semEmail > 0
+      ? 'As ' + semEmail + ' aluna(s) com treino pra progredir estão sem e-mail cadastrado, então nenhuma pode ser processada agora. Cadastra o e-mail delas primeiro.'
+      : 'Nenhuma aluna ativa com treino já existente pra progredir agora.');
+    return;
+  }
+  if(!confirm('Isso vai PROGREDIR o treino de ' + elegiveis.length + ' aluna(s) ativa(s) que já têm treino.' + (semEmail > 0 ? ' (' + semEmail + ' outra(s) ficaram de fora por não ter e-mail cadastrado.)' : '') + ' Continuar?')) return;
   await executarGeracaoEmMassa(elegiveis, 'Progressão');
 }
 
@@ -5637,6 +5745,7 @@ function abrirResumoCompletoAluna(nomeAluna){
     renderSecaoColapsavel('Academia', '<div class="info-box"><p class="txt">' + (a.academia || 'Não informado') + '</p></div>', 'academia-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Plano fechado', renderPlanoFechadoConteudo(a), 'planofechado-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Transformar um dia em Tabata de casa', renderFerramentaTabata(a), 'tabata-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderSecaoColapsavel('Calendário de treinos', renderCalendarioTreinos(a.nome), 'calendario-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Roda da vida', renderRodaDaVidaNaFicha(a.nome), 'rodadavida-' + a.nome.replace(/[^a-zA-Z0-9]/g,''));
 }
 
@@ -6504,11 +6613,33 @@ async function sincronizarListaAlunasDoSupabase(){
       novas++;
     });
 
+    desambiguarNomesDuplicados();
     if(novas > 0 || atualizadas > 0) renderAlunas();
     return { novas: novas, atualizadas: atualizadas, erro: null };
   } catch(erroDeRede){
     return { novas: 0, erro: 'sem conexão com o Supabase agora' };
   }
+}
+
+// Evita o bug de "mexer na pessoa errada" quando duas alunas têm exatamente o mesmo nome (ex: duas
+// "Bianca", duas "Agatha") — o sistema usa o nome pra saber em quem mexer, então nomes repetidos faziam
+// qualquer ação (mover de aba, gerar treino, etc.) acertar sempre a primeira da lista, nunca a certa.
+// Aqui, sempre que dois nomes batem, cada uma ganha um diferenciador estável (fim do telefone, ou início
+// do e-mail se não tiver telefone) — roda de novo a cada sincronização sem duplicar o diferenciador.
+function desambiguarNomesDuplicados(){
+  const contagem = {};
+  alunasPersonal.forEach(function(a){
+    const base = a.nomeBase || a.nome;
+    contagem[base] = (contagem[base] || 0) + 1;
+  });
+  alunasPersonal.forEach(function(a){
+    const base = a.nomeBase || a.nome;
+    if(contagem[base] > 1){
+      a.nomeBase = base;
+      const identificador = a.telefone ? a.telefone.slice(-4) : (a.email ? a.email.slice(0, 6) : (a.dataAnamnese || '?'));
+      a.nome = base + ' (' + identificador + ')';
+    }
+  });
 }
 
 function showPersonalView(which){
@@ -7606,9 +7737,19 @@ function converterDataBrParaDate(dataBr){
 }
 
 // --- 1) Frequência de treino da semana ---
-function calcularRelatorioFrequenciaSemanal(){
+async function calcularRelatorioFrequenciaSemanal(){
   const ativas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
   const totalDiasSemana = totalDiasDeTreino();
+
+  // Busca o progresso DE VERDADE de cada uma no banco antes de contar. Até agora, o painel do
+  // Personal nunca carregava esse dado — só carregava quando a própria aluna fazia login nesse
+  // mesmo navegador — então o relatório saía errado: pra menos em quem realmente treinou, e podia
+  // mostrar dado de sessão antiga/errada em quem não tinha treinado nada.
+  for(let i = 0; i < ativas.length; i++){
+    const a = ativas[i];
+    if(a.authId){ await carregarProgressoDoSupabase(a.authId, a.nome); }
+  }
+
   const linhas = ativas.map(function(a){
     const prog = getProgressoAluna(a.nome);
     const concluidos = (prog.diasConcluidos[prog.semana] || []).length;
@@ -7633,7 +7774,7 @@ async function gerarRelatorioFrequenciaSemanal(){
   const area = document.getElementById('relatorio-frequencia-area');
   if(!area) return;
   area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Calculando...</p>';
-  const r = calcularRelatorioFrequenciaSemanal();
+  const r = await calcularRelatorioFrequenciaSemanal();
   window.__textoRelatorioFrequencia = montarTextoRelatorioFrequencia(r);
   await salvarCatalogoPersonal('relatorio_frequencia', r.dataGeracao, r);
   area.innerHTML = '<div class="info-box"><p class="txt" style="white-space:pre-wrap;font-size:12px;">' + window.__textoRelatorioFrequencia.replace(/\n/g,'<br>') + '</p></div>' +
@@ -10127,9 +10268,17 @@ function isDiaDasMaesHoje(){
 function renderInfoCardGerarTreino(){
   const elSemTreino = document.getElementById('dash-info-gerar-sem-treino');
   const elComTreino = document.getElementById('dash-info-progredir-com-treino');
-  const ativasElegiveis = alunasAtivasElegiveis();
-  if(elSemTreino) elSemTreino.textContent = ativasElegiveis.filter(function(a){ return !a.treinoAtual; }).length + ' aluna(s) ativa(s) ainda sem treino';
-  if(elComTreino) elComTreino.textContent = ativasElegiveis.filter(function(a){ return !!a.treinoAtual; }).length + ' aluna(s) ativa(s) com treino pra progredir';
+  // Usa a MESMA base do Controle de Treinos (todas as Ativas, sem exigir e-mail aqui), pra os números
+  // baterem entre as duas telas. O e-mail só é exigido de verdade na hora de processar (mais abaixo),
+  // porque sem ele não tem como salvar o treino no banco — mas isso agora aparece avisado, não escondido.
+  const todasAtivas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  const semTreino = todasAtivas.filter(function(a){ return !a.treinoAtual; });
+  const comTreino = todasAtivas.filter(function(a){ return !!a.treinoAtual; });
+  const semTreinoSemEmail = semTreino.filter(function(a){ return !a.email; }).length;
+  const comTreinoSemEmail = comTreino.filter(function(a){ return !a.email; }).length;
+
+  if(elSemTreino) elSemTreino.textContent = semTreino.length + ' aluna(s) ativa(s) ainda sem treino' + (semTreinoSemEmail > 0 ? ' (' + semTreinoSemEmail + ' sem e-mail, não entram na geração)' : '');
+  if(elComTreino) elComTreino.textContent = comTreino.length + ' aluna(s) ativa(s) com treino pra progredir' + (comTreinoSemEmail > 0 ? ' (' + comTreinoSemEmail + ' sem e-mail, não entram na progressão)' : '');
 }
 
 function calcularMetricasNegocio(){
