@@ -1,4 +1,4 @@
-[dna_musa_18.html](https://github.com/user-attachments/files/32270252/dna_musa_18.html)
+[dna_musa_19.html](https://github.com/user-attachments/files/32270280/dna_musa_19.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -3690,17 +3690,30 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
   }
 
   const dias = [];
+  const padroesUsadosPorGrupoNaSemana = {}; // grupoPrincipal -> padrões de movimento já usados em dias anteriores dessa semana
 
   for(let d = 0; d < numDias; d++){
     const ehDiaEnfase = d % 2 === 0; // dias pares = ênfase, ímpares = secundário (padrão validado com a Michele/Andriele)
     const grupoPrincipal = ehDiaEnfase ? enfase : (secundario || enfase);
     const grupoEstimulo = ehDiaEnfase ? secundario : enfase;
     const padroesUsadosNoDia = {}; // compartilhado entre ênfase e estímulo, pra nunca repetir padrão de movimento no mesmo dia
+    // Se esse MESMO grupo principal já apareceu num dia anterior dessa semana (comum em frequências
+    // altas, 5-6x), herda os padrões de movimento usados lá — garante que pelo menos o exercício
+    // principal saia diferente entre os dois dias, mesmo que o volume/série continue igual.
+    if(padroesUsadosPorGrupoNaSemana[grupoPrincipal]){
+      Object.assign(padroesUsadosNoDia, padroesUsadosPorGrupoNaSemana[grupoPrincipal]);
+    }
 
-    let exPrincipais = exerciciosDoGrupo(grupoPrincipal, padroesUsadosNoDia).map(function(nome, posicao){
+    const nomesEscolhidosPrincipal = exerciciosDoGrupo(grupoPrincipal, padroesUsadosNoDia);
+    let exPrincipais = nomesEscolhidosPrincipal.map(function(nome, posicao){
       // ITEM 11: rotação por família, só rotaciona a partir do 2º ciclo (indiceCiclo > 0)
       const nomeFinal = (perfil.indiceCiclo && perfil.indiceCiclo > 0) ? rotacionarExercicio(nome, false, perfil.indiceCiclo) : nome;
       return nomeFinal + ' · ' + (perfil.bloco === 'deload' ? 2 : (perfil.nivel === 'Avançado' ? 4 : 3)) + 'x' + reps;
+    });
+    // Registra os padrões desse grupo principal pra caso ele se repita mais adiante nessa mesma semana
+    padroesUsadosPorGrupoNaSemana[grupoPrincipal] = padroesUsadosPorGrupoNaSemana[grupoPrincipal] || {};
+    nomesEscolhidosPrincipal.forEach(function(nome){
+      padroesUsadosPorGrupoNaSemana[grupoPrincipal][obterPalavraChaveMovimento(nome)] = true;
     });
     // Fase de emagrecimento + nível qualifica + técnica aprovada: aumenta densidade combinando os 2 primeiros como bi-set
     if(perfil.bloco !== 'deload' && perfil.fase === 'Emagrecimento' && perfil.nivel !== 'Iniciante' && perfil.temTecnicaAprovada && exPrincipais.length >= 2){
@@ -3779,15 +3792,20 @@ function gerarDiasSuperiores(perfil, numDias){
   const seriesCostas = perfil.bloco === 'deload' ? 2 : (perfil.nivel === 'Avançado' ? 3 : 2);
   const inclureGluteoMedio = perfil.enfase === 'Glúteo';
   const dias = [];
+  const padroesUsadosPorGrupoNaSemana = {}; // "Costas"/"Ombro"/"Peito"/"Bíceps"/"Tríceps" -> padrões já usados em dias anteriores
 
   // Ordem composto-antes-de-isolado (item 3): Costas (puxada, composto) → Ombro/Peito (composto/misto) → Bíceps/Tríceps (isolado)
   for(let d = 0; d < numDias; d++){
     const padroesUsadosNoDia = {};
+    if(padroesUsadosPorGrupoNaSemana['Costas']) Object.assign(padroesUsadosNoDia, padroesUsadosPorGrupoNaSemana['Costas']);
 
-    // Costas: variedade real do banco (51 opções), sempre protegida com 2-3 exercícios, nunca menos
-    const candidatosCostas = selecionarExerciciosVariados('Costas', (perfil.nomeAluna || '') + '_costas', 3, perfil.indiceCiclo, null, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
+    // Costas: variedade real do banco (51 opções), sempre protegida com 2-3 exercícios, nunca menos.
+    // Herda os padrões de Costas já usados em dias anteriores dessa semana, pra nunca sair idêntica.
+    const candidatosCostas = selecionarExerciciosVariados('Costas', (perfil.nomeAluna || '') + '_costas', 3, perfil.indiceCiclo, padroesUsadosNoDia, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
     const nomesCostas = candidatosCostas || ['Remada Articular Aberta', 'Remada Articular Fechada', 'Crucifixo Inverso'];
     nomesCostas.forEach(function(n){ padroesUsadosNoDia[obterPalavraChaveMovimento(n.toUpperCase())] = true; });
+    padroesUsadosPorGrupoNaSemana['Costas'] = padroesUsadosPorGrupoNaSemana['Costas'] || {};
+    nomesCostas.forEach(function(n){ padroesUsadosPorGrupoNaSemana['Costas'][obterPalavraChaveMovimento(n.toUpperCase())] = true; });
     let ex = [
       nomesCostas[0] + ' · ' + seriesCostas + 'x' + reps,
       nomesCostas[1] + ' · ' + seriesCostas + 'x' + reps
@@ -3796,12 +3814,17 @@ function gerarDiasSuperiores(perfil, numDias){
       ex.push(nomesCostas[2] + ' · ' + Math.max(2, seriesCostas - 1) + 'x' + reps);
     }
 
-    // Ombro/Peito/Bíceps/Tríceps reais, alternando qual par recebe ênfase a cada dia (garante ≥2x/semana pra cada, em 3+ dias)
+    // Ombro/Peito/Bíceps/Tríceps reais, alternando qual par recebe ênfase a cada dia (garante ≥2x/semana pra cada, em 3+ dias).
+    // Cada grupo também herda os padrões já usados nele mesmo em dias anteriores dessa semana.
     const gruposSecundarios = (d % 2 === 0) ? ['Ombro', 'Peito'] : ['Bíceps', 'Tríceps'];
     gruposSecundarios.forEach(function(grupo){
-      const candidato = selecionarExerciciosVariados(grupo, (perfil.nomeAluna || '') + '_' + grupo, 1, perfil.indiceCiclo, null, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
+      const padroesDesseGrupo = {};
+      if(padroesUsadosPorGrupoNaSemana[grupo]) Object.assign(padroesDesseGrupo, padroesUsadosPorGrupoNaSemana[grupo]);
+      const candidato = selecionarExerciciosVariados(grupo, (perfil.nomeAluna || '') + '_' + grupo, 1, perfil.indiceCiclo, padroesDesseGrupo, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
       if(candidato && candidato[0]){
         ex.push(candidato[0] + ' · ' + (perfil.nivel === 'Avançado' ? 3 : 2) + 'x' + reps);
+        padroesUsadosPorGrupoNaSemana[grupo] = padroesUsadosPorGrupoNaSemana[grupo] || {};
+        padroesUsadosPorGrupoNaSemana[grupo][obterPalavraChaveMovimento(candidato[0].toUpperCase())] = true;
       }
     });
 
