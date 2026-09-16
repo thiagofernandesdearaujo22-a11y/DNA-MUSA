@@ -1,4 +1,4 @@
-[dna_musa_15.html](https://github.com/user-attachments/files/32177422/dna_musa_15.html)
+[dna_musa_16.html](https://github.com/user-attachments/files/32268122/dna_musa_16.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5175,6 +5175,20 @@ function finalizarArraste(){
   atualizarDiaPersonalNaTela(diaIndex);
 }
 
+function moverDiaTreino(nomeAluna, di, direcao){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !a.treinoAtual) return;
+  const dias = a.treinoAtual.dias;
+  const novoIndice = di + direcao;
+  if(novoIndice < 0 || novoIndice >= dias.length) return;
+  const temp = dias[di];
+  dias[di] = dias[novoIndice];
+  dias[novoIndice] = temp;
+  salvarTreinoNoSupabase(a.authId, a.treinoAtual);
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+}
+
 function moverExercicioTreino(diaIndex, exIndex, direcao){
   const a = alunaAberta;
   const diaAtual = a.treinoAtual.dias[diaIndex];
@@ -5794,6 +5808,10 @@ function openAlunaDetail(i){
       const letra = letraMatch ? letraMatch[1] : (di + 1);
       treinoHtml += '<div style="border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;">' +
         '<div style="display:flex;align-items:center;gap:12px;padding:12px;cursor:pointer;" onclick="alternarDiaExpandidoPersonal(' + di + ')">' +
+          '<span style="display:flex;flex-direction:column;flex-shrink:0;line-height:1;">' +
+            '<span style="font-size:12px;cursor:pointer;color:' + (di === 0 ? 'var(--border)' : 'var(--gold-soft)') + ';" onclick="event.stopPropagation();' + (di === 0 ? '' : 'moverDiaTreino(\'' + a.nome.replace(/'/g,"\\'") + '\',' + di + ',-1)') + '">▲</span>' +
+            '<span style="font-size:12px;cursor:pointer;color:' + (di === a.treinoAtual.dias.length - 1 ? 'var(--border)' : 'var(--gold-soft)') + ';" onclick="event.stopPropagation();' + (di === a.treinoAtual.dias.length - 1 ? '' : 'moverDiaTreino(\'' + a.nome.replace(/'/g,"\\'") + '\',' + di + ',1)') + '">▼</span>' +
+          '</span>' +
           '<div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="font-family:\'Playfair Display\',serif;font-size:16px;font-weight:700;color:#1A1409;">' + letra + '</span></div>' +
           '<div style="flex:1;"><p style="font-size:13px;font-weight:600;margin:0;">' + d.n + '</p><p id="dia-titulo-' + di + '" style="font-size:11px;color:var(--text-faint);margin:0;">' + (d.foco.indexOf(' · ') !== -1 ? d.foco.split(' · ').slice(1).join(' · ') : d.foco) + '</p></div>' +
           '<i class="ti ti-chevron-down" style="color:var(--text-faint);"></i>' +
@@ -7123,7 +7141,6 @@ const exerciciosBanco = [
   {nome:'ABDUÇÃO QUADRIL NO SOLO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=tTwLVwhe8Bg', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'CADEIRA EXTENSORA UNI', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/HRjzMl7a-IY', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'Glúteo 4 apoios com caneleiras', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/JmnIUWP5gno', camada:'acessorio', nivelMinimo:'Iniciante'},
-  {nome:'CADEIRINHA', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/BOHl-YMWFnk', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'EDUCATIVO AGACHAMENTO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/WP-gDofgT8c', camada:'base', nivelMinimo:'Iniciante'},
   {nome:'Extensão de quadril  na polia com tronco inclinado', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/dvsgo4Gj-hA', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'FLEXÃO DE QUADRIL DEITADO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/GJ4DAuWxuVU', camada:'acessorio', nivelMinimo:'Iniciante'},
@@ -11140,6 +11157,10 @@ function renderMeuProgressoConteudo(container, nome, a){
   // Check-in emocional do dia + hábitos com pontuação (o que ela preenche, vem depois do que ela olha)
   html += '<div id="checkin-habitos-area"></div>';
 
+  // Calendário de treinos (mês a mês, arrasta ou clica nas setinhas pra trocar de mês)
+  html += '<p class="section-label" style="margin-top:20px;">Meu calendário de treinos</p>';
+  html += '<div class="info-box" id="calendario-treinos-aluna-' + nome.replace(/[^a-zA-Z0-9]/g,'') + '"></div>';
+
   // Linha do tempo de composição (peso/gordura), cruzando com o que já construímos
   html += '<p class="section-label" style="margin-top:20px;">Linha do tempo</p>';
   const historico = (a.composicaoHistorico || []).slice();
@@ -11206,6 +11227,18 @@ function renderMeuProgressoConteudo(container, nome, a){
 
   container.innerHTML = html;
   renderCheckInEHabitos(nome);
+  renderCalendarioTreinosAluna(nome);
+}
+
+// Versão do calendário pro login da própria aluna: o progresso dela já está carregado nesse momento
+// (foi trazido no login), então desenha direto, sem precisar buscar nada de novo no banco.
+function renderCalendarioTreinosAluna(nome){
+  const idArea = 'calendario-treinos-aluna-' + nome.replace(/[^a-zA-Z0-9]/g,'');
+  if(!window.__mesCalendarioVisualizado[nome]){
+    const hoje = new Date();
+    window.__mesCalendarioVisualizado[nome] = { ano: hoje.getFullYear(), mes: hoje.getMonth() };
+  }
+  desenharCalendarioTreinos(nome, idArea);
 }
 
 function calcularEstatisticasAluna(nome){
