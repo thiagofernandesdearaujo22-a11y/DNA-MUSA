@@ -1,4 +1,4 @@
-[dna_musa_16.html](https://github.com/user-attachments/files/32268122/dna_musa_16.html)
+[Uploading dna_musa_17.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5184,7 +5184,7 @@ function moverDiaTreino(nomeAluna, di, direcao){
   const temp = dias[di];
   dias[di] = dias[novoIndice];
   dias[novoIndice] = temp;
-  salvarTreinoNoSupabase(a.authId, a.treinoAtual);
+  sincronizarTreinoComSupabase(a); // mesmo caminho seguro de sempre (com o plano B do backup pra quem ainda não tem login)
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
 }
@@ -5690,6 +5690,11 @@ async function buscarTreinoRealDaAluna(a, i){
       const { data: treinoData } = await supabaseClient.from('treinos').select('*').eq('aluna_id', alunaRow.auth_id).order('updated_at', { ascending: false }).limit(1).maybeSingle();
       if(treinoData){
         a.treinoAtual = { fase: treinoData.fase, volume: treinoData.volume, dias: treinoData.dias };
+        if(alunaAberta === a) openAlunaDetail(i);
+      } else if(alunaRow.treino_atual_backup){
+        // Plano B: ela tem login, mas por algum motivo a tabela oficial ficou sem essa linha —
+        // usa o backup, que é exatamente o que faltava checar aqui antes (bug real, corrigido agora)
+        a.treinoAtual = alunaRow.treino_atual_backup;
         if(alunaAberta === a) openAlunaDetail(i);
       } else {
         const statusEl = document.getElementById('treino-status-inicial');
@@ -10302,42 +10307,44 @@ async function carregarTreinosDeTodasAtivas(){
   });
   if(semTreinoCarregado.length === 0) return;
   try {
-    // Passo 1: quem ainda não tem o authId carregado localmente, busca em bloco por e-mail agora
-    // (muitas alunas migradas antigas nunca tiveram esse campo sincronizado direito até aqui).
-    // Já aproveita e traz o "backup" do treino também — pra quem nunca teve login de verdade
-    // criado (auth_id nulo), o treino é guardado direto nessa coluna, como plano B.
-    const semAuthId = semTreinoCarregado.filter(function(a){ return !a.authId; });
-    if(semAuthId.length > 0){
-      const emailsParaBuscar = semAuthId.map(function(a){ return a.email; });
-      const { data: linhasAlunas } = await supabaseClient.from('alunas').select('email, auth_id, treino_atual_backup').in('email', emailsParaBuscar);
-      if(linhasAlunas){
-        const infoPorEmail = {};
-        linhasAlunas.forEach(function(l){ if(l.email) infoPorEmail[l.email.toLowerCase()] = l; });
-        semAuthId.forEach(function(a){
-          const info = infoPorEmail[a.email.toLowerCase()];
-          if(!info) return;
-          if(info.auth_id){
-            a.authId = info.auth_id;
-          } else if(info.treino_atual_backup){
-            a.treinoAtual = info.treino_atual_backup; // plano B: sem login de verdade, mas com treino salvo no backup
-          }
+    // Busca de uma vez, pra TODAS (independente de já ter authId local ou não): o auth_id atualizado
+    // e o backup do treino. O backup serve de plano B em dois casos: quem nunca teve login de verdade
+    // criado, E quem tem login mas por algum motivo a tabela oficial de treinos ficou sem essa linha
+    // (foi exatamente o que causou o treino da Joice "sumir" — corrigido agora).
+    const emailsParaBuscar = semTreinoCarregado.map(function(a){ return a.email; });
+    const { data: linhasAlunas } = await supabaseClient.from('alunas').select('email, auth_id, treino_atual_backup').in('email', emailsParaBuscar);
+    const infoPorEmail = {};
+    if(linhasAlunas){
+      linhasAlunas.forEach(function(l){ if(l.email) infoPorEmail[l.email.toLowerCase()] = l; });
+      semTreinoCarregado.forEach(function(a){
+        const info = infoPorEmail[a.email.toLowerCase()];
+        if(info && info.auth_id) a.authId = info.auth_id;
+      });
+    }
+
+    // Busca o treino mais recente de quem tem authId
+    const comAuthId = semTreinoCarregado.filter(function(a){ return a.authId; });
+    if(comAuthId.length > 0){
+      const idsParaBuscar = comAuthId.map(function(a){ return a.authId; });
+      const { data: linhas } = await supabaseClient.from('treinos').select('*').in('aluna_id', idsParaBuscar).order('updated_at', { ascending: false });
+      if(linhas){
+        const maisRecentePorAluna = {};
+        linhas.forEach(function(linha){
+          if(!maisRecentePorAluna[linha.aluna_id]) maisRecentePorAluna[linha.aluna_id] = linha; // já vem do mais novo pro mais velho
+        });
+        comAuthId.forEach(function(a){
+          const treinoRow = maisRecentePorAluna[a.authId];
+          if(treinoRow) a.treinoAtual = { fase: treinoRow.fase, volume: treinoRow.volume, dias: treinoRow.dias };
         });
       }
     }
 
-    // Passo 2: busca o treino mais recente de quem tem authId (pulando quem já resolveu pelo backup acima)
-    const comAuthId = semTreinoCarregado.filter(function(a){ return a.authId && !a.treinoAtual; });
-    if(comAuthId.length === 0) return;
-    const idsParaBuscar = comAuthId.map(function(a){ return a.authId; });
-    const { data: linhas } = await supabaseClient.from('treinos').select('*').in('aluna_id', idsParaBuscar).order('updated_at', { ascending: false });
-    if(!linhas) return;
-    const maisRecentePorAluna = {};
-    linhas.forEach(function(linha){
-      if(!maisRecentePorAluna[linha.aluna_id]) maisRecentePorAluna[linha.aluna_id] = linha; // já vem do mais novo pro mais velho
-    });
-    comAuthId.forEach(function(a){
-      const treinoRow = maisRecentePorAluna[a.authId];
-      if(treinoRow) a.treinoAtual = { fase: treinoRow.fase, volume: treinoRow.volume, dias: treinoRow.dias };
+    // Quem ainda ficou sem treino (sem authId, ou com authId mas sem linha na tabela oficial):
+    // usa o backup, se tiver
+    semTreinoCarregado.forEach(function(a){
+      if(a.treinoAtual) return;
+      const info = infoPorEmail[a.email.toLowerCase()];
+      if(info && info.treino_atual_backup) a.treinoAtual = info.treino_atual_backup;
     });
   } catch(erroDeRede){
     console.warn('Sem conexão pra buscar treinos em bloco agora:', erroDeRede);
