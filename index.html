@@ -2771,7 +2771,7 @@ function renderCheckInEHabitos(nome){
 
   function botaoEscala(campo, valorAtual){
     return [1,2,3,4,5].map(function(n){
-      return '<span class="chip" style="flex:1;text-align:center;' + (valorAtual === n ? 'background:var(--gold-soft);color:#1A1409;border-color:var(--gold-soft);' : '') + '" onclick="salvarCampoCheckInEmocional(\'' + nome.replace(/'/g,"\\'") + '\',\'' + campo + '\',' + n + ')">' + n + '</span>';
+      return '<span class="chip" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;padding:0;' + (valorAtual === n ? 'background:var(--gold-soft);color:#1A1409;border-color:var(--gold-soft);' : '') + '" onclick="salvarCampoCheckInEmocional(\'' + nome.replace(/'/g,"\\'") + '\',\'' + campo + '\',' + n + ')">' + n + '</span>';
     }).join('');
   }
 
@@ -2783,9 +2783,9 @@ function renderCheckInEHabitos(nome){
       ? '<span class="chip" style="cursor:pointer;margin-bottom:16px;display:inline-block;" onclick="voltarParaPreenchimentoDeHoje(\'' + nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-arrow-back" style="font-size:11px;vertical-align:-1px;margin-right:4px;"></i>Voltar pra hoje</span>'
       : '<span class="chip" style="cursor:pointer;margin-bottom:16px;display:inline-block;" onclick="abrirPreenchimentoDeOntem(\'' + nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-calendar-time" style="font-size:11px;vertical-align:-1px;margin-right:4px;"></i>Esqueci de preencher ontem</span>') +
     '<div class="info-box" style="margin-bottom:14px;">' +
-      '<p class="txt" style="font-size:12px;margin-bottom:8px;">Humor</p><div style="display:flex;justify-content:space-between;gap:6px;margin-bottom:16px;">' + botaoEscala('humor', checkin.humor) + '</div>' +
-      '<p class="txt" style="font-size:12px;margin-bottom:8px;">Ansiedade</p><div style="display:flex;justify-content:space-between;gap:6px;margin-bottom:16px;">' + botaoEscala('ansiedade', checkin.ansiedade) + '</div>' +
-      '<p class="txt" style="font-size:12px;margin-bottom:8px;">Disposição</p><div style="display:flex;justify-content:space-between;gap:6px;">' + botaoEscala('disposicao', checkin.disposicao) + '</div>' +
+      '<p class="txt" style="font-size:12px;margin-bottom:8px;text-align:center;">Humor</p><div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;">' + botaoEscala('humor', checkin.humor) + '</div>' +
+      '<p class="txt" style="font-size:12px;margin-bottom:8px;text-align:center;">Ansiedade</p><div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;">' + botaoEscala('ansiedade', checkin.ansiedade) + '</div>' +
+      '<p class="txt" style="font-size:12px;margin-bottom:8px;text-align:center;">Disposição</p><div style="display:flex;justify-content:center;gap:10px;">' + botaoEscala('disposicao', checkin.disposicao) + '</div>' +
     '</div>' +
     '<div class="info-box" style="margin-bottom:14px;">' +
       '<p class="txt" style="font-size:12px;margin-bottom:4px;">Quantas horas você dormiu?</p>' +
@@ -3532,6 +3532,25 @@ function ehExercicioElastico(e){
 // Regra fixa da metodologia: nunca dois exercícios de Afundo (nem variações dele) no mesmo treino.
 // Essa é uma trava final, roda depois de tudo pronto, garantindo isso não importa por qual caminho
 // um segundo Afundo tenha entrado no dia (reforço de tempo, bi-set, etc.)
+// Nunca repetir o mesmo exercício duas vezes no mesmo treino (mesmo cruzando bi-sets)
+function extrairTodosNomesDeLinha(linha){
+  if(linha.indexOf('|||') !== -1){
+    const partes = linha.split('|||');
+    return [(partes[1]||'').split(' · ')[0], (partes[2]||'').split(' · ')[0]].filter(Boolean);
+  }
+  return [linha.split(' · ')[0]];
+}
+
+function removerExerciciosExatamenteRepetidosNoDia(dia){
+  const nomesVistos = {};
+  dia.ex = dia.ex.filter(function(linha){
+    const nomes = extrairTodosNomesDeLinha(linha);
+    const jaRepetiu = nomes.some(function(n){ return nomesVistos[n.toUpperCase().trim()]; });
+    nomes.forEach(function(n){ nomesVistos[n.toUpperCase().trim()] = true; });
+    return !jaRepetiu;
+  });
+}
+
 function removerVariacoesDuplicadasDeAfundo(dia){
   let jaTemAfundo = false;
   dia.ex = dia.ex.filter(function(linha){
@@ -3721,6 +3740,34 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
         ultimoDia.ex.push(opcoesPosterior[0] + ' · ' + seriesDoExercicio + 'x' + (reps + 2) + ' (volume mínimo de posteriores: 50% do volume de quadríceps, garantido pela metodologia)');
       }
     }
+
+    // Regra especial quando Glúteos é a ênfase: tanto quadríceps quanto posteriores precisam somar
+    // pelo menos 50% do volume semanal de glúteos, cada um — senão os dias de glúteos ficam
+    // desequilibrados. Só entra em ação quando glúteos é a prioridade real da aluna.
+    if(perfil.enfase === 'Glúteos'){
+      const seriesGluteos = totaisSemana['Glúteos'] || 0;
+      const minimoQuadriceps = Math.ceil(seriesGluteos * 0.5);
+      const minimoPosteriorGluteo = Math.ceil(seriesGluteos * 0.5);
+      const seriesQuadricepsAtual = totaisSemana['Quadríceps'] || 0;
+      const seriesPosteriorAtual = totaisSemana['Isquiotibiais'] || 0;
+
+      if(seriesGluteos > 0 && seriesQuadricepsAtual < minimoQuadriceps){
+        const opcoesQuad = exerciciosDoGrupo('Quadríceps', {});
+        if(opcoesQuad && opcoesQuad[0]){
+          const faltamQuad = minimoQuadriceps - seriesQuadricepsAtual;
+          const seriesQuad = Math.max(perfil.bloco === 'deload' ? 2 : 3, faltamQuad);
+          dias[dias.length - 1].ex.push(opcoesQuad[0] + ' · ' + seriesQuad + 'x' + reps + ' (volume mínimo de quadríceps: 50% do volume de glúteos, garantido pela metodologia)');
+        }
+      }
+      if(seriesGluteos > 0 && seriesPosteriorAtual < minimoPosteriorGluteo){
+        const opcoesPost = exerciciosDoGrupo('Posterior', {});
+        if(opcoesPost && opcoesPost[0]){
+          const faltamPost = minimoPosteriorGluteo - seriesPosteriorAtual;
+          const seriesPost = Math.max(perfil.bloco === 'deload' ? 2 : 3, faltamPost);
+          dias[dias.length - 1].ex.push(opcoesPost[0] + ' · ' + seriesPost + 'x' + (reps + 2) + ' (volume mínimo de posteriores: 50% do volume de glúteos, garantido pela metodologia)');
+        }
+      }
+    }
   }
 
   return dias;
@@ -3904,6 +3951,7 @@ function gerarTreinoSemanal(perfil){
       }
     }
     removerVariacoesDuplicadasDeAfundo(dia);
+    removerExerciciosExatamenteRepetidosNoDia(dia);
     const duracaoFinal = calcularDuracaoDia(dia);
     dia.duracaoEstimadaMin = Math.round(duracaoFinal);
     dia.excedeTempo = perfil.tempoDisponivel ? duracaoFinal > perfil.tempoDisponivel : false;
@@ -5323,13 +5371,14 @@ function mostrarOpcoesDeTrocaMesmoAssim(diaIndex, exIndex){
     return (!grupo || grupoDoEx === grupo) && e.nome.toUpperCase() !== nomeAtual.toUpperCase();
   });
 
-  // Motor 5: prioriza mesma família biomecânica primeiro (troca com justificativa funcional, não aleatória)
+  // Motor 5: prioriza mesma família biomecânica primeiro (troca com justificativa funcional, não aleatória);
+  // dentro de cada grupo (mesma família ou não), organiza em ordem alfabética
   opcoes.sort(function(x, y){
     const xMesmaFamilia = familiaAtual && obterFamiliaBiomecanica(x.nome) === familiaAtual;
     const yMesmaFamilia = familiaAtual && obterFamiliaBiomecanica(y.nome) === familiaAtual;
     if(xMesmaFamilia && !yMesmaFamilia) return -1;
     if(!xMesmaFamilia && yMesmaFamilia) return 1;
-    return 0;
+    return x.nome.localeCompare(y.nome, 'pt-BR');
   });
   window.__opcoesTrocaPorExercicio = window.__opcoesTrocaPorExercicio || {};
   window.__opcoesTrocaPorExercicio[diaIndex + '_' + exIndex] = opcoes;
@@ -6835,9 +6884,6 @@ const exerciciosBanco = [
   {nome:'DESENVOLVIMENTO FRONTAL COM BARRA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/n0sRwlEbFRY'},
   {nome:'DESENVOLVIMENTO FRONTAL COM BARRA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/n0sRwlEbFRY'},
   {nome:'ELEVAÇÃO LATERAL INCLINADA NA ROLDANA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/IVqSmYZ2awM'},
-  {nome:'ELEVAÇÃO LATERAL DECLINADA NA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/RKZcUyuDXB4'},
-  {nome:'ELEVAÇÃO LATERAL NA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/w9ebX7LO9SI'},
-  {nome:'ELEVAÇÃO LATERAL NA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/w9ebX7LO9SI'},
   {nome:'LEG HORIZONTAL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/0KLrU6JXOUE', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'PANTURRILHA SENTADO NA MÁQUINA', grupo:'Panturrilha', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/t8vU7HK_wcU'},
   {nome:'REMADA FECHADA COM APOIO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/shorts/6lAxaZwpfDg'},
@@ -6948,7 +6994,6 @@ const exerciciosBanco = [
   {nome:'PRANCHA VENTRAL', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/BDwijwkx3IM'},
   {nome:'VOADOR', grupo:'Peito', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Xf-gNOsEAkk'},
   {nome:'FACEPULL ELÁSTICO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/nEEC350vjtM'},
-  {nome:'ELEV LAT. DECLINADA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/RKZcUyuDXB4'},
   {nome:'ROSCA SCOTT UNILATERAL', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/eMuzfwJLMHA'},
   {nome:'TRÍCEPS APOIADO', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1XNQYUWWr4w'},
   {nome:'ABS TESOURINHA', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ZamgsrcklEU'},
@@ -6967,7 +7012,6 @@ const exerciciosBanco = [
   {nome:'TRÍCEPS COICE UNI NA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/cQ7TeC_rdlg'},
   {nome:'PRANCHA ALTA', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1L3sIFCFunU'},
   {nome:'PULLDOWN COM CORDA NA POLIA', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://www.youtube.com/watch?v=H7jlJ-QxC9I'},
-  {nome:'ELEV LAT. INCLINADA POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/IVqSmYZ2awM'},
   {nome:'ROSCA MARTELO ALTERNADA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/CjfIwcLz5Xk'},
   {nome:'TRÍCEPS  UNI NA POLIA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/udH-RZ2Wb2Y'},
   {nome:'ABS OBLÍCUO TOCANDO O PÉ', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/7Wv15aDEhVc'},
@@ -6981,7 +7025,6 @@ const exerciciosBanco = [
   {nome:'FLEXÃO DE COTOVELO COM MOCHILA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/X42BMTwuPMA'},
   {nome:'ABS ESCALADA LATERAL', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/rLAnLALPjjE'},
   {nome:'PUXADA COM TRIÂNGULO', grupo:'Costas', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/Ps3_hCKtZ58'},
-  {nome:'ELEVAÇÃO LATERAL POLIA', grupo:'Ombros', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/w9ebX7LO9SI'},
   {nome:'FLEXÃO COTOVELOS ROLDANA', grupo:'Bíceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/oOPtQW5lubk'},
   {nome:'TRÍCEPS TESTA', grupo:'Tríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/bpp_l5Gdv7c'},
   {nome:'PRANCHA LATERAL', grupo:'Abdômen', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/n9uoOzblcqk'},
@@ -7091,7 +7134,6 @@ const exerciciosBanco = [
   {nome:'EDUCATIVO STIFF', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/1P03JzjPPOE', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'CADEIRA ABDUTORA( ABRIR )', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/WMx7JeUTXJs', camada:'base', nivelMinimo:'Iniciante'},
   {nome:'AFUNDO C/FLEX DE QUADRIL', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/OMQhwRW23ZI', camada:'base', nivelMinimo:'Intermediário'},
-  {nome:'ELEVAÇÃO FROG', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/j4_-w9BcarQ', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'CADEIRA ADUTORA ( FECHAR )', grupo:'Panturrilha', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/lzuSEi65_IQ'},
   {nome:'AFUNDO COM ELÁSTICO', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/YWvy-2OLeJU', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'ELEVAÇÃO PÉLVICA', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/O84nvpikZiU', camada:'base', nivelMinimo:'Iniciante'},
@@ -7111,17 +7153,14 @@ const exerciciosBanco = [
   {nome:'FLEXÕ NÓRDICA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/DIRx__DoJqo', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'FLEX. DE JOELHOS NO SOLO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/fWW4ASUCi_c', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'AGACHAMENTO GUIADO Y', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/ajf2fUekZr4', camada:'base', nivelMinimo:'Iniciante'},
-  {nome:'FLEXÃO DE JOELHOS COM BOLA ADAPTADO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/DgDD-47bVGk', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'FLEX. DE JOELHOS DE PÉ', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/-ixMlKa11bA', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'AGACHAMENTO HACK', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/-qYxx4mRjoc', camada:'base', nivelMinimo:'Iniciante'},
   {nome:'STIFF COM HALTERES', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/5rJy8qqQofQ', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'FLEX. JOELHOS ADP', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/6bE5P4x36-o', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'AGACHAMENTO HACK Y', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/hqTvBjX4lgY', camada:'base', nivelMinimo:'Iniciante'},
   {nome:'STIFF UNI SEM APOIO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/E6QF1VWS1qY', camada:'base', nivelMinimo:'Intermediário'},
-  {nome:'FLEXÃO DE JOELHOS COM BOLA', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/H0nTtztJK8M', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'AGACHAMENTO LIVRE', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/3Mq1lLgE00g', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'STIFF UNI COM APOIO', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/GyDrpYEPWQw', camada:'base', nivelMinimo:'Intermediário'},
-  {nome:'FROG NO SOLO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/tWdgdM3B5rA', camada:'acessorio', nivelMinimo:'Iniciante'},
   {nome:'AGACHAMENTO PC', grupo:'Quadríceps', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/pcfm6MBXeMg', camada:'base', nivelMinimo:'Iniciante'},
   {nome:'FLEXÃO DE JOELHOS EM PÉ', grupo:'Isquiotibiais', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/7H6O9-WYZ74', camada:'base', nivelMinimo:'Intermediário'},
   {nome:'GLÚT. 4 APOIOS JOE. ESTENDIDO', grupo:'Glúteos', ambiente:'Academia', nivel:'A definir', metodo:'', video:'https://youtu.be/xb_lnHwwZE4', camada:'acessorio', nivelMinimo:'Iniciante'},
@@ -11161,7 +11200,7 @@ function renderMeuProgressoConteudo(container, nome, a){
   '</div>';
 
   // Check-in emocional do dia + hábitos com pontuação (o que ela preenche, vem depois do que ela olha)
-  html += '<div id="checkin-habitos-area"></div>';
+  html += '<div id="checkin-habitos-area" style="margin-top:24px;"></div>';
 
   // Calendário de treinos (mês a mês, arrasta ou clica nas setinhas pra trocar de mês)
   html += '<p class="section-label" style="margin-top:20px;">Meu calendário de treinos</p>';
