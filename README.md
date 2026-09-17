@@ -1,4 +1,4 @@
-[Uploading dna_musa_21.html…]()
+[dna_musa_22.html](https://github.com/user-attachments/files/32314939/dna_musa_22.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -727,13 +727,52 @@
         <div id="resumo-fechamento-area" style="margin-bottom:14px;"></div>
 
         <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="gerarEPublicarDestaquesSemana()"><i class="ti ti-sparkles" style="margin-right:6px;"></i>Publicar destaques da semana (Ranking)</button>
-        <div id="destaques-semana-area"></div>
+        <div id="destaques-semana-area" style="margin-bottom:14px;"></div>
+
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="gerarRelatorioSuporteSemanal()"><i class="ti ti-headset" style="margin-right:6px;"></i>Relatório de suporte da semana</button>
+        <div id="relatorio-suporte-area"></div>
       </div>
 
       <div id="personal-faturamento" style="display:none;">
         <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
         <h1 class="page-title" style="margin-top:0;">Faturamento & Metas</h1>
         <div id="faturamento-metas-area"></div>
+      </div>
+
+      <div id="personal-dashboard-suporte" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
+        <h1 class="page-title" style="margin-top:0;">Painel do Personal</h1>
+        <p class="page-sub">Visão geral das suas alunas</p>
+
+        <div id="metricas-negocio-area-2"></div>
+
+        <div style="background:linear-gradient(135deg,rgba(217,139,46,0.14),rgba(92,56,20,0.08));border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin:10px 0 8px;cursor:pointer;" onclick="iniciarGeracaoParaSemTreino()">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-wand" style="font-size:17px;color:#1A1409;"></i></div>
+            <div style="flex:1;">
+              <p style="font-size:13px;font-weight:700;margin:0;">Gerar treino</p>
+              <p id="dash-info-gerar-sem-treino-2" style="font-size:11px;color:var(--text-faint);margin:1px 0 0;">Calculando...</p>
+            </div>
+            <i class="ti ti-chevron-right" style="color:var(--gold-soft);font-size:16px;"></i>
+          </div>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(217,139,46,0.14),rgba(92,56,20,0.08));border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin:0 0 22px;cursor:pointer;" onclick="iniciarProgressaoParaComTreino()">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-trending-up" style="font-size:17px;color:#1A1409;"></i></div>
+            <div style="flex:1;">
+              <p style="font-size:13px;font-weight:700;margin:0;">Progredir treino</p>
+              <p id="dash-info-progredir-com-treino-2" style="font-size:11px;color:var(--text-faint);margin:1px 0 0;">Calculando...</p>
+            </div>
+            <i class="ti ti-chevron-right" style="color:var(--gold-soft);font-size:16px;"></i>
+          </div>
+        </div>
+
+        <p class="section-label" style="margin-top:6px;">Ferramentas do painel</p>
+        <div id="atalhos-dashboard-area-2"></div>
+
+        <p class="section-label" style="margin-top:22px;">Central de Suporte</p>
+        <p class="page-sub" style="margin-top:-6px;">Prioridades de hoje, com sugestão pronta pra cada uma. Ciclo reinicia toda Segunda, Quarta e Sexta.</p>
+        <div id="area-controle-suporte"></div>
       </div>
 
       <div id="personal-alunas" style="display:none;">
@@ -4620,7 +4659,8 @@ async function executarSalvamentoPerfilAluna(nomeAluna){
         dataFicouVerde: a.dataFicouVerde || null,
         ordemConclusaoCicloAtual: a.ordemConclusaoCicloAtual || null,
         ordemUltimoCiclo: a.ordemUltimoCiclo || null,
-        sinalRiscoEmocional: a.sinalRiscoEmocional || null
+        suporteUltimoContato: a.suporteUltimoContato || null,
+        suporteHistorico: a.suporteHistorico || []
       }
     }, { onConflict: 'email' });
   } catch(erroDeRede){
@@ -6518,6 +6558,7 @@ function renderElegibilidadeFase(a){
 
 const ferramentasPersonal = [
   { titulo: 'Alunas', icone: 'ti-users', view: 'alunas' },
+  { titulo: 'Painel de Suporte (2ª Dashboard)', icone: 'ti-layout-dashboard', view: 'dashboard-suporte' },
   { titulo: 'Sinalizações', icone: 'ti-heart-handshake', view: 'sinalizacoes' },
   { titulo: 'Controle de Treinos', icone: 'ti-list-check', view: 'controle' },
   { titulo: 'Banco de exercícios', icone: 'ti-video', view: 'exercicios' },
@@ -6700,7 +6741,7 @@ function desambiguarNomesDuplicados(){
 function showPersonalView(which){
   renderFerramentasPersonal();
   atualizarSidebarAtiva(which);
-  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes','comunicacao','ferramentas-treino','inteligencia','relatorios','faturamento'].forEach(function(v){
+  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes','comunicacao','ferramentas-treino','inteligencia','relatorios','faturamento','dashboard-suporte'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
   });
   if(which === 'sinalizacoes'){ renderSinalizacoes(); }
@@ -6715,6 +6756,9 @@ function showPersonalView(which){
   if(which === 'comunicacao'){ renderCentralDeAvisos(); }
   if(which === 'inteligencia'){ renderRelatoriosTendencias(); }
   if(which === 'faturamento'){ renderFaturamentoMetas(); }
+  if(which === 'dashboard-suporte'){
+    renderAtalhosDashboard(); renderMetricasNegocio(); renderInfoCardGerarTreino(); renderControleSuporte();
+  }
   if(which === 'dashboard'){
     renderAtalhosDashboard(); renderMetricasNegocio(); renderInfoCardGerarTreino();
     // A sincronização de anamneses novas também precisa rodar aqui, não só na aba Alunas — senão o
@@ -10391,6 +10435,11 @@ async function renderInfoCardGerarTreino(){
 
   if(elSemTreino) elSemTreino.textContent = semTreino.length + ' aluna(s) ativa(s) ainda sem treino' + (semTreinoSemEmail > 0 ? ' (' + semTreinoSemEmail + ' sem e-mail, não entram na geração)' : '');
   if(elComTreino) elComTreino.textContent = comTreino.length + ' aluna(s) ativa(s) com treino pra progredir' + (comTreinoSemEmail > 0 ? ' (' + comTreinoSemEmail + ' sem e-mail, não entram na progressão)' : '');
+  // Mesma informação, espelhada na 2ª Dashboard
+  const elSemTreino2 = document.getElementById('dash-info-gerar-sem-treino-2');
+  const elComTreino2 = document.getElementById('dash-info-progredir-com-treino-2');
+  if(elSemTreino2) elSemTreino2.textContent = elSemTreino ? elSemTreino.textContent : '';
+  if(elComTreino2) elComTreino2.textContent = elComTreino ? elComTreino.textContent : '';
 }
 
 function calcularMetricasNegocio(){
@@ -10417,11 +10466,14 @@ function renderMetricasNegocio(){
   const area = document.getElementById('metricas-negocio-area');
   if(!area) return;
   const m = calcularMetricasNegocio();
-  area.innerHTML =
+  const htmlStats =
     '<div class="alert-row" style="grid-template-columns:1fr 1fr;margin-bottom:6px;">' +
       '<div class="alert-stat"><p class="num">' + m.clientesAtivos + '</p><p class="lbl2">Clientes ativos</p></div>' +
       '<div class="alert-stat"><p class="num">' + m.taxaRetencao + '%</p><p class="lbl2">Taxa de retenção</p></div>' +
     '</div>';
+  area.innerHTML = htmlStats;
+  const area2 = document.getElementById('metricas-negocio-area-2'); // mesma info, espelhada na 2ª Dashboard
+  if(area2) area2.innerHTML = htmlStats;
 }
 
 function renderFaturamentoMetas(){
@@ -10439,8 +10491,6 @@ function renderFaturamentoMetas(){
 // Ícone + rótulo + descrição curta, cada linha abrindo sua própria tela — substitui o formato antigo
 // de sanfona (que empilhava tudo numa página só) por atalhos diretos, mais fáceis de escanear.
 function renderAtalhosDashboard(){
-  const area = document.getElementById('atalhos-dashboard-area');
-  if(!area) return;
   const atalhos = [
     { view: 'comunicacao', icone: 'ti-message-circle', titulo: 'Comunicação com as alunas', desc: 'WhatsApp, avisos in-app e mensagens em massa' },
     { view: 'ferramentas-treino', icone: 'ti-barbell', titulo: 'Ferramentas de treino', desc: 'Réplicas, auditoria de volume, meta do Ranking' },
@@ -10448,7 +10498,7 @@ function renderAtalhosDashboard(){
     { view: 'relatorios', icone: 'ti-report', titulo: 'Relatórios da semana', desc: 'Frequência, respostas, fechamento, destaques' },
     { view: 'faturamento', icone: 'ti-cash', titulo: 'Faturamento & Metas', desc: 'Meta do mês e sugestões pra bater' }
   ];
-  area.innerHTML = atalhos.map(function(a){
+  const html = atalhos.map(function(a){
     return '<div class="list-item" style="cursor:pointer;margin-bottom:8px;" onclick="showPersonalView(\'' + a.view + '\')">' +
       '<span style="display:flex;align-items:center;gap:12px;">' +
         '<span style="width:34px;height:34px;border-radius:10px;background:var(--card-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ' + a.icone + '" style="font-size:16px;color:var(--gold-soft);"></i></span>' +
@@ -10457,6 +10507,10 @@ function renderAtalhosDashboard(){
       '<i class="ti ti-chevron-right" style="color:var(--text-faint);flex-shrink:0;"></i>' +
     '</div>';
   }).join('');
+  const area = document.getElementById('atalhos-dashboard-area');
+  if(area) area.innerHTML = html;
+  const area2 = document.getElementById('atalhos-dashboard-area-2'); // mesma lista, espelhada na 2ª Dashboard
+  if(area2) area2.innerHTML = html;
 }
 
 function renderMetaFinanceiraConteudo(m){
@@ -10523,6 +10577,157 @@ async function salvarMetaFaturamento(){
 function editarMetaFaturamento(){
   metaFaturamentoMensal = 0; // volta pro formulário de definir meta
   renderFaturamentoMetas();
+}
+
+// ===== CONTROLE DE SUPORTE (Central de Suporte da colaboradora) =====
+// Junta sinais que já existem no sistema (risco emocional, abandono, aniversário, plano vencendo,
+// dúvida sem resposta) numa lista única de prioridades do dia, num ciclo de Segunda/Quarta/Sexta —
+// mesma lógica de reset do Controle de Treinos, só que baseada em dias fixos da semana, não em "todo mundo terminou".
+function obterInicioCicloSuporte(){
+  const hoje = new Date();
+  hoje.setHours(0,0,0,0);
+  const diaSemana = hoje.getDay(); // 0=dom,1=seg,2=ter,3=qua,4=qui,5=sex,6=sab
+  const diasReferencia = [1,3,5]; // segunda, quarta, sexta
+  let melhorData = null;
+  diasReferencia.forEach(function(dr){
+    let diff = diaSemana - dr;
+    if(diff < 0) diff += 7;
+    const candidato = new Date(hoje);
+    candidato.setDate(hoje.getDate() - diff);
+    if(!melhorData || candidato > melhorData) melhorData = candidato;
+  });
+  return melhorData;
+}
+
+function calcularPendenciasSuporteHoje(){
+  const dados = calcularCentralDeAvisos();
+  const inicioCiclo = obterInicioCicloSuporte();
+  const pendencias = [];
+  const jaAdicionadas = {}; // evita duplicar a mesma aluna 2x se ela bater em mais de um sinal ao mesmo tempo
+
+  function jaContatadaNesseCiclo(a){
+    if(!a.suporteUltimoContato) return false;
+    return new Date(a.suporteUltimoContato) >= inicioCiclo;
+  }
+
+  function adicionar(lista, tipo, corTag, sugestao){
+    lista.forEach(function(a){
+      if(jaAdicionadas[a.nome]) return;
+      if(jaContatadaNesseCiclo(a)) return;
+      jaAdicionadas[a.nome] = true;
+      pendencias.push({ nome: a.nome, tipo: tipo, cor: corTag, sugestao: sugestao });
+    });
+  }
+
+  const comRiscoEmocional = alunasPersonal.filter(function(a){ return a.sinalRiscoEmocional && !a.sinalRiscoEmocional.visto; });
+  adicionar(comRiscoEmocional, '🔴 Sinal de risco emocional', '#C9784A', 'Pergunta como ela tá em geral, sem cobrar treino.');
+  adicionar(dados.risco, '🟠 Sumiu / sem constância', '#E2A33D', 'Pergunta se mudou algo na rotina, oferece ajustar o treino.');
+  adicionar(dados.aniversario, '🟡 Aniversário', '#D4AF6E', 'Manda parabéns + um mimo, fortalece o vínculo.');
+  adicionar(dados.planoVencendo, '🟡 Plano vencendo', '#D4AF6E', 'Oferece renovação, destacando o resultado que ela já teve.');
+
+  const comDuvidaPendente = alunasPersonal.filter(function(a){ return (a.duvidasSinalizadas || []).some(function(d){ return !d.resolvida; }); });
+  adicionar(comDuvidaPendente, '🔵 Dúvida sem resposta', '#6E9AD4', 'Responde agora, antes que ela perca confiança no suporte.');
+
+  return pendencias;
+}
+
+function calcularFeitasNesseCiclo(){
+  const inicioCiclo = obterInicioCicloSuporte();
+  return alunasPersonal.filter(function(a){
+    return a.suporteUltimoContato && new Date(a.suporteUltimoContato) >= inicioCiclo;
+  });
+}
+
+function abrirFormularioContatoSuporte(nomeAluna){
+  const el = document.getElementById('form-contato-' + nomeAluna.replace(/[^a-zA-Z0-9]/g,''));
+  if(!el) return;
+  el.innerHTML = '<textarea class="form-input" id="resumo-contato-' + nomeAluna.replace(/[^a-zA-Z0-9]/g,'') + '" placeholder="O que você fez? Ex: Perguntei como ela tá, disse que a semana foi corrida mas vai retomar segunda" style="min-height:50px;font-size:12px;margin-top:6px;"></textarea>' +
+    '<button class="btn-gold" style="width:auto;padding:6px 14px;margin-top:6px;font-size:12px;" onclick="registrarContatoSuporte(\'' + nomeAluna.replace(/'/g,"\\'") + '\')">Salvar</button>';
+}
+
+function registrarContatoSuporte(nomeAluna){
+  const idSufixo = nomeAluna.replace(/[^a-zA-Z0-9]/g,'');
+  const campoResumo = document.getElementById('resumo-contato-' + idSufixo);
+  const resumo = campoResumo ? campoResumo.value.trim() : '';
+  if(!resumo){ alert('Escreve um resumo curto do que foi feito antes de salvar.'); return; }
+
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  a.suporteUltimoContato = new Date().toISOString();
+  if(!a.suporteHistorico) a.suporteHistorico = [];
+  a.suporteHistorico.push({ data: new Date().toISOString(), resumo: resumo });
+  salvarPerfilAlunaNoSupabase(a.nome);
+  renderControleSuporte();
+}
+
+function renderControleSuporte(){
+  const container = document.getElementById('area-controle-suporte');
+  if(!container) return;
+  const pendencias = calcularPendenciasSuporteHoje();
+  const feitas = calcularFeitasNesseCiclo();
+  const total = pendencias.length + feitas.length;
+
+  let html = '<div class="info-box" style="text-align:center;margin-bottom:12px;">' +
+    '<p class="txt" style="font-size:12px;color:var(--text-faint);">✓ ' + feitas.length + ' de ' + total + ' feitas nesse ciclo (Seg/Qua/Sex)</p>' +
+  '</div>';
+
+  if(pendencias.length === 0 && feitas.length === 0){
+    html += '<div class="info-box"><p class="txt" style="color:var(--text-faint);">Nenhuma pendência de suporte agora — tudo tranquilo por aqui.</p></div>';
+  }
+
+  html += pendencias.map(function(p){
+    const idSufixo = p.nome.replace(/[^a-zA-Z0-9]/g,'');
+    return '<div class="list-item" style="flex-direction:column;align-items:stretch;margin-bottom:8px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+        '<div><span style="font-weight:600;">' + p.nome + '</span><p class="txt" style="font-size:11px;color:' + p.cor + ';margin:2px 0 0;">' + p.tipo + '</p></div>' +
+        '<span class="acao-pill" onclick="abrirFormularioContatoSuporte(\'' + p.nome.replace(/'/g,"\\'") + '\')">Já entrei em contato</span>' +
+      '</div>' +
+      '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:4px;">💡 ' + p.sugestao + '</p>' +
+      '<div id="form-contato-' + idSufixo + '"></div>' +
+    '</div>';
+  }).join('');
+
+  html += feitas.map(function(a){
+    const dataFormatada = new Date(a.suporteUltimoContato).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+    const ultimoResumo = (a.suporteHistorico && a.suporteHistorico.length) ? a.suporteHistorico[a.suporteHistorico.length - 1].resumo : '';
+    return '<div class="list-item" style="flex-direction:column;align-items:stretch;margin-bottom:8px;opacity:0.75;">' +
+      '<div style="display:flex;justify-content:space-between;"><span style="color:var(--success);font-weight:600;">' + a.nome + '</span><span class="tag">' + dataFormatada + '</span></div>' +
+      (ultimoResumo ? '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:2px;">"' + ultimoResumo + '"</p>' : '') +
+    '</div>';
+  }).join('');
+
+  container.innerHTML = html;
+}
+
+function gerarRelatorioSuporteSemanal(){
+  const area = document.getElementById('relatorio-suporte-area');
+  if(!area) return;
+  const seteDiasAtras = new Date();
+  seteDiasAtras.setDate(seteDiasAtras.getDate() - 7);
+
+  const registrosDaSemana = [];
+  alunasPersonal.forEach(function(a){
+    (a.suporteHistorico || []).forEach(function(r){
+      if(new Date(r.data) >= seteDiasAtras){
+        registrosDaSemana.push({ nome: a.nome, data: r.data, resumo: r.resumo });
+      }
+    });
+  });
+  registrosDaSemana.sort(function(x, y){ return new Date(y.data) - new Date(x.data); });
+
+  if(registrosDaSemana.length === 0){
+    area.innerHTML = '<div class="info-box"><p class="txt" style="color:var(--text-faint);">Nenhum contato de suporte registrado nos últimos 7 dias.</p></div>';
+    return;
+  }
+
+  area.innerHTML = '<div class="info-box" style="margin-bottom:10px;"><p class="lbl">' + registrosDaSemana.length + ' contato(s) de suporte essa semana</p></div>' +
+    registrosDaSemana.map(function(r){
+      const dataFormatada = new Date(r.data).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+      return '<div class="list-item" style="flex-direction:column;align-items:stretch;margin-bottom:6px;">' +
+        '<div style="display:flex;justify-content:space-between;"><span style="font-weight:600;">' + r.nome + '</span><span class="tag">' + dataFormatada + '</span></div>' +
+        '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:2px;">"' + r.resumo + '"</p>' +
+      '</div>';
+    }).join('');
 }
 
 function calcularCentralDeAvisos(){
