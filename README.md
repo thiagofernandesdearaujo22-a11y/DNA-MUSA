@@ -1,4 +1,4 @@
-[dna_musa_19.html](https://github.com/user-attachments/files/32270280/dna_musa_19.html)
+[dna_musa_20.html](https://github.com/user-attachments/files/32314151/dna_musa_20.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -3264,15 +3264,15 @@ function renderPerguntaPeso(mes){
 }
 
 function registrarPesoMensal(mes){
-  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
-  if(!alunaAtual) return;
-  const prog = getProgressoAluna(alunaAtual.nome);
+  const alunaAtual = obterAlunaLogadaOuCriar();
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
   const peso = parseFloat(document.getElementById('peso-atual-input').value);
   if(isNaN(peso)) return;
   if(!prog.pesoChecks) prog.pesoChecks = {};
   prog.pesoChecks[mes] = true;
   if(!alunaAtual.pesoHistorico) alunaAtual.pesoHistorico = [];
   alunaAtual.pesoHistorico.push({ semana: prog.semana, peso: peso });
+  salvarPerfilAlunaNoSupabase(NOME_ALUNA_LOGADA);
   const el = document.getElementById('area-peso');
   if(el) el.innerHTML = '<p class="txt">Peso registrado! Isso já entra no cálculo de elegibilidade de mudança de fase.</p>';
 }
@@ -8988,6 +8988,18 @@ const supabaseClient = (typeof window.supabase !== 'undefined') ? window.supabas
 let sessaoUsuarioAtual = null; // guarda o usuário logado de verdade (Supabase Auth)
 let NOME_ALUNA_LOGADA = 'Andriele Caroline Rubert'; // padrão pra testes locais; some real, vira dinâmico após login de verdade
 
+// Garante que a aluna logada sempre tenha um registro em alunasPersonal, mesmo se por qualquer motivo
+// o login não tiver criado ele ainda — evita que funções que salvam carga, peso, ciclo, etc. falhem
+// silenciosamente (era exatamente essa a causa do erro relatado ao confirmar carga/registrar treino).
+function obterAlunaLogadaOuCriar(){
+  let a = alunasPersonal.find(function(x){ return x.nome === NOME_ALUNA_LOGADA; });
+  if(!a){
+    a = { nome: NOME_ALUNA_LOGADA, email: '', telefone: '', nivel: 'Iniciante', freq: '3x por semana', status: 'ok', statusLabel: 'Ativa recente' };
+    alunasPersonal.push(a);
+  }
+  return a;
+}
+
 async function restaurarSessaoAtiva(){
   function mostrarDiagnostico(texto, ehErro){
     const el = document.createElement('div');
@@ -10032,9 +10044,9 @@ function calcularMetaAguaLitros(pesoTexto){
 }
 
 function registrarNutricaoSemana(){
-  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
-  if(!alunaAtual || semanaNutricaoPendente === null) return;
-  const prog = getProgressoAluna(alunaAtual.nome);
+  const alunaAtual = obterAlunaLogadaOuCriar();
+  if(semanaNutricaoPendente === null) return;
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
   const fugas = parseInt(document.getElementById('nutri-fugas').value, 10) || 0;
   const tipos = [];
   if(document.getElementById('nutri-mais').checked) tipos.push('mais');
@@ -11473,8 +11485,8 @@ if(type === 'central'){
       d.blocos.map(function(bloco, bi){ return '<div class="list-item"><span>Bloco ' + (bi+1) + ': ' + bloco.nome + '</span></div>'; }).join('') +
       '<button class="btn-gold" style="margin-top:14px;" onclick="iniciarTabata(' + JSON.stringify(d).replace(/"/g,'&quot;') + ')"><i class="ti ti-player-play" style="margin-right:6px;"></i>Iniciar Tabata</button>';
     } else if(!d.descanso){
-      const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
-      const prog = alunaAtual ? getProgressoAluna(alunaAtual.nome) : null;
+      const alunaAtual = obterAlunaLogadaOuCriar();
+      const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
 
       // Barra de progresso segmentada: 1 segmento por exercício do dia
       const totalExerciciosDia = d.ex.length;
@@ -11880,9 +11892,9 @@ function confirmarSerieExercicio(idx, nomeExercicio){
   const reps = parseInt(repsEl.value, 10);
   if(isNaN(carga) || isNaN(reps)){ alert('Preenche o peso e as repetições antes de confirmar.'); return; }
 
-  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
-  if(!alunaAtual) return;
-  const prog = getProgressoAluna(alunaAtual.nome);
+  // Usa o nome de quem está logada agora, direto — não depende de uma lista (alunasPersonal) que só
+  // existe do lado do Personal. Era exatamente isso que fazia essa confirmação falhar silenciosamente.
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
   if(!prog.historico[nomeExercicio]) prog.historico[nomeExercicio] = [];
 
   // Se ela confirmar de novo o mesmo exercício na mesma semana (por engano ou pra corrigir), substitui
@@ -11893,20 +11905,30 @@ function confirmarSerieExercicio(idx, nomeExercicio){
   if(idxExistente !== -1) prog.historico[nomeExercicio][idxExistente] = registro;
   else prog.historico[nomeExercicio].push(registro);
 
-  salvarProgressoNoSupabase(alunaAtual.nome);
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
 
   cargaEl.disabled = true;
   repsEl.disabled = true;
   const elResultado = document.getElementById('confirmado-serie-' + idx);
   if(elResultado) elResultado.innerHTML = '<p style="font-size:11px;color:var(--success);margin-top:4px;">✓ Salvo — sugestão pra próxima: ' + sugestao.valor + 'kg</p>';
+
+  // Registro automático: a partir do 3º exercício confirmado nesse treino, já registra o dia sozinha,
+  // sem precisar clicar no botão. Continua podendo clicar em "Registrar treino" manualmente também,
+  // a qualquer momento (registrar de novo só atualiza os dados, não duplica nada).
+  const totalConfirmadosNoTreino = document.querySelectorAll('[id^="confirmado-serie-"]:not(:empty)').length;
+  if(!prog.diasComAutoRegistroFeito) prog.diasComAutoRegistroFeito = {};
+  if(totalConfirmadosNoTreino >= 3 && typeof detailDiaAtual === 'number' && !prog.diasComAutoRegistroFeito[detailDiaAtual + '_' + prog.semana]){
+    prog.diasComAutoRegistroFeito[detailDiaAtual + '_' + prog.semana] = true;
+    registrarTreinoDia(detailDiaAtual);
+  }
 }
 
 function registrarTreinoDia(diaIndex){
   try {
     const d = dias[diaIndex];
-    const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
-    if(!alunaAtual) return;
-    const prog = getProgressoAluna(alunaAtual.nome);
+    // Mesma correção: usa quem está logada agora, direto, sem depender de alunasPersonal
+    // (que não existe do lado da aluna) — essa era a causa do erro ao registrar o dia.
+    const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
     let registrados = 0;
     let houveReducao = false;
     d.ex.forEach(function(linha, j){
@@ -11942,10 +11964,10 @@ function registrarTreinoDia(diaIndex){
       if(!prog.horariosTreino) prog.horariosTreino = [];
       const agora = new Date();
       prog.horariosTreino.push({ dia: d.n, hora: agora.getHours(), minuto: agora.getMinutes(), data: agora.toISOString() });
-      resultadoSemana = checarConclusaoSemana(alunaAtual.nome);
+      resultadoSemana = checarConclusaoSemana(NOME_ALUNA_LOGADA);
     }
 
-    if(registrados > 0) salvarProgressoNoSupabase(alunaAtual.nome);
+    if(registrados > 0) salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
 
     openDetail('dia', diaIndex);
     const conf = document.getElementById('registro-confirmacao');
@@ -11969,13 +11991,13 @@ function registrarTreinoDia(diaIndex){
         if(!prog.nutricao || !prog.nutricao[semanaFechada]){
           conf.innerHTML += renderPerguntaNutricao(semanaFechada);
         }
-        const mesPendente = verificarCheckinPeso(alunaAtual.nome);
+        const mesPendente = verificarCheckinPeso(NOME_ALUNA_LOGADA);
         if(mesPendente !== null){
           conf.innerHTML += renderPerguntaPeso(mesPendente);
         }
       }
 
-      if(houveReducao && !alunaAtual.cicloPerguntado && !alunaAtual.cicloInfo){
+      if(houveReducao && !obterAlunaLogadaOuCriar().cicloPerguntado && !obterAlunaLogadaOuCriar().cicloInfo){
         conf.innerHTML += renderPerguntaCiclo();
       }
     }
@@ -11998,24 +12020,24 @@ function renderPerguntaCiclo(){
 }
 
 function registrarCiclo(){
-  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
+  const alunaAtual = obterAlunaLogadaOuCriar();
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
   const dias_atras = parseInt(document.getElementById('ciclo-dias').value, 10);
   const medicamento = document.getElementById('ciclo-medicamento').value;
   alunaAtual.cicloPerguntado = true;
   if(!isNaN(dias_atras)){
-    const prog = getProgressoAluna(alunaAtual.nome);
     const semanasAteProximoPeriodo = Math.round((28 - dias_atras) / 7);
     alunaAtual.cicloInfo = { diasAtras: dias_atras, medicamento: medicamento, semanaEstimadaProximoPeriodo: prog.semana + semanasAteProximoPeriodo };
   }
   const elCiclo = document.getElementById('area-ciclo');
   if(elCiclo) elCiclo.innerHTML = '<p class="txt">Obrigada por compartilhar, isso vai deixar suas análises mais precisas, sem afetar nada além disso.</p>';
-  salvarPerfilAlunaNoSupabase(alunaAtual.nome);
+  salvarPerfilAlunaNoSupabase(NOME_ALUNA_LOGADA);
 }
 
 function pularCiclo(){
-  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
+  const alunaAtual = obterAlunaLogadaOuCriar();
   alunaAtual.cicloPerguntado = true;
-  salvarPerfilAlunaNoSupabase(alunaAtual.nome);
+  salvarPerfilAlunaNoSupabase(NOME_ALUNA_LOGADA);
   const elCiclo2 = document.getElementById('area-ciclo');
   if(elCiclo2) elCiclo2.innerHTML = '<p class="txt">Sem problemas, pode responder outra hora, se quiser.</p>';
 }
