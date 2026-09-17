@@ -643,115 +643,96 @@
 
         <div id="metricas-negocio-area"></div>
 
-        <div style="background:linear-gradient(135deg,rgba(217,139,46,0.14),rgba(92,56,20,0.08));border:1px solid var(--border-strong);border-radius:16px;padding:16px;margin:10px 0 10px;cursor:pointer;" onclick="iniciarGeracaoParaSemTreino()">
-          <div style="display:flex;align-items:center;gap:12px;">
-            <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-wand" style="font-size:20px;color:#1A1409;"></i></div>
+        <div style="background:linear-gradient(135deg,rgba(217,139,46,0.14),rgba(92,56,20,0.08));border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin:10px 0 8px;cursor:pointer;" onclick="iniciarGeracaoParaSemTreino()">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-wand" style="font-size:17px;color:#1A1409;"></i></div>
             <div style="flex:1;">
-              <p style="font-size:14px;font-weight:700;margin:0;">Gerar treino (quem ainda não tem)</p>
-              <p id="dash-info-gerar-sem-treino" style="font-size:11.5px;color:var(--text-faint);margin:2px 0 0;">Calculando...</p>
+              <p style="font-size:13px;font-weight:700;margin:0;">Gerar treino</p>
+              <p id="dash-info-gerar-sem-treino" style="font-size:11px;color:var(--text-faint);margin:1px 0 0;">Calculando...</p>
             </div>
-            <i class="ti ti-chevron-right" style="color:var(--gold-soft);font-size:18px;"></i>
+            <i class="ti ti-chevron-right" style="color:var(--gold-soft);font-size:16px;"></i>
           </div>
         </div>
-        <div style="background:linear-gradient(135deg,rgba(217,139,46,0.14),rgba(92,56,20,0.08));border:1px solid var(--border-strong);border-radius:16px;padding:16px;margin:0 0 14px;cursor:pointer;" onclick="iniciarProgressaoParaComTreino()">
-          <div style="display:flex;align-items:center;gap:12px;">
-            <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-trending-up" style="font-size:20px;color:#1A1409;"></i></div>
+        <div style="background:linear-gradient(135deg,rgba(217,139,46,0.14),rgba(92,56,20,0.08));border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin:0 0 22px;cursor:pointer;" onclick="iniciarProgressaoParaComTreino()">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-trending-up" style="font-size:17px;color:#1A1409;"></i></div>
             <div style="flex:1;">
-              <p style="font-size:14px;font-weight:700;margin:0;">Progredir treino (quem já tem)</p>
-              <p id="dash-info-progredir-com-treino" style="font-size:11.5px;color:var(--text-faint);margin:2px 0 0;">Calculando...</p>
+              <p style="font-size:13px;font-weight:700;margin:0;">Progredir treino</p>
+              <p id="dash-info-progredir-com-treino" style="font-size:11px;color:var(--text-faint);margin:1px 0 0;">Calculando...</p>
             </div>
-            <i class="ti ti-chevron-right" style="color:var(--gold-soft);font-size:18px;"></i>
+            <i class="ti ti-chevron-right" style="color:var(--gold-soft);font-size:16px;"></i>
           </div>
         </div>
         <div id="geracao-massa-area"></div>
 
-        <div class="section-colapsavel" style="margin-top:22px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="alternarSecaoColapsavel('dash-comunicacao')">
-            <span style="display:flex;align-items:center;gap:10px;">
-              <span style="width:32px;height:32px;border-radius:9px;background:var(--card-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-message-circle" style="font-size:15px;color:var(--gold-soft);"></i></span>
-              <p class="section-label" style="margin:0;">Comunicação com as alunas</p>
-            </span>
-            <i class="ti ti-chevron-down" id="chevron-dash-comunicacao" style="color:var(--gold-soft);font-size:16px;transition:transform .2s;"></i>
-          </div>
-          <div id="conteudo-dash-comunicacao" style="display:none;margin-top:12px;">
-            <p class="section-label" style="margin-top:0;">Central de avisos (WhatsApp)</p>
-            <button class="chip" style="cursor:pointer;margin-bottom:10px;" onclick="testarConexaoWhatsApp()"><i class="ti ti-plug-connected" style="margin-right:4px;"></i>Testar conexão do WhatsApp</button>
-            <div id="resultado-teste-whatsapp"></div>
-            <div id="central-avisos-area"></div>
-
-            <p class="section-label" style="margin-top:22px;">Avisos dentro do app</p>
-            <p class="page-sub" style="margin-top:-6px;">Não depende de WhatsApp nem de nenhum serviço externo</p>
-            <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:10px;" onclick="mostrarFormularioAvisoEmMassa()"><i class="ti ti-bell" style="margin-right:6px;"></i>Mandar aviso pra todas (in-app)</button>
-            <div id="aviso-massa-inapp-area"></div>
-
-            <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;margin-top:10px;" onclick="mostrarFormularioMensagemEmMassa()"><i class="ti ti-speakerphone" style="margin-right:6px;"></i>Mandar mensagem pra todas</button>
-            <div id="mensagem-massa-area"></div>
-
-            <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="mostrarFormularioAvisarTreinoAjustado()"><i class="ti ti-barbell" style="margin-right:6px;"></i>Avisar treino ajustado (escolher alunas)</button>
-            <div id="avisar-treino-ajustado-area"></div>
-          </div>
-        </div>
-
-        <div class="section-colapsavel" style="margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="alternarSecaoColapsavel('dash-ferramentas-treino')">
-            <span style="display:flex;align-items:center;gap:10px;">
-              <span style="width:32px;height:32px;border-radius:9px;background:var(--card-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-barbell" style="font-size:15px;color:var(--gold-soft);"></i></span>
-              <p class="section-label" style="margin:0;">Ferramentas de treino</p>
-            </span>
-            <i class="ti ti-chevron-down" id="chevron-dash-ferramentas-treino" style="color:var(--gold-soft);font-size:16px;transition:transform .2s;"></i>
-          </div>
-          <div id="conteudo-dash-ferramentas-treino" style="display:none;margin-top:12px;">
-            <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="verificarReplicasDeTreino()"><i class="ti ti-copy-check" style="margin-right:6px;"></i>Verificar réplicas de treino</button>
-            <div id="replicas-treino-area"></div>
-            <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="auditarVolumePosteriores()"><i class="ti ti-clipboard-check" style="margin-right:6px;"></i>Auditar volume mínimo de posteriores</button>
-            <div id="auditoria-posteriores-area"></div>
-            <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="mostrarConfigRanking()"><i class="ti ti-trophy" style="margin-right:6px;"></i>Configurar meta do Ranking</button>
-            <div id="config-ranking-area"></div>
-          </div>
-        </div>
-
-        <div class="section-colapsavel" style="margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="alternarSecaoColapsavel('dash-inteligencia')">
-            <span style="display:flex;align-items:center;gap:10px;">
-              <span style="width:32px;height:32px;border-radius:9px;background:var(--card-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-trending-up" style="font-size:15px;color:var(--gold-soft);"></i></span>
-              <p class="section-label" style="margin:0;">Inteligência de mercado</p>
-            </span>
-            <i class="ti ti-chevron-down" id="chevron-dash-inteligencia" style="color:var(--gold-soft);font-size:16px;transition:transform .2s;"></i>
-          </div>
-          <div id="conteudo-dash-inteligencia" style="display:none;margin-top:12px;">
-            <p class="page-sub" style="margin-top:-6px;">O que está bombando agora no nicho de estética feminina/fitness</p>
-            <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:12px;" onclick="gerarRelatorioTendencias()"><i class="ti ti-trending-up" style="margin-right:6px;"></i>🔎 Gerar novo relatório de tendências</button>
-            <div id="relatorio-tendencias-area"></div>
-          </div>
-        </div>
-
-        <div class="section-colapsavel" style="margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="alternarSecaoColapsavel('dash-relatorios')">
-            <span style="display:flex;align-items:center;gap:10px;">
-              <span style="width:32px;height:32px;border-radius:9px;background:var(--card-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-report" style="font-size:15px;color:var(--gold-soft);"></i></span>
-              <p class="section-label" style="margin:0;">Relatórios da semana</p>
-            </span>
-            <i class="ti ti-chevron-down" id="chevron-dash-relatorios" style="color:var(--gold-soft);font-size:16px;transition:transform .2s;"></i>
-          </div>
-          <div id="conteudo-dash-relatorios" style="display:none;margin-top:12px;">
-            <p class="page-sub" style="margin-top:-6px;">Só considera alunas Ativas. Bom pra fechar a semana, toda sexta-feira</p>
-
-            <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:8px;" onclick="gerarRelatorioFrequenciaSemanal()"><i class="ti ti-calendar-stats" style="margin-right:6px;"></i>Relatório de frequência de treino</button>
-            <div id="relatorio-frequencia-area" style="margin-bottom:14px;"></div>
-
-            <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:8px;" onclick="gerarRelatorioRespostas()"><i class="ti ti-message-2" style="margin-right:6px;"></i>Relatório de respostas e comentários</button>
-            <div id="relatorio-respostas-area" style="margin-bottom:14px;"></div>
-
-            <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:8px;" onclick="gerarResumoFechamentoSemana()"><i class="ti ti-clipboard-text" style="margin-right:6px;"></i>Resumo de fechamento da semana</button>
-            <div id="resumo-fechamento-area" style="margin-bottom:14px;"></div>
-
-            <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="gerarEPublicarDestaquesSemana()"><i class="ti ti-sparkles" style="margin-right:6px;"></i>Publicar destaques da semana (Ranking)</button>
-            <div id="destaques-semana-area"></div>
-          </div>
-        </div>
+        <p class="section-label" style="margin-top:6px;">Ferramentas do painel</p>
+        <div id="atalhos-dashboard-area"></div>
 
         <p class="section-label" id="label-ferramentas-dashboard" style="margin-top:22px;">Ferramentas</p>
         <div class="poster-grid" id="grid-ferramentas-personal"></div>
+      </div>
+
+      <div id="personal-comunicacao" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
+        <h1 class="page-title" style="margin-top:0;">Comunicação com as alunas</h1>
+        <p class="section-label" style="margin-top:0;">Central de avisos (WhatsApp)</p>
+        <button class="chip" style="cursor:pointer;margin-bottom:10px;" onclick="testarConexaoWhatsApp()"><i class="ti ti-plug-connected" style="margin-right:4px;"></i>Testar conexão do WhatsApp</button>
+        <div id="resultado-teste-whatsapp"></div>
+        <div id="central-avisos-area"></div>
+
+        <p class="section-label" style="margin-top:22px;">Avisos dentro do app</p>
+        <p class="page-sub" style="margin-top:-6px;">Não depende de WhatsApp nem de nenhum serviço externo</p>
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:10px;" onclick="mostrarFormularioAvisoEmMassa()"><i class="ti ti-bell" style="margin-right:6px;"></i>Mandar aviso pra todas (in-app)</button>
+        <div id="aviso-massa-inapp-area"></div>
+
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;margin-top:10px;" onclick="mostrarFormularioMensagemEmMassa()"><i class="ti ti-speakerphone" style="margin-right:6px;"></i>Mandar mensagem pra todas</button>
+        <div id="mensagem-massa-area"></div>
+
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="mostrarFormularioAvisarTreinoAjustado()"><i class="ti ti-barbell" style="margin-right:6px;"></i>Avisar treino ajustado (escolher alunas)</button>
+        <div id="avisar-treino-ajustado-area"></div>
+      </div>
+
+      <div id="personal-ferramentas-treino" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
+        <h1 class="page-title" style="margin-top:0;">Ferramentas de treino</h1>
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="verificarReplicasDeTreino()"><i class="ti ti-copy-check" style="margin-right:6px;"></i>Verificar réplicas de treino</button>
+        <div id="replicas-treino-area"></div>
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="auditarVolumePosteriores()"><i class="ti ti-clipboard-check" style="margin-right:6px;"></i>Auditar volume mínimo de posteriores</button>
+        <div id="auditoria-posteriores-area"></div>
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="mostrarConfigRanking()"><i class="ti ti-trophy" style="margin-right:6px;"></i>Configurar meta do Ranking</button>
+        <div id="config-ranking-area"></div>
+      </div>
+
+      <div id="personal-inteligencia" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
+        <h1 class="page-title" style="margin-top:0;">Inteligência de mercado</h1>
+        <p class="page-sub" style="margin-top:-6px;">O que está bombando agora no nicho de estética feminina/fitness</p>
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:12px;" onclick="gerarRelatorioTendencias()"><i class="ti ti-trending-up" style="margin-right:6px;"></i>🔎 Gerar novo relatório de tendências</button>
+        <div id="relatorio-tendencias-area"></div>
+      </div>
+
+      <div id="personal-relatorios" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
+        <h1 class="page-title" style="margin-top:0;">Relatórios da semana</h1>
+        <p class="page-sub" style="margin-top:-6px;">Só considera alunas Ativas. Bom pra fechar a semana, toda sexta-feira</p>
+
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:8px;" onclick="gerarRelatorioFrequenciaSemanal()"><i class="ti ti-calendar-stats" style="margin-right:6px;"></i>Relatório de frequência de treino</button>
+        <div id="relatorio-frequencia-area" style="margin-bottom:14px;"></div>
+
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:8px;" onclick="gerarRelatorioRespostas()"><i class="ti ti-message-2" style="margin-right:6px;"></i>Relatório de respostas e comentários</button>
+        <div id="relatorio-respostas-area" style="margin-bottom:14px;"></div>
+
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:8px;" onclick="gerarResumoFechamentoSemana()"><i class="ti ti-clipboard-text" style="margin-right:6px;"></i>Resumo de fechamento da semana</button>
+        <div id="resumo-fechamento-area" style="margin-bottom:14px;"></div>
+
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="gerarEPublicarDestaquesSemana()"><i class="ti ti-sparkles" style="margin-right:6px;"></i>Publicar destaques da semana (Ranking)</button>
+        <div id="destaques-semana-area"></div>
+      </div>
+
+      <div id="personal-faturamento" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
+        <h1 class="page-title" style="margin-top:0;">Faturamento & Metas</h1>
+        <div id="faturamento-metas-area"></div>
       </div>
 
       <div id="personal-alunas" style="display:none;">
@@ -759,10 +740,6 @@
         <h1 class="page-title" style="margin-top:0;">Alunas</h1>
         <p class="page-sub" id="alunas-count-label" style="margin-top:-6px;"></p>
         <div id="alertas-risco-emocional-area"></div>
-        <div id="aviso-modo-antigas" style="display:none;background:var(--card-2);border:1px solid var(--border-strong);border-radius:10px;padding:10px 12px;margin-bottom:12px;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;color:var(--gold-soft);">Mostrando só alunas antigas (anamnese de 2024 ou antes)</span>
-          <span class="chip" style="cursor:pointer;" onclick="voltarParaTodasAlunas()">Ver todas</span>
-        </div>
         <div class="filter-row" style="margin-bottom:12px;">
           <div class="chip active" id="filtro-tab-ativas" onclick="alternarFiltroAlunas('ativas')">Ativas</div>
           <div class="chip" id="filtro-tab-porvencer" onclick="alternarFiltroAlunas('porvencer')">Por vencer</div>
@@ -2384,42 +2361,16 @@ function confirmarMoverAlunasSelecionadas(){
   alternarModoSelecaoAlunas(); // já limpa a seleção, esconde a barra e re-renderiza
 }
 
-function ehAlunaAntiga(a){
-  if(!a.dataAnamnese) return false;
-  const ano = parseInt(String(a.dataAnamnese).slice(0, 4), 10);
-  return !isNaN(ano) && ano <= 2024;
-}
-
-let mostrarSoAlunasAntigas = false;
-
-function abrirAlunasAntigas(){
-  openLevel2('personal');
-  showPersonalView('alunas');
-  mostrarSoAlunasAntigas = true; // define DEPOIS de showPersonalView, que já reseta pra false por padrão
-  renderAlunas();
-}
-
-function voltarParaTodasAlunas(){
-  mostrarSoAlunasAntigas = false;
-  renderAlunas();
-}
-
 function renderAlunas(){
   const list = document.getElementById('alunas-list');
   const termo = (document.getElementById('aluna-search') ? document.getElementById('aluna-search').value : '').toUpperCase();
   list.innerHTML = '';
   renderAlertasRiscoEmocional();
 
-  const avisoAntigas = document.getElementById('aviso-modo-antigas');
-  if(avisoAntigas){
-    avisoAntigas.style.display = mostrarSoAlunasAntigas ? 'flex' : 'none';
-  }
-
   const filtradas = alunasPersonal.filter(function(a){
     const bateBusca = !termo || a.nome.toUpperCase().indexOf(termo) !== -1;
     const bateStatus = statusDoPlano(a) === filtroAlunasAtivo;
-    const bateAntiguidade = mostrarSoAlunasAntigas ? ehAlunaAntiga(a) : true;
-    return bateBusca && bateStatus && bateAntiguidade;
+    return bateBusca && bateStatus;
   }).sort(function(a, b){ return a.nome.localeCompare(b.nome, 'pt-BR'); });
   document.getElementById('alunas-count-label').textContent = filtradas.length + ' de ' + alunasPersonal.length + ' alunas';
   if(!window.alunasQtdVisivel) window.alunasQtdVisivel = 80;
@@ -2433,7 +2384,7 @@ function renderAlunas(){
     el.innerHTML =
       '<div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:8px;" data-abrir="1">' +
         (modoSelecaoAlunasAtivo ? '<input type="checkbox" class="checkbox-selecao-aluna" ' + (marcada ? 'checked' : '') + ' style="flex-shrink:0;width:18px;height:18px;">' : '') +
-        '<div style="flex:1;"><p class="aluna-name">' + a.nome + (a.recemChegadaDaAnamnese ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">nova</span>' : '') + (!ehAlunaAntiga(a) && a.dataAnamnese ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">2025</span>' : '') + '</p><p class="aluna-meta">' + a.nivel + ' · ' + a.freq + (a.statusPlanoManual ? ' · movida manualmente' : '') + (a.valorPlano != null ? ' · R$ ' + a.valorPlano.toFixed(2).replace('.', ',') : '') + '</p></div>' +
+        '<div style="flex:1;"><p class="aluna-name">' + a.nome + (a.recemChegadaDaAnamnese ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">nova</span>' : '') + '</p><p class="aluna-meta">' + a.nivel + ' · ' + a.freq + (a.statusPlanoManual ? ' · movida manualmente' : '') + (a.valorPlano != null ? ' · R$ ' + a.valorPlano.toFixed(2).replace('.', ',') : '') + '</p></div>' +
         '<span style="display:flex;align-items:center;gap:6px;">' +
           '<span class="tag" style="background:' + financeiro.corSuave + ';color:' + financeiro.cor + ';">' + financeiro.label + '</span>' +
           '<span class="status-dot ' + a.status + '"></span><span class="status-txt ' + a.status + '">' + a.statusLabel + '</span>' +
@@ -6568,7 +6519,6 @@ const ferramentasPersonal = [
   { titulo: 'Alunas', icone: 'ti-users', view: 'alunas' },
   { titulo: 'Sinalizações', icone: 'ti-heart-handshake', view: 'sinalizacoes' },
   { titulo: 'Controle de Treinos', icone: 'ti-list-check', view: 'controle' },
-  { titulo: 'Alunas antigas (2024-)', icone: 'ti-history', view: 'alunas', acaoEspecial: 'abrirAlunasAntigas' },
   { titulo: 'Banco de exercícios', icone: 'ti-video', view: 'exercicios' },
   { titulo: 'Biblioteca de conteúdo', icone: 'ti-library', view: 'conteudo' },
   { titulo: 'Biblioteca de treinos', icone: 'ti-clipboard-list', view: 'treinos' },
@@ -6749,8 +6699,7 @@ function desambiguarNomesDuplicados(){
 function showPersonalView(which){
   renderFerramentasPersonal();
   atualizarSidebarAtiva(which);
-  mostrarSoAlunasAntigas = false; // reseta por padrão sempre — quem quer o modo antigas, define depois de chamar essa função
-  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes'].forEach(function(v){
+  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes','comunicacao','ferramentas-treino','inteligencia','relatorios','faturamento'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
   });
   if(which === 'sinalizacoes'){ renderSinalizacoes(); }
@@ -6762,15 +6711,17 @@ function showPersonalView(which){
       renderControleTreinos();
     });
   }
+  if(which === 'comunicacao'){ renderCentralDeAvisos(); }
+  if(which === 'inteligencia'){ renderRelatoriosTendencias(); }
+  if(which === 'faturamento'){ renderFaturamentoMetas(); }
   if(which === 'dashboard'){
-    renderCentralDeAvisos(); renderMetricasNegocio(); renderRelatoriosTendencias(); renderInfoCardGerarTreino();
+    renderAtalhosDashboard(); renderMetricasNegocio(); renderInfoCardGerarTreino();
     // A sincronização de anamneses novas também precisa rodar aqui, não só na aba Alunas — senão o
     // Dashboard mostra números desatualizados até a próxima vez que alguém visitar Alunas e voltar.
     sincronizarListaAlunasDoSupabase().then(function(resultado){
       if(resultado.novas > 0 || resultado.atualizadas > 0){
         renderMetricasNegocio();
         renderInfoCardGerarTreino();
-        renderCentralDeAvisos();
       }
     });
   }
@@ -10465,14 +10416,46 @@ function renderMetricasNegocio(){
   const area = document.getElementById('metricas-negocio-area');
   if(!area) return;
   const m = calcularMetricasNegocio();
+  area.innerHTML =
+    '<div class="alert-row" style="grid-template-columns:1fr 1fr;margin-bottom:6px;">' +
+      '<div class="alert-stat"><p class="num">' + m.clientesAtivos + '</p><p class="lbl2">Clientes ativos</p></div>' +
+      '<div class="alert-stat"><p class="num">' + m.taxaRetencao + '%</p><p class="lbl2">Taxa de retenção</p></div>' +
+    '</div>';
+}
+
+function renderFaturamentoMetas(){
+  const area = document.getElementById('faturamento-metas-area');
+  if(!area) return;
+  const m = calcularMetricasNegocio();
   const faturamentoFormatado = m.faturamentoMes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   area.innerHTML =
-    '<div class="alert-row" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:14px;">' +
-      '<div class="alert-stat"><p class="num">' + m.clientesAtivos + '</p><p class="lbl2">Clientes ativos</p></div>' +
+    '<div class="alert-row" style="grid-template-columns:1fr;margin-bottom:14px;">' +
       '<div class="alert-stat"><p class="num">R$ ' + faturamentoFormatado + '</p><p class="lbl2">Faturamento do mês</p></div>' +
-      '<div class="alert-stat"><p class="num">' + m.taxaRetencao + '%</p><p class="lbl2">Taxa de retenção</p></div>' +
     '</div>' +
     renderMetaFinanceiraConteudo(m);
+}
+
+// Ícone + rótulo + descrição curta, cada linha abrindo sua própria tela — substitui o formato antigo
+// de sanfona (que empilhava tudo numa página só) por atalhos diretos, mais fáceis de escanear.
+function renderAtalhosDashboard(){
+  const area = document.getElementById('atalhos-dashboard-area');
+  if(!area) return;
+  const atalhos = [
+    { view: 'comunicacao', icone: 'ti-message-circle', titulo: 'Comunicação com as alunas', desc: 'WhatsApp, avisos in-app e mensagens em massa' },
+    { view: 'ferramentas-treino', icone: 'ti-barbell', titulo: 'Ferramentas de treino', desc: 'Réplicas, auditoria de volume, meta do Ranking' },
+    { view: 'inteligencia', icone: 'ti-trending-up', titulo: 'Inteligência de mercado', desc: 'Tendências do nicho de estética/fitness' },
+    { view: 'relatorios', icone: 'ti-report', titulo: 'Relatórios da semana', desc: 'Frequência, respostas, fechamento, destaques' },
+    { view: 'faturamento', icone: 'ti-cash', titulo: 'Faturamento & Metas', desc: 'Meta do mês e sugestões pra bater' }
+  ];
+  area.innerHTML = atalhos.map(function(a){
+    return '<div class="list-item" style="cursor:pointer;margin-bottom:8px;" onclick="showPersonalView(\'' + a.view + '\')">' +
+      '<span style="display:flex;align-items:center;gap:12px;">' +
+        '<span style="width:34px;height:34px;border-radius:10px;background:var(--card-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ' + a.icone + '" style="font-size:16px;color:var(--gold-soft);"></i></span>' +
+        '<span><p style="font-size:13px;font-weight:600;margin:0;">' + a.titulo + '</p><p style="font-size:11px;color:var(--text-faint);margin:1px 0 0;">' + a.desc + '</p></span>' +
+      '</span>' +
+      '<i class="ti ti-chevron-right" style="color:var(--text-faint);flex-shrink:0;"></i>' +
+    '</div>';
+  }).join('');
 }
 
 function renderMetaFinanceiraConteudo(m){
@@ -10533,12 +10516,12 @@ async function salvarMetaFaturamento(){
   if(!valor || valor <= 0){ alert('Digita um valor de meta válido.'); return; }
   metaFaturamentoMensal = valor;
   await salvarCatalogoPersonal('config_meta_financeira', 'meta', { meta: metaFaturamentoMensal });
-  renderMetricasNegocio();
+  renderFaturamentoMetas();
 }
 
 function editarMetaFaturamento(){
   metaFaturamentoMensal = 0; // volta pro formulário de definir meta
-  renderMetricasNegocio();
+  renderFaturamentoMetas();
 }
 
 function calcularCentralDeAvisos(){
