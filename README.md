@@ -1,4 +1,4 @@
-[dna_musa_23.html](https://github.com/user-attachments/files/32361672/dna_musa_23.html)
+[dna_musa_24.html](https://github.com/user-attachments/files/32362108/dna_musa_24.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -645,26 +645,6 @@
         <div id="metricas-negocio-area"></div>
         <div id="aviso-aniversarios-area"></div>
 
-        <div style="background:linear-gradient(135deg,rgba(217,139,46,0.14),rgba(92,56,20,0.08));border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin:10px 0 8px;cursor:pointer;" onclick="iniciarGeracaoParaSemTreino()">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-wand" style="font-size:17px;color:#1A1409;"></i></div>
-            <div style="flex:1;">
-              <p style="font-size:13px;font-weight:700;margin:0;">Gerar treino</p>
-              <p id="dash-info-gerar-sem-treino" style="font-size:11px;color:var(--text-faint);margin:1px 0 0;">Calculando...</p>
-            </div>
-            <i class="ti ti-chevron-right" style="color:var(--gold-soft);font-size:16px;"></i>
-          </div>
-        </div>
-        <div style="background:linear-gradient(135deg,rgba(217,139,46,0.14),rgba(92,56,20,0.08));border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin:0 0 22px;cursor:pointer;" onclick="iniciarProgressaoParaComTreino()">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-trending-up" style="font-size:17px;color:#1A1409;"></i></div>
-            <div style="flex:1;">
-              <p style="font-size:13px;font-weight:700;margin:0;">Progredir treino</p>
-              <p id="dash-info-progredir-com-treino" style="font-size:11px;color:var(--text-faint);margin:1px 0 0;">Calculando...</p>
-            </div>
-            <i class="ti ti-chevron-right" style="color:var(--gold-soft);font-size:16px;"></i>
-          </div>
-        </div>
         <div id="geracao-massa-area"></div>
 
         <p class="section-label" style="margin-top:6px;">Ferramentas do painel</p>
@@ -697,6 +677,28 @@
       <div id="personal-ferramentas-treino" style="display:none;">
         <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
         <h1 class="page-title" style="margin-top:0;">Ferramentas de treino</h1>
+
+        <div style="background:linear-gradient(135deg,rgba(217,139,46,0.14),rgba(92,56,20,0.08));border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin:0 0 8px;cursor:pointer;" onclick="iniciarGeracaoParaSemTreino()">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-wand" style="font-size:17px;color:#1A1409;"></i></div>
+            <div style="flex:1;">
+              <p style="font-size:13px;font-weight:700;margin:0;">Gerar treino</p>
+              <p id="dash-info-gerar-sem-treino" style="font-size:11px;color:var(--text-faint);margin:1px 0 0;">Calculando...</p>
+            </div>
+            <i class="ti ti-chevron-right" style="color:var(--gold-soft);font-size:16px;"></i>
+          </div>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(217,139,46,0.14),rgba(92,56,20,0.08));border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin:0 0 18px;cursor:pointer;" onclick="iniciarProgressaoParaComTreino()">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-trending-up" style="font-size:17px;color:#1A1409;"></i></div>
+            <div style="flex:1;">
+              <p style="font-size:13px;font-weight:700;margin:0;">Progredir treino</p>
+              <p id="dash-info-progredir-com-treino" style="font-size:11px;color:var(--text-faint);margin:1px 0 0;">Calculando...</p>
+            </div>
+            <i class="ti ti-chevron-right" style="color:var(--gold-soft);font-size:16px;"></i>
+          </div>
+        </div>
+
         <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="verificarReplicasDeTreino()"><i class="ti ti-copy-check" style="margin-right:6px;"></i>Verificar réplicas de treino</button>
         <div id="replicas-treino-area"></div>
         <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="auditarVolumePosteriores()"><i class="ti ti-clipboard-check" style="margin-right:6px;"></i>Auditar volume mínimo de posteriores</button>
@@ -747,27 +749,6 @@
 
         <div id="metricas-negocio-area-2"></div>
         <div id="aviso-aniversarios-area-2"></div>
-
-        <div style="background:linear-gradient(135deg,rgba(217,139,46,0.14),rgba(92,56,20,0.08));border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin:10px 0 8px;cursor:pointer;" onclick="iniciarGeracaoParaSemTreino()">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-wand" style="font-size:17px;color:#1A1409;"></i></div>
-            <div style="flex:1;">
-              <p style="font-size:13px;font-weight:700;margin:0;">Gerar treino</p>
-              <p id="dash-info-gerar-sem-treino-2" style="font-size:11px;color:var(--text-faint);margin:1px 0 0;">Calculando...</p>
-            </div>
-            <i class="ti ti-chevron-right" style="color:var(--gold-soft);font-size:16px;"></i>
-          </div>
-        </div>
-        <div style="background:linear-gradient(135deg,rgba(217,139,46,0.14),rgba(92,56,20,0.08));border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin:0 0 22px;cursor:pointer;" onclick="iniciarProgressaoParaComTreino()">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-trending-up" style="font-size:17px;color:#1A1409;"></i></div>
-            <div style="flex:1;">
-              <p style="font-size:13px;font-weight:700;margin:0;">Progredir treino</p>
-              <p id="dash-info-progredir-com-treino-2" style="font-size:11px;color:var(--text-faint);margin:1px 0 0;">Calculando...</p>
-            </div>
-            <i class="ti ti-chevron-right" style="color:var(--gold-soft);font-size:16px;"></i>
-          </div>
-        </div>
 
         <p class="section-label" style="margin-top:6px;">Ferramentas do painel</p>
         <div id="atalhos-dashboard-area-2"></div>
@@ -6795,6 +6776,7 @@ function showPersonalView(which){
     });
   }
   if(which === 'comunicacao'){ renderCentralDeAvisos(); }
+  if(which === 'ferramentas-treino'){ renderInfoCardGerarTreino(); }
   if(which === 'inteligencia'){ renderRelatoriosTendencias(); }
   if(which === 'faturamento'){ renderFaturamentoMetas(); }
   if(which === 'dashboard-suporte'){
@@ -8432,8 +8414,8 @@ function aplicarTransicaoSuave(elId){
 // Lista de contas com acesso à área do Personal. Pra adicionar alguém novo, só acrescenta um item
 // aqui — no primeiro login dessa pessoa, a conta de verdade é criada sozinha no Supabase.
 const CONTAS_PERSONAL = [
-  { email: 'thiagofernandesdearaujo22@gmail.com', senha: 'Senhanova22-', nome: 'Thiago' },
-  { email: 'biancavmelu5@icloud.com', senha: 'Vgqfiz436!', nome: 'Bianca' }
+  { email: 'thiagofernandesdearaujo22@gmail.com', senha: '123456', nome: 'Thiago' },
+  { email: 'biancavmelu5@icloud.com', senha: '123456', nome: 'Bianca' }
 ];
 const EMAIL_PERSONAL = CONTAS_PERSONAL[0].email; // mantido só pra não quebrar o autopreenchimento do formulário
 const SENHA_PERSONAL = CONTAS_PERSONAL[0].senha;
@@ -10514,11 +10496,6 @@ async function renderInfoCardGerarTreino(){
 
   if(elSemTreino) elSemTreino.textContent = semTreino.length + ' aluna(s) ativa(s) ainda sem treino' + (semTreinoSemEmail > 0 ? ' (' + semTreinoSemEmail + ' sem e-mail, não entram na geração)' : '');
   if(elComTreino) elComTreino.textContent = comTreino.length + ' aluna(s) ativa(s) com treino pra progredir' + (comTreinoSemEmail > 0 ? ' (' + comTreinoSemEmail + ' sem e-mail, não entram na progressão)' : '');
-  // Mesma informação, espelhada na 2ª Dashboard
-  const elSemTreino2 = document.getElementById('dash-info-gerar-sem-treino-2');
-  const elComTreino2 = document.getElementById('dash-info-progredir-com-treino-2');
-  if(elSemTreino2) elSemTreino2.textContent = elSemTreino ? elSemTreino.textContent : '';
-  if(elComTreino2) elComTreino2.textContent = elComTreino ? elComTreino.textContent : '';
 }
 
 function calcularMetricasNegocio(){
@@ -10570,26 +10547,29 @@ function renderFaturamentoMetas(){
 // Ícone + rótulo + descrição curta, cada linha abrindo sua própria tela — substitui o formato antigo
 // de sanfona (que empilhava tudo numa página só) por atalhos diretos, mais fáceis de escanear.
 function renderAtalhosDashboard(){
-  const atalhos = [
+  const atalhosBase = [
     { view: 'comunicacao', icone: 'ti-message-circle', titulo: 'Comunicação com as alunas', desc: 'WhatsApp, avisos in-app e mensagens em massa' },
-    { view: 'ferramentas-treino', icone: 'ti-barbell', titulo: 'Ferramentas de treino', desc: 'Réplicas, auditoria de volume, meta do Ranking' },
+    { view: 'ferramentas-treino', icone: 'ti-barbell', titulo: 'Ferramentas de treino', desc: 'Gerar/progredir treino, réplicas, auditoria, Ranking' },
     { view: 'inteligencia', icone: 'ti-trending-up', titulo: 'Inteligência de mercado', desc: 'Tendências do nicho de estética/fitness' },
     { view: 'relatorios', icone: 'ti-report', titulo: 'Relatórios da semana', desc: 'Frequência, respostas, fechamento, destaques' },
     { view: 'faturamento', icone: 'ti-cash', titulo: 'Faturamento & Metas', desc: 'Meta do mês e sugestões pra bater' }
   ];
-  const html = atalhos.map(function(a){
-    return '<div class="list-item" style="cursor:pointer;margin-bottom:8px;" onclick="showPersonalView(\'' + a.view + '\')">' +
-      '<span style="display:flex;align-items:center;gap:12px;">' +
-        '<span style="width:34px;height:34px;border-radius:10px;background:var(--card-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ' + a.icone + '" style="font-size:16px;color:var(--gold-soft);"></i></span>' +
-        '<span><p style="font-size:13px;font-weight:600;margin:0;">' + a.titulo + '</p><p style="font-size:11px;color:var(--text-faint);margin:1px 0 0;">' + a.desc + '</p></span>' +
-      '</span>' +
-      '<i class="ti ti-chevron-right" style="color:var(--text-faint);flex-shrink:0;"></i>' +
-    '</div>';
-  }).join('');
+  function montarHtml(lista){
+    return lista.map(function(a){
+      return '<div class="list-item" style="cursor:pointer;margin-bottom:8px;" onclick="showPersonalView(\'' + a.view + '\')">' +
+        '<span style="display:flex;align-items:center;gap:12px;">' +
+          '<span style="width:34px;height:34px;border-radius:10px;background:var(--card-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ' + a.icone + '" style="font-size:16px;color:var(--gold-soft);"></i></span>' +
+          '<span><p style="font-size:13px;font-weight:600;margin:0;">' + a.titulo + '</p><p style="font-size:11px;color:var(--text-faint);margin:1px 0 0;">' + a.desc + '</p></span>' +
+        '</span>' +
+        '<i class="ti ti-chevron-right" style="color:var(--text-faint);flex-shrink:0;"></i>' +
+      '</div>';
+    }).join('');
+  }
   const area = document.getElementById('atalhos-dashboard-area');
-  if(area) area.innerHTML = html;
-  const area2 = document.getElementById('atalhos-dashboard-area-2'); // mesma lista, espelhada na 2ª Dashboard
-  if(area2) area2.innerHTML = html;
+  if(area) area.innerHTML = montarHtml(atalhosBase);
+  // Versão da colaboradora: sem "Ferramentas de treino" por enquanto (ela ainda não mexe em treino)
+  const area2 = document.getElementById('atalhos-dashboard-area-2');
+  if(area2) area2.innerHTML = montarHtml(atalhosBase.filter(function(a){ return a.view !== 'ferramentas-treino'; }));
 }
 
 function renderMetaFinanceiraConteudo(m){
