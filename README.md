@@ -1,4 +1,4 @@
-[dna_musa_24.html](https://github.com/user-attachments/files/32362108/dna_musa_24.html)
+[dna_musa_25.html](https://github.com/user-attachments/files/32399670/dna_musa_25.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6761,6 +6761,9 @@ function desambiguarNomesDuplicados(){
 }
 
 function showPersonalView(which){
+  // A Bianca nunca vê a 1ª Dashboard (a do Thiago) — qualquer tentativa de ir pra 'dashboard'
+  // (inclusive os links "Voltar ao Painel" espalhados pelo app) já redireciona pra 2ª Dashboard dela.
+  if(which === 'dashboard' && NOME_PERSONAL_LOGADO === 'Bianca') which = 'dashboard-suporte';
   renderFerramentasPersonal();
   atualizarSidebarAtiva(which);
   ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes','comunicacao','ferramentas-treino','inteligencia','relatorios','faturamento','dashboard-suporte'].forEach(function(v){
@@ -8417,6 +8420,7 @@ const CONTAS_PERSONAL = [
   { email: 'thiagofernandesdearaujo22@gmail.com', senha: '123456', nome: 'Thiago' },
   { email: 'biancavmelu5@icloud.com', senha: '123456', nome: 'Bianca' }
 ];
+let NOME_PERSONAL_LOGADO = null; // 'Thiago' ou 'Bianca' — define qual Dashboard (1ª ou 2ª) ela vê como padrão
 const EMAIL_PERSONAL = CONTAS_PERSONAL[0].email; // mantido só pra não quebrar o autopreenchimento do formulário
 const SENHA_PERSONAL = CONTAS_PERSONAL[0].senha;
 
@@ -8878,10 +8882,12 @@ async function loginPersonal(){
     }
 
     sessaoTipo = 'personal';
+    NOME_PERSONAL_LOGADO = encontrarContaPersonal(email, senha).nome;
     document.getElementById('backbar').style.display = 'flex';
     document.getElementById('backlabel').textContent = 'Sair';
     pedirPermissaoNotificacao();
     openLevel2('personal');
+    if(NOME_PERSONAL_LOGADO === 'Bianca') showPersonalView('dashboard-suporte'); // ela vai direto pra 2ª Dashboard, não pra padrão do Thiago
     sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
     perguntarSeQuerLembrarLogin();
 
@@ -8903,10 +8909,12 @@ async function loginPersonal(){
     }
     erroEl.style.display = 'none';
     sessaoTipo = 'personal';
+    NOME_PERSONAL_LOGADO = encontrarContaPersonal(email, senha).nome;
     document.getElementById('backbar').style.display = 'flex';
     document.getElementById('backlabel').textContent = 'Sair';
     pedirPermissaoNotificacao();
     openLevel2('personal');
+    if(NOME_PERSONAL_LOGADO === 'Bianca') showPersonalView('dashboard-suporte'); // ela vai direto pra 2ª Dashboard, não pra padrão do Thiago
     sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
     perguntarSeQuerLembrarLogin();
     return;
@@ -8937,10 +8945,12 @@ async function loginPersonal(){
     sessaoUsuarioAtual = data.user;
     erroEl.style.display = 'none';
     sessaoTipo = 'personal';
+    NOME_PERSONAL_LOGADO = encontrarContaPersonal(email, senha).nome;
     document.getElementById('backbar').style.display = 'flex';
     document.getElementById('backlabel').textContent = 'Sair';
     pedirPermissaoNotificacao();
     openLevel2('personal');
+    if(NOME_PERSONAL_LOGADO === 'Bianca') showPersonalView('dashboard-suporte'); // ela vai direto pra 2ª Dashboard, não pra padrão do Thiago
     sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
     perguntarSeQuerLembrarLogin();
   } catch(erroDeRede){
@@ -8949,10 +8959,12 @@ async function loginPersonal(){
     if(encontrarContaPersonal(email, senha)){
       erroEl.style.display = 'none';
       sessaoTipo = 'personal';
+      NOME_PERSONAL_LOGADO = encontrarContaPersonal(email, senha).nome;
       document.getElementById('backbar').style.display = 'flex';
       document.getElementById('backlabel').textContent = 'Sair';
       pedirPermissaoNotificacao();
       openLevel2('personal');
+      if(NOME_PERSONAL_LOGADO === 'Bianca') showPersonalView('dashboard-suporte'); // ela vai direto pra 2ª Dashboard, não pra padrão do Thiago
       sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
       perguntarSeQuerLembrarLogin();
     } else {
@@ -9062,12 +9074,14 @@ async function restaurarSessaoAtiva(){
 
     if(perfilRow.tipo === 'personal'){
       sessaoTipo = 'personal';
+      NOME_PERSONAL_LOGADO = perfilRow.nome;
       const backbar = document.getElementById('backbar');
       if(backbar) backbar.style.display = 'flex';
       const backlabel = document.getElementById('backlabel');
       if(backlabel) backlabel.textContent = 'Sair';
       pedirPermissaoNotificacao();
       openLevel2('personal');
+      if(NOME_PERSONAL_LOGADO === 'Bianca') showPersonalView('dashboard-suporte'); // ela vai direto pra 2ª Dashboard, não pra padrão do Thiago
       sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
       perguntarSeQuerLembrarLogin();
     } else if(perfilRow.tipo === 'aluna'){
