@@ -1,4 +1,4 @@
-[dna_musa_22.html](https://github.com/user-attachments/files/32314939/dna_musa_22.html)
+[dna_musa_23.html](https://github.com/user-attachments/files/32361672/dna_musa_23.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -643,6 +643,7 @@
         <p class="page-sub">Visão geral das suas alunas</p>
 
         <div id="metricas-negocio-area"></div>
+        <div id="aviso-aniversarios-area"></div>
 
         <div style="background:linear-gradient(135deg,rgba(217,139,46,0.14),rgba(92,56,20,0.08));border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin:10px 0 8px;cursor:pointer;" onclick="iniciarGeracaoParaSemTreino()">
           <div style="display:flex;align-items:center;gap:10px;">
@@ -745,6 +746,7 @@
         <p class="page-sub">Visão geral das suas alunas</p>
 
         <div id="metricas-negocio-area-2"></div>
+        <div id="aviso-aniversarios-area-2"></div>
 
         <div style="background:linear-gradient(135deg,rgba(217,139,46,0.14),rgba(92,56,20,0.08));border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin:10px 0 8px;cursor:pointer;" onclick="iniciarGeracaoParaSemTreino()">
           <div style="display:flex;align-items:center;gap:10px;">
@@ -4250,7 +4252,7 @@ function classificarAluna(a){
   const ajusteIdade = ajusteRecuperacaoPorIdade(a.idade || null);
   const tecnicasAprovadas = a.tecnicaAprovada ? Object.keys(a.tecnicaAprovada).filter(function(k){ return a.tecnicaAprovada[k] === 'aprovado'; }).length : 0;
   const stats = calcularEstatisticasAluna(a.nome);
-  const piramideInfo = extrairEnfaseSecundaria(a.piramide);
+  const piramideInfo = obterEnfaseSecundariaEfetiva(a);
   const freqMatch = (a.freq || '').match(/\d+/);
   const freqDesejada = freqMatch ? parseInt(freqMatch[0], 10) : 3;
 
@@ -4298,6 +4300,37 @@ function temTecnicaAprovada(a){
   return Object.keys(a.tecnicaAprovada).some(function(k){ return a.tecnicaAprovada[k] === 'aprovado'; });
 }
 
+// Se o Personal já definiu manualmente a prioridade dela (em vez de deixar o texto livre da anamnese
+// decidir sozinho), essa escolha manual sempre vale mais — é o que permite corrigir uma pirâmide que
+// saiu incompleta ou ambígua, sem precisar reescrever a resposta da aluna.
+function obterEnfaseSecundariaEfetiva(a){
+  if(a.piramideManual && a.piramideManual.enfase){
+    return { enfase: a.piramideManual.enfase, secundario: a.piramideManual.secundario || null };
+  }
+  return extrairEnfaseSecundaria(a.piramide);
+}
+
+function editarPiramideManual(nomeAluna, campo, valor){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  if(!a.piramideManual) a.piramideManual = {};
+  a.piramideManual[campo] = valor || null;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+  mostrarPreviewMudancaTreino(nomeAluna);
+}
+
+function resetarPiramideParaAutomatica(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  a.piramideManual = null;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+  mostrarPreviewMudancaTreino(nomeAluna);
+}
+
 function extrairEnfaseSecundaria(piramideTexto){
   const upper = (piramideTexto || '').toUpperCase();
   const mapaKeywords = [
@@ -4340,7 +4373,7 @@ function calcularTempoRealDeMusculacao(a, blocoInfo){
 }
 
 function construirPerfilAluna(a){
-  const piramideInfo = extrairEnfaseSecundaria(a.piramide);
+  const piramideInfo = obterEnfaseSecundariaEfetiva(a);
   const enfase = piramideInfo.enfase;
   const secundario = piramideInfo.secundario;
   const blocoInfo = calcularBlocoAtual(a);
@@ -4856,7 +4889,7 @@ function alternarSecaoColapsavel(idUnico){
 }
 
 function renderResumoMetodologiaAutomatica(a){
-  const piramideInfo = extrairEnfaseSecundaria(a.piramide);
+  const piramideInfo = obterEnfaseSecundariaEfetiva(a);
   const enfaseDetectada = piramideInfo.enfase;
   const secundarioDetectado = piramideInfo.secundario;
   const dQuad = a.direcionamentoQuadriceps || 'nenhum';
@@ -5521,7 +5554,7 @@ function gerarResumoAnamnese(a){
   const partes = [];
   if(a.idade) partes.push(a.idade + ' anos');
   if(a.piramide){
-    const piramideInfo = extrairEnfaseSecundaria(a.piramide);
+    const piramideInfo = obterEnfaseSecundariaEfetiva(a);
     partes.push('prioriza ' + piramideInfo.enfase.toLowerCase() + (piramideInfo.secundario ? ' e depois ' + piramideInfo.secundario.toLowerCase() : ''));
   }
   if(a.objetivo) partes.push('objetivo: "' + (a.objetivo.length > 90 ? a.objetivo.slice(0,90) + '...' : a.objetivo) + '"');
@@ -5828,6 +5861,7 @@ function abrirResumoCompletoAluna(nomeAluna){
     renderSecaoColapsavel('Plano fechado', renderPlanoFechadoConteudo(a), 'planofechado-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Transformar um dia em Tabata de casa', renderFerramentaTabata(a), 'tabata-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Calendário de treinos', renderCalendarioTreinos(a.nome), 'calendario-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderSecaoColapsavel('Data de nascimento', '<div class="info-box"><input type="date" class="form-input" value="' + (a.dataNascimento || '') + '" onchange="editarDataNascimentoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)"><p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:6px;">Normalmente já vem sozinha da anamnese. Só preencha aqui se ela respondeu antes da gente ativar isso.</p></div>', 'nascimento-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Roda da vida', renderRodaDaVidaNaFicha(a.nome), 'rodadavida-' + a.nome.replace(/[^a-zA-Z0-9]/g,''));
 }
 
@@ -5951,8 +5985,15 @@ function openAlunaDetail(i){
         '<select class="form-select" style="font-size:13px;padding:6px;margin-top:4px;" onchange="editarAmbienteTreinoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)">' +
           ['Academia','Casa'].map(function(amb){ return '<option value="' + amb + '"' + ((a.ambienteTreino || 'Academia') === amb ? ' selected' : '') + '>' + amb + '</option>'; }).join('') +
         '</select></div>' +
-      '<div class="stat-card"><p class="stat-label">Data de nascimento</p>' +
-        '<input type="date" class="form-input" style="font-size:13px;padding:6px;margin-top:4px;" value="' + (a.dataNascimento || '') + '" onchange="editarDataNascimentoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)"></div>' +
+      '<div class="stat-card"><p class="stat-label">Prioridade (pirâmide)</p>' +
+        '<select class="form-select" style="font-size:12px;padding:6px;margin-top:4px;" onchange="editarPiramideManual(\'' + a.nome.replace(/'/g,"\\'") + '\',\'enfase\',this.value)">' +
+          ['Glúteo','Quadríceps','Posterior'].map(function(g){ return '<option value="' + g + '"' + (obterEnfaseSecundariaEfetiva(a).enfase === g ? ' selected' : '') + '>' + g + ' (ênfase)</option>'; }).join('') +
+        '</select>' +
+        '<select class="form-select" style="font-size:12px;padding:6px;margin-top:4px;" onchange="editarPiramideManual(\'' + a.nome.replace(/'/g,"\\'") + '\',\'secundario\',this.value)">' +
+          ['Glúteo','Quadríceps','Posterior'].map(function(g){ return '<option value="' + g + '"' + (obterEnfaseSecundariaEfetiva(a).secundario === g ? ' selected' : '') + '>' + g + ' (secundário)</option>'; }).join('') +
+        '</select>' +
+        (a.piramideManual ? '<p style="font-size:10px;color:var(--gold-soft);cursor:pointer;margin-top:4px;" onclick="resetarPiramideParaAutomatica(\'' + a.nome.replace(/'/g,"\\'") + '\')">↺ Voltar pra automático (anamnese)</p>' : '<p style="font-size:10px;color:var(--text-faint);margin-top:4px;">Vindo da anamnese</p>') +
+      '</div>' +
     '</div>' +
     '<p style="font-size:11px;color:var(--text-faint);margin:-8px 0 12px;">Ajustar aqui atualiza automaticamente toda a estrutura de treino gerada — o gerador nunca mistura exercício de academia com exercício de casa</p>' +
     '<div id="preview-mudanca-area"></div>' +
@@ -6758,15 +6799,20 @@ function showPersonalView(which){
   if(which === 'faturamento'){ renderFaturamentoMetas(); }
   if(which === 'dashboard-suporte'){
     renderAtalhosDashboard(); renderMetricasNegocio(); renderInfoCardGerarTreino(); renderControleSuporte();
+    const elAviso2 = document.getElementById('aviso-aniversarios-area-2');
+    if(elAviso2) elAviso2.innerHTML = renderAvisoAniversarios();
   }
   if(which === 'dashboard'){
     renderAtalhosDashboard(); renderMetricasNegocio(); renderInfoCardGerarTreino();
+    const elAviso = document.getElementById('aviso-aniversarios-area');
+    if(elAviso) elAviso.innerHTML = renderAvisoAniversarios();
     // A sincronização de anamneses novas também precisa rodar aqui, não só na aba Alunas — senão o
     // Dashboard mostra números desatualizados até a próxima vez que alguém visitar Alunas e voltar.
     sincronizarListaAlunasDoSupabase().then(function(resultado){
       if(resultado.novas > 0 || resultado.atualizadas > 0){
         renderMetricasNegocio();
         renderInfoCardGerarTreino();
+        if(elAviso) elAviso.innerHTML = renderAvisoAniversarios();
       }
     });
   }
@@ -10344,6 +10390,39 @@ function alunasAniversarioHoje(){
     if(partes.length < 3) return false;
     return parseInt(partes[1], 10) === mesHoje && parseInt(partes[2], 10) === diaHoje;
   });
+}
+
+function alunasAniversarioAmanha(){
+  const amanha = new Date();
+  amanha.setDate(amanha.getDate() + 1);
+  const mesAmanha = amanha.getMonth() + 1, diaAmanha = amanha.getDate();
+  return alunasPersonal.filter(function(a){
+    if(!a.telefone || !a.dataNascimento) return false;
+    const partes = a.dataNascimento.split('-');
+    if(partes.length < 3) return false;
+    return parseInt(partes[1], 10) === mesAmanha && parseInt(partes[2], 10) === diaAmanha;
+  });
+}
+
+// Mostra o aviso de aniversário direto na tela (Dashboard e 2ª Dashboard), em vez de deixar a data
+// exposta na ficha o tempo todo — só aparece quando realmente importa: hoje ou amanhã.
+function renderAvisoAniversarios(){
+  const hojeList = alunasAniversarioHoje();
+  const amanhaList = alunasAniversarioAmanha();
+  if(hojeList.length === 0 && amanhaList.length === 0) return '';
+
+  let html = '';
+  if(hojeList.length > 0){
+    html += '<div class="info-box" style="border-color:var(--gold-soft);margin-bottom:8px;">' +
+      '<p class="lbl" style="margin:0;">🎂 Aniversário hoje: ' + hojeList.map(function(a){ return a.nome; }).join(', ') + '</p>' +
+    '</div>';
+  }
+  if(amanhaList.length > 0){
+    html += '<div class="info-box" style="margin-bottom:8px;">' +
+      '<p class="txt" style="margin:0;font-size:12px;">🎈 Aniversário amanhã: ' + amanhaList.map(function(a){ return a.nome; }).join(', ') + '</p>' +
+    '</div>';
+  }
+  return html;
 }
 
 function segundoDomingoDeMaio(ano){
