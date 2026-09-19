@@ -807,6 +807,14 @@
         <div id="area-detalhe-sinalizacao"></div>
       </div>
 
+      <div id="personal-conversas" style="display:none;">
+        <div class="local-back" id="conversas-voltar" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Dashboard</span></div>
+        <h1 class="page-title" id="conversas-titulo" style="margin-top:0;">Conversas</h1>
+        <p class="page-sub" id="conversas-subtitulo" style="margin-top:-6px;">Todo mundo que já trocou mensagem pelo WhatsApp com vocês</p>
+        <div id="area-lista-conversas"></div>
+        <div id="area-conversa-aberta"></div>
+      </div>
+
       <div id="personal-controle" style="display:none;">
         <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Dashboard</span></div>
         <h1 class="page-title" style="margin-top:0;">Controle de Treinos</h1>
@@ -6581,6 +6589,7 @@ const ferramentasPersonal = [
   { titulo: 'Alunas', icone: 'ti-users', view: 'alunas' },
   { titulo: 'Painel de Suporte (2ª Dashboard)', icone: 'ti-layout-dashboard', view: 'dashboard-suporte' },
   { titulo: 'Sinalizações', icone: 'ti-heart-handshake', view: 'sinalizacoes' },
+  { titulo: 'Conversas', icone: 'ti-brand-whatsapp', view: 'conversas' },
   { titulo: 'Controle de Treinos', icone: 'ti-list-check', view: 'controle' },
   { titulo: 'Banco de exercícios', icone: 'ti-video', view: 'exercicios' },
   { titulo: 'Biblioteca de conteúdo', icone: 'ti-library', view: 'conteudo' },
@@ -6765,10 +6774,11 @@ function showPersonalView(which){
   if(which === 'dashboard' && NOME_PERSONAL_LOGADO === 'Bianca') which = 'dashboard-suporte';
   renderFerramentasPersonal();
   atualizarSidebarAtiva(which);
-  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes','comunicacao','ferramentas-treino','inteligencia','relatorios','faturamento','dashboard-suporte'].forEach(function(v){
+  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes','comunicacao','ferramentas-treino','inteligencia','relatorios','faturamento','dashboard-suporte','conversas'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
   });
   if(which === 'sinalizacoes'){ renderSinalizacoes(); }
+  if(which === 'conversas'){ renderListaConversas(); }
   if(which === 'controle'){
     renderControleTreinos();
     // Mesma lógica do Dashboard: sincroniza com o que há de mais recente (inclusive quem acabou de
@@ -9351,6 +9361,70 @@ function marcarSinalRiscoComoVisto(nomeAluna){
   salvarPerfilAlunaNoSupabase(nomeAluna);
   renderAlunas();
   renderSinalizacoes();
+}
+
+async function renderListaConversas(){
+  const titulo = document.getElementById('conversas-titulo');
+  const subtitulo = document.getElementById('conversas-subtitulo');
+  const voltar = document.getElementById('conversas-voltar');
+  titulo.textContent = 'Conversas';
+  subtitulo.style.display = '';
+  voltar.onclick = function(){ showPersonalView('dashboard'); };
+  document.getElementById('area-conversa-aberta').innerHTML = '';
+
+  const area = document.getElementById('area-lista-conversas');
+  if(!area) return;
+  area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Carregando conversas...</p>';
+  if(!supabaseClient){ area.innerHTML = '<div class="info-box"><p class="txt">Sem conexão com o banco agora.</p></div>'; return; }
+  try {
+    const { data, error } = await supabaseClient.from('mensagens_whatsapp').select('*').order('data_hora', { ascending: false });
+    if(error){ area.innerHTML = '<div class="info-box"><p class="txt">Não consegui carregar as conversas agora.</p></div>'; return; }
+    if(!data || data.length === 0){ area.innerHTML = '<div class="info-box"><p class="txt" style="color:var(--text-faint);">Nenhuma conversa registrada ainda.</p></div>'; return; }
+
+    // Já vem do mais novo pro mais velho, então a 1ª ocorrência de cada telefone é a mensagem mais recente dele
+    const porTelefone = {};
+    data.forEach(function(m){
+      if(!porTelefone[m.telefone]) porTelefone[m.telefone] = { nome: m.aluna_nome || m.telefone, ultima: m, telefone: m.telefone };
+    });
+    const lista = Object.values(porTelefone).sort(function(a, b){ return new Date(b.ultima.data_hora) - new Date(a.ultima.data_hora); });
+
+    area.innerHTML = lista.map(function(c){
+      const dataFormatada = new Date(c.ultima.data_hora).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+      const prefixo = c.ultima.direcao === 'enviada' ? 'Você: ' : '';
+      return '<div class="list-item" style="cursor:pointer;flex-direction:column;align-items:stretch;margin-bottom:8px;" onclick="abrirConversaCompleta(\'' + c.telefone + '\',\'' + c.nome.replace(/'/g,"\\'") + '\')">' +
+        '<div style="display:flex;justify-content:space-between;"><span style="font-weight:600;">' + c.nome + '</span><span class="tag">' + dataFormatada + '</span></div>' +
+        '<p class="txt" style="font-size:12px;color:var(--text-faint);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + prefixo + c.ultima.texto + '</p>' +
+      '</div>';
+    }).join('');
+  } catch(erro){
+    area.innerHTML = '<div class="info-box"><p class="txt">Erro ao carregar: ' + erro.message + '</p></div>';
+  }
+}
+
+async function abrirConversaCompleta(telefone, nome){
+  document.getElementById('area-lista-conversas').innerHTML = '';
+  document.getElementById('conversas-titulo').textContent = nome;
+  document.getElementById('conversas-subtitulo').style.display = 'none';
+  document.getElementById('conversas-voltar').onclick = function(){ renderListaConversas(); };
+
+  const area = document.getElementById('area-conversa-aberta');
+  area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Carregando conversa...</p>';
+  try {
+    const { data, error } = await supabaseClient.from('mensagens_whatsapp').select('*').eq('telefone', telefone).order('data_hora', { ascending: true });
+    if(error || !data){ area.innerHTML = '<div class="info-box"><p class="txt">Não consegui carregar essa conversa.</p></div>'; return; }
+    area.innerHTML = data.map(function(m){
+      const ehEnviada = m.direcao === 'enviada';
+      const hora = new Date(m.data_hora).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+      return '<div style="display:flex;justify-content:' + (ehEnviada ? 'flex-end' : 'flex-start') + ';margin-bottom:8px;">' +
+        '<div style="max-width:75%;background:' + (ehEnviada ? 'var(--gold-soft)' : 'var(--card-2)') + ';color:' + (ehEnviada ? '#1A1409' : 'var(--text)') + ';border-radius:14px;padding:8px 12px;">' +
+          '<p style="font-size:13px;margin:0;">' + m.texto + '</p>' +
+          '<p style="font-size:9px;margin:4px 0 0;opacity:0.7;text-align:right;">' + hora + '</p>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } catch(erro){
+    area.innerHTML = '<div class="info-box"><p class="txt">Erro ao carregar: ' + erro.message + '</p></div>';
+  }
 }
 
 function renderSinalizacoes(){
