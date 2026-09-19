@@ -1,4 +1,4 @@
-[dna_musa_25.html](https://github.com/user-attachments/files/32399710/dna_musa_25.html)
+[dna_musa_26.html](https://github.com/user-attachments/files/32423515/dna_musa_26.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -8417,8 +8417,8 @@ function aplicarTransicaoSuave(elId){
 // Lista de contas com acesso à área do Personal. Pra adicionar alguém novo, só acrescenta um item
 // aqui — no primeiro login dessa pessoa, a conta de verdade é criada sozinha no Supabase.
 const CONTAS_PERSONAL = [
-  { email: 'thiagofernandesdearaujo22@gmail.com', senha: '123456', nome: 'Thiago' },
-  { email: 'biancavmelu5@icloud.com', senha: '123456', nome: 'Bianca' }
+  { email: 'thiagofernandesdearaujo22@gmail.com', senha: 'Senhanova22-', nome: 'Thiago' },
+  { email: 'biancavmelu5@icloud.com', senha: 'Vgqfiz436!', nome: 'Bianca' }
 ];
 let NOME_PERSONAL_LOGADO = null; // 'Thiago' ou 'Bianca' — define qual Dashboard (1ª ou 2ª) ela vê como padrão
 const EMAIL_PERSONAL = CONTAS_PERSONAL[0].email; // mantido só pra não quebrar o autopreenchimento do formulário
