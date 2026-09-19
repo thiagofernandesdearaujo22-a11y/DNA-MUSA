@@ -656,20 +656,22 @@
       <div id="personal-comunicacao" style="display:none;">
         <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
         <h1 class="page-title" style="margin-top:0;">Comunicação com as alunas</h1>
-        <p class="section-label" style="margin-top:0;">Central de avisos (WhatsApp)</p>
+
         <button class="chip" style="cursor:pointer;margin-bottom:10px;" onclick="testarConexaoWhatsApp()"><i class="ti ti-plug-connected" style="margin-right:4px;"></i>Testar conexão do WhatsApp</button>
         <div id="resultado-teste-whatsapp"></div>
         <div id="central-avisos-area"></div>
 
-        <p class="section-label" style="margin-top:22px;">Avisos dentro do app</p>
-        <p class="page-sub" style="margin-top:-6px;">Não depende de WhatsApp nem de nenhum serviço externo</p>
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:10px;" onclick="mostrarFormularioAvisoEmMassa()"><i class="ti ti-bell" style="margin-right:6px;"></i>Mandar aviso pra todas (in-app)</button>
-        <div id="aviso-massa-inapp-area"></div>
+        <p class="section-label" style="margin-top:18px;">Enviar mensagem em massa</p>
+        <p class="page-sub" style="margin-top:-6px;">Cada botão abaixo já deixa claro por onde a mensagem sai</p>
 
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;margin-top:10px;" onclick="mostrarFormularioMensagemEmMassa()"><i class="ti ti-speakerphone" style="margin-right:6px;"></i>Mandar mensagem pra todas</button>
-        <div id="mensagem-massa-area"></div>
+        <button class="btn-gold" style="background:#25D366;color:#fff;border:none;margin-bottom:8px;" onclick="mostrarPainelEnvio('whatsapp')"><i class="ti ti-brand-whatsapp" style="margin-right:6px;"></i>Mandar via WhatsApp</button>
+        <div id="painel-envio-whatsapp"></div>
 
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="mostrarFormularioAvisarTreinoAjustado()"><i class="ti ti-barbell" style="margin-right:6px;"></i>Avisar treino ajustado (escolher alunas)</button>
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;margin-top:8px;" onclick="mostrarPainelEnvio('app')"><i class="ti ti-device-mobile" style="margin-right:6px;"></i>Mandar via Aplicativo</button>
+        <div id="painel-envio-app"></div>
+
+        <p class="section-label" style="margin-top:18px;">Ferramenta específica</p>
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="mostrarFormularioAvisarTreinoAjustado()"><i class="ti ti-barbell" style="margin-right:6px;"></i>Avisar treino ajustado (WhatsApp + Aplicativo juntos)</button>
         <div id="avisar-treino-ajustado-area"></div>
       </div>
 
@@ -2881,43 +2883,110 @@ function responderAceiteAvisos(aceita){
 }
 
 // ===== ENVIO EM MASSA PELO PERSONAL (in-app, sem depender de WhatsApp/Z-API) =====
-function mostrarFormularioAvisoEmMassa(){
-  const area = document.getElementById('aviso-massa-inapp-area');
+// ===== ENVIO EM MASSA UNIFICADO — mesmo painel de opções, usado tanto pra WhatsApp quanto pra Aplicativo,
+// deixando bem claro em qual canal a mensagem sai (a cor e o texto do botão já entregam isso) =====
+function mostrarPainelEnvio(canal){
+  const area = document.getElementById('painel-envio-' + canal);
   if(!area) return;
-  area.innerHTML =
-    '<div class="form-group"><textarea class="form-input" id="texto-aviso-massa-inapp" rows="3" placeholder="Escreva o aviso..."></textarea></div>' +
+  if(area.innerHTML){ area.innerHTML = ''; return; } // clica de novo no botão de cima = fecha
+
+  const elegiveis = alunasPersonal.filter(function(a){ return true; });
+  let html = '<div class="info-box">' +
     '<div class="form-group"><label class="form-label">Pra quem?</label>' +
-      '<select class="form-select" id="publico-aviso-massa-inapp">' +
+      '<select class="form-select" id="publico-envio-' + canal + '" onchange="alternarSelecaoEspecificaEnvio(\'' + canal + '\')">' +
         '<option value="todas">Todas as alunas</option>' +
         '<option value="ativas">Só ativas</option>' +
         '<option value="porvencer">Plano vencendo</option>' +
         '<option value="vencidas">Plano vencido</option>' +
+        '<option value="risco">Risco de abandono</option>' +
+        '<option value="especificas">Selecionar alunas específicas</option>' +
       '</select></div>' +
-    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="confirmarAvisoEmMassaInApp()">Enviar aviso</button>' +
-    '<div id="resultado-aviso-massa-inapp" style="margin-top:10px;"></div>';
+    '<div id="lista-especificas-envio-' + canal + '" style="display:none;">' +
+      '<input class="form-input" id="busca-envio-' + canal + '" placeholder="Buscar aluna por nome..." oninput="filtrarListaEnvio(\'' + canal + '\')" style="margin-bottom:8px;">' +
+      '<div class="row" style="gap:8px;margin-bottom:8px;"><span class="chip" style="cursor:pointer;" onclick="marcarTodasEnvio(\'' + canal + '\',true)">Marcar todas</span><span class="chip" style="cursor:pointer;" onclick="marcarTodasEnvio(\'' + canal + '\',false)">Limpar seleção</span></div>' +
+      '<div style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:10px;">' +
+        elegiveis.map(function(a){
+          return '<label class="linha-envio-' + canal + '" data-nome-busca="' + a.nome.toUpperCase().replace(/"/g,'&quot;') + '" style="display:flex;align-items:center;gap:8px;padding:6px 4px;font-size:13px;cursor:pointer;">' +
+            '<input type="checkbox" class="checkbox-envio-' + canal + '" value="' + a.nome.replace(/"/g,'&quot;') + '"> ' + a.nome +
+          '</label>';
+        }).join('') +
+      '</div>' +
+    '</div>' +
+    '<div class="form-group"><label class="form-label">Mensagem</label><textarea class="form-input" id="texto-envio-' + canal + '" rows="4" placeholder="Escreve aqui...' + (canal === 'whatsapp' ? ' pode usar {nome} que substitui pelo primeiro nome de cada aluna' : '') + '"></textarea></div>' +
+    '<button class="btn-gold" style="' + (canal === 'whatsapp' ? 'background:#25D366;color:#fff;border:none;' : '') + '" onclick="confirmarEnvioMassa(\'' + canal + '\')">' + (canal === 'whatsapp' ? 'Enviar pelo WhatsApp' : 'Enviar pelo Aplicativo') + '</button>' +
+    '<div id="resultado-envio-' + canal + '" style="margin-top:10px;"></div>' +
+  '</div>';
+  area.innerHTML = html;
 }
 
-async function confirmarAvisoEmMassaInApp(){
-  await sincronizarListaAlunasDoSupabase(); // sempre busca a lista mais nova antes de decidir quem recebe, nunca manda com dado velho
-  const texto = document.getElementById('texto-aviso-massa-inapp').value.trim();
-  const publico = document.getElementById('publico-aviso-massa-inapp').value;
-  if(!texto){ alert('Escreve o aviso antes de enviar.'); return; }
+function alternarSelecaoEspecificaEnvio(canal){
+  const modo = document.getElementById('publico-envio-' + canal).value;
+  const areaLista = document.getElementById('lista-especificas-envio-' + canal);
+  if(areaLista) areaLista.style.display = modo === 'especificas' ? 'block' : 'none';
+}
 
-  let elegiveis = alunasPersonal.filter(function(a){ return true; });
-  if(publico === 'ativas') elegiveis = elegiveis.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
-  if(publico === 'porvencer') elegiveis = elegiveis.filter(function(a){ return statusDoPlano(a) === 'porvencer'; });
-  if(publico === 'vencidas') elegiveis = elegiveis.filter(function(a){ return statusDoPlano(a) === 'vencidas'; });
-
-  if(!confirm('Vai mandar esse aviso pra ' + elegiveis.length + ' aluna(s). Continuar?')) return;
-
-  let enviados = 0, recusaram = 0;
-  elegiveis.forEach(function(a){
-    if(enviarAvisoInApp(a.nome, texto, 'massa')) enviados++; else recusaram++;
+function filtrarListaEnvio(canal){
+  const termo = (document.getElementById('busca-envio-' + canal).value || '').toUpperCase().trim();
+  document.querySelectorAll('.linha-envio-' + canal).forEach(function(linha){
+    linha.style.display = (!termo || linha.getAttribute('data-nome-busca').indexOf(termo) !== -1) ? 'flex' : 'none';
   });
+}
 
-  const area = document.getElementById('resultado-aviso-massa-inapp');
-  area.innerHTML = '<div class="info-box" style="border-color:var(--success);"><p class="txt">✓ ' + enviados + ' recebida(s)' + (recusaram > 0 ? ' · ' + recusaram + ' não recebem avisos (recusaram no primeiro acesso)' : '') + '</p></div>';
-  document.getElementById('texto-aviso-massa-inapp').value = '';
+function marcarTodasEnvio(canal, marcar){
+  // Só marca/desmarca quem está visível na busca atual, pra não mexer sem querer em quem está escondido pelo filtro
+  document.querySelectorAll('.linha-envio-' + canal).forEach(function(linha){
+    if(linha.style.display === 'none') return;
+    const chk = linha.querySelector('.checkbox-envio-' + canal);
+    if(chk) chk.checked = marcar;
+  });
+}
+
+async function confirmarEnvioMassa(canal){
+  await sincronizarListaAlunasDoSupabase(); // sempre busca a lista mais nova antes de decidir quem recebe, nunca manda com dado velho
+  const publico = document.getElementById('publico-envio-' + canal).value;
+  const texto = document.getElementById('texto-envio-' + canal).value.trim();
+  if(!texto){ alert('Escreve a mensagem antes de enviar.'); return; }
+
+  let destinatarias;
+  if(publico === 'especificas'){
+    const nomesEscolhidos = Array.prototype.slice.call(document.querySelectorAll('.checkbox-envio-' + canal + ':checked')).map(function(el){ return el.value; });
+    if(nomesEscolhidos.length === 0){ alert('Marca pelo menos uma aluna antes de enviar.'); return; }
+    destinatarias = alunasPersonal.filter(function(a){ return nomesEscolhidos.indexOf(a.nome) !== -1; });
+  } else {
+    destinatarias = alunasPersonal.filter(function(a){ return true; });
+    if(publico === 'ativas') destinatarias = destinatarias.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+    if(publico === 'porvencer') destinatarias = destinatarias.filter(function(a){ return statusDoPlano(a) === 'porvencer'; });
+    if(publico === 'vencidas') destinatarias = destinatarias.filter(function(a){ return statusDoPlano(a) === 'vencidas'; });
+    if(publico === 'risco') destinatarias = destinatarias.filter(function(a){ return detectarRiscoAbandonoPorConstancia(a.nome); });
+  }
+
+  const nomeCanal = canal === 'whatsapp' ? 'pelo WhatsApp' : 'pelo Aplicativo';
+  if(!confirm('Vai mandar essa mensagem ' + nomeCanal + ' pra ' + destinatarias.length + ' aluna(s). Continuar?')) return;
+
+  const areaResultado = document.getElementById('resultado-envio-' + canal);
+
+  if(canal === 'whatsapp'){
+    const comTelefone = destinatarias.filter(function(a){ return a.telefone; });
+    let enviadas = 0, erros = [];
+    for(let i = 0; i < comTelefone.length; i++){
+      const a = comTelefone[i];
+      areaResultado.innerHTML = '<p class="txt" style="color:var(--text-faint);">Enviando ' + (i+1) + ' de ' + comTelefone.length + '... (com pausa entre cada uma, pra proteger seu WhatsApp de bloqueio)</p>';
+      const mensagemPersonalizada = texto.replace(/\{nome\}/g, a.nome.split(' ')[0]);
+      const saida = await enviarWhatsApp(a.telefone, mensagemPersonalizada);
+      if(saida.sucesso) enviadas++; else erros.push({ nome: a.nome, motivo: saida.motivo });
+      await pausaEntreEnviosWhatsApp();
+    }
+    areaResultado.innerHTML = '<div class="info-box" style="border-color:var(--success);"><p class="txt">✓ ' + enviadas + ' de ' + comTelefone.length + ' enviada(s) pelo WhatsApp' + (destinatarias.length > comTelefone.length ? ' · ' + (destinatarias.length - comTelefone.length) + ' sem telefone cadastrado' : '') + '</p>' +
+      (erros.length > 0 ? '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:6px;">Falharam: ' + erros.map(function(e){ return e.nome; }).join(', ') + '</p>' : '') +
+    '</div>';
+  } else {
+    let enviados = 0, recusaram = 0;
+    destinatarias.forEach(function(a){
+      if(enviarAvisoInApp(a.nome, texto, 'massa')) enviados++; else recusaram++;
+    });
+    areaResultado.innerHTML = '<div class="info-box" style="border-color:var(--success);"><p class="txt">✓ ' + enviados + ' recebida(s) no aplicativo' + (recusaram > 0 ? ' · ' + recusaram + ' não recebem avisos (recusaram no primeiro acesso)' : '') + '</p></div>';
+  }
+  document.getElementById('texto-envio-' + canal).value = '';
 }
 
 // ===== AVISAR TREINO AJUSTADO — mensagem pronta, escolhendo alunas específicas, manda por WhatsApp + in-app juntos =====
@@ -2926,6 +2995,7 @@ const MENSAGEM_PADRAO_TREINO_AJUSTADO = 'Oi! Passando pra avisar que seu treino 
 function mostrarFormularioAvisarTreinoAjustado(){
   const area = document.getElementById('avisar-treino-ajustado-area');
   if(!area) return;
+  if(area.innerHTML){ area.innerHTML = ''; return; } // clica de novo no botão de cima = fecha
   const elegiveis = alunasPersonal.filter(function(a){ return true; });
 
   let html = '<div class="form-group"><textarea class="form-input" id="texto-treino-ajustado" rows="3">' + MENSAGEM_PADRAO_TREINO_AJUSTADO + '</textarea></div>';
@@ -10618,9 +10688,8 @@ function renderMetricasNegocio(){
   if(!area) return;
   const m = calcularMetricasNegocio();
   const htmlStats =
-    '<div class="alert-row" style="grid-template-columns:1fr 1fr;margin-bottom:6px;">' +
+    '<div class="alert-row" style="grid-template-columns:1fr;margin-bottom:6px;">' +
       '<div class="alert-stat"><p class="num">' + m.clientesAtivos + '</p><p class="lbl2">Clientes ativos</p></div>' +
-      '<div class="alert-stat"><p class="num">' + m.taxaRetencao + '%</p><p class="lbl2">Taxa de retenção</p></div>' +
     '</div>';
   area.innerHTML = htmlStats;
   const area2 = document.getElementById('metricas-negocio-area-2'); // mesma info, espelhada na 2ª Dashboard
@@ -10664,7 +10733,7 @@ function renderAtalhosDashboard(){
   if(area) area.innerHTML = montarHtml(atalhosBase);
   // Versão da colaboradora: sem "Ferramentas de treino" por enquanto (ela ainda não mexe em treino)
   const area2 = document.getElementById('atalhos-dashboard-area-2');
-  if(area2) area2.innerHTML = montarHtml(atalhosBase.filter(function(a){ return a.view !== 'ferramentas-treino'; }));
+  if(area2) area2.innerHTML = montarHtml(atalhosBase.filter(function(a){ return a.view !== 'ferramentas-treino' && a.view !== 'inteligencia'; }));
 }
 
 function renderMetaFinanceiraConteudo(m){
@@ -10974,51 +11043,6 @@ async function enviarAvisosEmLote(tipo){
   }
   const listaErros = erros.length ? '<ul style="margin:8px 0 0;padding-left:18px;font-size:11px;color:var(--text-faint);">' + erros.map(function(e){ return '<li>' + e.nome + ': ' + (e.motivo || 'motivo não informado') + '</li>'; }).join('') + '</ul>' : '';
   resultadoArea.innerHTML = '<div class="info-box" style="border-color:' + (erros.length ? '#C9784A' : 'var(--success)') + ';margin-top:8px;"><p class="txt">' + (erros.length ? '' : '✓ ') + enviadas + ' enviada(s)' + (erros.length ? ' · ' + erros.length + ' com erro' : '') + '</p>' + listaErros + '</div>';
-}
-
-function mostrarFormularioMensagemEmMassa(){
-  const area = document.getElementById('mensagem-massa-area');
-  if(area.innerHTML){ area.innerHTML = ''; return; }
-  area.innerHTML = '<div class="info-box">' +
-    '<div class="form-group"><label class="form-label">Quem recebe?</label>' +
-      '<select class="form-select" id="massa-publico">' +
-        '<option value="todas">Todas as alunas</option>' +
-        '<option value="ativas">Só as ativas</option>' +
-        '<option value="porvencer">Só com plano vencendo</option>' +
-        '<option value="vencidas">Só com plano vencido</option>' +
-        '<option value="risco">Só em risco de abandono</option>' +
-      '</select>' +
-    '</div>' +
-    '<div class="form-group"><label class="form-label">Mensagem</label><textarea class="form-input" id="massa-texto" rows="4" placeholder="Escreve aqui... pode usar {nome} que substitui pelo primeiro nome de cada aluna"></textarea></div>' +
-    '<button class="btn-gold" onclick="confirmarMensagemEmMassa()">Enviar pra todas</button>' +
-  '</div>';
-}
-
-async function confirmarMensagemEmMassa(){
-  await sincronizarListaAlunasDoSupabase(); // sempre busca a lista mais nova antes de decidir quem recebe, nunca manda com dado velho
-  const publico = document.getElementById('massa-publico').value;
-  const texto = document.getElementById('massa-texto').value.trim();
-  if(!texto){ alert('Escreve a mensagem primeiro.'); return; }
-
-  let destinatarias = alunasPersonal.filter(function(a){ return a.telefone; });
-  if(publico === 'ativas') destinatarias = destinatarias.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
-  else if(publico === 'porvencer') destinatarias = destinatarias.filter(function(a){ return statusDoPlano(a) === 'porvencer'; });
-  else if(publico === 'vencidas') destinatarias = destinatarias.filter(function(a){ return statusDoPlano(a) === 'vencidas'; });
-  else if(publico === 'risco') destinatarias = destinatarias.filter(function(a){ return detectarRiscoAbandonoPorConstancia(a.nome); });
-
-  if(!confirm('Vai mandar essa mensagem pra ' + destinatarias.length + ' aluna(s), pelo WhatsApp. Continuar?')) return;
-
-  const area = document.getElementById('mensagem-massa-area');
-  let enviadas = 0, erros = [];
-  for(let i = 0; i < destinatarias.length; i++){
-    const a = destinatarias[i];
-    area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Enviando ' + (i+1) + ' de ' + destinatarias.length + '... (de propósito, com pausa entre cada uma, pra proteger seu WhatsApp de bloqueio)</p>';
-    const mensagemPersonalizada = texto.replace(/\{nome\}/g, a.nome.split(' ')[0]);
-    const saida = await enviarWhatsApp(a.telefone, mensagemPersonalizada);
-    if(saida.sucesso) enviadas++; else erros.push({ nome: a.nome, motivo: saida.motivo });
-    await pausaEntreEnviosWhatsApp();
-  }
-  area.innerHTML = '<div class="info-box" style="border-color:' + (erros.length ? '#C9784A' : 'var(--success)') + ';"><p class="lbl" style="color:' + (erros.length ? '#C9784A' : 'var(--success)') + ';">' + (erros.length ? 'Concluído com erros' : '✓ Concluído') + '</p><p class="txt">' + enviadas + ' enviada(s)' + (erros.length ? ' · ' + erros.length + ' com erro' : '') + '</p>' + (erros.length ? '<ul style="margin:8px 0 0;padding-left:18px;font-size:11px;color:var(--text-faint);">' + erros.map(function(e){ return '<li>' + e.nome + ': ' + (e.motivo || 'motivo não informado') + '</li>'; }).join('') + '</ul>' : '') + '</div>';
 }
 
 // ===== ENVIO DE WHATSAPP (via porteiro seguro no Supabase) =====
