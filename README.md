@@ -1,4 +1,4 @@
-[dna_musa_26.html](https://github.com/user-attachments/files/32423515/dna_musa_26.html)
+[dna_musa_27.html](https://github.com/user-attachments/files/32423698/dna_musa_27.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6786,6 +6786,14 @@ function showPersonalView(which){
     renderAtalhosDashboard(); renderMetricasNegocio(); renderInfoCardGerarTreino(); renderControleSuporte();
     const elAviso2 = document.getElementById('aviso-aniversarios-area-2');
     if(elAviso2) elAviso2.innerHTML = renderAvisoAniversarios();
+    // Mesma sincronização que a Dashboard do Thiago já fazia — faltava aqui, por isso os números
+    // da Bianca só vinham corretos depois de alguém visitar outra aba que sincronizasse por acaso.
+    sincronizarListaAlunasDoSupabase().then(function(resultado){
+      renderMetricasNegocio();
+      renderInfoCardGerarTreino();
+      renderControleSuporte(); // sinais novos (aniversário, risco, etc.) também dependem do dado fresco
+      if(elAviso2) elAviso2.innerHTML = renderAvisoAniversarios();
+    });
   }
   if(which === 'dashboard'){
     renderAtalhosDashboard(); renderMetricasNegocio(); renderInfoCardGerarTreino();
