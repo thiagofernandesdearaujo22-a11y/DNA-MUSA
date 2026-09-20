@@ -6691,16 +6691,43 @@ function renderSidebarPersonal(){
   if(!sidebar || sidebar.dataset.rendered) return;
   sidebar.dataset.rendered = 'true';
 
+  // 3 grupos temáticos, pra não ficar uma lista enorme solta — cada um abre/fecha, e o grupo com a
+  // tela ativa já vem aberto sozinho (ver atualizarSidebarAtiva)
+  const grupos = [
+    { nome: 'Atendimento & Suporte', views: ['dashboard-suporte','sinalizacoes','conversas','controle'] },
+    { nome: 'Bancos de referência', views: ['exercicios','patologias','desvios','corrida'] },
+    { nome: 'Conteúdo pras alunas', views: ['conteudo','treinos','mobilidade','desafios'] }
+  ];
+
   let html = '<div class="side-logo">DNA MUSA</div>';
   html += '<div class="side-item" data-side-view="dashboard" onclick="showPersonalView(\'dashboard\')"><i class="ti ti-layout-dashboard"></i>Dashboard</div>';
   html += '<div class="side-item" data-side-view="alunas" onclick="showPersonalView(\'alunas\')"><i class="ti ti-users"></i>Alunas</div>';
-  html += '<div class="side-grupo-label">Ferramentas</div>';
-  ferramentasPersonal.forEach(function(f){
-    html += '<div class="side-item" data-side-view="' + f.view + '" onclick="' + (f.acaoEspecial ? f.acaoEspecial + '()' : "showPersonalView('" + f.view + "')") + '"><i class="ti ' + f.icone + '"></i>' + f.titulo + '</div>';
+
+  grupos.forEach(function(grupo, gi){
+    const itensDoGrupo = ferramentasPersonal.filter(function(f){ return grupo.views.indexOf(f.view) !== -1; });
+    html += '<div class="side-grupo-header" onclick="alternarGrupoSidebar(' + gi + ')" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:10px;margin-top:6px;border-radius:8px;">' +
+      '<span style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-faint);">' + grupo.nome + '</span>' +
+      '<i class="ti ti-chevron-down" id="chevron-sidebar-grupo-' + gi + '" style="font-size:12px;color:var(--text-faint);transition:transform .2s;"></i>' +
+    '</div>' +
+    '<div id="sidebar-grupo-' + gi + '" style="display:none;">' +
+      itensDoGrupo.map(function(f){
+        return '<div class="side-item" data-side-view="' + f.view + '" onclick="' + (f.acaoEspecial ? f.acaoEspecial + '()' : "showPersonalView('" + f.view + "')") + '"><i class="ti ' + f.icone + '"></i>' + f.titulo + '</div>';
+      }).join('') +
+    '</div>';
   });
-  html += '<div class="side-item side-sair" onclick="goBack()"><i class="ti ti-logout"></i>Sair</div>';
+
+  html += '<div class="side-item side-sair" style="margin-top:10px;" onclick="goBack()"><i class="ti ti-logout"></i>Sair</div>';
 
   sidebar.innerHTML = html;
+}
+
+function alternarGrupoSidebar(indice){
+  const el = document.getElementById('sidebar-grupo-' + indice);
+  const chevron = document.getElementById('chevron-sidebar-grupo-' + indice);
+  if(!el) return;
+  const abrindo = el.style.display === 'none';
+  el.style.display = abrindo ? 'block' : 'none';
+  if(chevron) chevron.style.transform = abrindo ? 'rotate(180deg)' : 'rotate(0deg)';
 }
 
 function atualizarSidebarAtiva(which){
@@ -6709,6 +6736,18 @@ function atualizarSidebarAtiva(which){
   sidebar.querySelectorAll('.side-item').forEach(function(el){
     el.classList.toggle('ativo', el.getAttribute('data-side-view') === which);
   });
+  // Sempre abre sozinho o grupo que contém a tela em que você está — assim nunca fica "escondida"
+  // dentro de um grupo fechado sem você perceber onde foi parar
+  const itemAtivo = sidebar.querySelector('.side-item.ativo[data-side-view="' + which + '"]');
+  if(itemAtivo){
+    const grupoPai = itemAtivo.closest('[id^="sidebar-grupo-"]');
+    if(grupoPai){
+      grupoPai.style.display = 'block';
+      const indice = grupoPai.id.replace('sidebar-grupo-', '');
+      const chevron = document.getElementById('chevron-sidebar-grupo-' + indice);
+      if(chevron) chevron.style.transform = 'rotate(180deg)';
+    }
+  }
 }
 
 // A anamnese guarda a data em formato brasileiro (dd/mm/aaaa, às vezes com pontos, dois pontos, ou
