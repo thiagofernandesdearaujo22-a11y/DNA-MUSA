@@ -1096,7 +1096,7 @@ window.addEventListener('unhandledrejection', function(evento){
 let level2 = null;
 let sessaoTipo = null; // 'aluna' | 'personal' — declarado cedo de propósito, é usado logo no primeiro render da tela
 
-const faseAtual = 'Fase 1 · Emagrecimento (override por IMC)';
+const faseAtual = 'Base';
 let dias = [
   {n:'Segunda', foco:'Treino A · Quadríceps e Glúteo', ex:['Leg Press 45 · 4x12','Agachamento Hack · 3x12','Extensão de quadril na máquina · 3x15','Abdução de quadril na polia · 3x15']},
   {n:'Terça', foco:'Treino B · Costas e Abdômen', ex:['Bi-set|||Remada articular aberta · 3x12|||Crucifixo Inverso · 3x15','Remada articular fechada · 3x12','Prancha ventral · 3x30s','Abdominal canivete · 3x15']},
@@ -1154,11 +1154,10 @@ function abrirListaDeTreinosDaSemana(){
 // Segurar pressionado um dia (qualquer um, inclusive descanso) por meio segundo já pergunta se quer
 // marcar como feito, sem precisar abrir o treino inteiro — pensado pra quem esqueceu de registrar.
 let timerPressionarDia = null;
-let diaFoiMarcadoPorPressao = false;
+let ultimoRegistroRapidoEm = 0; // guarda o instante do último "segurar", pra abrirDiaDaSemana saber que não é pra abrir o treino agora
 function iniciarPressionarDia(indice){
-  diaFoiMarcadoPorPressao = false;
   timerPressionarDia = setTimeout(function(){
-    diaFoiMarcadoPorPressao = true;
+    ultimoRegistroRapidoEm = Date.now(); // marca já aqui, mesmo antes de confirmar — ela claramente quis segurar, não tocar rápido
     if(navigator.vibrate) navigator.vibrate(30); // pequeno feedback tátil, se o aparelho suportar
     confirmarRegistroRapidoDoDia(indice);
   }, 600);
@@ -1182,11 +1181,12 @@ function registrarDiaRapido(indice){
   prog.horariosTreino.push({ dia: d.n, hora: agora.getHours(), minuto: agora.getMinutes(), data: agora.toISOString(), registroRapido: true });
   checarConclusaoSemana(NOME_ALUNA_LOGADA);
   salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  ultimoRegistroRapidoEm = Date.now(); // reforça a trava, cobrindo o tempo que o innerHTML novo leva pra entrar
   abrirListaDeTreinosDaSemana(); // recarrega a lista já mostrando esse dia verde
 }
 
 function abrirDiaDaSemana(i){
-  if(diaFoiMarcadoPorPressao){ diaFoiMarcadoPorPressao = false; return; } // evita abrir o treino logo depois de um "segurar" que já registrou
+  if(Date.now() - ultimoRegistroRapidoEm < 1200){ return; } // evita abrir o treino logo depois de um "segurar" que acabou de registrar (janela de tempo, mais confiável que uma bandeira sozinha)
   veioDaListaDeTreinosDaSemana = true;
   setActive('detail');
   document.getElementById('backlabel').textContent = 'Treinos da semana';
@@ -2172,7 +2172,7 @@ const alunasPersonal = [
   {nome:'JULIANA HERMES PEREIRA REGO', status:'ok', statusLabel:'Ativa recente', nivel:'A definir', freq:'5x por semana', email:'jhpr16@gmail.com', telefone:'51998005817', piramide:'1- braço / 2 - coxa / 3 - barriga / 4 - costas', objetivo:'Emagrecer e tornear', restricoes:'Nenhuma relatada', academia:'Yes Fitnnes', dataAnamnese:'2026-06-22', statusPlanoManual:'vencidas'},
   {nome:'Andriele Caroline Rubert', status:'ok', statusLabel:'Ativa recente', nivel:'Iniciante', freq:'5x por semana', email:'andrielecarolinerubert@gmail.com', telefone:'51991423839', piramide:'1- bumbum, 2- barriga(perder), 3- pernas, 4- costas', objetivo:'Esse ano decidi que vou focar no meu corpo e deixar ele de um jeito que eu me sinta bem, já perdi muito peso mas nunca fiquei com o corpo que queria, agora estou focada nisso e acredito que tu pode me auxiliar nesse processo', restricoes:'Dor no joelho ao fazer afundo ou stiff, excluídos da prescrição inicial', academia:'Performance', dataAnamnese:'2026-06-30', idade:30, queixaDor:true, regiaoQueixa:'Joelho', desviosPosturaisConfirmados:['ombros_protrusos'], statusPlanoManual:'ativas',
    peso:'101 kg', altura:'1,69 m', imc:'35,4 (fase 1: emagrecimento prioritário)',
-   treinoAtual:{fase:'Fase 1 · Emagrecimento (override por IMC)', volume:'Dentro do limite de iniciante · até 20 séries/semana por ênfase',
+   treinoAtual:{fase:'Base', volume:'Dentro do limite de iniciante · até 20 séries/semana por ênfase',
      dias:[
        {n:'Segunda', foco:'Inferiores A · Quadríceps e Glúteo', ex:['Leg Press 45 · 4x12','Agachamento Hack · 3x12','Extensão de quadril na máquina · 3x15','Abdução de quadril na polia · 3x15']},
        {n:'Terça', foco:'Superiores · Costas e Abdômen', ex:['Remada articular aberta · 3x12','Remada articular fechada · 3x12','Prancha ventral · 3x30s','Abdominal canivete · 3x15']},
@@ -3300,10 +3300,18 @@ function totalDiasDeTreino(){
   return dias.filter(function(d){ return !d.descanso; }).length;
 }
 
+// Conta só dias de TREINO de verdade dentro do que foi registrado na semana — um dia de descanso
+// registrado (ela fez alguma atividade nele) não deve contar pra "quantos treinos ela já fez".
+function contarDiasDeTreinoConcluidos(prog){
+  const nomesDiasDeTreino = dias.filter(function(d){ return !d.descanso; }).map(function(d){ return d.n; });
+  const registrados = prog.diasConcluidos[prog.semana] || [];
+  return registrados.filter(function(nome){ return nomesDiasDeTreino.indexOf(nome) !== -1; }).length;
+}
+
 function checarConclusaoSemana(nomeAluna){
   const prog = getProgressoAluna(nomeAluna);
   const total = totalDiasDeTreino();
-  const concluidos = (prog.diasConcluidos[prog.semana] || []).length;
+  const concluidos = contarDiasDeTreinoConcluidos(prog);
   if(concluidos >= total){
     prog.semana += 1;
     return { avancou: true, concluidos: concluidos, total: total };
@@ -4260,7 +4268,7 @@ function renderProgressao(a){
   }
 
   const totalDias = totalDiasDeTreino();
-  const concluidosSemana = (prog.diasConcluidos[prog.semana] || []).length;
+  const concluidosSemana = contarDiasDeTreinoConcluidos(prog);
 
   let reavaliacaoHtml = '';
   if(prog.semana >= 6){
@@ -4747,7 +4755,7 @@ function confirmarGerarTreinoPreview(){
     if(i < treinoPreviewPendente.semana.length) return Object.assign({ n: nome }, treinoPreviewPendente.semana[i]);
     return { n: nome, foco: 'Descanso', descanso: true, ex: [] };
   });
-  a.treinoAtual = { fase: (a.treinoAtual && a.treinoAtual.fase) || 'A definir', volume: 'Gerado automaticamente, revise antes de confirmar', dias: semanaComNome };
+  a.treinoAtual = { fase: rotuloFaseParaAluna(a), volume: 'Gerado automaticamente, revise antes de confirmar', dias: semanaComNome };
   sincronizarTreinoComSupabase(a);
   marcarStatusControleCiclo(a.nome, 'amarelo');
   treinoPreviewPendente = null;
@@ -5113,6 +5121,14 @@ function mostrarDiagnosticoParaProgredir(nomeAluna){
 
 // Núcleo reaproveitável: calcula e atribui o treino, sem nenhum efeito de navegação/tela —
 // usado tanto pelo botão individual quanto pela geração em massa.
+// Rótulo de fase simplificado pra mostrar pra aluna — nunca a razão técnica por trás (override de IMC,
+// objetivo declarado, fadiga, etc.), só o nome do bloco que ela está treinando agora.
+function rotuloFaseParaAluna(a){
+  const infoBloco = calcularBlocoAtual(a);
+  const rotulos = { base: 'Base', choque: 'Choque', deload: 'Regenerativo' };
+  return rotulos[infoBloco.blocoTecnico] || 'Base';
+}
+
 async function construirEAtribuirTreino(nomeAluna){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return { ok: false, motivo: 'aluna não encontrada' };
@@ -5125,7 +5141,7 @@ async function construirEAtribuirTreino(nomeAluna){
     return { n: nome, foco: 'Descanso', descanso: true, ex: [] };
   });
 
-  a.treinoAtual = { fase: (a.treinoAtual && a.treinoAtual.fase) || 'A definir', volume: 'Gerado automaticamente, revise antes de confirmar', dias: semanaComNome };
+  a.treinoAtual = { fase: rotuloFaseParaAluna(a), volume: 'Gerado automaticamente, revise antes de confirmar', dias: semanaComNome };
   const saidaSalvamento = await sincronizarTreinoComSupabase(a);
 
   const resultado = validarPrescricao(perfil, semana);
@@ -8064,7 +8080,7 @@ async function calcularRelatorioFrequenciaSemanal(){
 
   const linhas = ativas.map(function(a){
     const prog = getProgressoAluna(a.nome);
-    const concluidos = (prog.diasConcluidos[prog.semana] || []).length;
+    const concluidos = contarDiasDeTreinoConcluidos(prog);
     return { nome: a.nome, concluidos: concluidos, total: totalDiasSemana };
   }).sort(function(x,y){ return x.concluidos - y.concluidos; }); // menor constância primeiro, chama mais atenção
 
@@ -8144,7 +8160,7 @@ function calcularResumoFechamentoSemana(){
 
   ativas.forEach(function(a){
     const prog = getProgressoAluna(a.nome);
-    const concluidos = (prog.diasConcluidos[prog.semana] || []).length;
+    const concluidos = contarDiasDeTreinoConcluidos(prog);
     const pct = totalDiasSemana > 0 ? concluidos / totalDiasSemana : 1;
     let precisaAtencao = false;
 
@@ -9718,7 +9734,7 @@ function montarDadosParaResumoIA(nomeAluna){
   const prog = getProgressoAluna(nomeAluna);
 
   const totalDiasSemana = totalDiasDeTreino();
-  const concluidosSemana = (prog.diasConcluidos[prog.semana] || []).length;
+  const concluidosSemana = contarDiasDeTreinoConcluidos(prog);
 
   const hoje = new Date();
   const seteDiasAtras = new Date(hoje); seteDiasAtras.setDate(hoje.getDate() - 7);
@@ -11073,9 +11089,10 @@ async function renderCentralDeAvisos(){
   const dados = calcularCentralDeAvisos();
 
   function linhaAviso(titulo, lista, tipo){
-    return '<div class="list-item" style="margin-bottom:6px;">' +
-      '<span>' + titulo + ' <span class="tag">' + lista.length + '</span></span>' +
-      (lista.length > 0 ? '<span class="acao-pill" onclick="enviarAvisosEmLote(\'' + tipo + '\')">Enviar avisos</span>' : '') +
+    if(lista.length === 0) return ''; // linha zerada não ocupa espaço à toa
+    return '<div class="list-item" style="margin-bottom:4px;padding:8px 10px;">' +
+      '<span style="font-size:12px;">' + titulo + ' <span class="tag" style="font-size:10px;padding:1px 6px;">' + lista.length + '</span></span>' +
+      '<span class="acao-pill" style="font-size:11px;padding:4px 10px;" onclick="enviarAvisosEmLote(\'' + tipo + '\')">Enviar</span>' +
     '</div>';
   }
 
@@ -11085,12 +11102,14 @@ async function renderCentralDeAvisos(){
   const eDiaDasMaes = isDiaDasMaesHoje();
   const totalComTelefone = alunasPersonal.filter(function(a){ return a.telefone; }).length;
 
-  area.innerHTML =
-    linhaAviso('Risco de abandono', dados.risco, 'riscoAbandono') +
+  const linhasAvisos = linhaAviso('Risco de abandono', dados.risco, 'riscoAbandono') +
     linhaAviso('Avaliação física atrasada', dados.avaliacaoAtrasada, 'avaliacaoAtrasada') +
     linhaAviso('Plano vencendo em breve', dados.planoVencendo, 'planoVencendo') +
     linhaAviso('Plano já vencido', dados.planoVencido, 'planoVencido') +
-    linhaAviso('Aniversário hoje', dados.aniversario, 'aniversario') +
+    linhaAviso('Aniversário hoje', dados.aniversario, 'aniversario');
+
+  area.innerHTML =
+    (linhasAvisos || '<p class="txt" style="font-size:12px;color:var(--text-faint);">Nenhum aviso pendente agora.</p>') +
     (metaBatida ? '<div class="list-item" style="margin-bottom:6px;background:var(--success-soft);"><span>🎉 Meta da comunidade batida!</span><span class="acao-pill" onclick="avisarMetaComunidadeBatida()">Avisar todas</span></div>' : '') +
     (eDiaDaMulher ? '<div class="list-item" style="margin-bottom:6px;background:var(--success-soft);"><span>💐 Hoje é Dia da Mulher <span class="tag">' + totalComTelefone + '</span></span><span class="acao-pill" onclick="avisarDataEspecial(\'diaDaMulher\')">Avisar todas</span></div>' : '') +
     (eDiaDasMaes ? '<div class="list-item" style="margin-bottom:6px;background:var(--success-soft);"><span>💐 Hoje é Dia das Mães <span class="tag">' + totalComTelefone + '</span></span><span class="acao-pill" onclick="avisarDataEspecial(\'diaDasMaes\')">Avisar todas</span></div>' : '') +
@@ -12056,7 +12075,8 @@ if(type === 'central'){
           '<div id="ex-expandido-' + j + '" style="display:none;padding:0 12px 12px;">' + conteudoExpandido + '</div>' +
         '</div>';
       });
-      corpoTreino += '<button class="btn-gold" style="margin-top:10px;" onclick="registrarTreinoDia(' + arg + ')">Registrar treino de hoje</button>' +
+      const jaRegistradoHoje = prog && (prog.diasConcluidos[prog.semana] || []).indexOf(d.n) !== -1;
+      corpoTreino += '<button class="btn-gold" id="btn-registrar-treino-dia" style="margin-top:10px;' + (jaRegistradoHoje ? 'background:var(--success);color:#fff;' : '') + '" onclick="registrarTreinoDia(' + arg + ')">' + (jaRegistradoHoje ? '✓ Treino registrado' : 'Registrar treino de hoje') + '</button>' +
         '<div id="registro-confirmacao" style="margin-top:10px;"></div>';
     }
     el.innerHTML =
