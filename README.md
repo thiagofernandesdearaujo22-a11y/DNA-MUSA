@@ -1,4 +1,4 @@
-[dna_musa_30.html](https://github.com/user-attachments/files/32441413/dna_musa_30.html)
+[dna_musa_31.html](https://github.com/user-attachments/files/32441813/dna_musa_31.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1135,13 +1135,16 @@ function abrirListaDeTreinosDaSemana(){
   lista.innerHTML = dias.map(function(d, i){
     const abrev = abreviacoes[d.n] || d.n.slice(0,3).toUpperCase();
     const foiRegistrado = diasRegistradosEssaSemana.indexOf(d.n) !== -1;
-    return '<div style="display:flex;align-items:center;gap:14px;padding:16px;margin-bottom:10px;border-radius:16px;background:' + (foiRegistrado ? 'var(--success-soft)' : (d.hoje ? 'linear-gradient(135deg,rgba(217,139,46,0.18),rgba(92,56,20,0.12))' : 'var(--card)')) + ';border:1px solid ' + (foiRegistrado ? 'var(--success)' : (d.hoje ? 'var(--gold-soft)' : 'var(--border)')) + ';cursor:pointer;" onclick="abrirDiaDaSemana(' + i + ')">' +
+    return '<div style="display:flex;align-items:center;gap:14px;padding:16px;margin-bottom:10px;border-radius:16px;background:' + (foiRegistrado ? 'var(--success-soft)' : (d.hoje ? 'linear-gradient(135deg,rgba(217,139,46,0.18),rgba(92,56,20,0.12))' : 'var(--card)')) + ';border:1px solid ' + (foiRegistrado ? 'var(--success)' : (d.hoje ? 'var(--gold-soft)' : 'var(--border)')) + ';cursor:pointer;user-select:none;-webkit-user-select:none;" ' +
+      'onclick="abrirDiaDaSemana(' + i + ')" ' +
+      'onmousedown="iniciarPressionarDia(' + i + ')" onmouseup="cancelarPressionarDia()" onmouseleave="cancelarPressionarDia()" ' +
+      'ontouchstart="iniciarPressionarDia(' + i + ')" ontouchend="cancelarPressionarDia()" ontouchmove="cancelarPressionarDia()">' +
       '<div style="width:48px;height:48px;border-radius:14px;background:' + (foiRegistrado ? 'var(--success)' : 'linear-gradient(135deg,#F4D9A5,#E8C58A)') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
         '<span style="font-size:11px;font-weight:700;letter-spacing:0.5px;color:#1A1409;">' + abrev + '</span>' +
       '</div>' +
       '<div style="flex:1;min-width:0;">' +
         '<p style="font-size:13px;font-weight:600;margin:0 0 2px;">' + d.n + (d.hoje ? ' <span class="tag" style="margin-left:4px;">hoje</span>' : '') + (foiRegistrado ? ' <span class="tag" style="margin-left:4px;background:var(--success-soft);color:var(--success);">registrado</span>' : '') + '</p>' +
-        '<p style="font-size:12px;color:var(--text-faint);margin:0;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.foco + '</p>' +
+        '<p style="font-size:12px;color:var(--text-faint);margin:0;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.foco + (foiRegistrado ? '' : ' · segure pra marcar como feito') + '</p>' +
       '</div>' +
       (foiRegistrado ? '<i class="ti ti-circle-check" style="color:var(--success);font-size:20px;flex-shrink:0;"></i>' : '<i class="ti ti-chevron-right" style="color:var(--text-faint);font-size:18px;flex-shrink:0;"></i>') +
     '</div>';
@@ -1149,7 +1152,42 @@ function abrirListaDeTreinosDaSemana(){
   setActive('semana-treinos');
 }
 
+// Segurar pressionado um dia (qualquer um, inclusive descanso) por meio segundo já pergunta se quer
+// marcar como feito, sem precisar abrir o treino inteiro — pensado pra quem esqueceu de registrar.
+let timerPressionarDia = null;
+let diaFoiMarcadoPorPressao = false;
+function iniciarPressionarDia(indice){
+  diaFoiMarcadoPorPressao = false;
+  timerPressionarDia = setTimeout(function(){
+    diaFoiMarcadoPorPressao = true;
+    if(navigator.vibrate) navigator.vibrate(30); // pequeno feedback tátil, se o aparelho suportar
+    confirmarRegistroRapidoDoDia(indice);
+  }, 600);
+}
+function cancelarPressionarDia(){
+  if(timerPressionarDia){ clearTimeout(timerPressionarDia); timerPressionarDia = null; }
+}
+function confirmarRegistroRapidoDoDia(indice){
+  const d = dias[indice];
+  if(confirm('Marcar "' + d.n + '" como feito, sem abrir o treino?')){
+    registrarDiaRapido(indice);
+  }
+}
+function registrarDiaRapido(indice){
+  const d = dias[indice];
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  if(!prog.diasConcluidos[prog.semana]) prog.diasConcluidos[prog.semana] = [];
+  if(prog.diasConcluidos[prog.semana].indexOf(d.n) === -1) prog.diasConcluidos[prog.semana].push(d.n);
+  if(!prog.horariosTreino) prog.horariosTreino = [];
+  const agora = new Date();
+  prog.horariosTreino.push({ dia: d.n, hora: agora.getHours(), minuto: agora.getMinutes(), data: agora.toISOString(), registroRapido: true });
+  checarConclusaoSemana(NOME_ALUNA_LOGADA);
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  abrirListaDeTreinosDaSemana(); // recarrega a lista já mostrando esse dia verde
+}
+
 function abrirDiaDaSemana(i){
+  if(diaFoiMarcadoPorPressao){ diaFoiMarcadoPorPressao = false; return; } // evita abrir o treino logo depois de um "segurar" que já registrou
   veioDaListaDeTreinosDaSemana = true;
   setActive('detail');
   document.getElementById('backlabel').textContent = 'Treinos da semana';
@@ -2599,10 +2637,38 @@ const progressoesPorAluna = {};
 let alunaAberta = null;
 let detailDiaAtual = null;
 
+// Vira a semana sempre a partir de segunda 00:00 (ou seja, domingo 23:59 é o corte) — não importa se
+// ela completou todos os dias ou não. Antes disso só existia a virada "completou tudo", que travava
+// pra sempre quem esquecesse de registrar um dia. As duas continuam funcionando juntas: quem termina
+// antes já avança (função checarConclusaoSemana), e quem não termina também avança quando o calendário virar.
+function obterInicioSemanaCalendario(dataBase){
+  const d = new Date(dataBase);
+  d.setHours(0, 0, 0, 0);
+  const diaSemana = d.getDay(); // 0=domingo, 1=segunda, ..., 6=sábado
+  const diffParaSegunda = diaSemana === 0 ? 6 : diaSemana - 1; // domingo pertence à semana que começou na segunda anterior
+  d.setDate(d.getDate() - diffParaSegunda);
+  return d;
+}
+
+function verificarViradaDeSemanaPorCalendario(prog){
+  const inicioSemanaAtual = obterInicioSemanaCalendario(new Date());
+  if(!prog.semanaIniciadaEm){
+    prog.semanaIniciadaEm = inicioSemanaAtual.toISOString(); // primeira vez que essa aluna é vista, só marca o início, sem avançar nada
+    return;
+  }
+  const inicioSemanaRegistrada = new Date(prog.semanaIniciadaEm);
+  if(inicioSemanaAtual > inicioSemanaRegistrada){
+    const semanasPassadas = Math.round((inicioSemanaAtual - inicioSemanaRegistrada) / (7 * 24 * 60 * 60 * 1000));
+    prog.semana += semanasPassadas;
+    prog.semanaIniciadaEm = inicioSemanaAtual.toISOString();
+  }
+}
+
 function getProgressoAluna(nome){
   if(!progressoesPorAluna[nome]){
-    progressoesPorAluna[nome] = { semana: 1, historico: {}, diasConcluidos: {}, substituicoes: [], nutricao: {} };
+    progressoesPorAluna[nome] = { semana: 1, historico: {}, diasConcluidos: {}, substituicoes: [], nutricao: {}, semanaIniciadaEm: obterInicioSemanaCalendario(new Date()).toISOString() };
   }
+  verificarViradaDeSemanaPorCalendario(progressoesPorAluna[nome]);
   return progressoesPorAluna[nome];
 }
 
@@ -12245,6 +12311,7 @@ function renderPerguntaFeedbackTreino(diaIndex){
     '</div>' +
     '<div class="form-group" id="feedback-escala-group" style="display:none;"><label class="form-label">Numa escala de 0 a 10, qual a intensidade do desconforto?</label><input class="form-input" id="feedback-escala-desconforto" type="number" min="0" max="10" placeholder="0-10"></div>' +
     '<div class="form-group"><label class="form-label">E a intensidade geral do treino, de 0 a 10?</label><input class="form-input" id="feedback-intensidade" type="number" min="0" max="10" placeholder="0-10"></div>' +
+    '<div class="form-group"><label class="form-label">Quer deixar algum comentário? (opcional)</label><textarea class="form-input" id="feedback-comentario" rows="2" placeholder="Como se sentiu, alguma observação..."></textarea></div>' +
     '<button class="btn-gold" onclick="registrarFeedbackTreino(' + diaIndex + ')">Enviar</button>' +
     '</div>';
 }
@@ -12256,23 +12323,26 @@ function alternarCampoExercicioFeedback(){
 }
 
 function registrarFeedbackTreino(diaIndex){
-  const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
-  if(!alunaAtual) return;
-  const prog = getProgressoAluna(alunaAtual.nome);
+  const alunaAtual = obterAlunaLogadaOuCriar();
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
   const desconforto = document.getElementById('feedback-desconforto').value === 'Sim';
   const exercicioDesconforto = desconforto ? document.getElementById('feedback-exercicio-desconforto').value : null;
   const escalaDesconforto = desconforto ? parseInt(document.getElementById('feedback-escala-desconforto').value, 10) : null;
   const intensidadeInput = parseInt(document.getElementById('feedback-intensidade').value, 10);
+  const comentario = (document.getElementById('feedback-comentario').value || '').trim();
 
   if(!prog.feedbackTreino) prog.feedbackTreino = [];
   prog.feedbackTreino.push({
     semana: prog.semana,
     dia: dias[diaIndex].n,
+    data: new Date().toISOString(),
     desconforto: desconforto,
     exercicio: exercicioDesconforto,
     escalaDesconforto: escalaDesconforto,
-    intensidade: isNaN(intensidadeInput) ? null : intensidadeInput
+    intensidade: isNaN(intensidadeInput) ? null : intensidadeInput,
+    comentario: comentario || null
   });
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA); // faltava isso — sem essa linha, o feedback nunca chegava a ser salvo de verdade
 
   let msg = 'Obrigada pelo feedback! Isso ajuda a calibrar seus próximos treinos.';
 
@@ -12683,6 +12753,7 @@ function goBack(){
   const detailActive = document.querySelector('[data-view="detail"]').classList.contains('active');
   if(detailActive && veioDaListaDeTreinosDaSemana){
     veioDaListaDeTreinosDaSemana = false;
+    abrirListaDeTreinosDaSemana(); // recarrega a lista com o que acabou de ser registrado, antes de mostrar
     setActive('semana-treinos');
     document.getElementById('backlabel').textContent = 'Voltar para o início';
   } else if(detailActive){
