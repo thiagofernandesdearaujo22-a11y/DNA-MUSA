@@ -1,4 +1,4 @@
-[dna_musa_32.html](https://github.com/user-attachments/files/32443064/dna_musa_32.html)
+[dna_musa_33.html](https://github.com/user-attachments/files/32443373/dna_musa_33.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -609,6 +609,9 @@
       <h1 class="page-title">Ranking da comunidade</h1>
       <p class="page-sub">Todo mundo junto, evoluindo junto</p>
       <div id="area-ranking-conteudo"></div>
+      <p class="section-label" style="margin-top:18px;">Top 10 da semana</p>
+      <p class="page-sub" style="margin-top:-6px;">Consistência + evolução de carga + check-ins diários</p>
+      <div id="area-ranking-publico"></div>
     </div>
 
     <!-- RODA DA VIDA -->
@@ -642,6 +645,7 @@
         <h1 class="page-title">Painel do Personal</h1>
         <p class="page-sub">Visão geral das suas alunas</p>
 
+        <div id="area-presenca-equipe-dash"></div>
         <div id="metricas-negocio-area"></div>
         <div id="aviso-aniversarios-area"></div>
 
@@ -749,6 +753,7 @@
         <h1 class="page-title" style="margin-top:0;">Painel do Personal</h1>
         <p class="page-sub">Visão geral das suas alunas</p>
 
+        <div id="area-presenca-equipe-dash-2"></div>
         <div id="metricas-negocio-area-2"></div>
         <div id="aviso-aniversarios-area-2"></div>
 
@@ -5146,6 +5151,7 @@ async function construirEAtribuirTreino(nomeAluna){
   const saidaSalvamento = await sincronizarTreinoComSupabase(a);
 
   const resultado = validarPrescricao(perfil, semana);
+  avisarEquipeTreinoEntregue(nomeAluna); // avisa quem mais estiver online agora que um treino saiu
   return { ok: true, resultado: resultado, salvamento: saidaSalvamento };
 }
 
@@ -6783,6 +6789,7 @@ function renderSidebarPersonal(){
   ];
 
   let html = '<div class="side-logo">DNA MUSA</div>';
+  html += '<div id="area-presenca-equipe" style="padding:0 10px 10px;"></div>';
   html += '<div class="side-item" data-side-view="dashboard" onclick="showPersonalView(\'dashboard\')"><i class="ti ti-layout-dashboard"></i>Dashboard</div>';
   html += '<div class="side-item" data-side-view="alunas" onclick="showPersonalView(\'alunas\')"><i class="ti ti-users"></i>Alunas</div>';
 
@@ -8631,6 +8638,86 @@ const CONTAS_PERSONAL = [
 ];
 let NOME_PERSONAL_LOGADO = null; // 'Thiago' ou 'Bianca' — define qual Dashboard (1ª ou 2ª) ela vê como padrão
 const EMAIL_PERSONAL = CONTAS_PERSONAL[0].email; // mantido só pra não quebrar o autopreenchimento do formulário
+
+// ===== PRESENÇA DA EQUIPE EM TEMPO REAL (tipo o "fulano está editando" do Excel/Google Docs) =====
+// Usa o recurso de Presença do Supabase Realtime: cada um que loga como Personal entra num mesmo
+// "canal", e o Supabase avisa automaticamente quando alguém entra/sai — sem precisar ficar checando.
+let canalPresencaEquipe = null;
+let timerMensagemAleatoriaEquipe = null;
+
+const MENSAGENS_ALEATORIAS_EQUIPE = [
+  'Bora, mais um dia de transformar vidas 💪',
+  'Cada treino entregue é uma aluna mais perto do resultado dela',
+  'Time DNA MUSA on fire hoje 🔥',
+  'Lembrete: a constância de vocês duas é o que sustenta tudo isso',
+  'Uma mensagem de suporte hoje pode ser o que evita uma desistência amanhã',
+  'Orgulho do trabalho que vocês fazem juntas'
+];
+
+function iniciarPresencaEquipe(){
+  if(!supabaseClient || canalPresencaEquipe || !NOME_PERSONAL_LOGADO) return;
+
+  canalPresencaEquipe = supabaseClient.channel('personal-presence', {
+    config: { presence: { key: NOME_PERSONAL_LOGADO } }
+  });
+
+  canalPresencaEquipe.on('presence', { event: 'sync' }, function(){
+    renderPresencaEquipe(canalPresencaEquipe.presenceState());
+  });
+
+  canalPresencaEquipe.on('broadcast', { event: 'evento_equipe' }, function(mensagem){
+    mostrarNotificacaoEquipe(mensagem.payload.texto);
+  });
+
+  canalPresencaEquipe.subscribe(async function(status){
+    if(status === 'SUBSCRIBED'){
+      await canalPresencaEquipe.track({ nome: NOME_PERSONAL_LOGADO, online_em: new Date().toISOString() });
+      // De vez em quando (a cada ~40 min de sessão aberta), manda uma mensagem aleatória de moral pra
+      // quem estiver online — as duas veem ao mesmo tempo, reforça o time
+      timerMensagemAleatoriaEquipe = setInterval(function(){
+        const msg = MENSAGENS_ALEATORIAS_EQUIPE[Math.floor(Math.random() * MENSAGENS_ALEATORIAS_EQUIPE.length)];
+        canalPresencaEquipe.send({ type: 'broadcast', event: 'evento_equipe', payload: { texto: msg } });
+      }, 40 * 60 * 1000);
+    }
+  });
+}
+
+function renderPresencaEquipe(estado){
+  const outraPessoa = NOME_PERSONAL_LOGADO === 'Thiago' ? 'Bianca' : 'Thiago';
+  const estaOnline = !!estado[outraPessoa];
+  const html = estaOnline
+    ? '<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--success);"><span style="width:7px;height:7px;border-radius:50%;background:var(--success);display:inline-block;"></span>' + outraPessoa + ' online agora</div>'
+    : '<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-faint);"><span style="width:7px;height:7px;border-radius:50%;background:var(--text-faint);display:inline-block;"></span>' + outraPessoa + ' offline</div>';
+  ['area-presenca-equipe', 'area-presenca-equipe-dash', 'area-presenca-equipe-dash-2'].forEach(function(id){
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = html;
+  });
+}
+
+// Aparece por uns segundos no topo da tela e some sozinha — usado tanto pra "fulano entregou um
+// treino" quanto pras mensagens aleatórias de moral do time
+function mostrarNotificacaoEquipe(texto){
+  let toast = document.getElementById('toast-equipe');
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'toast-equipe';
+    toast.style.cssText = 'position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--gold-soft);border-radius:12px;padding:10px 16px;font-size:12px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.3);max-width:90%;text-align:center;transition:opacity .3s;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = texto;
+  toast.style.opacity = '1';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(function(){ toast.style.opacity = '0'; }, 5000);
+}
+
+// Avisa a equipe (a outra pessoa online, se tiver) que um treino acabou de ser entregue
+function avisarEquipeTreinoEntregue(nomeAluna){
+  if(!canalPresencaEquipe || !NOME_PERSONAL_LOGADO) return;
+  canalPresencaEquipe.send({
+    type: 'broadcast', event: 'evento_equipe',
+    payload: { texto: NOME_PERSONAL_LOGADO + ' entregou mais um treino, pra ' + nomeAluna.split(' ')[0] + ' 💛' }
+  });
+}
 const SENHA_PERSONAL = CONTAS_PERSONAL[0].senha;
 
 function encontrarContaPersonal(email, senha){
@@ -9204,12 +9291,12 @@ function openLevel2(which){
   document.getElementById('backlabel').textContent = (which === 'personal') ? 'Sair' : 'Voltar para o início';
   const phoneEl = document.getElementById('phone-container');
   if(phoneEl) phoneEl.classList.toggle('modo-personal', which === 'personal');
-  if(which === 'personal'){ showPersonalView('dashboard'); carregarCatalogoPersonal(); }
+  if(which === 'personal'){ showPersonalView('dashboard'); carregarCatalogoPersonal(); iniciarPresencaEquipe(); }
   if(which === 'chatia'){ inicializarChatIA(); }
   if(which === 'home' && typeof renderHome === 'function'){ renderHome(); }
   if(which === 'dados' && typeof renderAvaliacoes === 'function'){ renderAvaliacoes(); }
   if(which === 'progresso' && typeof renderMeuProgresso === 'function'){ renderMeuProgresso(); }
-  if(which === 'ranking' && typeof renderRanking === 'function'){ renderRanking(); }
+  if(which === 'ranking' && typeof renderRanking === 'function'){ renderRanking(); renderRankingPublico(); }
   if(which === 'rodadavida'){ renderRodaDaVidaAluna(); }
 }
 
@@ -11388,6 +11475,84 @@ function calcularPontosAluna(nome){
   const prog = getProgressoAluna(nome);
   const historico = prog.dnaScoreHistorico || [];
   return historico.reduce(function(soma, r){ return soma + (r.score || 0); }, 0);
+}
+
+// Ranking PÚBLICO (com nome e pontuação visíveis pras top 10, tipo Gym Rats) — diferente do ranking
+// anônimo acima. Mistura 3 sinais: consistência (treinos feitos), evolução de carga real (prova que
+// não é só marcar presença) e check-ins diários (humor/disposição), nas últimas 4 semanas.
+function calcularPontosRankingPublico(nome){
+  const prog = getProgressoAluna(nome);
+  let pontos = 0;
+  const semanaAtual = prog.semana;
+  const semanaMaisAntiga = Math.max(1, semanaAtual - 3);
+
+  // Consistência: 10 pontos por treino de verdade registrado (dias de descanso não contam)
+  const nomesDiasDeTreino = dias.filter(function(d){ return !d.descanso; }).map(function(d){ return d.n; });
+  for(let s = semanaMaisAntiga; s <= semanaAtual; s++){
+    const registrados = prog.diasConcluidos[s] || [];
+    pontos += registrados.filter(function(nomeD){ return nomesDiasDeTreino.indexOf(nomeD) !== -1; }).length * 10;
+  }
+
+  // Evolução de carga: 15 pontos de bônus por exercício em que a carga mais recente é maior que a
+  // mais antiga registrada nesse período — prova que ela está progredindo de verdade, não só malhando
+  Object.keys(prog.historico || {}).forEach(function(nomeEx){
+    const entradas = prog.historico[nomeEx].filter(function(r){ return r.semana >= semanaMaisAntiga; });
+    if(entradas.length >= 2 && entradas[entradas.length - 1].carga > entradas[0].carga){
+      pontos += 15;
+    }
+  });
+
+  // Check-ins diários: 3 pontos por dia que ela preencheu humor/ansiedade/disposição
+  const checkinsRecentes = Object.values(prog.checkinsEmocionais || {}).filter(function(c){
+    return new Date(c.data + 'T00:00:00') >= new Date(Date.now() - 28 * 24 * 60 * 60 * 1000);
+  });
+  pontos += checkinsRecentes.length * 3;
+
+  return pontos;
+}
+
+// Recalcula e sincroniza os pontos dela no ranking público — chamado sempre que algo relevante pra
+// pontuação acontece (registrar treino, check-in, etc.), pra manter o ranking sempre atualizado
+async function sincronizarPontosRankingPublico(nome){
+  const pontos = calcularPontosRankingPublico(nome);
+  const a = obterAlunaLogadaOuCriar();
+  a.pontosRankingPublico = pontos;
+  await salvarPerfilAlunaNoSupabase(nome);
+}
+
+async function buscarRankingPublicoTop10(){
+  if(!supabaseClient) return [];
+  try {
+    const { data, error } = await supabaseClient.rpc('obter_ranking_publico_top10');
+    if(error || !data) return [];
+    return data;
+  } catch(erroDeRede){
+    console.warn('Não consegui buscar o ranking público agora:', erroDeRede);
+    return [];
+  }
+}
+
+async function renderRankingPublico(){
+  const container = document.getElementById('area-ranking-publico');
+  if(!container) return;
+  container.innerHTML = '<p class="txt" style="color:var(--text-faint);">Carregando ranking...</p>';
+
+  await sincronizarPontosRankingPublico(NOME_ALUNA_LOGADA); // garante que a pontuação dela está atualizada antes de mostrar a lista
+  const top10 = await buscarRankingPublicoTop10();
+
+  if(top10.length === 0){
+    container.innerHTML = '<div class="info-box"><p class="txt" style="color:var(--text-faint);">Ainda não tem ranking suficiente pra mostrar — continue treinando!</p></div>';
+    return;
+  }
+
+  const medalhas = ['🥇', '🥈', '🥉'];
+  container.innerHTML = top10.map(function(r, i){
+    const souEu = r.nome === NOME_ALUNA_LOGADA;
+    return '<div class="list-item" style="margin-bottom:6px;' + (souEu ? 'border-color:var(--gold-soft);background:var(--gold-deep);' : '') + '">' +
+      '<span>' + (medalhas[i] || (i + 1) + 'º') + ' ' + r.nome.split(' ')[0] + (souEu ? ' (você)' : '') + '</span>' +
+      '<span class="tag">' + r.pontos + ' pts</span>' +
+    '</div>';
+  }).join('');
 }
 
 // Busca de verdade os pontos de TODAS as alunas (não só a que está logada), através de uma função
