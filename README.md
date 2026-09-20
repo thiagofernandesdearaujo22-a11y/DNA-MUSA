@@ -1,4 +1,4 @@
-[dna_musa_34.html](https://github.com/user-attachments/files/32446655/dna_musa_34.html)
+[dna_musa_35.html](https://github.com/user-attachments/files/32446868/dna_musa_35.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -10263,7 +10263,8 @@ function getEmbedUrl(url){
   if(!url) return '';
   const m1 = url.match(/youtu\.be\/([A-Za-z0-9_-]+)/);
   const m2 = url.match(/[?&]v=([A-Za-z0-9_-]+)/);
-  const id = m1 ? m1[1] : (m2 ? m2[1] : '');
+  const m3 = url.match(/youtube\.com\/shorts\/([A-Za-z0-9_-]+)/); // faltava reconhecer link de Shorts
+  const id = m1 ? m1[1] : (m2 ? m2[1] : (m3 ? m3[1] : ''));
   return id ? 'https://www.youtube.com/embed/' + id : '';
 }
 
