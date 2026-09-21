@@ -1,4 +1,4 @@
-[dna_musa_35.html](https://github.com/user-attachments/files/32446868/dna_musa_35.html)
+[dna_musa_36.html](https://github.com/user-attachments/files/32450737/dna_musa_36.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -3833,13 +3833,29 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
     'Quadríceps': ['Leg Press 45', 'Agachamento Hack, profundo', 'Cadeira Extensora'],
     'Pernas': ['Leg Press 45', 'Cadeira flexora', 'Agachamento Hack, profundo']
   };
+  // Filtra uma lista de NOMES (não objetos) contra o banco de verdade, garantindo ambiente correto e
+  // presença real no banco — os direcionamentos (glúteo/quadríceps) usam listas fixas de nomes que não
+  // passavam por nenhuma dessas checagens, deixando vazar exercício de Casa pra Academia (ou nomes que
+  // nem existem cadastrados ainda, tipo "Flexão Nórdica Reversa").
+  function filtrarNomesPorAmbiente(nomes){
+    return nomes.filter(function(nome){
+      const exBanco = exerciciosBanco.find(function(e){ return e.nome.toUpperCase() === nome.toUpperCase(); });
+      if(!exBanco) return false; // não existe cadastrado no banco ainda
+      if(!exBanco.grupo) return false; // sem grupo classificado, não confiável pra entrar sozinho numa prescrição automática
+      return perfil.ambienteTreino === 'Casa' ? exercicioServeParaCasa(exBanco) : ((exBanco.ambiente || 'Academia') === 'Academia' && !ehExercicioElastico(exBanco));
+    });
+  }
+
   function exerciciosDoGrupo(grupo, padroesJaUsadosNoDia){
     // ITEM 8/9 conectados: usa direcionamento técnico quando definido
     if(grupo === 'Glúteo' && perfil.direcionamentoGluteo && perfil.direcionamentoGluteo !== 'nenhum'){
-      return sugerirExerciciosGluteo(perfil.direcionamentoGluteo).prioridade;
+      const sugestaoFiltrada = filtrarNomesPorAmbiente(sugerirExerciciosGluteo(perfil.direcionamentoGluteo).prioridade);
+      if(sugestaoFiltrada.length > 0) return sugestaoFiltrada;
+      // filtrou tudo (nenhum válido pro ambiente atual) — cai pro caminho normal abaixo, não trava a geração
     }
     if(grupo === 'Quadríceps' && perfil.direcionamentoQuadriceps === 'distal'){
-      return sugerirExerciciosQuadriceps('distal').prioridade;
+      const sugestaoFiltrada = filtrarNomesPorAmbiente(sugerirExerciciosQuadriceps('distal').prioridade);
+      if(sugestaoFiltrada.length > 0) return sugestaoFiltrada;
     }
     const variados = selecionarExerciciosVariados(grupo, perfil.nomeAluna, 3, perfil.indiceCiclo, padroesJaUsadosNoDia, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
     if(variados) return variados;
@@ -3920,7 +3936,7 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
       if(opcoesPosterior && opcoesPosterior[0]){
         const seriesMinimas = perfil.bloco === 'deload' ? 2 : 3;
         const faltam = minimoNecessario - seriesPosterior;
-        const seriesDoExercicio = Math.max(seriesMinimas, faltam);
+        const seriesDoExercicio = Math.min(5, Math.max(seriesMinimas, faltam)); // teto de 5 séries por exercício — nunca uma prescrição absurda tipo "15x15" só pra fechar volume de uma vez
         ultimoDia.ex.push(opcoesPosterior[0] + ' · ' + seriesDoExercicio + 'x' + Math.min(15, reps + 2) + ' (volume mínimo de posteriores: 50% do volume de quadríceps, garantido pela metodologia)');
       }
     }
@@ -3939,7 +3955,7 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
         const opcoesQuad = exerciciosDoGrupo('Quadríceps', {});
         if(opcoesQuad && opcoesQuad[0]){
           const faltamQuad = minimoQuadriceps - seriesQuadricepsAtual;
-          const seriesQuad = Math.max(perfil.bloco === 'deload' ? 2 : 3, faltamQuad);
+          const seriesQuad = Math.min(5, Math.max(perfil.bloco === 'deload' ? 2 : 3, faltamQuad)); // mesmo teto de 5 séries
           dias[dias.length - 1].ex.push(opcoesQuad[0] + ' · ' + seriesQuad + 'x' + reps + ' (volume mínimo de quadríceps: 50% do volume de glúteos, garantido pela metodologia)');
         }
       }
@@ -3947,7 +3963,7 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
         const opcoesPost = exerciciosDoGrupo('Posterior', {});
         if(opcoesPost && opcoesPost[0]){
           const faltamPost = minimoPosteriorGluteo - seriesPosteriorAtual;
-          const seriesPost = Math.max(perfil.bloco === 'deload' ? 2 : 3, faltamPost);
+          const seriesPost = Math.min(5, Math.max(perfil.bloco === 'deload' ? 2 : 3, faltamPost)); // mesmo teto de 5 séries
           dias[dias.length - 1].ex.push(opcoesPost[0] + ' · ' + seriesPost + 'x' + Math.min(15, reps + 2) + ' (volume mínimo de posteriores: 50% do volume de glúteos, garantido pela metodologia)');
         }
       }
@@ -5458,6 +5474,17 @@ function finalizarArraste(){
   atualizarDiaPersonalNaTela(diaIndex);
 }
 
+// Depois de qualquer reordenação, recalcula a letra (A, B, C...) de cada dia com base na posição nova
+// — sem isso, o nome do dia ficava com a letra antiga, destoando da ordem real na tela.
+function atualizarLetrasDosDias(dias){
+  dias.forEach(function(d, i){
+    if(!d.foco) return;
+    d.foco = d.foco.replace(/^(\S+) ([A-Z]) · /, function(match, prefixo){
+      return prefixo + ' ' + String.fromCharCode(65 + i) + ' · ';
+    });
+  });
+}
+
 function moverDiaTreino(nomeAluna, di, direcao){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a || !a.treinoAtual) return;
@@ -5467,6 +5494,7 @@ function moverDiaTreino(nomeAluna, di, direcao){
   const temp = dias[di];
   dias[di] = dias[novoIndice];
   dias[novoIndice] = temp;
+  atualizarLetrasDosDias(dias);
   sincronizarTreinoComSupabase(a); // mesmo caminho seguro de sempre (com o plano B do backup pra quem ainda não tem login)
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
