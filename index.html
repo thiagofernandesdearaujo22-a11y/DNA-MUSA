@@ -557,6 +557,7 @@
         <span style="color:#1A1409;font-weight:600;"><i class="ti ti-calendar-week" style="margin-right:8px;"></i>Ver treinos da semana</span>
         <span class="tag" id="resumo-dias-semana" style="background:rgba(0,0,0,0.15);color:#1A1409;"></span>
       </div>
+      <div id="botao-desafio-area"></div>
 
       <div class="list-item" style="cursor:pointer;margin-top:10px;" onclick="openLevel2('progresso')">
         <span><i class="ti ti-trending-up" style="margin-right:8px;color:var(--gold-soft);"></i>Meu progresso</span>
@@ -611,6 +612,13 @@
       <p class="section-label" style="margin-top:18px;">Top 10 da semana</p>
       <p class="page-sub" style="margin-top:-6px;">Consistência + evolução de carga + check-ins diários</p>
       <div id="area-ranking-publico"></div>
+    </div>
+
+    <!-- DESAFIO SECA E EMPINA -->
+    <div class="view" data-view="desafio-seca-empina">
+      <p style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold);margin:0 0 4px;letter-spacing:0.5px;">Desafio Seca e Empina</p>
+      <p class="page-sub" id="se-subtitulo-estrutura"></p>
+      <div id="se-lista-dias"></div>
     </div>
 
     <!-- RODA DA VIDA -->
@@ -979,8 +987,14 @@
 
       <div id="personal-desafios" style="display:none;">
         <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
-        <h1 class="page-title" style="margin-top:0;">Grupo de desafio</h1>
-        <p class="page-sub">Crie um treino e gere um link de inscrição, quem entra participa só do desafio, sem acesso ao restante do app</p>
+        <h1 class="page-title" style="margin-top:0;">Desafio</h1>
+
+        <p class="section-label" style="margin-top:0;">Seca e Empina — em andamento</p>
+        <div id="lista-seca-empina"></div>
+        <button class="btn-gold" onclick="mostrarFormularioInscricaoSecaEmpina()" style="margin-bottom:22px;">Inscrever aluna no Seca e Empina</button>
+        <div id="form-inscricao-seca-empina"></div>
+
+        <p class="page-sub" style="margin-top:22px;">Crie um treino e gere um link de inscrição, quem entra participa só do desafio, sem acesso ao restante do app</p>
 
         <div id="desafios-list"></div>
 
@@ -3825,6 +3839,237 @@ function selecionarExerciciosVariados(grupoInterno, nomeAluna, quantidade, indic
   return selecionados;
 }
 
+// ============================================================
+// MOTOR DO DESAFIO "SECA E EMPINA" — completamente separado do motor adaptativo normal.
+// Não usa histórico da aluna nem perfil dela pra decidir nada; só recebe metas de volume fixas
+// por estrutura (1 a 10) e monta a semana pra bater essas metas, dentro das regras específicas
+// desse desafio (Glúteo Médio restrito a 3 exercícios, alguns unilaterais banidos, etc.)
+// ============================================================
+
+const ESTRUTURAS_SECA_EMPINA = [
+  { quadriceps: 18, posterior: 18, gluteoMedio: 9,  gluteoMaximo: 14 },
+  { quadriceps: 22, posterior: 18, gluteoMedio: 9,  gluteoMaximo: 20 },
+  { quadriceps: 26, posterior: 15, gluteoMedio: 19, gluteoMaximo: 27 },
+  { quadriceps: 25, posterior: 22, gluteoMedio: 18, gluteoMaximo: 24 },
+  { quadriceps: 25, posterior: 24, gluteoMedio: 20, gluteoMaximo: 26 },
+  { quadriceps: 25, posterior: 26, gluteoMedio: 21, gluteoMaximo: 27 },
+  { quadriceps: 24, posterior: 27, gluteoMedio: 23, gluteoMaximo: 28 },
+  { quadriceps: 24, posterior: 28, gluteoMedio: 24, gluteoMaximo: 28 },
+  { quadriceps: 24, posterior: 28, gluteoMedio: 24, gluteoMaximo: 29 },
+  { quadriceps: 24, posterior: 28, gluteoMedio: 25, gluteoMaximo: 29 }
+];
+
+const FATOR_REDUCAO_3X_DESAFIO = 0.65; // pra quem faz o desafio em 3x, reduz o volume total (não dá pra manter o de 5x em menos sessões)
+
+// Exercícios permitidos pro desafio, por grupo — listas específicas dessa metodologia, não o banco geral
+const GLUTEO_MEDIO_DESAFIO = ['CADEIRA ABDUTORA', 'CADEIRA ABDUTORA-TRONCO A FRENTE', 'CADEIRA ABDUTORA EM PÉ 45º'];
+const BANIDOS_DESAFIO = ['CADEIRA EXTENSORA UNI', 'CADEIRA FLEXORA UNILATERAL']; // nunca usar nesse desafio, mesmo que sirvam no motor normal
+
+function obterMetaVolumeDesafio(numeroEstrutura, frequencia){
+  const base = ESTRUTURAS_SECA_EMPINA[numeroEstrutura - 1];
+  if(!base) return null;
+  if(frequencia >= 5) return base;
+  return {
+    quadriceps: Math.round(base.quadriceps * FATOR_REDUCAO_3X_DESAFIO),
+    posterior: Math.round(base.posterior * FATOR_REDUCAO_3X_DESAFIO),
+    gluteoMedio: Math.round(base.gluteoMedio * FATOR_REDUCAO_3X_DESAFIO),
+    gluteoMaximo: Math.round(base.gluteoMaximo * FATOR_REDUCAO_3X_DESAFIO)
+  };
+}
+
+// Pool de exercícios específico do desafio — sempre Academia, nunca elástico, nunca banido, e pra
+// Glúteo Médio, só os 3 nomes permitidos (nada de polia/caneleira, pra economizar tempo de sessão)
+function poolDesafio(grupoBanco, restringirGluteoMedio){
+  if(restringirGluteoMedio){
+    return exerciciosBanco.filter(function(e){ return GLUTEO_MEDIO_DESAFIO.indexOf(e.nome.toUpperCase()) !== -1; }).map(function(e){ return e.nome; });
+  }
+  return exerciciosBanco.filter(function(e){
+    if((e.ambiente || 'Academia') !== 'Academia') return false;
+    if(e.grupo !== grupoBanco) return false;
+    if(ehExercicioElastico(e)) return false;
+    if(BANIDOS_DESAFIO.indexOf(e.nome.toUpperCase()) !== -1) return false;
+    return true;
+  }).map(function(e){ return e.nome; });
+}
+
+// Monta uma lista de exercícios pra um grupo, batendo a meta de séries semanais, distribuída pelos
+// dias em que esse grupo aparece — nunca repete exercício no mesmo dia, nunca 2 unilaterais juntos,
+// varia a escolha ciclicamente pra não sair sempre os 2 primeiros do pool
+function distribuirVolumeDesafio(metaSeries, numDias, poolNomes, seedVariacao){
+  const diasComEsseGrupo = [];
+  const seriesPorDia = Math.max(2, Math.round(metaSeries / numDias / 3)); // ~3 séries por exercício, como padrão da casa
+  const exerciciosPorDia = Math.max(1, Math.round(metaSeries / numDias / seriesPorDia));
+  for(let d = 0; d < numDias; d++){
+    const escolhidos = [];
+    const usadosNoDia = {};
+    let tentativas = 0;
+    while(escolhidos.length < exerciciosPorDia && tentativas < poolNomes.length * 2){
+      const idx = (seedVariacao + d * 7 + tentativas) % poolNomes.length;
+      const candidato = poolNomes[idx];
+      tentativas++;
+      if(usadosNoDia[candidato]) continue;
+      if(escolhidos.some(function(nome){ return ehExercicioUnilateral(nome); }) && ehExercicioUnilateral(candidato)) continue; // nunca 2 unilaterais juntos, regra da casa
+      usadosNoDia[candidato] = true;
+      escolhidos.push(candidato);
+    }
+    diasComEsseGrupo.push(escolhidos.map(function(nome){ return nome + ' · ' + seriesPorDia + 'x12'; }));
+  }
+  return diasComEsseGrupo;
+}
+
+// Gera a semana inteira do desafio pra uma estrutura + frequência específicas
+function gerarSemanaDesafio(numeroEstrutura, frequencia, seedVariacao){
+  const meta = obterMetaVolumeDesafio(numeroEstrutura, frequencia);
+  if(!meta) return null;
+  const numDias = frequencia;
+  const nomesDias = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+
+  const poolQuad = poolDesafio('Quadríceps', false);
+  const poolPost = poolDesafio('Isquiotibiais', false);
+  const poolGMedio = poolDesafio(null, true);
+  const poolGMax = poolDesafio('Glúteos', false).filter(function(nome){ return GLUTEO_MEDIO_DESAFIO.indexOf(nome.toUpperCase()) === -1; });
+
+  const diasQuad = distribuirVolumeDesafio(meta.quadriceps, numDias, poolQuad, seedVariacao);
+  const diasPost = distribuirVolumeDesafio(meta.posterior, numDias, poolPost, seedVariacao + 1);
+  const diasGMedio = distribuirVolumeDesafio(meta.gluteoMedio, numDias, poolGMedio, seedVariacao + 2);
+  const diasGMax = distribuirVolumeDesafio(meta.gluteoMaximo, numDias, poolGMax, seedVariacao + 3);
+
+  const dias = [];
+  for(let d = 0; d < numDias; d++){
+    const ex = [].concat(diasGMax[d], diasQuad[d], diasPost[d], diasGMedio[d]);
+    const dia = { n: nomesDias[d], foco: 'Seca e Empina · Estrutura ' + numeroEstrutura, ex: ex, descanso: false };
+    removerExerciciosExatamenteRepetidosNoDia(dia);
+    dias.push(dia);
+  }
+  // Completa a semana com dias de descanso até fechar 7
+  for(let d = numDias; d < 7; d++){
+    dias.push({ n: nomesDias[d], foco: 'Descanso', ex: [], descanso: true });
+  }
+  return { numeroEstrutura: numeroEstrutura, frequencia: frequencia, dias: dias, metaVolume: meta };
+}
+
+// ===== PERSONAL: inscrever aluna, listar quem está ativa, avançar de estrutura =====
+function mostrarFormularioInscricaoSecaEmpina(){
+  const area = document.getElementById('form-inscricao-seca-empina');
+  if(!area) return;
+  if(area.innerHTML){ area.innerHTML = ''; return; }
+  const elegiveis = alunasPersonal.filter(function(a){ return !a.desafioAtivo; });
+  area.innerHTML = '<div class="info-box">' +
+    '<div class="form-group"><label class="form-label">Aluna</label><select class="form-select" id="se-aluna">' +
+      elegiveis.map(function(a){ return '<option value="' + a.nome.replace(/"/g,'&quot;') + '">' + a.nome + '</option>'; }).join('') +
+    '</select></div>' +
+    '<div class="form-group"><label class="form-label">Frequência</label><select class="form-select" id="se-frequencia"><option value="5">5x por semana</option><option value="3">3x por semana</option></select></div>' +
+    '<button class="btn-gold" onclick="confirmarInscricaoSecaEmpina()">Inscrever e gerar 1ª semana</button>' +
+  '</div>';
+}
+
+function confirmarInscricaoSecaEmpina(){
+  const nomeAluna = document.getElementById('se-aluna').value;
+  const frequencia = parseInt(document.getElementById('se-frequencia').value, 10);
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+
+  const seed = hashString(nomeAluna);
+  const semana = gerarSemanaDesafio(1, frequencia, seed);
+  a.desafioAtivo = { nome: 'Seca e Empina', dataInicio: new Date().toISOString(), frequencia: frequencia, estruturaAtual: 1 };
+  a.desafioTreino = semana;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+
+  document.getElementById('form-inscricao-seca-empina').innerHTML = '';
+  renderListaSecaEmpina();
+}
+
+function removerAlunaDoSecaEmpina(nomeAluna){
+  if(!confirm('Tirar ' + nomeAluna + ' do desafio Seca e Empina?')) return;
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  a.desafioAtivo = null;
+  a.desafioTreino = null;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+  renderListaSecaEmpina();
+}
+
+function renderListaSecaEmpina(){
+  const area = document.getElementById('lista-seca-empina');
+  if(!area) return;
+  const ativas = alunasPersonal.filter(function(a){ return a.desafioAtivo; });
+  if(ativas.length === 0){
+    area.innerHTML = '<div class="info-box"><p class="txt" style="color:var(--text-faint);">Nenhuma aluna no Seca e Empina agora.</p></div>';
+    return;
+  }
+  area.innerHTML = ativas.map(function(a){
+    const diasNoDesafio = Math.floor((Date.now() - new Date(a.desafioAtivo.dataInicio).getTime()) / (1000*60*60*24));
+    return '<div class="list-item" style="margin-bottom:6px;">' +
+      '<span>' + a.nome + ' <span class="tag">Estrutura ' + a.desafioAtivo.estruturaAtual + '/10 · ' + a.desafioAtivo.frequencia + 'x · dia ' + diasNoDesafio + '</span></span>' +
+      '<span class="acao-pill" style="background:var(--danger);" onclick="removerAlunaDoSecaEmpina(\'' + a.nome.replace(/'/g,"\\'") + '\')">Remover</span>' +
+    '</div>';
+  }).join('');
+}
+
+// ===== ALUNA: botão condicional na home, tela do desafio, marcar dia como feito =====
+// Usa obterAlunaLogadaOuCriar() (não alunasPersonal.find direto) — sessão da aluna não tem a lista
+// completa carregada, e essa é a forma segura já estabelecida no resto do app pra esse caso.
+function renderBotaoDesafio(){
+  const area = document.getElementById('botao-desafio-area');
+  if(!area) return;
+  const a = obterAlunaLogadaOuCriar();
+  if(!a.desafioAtivo){ area.innerHTML = ''; return; }
+  area.innerHTML = '<div class="list-item" style="cursor:pointer;background:linear-gradient(135deg,#6FA87C,#4C8058);border:none;margin-top:10px;" onclick="abrirTelaDesafioSecaEmpina()">' +
+    '<span style="color:#fff;font-weight:600;"><i class="ti ti-flag" style="margin-right:8px;"></i>Desafio Seca e Empina</span>' +
+    '<span class="tag" style="background:rgba(0,0,0,0.15);color:#fff;">Estrutura ' + a.desafioAtivo.estruturaAtual + '/10</span>' +
+  '</div>';
+}
+
+function abrirTelaDesafioSecaEmpina(){
+  const a = obterAlunaLogadaOuCriar();
+  if(!a.desafioTreino) return;
+  openLevel2('desafio-seca-empina');
+  document.getElementById('se-subtitulo-estrutura').textContent = 'Estrutura ' + a.desafioTreino.numeroEstrutura + ' de 10 · ' + a.desafioTreino.frequencia + 'x por semana';
+  const lista = document.getElementById('se-lista-dias');
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const feitosDesafio = prog.desafioDiasConcluidos || {};
+  const chaveEstrutura = 'estrutura' + a.desafioTreino.numeroEstrutura;
+  const feitosNessaEstrutura = feitosDesafio[chaveEstrutura] || [];
+
+  lista.innerHTML = a.desafioTreino.dias.map(function(d, i){
+    if(d.descanso) return '';
+    const feito = feitosNessaEstrutura.indexOf(d.n) !== -1;
+    return '<div class="info-box" style="margin-bottom:10px;' + (feito ? 'border-color:var(--success);' : '') + '">' +
+      '<p class="lbl" style="margin:0 0 6px;">' + d.n + (feito ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">feito</span>' : '') + '</p>' +
+      d.ex.map(function(linha){ return '<p class="txt" style="font-size:12.5px;margin:3px 0;">' + linha + '</p>'; }).join('') +
+      '<button class="btn-gold" style="margin-top:10px;' + (feito ? 'background:var(--success);color:#fff;' : '') + '" onclick="marcarDiaDesafioFeito(' + i + ')">' + (feito ? '✓ Treino registrado' : 'Registrar treino de hoje') + '</button>' +
+    '</div>';
+  }).join('');
+}
+
+function marcarDiaDesafioFeito(indiceDia){
+  const a = obterAlunaLogadaOuCriar();
+  const d = a.desafioTreino.dias[indiceDia];
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  if(!prog.desafioDiasConcluidos) prog.desafioDiasConcluidos = {};
+  const chaveEstrutura = 'estrutura' + a.desafioTreino.numeroEstrutura;
+  if(!prog.desafioDiasConcluidos[chaveEstrutura]) prog.desafioDiasConcluidos[chaveEstrutura] = [];
+  if(prog.desafioDiasConcluidos[chaveEstrutura].indexOf(d.n) === -1) prog.desafioDiasConcluidos[chaveEstrutura].push(d.n);
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  abrirTelaDesafioSecaEmpina(); // recarrega já mostrando o dia verde
+}
+
+// Verifica se já passaram 30 dias desde a última virada de estrutura, e avança sozinho se sim —
+// chamado no login da aluna, então funciona mesmo sem o Personal precisar fazer nada manualmente
+function verificarAvancoEstruturaDesafio(){
+  const a = obterAlunaLogadaOuCriar();
+  if(!a.desafioAtivo || a.desafioAtivo.estruturaAtual >= 10) return;
+  const dataBase = a.desafioAtivo.dataUltimaVirada ? new Date(a.desafioAtivo.dataUltimaVirada) : new Date(a.desafioAtivo.dataInicio);
+  const diasPassados = Math.floor((Date.now() - dataBase.getTime()) / (1000*60*60*24));
+  if(diasPassados < 30) return;
+  const novaEstrutura = Math.min(10, a.desafioAtivo.estruturaAtual + Math.floor(diasPassados / 30));
+  a.desafioAtivo.estruturaAtual = novaEstrutura;
+  a.desafioAtivo.dataUltimaVirada = new Date().toISOString();
+  a.desafioTreino = gerarSemanaDesafio(novaEstrutura, a.desafioAtivo.frequencia, hashString(NOME_ALUNA_LOGADA) + novaEstrutura);
+  salvarPerfilAlunaNoSupabase(NOME_ALUNA_LOGADA);
+}
+
+
 function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
   // perfil.enfase = grupo prioritário (ex: 'Glúteo'), perfil.secundario = 2º grupo da pirâmide
   const enfase = perfil.enfase;
@@ -4893,7 +5138,9 @@ async function executarSalvamentoPerfilAluna(nomeAluna){
         ordemConclusaoCicloAtual: a.ordemConclusaoCicloAtual || null,
         ordemUltimoCiclo: a.ordemUltimoCiclo || null,
         suporteUltimoContato: a.suporteUltimoContato || null,
-        suporteHistorico: a.suporteHistorico || []
+        suporteHistorico: a.suporteHistorico || [],
+        desafioAtivo: a.desafioAtivo || null,
+        desafioTreino: a.desafioTreino || null
       }
     }, { onConflict: 'email' });
   } catch(erroDeRede){
@@ -7119,7 +7366,7 @@ function showPersonalView(which){
     });
   }
   if(which === 'treinos'){ renderTemplates(); populateExercicioSelect(); }
-  if(which === 'desafios'){ renderDesafios(); populateTreinoSelect(); }
+  if(which === 'desafios'){ renderDesafios(); populateTreinoSelect(); renderListaSecaEmpina(); }
   if(which === 'mobilidade'){ renderArticulacaoChips(); renderAquecimentoBanco(); document.getElementById('mob-articulacoes-view').style.display = 'block'; document.getElementById('mob-lista-view').style.display = 'none'; }
   if(which === 'patologias'){ renderPatologiaChips(); renderPatologiaList(); }
   if(which === 'desvios'){ renderDesviosBanco(); }
@@ -9329,7 +9576,7 @@ function openLevel2(which){
   if(phoneEl) phoneEl.classList.toggle('modo-personal', which === 'personal');
   if(which === 'personal'){ showPersonalView('dashboard'); carregarCatalogoPersonal(); iniciarPresencaEquipe(); }
   if(which === 'chatia'){ inicializarChatIA(); }
-  if(which === 'home' && typeof renderHome === 'function'){ renderHome(); }
+  if(which === 'home' && typeof renderHome === 'function'){ renderHome(); verificarAvancoEstruturaDesafio(); renderBotaoDesafio(); }
   if(which === 'dados' && typeof renderAvaliacoes === 'function'){ renderAvaliacoes(); }
   if(which === 'progresso' && typeof renderMeuProgresso === 'function'){ renderMeuProgresso(); }
   if(which === 'ranking' && typeof renderRanking === 'function'){ renderRanking(); renderRankingPublico(); }
