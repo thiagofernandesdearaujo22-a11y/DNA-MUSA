@@ -1,4 +1,4 @@
-[dna_musa_44.html](https://github.com/user-attachments/files/32510313/dna_musa_44.html)
+[dna_musa_45.html](https://github.com/user-attachments/files/32510763/dna_musa_45.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6599,7 +6599,9 @@ function openAlunaDetail(i){
         '</div>' +
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 8px 0 0;font-size:13px;background:#25D366;color:#fff;border:none;" onclick="enviarCredenciaisPorWhatsApp(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-brand-whatsapp" style="vertical-align:-2px;margin-right:6px;"></i>Mandar login e senha por WhatsApp</button>' +
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 8px 0 0;font-size:13px;background:var(--success);color:#fff;border:none;" onclick="marcarTreinoFeitoManualmente(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-check" style="vertical-align:-2px;margin-right:6px;"></i>Treino feito</button>' +
-        '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 0 0;font-size:13px;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="navigator.clipboard.writeText(\'E-mail: ' + a.email + ' - Senha: ' + a.senhaGerada + ' - Link: ' + (LINK_DO_APP) + '\')">Copiar dados</button>'
+        '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 0 0;font-size:13px;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="navigator.clipboard.writeText(\'E-mail: ' + a.email + ' - Senha: ' + a.senhaGerada + ' - Link: ' + (LINK_DO_APP) + '\')">Copiar dados</button>' +
+        '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 0 0;font-size:13px;background:var(--card-2);color:#C9784A;border:1px solid var(--border);" onclick="alterarSenhaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-key" style="vertical-align:-2px;margin-right:6px;"></i>Alterar senha</button>' +
+        '<div id="alterar-senha-resultado" style="margin-top:8px;"></div>'
       : '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="criarLoginParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-key" style="font-size:14px;vertical-align:-2px;margin-right:6px;"></i>Gerar acesso ao app</button>'
     ) +
     '<div id="acesso-gerado-area"></div>' +
@@ -6873,6 +6875,37 @@ function gerarSenhaAleatoria(){
   let senha = '';
   for(let i = 0; i < 8; i++) senha += chars.charAt(Math.floor(Math.random() * chars.length));
   return senha;
+}
+
+// Troca a senha real da aluna direto pelo app, chamando o porteiro seguro (que usa a chave de
+// administrador escondida no servidor). Evita casos de login travado — antes só dava pra resolver
+// isso manualmente no painel do Supabase.
+async function alterarSenhaAluna(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !a.email) return;
+  if(!confirm('Trocar a senha de ' + nomeAluna + '? A senha antiga dela deixa de funcionar na hora.')) return;
+
+  const area = document.getElementById('alterar-senha-resultado');
+  if(area) area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Trocando senha...</p>';
+
+  const novaSenha = gerarSenhaAleatoria();
+  try {
+    const resposta = await fetch(SUPABASE_URL + '/functions/v1/alterar-senha-aluna', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+      body: JSON.stringify({ email: a.email, novaSenha: novaSenha })
+    });
+    const dados = await resposta.json();
+    if(!resposta.ok || dados.error){
+      if(area) area.innerHTML = '<div class="info-box"><p class="txt" style="color:#C9784A;">Não consegui trocar: ' + (dados.error || 'erro desconhecido') + '</p></div>';
+      return;
+    }
+    a.senhaGerada = novaSenha;
+    const i = alunasPersonal.indexOf(a);
+    openAlunaDetail(i); // recarrega a ficha já mostrando a senha nova nos campos de "Copiar dados"/"Mandar por WhatsApp"
+  } catch(erro){
+    if(area) area.innerHTML = '<div class="info-box"><p class="txt" style="color:#C9784A;">Erro de conexão: ' + erro.message + '</p></div>';
+  }
 }
 
 async function criarLoginParaAluna(nomeAluna){
@@ -9144,14 +9177,15 @@ async function loginAluna(){
         erroEl.style.display = 'block';
         return;
       }
-      // Senha errada numa conta que já existe (não confundir com primeiro acesso)
+      // Senha errada numa conta que já existe (não confundir com primeiro acesso). O próprio Supabase
+      // já garante que esse erro só acontece quando a conta de login existe — não precisa (e não deve)
+      // depender do vínculo auth_id estar salvo na tabela alunas pra confiar nisso. Antes, sem esse
+      // vínculo (justamente o bug que estávamos corrigindo), caía direto pra tentar criar conta nova
+      // e batia de frente com "User already registered".
       if(error.message.toLowerCase().indexOf('invalid login credentials') !== -1){
-        const jaTemConta = await supabaseClient.from('alunas').select('auth_id').eq('email', email).maybeSingle();
-        if(jaTemConta.data && jaTemConta.data.auth_id){
-          erroEl.textContent = 'Senha incorreta.';
-          erroEl.style.display = 'block';
-          return;
-        }
+        erroEl.textContent = 'Senha incorreta.';
+        erroEl.style.display = 'block';
+        return;
       }
       // Ainda não existe login com esse e-mail: cadastra agora (primeiro acesso, mesmo que já tenha dados da anamnese)
       const cadastro = await supabaseClient.auth.signUp({ email: email, password: senha });
