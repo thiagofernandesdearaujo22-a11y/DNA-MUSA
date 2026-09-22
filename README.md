@@ -1,4 +1,4 @@
-[dna_musa_40.html](https://github.com/user-attachments/files/32495189/dna_musa_40.html)
+[dna_musa_41.html](https://github.com/user-attachments/files/32495258/dna_musa_41.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -708,6 +708,17 @@
             <div style="flex:1;">
               <p style="font-size:13px;font-weight:700;margin:0;">Progredir treino</p>
               <p id="dash-info-progredir-com-treino" style="font-size:11px;color:var(--text-faint);margin:1px 0 0;">Calculando...</p>
+            </div>
+            <i class="ti ti-chevron-right" style="color:var(--gold-soft);font-size:16px;"></i>
+          </div>
+        </div>
+
+        <div style="background:linear-gradient(135deg,rgba(111,168,124,0.16),rgba(76,128,88,0.10));border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin:0 0 18px;cursor:pointer;" onclick="iniciarGeracaoOuProgressaoParaNaoEnviados()">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#8FC79B,#6FA87C);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-refresh" style="font-size:17px;color:#1A1409;"></i></div>
+            <div style="flex:1;">
+              <p style="font-size:13px;font-weight:700;margin:0;">Gerar ou progredir · quem falta enviar</p>
+              <p style="font-size:11px;color:var(--text-faint);margin:1px 0 0;">Pega todo mundo ainda não marcado como enviado, ideal depois de mudar uma regra do motor</p>
             </div>
             <i class="ti ti-chevron-right" style="color:var(--gold-soft);font-size:16px;"></i>
           </div>
@@ -5712,6 +5723,24 @@ async function iniciarProgressaoParaComTreino(){
   await executarGeracaoEmMassa(elegiveis, 'Progressão');
 }
 
+// Combina os dois casos (gerar quem não tem + progredir quem tem) filtrando só por quem ainda não
+// foi marcado como "enviado" (verde) no Controle de Treinos — útil sempre que uma regra nova é
+// adicionada no motor: roda isso uma vez e pega todo mundo que ainda está pendente de receber a
+// atualização, sem precisar separar manualmente quem já tinha treino de quem não tinha.
+async function iniciarGeracaoOuProgressaoParaNaoEnviados(){
+  const naoEnviadas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas' && a.statusControleCiclo !== 'verde'; });
+  const elegiveis = naoEnviadas.filter(function(a){ return a.email; });
+  const semEmail = naoEnviadas.length - elegiveis.length;
+  if(elegiveis.length === 0){
+    alert(semEmail > 0
+      ? 'Todas as ' + semEmail + ' aluna(s) ainda não enviadas estão sem e-mail cadastrado, então nenhuma pode ser processada agora.'
+      : 'Todo mundo já está marcado como enviado (verde) no Controle de Treinos. Nada pendente agora.');
+    return;
+  }
+  if(!confirm('Isso vai gerar (quem ainda não tem) ou progredir (quem já tem) o treino de ' + elegiveis.length + ' aluna(s) que ainda não foram marcadas como enviadas.' + (semEmail > 0 ? ' (' + semEmail + ' outra(s) ficaram de fora por não ter e-mail cadastrado.)' : '') + ' Continuar?')) return;
+  await executarGeracaoEmMassa(elegiveis, 'Geração/Progressão pra quem falta enviar');
+}
+
 function editarSeriesReps(diaIndex, exIndex, novoValor){
   const a = alunaAberta;
   const nomeAtual = a.treinoAtual.dias[diaIndex].ex[exIndex].split(' · ')[0];
@@ -10052,11 +10081,12 @@ async function abrirConversaCompleta(telefone, nome){
   document.getElementById('conversas-voltar').onclick = function(){ renderListaConversas(); };
 
   const area = document.getElementById('area-conversa-aberta');
-  area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Carregando conversa...</p>';
+  area.innerHTML = '<button class="chip" style="cursor:pointer;background:var(--danger);color:#fff;margin-bottom:10px;" onclick="excluirConversaCompleta(\'' + telefone + '\',\'' + nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-trash" style="margin-right:4px;"></i>Excluir essa conversa inteira</button>' +
+    '<p class="txt" style="color:var(--text-faint);">Carregando conversa...</p>';
   try {
     const { data, error } = await supabaseClient.from('mensagens_whatsapp').select('*').eq('telefone', telefone).order('data_hora', { ascending: true });
-    if(error || !data){ area.innerHTML = '<div class="info-box"><p class="txt">Não consegui carregar essa conversa.</p></div>'; return; }
-    area.innerHTML = data.map(function(m){
+    if(error || !data){ area.innerHTML += '<div class="info-box"><p class="txt">Não consegui carregar essa conversa.</p></div>'; return; }
+    area.innerHTML += data.map(function(m){
       const ehEnviada = m.direcao === 'enviada';
       const hora = new Date(m.data_hora).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
       return '<div style="display:flex;justify-content:' + (ehEnviada ? 'flex-end' : 'flex-start') + ';margin-bottom:8px;">' +
@@ -10067,7 +10097,18 @@ async function abrirConversaCompleta(telefone, nome){
       '</div>';
     }).join('');
   } catch(erro){
-    area.innerHTML = '<div class="info-box"><p class="txt">Erro ao carregar: ' + erro.message + '</p></div>';
+    area.innerHTML += '<div class="info-box"><p class="txt">Erro ao carregar: ' + erro.message + '</p></div>';
+  }
+}
+
+async function excluirConversaCompleta(telefone, nome){
+  if(!confirm('Apagar a conversa inteira com "' + nome + '"? Isso não pode ser desfeito.')) return;
+  try {
+    const { error } = await supabaseClient.from('mensagens_whatsapp').delete().eq('telefone', telefone);
+    if(error){ alert('Não consegui apagar: ' + error.message); return; }
+    renderListaConversas();
+  } catch(erro){
+    alert('Erro ao apagar: ' + erro.message);
   }
 }
 
