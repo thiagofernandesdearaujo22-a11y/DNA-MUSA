@@ -6889,7 +6889,7 @@ async function alterarSenhaAluna(nomeAluna){
 
   const novaSenha = gerarSenhaAleatoria();
   try {
-    const resposta = await fetch(SUPABASE_URL + '/functions/v1/alterar-senha-aluna', {
+    const resposta = await fetch(SUPABASE_URL + '/functions/v1/bright-function', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
       body: JSON.stringify({ email: a.email, novaSenha: novaSenha })
