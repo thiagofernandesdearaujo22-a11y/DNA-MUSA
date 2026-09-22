@@ -1,4 +1,4 @@
-[dna_musa_46.html](https://github.com/user-attachments/files/32511297/dna_musa_46.html)
+[Uploading dna_musa_47.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -4159,10 +4159,10 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
   const metodo = perfil.bloco === 'choque' ? ('Cluster set (blocos de ' + sugerirBlocoCluster(perfil.indiceCiclo || 0) + ')') : 'Padrão';
 
   const bancoPorGrupo = {
-    'Glúteo': ['Elevação Pélvica', 'Agachamento Hack, profundo', 'Abdução de quadril na polia'],
-    'Posterior': ['Cadeira flexora', 'Extensão de quadril no banco romano', 'Flexora de Joelhos em Pé'],
-    'Quadríceps': ['Leg Press 45', 'Agachamento Hack, profundo', 'Cadeira Extensora'],
-    'Pernas': ['Leg Press 45', 'Cadeira flexora', 'Agachamento Hack, profundo']
+    'Glúteo': ['Elevação Pélvica', 'Agachamento Hack', 'Abdução de quadril na polia'],
+    'Posterior': ['Cadeira flexora', 'Extensão de quadril no banco romano', 'Flexão de Joelhos em Pé'],
+    'Quadríceps': ['Leg Press 45', 'Agachamento Hack', 'Cadeira Extensora'],
+    'Pernas': ['Leg Press 45', 'Cadeira flexora', 'Agachamento Hack']
   };
   // Filtra uma lista de NOMES (não objetos) contra o banco de verdade, garantindo ambiente correto e
   // presença real no banco — os direcionamentos (glúteo/quadríceps) usam listas fixas de nomes que não
@@ -4194,7 +4194,11 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
     // Se não achou exercício de Casa suficiente pro grupo, prefere ficar com menos exercícios
     // a preencher com exercício de academia.
     if(perfil.ambienteTreino === 'Casa') return [];
-    return bancoPorGrupo[grupo] || bancoPorGrupo['Pernas'];
+    // Passa pela mesma validação de existência real + ambiente (sem checar nível de novo, já que
+    // é exatamente o nível vazio o motivo de ter caído aqui) — nunca mais deixa um nome inventado
+    // ou mal digitado entrar de gaiato numa prescrição de verdade.
+    const fallbackValidado = filtrarNomesPorAmbiente(bancoPorGrupo[grupo] || bancoPorGrupo['Pernas']);
+    return fallbackValidado.length > 0 ? fallbackValidado : (bancoPorGrupo[grupo] || bancoPorGrupo['Pernas']);
   }
 
   const dias = [];
@@ -9856,6 +9860,7 @@ async function restaurarSessaoAtiva(){
       await carregarELigarTreinoDaAluna(sessao.user.id);
       await carregarProgressoDoSupabase(sessao.user.id, NOME_ALUNA_LOGADA);
       mostrarDiagnostico('Restaurada com sucesso, indo pra tela dela.', false);
+      retomarCronometroSalvo(); // se ela tinha um descanso rodando quando o app recarregou, retoma certinho, sem zerar
 
       const dentroDoLimiteDeIntroRestaurada = deveExibirEEIncrementarIntro(NOME_ALUNA_LOGADA);
       if(dentroDoLimiteDeIntroRestaurada){
@@ -10532,9 +10537,26 @@ function atualizarTelaTabata(){
   }
 }
 
+// Guarda o cronômetro ativo no localStorage, baseado em HORÁRIO REAL de término (não em contagem
+// de segundos) — assim, mesmo se o navegador pausar o app em segundo plano (comum no celular) e
+// perder alguns "tiques" do setInterval, o tempo real restante continua sempre certo quando ela volta.
+function salvarCronometroNoLocalStorage(){
+  if(!cronometroDescansoAtivo){ try { localStorage.removeItem('musaCronometroAtivo'); } catch(e){} return; }
+  try {
+    localStorage.setItem('musaCronometroAtivo', JSON.stringify({
+      idx: cronometroDescansoAtivo.idx,
+      horarioFim: cronometroDescansoAtivo.horarioFim,
+      total: cronometroDescansoAtivo.total,
+      pausado: cronometroDescansoAtivo.pausado,
+      restanteQuandoPausado: cronometroDescansoAtivo.pausado ? cronometroDescansoAtivo.restante : null
+    }));
+  } catch(e){}
+}
+
 function iniciarDescanso(idx, segundosTotais){
   if(descansoIntervals[idx]) clearInterval(descansoIntervals[idx]);
-  cronometroDescansoAtivo = { idx: idx, restante: segundosTotais, total: segundosTotais, pausado: false };
+  cronometroDescansoAtivo = { idx: idx, restante: segundosTotais, total: segundosTotais, pausado: false, horarioFim: Date.now() + segundosTotais * 1000 };
+  salvarCronometroNoLocalStorage();
 
   const display = document.getElementById('descanso-display-' + idx);
   if(display){ display.style.color = 'var(--gold-soft)'; display.textContent = segundosTotais + 's'; }
@@ -10543,7 +10565,9 @@ function iniciarDescanso(idx, segundosTotais){
 
   descansoIntervals[idx] = setInterval(function(){
     if(!cronometroDescansoAtivo || cronometroDescansoAtivo.pausado) return;
-    cronometroDescansoAtivo.restante--;
+    // Recalcula sempre pelo horário real de término, nunca só decrementando — garante precisão mesmo
+    // se o navegador tiver "pulado" tiques enquanto o app estava em segundo plano.
+    cronometroDescansoAtivo.restante = Math.max(0, Math.round((cronometroDescansoAtivo.horarioFim - Date.now()) / 1000));
     const restante = cronometroDescansoAtivo.restante;
 
     const elInline = document.getElementById('descanso-display-' + idx);
@@ -10566,9 +10590,64 @@ function iniciarDescanso(idx, segundosTotais){
       if(elFull) elFull.textContent = '🔔 Vai!';
       fecharCronometroFullscreen();
       cronometroDescansoAtivo = null;
+      salvarCronometroNoLocalStorage(); // remove do localStorage, já que acabou
     }
   }, 1000);
 }
+
+// Retoma o cronômetro exatamente de onde estava, se ela minimizou ou o navegador pausou o app —
+// chamado ao restaurar a sessão dela E toda vez que a aba volta a ficar visível.
+function retomarCronometroSalvo(){
+  let salvo = null;
+  try { salvo = JSON.parse(localStorage.getItem('musaCronometroAtivo') || 'null'); } catch(e){}
+  if(!salvo) return;
+
+  const restanteReal = salvo.pausado ? salvo.restanteQuandoPausado : Math.max(0, Math.round((salvo.horarioFim - Date.now()) / 1000));
+  if(!salvo.pausado && restanteReal <= 0){
+    try { localStorage.removeItem('musaCronometroAtivo'); } catch(e){}
+    return; // já tinha acabado enquanto ela estava fora, não faz sentido reabrir zerado
+  }
+
+  cronometroDescansoAtivo = { idx: salvo.idx, restante: restanteReal, total: salvo.total, pausado: salvo.pausado, horarioFim: salvo.horarioFim };
+  if(!salvo.pausado){
+    if(descansoIntervals[salvo.idx]) clearInterval(descansoIntervals[salvo.idx]);
+    descansoIntervals[salvo.idx] = setInterval(function(){
+      if(!cronometroDescansoAtivo || cronometroDescansoAtivo.pausado) return;
+      cronometroDescansoAtivo.restante = Math.max(0, Math.round((cronometroDescansoAtivo.horarioFim - Date.now()) / 1000));
+      const restante = cronometroDescansoAtivo.restante;
+      const elInline = document.getElementById('descanso-display-' + salvo.idx);
+      const elFull = document.getElementById('cronometro-fullscreen-numero');
+      const elPill = document.getElementById('cronometro-pill-numero');
+      const ring = document.getElementById('cronometro-fullscreen-ring');
+      if(restante > 0){
+        if(elInline) elInline.textContent = restante + 's';
+        if(elFull) elFull.textContent = restante + 's';
+        if(elPill) elPill.textContent = restante + 's';
+        if(ring) ring.setAttribute('stroke-dashoffset', String(616 * (1 - restante / cronometroDescansoAtivo.total)));
+      } else {
+        clearInterval(descansoIntervals[salvo.idx]);
+        delete descansoIntervals[salvo.idx];
+        if(elInline){ elInline.style.color = '#E2A33D'; elInline.textContent = '🔔 Vai! Próxima série'; }
+        fecharCronometroFullscreen();
+        cronometroDescansoAtivo = null;
+        salvarCronometroNoLocalStorage();
+      }
+    }, 1000);
+  }
+  abrirCronometroFullscreen();
+}
+
+// Sempre que a aba volta a ficar vis&iacute;vel (ela minimizou o app, trocou de aplicativo, e voltou),
+// recalcula o cron&ocirc;metro na hora — sem esperar o pr&oacute;ximo tique — e confirma que a sess&atilde;o
+// continua v&aacute;lida, sem nunca precisar deslogar por causa disso.
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState !== 'visible') return;
+  if(cronometroDescansoAtivo && !cronometroDescansoAtivo.pausado){
+    cronometroDescansoAtivo.restante = Math.max(0, Math.round((cronometroDescansoAtivo.horarioFim - Date.now()) / 1000));
+  } else if(!cronometroDescansoAtivo){
+    retomarCronometroSalvo(); // pode ter tido um cronômetro salvo de antes de uma pausa mais longa
+  }
+});
 
 function abrirCronometroFullscreen(){
   if(!cronometroDescansoAtivo && !tabataAtivo) return;
@@ -10604,6 +10683,12 @@ function pausarOuRetomarCronometro(){
   }
   if(!cronometroDescansoAtivo) return;
   cronometroDescansoAtivo.pausado = !cronometroDescansoAtivo.pausado;
+  if(!cronometroDescansoAtivo.pausado){
+    // Retomando: recalcula o horário de término a partir de agora + o tanto que ainda restava,
+    // já que o horário antigo ficou desatualizado durante a pausa.
+    cronometroDescansoAtivo.horarioFim = Date.now() + cronometroDescansoAtivo.restante * 1000;
+  }
+  salvarCronometroNoLocalStorage();
   document.getElementById('cronometro-fullscreen-btn').textContent = cronometroDescansoAtivo.pausado ? 'Retomar' : 'Pausar';
 }
 
@@ -10621,6 +10706,7 @@ function pararCronometroFullscreen(){
   }
   const idx = cronometroDescansoAtivo ? cronometroDescansoAtivo.idx : null;
   cronometroDescansoAtivo = null;
+  salvarCronometroNoLocalStorage(); // remove do localStorage também, já que foi encerrado manualmente
   fecharCronometroFullscreen();
   if(idx !== null){
     const elInline = document.getElementById('descanso-display-' + idx);
