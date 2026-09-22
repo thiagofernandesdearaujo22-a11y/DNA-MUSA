@@ -1,4 +1,4 @@
-[dna_musa_38.html](https://github.com/user-attachments/files/32492407/dna_musa_38.html)
+[Uploading dna_musa_39.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -3955,28 +3955,77 @@ function mostrarFormularioInscricaoSecaEmpina(){
   if(!area) return;
   if(area.innerHTML){ area.innerHTML = ''; return; }
   const elegiveis = alunasPersonal.filter(function(a){ return !a.desafioAtivo; });
+  const opcoesEstrutura = Array.from({length:10}, function(_, i){ return '<option value="' + (i+1) + '">Estrutura ' + (i+1) + '</option>'; }).join('');
   area.innerHTML = '<div class="info-box">' +
-    '<div class="form-group"><label class="form-label">Aluna</label><select class="form-select" id="se-aluna">' +
-      elegiveis.map(function(a){ return '<option value="' + a.nome.replace(/"/g,'&quot;') + '">' + a.nome + '</option>'; }).join('') +
-    '</select></div>' +
     '<div class="form-group"><label class="form-label">Frequência</label><select class="form-select" id="se-frequencia"><option value="5">5x por semana</option><option value="3">3x por semana</option></select></div>' +
-    '<button class="btn-gold" onclick="confirmarInscricaoSecaEmpina()">Inscrever e gerar 1ª semana</button>' +
+    '<div class="form-group"><label class="form-label">Estrutura inicial</label><select class="form-select" id="se-estrutura-inicial">' + opcoesEstrutura + '</select>' +
+      '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:4px;">Usa "Estrutura 1" pra quem está começando agora; escolhe uma mais avançada pra quem já vinha fazendo o desafio antes do app</p>' +
+    '</div>' +
+    '<div class="form-group"><label class="form-label">Alunas (marca uma ou várias)</label>' +
+      '<input class="form-input" id="se-busca-alunas" placeholder="Buscar aluna..." oninput="filtrarAlunasSecaEmpina()" style="margin-bottom:8px;">' +
+      '<div class="row" style="gap:8px;margin-bottom:8px;"><span class="chip" style="cursor:pointer;" onclick="marcarTodasSecaEmpina(true)">Marcar todas</span><span class="chip" style="cursor:pointer;" onclick="marcarTodasSecaEmpina(false)">Limpar seleção</span></div>' +
+      '<div style="max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:8px;">' +
+        elegiveis.map(function(a){
+          return '<label class="linha-se-aluna" data-nome-busca="' + a.nome.toUpperCase().replace(/"/g,'&quot;') + '" style="display:flex;align-items:center;gap:8px;padding:6px 4px;font-size:13px;cursor:pointer;">' +
+            '<input type="checkbox" class="checkbox-se-aluna" value="' + a.nome.replace(/"/g,'&quot;') + '"> ' + a.nome +
+          '</label>';
+        }).join('') +
+      '</div>' +
+    '</div>' +
+    '<button class="btn-gold" onclick="confirmarInscricaoSecaEmpina()">Inscrever e gerar a estrutura escolhida</button>' +
   '</div>';
 }
 
-function confirmarInscricaoSecaEmpina(){
-  const nomeAluna = document.getElementById('se-aluna').value;
-  const frequencia = parseInt(document.getElementById('se-frequencia').value, 10);
-  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
-  if(!a) return;
+function filtrarAlunasSecaEmpina(){
+  const termo = document.getElementById('se-busca-alunas').value.toUpperCase().trim();
+  document.querySelectorAll('.linha-se-aluna').forEach(function(linha){
+    linha.style.display = (!termo || linha.getAttribute('data-nome-busca').indexOf(termo) !== -1) ? 'flex' : 'none';
+  });
+}
 
-  const seed = hashString(nomeAluna);
-  const semana = gerarSemanaDesafio(1, frequencia, seed);
-  a.desafioAtivo = { nome: 'Seca e Empina', dataInicio: new Date().toISOString(), frequencia: frequencia, estruturaAtual: 1 };
-  a.desafioTreino = semana;
-  salvarPerfilAlunaNoSupabase(nomeAluna);
+function marcarTodasSecaEmpina(marcar){
+  document.querySelectorAll('.linha-se-aluna').forEach(function(linha){
+    if(linha.style.display === 'none') return;
+    const chk = linha.querySelector('.checkbox-se-aluna');
+    if(chk) chk.checked = marcar;
+  });
+}
+
+function confirmarInscricaoSecaEmpina(){
+  const frequencia = parseInt(document.getElementById('se-frequencia').value, 10);
+  const estruturaInicial = parseInt(document.getElementById('se-estrutura-inicial').value, 10);
+  const nomesEscolhidos = Array.prototype.slice.call(document.querySelectorAll('.checkbox-se-aluna:checked')).map(function(el){ return el.value; });
+  if(nomesEscolhidos.length === 0){ alert('Marca pelo menos uma aluna antes de inscrever.'); return; }
+
+  nomesEscolhidos.forEach(function(nomeAluna){
+    const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+    if(!a) return;
+    const seed = hashString(nomeAluna);
+    const semana = gerarSemanaDesafio(estruturaInicial, frequencia, seed + estruturaInicial);
+    a.desafioAtivo = { nome: 'Seca e Empina', dataInicio: new Date().toISOString(), dataUltimaVirada: new Date().toISOString(), frequencia: frequencia, estruturaAtual: estruturaInicial };
+    a.desafioTreinos = {};
+    a.desafioTreinos[estruturaInicial] = semana;
+    salvarPerfilAlunaNoSupabase(nomeAluna);
+  });
 
   document.getElementById('form-inscricao-seca-empina').innerHTML = '';
+  renderListaSecaEmpina();
+}
+
+// Avança TODAS as alunas ativas no desafio pra próxima estrutura de uma vez, manualmente — sem
+// precisar esperar os 30 dias automáticos. Gera e guarda a semana nova, sem apagar as anteriores.
+function avancarTodasEstruturaSecaEmpina(){
+  const ativas = alunasPersonal.filter(function(a){ return a.desafioAtivo && a.desafioAtivo.estruturaAtual < 10; });
+  if(ativas.length === 0){ alert('Ninguém pra avançar (ou já estão todas na estrutura 10).'); return; }
+  if(!confirm('Avançar ' + ativas.length + ' aluna(s) pra próxima estrutura agora?')) return;
+  ativas.forEach(function(a){
+    const novaEstrutura = a.desafioAtivo.estruturaAtual + 1;
+    a.desafioAtivo.estruturaAtual = novaEstrutura;
+    a.desafioAtivo.dataUltimaVirada = new Date().toISOString();
+    if(!a.desafioTreinos) a.desafioTreinos = {};
+    a.desafioTreinos[novaEstrutura] = gerarSemanaDesafio(novaEstrutura, a.desafioAtivo.frequencia, hashString(a.nome) + novaEstrutura);
+    salvarPerfilAlunaNoSupabase(a.nome);
+  });
   renderListaSecaEmpina();
 }
 
@@ -3985,7 +4034,7 @@ function removerAlunaDoSecaEmpina(nomeAluna){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
   a.desafioAtivo = null;
-  a.desafioTreino = null;
+  a.desafioTreinos = null;
   salvarPerfilAlunaNoSupabase(nomeAluna);
   renderListaSecaEmpina();
 }
@@ -4004,7 +4053,8 @@ function renderListaSecaEmpina(){
       '<span>' + a.nome + ' <span class="tag">Estrutura ' + a.desafioAtivo.estruturaAtual + '/10 · ' + a.desafioAtivo.frequencia + 'x · dia ' + diasNoDesafio + '</span></span>' +
       '<span class="acao-pill" style="background:var(--danger);" onclick="removerAlunaDoSecaEmpina(\'' + a.nome.replace(/'/g,"\\'") + '\')">Remover</span>' +
     '</div>';
-  }).join('');
+  }).join('') +
+  '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:8px;" onclick="avancarTodasEstruturaSecaEmpina()">Avançar todas pra próxima estrutura agora</button>';
 }
 
 // ===== ALUNA: botão condicional na home, tela do desafio, marcar dia como feito =====
@@ -4023,36 +4073,54 @@ function renderBotaoDesafio(){
 
 function abrirTelaDesafioSecaEmpina(){
   const a = obterAlunaLogadaOuCriar();
-  if(!a.desafioTreino) return;
+  if(!a.desafioAtivo) return;
   openLevel2('desafio-seca-empina');
-  document.getElementById('se-subtitulo-estrutura').textContent = 'Estrutura ' + a.desafioTreino.numeroEstrutura + ' de 10 · ' + a.desafioTreino.frequencia + 'x por semana';
+  document.getElementById('se-subtitulo-estrutura').textContent = 'Escolhe qual estrutura treinar hoje';
+  const lista = document.getElementById('se-lista-dias');
+  const estruturaAtual = a.desafioAtivo.estruturaAtual;
+  const botoes = [];
+  for(let n = 1; n <= estruturaAtual; n++){
+    botoes.push('<div class="list-item" style="cursor:pointer;margin-bottom:8px;" onclick="abrirEstruturaDesafio(' + n + ')">' +
+      '<span><i class="ti ti-flag" style="margin-right:8px;color:var(--gold-soft);"></i>Estrutura ' + n + (n === estruturaAtual ? ' <span class="tag">atual</span>' : '') + '</span>' +
+      '<i class="ti ti-chevron-right" style="color:var(--text-faint);"></i>' +
+    '</div>');
+  }
+  lista.innerHTML = botoes.join('');
+}
+
+function abrirEstruturaDesafio(numeroEstrutura){
+  const a = obterAlunaLogadaOuCriar();
+  const semana = a.desafioTreinos && a.desafioTreinos[numeroEstrutura];
+  if(!semana) return;
+  document.getElementById('se-subtitulo-estrutura').innerHTML = '<span style="cursor:pointer;color:var(--gold-soft);" onclick="abrirTelaDesafioSecaEmpina()">← Trocar estrutura</span> · Estrutura ' + numeroEstrutura + ' de 10 · ' + semana.frequencia + 'x por semana';
   const lista = document.getElementById('se-lista-dias');
   const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
   const feitosDesafio = prog.desafioDiasConcluidos || {};
-  const chaveEstrutura = 'estrutura' + a.desafioTreino.numeroEstrutura;
+  const chaveEstrutura = 'estrutura' + numeroEstrutura;
   const feitosNessaEstrutura = feitosDesafio[chaveEstrutura] || [];
 
-  lista.innerHTML = a.desafioTreino.dias.map(function(d, i){
+  lista.innerHTML = semana.dias.map(function(d, i){
     if(d.descanso) return '';
     const feito = feitosNessaEstrutura.indexOf(d.n) !== -1;
     return '<div class="info-box" style="margin-bottom:10px;' + (feito ? 'border-color:var(--success);' : '') + '">' +
       '<p class="lbl" style="margin:0 0 6px;">' + d.n + (feito ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">feito</span>' : '') + '</p>' +
       d.ex.map(function(linha){ return '<p class="txt" style="font-size:12.5px;margin:3px 0;">' + linha + '</p>'; }).join('') +
-      '<button class="btn-gold" style="margin-top:10px;' + (feito ? 'background:var(--success);color:#fff;' : '') + '" onclick="marcarDiaDesafioFeito(' + i + ')">' + (feito ? '✓ Treino registrado' : 'Registrar treino de hoje') + '</button>' +
+      '<button class="btn-gold" style="margin-top:10px;' + (feito ? 'background:var(--success);color:#fff;' : '') + '" onclick="marcarDiaDesafioFeito(' + numeroEstrutura + ',' + i + ')">' + (feito ? '✓ Treino registrado' : 'Registrar treino de hoje') + '</button>' +
     '</div>';
   }).join('');
 }
 
-function marcarDiaDesafioFeito(indiceDia){
+function marcarDiaDesafioFeito(numeroEstrutura, indiceDia){
   const a = obterAlunaLogadaOuCriar();
-  const d = a.desafioTreino.dias[indiceDia];
+  const semana = a.desafioTreinos[numeroEstrutura];
+  const d = semana.dias[indiceDia];
   const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
   if(!prog.desafioDiasConcluidos) prog.desafioDiasConcluidos = {};
-  const chaveEstrutura = 'estrutura' + a.desafioTreino.numeroEstrutura;
+  const chaveEstrutura = 'estrutura' + numeroEstrutura;
   if(!prog.desafioDiasConcluidos[chaveEstrutura]) prog.desafioDiasConcluidos[chaveEstrutura] = [];
   if(prog.desafioDiasConcluidos[chaveEstrutura].indexOf(d.n) === -1) prog.desafioDiasConcluidos[chaveEstrutura].push(d.n);
   salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
-  abrirTelaDesafioSecaEmpina(); // recarrega já mostrando o dia verde
+  abrirEstruturaDesafio(numeroEstrutura); // recarrega já mostrando o dia verde
 }
 
 // Verifica se já passaram 30 dias desde a última virada de estrutura, e avança sozinho se sim —
@@ -4060,13 +4128,14 @@ function marcarDiaDesafioFeito(indiceDia){
 function verificarAvancoEstruturaDesafio(){
   const a = obterAlunaLogadaOuCriar();
   if(!a.desafioAtivo || a.desafioAtivo.estruturaAtual >= 10) return;
-  const dataBase = a.desafioAtivo.dataUltimaVirada ? new Date(a.desafioAtivo.dataUltimaVirada) : new Date(a.desafioAtivo.dataInicio);
+  const dataBase = new Date(a.desafioAtivo.dataUltimaVirada || a.desafioAtivo.dataInicio);
   const diasPassados = Math.floor((Date.now() - dataBase.getTime()) / (1000*60*60*24));
   if(diasPassados < 30) return;
   const novaEstrutura = Math.min(10, a.desafioAtivo.estruturaAtual + Math.floor(diasPassados / 30));
   a.desafioAtivo.estruturaAtual = novaEstrutura;
   a.desafioAtivo.dataUltimaVirada = new Date().toISOString();
-  a.desafioTreino = gerarSemanaDesafio(novaEstrutura, a.desafioAtivo.frequencia, hashString(NOME_ALUNA_LOGADA) + novaEstrutura);
+  if(!a.desafioTreinos) a.desafioTreinos = {};
+  a.desafioTreinos[novaEstrutura] = gerarSemanaDesafio(novaEstrutura, a.desafioAtivo.frequencia, hashString(NOME_ALUNA_LOGADA) + novaEstrutura);
   salvarPerfilAlunaNoSupabase(NOME_ALUNA_LOGADA);
 }
 
@@ -5141,7 +5210,7 @@ async function executarSalvamentoPerfilAluna(nomeAluna){
         suporteUltimoContato: a.suporteUltimoContato || null,
         suporteHistorico: a.suporteHistorico || [],
         desafioAtivo: a.desafioAtivo || null,
-        desafioTreino: a.desafioTreino || null
+        desafioTreinos: a.desafioTreinos || null
       }
     }, { onConflict: 'email' });
   } catch(erroDeRede){
