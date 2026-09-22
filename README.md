@@ -1,4 +1,4 @@
-[Uploading dna_musa_48.html…]()
+[dna_musa_49.html](https://github.com/user-attachments/files/32539574/dna_musa_49.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -9738,7 +9738,7 @@ function openLevel2(which){
   document.getElementById('backlabel').textContent = (which === 'personal') ? 'Sair' : 'Voltar para o início';
   const phoneEl = document.getElementById('phone-container');
   if(phoneEl) phoneEl.classList.toggle('modo-personal', which === 'personal');
-  if(which === 'personal'){ showPersonalView('dashboard'); carregarCatalogoPersonal(); iniciarPresencaEquipe(); }
+  if(which === 'personal'){ showPersonalView('dashboard'); carregarCatalogoPersonal(); iniciarPresencaEquipe(); iniciarRealtimeConversas(); }
   if(which === 'chatia'){ inicializarChatIA(); }
   if(which === 'home' && typeof renderHome === 'function'){ renderHome(); verificarAvancoEstruturaDesafio(); renderBotaoDesafio(); }
   if(which === 'dados' && typeof renderAvaliacoes === 'function'){ renderAvaliacoes(); }
@@ -10102,7 +10102,30 @@ function marcarSinalRiscoComoVisto(nomeAluna){
   renderSinalizacoes();
 }
 
+let telefoneConversaAberta = null; // null = está na lista; com valor = está vendo uma conversa específica
+let canalConversasRealtime = null;
+
+// Escuta em tempo real qualquer mensagem nova chegando na tabela — assim que uma linha é inserida
+// (seja recebida ou enviada, de qualquer instância), atualiza a tela na hora, sem precisar recarregar.
+function iniciarRealtimeConversas(){
+  if(!supabaseClient || canalConversasRealtime) return;
+  canalConversasRealtime = supabaseClient.channel('mensagens-realtime')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensagens_whatsapp' }, function(payload){
+      const nova = payload.new;
+      const telaConversasAberta = document.getElementById('personal-conversas') && document.getElementById('personal-conversas').style.display !== 'none';
+      if(!telaConversasAberta) return; // só atualiza se ela estiver mesmo olhando essa aba agora
+
+      if(telefoneConversaAberta && nova.telefone === telefoneConversaAberta){
+        abrirConversaCompleta(nova.telefone, nova.aluna_nome || nova.telefone); // recarrega a conversa aberta, já mostrando a mensagem nova
+      } else if(!telefoneConversaAberta){
+        renderListaConversas(); // está na lista — atualiza pra já mostrar essa conversa no topo
+      }
+    })
+    .subscribe();
+}
+
 async function renderListaConversas(){
+  telefoneConversaAberta = null;
   const titulo = document.getElementById('conversas-titulo');
   const subtitulo = document.getElementById('conversas-subtitulo');
   const voltar = document.getElementById('conversas-voltar');
@@ -10141,6 +10164,7 @@ async function renderListaConversas(){
 }
 
 async function abrirConversaCompleta(telefone, nome){
+  telefoneConversaAberta = telefone;
   document.getElementById('area-lista-conversas').innerHTML = '';
   document.getElementById('conversas-titulo').textContent = nome;
   document.getElementById('conversas-subtitulo').style.display = 'none';
