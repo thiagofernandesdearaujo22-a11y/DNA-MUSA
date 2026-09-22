@@ -4244,63 +4244,59 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
     });
   }
 
-  // Regra de volume mínimo de posteriores: o volume semanal de posterior precisa ser pelo menos
-  // 50% do volume semanal de quadríceps (em séries de verdade, contadas em todos os dias de inferiores
-  // já montados) — não um número fixo desconectado do quanto de quadríceps a aluna está recebendo.
-  // Roda sempre, mesmo quando Posterior já é ênfase/secundário, como uma trava de segurança real.
-  if(dias.length > 0){
-    const totaisSemana = {};
-    dias.forEach(function(d){
-      const totaisDia = calcularVolumePorGrupoNoDia(d.ex);
-      Object.keys(totaisDia).forEach(function(grupo){
-        totaisSemana[grupo] = (totaisSemana[grupo] || 0) + totaisDia[grupo];
-      });
-    });
-    const seriesQuadriceps = totaisSemana['Quadríceps'] || 0;
-    const seriesPosterior = totaisSemana['Isquiotibiais'] || 0;
-    const minimoNecessario = Math.ceil(seriesQuadriceps * 0.5);
-
-    if(seriesQuadriceps > 0 && seriesPosterior < minimoNecessario){
-      const ultimoDia = dias[dias.length - 1];
-      const opcoesPosterior = exerciciosDoGrupo('Posterior', {});
-      if(opcoesPosterior && opcoesPosterior[0]){
-        const seriesMinimas = perfil.bloco === 'deload' ? 2 : 3;
-        const faltam = minimoNecessario - seriesPosterior;
-        const seriesDoExercicio = Math.min(5, Math.max(seriesMinimas, faltam)); // teto de 5 séries por exercício — nunca uma prescrição absurda tipo "15x15" só pra fechar volume de uma vez
-        ultimoDia.ex.push(opcoesPosterior[0] + ' · ' + seriesDoExercicio + 'x' + Math.min(15, reps + 2) + ' (volume mínimo de posteriores: 50% do volume de quadríceps, garantido pela metodologia)');
-      }
-    }
-
-    // Regra especial quando Glúteos é a ênfase: tanto quadríceps quanto posteriores precisam somar
-    // pelo menos 50% do volume semanal de glúteos, cada um — senão os dias de glúteos ficam
-    // desequilibrados. Só entra em ação quando glúteos é a prioridade real da aluna.
-    if(perfil.enfase === 'Glúteos'){
-      const seriesGluteos = totaisSemana['Glúteos'] || 0;
-      const minimoQuadriceps = Math.ceil(seriesGluteos * 0.5);
-      const minimoPosteriorGluteo = Math.ceil(seriesGluteos * 0.5);
-      const seriesQuadricepsAtual = totaisSemana['Quadríceps'] || 0;
-      const seriesPosteriorAtual = totaisSemana['Isquiotibiais'] || 0;
-
-      if(seriesGluteos > 0 && seriesQuadricepsAtual < minimoQuadriceps){
-        const opcoesQuad = exerciciosDoGrupo('Quadríceps', {});
-        if(opcoesQuad && opcoesQuad[0]){
-          const faltamQuad = minimoQuadriceps - seriesQuadricepsAtual;
-          const seriesQuad = Math.min(5, Math.max(perfil.bloco === 'deload' ? 2 : 3, faltamQuad)); // mesmo teto de 5 séries
-          dias[dias.length - 1].ex.push(opcoesQuad[0] + ' · ' + seriesQuad + 'x' + reps + ' (volume mínimo de quadríceps: 50% do volume de glúteos, garantido pela metodologia)');
-        }
-      }
-      if(seriesGluteos > 0 && seriesPosteriorAtual < minimoPosteriorGluteo){
-        const opcoesPost = exerciciosDoGrupo('Posterior', {});
-        if(opcoesPost && opcoesPost[0]){
-          const faltamPost = minimoPosteriorGluteo - seriesPosteriorAtual;
-          const seriesPost = Math.min(5, Math.max(perfil.bloco === 'deload' ? 2 : 3, faltamPost)); // mesmo teto de 5 séries
-          dias[dias.length - 1].ex.push(opcoesPost[0] + ' · ' + seriesPost + 'x' + Math.min(15, reps + 2) + ' (volume mínimo de posteriores: 50% do volume de glúteos, garantido pela metodologia)');
-        }
-      }
-    }
-  }
+  // A garantia de volume mínimo (secundário/terciário vs primário) agora roda como verificação FINAL,
+  // depois do corte por tempo — ver aplicarVolumeMinimoTerciario(), chamada no fim de gerarTreinoSemanal.
+  // Rodar só aqui, antes do corte, permitia que o corte por tempo removesse exatamente esse exercício
+  // de segurança sem ninguém perceber.
 
   return dias;
+}
+
+// Regra de volume mínimo GENERALIZADA (substitui as 2 regras específicas que existiam antes, que
+// tinham um erro de digitação — comparava com 'Glúteos' no plural, mas o valor real é 'Glúteo' no
+// singular, então aquele bloco nunca executava de verdade). Agora: qualquer que seja o grupo
+// PRIMÁRIO (ênfase), os outros 2 grupos (secundário e terciário) precisam ter, cada um, pelo menos
+// 50% do volume do primário — sempre, sem depender de qual combinação específica foi escolhida.
+// Roda como verificação FINAL, depois de qualquer corte por tempo — se algo cortou o exercício de
+// segurança antes, essa checagem final recoloca, garantindo que a regra realmente se sustente.
+function aplicarVolumeMinimoTerciario(diasInferiores, perfil, reps){
+  if(!diasInferiores || diasInferiores.length === 0) return;
+  const GRUPOS_INFERIORES = { 'Glúteo': 'Glúteos', 'Quadríceps': 'Quadríceps', 'Posterior': 'Isquiotibiais' };
+  const primario = perfil.enfase;
+  if(!GRUPOS_INFERIORES[primario]) return; // ênfase não é um dos 3 grupos de inferiores, não se aplica
+
+  const totaisSemana = {};
+  diasInferiores.forEach(function(d){
+    const totaisDia = calcularVolumePorGrupoNoDia(d.ex);
+    Object.keys(totaisDia).forEach(function(grupo){
+      totaisSemana[grupo] = (totaisSemana[grupo] || 0) + totaisDia[grupo];
+    });
+  });
+
+  const seriesPrimario = totaisSemana[GRUPOS_INFERIORES[primario]] || 0;
+  if(seriesPrimario === 0) return; // sem volume nenhum do primário ainda, não dá pra calcular 50% de nada
+
+  const outrosGrupos = Object.keys(GRUPOS_INFERIORES).filter(function(g){ return g !== primario; }); // secundário + terciário
+  outrosGrupos.forEach(function(grupoInterno){
+    const nomeBanco = GRUPOS_INFERIORES[grupoInterno];
+    const seriesAtual = totaisSemana[nomeBanco] || 0;
+    const minimoNecessario = Math.ceil(seriesPrimario * 0.5);
+    if(seriesAtual >= minimoNecessario) return; // já está ok, nada a fazer
+
+    const nomeGrupoBusca = grupoInterno === 'Posterior' ? 'Posterior' : grupoInterno; // exerciciosDoGrupo espera 'Posterior', não 'Isquiotibiais'
+    const opcoes = exerciciosDoGrupo(nomeGrupoBusca, {});
+    if(!opcoes || !opcoes[0]) return;
+
+    const seriesMinimas = perfil.bloco === 'deload' ? 2 : 3;
+    const faltam = minimoNecessario - seriesAtual;
+    const seriesDoExercicio = Math.min(5, Math.max(seriesMinimas, faltam)); // teto de 5 séries — nunca uma prescrição absurda tipo "15x15" só pra fechar volume de uma vez
+
+    // Insere no PRIMEIRO dia da lista (não no último) — o corte por tempo remove sempre do fim pra
+    // início, então começar pelo primeiro dia protege melhor esse exercício de ser cortado depois.
+    const diaAlvo = diasInferiores[0];
+    diaAlvo.ex.push(nomeBanco === 'Isquiotibiais' ? (opcoes[0] + ' · ' + seriesDoExercicio + 'x' + Math.min(15, reps + 2) + ' (volume mínimo de ' + grupoInterno.toLowerCase() + ': 50% do volume de ' + primario.toLowerCase() + ', garantido pela metodologia)')
+      : (opcoes[0] + ' · ' + seriesDoExercicio + 'x' + reps + ' (volume mínimo de ' + grupoInterno.toLowerCase() + ': 50% do volume de ' + primario.toLowerCase() + ', garantido pela metodologia)'));
+  });
 }
 
 function gerarDiasSuperiores(perfil, numDias){
@@ -4497,6 +4493,13 @@ function gerarTreinoSemanal(perfil){
     dia.duracaoEstimadaMin = Math.round(duracaoFinal);
     dia.excedeTempo = perfil.tempoDisponivel ? duracaoFinal > perfil.tempoDisponivel : false;
   });
+
+  // Verificação FINAL de volume mínimo (secundário/terciário vs primário) — roda só agora, depois do
+  // corte por tempo e da reinforço, garantindo que nada removido por esses passos tenha desfeito a
+  // regra. diasInf contém as mesmas referências de objeto que estão dentro de semana, então mexer
+  // aqui já reflete direto nela, sem precisar reconstruir nada.
+  const repsParaVolumeMinimo = perfil.bloco === 'deload' ? 14 : (perfil.bloco === 'choque' ? 7 : (perfil.fase === 'Desempenho' ? 9 : 11));
+  aplicarVolumeMinimoTerciario(diasInf, perfil, repsParaVolumeMinimo);
 
   // Renomeia sequencialmente: Treino A, Treino B, Treino C... e a descrição vem da análise real
   // de volume por grupo muscular prescrito nesse dia (motor de nomenclatura dinâmica), não do que
@@ -9168,7 +9171,20 @@ async function loginAluna(){
     sessaoUsuarioAtual = data.user;
 
     // Descobre o nome real dela (pode já existir cadastro feito pelo Personal com o mesmo e-mail)
-    const { data: alunaRow, error: erroAlunaRow } = await supabaseClient.from('alunas').select('*').eq('auth_id', data.user.id).maybeSingle();
+    let { data: alunaRow, error: erroAlunaRow } = await supabaseClient.from('alunas').select('*').eq('auth_id', data.user.id).maybeSingle();
+
+    // Recuperação automática: se não achou pelo auth_id, tenta achar pelo e-mail — cobre o caso de
+    // uma conta de login criada sem o vínculo ter sido salvo corretamente (ex: falha de rede no meio
+    // do primeiro cadastro). Se achar por e-mail, conserta o vínculo na hora, sem precisar travar
+    // o acesso dela nem depender do Personal pra corrigir manualmente.
+    if((erroAlunaRow || !alunaRow) && email){
+      const tentativaPorEmail = await supabaseClient.from('alunas').select('*').eq('email', email).maybeSingle();
+      if(tentativaPorEmail.data){
+        alunaRow = tentativaPorEmail.data;
+        erroAlunaRow = null;
+        await supabaseClient.from('alunas').update({ auth_id: data.user.id }).eq('email', email);
+      }
+    }
 
     if(erroAlunaRow || !alunaRow){
       // NUNCA deixa passar em silêncio — sem isso, o sistema ficaria com o nome padrão travado e mostraria dados de outra pessoa
