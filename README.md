@@ -1,4 +1,4 @@
-[Uploading dna_musa_39.html…]()
+[dna_musa_40.html](https://github.com/user-attachments/files/32495189/dna_musa_40.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -11639,7 +11639,7 @@ async function enviarWhatsApp(telefone, mensagem, jaTentouDeNovo){
     const resposta = await fetch(SUPABASE_URL + '/functions/v1/enviar-whatsapp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-      body: JSON.stringify({ telefone: telefone, mensagem: mensagem })
+      body: JSON.stringify({ telefone: telefone, mensagem: mensagem, remetente: NOME_PERSONAL_LOGADO })
     });
     const dados = await resposta.json();
     if(!resposta.ok || dados.error){
