@@ -1,4 +1,4 @@
-[Uploading dna_musa_47.html…]()
+[Uploading dna_musa_48.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5095,6 +5095,17 @@ async function garantirSessaoValida(){
     const { data: sessaoData } = await supabaseClient.auth.getSession();
     const sessao = sessaoData ? sessaoData.session : null;
     if(!sessao || !sessao.user){ mostrarAvisoSessaoInvalida(); return false; }
+
+    // Mesma correção do login: getSession() não renova sozinha, então se o token de acesso já
+    // venceu (padrão de 1h), tenta renovar antes de desistir — sem isso, qualquer ajuste feito
+    // depois de 1h de app aberto caía nesse aviso de sessão inválida à toa.
+    if(sessao.expires_at && (sessao.expires_at * 1000) < Date.now()){
+      const { data: sessaoRenovada, error: erroRenovar } = await supabaseClient.auth.refreshSession();
+      if(erroRenovar || !sessaoRenovada || !sessaoRenovada.session){
+        mostrarAvisoSessaoInvalida();
+        return false;
+      }
+    }
 
     // Não basta ter sessão — precisa bater como "personal" de verdade na tabela perfis, senão o RLS bloqueia mesmo com sessão válida
     const { data: perfilRow, error: erroPerfil } = await supabaseClient.from('perfis').select('tipo').eq('id', sessao.user.id).maybeSingle();
