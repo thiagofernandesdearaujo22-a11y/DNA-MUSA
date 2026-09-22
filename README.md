@@ -1,4 +1,4 @@
-[dna_musa_49.html](https://github.com/user-attachments/files/32539574/dna_musa_49.html)
+[dna_musa_50.html](https://github.com/user-attachments/files/32540251/dna_musa_50.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -11884,7 +11884,7 @@ async function testarConexaoWhatsApp(){
     const resposta = await fetch(SUPABASE_URL + '/functions/v1/enviar-whatsapp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-      body: JSON.stringify({ verificarStatus: true })
+      body: JSON.stringify({ verificarStatus: true, remetente: NOME_PERSONAL_LOGADO })
     });
     const dados = await resposta.json();
     if(!resposta.ok || dados.error){
