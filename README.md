@@ -1,4 +1,4 @@
-[dna_musa_45.html](https://github.com/user-attachments/files/32510763/dna_musa_45.html)
+[dna_musa_46.html](https://github.com/user-attachments/files/32511297/dna_musa_46.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6890,7 +6890,7 @@ async function alterarSenhaAluna(nomeAluna){
 
   const novaSenha = gerarSenhaAleatoria();
   try {
-    const resposta = await fetch(SUPABASE_URL + '/functions/v1/alterar-senha-aluna', {
+    const resposta = await fetch(SUPABASE_URL + '/functions/v1/bright-function', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
       body: JSON.stringify({ email: a.email, novaSenha: novaSenha })
