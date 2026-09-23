@@ -1,4 +1,4 @@
-[dna_musa_50.html](https://github.com/user-attachments/files/32540251/dna_musa_50.html)
+[Uploading dna_musa_51.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -4288,8 +4288,10 @@ function aplicarVolumeMinimoTerciario(diasInferiores, perfil, reps){
     const minimoNecessario = Math.ceil(seriesPrimario * 0.5);
     if(seriesAtual >= minimoNecessario) return; // já está ok, nada a fazer
 
-    const nomeGrupoBusca = grupoInterno === 'Posterior' ? 'Posterior' : grupoInterno; // exerciciosDoGrupo espera 'Posterior', não 'Isquiotibiais'
-    const opcoes = exerciciosDoGrupo(nomeGrupoBusca, {});
+    const nomeGrupoBusca = grupoInterno === 'Posterior' ? 'Posterior' : grupoInterno; // mesmo nome usado no resto do motor
+    // Chama a seleção direto pela função global (não a versão aninhada de dentro de gerarDiasInferiores,
+    // que não existe aqui fora — era exatamente esse erro de escopo que travava a tela ao trocar nível).
+    const opcoes = selecionarExerciciosVariados(nomeGrupoBusca, perfil.nomeAluna || '', 1, perfil.indiceCiclo, {}, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
     if(!opcoes || !opcoes[0]) return;
 
     const seriesMinimas = perfil.bloco === 'deload' ? 2 : 3;
