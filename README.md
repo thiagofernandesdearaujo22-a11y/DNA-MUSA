@@ -1,4 +1,4 @@
-[Uploading dna_musa_51.html…]()
+[Uploading dna_musa_52.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5289,6 +5289,55 @@ function editarDataNascimentoAluna(nomeAluna, novaData){
   openAlunaDetail(i);
 }
 
+// As 3 funções abaixo atualizam o MESMO objeto usado em todo o resto do app (alunasPersonal) — por
+// isso, assim que confirma, qualquer checagem que já existe (tipo "sem e-mail não entra na geração")
+// já enxerga o valor novo na hora, sem precisar de nada especial em cada lugar que usa esse dado.
+
+function editarNomeAluna(nomeAntigo){
+  const idSufixo = nomeAntigo.replace(/[^a-zA-Z0-9]/g,'');
+  const campo = document.getElementById('dados-nome-' + idSufixo);
+  const novoNome = campo ? campo.value.trim() : '';
+  if(!novoNome){ alert('O nome não pode ficar vazio.'); return; }
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAntigo; });
+  if(!a) return;
+
+  a.nome = novoNome;
+  // Migra o progresso guardado (histórico de carga, check-ins, semana atual, etc.) pro nome novo —
+  // sem isso, esse histórico ficaria "órfão", preso debaixo do nome antigo que não existe mais.
+  if(typeof progressoesPorAluna !== 'undefined' && progressoesPorAluna[nomeAntigo]){
+    progressoesPorAluna[novoNome] = progressoesPorAluna[nomeAntigo];
+    delete progressoesPorAluna[nomeAntigo];
+  }
+  salvarPerfilAlunaNoSupabase(novoNome);
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+}
+
+function editarEmailAluna(nomeAluna){
+  const idSufixo = nomeAluna.replace(/[^a-zA-Z0-9]/g,'');
+  const campo = document.getElementById('dados-email-' + idSufixo);
+  const novoEmail = campo ? campo.value.trim() : '';
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  a.email = novoEmail || null;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+  renderInfoCardGerarTreino(); // atualiza na hora o card "gerar/progredir" — se ela tava fora por falta de e-mail, já reflete que agora entra
+}
+
+function editarTelefoneAluna(nomeAluna){
+  const idSufixo = nomeAluna.replace(/[^a-zA-Z0-9]/g,'');
+  const campo = document.getElementById('dados-telefone-' + idSufixo);
+  const novoTelefone = campo ? campo.value.trim() : '';
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  a.telefone = novoTelefone || null;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+}
+
 const secoesColapsaveisAbertas = {}; // guarda estado (aberta/fechada) de cada seção, sobrevive a recarregar a ficha
 
 function renderFormularioRelatarRestricao(nomeAluna){
@@ -6448,6 +6497,14 @@ function abrirResumoCompletoAluna(nomeAluna){
     renderSecaoColapsavel('Plano fechado', renderPlanoFechadoConteudo(a), 'planofechado-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Transformar um dia em Tabata de casa', renderFerramentaTabata(a), 'tabata-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Calendário de treinos', renderCalendarioTreinos(a.nome), 'calendario-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderSecaoColapsavel('Dados', '<div class="info-box">' +
+      '<div class="form-group"><label class="form-label">Nome</label><input class="form-input" id="dados-nome-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" value="' + a.nome.replace(/"/g,'&quot;') + '"><button class="btn-gold" style="width:auto;padding:6px 14px;margin-top:6px;font-size:12px;" onclick="editarNomeAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Salvar nome</button></div>' +
+      '<div class="form-group" style="margin-top:14px;"><label class="form-label">E-mail</label><input class="form-input" id="dados-email-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" value="' + (a.email || '').replace(/"/g,'&quot;') + '" placeholder="ainda sem e-mail cadastrado"><button class="btn-gold" style="width:auto;padding:6px 14px;margin-top:6px;font-size:12px;" onclick="editarEmailAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Salvar e-mail</button>' +
+        (!a.email ? '<p class="txt" style="font-size:11px;color:#E2A33D;margin-top:4px;">Sem e-mail, ela não entra na geração/progressão em massa até isso ser preenchido</p>' : '') +
+      '</div>' +
+      '<div class="form-group" style="margin-top:14px;"><label class="form-label">Telefone</label><input class="form-input" id="dados-telefone-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" value="' + (a.telefone || '').replace(/"/g,'&quot;') + '" placeholder="ainda sem telefone cadastrado"><button class="btn-gold" style="width:auto;padding:6px 14px;margin-top:6px;font-size:12px;" onclick="editarTelefoneAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Salvar telefone</button></div>' +
+      '<div id="dados-resultado-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" style="margin-top:8px;"></div>' +
+    '</div>', 'dados-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Data de nascimento', '<div class="info-box"><input type="date" class="form-input" value="' + (a.dataNascimento || '') + '" onchange="editarDataNascimentoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)"><p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:6px;">Normalmente já vem sozinha da anamnese. Só preencha aqui se ela respondeu antes da gente ativar isso.</p></div>', 'nascimento-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Roda da vida', renderRodaDaVidaNaFicha(a.nome), 'rodadavida-' + a.nome.replace(/[^a-zA-Z0-9]/g,''));
 }
