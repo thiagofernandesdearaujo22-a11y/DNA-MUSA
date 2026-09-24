@@ -1,4 +1,4 @@
-[dna_musa_54.html](https://github.com/user-attachments/files/32611576/dna_musa_54.html)
+[dna_musa_55.html](https://github.com/user-attachments/files/32611880/dna_musa_55.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6150,15 +6150,33 @@ function renderModoAulaPresencial(){
         const nome = extrairNomeExercicioDeLinha(linha);
         const historico = (prog.historico[nome] || []);
         const ultimo = historico.length > 0 ? historico[historico.length - 1] : null;
+        const metodoDoEx = d.metodos && d.metodos[ei];
+        const parceiros = (metodoDoEx && typeof metodoDoEx === 'object' && metodoDoEx.parceiros) ? metodoDoEx.parceiros.filter(function(p){ return !!p; }) : [];
         return '<div style="border-top:1px solid var(--border);padding:10px 0;">' +
-          '<p style="font-size:12.5px;font-weight:600;margin:0 0 6px;">' + linha + '</p>' +
+          '<p style="font-size:12.5px;font-weight:600;margin:0 0 6px;">' + linha + (parceiros.length > 0 ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + metodoDoEx.tipo + '</span>' : '') + '</p>' +
           (ultimo ? '<p class="txt" style="font-size:10.5px;color:var(--text-faint);margin:0 0 6px;">Último registrado: ' + ultimo.carga + 'kg x ' + ultimo.reps + '</p>' : '') +
-          '<div style="display:flex;gap:8px;align-items:center;">' +
+          '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
             '<input type="number" placeholder="kg" id="ap-carga-' + di + '-' + ei + '" class="form-input" style="width:70px;padding:8px;" value="' + (ultimo ? ultimo.carga : '') + '">' +
             '<input type="number" placeholder="reps" id="ap-reps-' + di + '-' + ei + '" class="form-input" style="width:70px;padding:8px;" value="' + (ultimo ? ultimo.reps : '') + '">' +
             '<button class="btn-gold" style="width:auto;padding:8px 14px;font-size:12px;margin:0;" onclick="confirmarSerieComoPersonal(' + di + ',' + ei + ',\'' + nome.replace(/'/g,"\\'") + '\')">Confirmar</button>' +
           '</div>' +
           '<div id="ap-resultado-' + di + '-' + ei + '"></div>' +
+          // Bi-set/Tri-set: cada parceiro entra do lado, na mesma caixa, com seu próprio campo de
+          // carga/reps — o histórico de cada um fica separado, pelo nome de cada exercício.
+          parceiros.map(function(nomeParceiro, p){
+            const historicoParceiro = (prog.historico[nomeParceiro] || []);
+            const ultimoParceiro = historicoParceiro.length > 0 ? historicoParceiro[historicoParceiro.length - 1] : null;
+            return '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);">' +
+              '<p style="font-size:12px;font-weight:600;margin:0 0 6px;color:var(--gold-soft);">↳ ' + nomeParceiro + '</p>' +
+              (ultimoParceiro ? '<p class="txt" style="font-size:10.5px;color:var(--text-faint);margin:0 0 6px;">Último registrado: ' + ultimoParceiro.carga + 'kg x ' + ultimoParceiro.reps + '</p>' : '') +
+              '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
+                '<input type="number" placeholder="kg" id="ap-carga-' + di + '-' + ei + '-p' + p + '" class="form-input" style="width:70px;padding:8px;" value="' + (ultimoParceiro ? ultimoParceiro.carga : '') + '">' +
+                '<input type="number" placeholder="reps" id="ap-reps-' + di + '-' + ei + '-p' + p + '" class="form-input" style="width:70px;padding:8px;" value="' + (ultimoParceiro ? ultimoParceiro.reps : '') + '">' +
+                '<button class="btn-gold" style="width:auto;padding:8px 14px;font-size:12px;margin:0;" onclick="confirmarSerieComoPersonal(' + di + ',\'' + ei + '-p' + p + '\',\'' + nomeParceiro.replace(/'/g,"\\'") + '\')">Confirmar</button>' +
+              '</div>' +
+              '<div id="ap-resultado-' + di + '-' + ei + '-p' + p + '"></div>' +
+            '</div>';
+          }).join('') +
         '</div>';
       }).join('') +
     '</div>';
