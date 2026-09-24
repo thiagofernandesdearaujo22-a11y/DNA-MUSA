@@ -797,6 +797,11 @@
           <div class="chip" style="background:var(--card-2);color:var(--gold-soft);" onclick="abrirTelaFunil()"><i class="ti ti-filter-cog" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Funil</div>
           <div class="chip" id="chip-modo-selecao" style="background:var(--card-2);color:var(--gold-soft);" onclick="alternarModoSelecaoAlunas()"><i class="ti ti-checkbox" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Marcar</div>
         </div>
+        <div class="filter-row" style="margin-bottom:12px;">
+          <div class="chip active" id="filtro-desafio-todas" onclick="alternarFiltroDesafio('todas')">Todas</div>
+          <div class="chip" id="filtro-desafio-dentro" onclick="alternarFiltroDesafio('dentro')"><i class="ti ti-flag" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>No desafio</div>
+          <div class="chip" id="filtro-desafio-fora" onclick="alternarFiltroDesafio('fora')">Fora do desafio</div>
+        </div>
         <div id="barra-selecao-alunas" style="display:none;background:var(--card);border:1px solid var(--border-strong);border-radius:12px;padding:10px 12px;margin-bottom:12px;align-items:center;gap:8px;flex-wrap:wrap;">
           <span id="contagem-selecao-alunas" style="font-size:12px;color:var(--gold-soft);flex-shrink:0;">0 selecionada(s)</span>
           <select class="form-select" id="destino-mover-alunas" style="flex:1;min-width:140px;font-size:12px;padding:6px;">
@@ -2454,6 +2459,16 @@ function alternarEstagioFunil(estagio){
 }
 
 let filtroAlunasAtivo = 'ativas';
+let filtroDesafioAtivo = 'todas';
+
+function alternarFiltroDesafio(filtro){
+  filtroDesafioAtivo = filtro;
+  ['todas', 'dentro', 'fora'].forEach(function(f){
+    const el = document.getElementById('filtro-desafio-' + f);
+    if(el) el.classList.toggle('active', f === filtro);
+  });
+  renderAlunas();
+}
 
 function alternarFiltroAlunas(filtro){
   filtroAlunasAtivo = filtro;
@@ -2529,7 +2544,8 @@ function renderAlunas(){
   const filtradas = alunasPersonal.filter(function(a){
     const bateBusca = !termo || a.nome.toUpperCase().indexOf(termo) !== -1;
     const bateStatus = statusDoPlano(a) === filtroAlunasAtivo;
-    return bateBusca && bateStatus;
+    const bateDesafio = filtroDesafioAtivo === 'todas' ? true : (filtroDesafioAtivo === 'dentro' ? !!a.desafioAtivo : !a.desafioAtivo);
+    return bateBusca && bateStatus && bateDesafio;
   }).sort(function(a, b){ return a.nome.localeCompare(b.nome, 'pt-BR'); });
   document.getElementById('alunas-count-label').textContent = filtradas.length + ' de ' + alunasPersonal.length + ' alunas';
   if(!window.alunasQtdVisivel) window.alunasQtdVisivel = 80;
@@ -2543,7 +2559,7 @@ function renderAlunas(){
     el.innerHTML =
       '<div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:8px;" data-abrir="1">' +
         (modoSelecaoAlunasAtivo ? '<input type="checkbox" class="checkbox-selecao-aluna" ' + (marcada ? 'checked' : '') + ' style="flex-shrink:0;width:18px;height:18px;">' : '') +
-        '<div style="flex:1;"><p class="aluna-name">' + a.nome + (a.recemChegadaDaAnamnese ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">nova</span>' : '') + '</p><p class="aluna-meta">' + a.nivel + ' · ' + a.freq + (a.statusPlanoManual ? ' · movida manualmente' : '') + (a.valorPlano != null ? ' · R$ ' + a.valorPlano.toFixed(2).replace('.', ',') : '') + '</p></div>' +
+        '<div style="flex:1;"><p class="aluna-name">' + a.nome + (a.recemChegadaDaAnamnese ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">nova</span>' : '') + (a.desafioAtivo ? ' <span class="tag" style="background:#6FA87C;color:#fff;"><i class="ti ti-flag" style="font-size:9px;vertical-align:-1px;"></i> desafio</span>' : '') + '</p><p class="aluna-meta">' + a.nivel + ' · ' + a.freq + (a.statusPlanoManual ? ' · movida manualmente' : '') + (a.valorPlano != null ? ' · R$ ' + a.valorPlano.toFixed(2).replace('.', ',') : '') + '</p></div>' +
         '<span style="display:flex;align-items:center;gap:6px;">' +
           '<span class="tag" style="background:' + financeiro.corSuave + ';color:' + financeiro.cor + ';">' + financeiro.label + '</span>' +
           '<span class="status-dot ' + a.status + '"></span><span class="status-txt ' + a.status + '">' + a.statusLabel + '</span>' +
