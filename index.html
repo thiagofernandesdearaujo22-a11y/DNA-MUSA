@@ -6037,22 +6037,36 @@ function abrirSelecaoGrupoParaAdicionar(diaIndex){
   const grupos = ['Costas','Peito','Ombros','Bíceps','Tríceps','Quadríceps','Glúteos','Isquiotibiais','Panturrilha','Abdômen'];
   const form = document.getElementById('add-exercicio-form-' + diaIndex);
   if(!form) return;
+  const ehTreinoDeCasa = alunaAberta && alunaAberta.ambienteTreino === 'Casa';
   form.innerHTML = '<p class="lbl" style="margin-top:8px;">De qual grupo muscular?</p>' +
+    (ehTreinoDeCasa ? '<p class="txt" style="font-size:11px;color:var(--text-faint);margin:-4px 0 6px;">Ela treina em casa, então já filtramos só exercícios de casa em qualquer grupo que você escolher</p>' : '') +
     '<div class="chip-list" style="margin:6px 0;">' +
     grupos.map(function(g){ return '<span class="chip" style="cursor:pointer;" onclick="abrirSelecaoExercicioParaAdicionar(' + diaIndex + ',\'' + g + '\')">' + g + '</span>'; }).join('') +
+    '<span class="chip" style="cursor:pointer;background:var(--gold-soft);color:#1A1409;" onclick="abrirSelecaoExercicioParaAdicionar(' + diaIndex + ',\'__CASA_TODOS__\')"><i class="ti ti-home" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Todos de casa</span>' +
     '</div>';
 }
 
 function abrirSelecaoExercicioParaAdicionar(diaIndex, grupo){
-  const opcoes = exerciciosBanco.filter(function(e){ return e.grupo === grupo || e.categoria === grupo; })
-    .sort(function(x, y){ return x.nome.localeCompare(y.nome, 'pt-BR'); });
+  const ehTreinoDeCasa = alunaAberta && alunaAberta.ambienteTreino === 'Casa';
+  const mostrarTodosDeCasa = grupo === '__CASA_TODOS__';
+  let opcoes = exerciciosBanco.filter(function(e){
+    if(mostrarTodosDeCasa) return e.ambiente === 'Casa';
+    const pertenceAoGrupo = e.grupo === grupo || e.categoria === grupo;
+    if(!pertenceAoGrupo) return false;
+    // Sempre bate o ambiente do exercício com o ambiente de treino dela — nos dois sentidos: aluna de
+    // academia nunca vê exercício de casa aqui, e vice-versa.
+    return ((e.ambiente || 'Academia') === 'Academia') !== ehTreinoDeCasa;
+  }).sort(function(x, y){ return x.nome.localeCompare(y.nome, 'pt-BR'); });
+
   const form = document.getElementById('add-exercicio-form-' + diaIndex);
   if(!form) return;
-  form.innerHTML = '<p class="lbl" style="margin-top:8px;">Exercício de ' + grupo + '</p>' +
+  const titulo = mostrarTodosDeCasa ? 'Todos os exercícios de casa' : ('Exercício de ' + grupo);
+  form.innerHTML = '<p class="lbl" style="margin-top:8px;">' + titulo + '</p>' +
+    (opcoes.length === 0 ? '<p class="txt" style="color:var(--text-faint);">Nenhum exercício de casa cadastrado nesse grupo ainda.</p>' :
     '<div class="form-group"><select class="form-select" id="add-exercicio-select-' + diaIndex + '">' +
       opcoes.map(function(e){ return '<option value="' + e.nome.replace(/"/g,'') + '">' + e.nome + '</option>'; }).join('') +
     '</select></div>' +
-    '<button class="btn-gold" style="width:auto;padding:8px 14px;margin:0;font-size:12px;" onclick="confirmarAdicionarExercicio(' + diaIndex + ')">Adicionar</button>';
+    '<button class="btn-gold" style="width:auto;padding:8px 14px;margin:0;font-size:12px;" onclick="confirmarAdicionarExercicio(' + diaIndex + ')">Adicionar</button>');
 }
 
 function confirmarAdicionarExercicio(diaIndex){
@@ -6266,7 +6280,8 @@ function mostrarOpcoesDeTrocaMesmoAssim(diaIndex, exIndex){
 
   let opcoes = exerciciosBanco.filter(function(e){
     const grupoDoEx = e.grupo || e.categoria;
-    return (!grupo || grupoDoEx === grupo) && e.nome.toUpperCase() !== nomeAtual.toUpperCase();
+    const mesmoAmbiente = exAtualBanco ? ((e.ambiente || 'Academia') === (exAtualBanco.ambiente || 'Academia')) : true;
+    return (!grupo || grupoDoEx === grupo) && mesmoAmbiente && e.nome.toUpperCase() !== nomeAtual.toUpperCase();
   });
 
   // Motor 5: prioriza mesma família biomecânica primeiro (troca com justificativa funcional, não aleatória);
