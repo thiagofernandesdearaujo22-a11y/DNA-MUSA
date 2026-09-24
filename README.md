@@ -1,4 +1,4 @@
-[Uploading dna_musa_53.html…]()
+[dna_musa_54.html](https://github.com/user-attachments/files/32611576/dna_musa_54.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6518,6 +6518,7 @@ function renderConteudoDiaPersonal(a, di){
       const nomeEdit = extrairNomeExercicioDeLinha(exLine);
       const setsRepsEdit = extrairRepsDeLinha(exLine);
       const metodoAplicado = d.metodos && d.metodos[ei];
+      const nomeMetodoParaTag = metodoAplicado ? (typeof metodoAplicado === 'string' ? metodoAplicado : metodoAplicado.tipo) : null;
       html += '<div class="list-item exercicio-linha" data-dia="' + di + '" data-ex="' + ei + '" style="flex-direction:column;align-items:stretch;gap:4px;padding:8px 12px;">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;">' +
           '<div style="display:flex;align-items:center;gap:8px;min-width:0;">' +
@@ -6526,13 +6527,14 @@ function renderConteudoDiaPersonal(a, di){
               '<span style="font-size:12px;cursor:pointer;color:' + (ei === 0 ? 'var(--border)' : 'var(--gold-soft)') + ';" onclick="' + (ei === 0 ? '' : 'moverExercicioTreino(' + di + ',' + ei + ',-1)') + '">▲</span>' +
               '<span style="font-size:12px;cursor:pointer;color:' + (ei === d.ex.length - 1 ? 'var(--border)' : 'var(--gold-soft)') + ';" onclick="' + (ei === d.ex.length - 1 ? '' : 'moverExercicioTreino(' + di + ',' + ei + ',1)') + '">▼</span>' +
             '</span>' +
-            '<span id="nome-ex-' + di + '-' + ei + '" style="font-size:12px;cursor:pointer;text-decoration:underline;text-decoration-color:var(--gold-soft);text-underline-offset:2px;" onclick="abrirVideoApenasExercicio(\'' + nomeEdit.replace(/'/g,"\\'") + '\', event)">' + nomeEdit + (metodoAplicado ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + metodoAplicado + '</span>' : '') + '</span>' +
+            '<span id="nome-ex-' + di + '-' + ei + '" style="font-size:12px;cursor:pointer;text-decoration:underline;text-decoration-color:var(--gold-soft);text-underline-offset:2px;" onclick="abrirVideoApenasExercicio(\'' + nomeEdit.replace(/'/g,"\\'") + '\', event)">' + nomeEdit + (nomeMetodoParaTag ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + nomeMetodoParaTag + '</span>' : '') + '</span>' +
           '</div>' +
           '<span style="display:flex;gap:4px;align-items:center;flex-shrink:0;">' +
             '<span class="acao-pill" onclick="alternarMetodoExercicio(' + di + ',' + ei + ')">Método</span>' +
             '<span onclick="abrirSubstituicao(' + di + ',' + ei + ')" style="cursor:pointer;color:var(--text-faint);padding:4px;font-size:15px;" title="Trocar exercício">⇄</span>' +
           '</span>' +
         '</div>' +
+        '<div id="parceiros-combo-' + di + '-' + ei + '">' + ((nomeMetodoParaTag === 'Bi-set' || nomeMetodoParaTag === 'Tri-set') ? htmlCaixasParceirosCombo(nomeEdit, nomeMetodoParaTag === 'Bi-set' ? 1 : 2, metodoAplicado.parceiros).replace(/THIS_DI/g, di).replace(/THIS_EI/g, ei) : '') + '</div>' +
         '<div id="metodo-picker-' + di + '-' + ei + '" style="display:none;"></div>' +
         '<div id="sub-picker-' + di + '-' + ei + '" style="display:none;"></div>' +
         '<div style="display:flex;gap:6px;">' +
@@ -6591,18 +6593,72 @@ function alternarMetodoExercicio(di, ei){
 function aplicarMetodoExercicio(di, ei, metodo){
   const a = alunaAberta;
   if(!a.treinoAtual.dias[di].metodos) a.treinoAtual.dias[di].metodos = {};
-  if(metodo === 'Nenhum') delete a.treinoAtual.dias[di].metodos[ei];
-  else a.treinoAtual.dias[di].metodos[ei] = metodo;
+  if(metodo === 'Nenhum'){
+    delete a.treinoAtual.dias[di].metodos[ei];
+  } else {
+    // Bi-set/Tri-set guardam também os exercícios parceiros — os outros métodos continuam como
+    // string simples (mesmo formato de sempre, sem quebrar nada que já existia).
+    const ehComboDeVarios = (metodo === 'Bi-set' || metodo === 'Tri-set');
+    a.treinoAtual.dias[di].metodos[ei] = ehComboDeVarios ? { tipo: metodo, parceiros: [] } : metodo;
+  }
   sincronizarTreinoComSupabase(a);
 
-  // Atualiza só esse exercício na tela, sem recarregar a ficha (isso fechava o dia e o picker)
   const nomeEx = a.treinoAtual.dias[di].ex[ei].split(' · ')[0];
   const elNome = document.getElementById('nome-ex-' + di + '-' + ei);
+  const nomeMetodoExibir = (metodo !== 'Nenhum') ? metodo : null;
   if(elNome){
-    elNome.innerHTML = nomeEx + (metodo !== 'Nenhum' ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + metodo + '</span>' : '');
+    elNome.innerHTML = nomeEx + (nomeMetodoExibir ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + nomeMetodoExibir + '</span>' : '');
   }
   const picker = document.getElementById('metodo-picker-' + di + '-' + ei);
   if(picker){ picker.style.display = 'none'; picker.innerHTML = ''; }
+
+  // Bi-set/Tri-set: abre na hora a caixinha pra escolher o(s) exercício(s) parceiro(s), do lado do
+  // que já está prescrito — mesma série/reps de sempre, ela só executa em sequência.
+  if(metodo === 'Bi-set') renderCaixasParceirosCombo(di, ei, 1);
+  if(metodo === 'Tri-set') renderCaixasParceirosCombo(di, ei, 2);
+  if(metodo !== 'Bi-set' && metodo !== 'Tri-set'){
+    const areaParceiros = document.getElementById('parceiros-combo-' + di + '-' + ei);
+    if(areaParceiros) areaParceiros.innerHTML = ''; // trocou pra um método sem combo, limpa qualquer parceiro que tivesse antes
+  }
+}
+
+// Gera só o HTML das caixinhas de parceiro (puro, sem mexer na tela) — usado tanto na primeira
+// renderização do dia (quando já tem um combo salvo) quanto ao escolher o método na hora.
+function htmlCaixasParceirosCombo(nomePrincipal, quantosParceiros, parceirosAtuais){
+  const exPrincipalBanco = exerciciosBanco.find(function(e){ return e.nome.toUpperCase() === nomePrincipal.toUpperCase(); });
+  const grupo = exPrincipalBanco ? (exPrincipalBanco.grupo || exPrincipalBanco.categoria) : null;
+  const opcoes = exerciciosBanco.filter(function(e){
+    const grupoDoEx = e.grupo || e.categoria;
+    return (!grupo || grupoDoEx === grupo) && e.nome.toUpperCase() !== nomePrincipal.toUpperCase();
+  }).sort(function(x, y){ return x.nome.localeCompare(y.nome, 'pt-BR'); });
+
+  let html = '<div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">';
+  for(let p = 0; p < quantosParceiros; p++){
+    html += '<select class="form-select" style="font-size:12px;padding:8px;" onchange="definirParceiroCombo(THIS_DI,THIS_EI,' + p + ',this.value)">' +
+      '<option value="">+ escolher exercício parceiro ' + (quantosParceiros > 1 ? (p+1) : '') + '</option>' +
+      opcoes.map(function(e){ return '<option value="' + e.nome.replace(/"/g,'&quot;') + '"' + ((parceirosAtuais||[])[p] === e.nome ? ' selected' : '') + '>' + e.nome + '</option>'; }).join('') +
+    '</select>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderCaixasParceirosCombo(di, ei, quantosParceiros){
+  const a = alunaAberta;
+  const area = document.getElementById('parceiros-combo-' + di + '-' + ei);
+  if(!area) return;
+  const nomePrincipal = extrairNomeExercicioDeLinha(a.treinoAtual.dias[di].ex[ei]);
+  const metodoAtual = a.treinoAtual.dias[di].metodos[ei];
+  const parceirosAtuais = (metodoAtual && metodoAtual.parceiros) || [];
+  area.innerHTML = htmlCaixasParceirosCombo(nomePrincipal, quantosParceiros, parceirosAtuais)
+    .replace(/THIS_DI/g, di).replace(/THIS_EI/g, ei);
+}
+
+function definirParceiroCombo(di, ei, posicao, nomeEscolhido){
+  const a = alunaAberta;
+  if(!a.treinoAtual.dias[di].metodos[ei] || typeof a.treinoAtual.dias[di].metodos[ei] === 'string') return;
+  a.treinoAtual.dias[di].metodos[ei].parceiros[posicao] = nomeEscolhido;
+  sincronizarTreinoComSupabase(a);
 }
 
 let treinoJaBuscadoPara = {};
