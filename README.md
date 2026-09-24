@@ -1,4 +1,4 @@
-[Uploading dna_musa_52.html…]()
+[Uploading dna_musa_53.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -730,6 +730,8 @@
         <div id="auditoria-posteriores-area"></div>
         <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="mostrarConfigRanking()"><i class="ti ti-trophy" style="margin-right:6px;"></i>Configurar meta do Ranking</button>
         <div id="config-ranking-area"></div>
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:14px;" onclick="verErrosRecentes()"><i class="ti ti-bug" style="margin-right:6px;"></i>Ver erros recentes do app</button>
+        <div id="erros-recentes-area"></div>
       </div>
 
       <div id="personal-inteligencia" style="display:none;">
@@ -997,6 +999,13 @@
         <button class="btn-gold" onclick="salvarTemplate()">Salvar template</button>
       </div>
 
+      <div id="personal-aula-presencial" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('aluna')"><i class="ti ti-arrow-left"></i><span>Voltar pra ficha</span></div>
+        <h1 class="page-title" style="margin-top:0;" id="ap-titulo">Modo Aula Presencial</h1>
+        <p class="page-sub">Edita a carga e as repetições dela em tempo real, direto na sua tela — igual ela faria pelo celular dela</p>
+        <div id="ap-conteudo"></div>
+      </div>
+
       <div id="personal-desafios" style="display:none;">
         <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
         <h1 class="page-title" style="margin-top:0;">Desafio</h1>
@@ -1113,14 +1122,54 @@ window.addEventListener('error', function(evento){
   // Erro de carregar fonte/imagem/CDN não deve travar o app inteiro — isso já é tratado visualmente em cada lugar específico.
   if(!evento.error) return;
   console.error('[Erro capturado]', evento.error);
+  registrarErroNoBanco(evento.error);
   const tela = document.getElementById('tela-erro-generica');
   if(tela && tela.style.display !== 'flex') tela.style.display = 'flex';
 });
 window.addEventListener('unhandledrejection', function(evento){
   console.error('[Promessa rejeitada sem tratamento]', evento.reason);
+  registrarErroNoBanco(evento.reason);
   // Erros de rede do Supabase já têm tratamento próprio (try/catch), então aqui só logamos,
   // não mostramos a tela cheia pra não interromper por uma falha que o próprio código já absorveu.
 });
+
+// Guarda o erro no banco automaticamente, pra revisão depois — sem depender de ninguém mandar print.
+// Nunca deixa um problema AQUI quebrar mais nada (por isso o try/catch envolvendo tudo).
+function registrarErroNoBanco(erro){
+  try {
+    if(!supabaseClient) return;
+    const mensagem = erro && erro.message ? erro.message : String(erro);
+    const pilha = erro && erro.stack ? String(erro.stack).slice(0, 2000) : null;
+    const tela = (typeof level2 !== 'undefined' && level2) ? level2 : (typeof sessaoTipo !== 'undefined' ? sessaoTipo : 'desconhecida');
+    const quem = (typeof NOME_ALUNA_LOGADA !== 'undefined' && NOME_ALUNA_LOGADA) ? NOME_ALUNA_LOGADA : ((typeof NOME_PERSONAL_LOGADO !== 'undefined' && NOME_PERSONAL_LOGADO) ? NOME_PERSONAL_LOGADO : 'não identificado');
+    supabaseClient.from('erros_app').insert({ mensagem: mensagem, pilha: pilha, tela: String(tela), quem: quem }).then(function(){}).catch(function(){});
+  } catch(erroAoRegistrar){
+    // Se até registrar o erro falhar, só desiste silenciosamente — nunca pode causar um segundo erro
+  }
+}
+
+async function verErrosRecentes(){
+  const area = document.getElementById('erros-recentes-area');
+  if(!area) return;
+  if(area.innerHTML){ area.innerHTML = ''; return; }
+  area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Carregando...</p>';
+  try {
+    const { data, error } = await supabaseClient.from('erros_app').select('*').order('data_hora', { ascending: false }).limit(30);
+    if(error || !data || data.length === 0){
+      area.innerHTML = '<div class="info-box"><p class="txt" style="color:var(--text-faint);">Nenhum erro registrado — ótimo sinal.</p></div>';
+      return;
+    }
+    area.innerHTML = data.map(function(e){
+      const dataFormatada = new Date(e.data_hora).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+      return '<div class="info-box" style="margin-bottom:6px;border-color:#C9784A;">' +
+        '<p class="txt" style="font-size:12px;color:#C9784A;margin:0;">' + e.mensagem + '</p>' +
+        '<p class="txt" style="font-size:10.5px;color:var(--text-faint);margin:4px 0 0;">' + (e.quem || '?') + ' · ' + (e.tela || '?') + ' · ' + dataFormatada + '</p>' +
+      '</div>';
+    }).join('');
+  } catch(erroDeRede){
+    area.innerHTML = '<div class="info-box"><p class="txt">Erro ao carregar: ' + erroDeRede.message + '</p></div>';
+  }
+}
 </script>
 
 <script>
@@ -3754,6 +3803,22 @@ function removerVariacoesDuplicadasDeAfundo(dia){
   });
 }
 
+// Nunca 2 Leg Press no mesmo treino — a não ser que um dos dois seja unilateral, aí os dois podem
+// conviver (trabalham de formas diferentes o suficiente pra não ser redundante).
+function removerLegsExcedentesNoDia(dia){
+  let jaTemLeg = false;
+  dia.ex = dia.ex.filter(function(linha){
+    const nomes = extrairTodosNomesDeLinha(linha);
+    const algumLeg = nomes.some(function(n){ return n.toUpperCase().indexOf('LEG PRESS') !== -1; });
+    if(!algumLeg) return true;
+    const algumUnilateral = nomes.some(function(n){ return ehExercicioUnilateral(n); });
+    if(algumUnilateral) return true; // exceção: um dos dois sendo unilateral, pode ter os dois no dia
+    if(jaTemLeg) return false;
+    jaTemLeg = true;
+    return true;
+  });
+}
+
 const ORDEM_NIVEL_TREINO = { 'Iniciante': 1, 'Intermediário': 2, 'Avançado': 3 };
 
 // Nível mínimo é um PISO, não uma trava exata: quem já está no nível dele ou acima sempre pode receber
@@ -4204,10 +4269,19 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
   const dias = [];
   const padroesUsadosPorGrupoNaSemana = {}; // grupoPrincipal -> padrões de movimento já usados em dias anteriores dessa semana
 
+  // Os 3 grupos possíveis de inferiores — o terciário é sempre o que sobra depois de ênfase e secundário
+  const TODOS_GRUPOS_INFERIORES = ['Glúteo', 'Quadríceps', 'Posterior'];
+  const terciario = TODOS_GRUPOS_INFERIORES.find(function(g){ return g !== enfase && g !== secundario; }) || enfase;
+
   for(let d = 0; d < numDias; d++){
-    const ehDiaEnfase = d % 2 === 0; // dias pares = ênfase, ímpares = secundário (padrão validado com a Michele/Andriele)
-    const grupoPrincipal = ehDiaEnfase ? enfase : (secundario || enfase);
-    const grupoEstimulo = ehDiaEnfase ? secundario : enfase;
+    // Rodízio de 3, não de 2: com frequência alta (3+ dias de inferiores), cada grupo tem seu dia de
+    // protagonista antes de QUALQUER um repetir — evita empilhar o mesmo grupo (ex: quad em 3 dias
+    // diferentes), que era o que esgotava as opções de exercício e deixava alguns dias com só 1-2.
+    const posicaoNoCiclo = d % 3;
+    let grupoPrincipal, grupoEstimulo;
+    if(posicaoNoCiclo === 0){ grupoPrincipal = enfase; grupoEstimulo = secundario; }
+    else if(posicaoNoCiclo === 1){ grupoPrincipal = secundario || enfase; grupoEstimulo = terciario; }
+    else { grupoPrincipal = terciario; grupoEstimulo = enfase; }
     const padroesUsadosNoDia = {}; // compartilhado entre ênfase e estímulo, pra nunca repetir padrão de movimento no mesmo dia
     // Se esse MESMO grupo principal já apareceu num dia anterior dessa semana (comum em frequências
     // altas, 5-6x), herda os padrões de movimento usados lá — garante que pelo menos o exercício
@@ -4216,7 +4290,14 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
       Object.assign(padroesUsadosNoDia, padroesUsadosPorGrupoNaSemana[grupoPrincipal]);
     }
 
-    const nomesEscolhidosPrincipal = exerciciosDoGrupo(grupoPrincipal, padroesUsadosNoDia);
+    let nomesEscolhidosPrincipal = exerciciosDoGrupo(grupoPrincipal, padroesUsadosNoDia);
+    // Rede de segurança: se sobrou pouquíssimo exercício (esgotou o banco de padrões distintos),
+    // tenta de novo sem a restrição de "já usado essa semana" — melhor repetir um padrão de vez em
+    // quando do que entregar um dia com 1 exercício só.
+    if(nomesEscolhidosPrincipal.length < 2){
+      const tentativaSemRestricao = exerciciosDoGrupo(grupoPrincipal, {});
+      if(tentativaSemRestricao.length > nomesEscolhidosPrincipal.length) nomesEscolhidosPrincipal = tentativaSemRestricao;
+    }
     // Preferência real do Thiago: quando o grupo principal é Glúteo, a elevação pélvica (o exercício
     // mais exigente) sempre entra primeiro no dia, com a aluna ainda fresca — nunca depois de outro.
     if(grupoPrincipal === 'Glúteo'){
@@ -4494,6 +4575,7 @@ function gerarTreinoSemanal(perfil){
       }
     }
     removerVariacoesDuplicadasDeAfundo(dia);
+    removerLegsExcedentesNoDia(dia);
     removerExerciciosExatamenteRepetidosNoDia(dia);
     removerUnilateraisExcedentesNoDia(dia);
     const duracaoFinal = calcularDuracaoDia(dia);
@@ -5963,7 +6045,8 @@ function abrirSelecaoGrupoParaAdicionar(diaIndex){
 }
 
 function abrirSelecaoExercicioParaAdicionar(diaIndex, grupo){
-  const opcoes = exerciciosBanco.filter(function(e){ return e.grupo === grupo || e.categoria === grupo; });
+  const opcoes = exerciciosBanco.filter(function(e){ return e.grupo === grupo || e.categoria === grupo; })
+    .sort(function(x, y){ return x.nome.localeCompare(y.nome, 'pt-BR'); });
   const form = document.getElementById('add-exercicio-form-' + diaIndex);
   if(!form) return;
   form.innerHTML = '<p class="lbl" style="margin-top:8px;">Exercício de ' + grupo + '</p>' +
@@ -5989,6 +6072,120 @@ function adicionarExercicioTreino(diaIndex){
   if(typeof dias !== 'undefined' && dias[diaIndex]) dias[diaIndex].ex.push('Novo exercício · 3x12');
   sincronizarTreinoComSupabase(a);
   atualizarDiaPersonalNaTela(diaIndex);
+}
+
+// ===== MODO AULA PRESENCIAL: Personal edita a carga dela em tempo real, direto pela própria sessão,
+// sem precisar trocar de login nem sair da conta de Personal. Usa getProgressoAluna(nomeAluna) — que
+// já aceita o nome como parâmetro explícito — em vez de depender de NOME_ALUNA_LOGADA, que só existe
+// numa sessão de aluna de verdade.
+let alunaModoPresencial = null;
+
+// ===== COPIAR TREINO PARA OUTRA ALUNA (útil pra alunas que treinam juntas, mesmo treino) =====
+function mostrarFormularioCopiarTreino(nomeOrigem){
+  const area = document.getElementById('copiar-treino-form');
+  if(!area) return;
+  if(area.innerHTML){ area.innerHTML = ''; return; }
+  const outras = alunasPersonal.filter(function(a){ return a.nome !== nomeOrigem; });
+  area.innerHTML = '<div class="info-box">' +
+    '<input class="form-input" id="ct-busca" placeholder="Buscar aluna..." oninput="filtrarAlunasCopiarTreino()" style="margin-bottom:8px;">' +
+    '<div style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:8px;">' +
+      outras.map(function(a){
+        return '<label class="linha-ct-aluna" data-nome-busca="' + a.nome.toUpperCase().replace(/"/g,'&quot;') + '" style="display:flex;align-items:center;gap:8px;padding:6px 4px;font-size:13px;cursor:pointer;">' +
+          '<input type="checkbox" class="checkbox-ct-aluna" value="' + a.nome.replace(/"/g,'&quot;') + '"> ' + a.nome + (a.treinoAtual ? ' <span class="tag" style="background:#C9784A;color:#fff;">já tem treino, será substituído</span>' : '') +
+        '</label>';
+      }).join('') +
+    '</div>' +
+    '<button class="btn-gold" style="margin-top:10px;" onclick="confirmarCopiarTreino(\'' + nomeOrigem.replace(/'/g,"\\'") + '\')">Copiar treino pras marcadas</button>' +
+  '</div>';
+}
+
+function filtrarAlunasCopiarTreino(){
+  const termo = document.getElementById('ct-busca').value.toUpperCase().trim();
+  document.querySelectorAll('.linha-ct-aluna').forEach(function(linha){
+    linha.style.display = (!termo || linha.getAttribute('data-nome-busca').indexOf(termo) !== -1) ? 'flex' : 'none';
+  });
+}
+
+function confirmarCopiarTreino(nomeOrigem){
+  const origem = alunasPersonal.find(function(x){ return x.nome === nomeOrigem; });
+  if(!origem || !origem.treinoAtual) return;
+  const nomesDestino = Array.prototype.slice.call(document.querySelectorAll('.checkbox-ct-aluna:checked')).map(function(el){ return el.value; });
+  if(nomesDestino.length === 0){ alert('Marca pelo menos uma aluna antes de copiar.'); return; }
+  if(!confirm('Copiar o treino de ' + nomeOrigem + ' pra ' + nomesDestino.length + ' aluna(s)? O treino atual delas (se tiverem) será substituído.')) return;
+
+  nomesDestino.forEach(function(nomeDestino){
+    const destino = alunasPersonal.find(function(x){ return x.nome === nomeDestino; });
+    if(!destino) return;
+    // Cópia de verdade, não referência — senão editar o treino de uma mexeria na outra junto
+    destino.treinoAtual = JSON.parse(JSON.stringify(origem.treinoAtual));
+    destino.statusControleCiclo = null; // volta a aparecer como pendente de envio, já que é treino novo pra ela
+    salvarPerfilAlunaNoSupabase(nomeDestino);
+  });
+
+  document.getElementById('copiar-treino-form').innerHTML = '';
+  alert('Copiado pra ' + nomesDestino.length + ' aluna(s) com sucesso.');
+}
+
+function abrirModoAulaPresencial(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !a.treinoAtual){ alert('Essa aluna ainda não tem treino gerado.'); return; }
+  alunaModoPresencial = a;
+  showPersonalView('aula-presencial');
+  document.getElementById('ap-titulo').textContent = 'Aula Presencial · ' + a.nome;
+  renderModoAulaPresencial();
+}
+
+function renderModoAulaPresencial(){
+  const a = alunaModoPresencial;
+  const area = document.getElementById('ap-conteudo');
+  if(!a || !area) return;
+  const prog = getProgressoAluna(a.nome);
+
+  area.innerHTML = a.treinoAtual.dias.map(function(d, di){
+    if(d.descanso) return '';
+    const letra = String.fromCharCode(65 + di);
+    return '<div class="info-box" style="margin-bottom:12px;">' +
+      '<p class="lbl" style="margin:0 0 8px;">Treino ' + letra + ' · ' + d.n + '</p>' +
+      d.ex.map(function(linha, ei){
+        const nome = extrairNomeExercicioDeLinha(linha);
+        const historico = (prog.historico[nome] || []);
+        const ultimo = historico.length > 0 ? historico[historico.length - 1] : null;
+        return '<div style="border-top:1px solid var(--border);padding:10px 0;">' +
+          '<p style="font-size:12.5px;font-weight:600;margin:0 0 6px;">' + linha + '</p>' +
+          (ultimo ? '<p class="txt" style="font-size:10.5px;color:var(--text-faint);margin:0 0 6px;">Último registrado: ' + ultimo.carga + 'kg x ' + ultimo.reps + '</p>' : '') +
+          '<div style="display:flex;gap:8px;align-items:center;">' +
+            '<input type="number" placeholder="kg" id="ap-carga-' + di + '-' + ei + '" class="form-input" style="width:70px;padding:8px;" value="' + (ultimo ? ultimo.carga : '') + '">' +
+            '<input type="number" placeholder="reps" id="ap-reps-' + di + '-' + ei + '" class="form-input" style="width:70px;padding:8px;" value="' + (ultimo ? ultimo.reps : '') + '">' +
+            '<button class="btn-gold" style="width:auto;padding:8px 14px;font-size:12px;margin:0;" onclick="confirmarSerieComoPersonal(' + di + ',' + ei + ',\'' + nome.replace(/'/g,"\\'") + '\')">Confirmar</button>' +
+          '</div>' +
+          '<div id="ap-resultado-' + di + '-' + ei + '"></div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }).join('');
+}
+
+function confirmarSerieComoPersonal(diaIndex, exIndex, nomeExercicio){
+  const a = alunaModoPresencial;
+  if(!a) return;
+  const cargaEl = document.getElementById('ap-carga-' + diaIndex + '-' + exIndex);
+  const repsEl = document.getElementById('ap-reps-' + diaIndex + '-' + exIndex);
+  const carga = parseFloat(cargaEl.value);
+  const reps = parseInt(repsEl.value, 10);
+  if(isNaN(carga) || isNaN(reps)){ alert('Preenche peso e repetições antes de confirmar.'); return; }
+
+  const prog = getProgressoAluna(a.nome);
+  if(!prog.historico[nomeExercicio]) prog.historico[nomeExercicio] = [];
+  const sugestao = sugerirAjusteCarga(carga, reps);
+  const registro = { semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao };
+  const idxExistente = prog.historico[nomeExercicio].findIndex(function(r){ return r.semana === prog.semana; });
+  if(idxExistente !== -1) prog.historico[nomeExercicio][idxExistente] = registro;
+  else prog.historico[nomeExercicio].push(registro);
+
+  salvarProgressoNoSupabase(a.nome);
+
+  const elResultado = document.getElementById('ap-resultado-' + diaIndex + '-' + exIndex);
+  if(elResultado) elResultado.innerHTML = '<p style="font-size:11px;color:var(--success);margin-top:4px;">✓ Salvo — sugestão pra próxima: ' + sugestao.valor + 'kg</p>';
 }
 
 // Uma linha normal é "Nome · 3x12". Um bi-set é "Bi-set|||Nome1 · 3x12|||Nome2 · 3x12" — sem essa
@@ -6547,7 +6744,10 @@ function openAlunaDetail(i){
   let treinoHtml = '<div class="list-item"><span id="treino-status-inicial">Verificando se já existe um treino salvo pra ela...</span></div>';
   let treinoAcoesHtml = '';
   if(a.treinoAtual){
-    treinoHtml = '<div class="badge">' + a.treinoAtual.fase + '</div>' +
+    treinoHtml = '<button class="btn-gold" style="background:linear-gradient(135deg,#6FA87C,#4C8058);color:#fff;margin-bottom:8px;" onclick="abrirModoAulaPresencial(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-device-mobile" style="margin-right:6px;"></i>Modo Aula Presencial — editar cargas agora</button>' +
+      '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:12px;" onclick="mostrarFormularioCopiarTreino(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-copy" style="margin-right:6px;"></i>Copiar esse treino para...</button>' +
+      '<div id="copiar-treino-form"></div>' +
+      '<div class="badge">' + a.treinoAtual.fase + '</div>' +
       '<p class="page-sub" style="margin:2px 0 10px;">' + a.treinoAtual.volume + '</p>';
     a.treinoAtual.dias.forEach(function(d, di){
       const letra = String.fromCharCode(65 + di); // sempre pela posição real (A, B, C...), nunca lendo texto do foco — evita a mistura de letra com número que dava em dias de descanso
@@ -7502,7 +7702,7 @@ function showPersonalView(which){
   if(which === 'dashboard' && NOME_PERSONAL_LOGADO === 'Bianca') which = 'dashboard-suporte';
   renderFerramentasPersonal();
   atualizarSidebarAtiva(which);
-  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes','comunicacao','ferramentas-treino','inteligencia','relatorios','faturamento','dashboard-suporte','conversas'].forEach(function(v){
+  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes','comunicacao','ferramentas-treino','inteligencia','relatorios','faturamento','dashboard-suporte','conversas','aula-presencial'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
   });
   if(which === 'sinalizacoes'){ renderSinalizacoes(); }
@@ -8074,6 +8274,7 @@ function renderExerciciosLista(){
     const termoUpper = termoBuscaExercicios.trim().toUpperCase();
     itens = itens.filter(function(e){ return e.nome.toUpperCase().indexOf(termoUpper) !== -1; });
   }
+  itens.sort(function(x, y){ return x.nome.localeCompare(y.nome, 'pt-BR'); });
 
   if(itens.length === 0){
     list.innerHTML = '<div class="info-box"><p class="txt">Nenhum exercício encontrado' + (termoBuscaExercicios.trim() ? ' com esse nome' : ' aqui ainda') + '.</p></div>';
