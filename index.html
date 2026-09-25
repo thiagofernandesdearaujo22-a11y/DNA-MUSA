@@ -4315,14 +4315,31 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
   const terciario = TODOS_GRUPOS_INFERIORES.find(function(g){ return g !== enfase && g !== secundario; }) || enfase;
 
   for(let d = 0; d < numDias; d++){
-    // Rodízio de 3, não de 2: com frequência alta (3+ dias de inferiores), cada grupo tem seu dia de
-    // protagonista antes de QUALQUER um repetir — evita empilhar o mesmo grupo (ex: quad em 3 dias
-    // diferentes), que era o que esgotava as opções de exercício e deixava alguns dias com só 1-2.
-    const posicaoNoCiclo = d % 3;
+    // Regra de espaçamento (intermediário+): o mesmo grupo de ÊNFASE, treinado com volume e
+    // intensidade altos, precisa de um intervalo maior antes de repetir — nunca no meio da semana,
+    // logo depois de secundário/terciário. Com 3+ dias de inferiores, a ênfase fica nas DUAS PONTAS
+    // (primeiro e último dia), e o meio da semana é preenchido pelos outros grupos, nunca repetindo
+    // ênfase no meio. Iniciante (volume/intensidade baixos) pode manter o rodízio simples de sempre,
+    // já que não tem o mesmo risco de recuperação insuficiente.
+    const nivelPedeEspacamento = perfil.nivel !== 'Iniciante';
     let grupoPrincipal, grupoEstimulo;
-    if(posicaoNoCiclo === 0){ grupoPrincipal = enfase; grupoEstimulo = secundario; }
-    else if(posicaoNoCiclo === 1){ grupoPrincipal = secundario || enfase; grupoEstimulo = terciario; }
-    else { grupoPrincipal = terciario; grupoEstimulo = enfase; }
+
+    if(numDias <= 2 || !nivelPedeEspacamento){
+      const ehDiaEnfase = d % 2 === 0;
+      grupoPrincipal = ehDiaEnfase ? enfase : (secundario || enfase);
+      grupoEstimulo = ehDiaEnfase ? secundario : enfase;
+    } else {
+      const ehPontaDaSemana = (d === 0 || d === numDias - 1);
+      if(ehPontaDaSemana){
+        grupoPrincipal = enfase;
+        grupoEstimulo = (d === 0) ? secundario : terciario;
+      } else {
+        // Dias do meio: nunca ênfase — só rotaciona entre secundário e terciário
+        const posicaoNoMeio = (d - 1) % 2;
+        grupoPrincipal = posicaoNoMeio === 0 ? (secundario || terciario) : (terciario || secundario);
+        grupoEstimulo = posicaoNoMeio === 0 ? terciario : secundario;
+      }
+    }
     const padroesUsadosNoDia = {}; // compartilhado entre ênfase e estímulo, pra nunca repetir padrão de movimento no mesmo dia
     // Se esse MESMO grupo principal já apareceu num dia anterior dessa semana (comum em frequências
     // altas, 5-6x), herda os padrões de movimento usados lá — garante que pelo menos o exercício
