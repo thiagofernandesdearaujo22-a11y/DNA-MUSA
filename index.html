@@ -1120,6 +1120,25 @@
   <button class="btn-gold" style="width:auto;padding:12px 28px;" onclick="window.location.reload()">Recarregar</button>
 </div>
 
+<div id="tela-pedido-notificacao" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:99998;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;">
+  <div style="width:56px;height:56px;border-radius:50%;background:var(--card-2);border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+    <i class="ti ti-bell-ringing" style="font-size:26px;color:var(--gold-soft);"></i>
+  </div>
+  <p style="font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--text);margin:0 0 8px;">Não perca nenhum aviso do seu treino</p>
+  <p style="font-size:13px;color:var(--text-dim);margin:0 0 26px;max-width:290px;">Ative as notificações pra saber na hora quando seu personal ajustar algo, mandar uma mensagem, ou quando for hora de registrar seu treino.</p>
+  <button class="btn-gold" style="width:auto;padding:12px 28px;margin-bottom:10px;" onclick="aceitarNotificacoes()">Quero receber</button>
+  <span style="font-size:13px;color:var(--text-faint);cursor:pointer;" onclick="recusarNotificacoes()">Agora não</span>
+</div>
+
+<div id="tela-obrigado-notificacao" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:99998;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;">
+  <div style="width:56px;height:56px;border-radius:50%;background:var(--card-2);border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+    <i class="ti ti-handshake" style="font-size:26px;color:var(--gold-soft);"></i>
+  </div>
+  <p style="font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--text);margin:0 0 8px;">Combinado! 🤝</p>
+  <p style="font-size:13px;color:var(--text-dim);margin:0 0 26px;max-width:290px;">Suas notificações vão te ajudar a nunca perder um ajuste do seu treino, e também vão contribuir com o preenchimento do seu perfil DNA — quanto mais completo, mais preciso fica seu acompanhamento e seu suporte. Obrigado pela confiança!</p>
+  <button class="btn-gold" style="width:auto;padding:12px 28px;" onclick="fecharTelaObrigadoNotificacao()">Entendi</button>
+</div>
+
 <script>
 window.addEventListener('error', function(evento){
   // Só reage a erro de JavaScript de verdade (tem stack de erro real).
@@ -6162,6 +6181,44 @@ function confirmarCopiarTreino(nomeOrigem){
   alert('Copiado pra ' + nomesDestino.length + ' aluna(s) com sucesso.');
 }
 
+// Atalho de 1 aluna só, do lado do "Alterar senha" na ficha — reaproveita a mesma lógica de envio
+// (app + WhatsApp juntos) que já existe na versão em massa de "Avisar treino ajustado".
+function mostrarAvisoAjusteIndividual(nomeAluna){
+  const area = document.getElementById('aviso-ajuste-individual');
+  if(!area) return;
+  if(area.innerHTML){ area.innerHTML = ''; return; }
+  area.innerHTML = '<div class="info-box">' +
+    '<div class="form-group"><label class="form-label">Mensagem</label><textarea class="form-input" id="texto-ajuste-individual" rows="3">Seu treino sofreu alguns ajustes! Já pode conferir na tela do treino.</textarea></div>' +
+    '<button class="btn-gold" onclick="confirmarAvisoAjusteIndividual(\'' + nomeAluna.replace(/'/g,"\\'") + '\')">Enviar (WhatsApp + app)</button>' +
+    '<div id="resultado-ajuste-individual" style="margin-top:8px;"></div>' +
+  '</div>';
+}
+
+async function confirmarAvisoAjusteIndividual(nomeAluna){
+  const texto = document.getElementById('texto-ajuste-individual').value.trim();
+  if(!texto){ alert('Escreve a mensagem antes de enviar.'); return; }
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+
+  const area = document.getElementById('resultado-ajuste-individual');
+  area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Enviando...</p>';
+
+  const noApp = enviarAvisoInApp(a.nome, texto, 'ajuste_treino');
+  let noWhats = false, motivoErro = null;
+  if(a.telefone){
+    const saida = await enviarWhatsApp(a.telefone, texto);
+    noWhats = saida.sucesso;
+    if(!saida.sucesso) motivoErro = saida.motivo;
+  } else {
+    motivoErro = 'sem telefone cadastrado';
+  }
+
+  area.innerHTML = '<p class="txt" style="color:' + (motivoErro ? '#C9784A' : 'var(--success)') + ';">' +
+    (noApp ? '✓ Recebida no app' : '✗ Não recebida no app') + ' · ' +
+    (noWhats ? '✓ Recebida no WhatsApp' : ('✗ WhatsApp: ' + (motivoErro || 'erro'))) +
+  '</p>';
+}
+
 function abrirModoAulaPresencial(nomeAluna){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a || !a.treinoAtual){ alert('Essa aluna ainda não tem treino gerado.'); return; }
@@ -6999,6 +7056,8 @@ function openAlunaDetail(i){
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 8px 0 0;font-size:13px;background:var(--success);color:#fff;border:none;" onclick="marcarTreinoFeitoManualmente(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-check" style="vertical-align:-2px;margin-right:6px;"></i>Treino feito</button>' +
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 0 0;font-size:13px;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="navigator.clipboard.writeText(\'E-mail: ' + a.email + ' - Senha: ' + a.senhaGerada + ' - Link: ' + (LINK_DO_APP) + '\')">Copiar dados</button>' +
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 0 0;font-size:13px;background:var(--card-2);color:#C9784A;border:1px solid var(--border);" onclick="alterarSenhaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-key" style="vertical-align:-2px;margin-right:6px;"></i>Alterar senha</button>' +
+        '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 0 0;font-size:13px;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="mostrarAvisoAjusteIndividual(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-barbell" style="vertical-align:-2px;margin-right:6px;"></i>Avisar ajuste de treino</button>' +
+        '<div id="aviso-ajuste-individual"></div>' +
         '<div id="alterar-senha-resultado" style="margin-top:8px;"></div>'
       : '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="criarLoginParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-key" style="font-size:14px;vertical-align:-2px;margin-right:6px;"></i>Gerar acesso ao app</button>'
     ) +
@@ -9916,9 +9975,44 @@ function pedirPermissaoNotificacao(){
   // Isso só guarda a permissão pro futuro (quando a Camada 2 de notificações reais estiver pronta).
   // Não envia notificação nenhuma agora — só evita ter que pedir de novo depois.
   if(typeof Notification === 'undefined') return; // navegador não suporta, não trava nada
-  if(Notification.permission === 'default'){
-    Notification.requestPermission().catch(function(){ /* usuária pode ter negado, sem problema */ });
-  }
+
+  // Guarda a resposta por conta própria, sem depender só do navegador lembrar — isso é o que
+  // resolve o pedido repetindo toda vez: navegadores embutidos (como o do WhatsApp) às vezes não
+  // persistem a permissão entre uma abertura e outra, então sem essa trava própria, cada nova
+  // abertura "esquecia" que já tinha perguntado antes.
+  try {
+    if(localStorage.getItem('musaJaPediuNotificacao') === 'sim') return;
+  } catch(e){}
+  if(Notification.permission !== 'default') return; // já respondeu isso antes, direto no navegador
+
+  // Mostra nossa tela explicando ANTES do pop-up oficial do sistema — só depois que ela topa aqui é
+  // que o pedido de verdade aparece, o que aumenta bem quem aceita de verdade.
+  const tela = document.getElementById('tela-pedido-notificacao');
+  if(tela) tela.style.display = 'flex';
+}
+
+function aceitarNotificacoes(){
+  const tela = document.getElementById('tela-pedido-notificacao');
+  if(tela) tela.style.display = 'none';
+  try {
+    if(typeof Notification !== 'undefined' && Notification.permission === 'default'){
+      Notification.requestPermission().catch(function(){});
+    }
+  } catch(e){}
+  try { localStorage.setItem('musaJaPediuNotificacao', 'sim'); } catch(e){}
+  const telaObrigado = document.getElementById('tela-obrigado-notificacao');
+  if(telaObrigado) telaObrigado.style.display = 'flex';
+}
+
+function recusarNotificacoes(){
+  const tela = document.getElementById('tela-pedido-notificacao');
+  if(tela) tela.style.display = 'none';
+  try { localStorage.setItem('musaJaPediuNotificacao', 'sim'); } catch(e){}
+}
+
+function fecharTelaObrigadoNotificacao(){
+  const tela = document.getElementById('tela-obrigado-notificacao');
+  if(tela) tela.style.display = 'none';
 }
 
 // ===== LEMBRAR LOGIN (opt-in, pra não ficar entrando sozinho na conta errada) =====
