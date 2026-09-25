@@ -1272,7 +1272,10 @@ function registrarDiaRapido(indice){
   if(!prog.horariosTreino) prog.horariosTreino = [];
   const agora = new Date();
   prog.horariosTreino.push({ dia: d.n, hora: agora.getHours(), minuto: agora.getMinutes(), data: agora.toISOString(), registroRapido: true });
-  checarConclusaoSemana(NOME_ALUNA_LOGADA);
+  // NÃO chama checarConclusaoSemana aqui — isso violava a regra já estabelecida de que a virada de
+  // semana só acontece por calendário (segunda 00:00). Chamar isso a cada registro fazia a semana
+  // avançar assim que ela completava todos os dias, mesmo no meio da semana, fazendo os registros
+  // de dias anteriores "sumirem" da lista (ficavam presos debaixo do número de semana antigo).
   salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
   avisarPersonalTreinoRegistrado(d.n, true);
   ultimoRegistroRapidoEm = Date.now(); // reforça a trava, cobrindo o tempo que o innerHTML novo leva pra entrar
@@ -1551,7 +1554,7 @@ function iniciarRegistroComposicaoNova(){
   const container = document.getElementById('area-registro-composicao');
   container.innerHTML = '<div class="info-box" style="margin-top:10px;" id="pergunta-composicao">' +
     '<p class="lbl">Qual o seu peso atual?</p>' +
-    '<div class="form-group"><input class="form-input" id="input-composicao-peso" type="number" step="0.1" placeholder="Ex: 62.5"></div>' +
+    '<div class="form-group"><input class="form-input" id="input-composicao-peso" type="text" inputmode="decimal" step="0.1" placeholder="Ex: 62.5"></div>' +
     '<button class="btn-gold" onclick="avancarRegistroComposicao()">Continuar</button>' +
   '</div>';
 }
@@ -1562,7 +1565,7 @@ function avancarRegistroComposicao(){
   const container = document.getElementById('pergunta-composicao');
 
   if(estado.etapa === 'peso'){
-    const peso = parseFloat(document.getElementById('input-composicao-peso').value);
+    const peso = parseCargaBR(document.getElementById('input-composicao-peso').value);
     if(isNaN(peso)) return;
     estado.peso = peso;
     estado.etapa = 'avaliacao';
@@ -1585,18 +1588,18 @@ function responderAvaliacaoFeita(sim){
   }
   estado.etapa = 'gordura';
   container.innerHTML = '<p class="lbl">Qual foi o seu percentual de gordura?</p>' +
-    '<div class="form-group"><input class="form-input" id="input-composicao-gordura" type="number" step="0.1" placeholder="Ex: 24.5"></div>' +
+    '<div class="form-group"><input class="form-input" id="input-composicao-gordura" type="text" inputmode="decimal" step="0.1" placeholder="Ex: 24.5"></div>' +
     '<button class="btn-gold" onclick="avancarParaMassaMagra()">Continuar</button>';
 }
 
 function avancarParaMassaMagra(){
   const estado = registroComposicaoEmAndamento;
-  const gorduraVal = parseFloat(document.getElementById('input-composicao-gordura').value);
+  const gorduraVal = parseCargaBR(document.getElementById('input-composicao-gordura').value);
   if(!isNaN(gorduraVal)) estado.gordura = gorduraVal;
   const container = document.getElementById('pergunta-composicao');
   container.innerHTML = '<p class="lbl">Qual foi a sua massa magra? (tudo menos gordura, em kg)</p>' +
     '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:-4px;">Se não souber ou a avaliação não trouxe esse dado, pode pular</p>' +
-    '<div class="form-group"><input class="form-input" id="input-composicao-massamagra" type="number" step="0.1" placeholder="Ex: 47.2"></div>' +
+    '<div class="form-group"><input class="form-input" id="input-composicao-massamagra" type="text" inputmode="decimal" step="0.1" placeholder="Ex: 47.2"></div>' +
     '<div style="display:flex;gap:8px;">' +
       '<button class="btn-gold" style="flex:1;" onclick="avancarParaPesoMuscular()">Continuar</button>' +
       '<button class="btn-gold" style="flex:1;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="pularEIrParaPesoMuscular()">Pular</button>' +
@@ -1610,13 +1613,13 @@ function pularEIrParaPesoMuscular(){
 function avancarParaPesoMuscular(pulou){
   const estado = registroComposicaoEmAndamento;
   if(!pulou){
-    const massaVal = parseFloat(document.getElementById('input-composicao-massamagra').value);
+    const massaVal = parseCargaBR(document.getElementById('input-composicao-massamagra').value);
     if(!isNaN(massaVal)) estado.massaMagra = massaVal;
   }
   const container = document.getElementById('pergunta-composicao');
   container.innerHTML = '<p class="lbl">E o peso muscular específico? (em kg, aparece nas avaliações antropométricas)</p>' +
     '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:-4px;">Diferente de massa magra — se não souber, pode pular</p>' +
-    '<div class="form-group"><input class="form-input" id="input-composicao-pesomuscular" type="number" step="0.1" placeholder="Ex: 24.8"></div>' +
+    '<div class="form-group"><input class="form-input" id="input-composicao-pesomuscular" type="text" inputmode="decimal" step="0.1" placeholder="Ex: 24.8"></div>' +
     '<div style="display:flex;gap:8px;">' +
       '<button class="btn-gold" style="flex:1;" onclick="finalizarComGorduraEMassa()">Salvar</button>' +
       '<button class="btn-gold" style="flex:1;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="finalizarRegistroComposicao()">Pular e salvar</button>' +
@@ -1625,7 +1628,7 @@ function avancarParaPesoMuscular(pulou){
 
 function finalizarComGorduraEMassa(){
   const estado = registroComposicaoEmAndamento;
-  const pesoMuscularVal = parseFloat(document.getElementById('input-composicao-pesomuscular').value);
+  const pesoMuscularVal = parseCargaBR(document.getElementById('input-composicao-pesomuscular').value);
   if(!isNaN(pesoMuscularVal)) estado.pesoMuscular = pesoMuscularVal;
   finalizarRegistroComposicao();
 }
@@ -2943,7 +2946,7 @@ function renderCheckInEHabitos(nome){
     '</div>' +
     '<div class="info-box" style="margin-bottom:14px;">' +
       '<p class="txt" style="font-size:12px;margin-bottom:4px;">Quantas horas você dormiu?</p>' +
-      '<input class="form-input" type="number" step="0.5" min="0" max="14" placeholder="Ex: 7.5" value="' + (checkin.sonoHoras != null ? checkin.sonoHoras : '') + '" onchange="salvarCampoCheckInEmocional(\'' + nome.replace(/'/g,"\\'") + '\',\'sonoHoras\',this.value === \'\' ? null : parseFloat(this.value))" style="margin-bottom:10px;">' +
+      '<input class="form-input" type="text" inputmode="decimal" min="0" max="14" placeholder="Ex: 7.5" value="' + (checkin.sonoHoras != null ? checkin.sonoHoras : '') + '" onchange="salvarCampoCheckInEmocional(\'' + nome.replace(/'/g,"\\'") + '\',\'sonoHoras\',this.value === \'\' ? null : parseCargaBR(this.value))" style="margin-bottom:10px;">' +
       '<p class="txt" style="font-size:12px;margin-bottom:4px;">Qualidade do sono</p><div class="row" style="gap:6px;">' + botaoEscala('sonoQualidade', checkin.sonoQualidade) + '</div>' +
     '</div>' +
     '<p class="section-label">Hábitos do dia <span class="tag">' + totalConcluidos + ' de ' + CATALOGO_HABITOS_DIARIOS.length + ' · ' + pontosHoje + ' pts</span></p>';
@@ -3413,12 +3416,16 @@ function contarDiasDeTreinoConcluidos(prog){
   return registrados.filter(function(nome){ return nomesDiasDeTreino.indexOf(nome) !== -1; }).length;
 }
 
-function checarConclusaoSemana(nomeAluna){
+function checarConclusaoSemana(nomeAluna, avancarDeVerdade){
   const prog = getProgressoAluna(nomeAluna);
   const total = totalDiasDeTreino();
   const concluidos = contarDiasDeTreinoConcluidos(prog);
   if(concluidos >= total){
-    prog.semana += 1;
+    // Só avança de verdade quando pedido explicitamente (o botão manual do Personal) — a chamada
+    // automática (toda vez que ela registra um dia) só usa isso pra MOSTRAR a mensagem de "semana
+    // concluída", sem mexer no contador de verdade. Mexer nesse contador aqui era o que fazia os
+    // dias registrados "sumirem" da lista dela, mesmo ainda no meio da semana.
+    if(avancarDeVerdade) prog.semana += 1;
     return { avancou: true, concluidos: concluidos, total: total };
   }
   return { avancou: false, concluidos: concluidos, total: total };
@@ -3487,7 +3494,7 @@ function renderPerguntaPeso(mes){
   return '<div class="info-box" id="area-peso" style="margin-top:10px;">' +
     '<p class="lbl">Check-in mensal de peso</p>' +
     '<p class="txt">Já faz um mês! Pode me passar seu peso atual? Isso ajuda a calibrar quando é hora de avançar de fase.</p>' +
-    '<div class="form-group"><input class="form-input" id="peso-atual-input" type="number" step="0.1" placeholder="Ex: 98.5"></div>' +
+    '<div class="form-group"><input class="form-input" id="peso-atual-input" type="text" inputmode="decimal" step="0.1" placeholder="Ex: 98.5"></div>' +
     '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="registrarPesoMensal(' + mes + ')">Enviar</button>' +
     '</div>';
 }
@@ -3495,7 +3502,7 @@ function renderPerguntaPeso(mes){
 function registrarPesoMensal(mes){
   const alunaAtual = obterAlunaLogadaOuCriar();
   const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
-  const peso = parseFloat(document.getElementById('peso-atual-input').value);
+  const peso = parseCargaBR(document.getElementById('peso-atual-input').value);
   if(isNaN(peso)) return;
   if(!prog.pesoChecks) prog.pesoChecks = {};
   prog.pesoChecks[mes] = true;
@@ -3541,7 +3548,7 @@ function registrarSessao(){
 }
 
 function avancarSemana(){
-  const resultado = checarConclusaoSemana(alunaAberta.nome);
+  const resultado = checarConclusaoSemana(alunaAberta.nome, true);
   const i = alunasPersonal.indexOf(alunaAberta);
   openAlunaDetail(i);
   const conf = document.getElementById('prog-reengajamento');
@@ -3655,8 +3662,8 @@ function sugerirExerciciosQuadriceps(direcionamento){
 }
 
 /* ===== ITEM 9: Direcionamento de glúteo (região inferior/superior) ===== */
-const EXERCICIOS_GLUTEO_INFERIOR = ['Afundo', 'Agachamento Búlgaro', 'Step Up', 'Extensão de quadril no banco romano', 'Coice (glúteo na polia)'];
-const EXERCICIOS_GLUTEO_SUPERIOR = ['Extensão de quadril com perna estendida', 'Rotação de quadril', 'Abdução de quadril na polia', 'Cadeira Abdutora em pé'];
+const EXERCICIOS_GLUTEO_INFERIOR = ['Afundo', 'Agachamento Búlgaro', 'Step Up', 'Extensão de quadril no banco romano'];
+const EXERCICIOS_GLUTEO_SUPERIOR = ['EXTENSÃO DE QUADRIL', 'ABDUÇÃO DE QUADRIL COM CANELEIRA', 'Abdução de quadril na polia', 'CADEIRA ABDUTORA EM PÉ 45º'];
 
 function sugerirExerciciosGluteo(direcionamento){
   if(direcionamento === 'inferior') return { prioridade: EXERCICIOS_GLUTEO_INFERIOR, regiao: 'Região inferior (próxima à prega glútea)' };
@@ -6185,7 +6192,7 @@ function renderModoAulaPresencial(){
           '<p style="font-size:12.5px;font-weight:600;margin:0 0 6px;">' + linha + (parceiros.length > 0 ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + metodoDoEx.tipo + '</span>' : '') + '</p>' +
           (ultimo ? '<p class="txt" style="font-size:10.5px;color:var(--text-faint);margin:0 0 6px;">Último registrado: ' + ultimo.carga + 'kg x ' + ultimo.reps + '</p>' : '') +
           '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
-            '<input type="number" placeholder="kg" id="ap-carga-' + di + '-' + ei + '" class="form-input" style="width:70px;padding:8px;" value="' + (ultimo ? ultimo.carga : '') + '">' +
+            '<input type="text" inputmode="decimal" placeholder="kg" id="ap-carga-' + di + '-' + ei + '" class="form-input" style="width:70px;padding:8px;" value="' + (ultimo ? ultimo.carga : '') + '">' +
             '<input type="number" placeholder="reps" id="ap-reps-' + di + '-' + ei + '" class="form-input" style="width:70px;padding:8px;" value="' + (ultimo ? ultimo.reps : '') + '">' +
             '<button class="btn-gold" style="width:auto;padding:8px 14px;font-size:12px;margin:0;" onclick="confirmarSerieComoPersonal(' + di + ',' + ei + ',\'' + nome.replace(/'/g,"\\'") + '\')">Confirmar</button>' +
           '</div>' +
@@ -6199,7 +6206,7 @@ function renderModoAulaPresencial(){
               '<p style="font-size:12px;font-weight:600;margin:0 0 6px;color:var(--gold-soft);">↳ ' + nomeParceiro + '</p>' +
               (ultimoParceiro ? '<p class="txt" style="font-size:10.5px;color:var(--text-faint);margin:0 0 6px;">Último registrado: ' + ultimoParceiro.carga + 'kg x ' + ultimoParceiro.reps + '</p>' : '') +
               '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
-                '<input type="number" placeholder="kg" id="ap-carga-' + di + '-' + ei + '-p' + p + '" class="form-input" style="width:70px;padding:8px;" value="' + (ultimoParceiro ? ultimoParceiro.carga : '') + '">' +
+                '<input type="text" inputmode="decimal" placeholder="kg" id="ap-carga-' + di + '-' + ei + '-p' + p + '" class="form-input" style="width:70px;padding:8px;" value="' + (ultimoParceiro ? ultimoParceiro.carga : '') + '">' +
                 '<input type="number" placeholder="reps" id="ap-reps-' + di + '-' + ei + '-p' + p + '" class="form-input" style="width:70px;padding:8px;" value="' + (ultimoParceiro ? ultimoParceiro.reps : '') + '">' +
                 '<button class="btn-gold" style="width:auto;padding:8px 14px;font-size:12px;margin:0;" onclick="confirmarSerieComoPersonal(' + di + ',\'' + ei + '-p' + p + '\',\'' + nomeParceiro.replace(/'/g,"\\'") + '\')">Confirmar</button>' +
               '</div>' +
@@ -6217,7 +6224,7 @@ function confirmarSerieComoPersonal(diaIndex, exIndex, nomeExercicio){
   if(!a) return;
   const cargaEl = document.getElementById('ap-carga-' + diaIndex + '-' + exIndex);
   const repsEl = document.getElementById('ap-reps-' + diaIndex + '-' + exIndex);
-  const carga = parseFloat(cargaEl.value);
+  const carga = parseCargaBR(cargaEl.value);
   const reps = parseInt(repsEl.value, 10);
   if(isNaN(carga) || isNaN(reps)){ alert('Preenche peso e repetições antes de confirmar.'); return; }
 
@@ -6705,6 +6712,19 @@ function renderCaixasParceirosCombo(di, ei, quantosParceiros){
 function definirParceiroCombo(di, ei, posicao, nomeEscolhido){
   const a = alunaAberta;
   if(!a.treinoAtual.dias[di].metodos[ei] || typeof a.treinoAtual.dias[di].metodos[ei] === 'string') return;
+
+  // Usa a validação que já existia no código mas nunca tinha sido conectada em lugar nenhum —
+  // bloqueia combinações sem sentido (mesmo padrão de movimento repetido, ou unilateral em combo).
+  if(nomeEscolhido){
+    const nomePrincipal = extrairNomeExercicioDeLinha(a.treinoAtual.dias[di].ex[ei]);
+    const validacao = validarCombinacaoBiset(nomePrincipal, nomeEscolhido);
+    if(!validacao.valido){
+      alert('Essa combinação não é recomendada: ' + validacao.motivo);
+      renderCaixasParceirosCombo(di, ei, (a.treinoAtual.dias[di].metodos[ei].tipo === 'Tri-set') ? 2 : 1); // desfaz a seleção na tela, volta pro estado salvo
+      return;
+    }
+  }
+
   a.treinoAtual.dias[di].metodos[ei].parceiros[posicao] = nomeEscolhido;
   sincronizarTreinoComSupabase(a);
 }
@@ -7255,6 +7275,15 @@ function gerarSenhaAleatoria(){
   return senha;
 }
 
+// Interpreta carga digitada aceitando vírgula OU ponto como decimal — teclados de celular em
+// português costumam mandar vírgula (ex: "12,5"), e um <input type="number"> às vezes rejeita isso
+// silenciosamente (o campo fica vazio por dentro mesmo mostrando algo na tela). Usar type="text" +
+// essa função evita isso de vez.
+function parseCargaBR(texto){
+  if(texto == null) return NaN;
+  return parseFloat(String(texto).trim().replace(',', '.'));
+}
+
 // Troca a senha real da aluna direto pelo app, chamando o porteiro seguro (que usa a chave de
 // administrador escondida no servidor). Evita casos de login travado — antes só dava pra resolver
 // isso manualmente no painel do Supabase.
@@ -7456,7 +7485,7 @@ function renderPlanoFechadoConteudo(a){
         Object.keys(planos).map(function(k){ return '<option value="' + k + '"' + (String(duracaoAtual) === k ? ' selected' : '') + '>' + planos[k] + '</option>'; }).join('') +
       '</select></div>' +
     '<div class="form-group"><label class="form-label">Valor do plano (R$)</label>' +
-      '<input class="form-input" type="number" step="0.01" min="0" placeholder="Ex: 350.00" id="plano-valor-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" value="' + (a.valorPlano != null ? a.valorPlano : '') + '" onchange="salvarPlanoFechado(\'' + a.nome.replace(/'/g,"\\'") + '\',\'valor\',this.value)"></div>' +
+      '<input class="form-input" type="text" inputmode="decimal" placeholder="Ex: 350.00" id="plano-valor-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" value="' + (a.valorPlano != null ? a.valorPlano : '') + '" onchange="salvarPlanoFechado(\'' + a.nome.replace(/'/g,"\\'") + '\',\'valor\',this.value)"></div>' +
     '<div class="form-group"><label class="form-label">Pagamento</label>' +
       '<select class="form-select" id="plano-pagamento-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" onchange="salvarPlanoFechado(\'' + a.nome.replace(/'/g,"\\'") + '\',\'pagamento\',this.value)">' +
         '<option value="pago"' + ((a.statusPagamento || 'pago') === 'pago' ? ' selected' : '') + '>Pago</option>' +
@@ -7489,7 +7518,7 @@ function salvarPlanoFechado(nomeAluna, campo, valor){
   if(!a) return;
   if(campo === 'data') a.dataFechouPlano = valor;
   if(campo === 'duracao') a.duracaoPlanoDias = parseInt(valor, 10) || null;
-  if(campo === 'valor') a.valorPlano = valor === '' ? null : parseFloat(valor);
+  if(campo === 'valor') a.valorPlano = valor === '' ? null : parseCargaBR(valor);
   if(campo === 'pagamento') a.statusPagamento = valor;
   salvarPerfilAlunaNoSupabase(nomeAluna);
   const i = alunasPersonal.indexOf(a);
@@ -11346,16 +11375,16 @@ function renderPerguntaNutricao(semanaFechada){
     '<p class="txt" style="margin-top:10px;">E sobre álcool essa semana? Pode ser sincera, sem julgamento, é só pra manter nosso perfil o mais assertivo possível.</p>' +
     '<div class="form-group"><label class="form-label">Taças de vinho (150ml cada)</label><input class="form-input" id="nutri-alc-taca" type="number" placeholder="0"></div>' +
     '<div class="form-group"><label class="form-label">Garrafas de vinho (750ml cada)</label><input class="form-input" id="nutri-alc-garrafa" type="number" placeholder="0"></div>' +
-    '<div class="form-group"><label class="form-label">Litros de vinho</label><input class="form-input" id="nutri-alc-litro" type="number" placeholder="0"></div>' +
+    '<div class="form-group"><label class="form-label">Litros de vinho</label><input class="form-input" id="nutri-alc-litro" type="text" inputmode="decimal" placeholder="0"></div>' +
     '<div class="form-group"><label class="form-label">Copos de cerveja (chope, 300ml cada)</label><input class="form-input" id="nutri-alc-copo-cerveja" type="number" placeholder="0"></div>' +
     '<div class="form-group"><label class="form-label">Latas de cerveja (350ml cada)</label><input class="form-input" id="nutri-alc-lata-cerveja" type="number" placeholder="0"></div>' +
     '<p class="txt" style="margin-top:10px;">Por último, em média, quantos litros de água você bebeu por dia essa semana?</p>' +
-    '<div class="form-group"><input class="form-input" id="nutri-agua" type="number" step="0.1" placeholder="Ex: 2.5"></div>' +
+    '<div class="form-group"><input class="form-input" id="nutri-agua" type="text" inputmode="decimal" step="0.1" placeholder="Ex: 2.5"></div>' +
     '<p class="txt" style="margin-top:10px;">E cardio essa semana, fez algum?</p>' +
     '<div class="form-group"><label class="form-label">Quantos dias de cardio?</label><input class="form-input" id="nutri-cardio-dias" type="number" placeholder="Ex: 2"></div>' +
     '<div class="form-group"><label class="form-label">Tempo total, em minutos, somando todos os dias</label><input class="form-input" id="nutri-cardio-minutos" type="number" placeholder="Ex: 60"></div>' +
     '<p class="txt" style="margin-top:10px;">Por último, em média, quantas horas você dormiu por noite essa semana?</p>' +
-    '<div class="form-group"><input class="form-input" id="nutri-sono" type="number" step="0.5" placeholder="Ex: 7"></div>' +
+    '<div class="form-group"><input class="form-input" id="nutri-sono" type="text" inputmode="decimal" step="0.5" placeholder="Ex: 7"></div>' +
     '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="registrarNutricaoSemana()">Enviar</button>' +
     '</div>';
 }
@@ -11363,7 +11392,7 @@ function renderPerguntaNutricao(semanaFechada){
 function converterAlcoolParaDoses(){
   const taca = parseFloat(document.getElementById('nutri-alc-taca').value) || 0;
   const garrafa = parseFloat(document.getElementById('nutri-alc-garrafa').value) || 0;
-  const litro = parseFloat(document.getElementById('nutri-alc-litro').value) || 0;
+  const litro = parseCargaBR(document.getElementById('nutri-alc-litro').value) || 0;
   const copoCerveja = parseFloat(document.getElementById('nutri-alc-copo-cerveja').value) || 0;
   const lataCerveja = parseFloat(document.getElementById('nutri-alc-lata-cerveja').value) || 0;
   // 1 dose ≈ 150ml de vinho ou ~330ml de cerveja
@@ -11392,10 +11421,10 @@ function registrarNutricaoSemana(){
   if(document.getElementById('nutri-menos').checked) tipos.push('menos');
   if(document.getElementById('nutri-doce').checked) tipos.push('doce');
   const dosesAlcool = converterAlcoolParaDoses();
-  const aguaLitros = parseFloat(document.getElementById('nutri-agua').value);
+  const aguaLitros = parseCargaBR(document.getElementById('nutri-agua').value);
   const metaAgua = calcularMetaAguaLitros(alunaAtual.peso);
   const cardioMinutos = parseFloat(document.getElementById('nutri-cardio-minutos').value) || 0;
-  const horasSonoInput = parseFloat(document.getElementById('nutri-sono').value);
+  const horasSonoInput = parseCargaBR(document.getElementById('nutri-sono').value);
   const horasSono = isNaN(horasSonoInput) ? null : horasSonoInput;
 
   const totalDias = totalDiasDeTreino();
@@ -11891,7 +11920,7 @@ function renderMetaFinanceiraConteudo(m){
   if(!metaFaturamentoMensal || metaFaturamentoMensal <= 0){
     return '<div class="info-box" style="margin-bottom:14px;">' +
       '<p class="lbl" style="margin-bottom:8px;">Meta do mês</p>' +
-      '<div class="form-group"><input class="form-input" id="input-meta-faturamento" type="number" step="0.01" placeholder="Quanto você quer faturar esse mês?"></div>' +
+      '<div class="form-group"><input class="form-input" id="input-meta-faturamento" type="text" inputmode="decimal" step="0.01" placeholder="Quanto você quer faturar esse mês?"></div>' +
       '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="salvarMetaFaturamento()">Definir meta</button>' +
     '</div>';
   }
@@ -11941,7 +11970,7 @@ function renderMetaFinanceiraConteudo(m){
 
 async function salvarMetaFaturamento(){
   const input = document.getElementById('input-meta-faturamento');
-  const valor = parseFloat(input.value);
+  const valor = parseCargaBR(input.value);
   if(!valor || valor <= 0){ alert('Digita um valor de meta válido.'); return; }
   metaFaturamentoMensal = valor;
   await salvarCatalogoPersonal('config_meta_financeira', 'meta', { meta: metaFaturamentoMensal });
@@ -13144,10 +13173,16 @@ if(type === 'central'){
         const alternativaHtml = '<p style="font-size:11px;color:var(--text-faint);margin:2px 0 8px;cursor:pointer;" onclick="mostrarAlternativaEmergencia(' + j + ',\'' + nomeEx.replace(/'/g,"\\'") + '\')">Equipamento ocupado? Ver alternativa</p><div id="alt-emergencia-' + j + '" style="display:none;margin-bottom:8px;"></div>';
 
         const metodoDoExercicio = d.metodos && d.metodos[j];
-        const cardMetodo = metodoDoExercicio
+        // Combos (Bi-set/Tri-set) guardam um objeto {tipo, parceiros}, os outros métodos continuam
+        // sendo só uma string — sempre normaliza pro nome antes de exibir, senão aparece "[object
+        // Object]" na tela dela quando o método é um combo.
+        const nomeMetodoExibicao = metodoDoExercicio ? (typeof metodoDoExercicio === 'string' ? metodoDoExercicio : metodoDoExercicio.tipo) : null;
+        const parceirosDoCombo = (metodoDoExercicio && typeof metodoDoExercicio === 'object' && metodoDoExercicio.parceiros) ? metodoDoExercicio.parceiros.filter(function(p){ return !!p; }) : [];
+        const cardMetodo = nomeMetodoExibicao
           ? '<div class="info-box" style="margin-bottom:8px;">' +
-              '<p class="lbl" style="margin-bottom:4px;">Sobre o método: ' + metodoDoExercicio + '</p>' +
-              '<p class="txt" style="margin-bottom:8px;">' + (descricoesMetodo[metodoDoExercicio] || '') + '</p>' +
+              '<p class="lbl" style="margin-bottom:4px;">Sobre o método: ' + nomeMetodoExibicao + '</p>' +
+              '<p class="txt" style="margin-bottom:8px;">' + (descricoesMetodo[nomeMetodoExibicao] || '') + '</p>' +
+              (parceirosDoCombo.length > 0 ? '<p class="txt" style="margin-bottom:8px;color:var(--gold-soft);">Faça em sequência, sem descanso, junto com: ' + parceirosDoCombo.join(' e ') + '</p>' : '') +
               '<div id="metodo-pergunta-' + j + '"><p class="txt" style="font-size:12px;margin-bottom:6px;">Você entendeu como funciona esse método?</p>' +
                 '<div style="display:flex;gap:8px;">' +
                   '<span class="chip" style="cursor:pointer;" onclick="responderEntendimentoMetodo(' + j + ',true)">Sim, entendi</span>' +
@@ -13163,7 +13198,7 @@ if(type === 'central'){
           alternativaHtml +
           notaSemanaAnterior +
           '<div style="display:flex;gap:8px;">' +
-            '<input class="form-input" data-carga="' + j + '" type="number" placeholder="Carga (kg)" style="flex:1;">' +
+            '<input class="form-input" data-carga="' + j + '" type="text" inputmode="decimal" placeholder="Carga (kg)" style="flex:1;">' +
             '<input class="form-input" data-reps="' + j + '" type="number" placeholder="Reps · 1ª série" style="flex:1;">' +
           '</div>' +
           '<button class="btn-gold" style="margin-top:8px;padding:8px;font-size:12px;" onclick="confirmarSerieExercicio(\'' + j + '\',\'' + nomeEx.replace(/'/g,"\\'") + '\')">Confirmar</button>' +
@@ -13172,7 +13207,7 @@ if(type === 'central'){
         corpoTreino += '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;">' +
           '<div style="display:flex;">' +
             '<div style="flex:1;display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:14px 12px;" onclick="alternarExercicioExpandido(' + j + ')">' +
-              '<span>' + nomeEx + (d.metodos && d.metodos[j] ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + d.metodos[j] + '</span>' : '') + '</span>' +
+              '<span>' + nomeEx + (nomeMetodoExibicao ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + nomeMetodoExibicao + '</span>' : '') + '</span>' +
               '<span class="tag">' + (partes[1] || '') + (descanso ? ' · ⏱ ' + descanso : '') + '</span>' +
             '</div>' +
             '<div style="width:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--card-2);" title="Ver opções parecidas" onclick="event.stopPropagation();alternarSubstituicoesInline(' + j + ',\'' + nomeEx.replace(/'/g,"\\'") + '\')">' +
@@ -13230,12 +13265,16 @@ function responderEntendimentoMetodo(idx, entendeu){
   if(entendeu){
     container.innerHTML = '<p class="txt" style="font-size:12px;color:var(--gold-soft);">✓ Que bom! Qualquer dúvida durante o treino é só chamar a Sol.</p>';
   } else {
-    const alunaAtual = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
+    // Correção: usava alunasPersonal.find, que não existe na sessão da aluna — o aviso pro Personal
+    // nunca era realmente registrado, silenciosamente, pra nenhuma aluna que clicasse "tenho dúvida".
+    const alunaAtual = obterAlunaLogadaOuCriar();
     if(alunaAtual){
       if(!alunaAtual.duvidasSinalizadas) alunaAtual.duvidasSinalizadas = [];
       const nomeEx = dias[detailDiaAtual].ex[idx].split(' · ')[0];
-      const metodoNome = dias[detailDiaAtual].metodos && dias[detailDiaAtual].metodos[idx];
+      const metodoObj = dias[detailDiaAtual].metodos && dias[detailDiaAtual].metodos[idx];
+      const metodoNome = metodoObj ? (typeof metodoObj === 'string' ? metodoObj : metodoObj.tipo) : '';
       alunaAtual.duvidasSinalizadas.push({ pergunta: 'Não entendeu o método "' + metodoNome + '" no exercício ' + nomeEx, respostaSol: 'Sinalizado automaticamente, sem resposta da Sol ainda. Revise com ela na próxima conversa.', resolvida: false, data: new Date().toISOString() });
+      salvarPerfilAlunaNoSupabase(NOME_ALUNA_LOGADA);
     }
     container.innerHTML = '<p class="txt" style="font-size:12px;color:var(--gold-soft);">Sem problema! Já avisei seu personal pra explicar melhor na próxima conversa. Por enquanto, pode fazer o exercício sem o método extra, só as séries normais.</p>';
   }
@@ -13315,7 +13354,7 @@ function renderCardBiset(linha, j, prog){
       '<div id="video-ex-dia-' + subId + '" style="display:none;margin-bottom:6px;"></div>' +
       nota +
       '<div style="display:flex;gap:8px;">' +
-        '<input class="form-input" data-carga="' + subId + '" type="number" placeholder="Carga (kg)" style="flex:1;">' +
+        '<input class="form-input" data-carga="' + subId + '" type="text" inputmode="decimal" placeholder="Carga (kg)" style="flex:1;">' +
         '<input class="form-input" data-reps="' + subId + '" type="number" placeholder="Reps · 1ª série" style="flex:1;">' +
       '</div>' +
       '<button class="btn-gold" style="margin-top:8px;padding:8px;font-size:12px;" onclick="confirmarSerieExercicio(\'' + subId + '\',\'' + nomeEx.replace(/'/g,"\\'") + '\')">Confirmar</button>' +
@@ -13491,7 +13530,7 @@ function confirmarSerieExercicio(idx, nomeExercicio){
   const cargaEl = document.querySelector('[data-carga="' + idx + '"]');
   const repsEl = document.querySelector('[data-reps="' + idx + '"]');
   if(!cargaEl || !repsEl) return;
-  const carga = parseFloat(cargaEl.value);
+  const carga = parseCargaBR(cargaEl.value);
   const reps = parseInt(repsEl.value, 10);
   if(isNaN(carga) || isNaN(reps)){ alert('Preenche o peso e as repetições antes de confirmar.'); return; }
 
@@ -13546,7 +13585,7 @@ function registrarTreinoDia(diaIndex){
         const cargaEl = document.querySelector('[data-carga="' + item.idx + '"]');
         const repsEl = document.querySelector('[data-reps="' + item.idx + '"]');
         if(!cargaEl || !repsEl) return;
-        const carga = parseFloat(cargaEl.value);
+        const carga = parseCargaBR(cargaEl.value);
         const reps = parseInt(repsEl.value, 10);
         if(isNaN(carga) || isNaN(reps)) return;
         if(!prog.historico[item.nome]) prog.historico[item.nome] = [];
