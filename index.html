@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1A1409">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DNA Musa">
+  <link rel="apple-touch-icon" href="/icon-192.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MUSA+, Protótipo</title>
@@ -470,6 +477,10 @@
         <p class="brand" id="launcher-brand" style="opacity:0;animation:introMusaFade 1s ease forwards;">DNA MUSA</p>
         <p class="brand-sub" style="animation:introMusaFade 1s ease forwards .2s;opacity:0;">Team Fernandes</p>
         <p class="sub">Escolha uma opção</p>
+        <div id="banner-instalar-app" style="display:none;background:var(--card-2);border:1px solid var(--border-strong);border-radius:12px;padding:10px 14px;margin:0 0 14px;max-width:320px;font-size:11.5px;color:var(--text-dim);text-align:center;">
+          <span id="banner-instalar-texto"></span>
+          <span style="display:block;margin-top:6px;color:var(--gold-soft);cursor:pointer;font-size:11px;" onclick="document.getElementById('banner-instalar-app').style.display='none';try{localStorage.setItem('musaBannerInstalarFechado','sim');}catch(e){}">Já sei, obrigada</span>
+        </div>
         <div class="profiles" style="flex-direction:column;align-items:center;gap:10px;">
           <div class="estrela-launcher">
             <div class="satelite satelite-topo" onclick="openLevel2('dados')">
@@ -976,7 +987,7 @@
         </div>
         <div class="form-group"><label class="form-label">Ênfase</label>
           <select class="form-select" id="tp-filtro-enfase" onchange="renderTemplates()">
-            <option>Todas</option><option>Glúteo</option><option>Quadríceps</option><option>Posterior</option><option>Emagrecimento</option>
+            <option>Todas</option><option>Glúteo</option><option>Quadríceps</option><option>Posterior</option><option>Costas</option><option>Peito</option><option>Full Body</option><option>Emagrecimento</option>
           </select>
         </div>
         <div class="form-group"><label class="form-label">Frequência</label>
@@ -4184,7 +4195,16 @@ function gerarSemanaDesafio(numeroEstrutura, frequencia, seedVariacao){
     });
 
     exDoDia = colocarElevacaoPelvicaPrimeiro(exDoDia);
-    const dia = { n: nomesDias[d], foco: 'Seca e Empina · Estrutura ' + numeroEstrutura, ex: exDoDia, descanso: false };
+    // Guarda o link do vídeo de cada exercício junto do dia: o celular da aluna só conhece o banco
+    // que vem no arquivo, não os exercícios que você cadastrou pelo app. Sem isso, o player dela
+    // diria "vídeo indisponível" justamente nesses.
+    const videosDoDia = {};
+    exDoDia.forEach(function(linha){
+      const nomeEx = extrairNomeExercicioDeLinha(linha);
+      const exBanco = buscarExercicioNoBanco(nomeEx);
+      if(exBanco && exBanco.video) videosDoDia[nomeEx] = exBanco.video;
+    });
+    const dia = { n: nomesDias[d], foco: 'Seca e Empina · Estrutura ' + numeroEstrutura, ex: exDoDia, descanso: false, videos: videosDoDia };
     removerLegsExcedentesNoDia(dia);
     removerVariacoesDuplicadasDeAfundo(dia);
     dias.push(dia);
@@ -4247,11 +4267,9 @@ function confirmarInscricaoSecaEmpina(){
   nomesEscolhidos.forEach(function(nomeAluna){
     const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
     if(!a) return;
-    const seed = hashString(nomeAluna);
-    const semana = gerarSemanaDesafio(estruturaInicial, frequencia, seed + estruturaInicial);
     a.desafioAtivo = { nome: 'Seca e Empina', dataInicio: new Date().toISOString(), dataUltimaVirada: new Date().toISOString(), frequencia: frequencia, estruturaAtual: estruturaInicial };
     a.desafioTreinos = {};
-    a.desafioTreinos[estruturaInicial] = semana;
+    garantirEstruturasDoDesafio(a); // gera da 1 até a inicial escolhida, pra todas já nascerem liberadas
     salvarPerfilAlunaNoSupabase(nomeAluna);
   });
 
@@ -4269,8 +4287,7 @@ function avancarTodasEstruturaSecaEmpina(){
     const novaEstrutura = a.desafioAtivo.estruturaAtual + 1;
     a.desafioAtivo.estruturaAtual = novaEstrutura;
     a.desafioAtivo.dataUltimaVirada = new Date().toISOString();
-    if(!a.desafioTreinos) a.desafioTreinos = {};
-    a.desafioTreinos[novaEstrutura] = gerarSemanaDesafio(novaEstrutura, a.desafioAtivo.frequencia, hashString(a.nome) + novaEstrutura);
+    garantirEstruturasDoDesafio(a); // a nova entra e todas as anteriores continuam liberadas
     salvarPerfilAlunaNoSupabase(a.nome);
   });
   renderListaSecaEmpina();
@@ -4336,11 +4353,42 @@ function htmlVolumeDesafio(semana){
     ' · Total <b>' + v.total + '</b> (~' + v.mediaPorSessao + '/sessão)';
 }
 
+// Semana de UMA estrutura pra UMA aluna (a mesma conta de sempre, então dá o mesmo resultado onde for gerada)
+function semanaDoDesafioParaAluna(nomeAluna, numeroEstrutura, frequencia){
+  return gerarSemanaDesafio(numeroEstrutura, frequencia, hashString(nomeAluna) + numeroEstrutura);
+}
+
+// Liberação acumulada: se ela está na estrutura 6, as estruturas 1 a 5 continuam liberadas e PRECISAM
+// ter treino de verdade por trás. Antes só a estrutura atual era gerada, e os botões das anteriores
+// apareciam mas não abriam nada. Só preenche o que falta, nunca sobrescreve treino que já existe.
+function garantirEstruturasDoDesafio(a){
+  if(!a || !a.desafioAtivo) return false;
+  if(!a.desafioTreinos) a.desafioTreinos = {};
+  let mudou = false;
+  const ate = Math.min(10, a.desafioAtivo.estruturaAtual);
+  for(let k = 1; k <= ate; k++){
+    if(!a.desafioTreinos[k]){
+      a.desafioTreinos[k] = semanaDoDesafioParaAluna(a.nome, k, a.desafioAtivo.frequencia);
+      mudou = true;
+    }
+  }
+  return mudou;
+}
+
+// Nome do exercício clicável (abre o vídeo) + o resto da linha (séries x repetições)
+function htmlLinhaExercicioDesafio(linha, dia){
+  const partes = String(linha).split(' · ');
+  const nome = partes[0];
+  const resto = partes.slice(1).join(' · ');
+  const url = (dia && dia.videos && dia.videos[nome]) || '';
+  return '<span style="cursor:pointer;text-decoration:underline;text-decoration-color:var(--gold-soft);text-underline-offset:2px;" onclick="abrirVideoApenasExercicio(\'' + nome.replace(/'/g,"\\'") + '\', event, \'' + url.replace(/'/g,"\\'") + '\')">' + nome + '</span>' + (resto ? ' · ' + resto : '');
+}
+
 function htmlDiasDaSemanaDesafio(semana){
   return semana.dias.filter(function(d){ return !d.descanso; }).map(function(d){
     const seriesDoDia = d.ex.reduce(function(soma, linha){ return soma + seriesDaLinhaDesafio(linha); }, 0);
     return '<p class="lbl" style="margin:10px 0 4px;">' + d.n + ' · ' + d.ex.length + ' exercícios · ' + seriesDoDia + ' séries</p>' +
-      d.ex.map(function(linha){ return '<p class="txt" style="font-size:12px;margin:2px 0;">' + linha + '</p>'; }).join('');
+      d.ex.map(function(linha){ return '<p class="txt" style="font-size:12px;margin:2px 0;">' + htmlLinhaExercicioDesafio(linha, d) + '</p>'; }).join('');
   }).join('');
 }
 
@@ -4377,9 +4425,17 @@ function verTreinoDesafioDaAluna(nomeAluna){
   const area = document.getElementById('ver-desafio-' + nomeAluna.replace(/[^a-zA-Z0-9]/g,''));
   if(!a || !area) return;
   if(area.innerHTML){ area.innerHTML = ''; return; }
-  const semana = a.desafioTreinos && a.desafioAtivo ? a.desafioTreinos[a.desafioAtivo.estruturaAtual] : null;
-  if(!semana){ area.innerHTML = '<div class="info-box"><p class="txt">Ela ainda não tem treino gerado nessa estrutura.</p></div>'; return; }
-  area.innerHTML = '<div class="info-box" style="margin-bottom:8px;"><p class="lbl">Estrutura ' + a.desafioAtivo.estruturaAtual + ' · ' + a.desafioAtivo.frequencia + 'x por semana</p><p class="txt" style="font-size:11.5px;color:var(--text-dim);">' + htmlVolumeDesafio(semana) + '</p>' + htmlDiasDaSemanaDesafio(semana) + '</div>';
+  if(!a.desafioAtivo){ area.innerHTML = '<div class="info-box"><p class="txt">Ela não está no desafio.</p></div>'; return; }
+  if(garantirEstruturasDoDesafio(a)) salvarPerfilAlunaNoSupabase(a.nome);
+  const atual = a.desafioAtivo.estruturaAtual;
+  let html = '<div class="info-box" style="margin-bottom:8px;"><p class="lbl">Estruturas liberadas pra ela: 1 a ' + atual + ' · ' + a.desafioAtivo.frequencia + 'x por semana</p>';
+  for(let n = atual; n >= 1; n--){
+    const semana = a.desafioTreinos[n];
+    if(!semana) continue;
+    html += '<details' + (n === atual ? ' open' : '') + ' style="margin-top:8px;"><summary style="cursor:pointer;font-weight:600;font-size:13px;">Estrutura ' + n + (n === atual ? ' (atual)' : '') +
+      ' <span style="font-weight:400;font-size:11.5px;color:var(--text-dim);margin-left:6px;">' + htmlVolumeDesafio(semana) + '</span></summary>' + htmlDiasDaSemanaDesafio(semana) + '</details>';
+  }
+  area.innerHTML = html + '</div>';
 }
 
 function renderListaSecaEmpina(){
@@ -4419,13 +4475,15 @@ function abrirTelaDesafioSecaEmpina(){
   const a = obterAlunaLogadaOuCriar();
   if(!a.desafioAtivo) return;
   openLevel2('desafio-seca-empina');
-  document.getElementById('se-subtitulo-estrutura').textContent = 'Escolhe qual estrutura treinar hoje';
+  // Rede de segurança pra quem já estava inscrita antes dessa correção: completa as que faltavam
+  if(garantirEstruturasDoDesafio(a)) salvarPerfilAlunaNoSupabase(NOME_ALUNA_LOGADA);
+  document.getElementById('se-subtitulo-estrutura').textContent = 'Estruturas liberadas: 1 a ' + a.desafioAtivo.estruturaAtual + '. Você pode treinar qualquer uma delas.';
   const lista = document.getElementById('se-lista-dias');
   const estruturaAtual = a.desafioAtivo.estruturaAtual;
   const botoes = [];
   for(let n = 1; n <= estruturaAtual; n++){
     botoes.push('<div class="list-item" style="cursor:pointer;margin-bottom:8px;" onclick="abrirEstruturaDesafio(' + n + ')">' +
-      '<span><i class="ti ti-flag" style="margin-right:8px;color:var(--gold-soft);"></i>Estrutura ' + n + (n === estruturaAtual ? ' <span class="tag">atual</span>' : '') + '</span>' +
+      '<span><i class="ti ti-flag" style="margin-right:8px;color:var(--gold-soft);"></i>Estrutura ' + n + (n === estruturaAtual ? ' <span class="tag">atual</span>' : ' <span class="tag" style="background:var(--card-2);color:var(--text-faint);">liberada</span>') + '</span>' +
       '<i class="ti ti-chevron-right" style="color:var(--text-faint);"></i>' +
     '</div>');
   }
@@ -4434,6 +4492,9 @@ function abrirTelaDesafioSecaEmpina(){
 
 function abrirEstruturaDesafio(numeroEstrutura){
   const a = obterAlunaLogadaOuCriar();
+  if(a.desafioAtivo && numeroEstrutura <= a.desafioAtivo.estruturaAtual && (!a.desafioTreinos || !a.desafioTreinos[numeroEstrutura])){
+    if(garantirEstruturasDoDesafio(a)) salvarPerfilAlunaNoSupabase(NOME_ALUNA_LOGADA);
+  }
   const semana = a.desafioTreinos && a.desafioTreinos[numeroEstrutura];
   if(!semana) return;
   document.getElementById('se-subtitulo-estrutura').innerHTML = '<span style="cursor:pointer;color:var(--gold-soft);" onclick="abrirTelaDesafioSecaEmpina()">← Trocar estrutura</span> · Estrutura ' + numeroEstrutura + ' de 10 · ' + semana.frequencia + 'x por semana';
@@ -4448,7 +4509,7 @@ function abrirEstruturaDesafio(numeroEstrutura){
     const feito = feitosNessaEstrutura.indexOf(d.n) !== -1;
     return '<div class="info-box" style="margin-bottom:10px;' + (feito ? 'border-color:var(--success);' : '') + '">' +
       '<p class="lbl" style="margin:0 0 6px;">' + d.n + (feito ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">feito</span>' : '') + '</p>' +
-      d.ex.map(function(linha){ return '<p class="txt" style="font-size:12.5px;margin:3px 0;">' + linha + '</p>'; }).join('') +
+      d.ex.map(function(linha){ return '<p class="txt" style="font-size:12.5px;margin:3px 0;">' + htmlLinhaExercicioDesafio(linha, d) + '</p>'; }).join('') +
       '<button class="btn-gold" style="margin-top:10px;' + (feito ? 'background:var(--success);color:#fff;' : '') + '" onclick="marcarDiaDesafioFeito(' + numeroEstrutura + ',' + i + ')">' + (feito ? '✓ Treino registrado' : 'Registrar treino de hoje') + '</button>' +
     '</div>';
   }).join('');
@@ -4478,8 +4539,7 @@ function verificarAvancoEstruturaDesafio(){
   const novaEstrutura = Math.min(10, a.desafioAtivo.estruturaAtual + Math.floor(diasPassados / 30));
   a.desafioAtivo.estruturaAtual = novaEstrutura;
   a.desafioAtivo.dataUltimaVirada = new Date().toISOString();
-  if(!a.desafioTreinos) a.desafioTreinos = {};
-  a.desafioTreinos[novaEstrutura] = gerarSemanaDesafio(novaEstrutura, a.desafioAtivo.frequencia, hashString(NOME_ALUNA_LOGADA) + novaEstrutura);
+  garantirEstruturasDoDesafio(a); // se ela ficou dias sem abrir e pulou de estrutura, as do caminho também entram
   salvarPerfilAlunaNoSupabase(NOME_ALUNA_LOGADA);
 }
 
@@ -4495,10 +4555,73 @@ function colocarElevacaoPelvicaPrimeiro(listaEx){
   return copia;
 }
 
+// Full Body: baseado na literatura de hipertrofia/força (Schoenfeld et al. 2016-2019, Volume Landmarks),
+// cada grupo grande é trabalhado em TODOS os dias, mas com volume baixo por sessão (2-3 séries), pra
+// somar um volume semanal saudável sem sessões longas nem fadiga acumulada — o oposto de um dia de
+// ênfase isolada, que concentra 4-6 séries de uma vez só. Grupos pequenos (braço) revezam por dia,
+// pra não estourar o tempo de sessão.
+function gerarDiasFullBody(perfil, numDias){
+  const reps = perfil.bloco === 'deload' ? 14 : (perfil.bloco === 'choque' ? 7 : (perfil.fase === 'Desempenho' ? 9 : 11));
+  const seriesGrande = perfil.bloco === 'deload' ? 2 : (perfil.nivel === 'Avançado' ? 3 : 2);
+  const dias = [];
+  const nomesDias = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+  const padroesPorGrupoNaSemana = {};
+
+  const gruposGrandes = ['Quadríceps', 'Posterior', 'Glúteo', 'Costas'];
+  const paresPequenos = [['Ombro', 'Peito'], ['Bíceps', 'Tríceps']];
+
+  for(let d = 0; d < numDias; d++){
+    const padroesNoDia = {};
+    let ex = [];
+
+    gruposGrandes.forEach(function(grupoDisplay){
+      const grupoBusca = grupoDisplay === 'Posterior' ? 'Posterior' : (grupoDisplay === 'Glúteo' ? 'Glúteo' : grupoDisplay);
+      const padroesDoGrupo = {};
+      if(padroesPorGrupoNaSemana[grupoDisplay]) Object.assign(padroesDoGrupo, padroesPorGrupoNaSemana[grupoDisplay]);
+      const candidato = selecionarExerciciosVariados(grupoBusca, (perfil.nomeAluna || '') + '_' + grupoDisplay, 1, (perfil.indiceCiclo || 0) + d, padroesDoGrupo, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
+      if(candidato && candidato[0]){
+        ex.push(candidato[0] + ' · ' + seriesGrande + 'x' + reps);
+        padroesPorGrupoNaSemana[grupoDisplay] = padroesPorGrupoNaSemana[grupoDisplay] || {};
+        padroesPorGrupoNaSemana[grupoDisplay][obterPalavraChaveMovimento(candidato[0].toUpperCase())] = true;
+        padroesNoDia[obterPalavraChaveMovimento(candidato[0].toUpperCase())] = true;
+      }
+    });
+
+    // Grupos pequenos revezam: um par por dia, alternando, pra não alongar demais a sessão
+    const parDoDia = paresPequenos[d % paresPequenos.length];
+    parDoDia.forEach(function(grupo){
+      const padroesDoGrupo = {};
+      if(padroesPorGrupoNaSemana[grupo]) Object.assign(padroesDoGrupo, padroesPorGrupoNaSemana[grupo]);
+      const candidato = selecionarExerciciosVariados(grupo, (perfil.nomeAluna || '') + '_' + grupo, 1, (perfil.indiceCiclo || 0) + d, padroesDoGrupo, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
+      if(candidato && candidato[0]){
+        ex.push(candidato[0] + ' · ' + (perfil.nivel === 'Avançado' ? 3 : 2) + 'x' + reps);
+        padroesPorGrupoNaSemana[grupo] = padroesPorGrupoNaSemana[grupo] || {};
+        padroesPorGrupoNaSemana[grupo][obterPalavraChaveMovimento(candidato[0].toUpperCase())] = true;
+      }
+    });
+
+    ex.push('Prancha ventral · 3x30s');
+    ex = colocarElevacaoPelvicaPrimeiro(ex);
+
+    const dia = { n: nomesDias[d], foco: 'Full Body ' + String.fromCharCode(65 + d) + ' · corpo inteiro, volume baixo por grupo', ex: ex, descanso: false };
+    removerLegsExcedentesNoDia(dia);
+    removerVariacoesDuplicadasDeAfundo(dia);
+    removerUnilateraisExcedentesNoDia(dia);
+    dias.push(dia);
+  }
+  for(let d = numDias; d < 7; d++) dias.push({ n: nomesDias[d], foco: 'Descanso', ex: [], descanso: true });
+  return dias;
+}
+
 function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
   // perfil.enfase = grupo prioritário (ex: 'Glúteo'), perfil.secundario = 2º grupo da pirâmide
-  const enfase = perfil.enfase;
-  const secundario = perfil.secundario;
+  // Esse motor só entende os 3 grupos de perna. Se a ênfase da aluna for Costas, Peito ou Full Body
+  // (prioridades de superiores, ou o motor à parte), cai aqui do mesmo jeito pra gerar a metade de
+  // baixo da semana — sem essa trava, ele tentava usar "Costas" como se fosse grupo de perna e saía
+  // Crucifixo/Flexão de braço no meio do treino de quadríceps.
+  const GRUPOS_VALIDOS_INFERIORES = ['Glúteo', 'Quadríceps', 'Posterior'];
+  const enfase = GRUPOS_VALIDOS_INFERIORES.indexOf(perfil.enfase) !== -1 ? perfil.enfase : 'Glúteo';
+  const secundario = GRUPOS_VALIDOS_INFERIORES.indexOf(perfil.secundario) !== -1 ? perfil.secundario : null;
   const reps = perfil.bloco === 'deload' ? 14 : (perfil.bloco === 'choque' ? 7 : (perfil.fase === 'Desempenho' ? 9 : 11));
   const metodo = perfil.bloco === 'choque' ? ('Cluster set (blocos de ' + sugerirBlocoCluster(perfil.indiceCiclo || 0) + ')') : 'Padrão';
 
@@ -4673,8 +4796,13 @@ function aplicarVolumeMinimoTerciario(diasInferiores, perfil, reps){
     const nomeGrupoBusca = grupoInterno === 'Posterior' ? 'Posterior' : grupoInterno; // mesmo nome usado no resto do motor
     // Chama a seleção direto pela função global (não a versão aninhada de dentro de gerarDiasInferiores,
     // que não existe aqui fora — era exatamente esse erro de escopo que travava a tela ao trocar nível).
-    const opcoes = selecionarExerciciosVariados(nomeGrupoBusca, perfil.nomeAluna || '', 1, perfil.indiceCiclo, {}, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
+    // Pede mais de 1 opção: se a primeira for unilateral e o dia de destino já tiver outra, escolhe a
+    // próxima da lista — sem isso, esse reforço de volume mínimo podia colocar 2 unilaterais no mesmo dia.
+    const opcoes = selecionarExerciciosVariados(nomeGrupoBusca, perfil.nomeAluna || '', 4, perfil.indiceCiclo, {}, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
     if(!opcoes || !opcoes[0]) return;
+    const diaAlvoTeste = diasInferiores[0];
+    const alvoJaTemUnilateral = (diaAlvoTeste.ex || []).some(function(linha){ return ehExercicioUnilateral(extrairNomeExercicioDeLinha(linha)); });
+    const opcaoEscolhida = (alvoJaTemUnilateral ? opcoes.find(function(n){ return !ehExercicioUnilateral(n); }) : opcoes[0]) || opcoes[0];
 
     const seriesMinimas = perfil.bloco === 'deload' ? 2 : 3;
     const faltam = minimoNecessario - seriesAtual;
@@ -4683,14 +4811,16 @@ function aplicarVolumeMinimoTerciario(diasInferiores, perfil, reps){
     // Insere no PRIMEIRO dia da lista (não no último) — o corte por tempo remove sempre do fim pra
     // início, então começar pelo primeiro dia protege melhor esse exercício de ser cortado depois.
     const diaAlvo = diasInferiores[0];
-    diaAlvo.ex.push(nomeBanco === 'Isquiotibiais' ? (opcoes[0] + ' · ' + seriesDoExercicio + 'x' + Math.min(15, reps + 2) + ' (volume mínimo de ' + grupoInterno.toLowerCase() + ': 50% do volume de ' + primario.toLowerCase() + ', garantido pela metodologia)')
-      : (opcoes[0] + ' · ' + seriesDoExercicio + 'x' + reps + ' (volume mínimo de ' + grupoInterno.toLowerCase() + ': 50% do volume de ' + primario.toLowerCase() + ', garantido pela metodologia)'));
+    diaAlvo.ex.push(nomeBanco === 'Isquiotibiais' ? (opcaoEscolhida + ' · ' + seriesDoExercicio + 'x' + Math.min(15, reps + 2) + ' (volume mínimo de ' + grupoInterno.toLowerCase() + ': 50% do volume de ' + primario.toLowerCase() + ', garantido pela metodologia)')
+      : (opcaoEscolhida + ' · ' + seriesDoExercicio + 'x' + reps + ' (volume mínimo de ' + grupoInterno.toLowerCase() + ': 50% do volume de ' + primario.toLowerCase() + ', garantido pela metodologia)'));
   });
 }
 
 function gerarDiasSuperiores(perfil, numDias){
   const reps = perfil.bloco === 'deload' ? 14 : (perfil.bloco === 'choque' ? 7 : (perfil.fase === 'Desempenho' ? 9 : 11));
-  const seriesCostas = perfil.bloco === 'deload' ? 2 : (perfil.nivel === 'Avançado' ? 3 : 2);
+  const ehEnfaseCostas = perfil.enfase === 'Costas';
+  const ehEnfasePeito = perfil.enfase === 'Peito';
+  const seriesCostas = (perfil.bloco === 'deload' ? 2 : (perfil.nivel === 'Avançado' ? 3 : 2)) + (ehEnfaseCostas ? 1 : 0);
   const inclureGluteoMedio = perfil.enfase === 'Glúteo';
   const dias = [];
   const padroesUsadosPorGrupoNaSemana = {}; // "Costas"/"Ombro"/"Peito"/"Bíceps"/"Tríceps" -> padrões já usados em dias anteriores
@@ -4711,21 +4841,39 @@ function gerarDiasSuperiores(perfil, numDias){
       nomesCostas[0] + ' · ' + seriesCostas + 'x' + reps,
       nomesCostas[1] + ' · ' + seriesCostas + 'x' + reps
     ];
-    if((perfil.indiceCiclo || 0) % 2 === 1 && nomesCostas[2]){
+    if((ehEnfaseCostas || (perfil.indiceCiclo || 0) % 2 === 1) && nomesCostas[2]){
       ex.push(nomesCostas[2] + ' · ' + Math.max(2, seriesCostas - 1) + 'x' + reps);
     }
 
     // Ombro/Peito/Bíceps/Tríceps reais, alternando qual par recebe ênfase a cada dia (garante ≥2x/semana pra cada, em 3+ dias).
     // Cada grupo também herda os padrões já usados nele mesmo em dias anteriores dessa semana.
-    const gruposSecundarios = (d % 2 === 0) ? ['Ombro', 'Peito'] : ['Bíceps', 'Tríceps'];
+    // Se a ênfase é Peito, ele entra TODO dia de superiores (em vez de alternar com Ombro), e ganha
+    // uma segunda opção nos dias em que sobraria só pro par Ombro/Peito — igual à lógica de Costas.
+    const gruposSecundarios = ehEnfasePeito ? ['Peito'] : ((d % 2 === 0) ? ['Ombro', 'Peito'] : ['Bíceps', 'Tríceps']);
     gruposSecundarios.forEach(function(grupo){
+      const ehGrupoDaEnfase = ehEnfasePeito && grupo === 'Peito';
       const padroesDesseGrupo = {};
       if(padroesUsadosPorGrupoNaSemana[grupo]) Object.assign(padroesDesseGrupo, padroesUsadosPorGrupoNaSemana[grupo]);
-      const candidato = selecionarExerciciosVariados(grupo, (perfil.nomeAluna || '') + '_' + grupo, 1, perfil.indiceCiclo, padroesDesseGrupo, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
-      if(candidato && candidato[0]){
-        ex.push(candidato[0] + ' · ' + (perfil.nivel === 'Avançado' ? 3 : 2) + 'x' + reps);
+      const quantidade = ehGrupoDaEnfase ? 2 : 1;
+      const candidatos = selecionarExerciciosVariados(grupo, (perfil.nomeAluna || '') + '_' + grupo, quantidade, perfil.indiceCiclo, padroesDesseGrupo, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
+      (candidatos || []).forEach(function(nomeEx, pos){
+        const seriesDoExercicio = (perfil.nivel === 'Avançado' ? 3 : 2) + (ehGrupoDaEnfase && pos === 0 ? 1 : 0);
+        ex.push(nomeEx + ' · ' + seriesDoExercicio + 'x' + reps);
         padroesUsadosPorGrupoNaSemana[grupo] = padroesUsadosPorGrupoNaSemana[grupo] || {};
-        padroesUsadosPorGrupoNaSemana[grupo][obterPalavraChaveMovimento(candidato[0].toUpperCase())] = true;
+        padroesUsadosPorGrupoNaSemana[grupo][obterPalavraChaveMovimento(nomeEx.toUpperCase())] = true;
+      });
+      if(ehEnfasePeito && grupo === 'Peito'){
+        // Ainda garante Ombro de vez em quando (metade dos dias), só que sempre depois do Peito
+        if(d % 2 === 0){
+          const padroesOmbro = {};
+          if(padroesUsadosPorGrupoNaSemana['Ombro']) Object.assign(padroesOmbro, padroesUsadosPorGrupoNaSemana['Ombro']);
+          const candOmbro = selecionarExerciciosVariados('Ombro', (perfil.nomeAluna || '') + '_Ombro', 1, perfil.indiceCiclo, padroesOmbro, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
+          if(candOmbro && candOmbro[0]){
+            ex.push(candOmbro[0] + ' · ' + (perfil.nivel === 'Avançado' ? 3 : 2) + 'x' + reps);
+            padroesUsadosPorGrupoNaSemana['Ombro'] = padroesUsadosPorGrupoNaSemana['Ombro'] || {};
+            padroesUsadosPorGrupoNaSemana['Ombro'][obterPalavraChaveMovimento(candOmbro[0].toUpperCase())] = true;
+          }
+        }
       }
     });
 
@@ -4735,8 +4883,10 @@ function gerarDiasSuperiores(perfil, numDias){
     } else if(inclureGluteoMedio){
       ex.push('Abdução de quadril elástico · 3x15'); // versão sem polia, pra treino em casa
     }
-    if(perfil.frequencia <= 3 || d % 2 === 0 || numDias <= 2){
-      ex.push('Panturrilha em pé · 3x15');
+    // Só existe panturrilha de máquina no banco (nenhuma opção de casa) — nunca adiciona pra quem
+    // treina em casa, senão sai um exercício de academia escondido num treino que devia ser só casa.
+    if((perfil.frequencia <= 3 || d % 2 === 0 || numDias <= 2) && perfil.ambienteTreino !== 'Casa'){
+      ex.push('Panturrilha Sentado na Máquina · 3x15');
     }
     dias.push({ foco: 'Superiores ' + String.fromCharCode(65 + d) + ' · Costas, ' + gruposSecundarios.join('/') + ' e Abdômen', ex: ex });
   }
@@ -4752,14 +4902,19 @@ function gerarTreinoSemanal(perfil){
     (perfil.bloco === 'deload' ? 0.5 : (perfil.bloco === 'choque' ? 0.82 : (perfil.volumeReduzidoPorFadiga ? 0.85 : 1))) *
     (perfil.estrategiaVolumeMultiplicador || 1);
 
-  const diasInf = gerarDiasInferiores(perfil, numInferiores, seriesTotais);
-  const diasSup = gerarDiasSuperiores(perfil, numSuperiores);
+  const ehFullBody = perfil.enfase === 'Full Body';
+  const diasInf = ehFullBody ? [] : gerarDiasInferiores(perfil, numInferiores, seriesTotais);
+  const diasSup = ehFullBody ? [] : gerarDiasSuperiores(perfil, numSuperiores);
 
-  const semana = [];
-  let i = 0, s = 0;
-  while(i < diasInf.length || s < diasSup.length){
-    if(i < diasInf.length){ semana.push(diasInf[i]); i++; }
-    if(s < diasSup.length){ semana.push(diasSup[s]); s++; }
+  let semana = [];
+  if(ehFullBody){
+    semana = gerarDiasFullBody(perfil, perfil.frequencia);
+  } else {
+    let i = 0, s = 0;
+    while(i < diasInf.length || s < diasSup.length){
+      if(i < diasInf.length){ semana.push(diasInf[i]); i++; }
+      if(s < diasSup.length){ semana.push(diasSup[s]); s++; }
+    }
   }
 
   function calcularDuracaoDia(dia){
@@ -6752,10 +6907,11 @@ function mostrarOpcoesDeTrocaMesmoAssim(diaIndex, exIndex){
   renderizarOpcoesTrocaFiltradas(opcoes, diaIndex, exIndex);
 }
 
-function abrirVideoApenasExercicio(nomeExercicio, ev){
+function abrirVideoApenasExercicio(nomeExercicio, ev, urlAlternativa){
   if(ev) ev.stopPropagation(); // nunca deixa o clique no nome também disparar a troca do exercício
   const exBanco = buscarExercicioNoBanco(nomeExercicio);
-  const embed = exBanco ? getEmbedUrl(exBanco.video) : '';
+  const urlDoVideo = (exBanco && exBanco.video) ? exBanco.video : (urlAlternativa || '');
+  const embed = urlDoVideo ? getEmbedUrl(urlDoVideo) : '';
   const overlay = document.createElement('div');
   overlay.id = 'overlay-video-apenas';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;';
@@ -10044,6 +10200,15 @@ async function loginAluna(){
     return;
   }
 
+  // Encerra qualquer sessão que já estivesse aberta nesse aparelho ANTES de tentar a nova, e limpa o
+  // estado da sessão anterior — sem isso, um aparelho compartilhado (ex: você mostrando pra outra
+  // aluna antes) podia deixar uma sessão salva de outra pessoa disputando com o login novo, e ela
+  // acabava vendo o treino de quem usou o aparelho antes dela.
+  try { await supabaseClient.auth.signOut(); } catch(e){}
+  NOME_ALUNA_LOGADA = null;
+  dias = [];
+  sessaoUsuarioAtual = null;
+
   try {
     let primeiroAcesso = false;
     let { data, error } = await supabaseClient.auth.signInWithPassword({ email: email, password: senha });
@@ -10141,6 +10306,7 @@ async function loginAluna(){
     }
     aplicarIdentidadeVisual(NOME_ALUNA_LOGADA);
     pedirPermissaoNotificacao();
+    mostrarBannerInstalarApp();
     verificarPerguntarSobreAvisos();
 
     sessaoTipo = 'aluna';
@@ -10177,6 +10343,7 @@ function entrarLocalPorEmail(email){
   }
   aplicarIdentidadeVisual(NOME_ALUNA_LOGADA);
   pedirPermissaoNotificacao();
+    mostrarBannerInstalarApp();
   verificarPerguntarSobreAvisos();
   renderBadgeAvisos();
   sessaoTipo = 'aluna';
@@ -10382,6 +10549,23 @@ function finalizarOnboardingEIr(destino){
 
 let timerIntroAtual = null;
 
+function mostrarBannerInstalarApp(){
+  const jaEstaInstalado = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+  if(jaEstaInstalado) return; // já está instalado, não precisa avisar mais nada
+  let jaFechou = false;
+  try { jaFechou = localStorage.getItem('musaBannerInstalarFechado') === 'sim'; } catch(e){}
+  if(jaFechou) return;
+
+  const ehIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const banner = document.getElementById('banner-instalar-app');
+  const texto = document.getElementById('banner-instalar-texto');
+  if(!banner || !texto) return;
+  texto.innerHTML = ehIOS
+    ? '📲 Pra usar como um aplicativo de verdade (sem precisar abrir o link toda vez): toque no ícone de compartilhar <b>(⬆️)</b> aqui do navegador, e depois em <b>"Adicionar à Tela de Início"</b>.'
+    : '📲 Pra usar como um aplicativo de verdade: toque nos <b>⋮</b> do navegador e escolha <b>"Instalar aplicativo"</b> ou <b>"Adicionar à tela inicial"</b>.';
+  banner.style.display = 'block';
+}
+
 function pedirPermissaoNotificacao(){
   // Isso só guarda a permissão pro futuro (quando a Camada 2 de notificações reais estiver pronta).
   // Não envia notificação nenhuma agora — só evita ter que pedir de novo depois.
@@ -10527,6 +10711,7 @@ async function loginPersonal(){
     document.getElementById('backbar').style.display = 'flex';
     document.getElementById('backlabel').textContent = 'Sair';
     pedirPermissaoNotificacao();
+    mostrarBannerInstalarApp();
     openLevel2('personal');
     if(NOME_PERSONAL_LOGADO === 'Bianca') showPersonalView('dashboard-suporte'); // ela vai direto pra 2ª Dashboard, não pra padrão do Thiago
     sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
@@ -10554,6 +10739,7 @@ async function loginPersonal(){
     document.getElementById('backbar').style.display = 'flex';
     document.getElementById('backlabel').textContent = 'Sair';
     pedirPermissaoNotificacao();
+    mostrarBannerInstalarApp();
     openLevel2('personal');
     if(NOME_PERSONAL_LOGADO === 'Bianca') showPersonalView('dashboard-suporte'); // ela vai direto pra 2ª Dashboard, não pra padrão do Thiago
     sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
@@ -10590,6 +10776,7 @@ async function loginPersonal(){
     document.getElementById('backbar').style.display = 'flex';
     document.getElementById('backlabel').textContent = 'Sair';
     pedirPermissaoNotificacao();
+    mostrarBannerInstalarApp();
     openLevel2('personal');
     if(NOME_PERSONAL_LOGADO === 'Bianca') showPersonalView('dashboard-suporte'); // ela vai direto pra 2ª Dashboard, não pra padrão do Thiago
     sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
@@ -10604,6 +10791,7 @@ async function loginPersonal(){
       document.getElementById('backbar').style.display = 'flex';
       document.getElementById('backlabel').textContent = 'Sair';
       pedirPermissaoNotificacao();
+    mostrarBannerInstalarApp();
       openLevel2('personal');
       if(NOME_PERSONAL_LOGADO === 'Bianca') showPersonalView('dashboard-suporte'); // ela vai direto pra 2ª Dashboard, não pra padrão do Thiago
       sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
@@ -10732,6 +10920,7 @@ async function restaurarSessaoAtiva(){
       const backlabel = document.getElementById('backlabel');
       if(backlabel) backlabel.textContent = 'Sair';
       pedirPermissaoNotificacao();
+    mostrarBannerInstalarApp();
       openLevel2('personal');
       if(NOME_PERSONAL_LOGADO === 'Bianca') showPersonalView('dashboard-suporte'); // ela vai direto pra 2ª Dashboard, não pra padrão do Thiago
       sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
@@ -10763,6 +10952,7 @@ async function restaurarSessaoAtiva(){
       }
       aplicarIdentidadeVisual(NOME_ALUNA_LOGADA);
       pedirPermissaoNotificacao();
+    mostrarBannerInstalarApp();
       sessaoTipo = 'aluna';
       const cardPersonal = document.getElementById('card-personal-launcher');
       if(cardPersonal) cardPersonal.style.display = 'none';
