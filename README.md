@@ -1,4 +1,4 @@
-[dna_musa_67.html](https://github.com/user-attachments/files/32747960/dna_musa_67.html)
+[dna_musa_68.html](https://github.com/user-attachments/files/32749483/dna_musa_68.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1199,16 +1199,22 @@ async function verErrosRecentes(){
   }
 }
 
-async function auditarAcessosAlunas(){
+function auditarAcessosAlunas(){
   const area = document.getElementById('auditoria-acessos-area');
   if(!area) return;
   if(area.innerHTML){ area.innerHTML = ''; return; }
-  area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Conferindo todas as alunas contra a Authentication de verdade... pode levar alguns segundos.</p>';
+  executarAuditoriaAcessos(false);
+}
+
+async function executarAuditoriaAcessos(corrigir){
+  const area = document.getElementById('auditoria-acessos-area');
+  if(!area) return;
+  area.innerHTML = '<p class="txt" style="color:var(--text-faint);">' + (corrigir ? 'Recriando as contas que faltam...' : 'Conferindo todas as alunas contra a Authentication de verdade...') + ' pode levar alguns segundos.</p>';
   try {
     const resposta = await fetch(SUPABASE_URL + '/functions/v1/auditar-acessos-alunas', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-      body: JSON.stringify({})
+      body: JSON.stringify({ corrigir: !!corrigir })
     });
     const dados = await resposta.json();
     if(!resposta.ok || dados.error){
@@ -1216,34 +1222,60 @@ async function auditarAcessosAlunas(){
       return;
     }
 
+    // Atualiza as fichas que estão na memória, senão elas continuariam mostrando a senha antiga
+    (dados.criadas || []).forEach(function(c){
+      const a = alunasPersonal.find(function(x){ return x.email === c.email; });
+      if(a){ a.senhaGerada = c.senha; if(c.authId) a.authId = c.authId; }
+    });
+
+    const linha = function(texto, cor){ return '<p class="txt" style="font-size:12px;margin-top:4px;' + (cor ? 'color:' + cor + ';' : '') + '">' + texto + '</p>'; };
     let html = '<div class="info-box" style="border-color:var(--success);">' +
-      '<p class="lbl" style="color:var(--success);">✓ Auditoria concluída — ' + dados.totalVerificadas + ' alunas com e-mail verificadas</p>' +
-      '<p class="txt" style="font-size:12px;">' + dados.ok + ' com acesso ok, sem nenhuma ação necessária</p>' +
+      '<p class="lbl" style="color:var(--success);">Auditoria concluída · ' + dados.totalVerificadas + ' alunas com e-mail</p>' +
+      linha('✓ ' + dados.ok + ' com acesso ok, nada a fazer') +
+      linha(dados.semAcessoAinda + ' nunca tiveram acesso criado (normal, não é erro)', 'var(--text-faint)') +
     '</div>';
 
     if(dados.vinculoQuebrado && dados.vinculoQuebrado.length > 0){
-      html += '<div class="info-box" style="border-color:#E2A33D;margin-top:8px;">' +
-        '<p class="lbl" style="color:#E2A33D;">🔧 ' + dados.vinculoQuebrado.length + ' com vínculo quebrado — já corrigido automaticamente agora</p>' +
-        dados.vinculoQuebrado.map(function(v){ return '<p class="txt" style="font-size:12px;margin-top:4px;">' + v.nome + '</p>'; }).join('') +
-      '</div>';
+      html += '<div class="info-box" style="border-color:#E2A33D;margin-top:8px;"><p class="lbl" style="color:#E2A33D;">🔧 ' + dados.vinculoQuebrado.length + ' com vínculo desalinhado, já corrigido agora</p>' +
+        dados.vinculoQuebrado.map(function(v){ return linha(v.nome); }).join('') + '</div>';
     }
 
-    if(dados.semConta && dados.semConta.length > 0){
-      html += '<div class="info-box" style="border-color:#C9784A;margin-top:8px;">' +
-        '<p class="lbl" style="color:#C9784A;">⚠ ' + dados.semConta.length + ' sem NENHUMA conta real — precisa criar do zero</p>' +
-        dados.semConta.map(function(s){
-          return '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">' +
-            '<span class="txt" style="font-size:12px;">' + s.nome + '</span>' +
-            '<span class="acao-pill" onclick="abrirFichaECriarAcesso(\'' + s.nome.replace(/'/g,"\\'") + '\')">Criar conta agora</span>' +
-          '</div>';
-        }).join('') +
-      '</div>';
+    if(dados.acessoQuebrado && dados.acessoQuebrado.length > 0){
+      html += '<div class="info-box" style="border-color:#C9784A;margin-top:8px;"><p class="lbl" style="color:#C9784A;">⚠ ' + dados.acessoQuebrado.length + ' com acesso "criado" na ficha, mas SEM conta real (o caso da Olayne)</p>' +
+        dados.acessoQuebrado.map(function(v){ return linha(v.nome + ' · ' + v.email); }).join('') +
+        '<button class="btn-gold" style="margin-top:10px;" onclick="executarAuditoriaAcessos(true)">Recriar o acesso de todas essas agora</button>' +
+        '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:6px;">Cria a conta de verdade e gera senha nova pra cada uma. Como a conta não existia, ninguém perde acesso nenhum.</p></div>';
+    }
+
+    if(dados.emailDiferente && dados.emailDiferente.length > 0){
+      html += '<div class="info-box" style="border-color:#E2A33D;margin-top:8px;"><p class="lbl" style="color:#E2A33D;">⚠ ' + dados.emailDiferente.length + ' com a conta em OUTRO e-mail (decisão sua)</p>' +
+        dados.emailDiferente.map(function(v){
+          return '<div style="margin-top:8px;"><p class="txt" style="font-size:12px;margin:0;"><b>' + v.nome + '</b><br>na ficha: ' + v.emailFicha + '<br>na conta de login: ' + v.emailConta + '</p>' +
+            '<span class="acao-pill" style="margin-top:6px;display:inline-block;" onclick="abrirFichaDaAluna(\'' + v.nome.replace(/'/g,"\\'") + '\')">Abrir a ficha (use "Alterar senha" pra alinhar)</span></div>';
+        }).join('') + '</div>';
+    }
+
+    if(dados.criadas && dados.criadas.length > 0){
+      html += '<div class="info-box" style="border-color:var(--success);margin-top:8px;"><p class="lbl" style="color:var(--success);">✓ ' + dados.criadas.length + ' conta(s) criada(s) de verdade</p>' +
+        dados.criadas.map(function(c){ return linha('<b>' + c.nome + '</b><br>' + c.email + '<br>senha: ' + c.senha); }).join('') +
+        '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:6px;">Já está atualizado na ficha de cada uma. É só mandar o login pelo botão "Mandar login e senha por WhatsApp".</p></div>';
+    }
+    if(dados.falhas && dados.falhas.length > 0){
+      html += '<div class="info-box" style="border-color:#C9784A;margin-top:8px;"><p class="lbl" style="color:#C9784A;">✗ ' + dados.falhas.length + ' que não consegui criar</p>' +
+        dados.falhas.map(function(f){ return linha(f.nome + ': ' + f.motivo); }).join('') + '</div>';
     }
 
     area.innerHTML = html;
   } catch(erroDeRede){
     area.innerHTML = '<div class="info-box"><p class="txt">Erro ao auditar: ' + erroDeRede.message + '</p></div>';
   }
+}
+
+function abrirFichaDaAluna(nomeAluna){
+  const i = alunasPersonal.findIndex(function(x){ return x.nome === nomeAluna; });
+  if(i === -1) return;
+  showPersonalView('aluna');
+  openAlunaDetail(i);
 }
 
 function abrirFichaECriarAcesso(nomeAluna){
@@ -7331,7 +7363,7 @@ function openAlunaDetail(i){
     renderSecaoColapsavel('Acompanhamento e histórico', renderElegibilidadeFase(a) + renderFunilEngajamento(a) + renderLinhaDoTempo(a) + renderPromocaoNivel(a) + renderBlocoPeriodizacao(a) + renderTecnicaPendente(a) + renderProgressao(a), 'acompanhamento') +
     '<p class="section-label" style="margin-top:22px;">Acesso ao app</p>' +
     (a.authId && a.senhaGerada
-      ? '<div class="info-box"><p class="lbl" style="color:var(--success);">✓ Acesso já criado automaticamente</p>' +
+      ? '<div class="info-box"><p class="lbl" style="color:var(--success);">Acesso gerado pelo app (se ela não conseguir entrar, use "Alterar senha")</p>' +
         '<p class="txt">E-mail: ' + a.email + '<br>Senha: <b>' + a.senhaGerada + '</b><br>Link do app: ' + (LINK_DO_APP) + '</p>' +
         '</div>' +
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 8px 0 0;font-size:13px;background:#25D366;color:#fff;border:none;" onclick="enviarCredenciaisPorWhatsApp(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-brand-whatsapp" style="vertical-align:-2px;margin-right:6px;"></i>Mandar login e senha por WhatsApp</button>' +
@@ -7649,8 +7681,12 @@ async function alterarSenhaAluna(nomeAluna){
       return;
     }
     a.senhaGerada = novaSenha;
+    if(dados.authId) a.authId = dados.authId; // sem isso, a ficha recarregada não reconhece que ela agora tem acesso
     const i = alunasPersonal.indexOf(a);
     openAlunaDetail(i); // recarrega a ficha já mostrando a senha nova nos campos de "Copiar dados"/"Mandar por WhatsApp"
+    // Conta o que aconteceu DE VERDADE — troca simples não precisa de aviso, os outros dois casos sim
+    if(dados.acao === 'conta_criada') alert('Ela não tinha conta de login de verdade na Authentication — criei agora.\n\nE-mail: ' + a.email + '\nSenha nova: ' + novaSenha);
+    else if(dados.acao === 'email_corrigido') alert('A conta dela existia, mas com outro e-mail (' + dados.emailAnterior + '). Corrigi pro e-mail da ficha (' + a.email + ') e troquei a senha.\n\nSenha nova: ' + novaSenha);
   } catch(erro){
     if(area) area.innerHTML = '<div class="info-box"><p class="txt" style="color:#C9784A;">Erro de conexão: ' + erro.message + '</p></div>';
   }
