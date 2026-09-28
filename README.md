@@ -1,4 +1,4 @@
-[dna_musa_66.html](https://github.com/user-attachments/files/32743742/dna_musa_66.html)
+[dna_musa_67.html](https://github.com/user-attachments/files/32747960/dna_musa_67.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1021,6 +1021,8 @@
         <div id="lista-seca-empina"></div>
         <button class="btn-gold" onclick="mostrarFormularioInscricaoSecaEmpina()" style="margin-bottom:22px;">Inscrever aluna no Seca e Empina</button>
         <div id="form-inscricao-seca-empina"></div>
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:10px;" onclick="alternarPreviewSecaEmpina()"><i class="ti ti-eye" style="margin-right:6px;"></i>Ver as 10 estruturas do Seca e Empina</button>
+        <div id="preview-seca-empina"></div>
 
         <p class="page-sub" style="margin-top:22px;">Crie um treino e gere um link de inscrição, quem entra participa só do desafio, sem acesso ao restante do app</p>
 
@@ -4053,8 +4055,10 @@ function obterMetaVolumeDesafio(numeroEstrutura, frequencia){
   };
 }
 
-// Pool de exercícios específico do desafio — sempre Academia, nunca elástico, nunca banido, e pra
-// Glúteo Médio, só os 3 nomes permitidos (nada de polia/caneleira, pra economizar tempo de sessão)
+// Pool de exercícios específico do desafio — sempre Academia, nunca elástico, nunca banido. Qualquer
+// exercício de ABDUÇÃO/ABDUTORA fica de fora de todos os pools comuns: glúteo médio só trabalha com as
+// 3 cadeiras abdutoras da lista (nada de polia, caneleira, deitado, no solo — regra da metodologia,
+// pra economizar tempo de sessão). Antes, essas variações vazavam pelo pool de Glúteo Máximo.
 function poolDesafio(grupoBanco, restringirGluteoMedio){
   if(restringirGluteoMedio){
     return exerciciosBanco.filter(function(e){ return GLUTEO_MEDIO_DESAFIO.indexOf(e.nome.toUpperCase()) !== -1; }).map(function(e){ return e.nome; });
@@ -4064,57 +4068,91 @@ function poolDesafio(grupoBanco, restringirGluteoMedio){
     if(e.grupo !== grupoBanco) return false;
     if(ehExercicioElastico(e)) return false;
     if(BANIDOS_DESAFIO.indexOf(e.nome.toUpperCase()) !== -1) return false;
+    if(e.nome.toUpperCase().indexOf('ABDU') !== -1) return false;
     return true;
   }).map(function(e){ return e.nome; });
 }
 
-// Monta uma lista de exercícios pra um grupo, batendo a meta de séries semanais, distribuída pelos
-// dias em que esse grupo aparece — nunca repete exercício no mesmo dia, nunca 2 unilaterais juntos,
-// varia a escolha ciclicamente pra não sair sempre os 2 primeiros do pool
-function distribuirVolumeDesafio(metaSeries, numDias, poolNomes, seedVariacao){
-  const diasComEsseGrupo = [];
-  const seriesPorDia = Math.max(2, Math.round(metaSeries / numDias / 3)); // ~3 séries por exercício, como padrão da casa
-  const exerciciosPorDia = Math.max(1, Math.round(metaSeries / numDias / seriesPorDia));
-  for(let d = 0; d < numDias; d++){
-    const escolhidos = [];
-    const usadosNoDia = {};
-    let tentativas = 0;
-    while(escolhidos.length < exerciciosPorDia && tentativas < poolNomes.length * 2){
-      const idx = (seedVariacao + d * 7 + tentativas) % poolNomes.length;
-      const candidato = poolNomes[idx];
-      tentativas++;
-      if(usadosNoDia[candidato]) continue;
-      if(escolhidos.some(function(nome){ return ehExercicioUnilateral(nome); }) && ehExercicioUnilateral(candidato)) continue; // nunca 2 unilaterais juntos, regra da casa
-      usadosNoDia[candidato] = true;
-      escolhidos.push(candidato);
-    }
-    diasComEsseGrupo.push(escolhidos.map(function(nome){ return nome + ' · ' + seriesPorDia + 'x12'; }));
+const SERIES_POR_EXERCICIO_DESAFIO = 3;
+
+// Quantos exercícios cada dia recebe de um grupo, preservando o volume SEMANAL da meta (em vez de
+// arredondar dia a dia e perder/ganhar séries). O que sobra da divisão vai pros dias das pontas
+// primeiro (primeiro e último), nunca todo empilhado nos dias do meio.
+function planoExerciciosPorDia(metaSeries, numDias){
+  const total = Math.max(1, Math.round(metaSeries / SERIES_POR_EXERCICIO_DESAFIO));
+  const base = Math.floor(total / numDias);
+  const resto = total % numDias;
+  const plano = [];
+  for(let d = 0; d < numDias; d++) plano.push(base);
+  for(let k = 0; k < resto; k++){
+    const posicao = resto === 1 ? 0 : Math.round(k * (numDias - 1) / (resto - 1));
+    plano[posicao]++;
   }
-  return diasComEsseGrupo;
+  return plano;
 }
 
-// Gera a semana inteira do desafio pra uma estrutura + frequência específicas
+// Gera a semana inteira do desafio pra uma estrutura + frequência específicas. Aplica as regras da
+// casa dia a dia, olhando o dia INTEIRO (todos os grupos juntos): nunca 2 unilaterais no dia, nunca
+// exercício repetido em dias diferentes (única exceção: as cadeiras abdutoras do glúteo médio, que a
+// metodologia permite repetir), elevação pélvica sempre primeiro, nunca 2 Leg Press.
 function gerarSemanaDesafio(numeroEstrutura, frequencia, seedVariacao){
   const meta = obterMetaVolumeDesafio(numeroEstrutura, frequencia);
   if(!meta) return null;
   const numDias = frequencia;
   const nomesDias = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
 
-  const poolQuad = poolDesafio('Quadríceps', false);
-  const poolPost = poolDesafio('Isquiotibiais', false);
-  const poolGMedio = poolDesafio(null, true);
-  const poolGMax = poolDesafio('Glúteos', false).filter(function(nome){ return GLUTEO_MEDIO_DESAFIO.indexOf(nome.toUpperCase()) === -1; });
+  const grupos = [
+    { chave: 'gluteoMaximo', pool: poolDesafio('Glúteos', false), repeteNaSemana: false, offset: 3 },
+    { chave: 'quadriceps',   pool: poolDesafio('Quadríceps', false), repeteNaSemana: false, offset: 0 },
+    { chave: 'posterior',    pool: poolDesafio('Isquiotibiais', false), repeteNaSemana: false, offset: 1 },
+    { chave: 'gluteoMedio',  pool: poolDesafio(null, true), repeteNaSemana: true, offset: 2 }
+  ];
+  grupos.forEach(function(g){ g.plano = planoExerciciosPorDia(meta[g.chave], numDias); });
 
-  const diasQuad = distribuirVolumeDesafio(meta.quadriceps, numDias, poolQuad, seedVariacao);
-  const diasPost = distribuirVolumeDesafio(meta.posterior, numDias, poolPost, seedVariacao + 1);
-  const diasGMedio = distribuirVolumeDesafio(meta.gluteoMedio, numDias, poolGMedio, seedVariacao + 2);
-  const diasGMax = distribuirVolumeDesafio(meta.gluteoMaximo, numDias, poolGMax, seedVariacao + 3);
-
+  const usadosNaSemana = {};
   const dias = [];
   for(let d = 0; d < numDias; d++){
-    const ex = [].concat(diasGMax[d], diasQuad[d], diasPost[d], diasGMedio[d]);
-    const dia = { n: nomesDias[d], foco: 'Seca e Empina · Estrutura ' + numeroEstrutura, ex: ex, descanso: false };
-    removerExerciciosExatamenteRepetidosNoDia(dia);
+    const usadosNoDia = {};
+    let temUnilateralNoDia = false;
+    let legPressNoDia = 0;
+    let temAfundoNoDia = false;
+    let exDoDia = [];
+
+    grupos.forEach(function(g){
+      let escolhidos = 0;
+      const n = g.plano[d];
+      const tamanho = g.pool.length;
+      // 1ª passada respeita tudo (inclusive não repetir na semana); 2ª relaxa só a repetição
+      // semanal, se o banco daquele grupo acabou — mas nunca relaxa repetição no dia nem unilateral
+      for(let passada = 0; passada < 2 && escolhidos < n; passada++){
+        for(let t = 0; t < tamanho && escolhidos < n; t++){
+          const nome = g.pool[(seedVariacao + g.offset + d * 5 + t) % tamanho];
+          if(usadosNoDia[nome]) continue;
+          if(passada === 0 && !g.repeteNaSemana && usadosNaSemana[nome]) continue;
+          const ehUni = ehExercicioUnilateral(nome);
+          if(ehUni && temUnilateralNoDia) continue;
+          const nomeUpper = nome.toUpperCase();
+          const ehLeg = nomeUpper.indexOf('LEG PRESS') !== -1;
+          const ehAfundo = nomeUpper.indexOf('AFUNDO') !== -1;
+          // Já respeita na hora de escolher (2 Leg Press só se um for unilateral, 1 afundo por dia) —
+          // antes o filtro removia DEPOIS de escolhido e a meta de volume ficava alguns pontos abaixo
+          if(ehLeg && !ehUni && legPressNoDia >= 1) continue;
+          if(ehAfundo && temAfundoNoDia) continue;
+          usadosNoDia[nome] = true;
+          usadosNaSemana[nome] = true;
+          if(ehUni) temUnilateralNoDia = true;
+          if(ehLeg) legPressNoDia++;
+          if(ehAfundo) temAfundoNoDia = true;
+          exDoDia.push(nome + ' · ' + SERIES_POR_EXERCICIO_DESAFIO + 'x12');
+          escolhidos++;
+        }
+      }
+    });
+
+    exDoDia = colocarElevacaoPelvicaPrimeiro(exDoDia);
+    const dia = { n: nomesDias[d], foco: 'Seca e Empina · Estrutura ' + numeroEstrutura, ex: exDoDia, descanso: false };
+    removerLegsExcedentesNoDia(dia);
+    removerVariacoesDuplicadasDeAfundo(dia);
     dias.push(dia);
   }
   // Completa a semana com dias de descanso até fechar 7
@@ -4214,6 +4252,51 @@ function removerAlunaDoSecaEmpina(nomeAluna){
   renderListaSecaEmpina();
 }
 
+// ===== VISUALIZAÇÃO (Personal): ver como cada estrutura sai, e o treino atual de cada inscrita =====
+function htmlDiasDaSemanaDesafio(semana){
+  return semana.dias.filter(function(d){ return !d.descanso; }).map(function(d){
+    return '<p class="lbl" style="margin:10px 0 4px;">' + d.n + ' · ' + d.ex.length + ' exercícios</p>' +
+      d.ex.map(function(linha){ return '<p class="txt" style="font-size:12px;margin:2px 0;">' + linha + '</p>'; }).join('');
+  }).join('');
+}
+
+function alternarPreviewSecaEmpina(){
+  const area = document.getElementById('preview-seca-empina');
+  if(!area) return;
+  if(area.innerHTML){ area.innerHTML = ''; return; }
+  area.innerHTML = '<div class="info-box" style="margin-top:8px;">' +
+    '<div class="form-group"><label class="form-label">Frequência</label><select class="form-select" id="se-preview-freq" onchange="renderConteudoPreviewSecaEmpina()"><option value="5">5x por semana</option><option value="3">3x por semana</option></select></div>' +
+    '<p class="txt" style="font-size:11px;color:var(--text-faint);">Exemplo de como cada estrutura sai. Cada aluna recebe uma variação própria de exercícios, com o mesmo volume e as mesmas regras.</p></div>' +
+    '<div id="preview-seca-empina-conteudo"></div>';
+  renderConteudoPreviewSecaEmpina();
+}
+
+function renderConteudoPreviewSecaEmpina(){
+  const alvo = document.getElementById('preview-seca-empina-conteudo');
+  const seletor = document.getElementById('se-preview-freq');
+  if(!alvo) return;
+  const freq = seletor ? parseInt(seletor.value, 10) : 5;
+  let html = '';
+  for(let n = 1; n <= 10; n++){
+    const semana = gerarSemanaDesafio(n, freq, 4242 + n);
+    const m = semana.metaVolume;
+    html += '<details class="info-box" style="margin-bottom:8px;"><summary style="cursor:pointer;font-weight:600;font-size:13px;">Estrutura ' + n + '</summary>' +
+      '<p class="txt" style="font-size:11px;color:var(--text-faint);margin:6px 0 0;">Meta semanal (séries): Quadríceps ' + m.quadriceps + ' · Posterior ' + m.posterior + ' · Glúteo médio ' + m.gluteoMedio + ' · Glúteo máximo ' + m.gluteoMaximo + '</p>' +
+      htmlDiasDaSemanaDesafio(semana) + '</details>';
+  }
+  alvo.innerHTML = html;
+}
+
+function verTreinoDesafioDaAluna(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  const area = document.getElementById('ver-desafio-' + nomeAluna.replace(/[^a-zA-Z0-9]/g,''));
+  if(!a || !area) return;
+  if(area.innerHTML){ area.innerHTML = ''; return; }
+  const semana = a.desafioTreinos && a.desafioAtivo ? a.desafioTreinos[a.desafioAtivo.estruturaAtual] : null;
+  if(!semana){ area.innerHTML = '<div class="info-box"><p class="txt">Ela ainda não tem treino gerado nessa estrutura.</p></div>'; return; }
+  area.innerHTML = '<div class="info-box" style="margin-bottom:8px;"><p class="lbl">Estrutura ' + a.desafioAtivo.estruturaAtual + ' · ' + a.desafioAtivo.frequencia + 'x por semana</p>' + htmlDiasDaSemanaDesafio(semana) + '</div>';
+}
+
 function renderListaSecaEmpina(){
   const area = document.getElementById('lista-seca-empina');
   if(!area) return;
@@ -4226,8 +4309,9 @@ function renderListaSecaEmpina(){
     const diasNoDesafio = Math.floor((Date.now() - new Date(a.desafioAtivo.dataInicio).getTime()) / (1000*60*60*24));
     return '<div class="list-item" style="margin-bottom:6px;">' +
       '<span>' + a.nome + ' <span class="tag">Estrutura ' + a.desafioAtivo.estruturaAtual + '/10 · ' + a.desafioAtivo.frequencia + 'x · dia ' + diasNoDesafio + '</span></span>' +
-      '<span class="acao-pill" style="background:var(--danger);" onclick="removerAlunaDoSecaEmpina(\'' + a.nome.replace(/'/g,"\\'") + '\')">Remover</span>' +
-    '</div>';
+      '<span style="display:flex;gap:6px;"><span class="acao-pill" onclick="verTreinoDesafioDaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Ver treino</span>' +
+      '<span class="acao-pill" style="background:var(--danger);" onclick="removerAlunaDoSecaEmpina(\'' + a.nome.replace(/'/g,"\\'") + '\')">Remover</span></span>' +
+    '</div><div id="ver-desafio-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '"></div>';
   }).join('') +
   '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:8px;" onclick="avancarTodasEstruturaSecaEmpina()">Avançar todas pra próxima estrutura agora</button>';
 }
