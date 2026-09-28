@@ -731,6 +731,8 @@
         <div id="config-ranking-area"></div>
         <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:14px;" onclick="verErrosRecentes()"><i class="ti ti-bug" style="margin-right:6px;"></i>Ver erros recentes do app</button>
         <div id="erros-recentes-area"></div>
+        <button class="btn-gold" style="background:var(--card-2);color:#6FA87C;border:1px solid var(--border);margin-top:14px;" onclick="auditarAcessosAlunas()"><i class="ti ti-shield-check" style="margin-right:6px;"></i>Auditar acessos de TODAS as alunas</button>
+        <div id="auditoria-acessos-area"></div>
       </div>
 
       <div id="personal-inteligencia" style="display:none;">
@@ -1192,6 +1194,61 @@ async function verErrosRecentes(){
   } catch(erroDeRede){
     area.innerHTML = '<div class="info-box"><p class="txt">Erro ao carregar: ' + erroDeRede.message + '</p></div>';
   }
+}
+
+async function auditarAcessosAlunas(){
+  const area = document.getElementById('auditoria-acessos-area');
+  if(!area) return;
+  if(area.innerHTML){ area.innerHTML = ''; return; }
+  area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Conferindo todas as alunas contra a Authentication de verdade... pode levar alguns segundos.</p>';
+  try {
+    const resposta = await fetch(SUPABASE_URL + '/functions/v1/auditar-acessos-alunas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+      body: JSON.stringify({})
+    });
+    const dados = await resposta.json();
+    if(!resposta.ok || dados.error){
+      area.innerHTML = '<div class="info-box"><p class="txt" style="color:#E2A33D;">Não consegui auditar: ' + (dados.error || 'erro desconhecido') + '</p></div>';
+      return;
+    }
+
+    let html = '<div class="info-box" style="border-color:var(--success);">' +
+      '<p class="lbl" style="color:var(--success);">✓ Auditoria concluída — ' + dados.totalVerificadas + ' alunas com e-mail verificadas</p>' +
+      '<p class="txt" style="font-size:12px;">' + dados.ok + ' com acesso ok, sem nenhuma ação necessária</p>' +
+    '</div>';
+
+    if(dados.vinculoQuebrado && dados.vinculoQuebrado.length > 0){
+      html += '<div class="info-box" style="border-color:#E2A33D;margin-top:8px;">' +
+        '<p class="lbl" style="color:#E2A33D;">🔧 ' + dados.vinculoQuebrado.length + ' com vínculo quebrado — já corrigido automaticamente agora</p>' +
+        dados.vinculoQuebrado.map(function(v){ return '<p class="txt" style="font-size:12px;margin-top:4px;">' + v.nome + '</p>'; }).join('') +
+      '</div>';
+    }
+
+    if(dados.semConta && dados.semConta.length > 0){
+      html += '<div class="info-box" style="border-color:#C9784A;margin-top:8px;">' +
+        '<p class="lbl" style="color:#C9784A;">⚠ ' + dados.semConta.length + ' sem NENHUMA conta real — precisa criar do zero</p>' +
+        dados.semConta.map(function(s){
+          return '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">' +
+            '<span class="txt" style="font-size:12px;">' + s.nome + '</span>' +
+            '<span class="acao-pill" onclick="abrirFichaECriarAcesso(\'' + s.nome.replace(/'/g,"\\'") + '\')">Criar conta agora</span>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+    }
+
+    area.innerHTML = html;
+  } catch(erroDeRede){
+    area.innerHTML = '<div class="info-box"><p class="txt">Erro ao auditar: ' + erroDeRede.message + '</p></div>';
+  }
+}
+
+function abrirFichaECriarAcesso(nomeAluna){
+  const i = alunasPersonal.findIndex(function(x){ return x.nome === nomeAluna; });
+  if(i === -1) return;
+  showPersonalView('aluna');
+  openAlunaDetail(i);
+  setTimeout(function(){ criarLoginParaAluna(nomeAluna); }, 300); // pequena espera pra ficha terminar de renderizar antes de criar
 }
 </script>
 
@@ -4257,6 +4314,17 @@ function verificarAvancoEstruturaDesafio(){
 }
 
 
+// Move qualquer variação de Elevação Pélvica pro início da lista do dia, sem mudar a ordem entre os
+// outros exercícios — usado em dias de ênfase Glúteo, onde ela precisa ser o primeiro movimento.
+function colocarElevacaoPelvicaPrimeiro(listaEx){
+  const indice = listaEx.findIndex(function(linha){ return extrairNomeExercicioDeLinha(linha).toUpperCase().indexOf('ELEVAÇÃO PÉLVICA') !== -1; });
+  if(indice <= 0) return listaEx; // já está primeira, ou não tem nenhuma nesse dia
+  const copia = listaEx.slice();
+  const [item] = copia.splice(indice, 1);
+  copia.unshift(item);
+  return copia;
+}
+
 function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
   // perfil.enfase = grupo prioritário (ex: 'Glúteo'), perfil.secundario = 2º grupo da pirâmide
   const enfase = perfil.enfase;
@@ -4381,9 +4449,14 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
     }
     const exEstimulo = grupoEstimulo ? [exerciciosDoGrupo(grupoEstimulo, padroesUsadosNoDia)[0] + ' · ' + (perfil.bloco === 'deload' ? 2 : 3) + 'x' + Math.min(15, reps + 2)] : [];
     const exPanturrilha = (perfil.frequencia <= 3) ? ['Panturrilha · 2x18'] : []; // baixa frequência: entra em todo dia, volume baixo
+    let exDoDia = exPrincipais.concat(exEstimulo).concat(exPanturrilha);
+    // Regra da metodologia: em dia de ênfase Glúteo, a Elevação Pélvica sempre vem primeiro — é o
+    // levantamento principal do dia, precisa ser feito com a aluna descansada, não depois de já ter
+    // gasto energia em outros exercícios.
+    if(grupoPrincipal === 'Glúteo') exDoDia = colocarElevacaoPelvicaPrimeiro(exDoDia);
     dias.push({
       foco: 'Inferiores ' + String.fromCharCode(65 + d) + ' · ' + grupoPrincipal + (grupoEstimulo ? ' + estímulo ' + grupoEstimulo : ''),
-      ex: exPrincipais.concat(exEstimulo).concat(exPanturrilha),
+      ex: exDoDia,
       metodo: metodo
     });
   }
@@ -4739,6 +4812,95 @@ function validarPrescricao(perfil, semana){
   if(perfil.queixaDor){
     checklist.push({ item: 'Queixa de dor sinalizada formalmente (não substituição silenciosa)', ok: perfil.queixaSinalizadaFormalmente === true, detalhe: perfil.queixaSinalizadaFormalmente ? 'sinalizada' : 'PENDENTE, confirmar com o personal' });
   }
+
+  // 10. Nenhum dia de treino (fora descanso) com menos de 3 exercícios — sinal de que o motor
+  // esgotou opções de exercício em algum grupo repetido, precisa de mais variação no banco
+  const diasDeTreino = semana.filter(function(d){ return !d.descanso && !d.tabata; });
+  const diaComPoucoExercicio = diasDeTreino.find(function(d){ return d.ex.length < 3; });
+  checklist.push({ item: 'Nenhum dia com menos de 3 exercícios', ok: !diaComPoucoExercicio, detalhe: diaComPoucoExercicio ? (diaComPoucoExercicio.n + ': só ' + diaComPoucoExercicio.ex.length) : 'todos com 3+' });
+
+  // 11. Nenhum exercício repetido em dias DIFERENTES da semana (mesmo nome, dias distintos) — sinal
+  // de banco esgotado ou de erro na hora de escolher, nunca deveria acontecer com o banco que temos
+  const nomesPorDia = {};
+  diasDeTreino.forEach(function(d){
+    d.ex.forEach(function(linha){
+      const nome = extrairNomeExercicioDeLinha(linha).toUpperCase();
+      if(!nomesPorDia[nome]) nomesPorDia[nome] = [];
+      if(nomesPorDia[nome].indexOf(d.n) === -1) nomesPorDia[nome].push(d.n);
+    });
+  });
+  const exerciciosRepetidosEmDiasDiferentes = Object.keys(nomesPorDia).filter(function(n){ return nomesPorDia[n].length > 1; });
+  checklist.push({ item: 'Nenhum exercício repetido em dias diferentes da semana', ok: exerciciosRepetidosEmDiasDiferentes.length === 0, detalhe: exerciciosRepetidosEmDiasDiferentes.length ? exerciciosRepetidosEmDiasDiferentes.slice(0,3).join(', ') : 'nenhum repetido' });
+
+  // 12. Ênfase nunca no meio da semana pra nível intermediário+ (precisa de espaçamento maior de
+  // recuperação) — checando pelo GRUPO real do banco de cada exercício, não pelo nome (buscar
+  // "QUADRÍCEPS" dentro de "Agachamento Frontal" nunca bate, por exemplo)
+  if(perfil.nivel !== 'Iniciante' && diasInferiores.length >= 3){
+    const grupoBancoDaEnfase = perfil.enfase === 'Glúteo' ? 'Glúteos' : (perfil.enfase === 'Posterior' ? 'Isquiotibiais' : perfil.enfase);
+    const indicesComEnfase = diasInferiores.map(function(d, i){
+      const temEnfase = d.ex.some(function(linha){
+        const nome = extrairNomeExercicioDeLinha(linha);
+        const exBanco = buscarExercicioNoBanco(nome);
+        return exBanco && (exBanco.grupo || exBanco.categoria) === grupoBancoDaEnfase;
+      });
+      return temEnfase ? i : -1;
+    }).filter(function(i){ return i !== -1; });
+    const ultimoIndice = diasInferiores.length - 1;
+    const enfaseSoNasPontas = indicesComEnfase.every(function(i){ return i === 0 || i === ultimoIndice; });
+    checklist.push({ item: 'Ênfase só nas pontas da semana (nunca no meio, nível intermediário+)', ok: enfaseSoNasPontas, detalhe: enfaseSoNasPontas ? 'ok' : 'ênfase apareceu no meio da semana' });
+  }
+
+  // 13. Nenhum exercício de ambiente errado pra essa aluna (Casa numa Academia ou vice-versa)
+  const ambienteEsperado = perfil.ambienteTreino === 'Casa' ? 'Casa' : 'Academia';
+  const exerciciosAmbienteErrado = [];
+  diasDeTreino.forEach(function(d){
+    d.ex.forEach(function(linha){
+      const nome = extrairNomeExercicioDeLinha(linha);
+      const exBanco = buscarExercicioNoBanco(nome);
+      if(exBanco && (exBanco.ambiente || 'Academia') !== ambienteEsperado) exerciciosAmbienteErrado.push(nome);
+    });
+  });
+  checklist.push({ item: 'Nenhum exercício do ambiente errado (' + ambienteEsperado + ')', ok: exerciciosAmbienteErrado.length === 0, detalhe: exerciciosAmbienteErrado.length ? exerciciosAmbienteErrado.slice(0,3).join(', ') : 'todos corretos' });
+
+  // 14. Reconfirma regras que já são evitadas NA HORA de gerar (nunca 2 unilaterais, nunca 2 Leg
+  // Press sem um ser unilateral) — mesmo essas já sendo tratadas na criação, reconferir aqui pega
+  // qualquer bug futuro nessas funções, ao invés de deixar passar batido silenciosamente
+  const diasComProblemaUnilateral = [];
+  const diasComDoisLegs = [];
+  diasDeTreino.forEach(function(d){
+    const unilateraisNoDia = d.ex.filter(function(linha){ return ehExercicioUnilateral(extrairNomeExercicioDeLinha(linha)); });
+    if(unilateraisNoDia.length > 1) diasComProblemaUnilateral.push(d.n);
+    const legsNoDia = d.ex.filter(function(linha){ return extrairNomeExercicioDeLinha(linha).toUpperCase().indexOf('LEG PRESS') !== -1; });
+    const algumLegUnilateral = legsNoDia.some(function(linha){ return ehExercicioUnilateral(extrairNomeExercicioDeLinha(linha)); });
+    if(legsNoDia.length > 1 && !algumLegUnilateral) diasComDoisLegs.push(d.n);
+  });
+  checklist.push({ item: 'Nunca 2 exercícios unilaterais no mesmo dia', ok: diasComProblemaUnilateral.length === 0, detalhe: diasComProblemaUnilateral.length ? diasComProblemaUnilateral.join(', ') : 'ok' });
+  checklist.push({ item: 'Nunca 2 Leg Press sem um ser unilateral', ok: diasComDoisLegs.length === 0, detalhe: diasComDoisLegs.length ? diasComDoisLegs.join(', ') : 'ok' });
+
+  // 16. Nenhuma variação de Afundo duplicada no mesmo dia — já evitado na hora de gerar, reconferido
+  // aqui pra pegar qualquer edição manual feita depois que reintroduza a duplicidade
+  const diasComAfundoDuplicado = diasDeTreino.filter(function(d){
+    const qtdAfundo = d.ex.filter(function(linha){ return linha.toUpperCase().indexOf('AFUNDO') !== -1; }).length;
+    return qtdAfundo > 1;
+  }).map(function(d){ return d.n; });
+  checklist.push({ item: 'Nenhuma variação de Afundo duplicada no mesmo dia', ok: diasComAfundoDuplicado.length === 0, detalhe: diasComAfundoDuplicado.length ? diasComAfundoDuplicado.join(', ') : 'ok' });
+
+  // 17. Nenhuma combinação de Bi-set/Tri-set redundante (usa a mesma validação que já existe na hora
+  // de escolher manualmente, mas reconfere aqui pro caso de algo ter sido montado sem passar por lá)
+  const combosInvalidos = [];
+  diasDeTreino.forEach(function(d){
+    if(!d.metodos) return;
+    Object.keys(d.metodos).forEach(function(ei){
+      const metodo = d.metodos[ei];
+      if(!metodo || typeof metodo === 'string' || !metodo.parceiros) return;
+      const nomePrincipal = extrairNomeExercicioDeLinha(d.ex[ei]);
+      metodo.parceiros.filter(function(p){ return !!p; }).forEach(function(nomeParceiro){
+        const validacao = validarCombinacaoBiset(nomePrincipal, nomeParceiro);
+        if(!validacao.valido) combosInvalidos.push(d.n + ': ' + nomePrincipal + ' + ' + nomeParceiro);
+      });
+    });
+  });
+  checklist.push({ item: 'Nenhuma combinação de Bi-set/Tri-set redundante', ok: combosInvalidos.length === 0, detalhe: combosInvalidos.length ? combosInvalidos.slice(0,3).join(' · ') : 'ok' });
 
   const aprovado = checklist.every(function(c){ return c.ok; });
   return { aprovado: aprovado, checklist: checklist };
@@ -5866,7 +6028,7 @@ async function verificarReplicasDeTreino(){
 
 async function executarGeracaoEmMassa(elegiveis, rotuloAcao){
   const area = document.getElementById('geracao-massa-area');
-  const resultados = { geradas: 0, progredidas: 0, verificadas: 0, apenasBackup: 0, erros: [] };
+  const resultados = { geradas: 0, progredidas: 0, verificadas: 0, apenasBackup: 0, erros: [], comPendencia: [] };
 
   for(let idx = 0; idx < elegiveis.length; idx++){
     const a = elegiveis[idx];
@@ -5883,6 +6045,16 @@ async function executarGeracaoEmMassa(elegiveis, rotuloAcao){
       if(jaTinhaTreino) resultados.progredidas++; else resultados.geradas++;
       if(saida.salvamento.verificado) resultados.verificadas++; else resultados.apenasBackup++;
       marcarStatusControleCiclo(a.nome, 'amarelo');
+
+      // NOVO: antes disso, o resultado da auditoria (validarPrescricao) era calculado e jogado fora
+      // aqui — era exatamente por isso que erros de regra nunca apareciam na geração em massa, só na
+      // tela de uma aluna por vez. Agora, qualquer item reprovado vira uma pendência visível no
+      // resumo final, pra você saber exatamente quem precisa de revisão manual, sem ter que abrir
+      // as 200 fichas uma por uma.
+      if(saida.resultado && !saida.resultado.aprovado){
+        const itensReprovados = saida.resultado.checklist.filter(function(c){ return !c.ok; }).map(function(c){ return c.item + (c.detalhe ? ' (' + c.detalhe + ')' : ''); });
+        resultados.comPendencia.push({ nome: a.nome, itens: itensReprovados });
+      }
     } catch(erro){
       resultados.erros.push({ nome: a.nome, motivo: erro.message });
     }
@@ -5895,7 +6067,15 @@ async function executarGeracaoEmMassa(elegiveis, rotuloAcao){
     (resultados.apenasBackup > 0 ? '<p class="txt" style="font-size:11px;color:var(--gold-soft);margin-top:2px;">⚠ ' + resultados.apenasBackup + ' salvas só no backup (login ainda não vinculado a essas)</p>' : '') +
     '<p class="txt" style="font-size:11px;color:' + (resultados.erros.length > 0 ? '#E2A33D' : 'var(--text-faint)') + ';margin-top:4px;">' + resultados.erros.length + ' com erro real</p>' +
     (resultados.erros.length > 0 ? '<p class="txt" style="font-size:11px;color:#E2A33D;margin-top:6px;">' + resultados.erros.map(function(e){ return e.nome + ' (' + e.motivo + ')'; }).join('<br>') + '</p>' : '') +
-  '</div>';
+  '</div>' +
+  (resultados.comPendencia.length > 0
+    ? '<div class="info-box" style="border-color:#C9784A;margin-top:8px;">' +
+        '<p class="lbl" style="color:#C9784A;">⚠ ' + resultados.comPendencia.length + ' aluna(s) com pendência na auditoria — revisar antes de considerar pronto</p>' +
+        resultados.comPendencia.map(function(p){
+          return '<p class="txt" style="font-size:11.5px;margin-top:8px;"><b>' + p.nome + '</b><br>' + p.itens.map(function(i){ return '· ' + i; }).join('<br>') + '</p>';
+        }).join('') +
+      '</div>'
+    : '<div class="info-box" style="border-color:var(--success);margin-top:8px;"><p class="txt" style="color:var(--success);font-size:12px;">✓ Todas as demais passaram na auditoria completa, sem nenhuma pendência.</p></div>');
 }
 
 // Alunas ativas SEM e-mail nunca entram (não tem como salvar login nem vincular treino), sempre
@@ -7415,11 +7595,26 @@ async function criarLoginParaAluna(nomeAluna){
 
     if(error){
       if(error.message.indexOf('already registered') !== -1){
-        const { data: alunaRow } = await supabaseClient.from('alunas').select('email,senha_gerada,auth_id').eq('email', a.email).maybeSingle();
-        if(alunaRow && alunaRow.senha_gerada){
-          areaResultado.innerHTML = '<div class="info-box"><p class="lbl" style="color:var(--success);">✓ Ela já tem acesso criado</p><p class="txt">' + alunaRow.email + '<br>' + alunaRow.senha_gerada + '</p></div>';
-        } else {
-          areaResultado.innerHTML = '<div class="info-box"><p class="txt" style="color:#E2A33D;">Já existe conta com esse e-mail, mas não achei a senha salva pra mostrar (foi criada de outro jeito, antes desse recurso existir). Ela precisa redefinir a senha pra conseguir entrar.</p></div>';
+        // Antes, isso só mostrava a senha SALVA na ficha, sem confirmar se a conta ainda existe de
+        // verdade na Authentication — foi exatamente isso que deixou passar o caso da aluna com
+        // vínculo quebrado (auth_id apontando pra conta que não existe mais). Agora, chama a mesma
+        // função que já verifica contra a Authentication de verdade e conserta o vínculo se precisar,
+        // usando a MESMA senha nova gerada agora — só mostra sucesso se isso realmente funcionar.
+        try {
+          const respostaTroca = await fetch(SUPABASE_URL + '/functions/v1/bright-function', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+            body: JSON.stringify({ email: a.email, novaSenha: senha })
+          });
+          const dadosTroca = await respostaTroca.json();
+          if(!respostaTroca.ok || dadosTroca.error){
+            areaResultado.innerHTML = '<div class="info-box"><p class="txt" style="color:#E2A33D;">Já existe um cadastro com esse e-mail, mas não consegui confirmar a conta de login de verdade: ' + (dadosTroca.error || 'erro desconhecido') + '. Provavelmente a conta foi removida da Authentication em algum momento — precisa investigar direto no Supabase.</p></div>';
+            return;
+          }
+          a.senhaGerada = senha;
+          areaResultado.innerHTML = '<div class="info-box"><p class="lbl" style="color:var(--success);">✓ Conta confirmada e senha atualizada de verdade</p><p class="txt">' + a.email + '<br>' + senha + '</p></div>';
+        } catch(erroTroca){
+          areaResultado.innerHTML = '<div class="info-box"><p class="txt" style="color:#E2A33D;">Não consegui confirmar a conta de login: ' + erroTroca.message + '</p></div>';
         }
       } else {
         areaResultado.innerHTML = '<div class="info-box"><p class="txt" style="color:#E2A33D;">' + error.message + '</p></div>';
