@@ -1,4 +1,4 @@
-[dna_musa_68.html](https://github.com/user-attachments/files/32749483/dna_musa_68.html)
+[dna_musa_69.html](https://github.com/user-attachments/files/32749890/dna_musa_69.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -902,6 +902,9 @@
             </div>
             <div class="form-group"><label class="form-label">Nível de complexidade</label>
               <select class="form-select" id="ex-nivel"><option>Básico</option><option>Intermediário</option><option>Avançado</option></select>
+            </div>
+            <div class="form-group"><label class="form-label">Onde se faz esse exercício</label>
+              <select class="form-select" id="ex-ambiente"><option value="Academia">Academia</option><option value="Casa">Casa</option></select>
             </div>
             <div class="form-group"><label class="form-label">Método padrão</label>
               <select class="form-select" id="ex-metodo"><option>Nenhum</option><option>Restpause</option><option>Dropset</option><option>Cluster set</option><option>Bi-set</option><option>Tri-set</option><option>Pirâmide crescente</option></select>
@@ -4285,9 +4288,59 @@ function removerAlunaDoSecaEmpina(nomeAluna){
 }
 
 // ===== VISUALIZAÇÃO (Personal): ver como cada estrutura sai, e o treino atual de cada inscrita =====
+// Em qual dos 4 grupos do desafio um exercício conta. Qualquer abdução/abdutora é glúteo médio (mesmo
+// que o banco a guarde em "Glúteos"), o resto segue o grupo do banco.
+function grupoDeVolumeDoDesafio(nome){
+  const u = String(nome).toUpperCase();
+  if(GLUTEO_MEDIO_DESAFIO.indexOf(u) !== -1 || u.indexOf('ABDU') !== -1) return 'gluteoMedio';
+  const ex = buscarExercicioNoBanco(nome);
+  if(!ex) return null;
+  const g = ex.grupo || ex.categoria;
+  if(g === 'Quadríceps') return 'quadriceps';
+  if(g === 'Isquiotibiais') return 'posterior';
+  if(g === 'Glúteos') return 'gluteoMaximo';
+  return null;
+}
+
+function seriesDaLinhaDesafio(linha){
+  return parseInt(((String(linha).split(' · ')[1] || '').split('x')[0]), 10) || 0;
+}
+
+// Conta as séries REAIS da semana, exercício por exercício — vale pra qualquer semana, inclusive
+// depois de uma edição manual (troca de exercício, mudança de série).
+function contarVolumeDaSemanaDesafio(semana){
+  const v = { quadriceps: 0, posterior: 0, gluteoMedio: 0, gluteoMaximo: 0, total: 0, sessoes: 0, mediaPorSessao: 0 };
+  semana.dias.forEach(function(d){
+    if(d.descanso) return;
+    v.sessoes++;
+    d.ex.forEach(function(linha){
+      const series = seriesDaLinhaDesafio(linha);
+      const g = grupoDeVolumeDoDesafio(extrairNomeExercicioDeLinha(linha));
+      if(g) v[g] += series;
+      v.total += series;
+    });
+  });
+  v.mediaPorSessao = v.sessoes ? Math.round(v.total / v.sessoes) : 0;
+  return v;
+}
+
+// "Quad 18 · Post 18 · G.Médio 9 · G.Máx 15 (meta 14)" — mostra a meta só onde o real difere dela
+function htmlVolumeDesafio(semana){
+  const v = contarVolumeDaSemanaDesafio(semana);
+  const m = semana.metaVolume || {};
+  const parte = function(rotulo, chave){
+    const meta = m[chave];
+    const dif = (meta != null && meta !== v[chave]) ? ' <span style="opacity:.65;">(meta ' + meta + ')</span>' : '';
+    return rotulo + ' <b>' + v[chave] + '</b>' + dif;
+  };
+  return parte('Quad', 'quadriceps') + ' · ' + parte('Post', 'posterior') + ' · ' + parte('G.Médio', 'gluteoMedio') + ' · ' + parte('G.Máx', 'gluteoMaximo') +
+    ' · Total <b>' + v.total + '</b> (~' + v.mediaPorSessao + '/sessão)';
+}
+
 function htmlDiasDaSemanaDesafio(semana){
   return semana.dias.filter(function(d){ return !d.descanso; }).map(function(d){
-    return '<p class="lbl" style="margin:10px 0 4px;">' + d.n + ' · ' + d.ex.length + ' exercícios</p>' +
+    const seriesDoDia = d.ex.reduce(function(soma, linha){ return soma + seriesDaLinhaDesafio(linha); }, 0);
+    return '<p class="lbl" style="margin:10px 0 4px;">' + d.n + ' · ' + d.ex.length + ' exercícios · ' + seriesDoDia + ' séries</p>' +
       d.ex.map(function(linha){ return '<p class="txt" style="font-size:12px;margin:2px 0;">' + linha + '</p>'; }).join('');
   }).join('');
 }
@@ -4312,8 +4365,9 @@ function renderConteudoPreviewSecaEmpina(){
   for(let n = 1; n <= 10; n++){
     const semana = gerarSemanaDesafio(n, freq, 4242 + n);
     const m = semana.metaVolume;
-    html += '<details class="info-box" style="margin-bottom:8px;"><summary style="cursor:pointer;font-weight:600;font-size:13px;">Estrutura ' + n + '</summary>' +
-      '<p class="txt" style="font-size:11px;color:var(--text-faint);margin:6px 0 0;">Meta semanal (séries): Quadríceps ' + m.quadriceps + ' · Posterior ' + m.posterior + ' · Glúteo médio ' + m.gluteoMedio + ' · Glúteo máximo ' + m.gluteoMaximo + '</p>' +
+    html += '<details class="info-box" style="margin-bottom:8px;"><summary style="cursor:pointer;font-weight:600;font-size:13px;">Estrutura ' + n +
+        ' <span style="font-weight:400;font-size:11.5px;color:var(--text-dim);margin-left:8px;">' + htmlVolumeDesafio(semana) + '</span></summary>' +
+      '<p class="txt" style="font-size:11px;color:var(--text-faint);margin:6px 0 0;">Meta da estrutura (séries por semana): Quadríceps ' + m.quadriceps + ' · Posterior ' + m.posterior + ' · Glúteo médio ' + m.gluteoMedio + ' · Glúteo máximo ' + m.gluteoMaximo + '</p>' +
       htmlDiasDaSemanaDesafio(semana) + '</details>';
   }
   alvo.innerHTML = html;
@@ -4326,7 +4380,7 @@ function verTreinoDesafioDaAluna(nomeAluna){
   if(area.innerHTML){ area.innerHTML = ''; return; }
   const semana = a.desafioTreinos && a.desafioAtivo ? a.desafioTreinos[a.desafioAtivo.estruturaAtual] : null;
   if(!semana){ area.innerHTML = '<div class="info-box"><p class="txt">Ela ainda não tem treino gerado nessa estrutura.</p></div>'; return; }
-  area.innerHTML = '<div class="info-box" style="margin-bottom:8px;"><p class="lbl">Estrutura ' + a.desafioAtivo.estruturaAtual + ' · ' + a.desafioAtivo.frequencia + 'x por semana</p>' + htmlDiasDaSemanaDesafio(semana) + '</div>';
+  area.innerHTML = '<div class="info-box" style="margin-bottom:8px;"><p class="lbl">Estrutura ' + a.desafioAtivo.estruturaAtual + ' · ' + a.desafioAtivo.frequencia + 'x por semana</p><p class="txt" style="font-size:11.5px;color:var(--text-dim);">' + htmlVolumeDesafio(semana) + '</p>' + htmlDiasDaSemanaDesafio(semana) + '</div>';
 }
 
 function renderListaSecaEmpina(){
@@ -8920,6 +8974,7 @@ function abrirEdicaoExercicio(nome){
     '<div class="info-box" style="margin-top:10px;">' +
       '<div class="form-group"><label class="form-label">Nome do exercício</label><input class="form-input" id="edicao-nome" value="' + e.nome.replace(/"/g,'&quot;') + '"></div>' +
       '<div class="form-group"><label class="form-label">Link do vídeo</label><input class="form-input" id="edicao-video" value="' + (e.video || '') + '" placeholder="Cole o link"></div>' +
+      '<div class="form-group"><label class="form-label">Onde se faz esse exercício</label><select class="form-select" id="edicao-ambiente"><option value="Academia"' + ((e.ambiente || 'Academia') === 'Academia' ? ' selected' : '') + '>Academia</option><option value="Casa"' + (e.ambiente === 'Casa' ? ' selected' : '') + '>Casa</option></select></div>' +
       '<button class="btn-gold" onclick="confirmarEdicaoExercicio(\'' + nome.replace(/'/g,"\\'") + '\')">Salvar alterações</button>' +
       '<button class="btn-gold" style="background:var(--card-2);color:#C9784A;border:1px solid var(--border);margin-top:8px;" onclick="excluirEVoltarParaLista(\'' + nome.replace(/'/g,"\\'") + '\')">Excluir exercício</button>' +
     '</div>';
@@ -8933,7 +8988,10 @@ function confirmarEdicaoExercicio(nome){
   const nomeAntigo = e.nome;
   e.nome = novoNome;
   e.video = document.getElementById('edicao-video').value.trim();
-  salvarCatalogoPersonal('exercicio_editado', nomeAntigo, { nomeAntigo: nomeAntigo, nome: e.nome, video: e.video, categoria: e.categoria, grupo: e.grupo });
+  const campoAmbiente = document.getElementById('edicao-ambiente');
+  if(campoAmbiente) e.ambiente = campoAmbiente.value;
+  normalizarAmbienteDoExercicio(e);
+  salvarCatalogoPersonal('exercicio_editado', nomeAntigo, { nomeAntigo: nomeAntigo, nome: e.nome, video: e.video, categoria: e.categoria, grupo: e.grupo, ambiente: e.ambiente });
   playExercicioVideo(e.nome);
 }
 
@@ -9197,6 +9255,22 @@ async function salvarCatalogoPersonal(tipo, chave, dados){
   }
 }
 
+// Garante que nome e ambiente nunca se contradizem: exercício com "CASA" no nome é de Casa. Sem isso, um
+// exercício de casa cadastrado pelo app (que gravava "Academia" fixo) entrava nos treinos de academia.
+function normalizarAmbienteDoExercicio(e){
+  if(!e) return false;
+  const antes = e.ambiente;
+  if(!e.ambiente) e.ambiente = 'Academia';
+  if(/\bCASA\b/i.test(e.nome || '')) e.ambiente = 'Casa';
+  return antes !== e.ambiente;
+}
+
+function normalizarAmbientesDoBanco(){
+  const corrigidos = [];
+  exerciciosBanco.forEach(function(e){ if(normalizarAmbienteDoExercicio(e)) corrigidos.push(e.nome); });
+  return corrigidos;
+}
+
 let catalogoPersonalJaCarregado = false;
 async function carregarCatalogoPersonal(){
   if(!supabaseClient || catalogoPersonalJaCarregado) return;
@@ -9205,6 +9279,9 @@ async function carregarCatalogoPersonal(){
     if(!linhas) return;
     catalogoPersonalJaCarregado = true;
 
+    // Exercícios adicionados pelo app precisam entrar ANTES das edições/movimentos deles — a ordem que o
+    // banco devolve as linhas não é garantida, e uma edição processada antes do exercício existir se perdia
+    linhas.sort(function(a, b){ return (b.tipo === 'exercicio_customizado' ? 1 : 0) - (a.tipo === 'exercicio_customizado' ? 1 : 0); });
     linhas.forEach(function(row){
       if(row.tipo === 'exercicio_customizado'){
         const jaExiste = exerciciosBanco.find(function(e){ return e.nome === row.dados.nome; });
@@ -9214,7 +9291,7 @@ async function carregarCatalogoPersonal(){
         if(ex){ ex.categoria = row.dados.categoria; ex.grupo = row.dados.categoria; }
       } else if(row.tipo === 'exercicio_editado'){
         const ex = exerciciosBanco.find(function(e){ return e.nome === row.dados.nomeAntigo; });
-        if(ex){ ex.nome = row.dados.nome; ex.video = row.dados.video; }
+        if(ex){ ex.nome = row.dados.nome; ex.video = row.dados.video; if(row.dados.ambiente) ex.ambiente = row.dados.ambiente; }
       } else if(row.tipo === 'conteudo'){
         const jaExisteConteudo = conteudos.find(function(c){ return c.n === row.dados.n; });
         if(!jaExisteConteudo){
@@ -9248,6 +9325,7 @@ async function carregarCatalogoPersonal(){
       }
     });
 
+    normalizarAmbientesDoBanco();
     renderExerciciosChips();
     const listaEstaVisivel = document.getElementById('ex-lista-view') && document.getElementById('ex-lista-view').style.display !== 'none' && document.getElementById('ex-lista') && document.getElementById('ex-lista').style.display !== 'none';
     if(listaEstaVisivel) renderExerciciosLista();
@@ -9266,11 +9344,12 @@ function addExercicio(){
     nome: nome,
     grupo: cat,
     categoria: cat,
-    ambiente: 'Academia',
+    ambiente: (document.getElementById('ex-ambiente') && document.getElementById('ex-ambiente').value) || 'Academia',
     nivel: document.getElementById('ex-nivel').value,
     metodo: document.getElementById('ex-metodo').value,
     video: document.getElementById('ex-video').value.trim()
   };
+  normalizarAmbienteDoExercicio(novoExercicio); // "EM CASA" no nome = Casa, mesmo que o campo tenha ficado em Academia
   exerciciosBanco.push(novoExercicio);
   salvarCatalogoPersonal('exercicio_customizado', nome, novoExercicio);
   document.getElementById('ex-nome').value = '';
