@@ -387,7 +387,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-FULLBODY-CORRECAO-REMOCAO</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-B-DROPDOWN-PRIORIDADE</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -5932,7 +5932,10 @@ function extrairEnfaseSecundaria(piramideTexto){
   const mapaKeywords = [
     { termos: ['GLÚTEO', 'GLUTEO', 'BUMBUM', 'BUNDA'], grupo: 'Glúteo' },
     { termos: ['QUADRÍCEPS', 'QUADRICEPS', 'COXA', 'PERNA'], grupo: 'Quadríceps' },
-    { termos: ['POSTERIOR'], grupo: 'Posterior' }
+    { termos: ['POSTERIOR'], grupo: 'Posterior' },
+    { termos: ['COSTAS', 'DORSAL'], grupo: 'Costas' },
+    { termos: ['PEITO', 'PEITORAL'], grupo: 'Peito' },
+    { termos: ['FULL BODY', 'CORPO TODO', 'CORPO INTEIRO'], grupo: 'Full Body' }
   ];
   const encontrados = [];
   const termosEncontrados = [];
@@ -8034,7 +8037,7 @@ function openAlunaDetail(i){
         '</select></div>' +
       '<div class="stat-card"><p class="stat-label">Prioridade (pirâmide)</p>' +
         '<select class="form-select" style="font-size:12px;padding:6px;margin-top:4px;" onchange="editarPiramideManual(\'' + a.nome.replace(/'/g,"\\'") + '\',\'enfase\',this.value)">' +
-          ['Glúteo','Quadríceps','Posterior'].map(function(g){ return '<option value="' + g + '"' + (obterEnfaseSecundariaEfetiva(a).enfase === g ? ' selected' : '') + '>' + g + ' (ênfase)</option>'; }).join('') +
+          ['Glúteo','Quadríceps','Posterior','Costas','Peito','Full Body'].map(function(g){ return '<option value="' + g + '"' + (obterEnfaseSecundariaEfetiva(a).enfase === g ? ' selected' : '') + '>' + g + ' (ênfase)</option>'; }).join('') +
         '</select>' +
         '<select class="form-select" style="font-size:12px;padding:6px;margin-top:4px;" onchange="editarPiramideManual(\'' + a.nome.replace(/'/g,"\\'") + '\',\'secundario\',this.value)">' +
           ['Glúteo','Quadríceps','Posterior'].map(function(g){ return '<option value="' + g + '"' + (obterEnfaseSecundariaEfetiva(a).secundario === g ? ' selected' : '') + '>' + g + ' (secundário)</option>'; }).join('') +
