@@ -1,4 +1,4 @@
-[Uploading dna_musa_71.html…]()
+[dna_musa_72.html](https://github.com/user-attachments/files/32782158/dna_musa_72.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6557,9 +6557,16 @@ function moverDiaTreino(nomeAluna, di, direcao){
   const dias = a.treinoAtual.dias;
   const novoIndice = di + direcao;
   if(novoIndice < 0 || novoIndice >= dias.length) return;
+  // O nome do dia (Segunda, Terça...) fica preso na posição — só o CONTEÚDO troca de lugar (foco,
+  // exercícios, método, duração, etc). Guarda os 2 nomes antes de trocar tudo, e devolve cada um pro
+  // lugar de onde veio, depois da troca.
+  const nomeDoDiaAtual = dias[di].n;
+  const nomeDoDiaDestino = dias[novoIndice].n;
   const temp = dias[di];
   dias[di] = dias[novoIndice];
   dias[novoIndice] = temp;
+  dias[di].n = nomeDoDiaAtual;
+  dias[novoIndice].n = nomeDoDiaDestino;
   atualizarLetrasDosDias(dias);
   sincronizarTreinoComSupabase(a); // mesmo caminho seguro de sempre (com o plano B do backup pra quem ainda não tem login)
   const i = alunasPersonal.indexOf(a);
@@ -11437,6 +11444,19 @@ function montarDadosParaResumoIA(nomeAluna){
   if(a.composicaoAtual && a.composicaoAtual.peso != null) texto += '- Peso atual: ' + a.composicaoAtual.peso + 'kg' + (a.composicaoAtual.gordura != null ? ', percentual de gordura: ' + a.composicaoAtual.gordura + '%' : '') + '\n';
   if(a.restricoes) texto += '- Restrições relatadas: ' + a.restricoes + '\n';
 
+  // Roda da Vida: só a mais recente FINALIZADA por ela (rascunho não finalizado não entra) — dá pro
+  // resumo enxergar além do treino, sem virar um relatório emocional, só contexto de vida real dela.
+  const ultimaRoda = getUltimaFinalizacaoRodaDaVida(nomeAluna);
+  if(ultimaRoda && ultimaRoda.areas){
+    const notas = AREAS_RODA_DA_VIDA.map(function(ar){ return { label: ar.label, nota: ultimaRoda.areas[ar.id] }; }).filter(function(x){ return x.nota != null; });
+    if(notas.length > 0){
+      const mediaGeral = Math.round((notas.reduce(function(s,x){ return s + x.nota; }, 0) / notas.length) * 10) / 10;
+      const maisBaixas = notas.slice().sort(function(x,y){ return x.nota - y.nota; }).slice(0, 3);
+      texto += '- Roda da Vida (última preenchida por ela, mês ' + ultimaRoda.mes + '): média geral ' + mediaGeral + '/10\n';
+      texto += '  - Áreas com nota mais baixa: ' + maisBaixas.map(function(x){ return x.label + ' (' + x.nota + '/10)'; }).join(', ') + '\n';
+    }
+  }
+
   return texto;
 }
 
@@ -11449,7 +11469,8 @@ async function gerarResumoPerformanceAluna(nomeAluna){
   const systemPrompt = 'Você ajuda um personal trainer a entender rapidamente a performance de uma aluna, a partir dos dados que ele te passar. ' +
     'Escreva em português, tom profissional e direto, sem travessões (use vírgulas e pontos), sem emojis. ' +
     'Estruture a resposta em markdown com estes títulos, nessa ordem: **Panorama**, **Pontos fortes**, **Pontos de atenção**, **Sugestão de conduta para a próxima semana**. ' +
-    'Use apenas os dados fornecidos, não invente números. Se um dado não foi informado, não mencione ele.';
+    'Use apenas os dados fornecidos, não invente números. Se um dado não foi informado, não mencione ele. ' +
+    'Se vier dado da Roda da Vida, use só como contexto de vida (ex: se uma área baixa pode estar afetando a constância no treino), nunca como diagnóstico ou conselho de vida fora do escopo de personal trainer.';
 
   try {
     const response = await fetch(SUPABASE_URL + '/functions/v1/chat-sol', {
