@@ -4403,6 +4403,11 @@ function alternarPreviewSecaEmpina(){
   renderConteudoPreviewSecaEmpina();
 }
 
+// Guarda a semente (seed) de cada estrutura mostrada na prévia — sem isso, toda vez que a tela
+// re-renderiza (ex: trocar frequência) a semente mudaria sozinha, e o "Regenerar" de uma estrutura
+// não conseguiria saber qual era a semente ATUAL pra sortear uma diferente dela.
+let sementesPreviewSecaEmpina = {};
+
 function renderConteudoPreviewSecaEmpina(){
   const alvo = document.getElementById('preview-seca-empina-conteudo');
   const seletor = document.getElementById('se-preview-freq');
@@ -4410,14 +4415,52 @@ function renderConteudoPreviewSecaEmpina(){
   const freq = seletor ? parseInt(seletor.value, 10) : 5;
   let html = '';
   for(let n = 1; n <= 10; n++){
-    const semana = gerarSemanaDesafio(n, freq, 4242 + n);
-    const m = semana.metaVolume;
-    html += '<details class="info-box" style="margin-bottom:8px;"><summary style="cursor:pointer;font-weight:600;font-size:13px;">Estrutura ' + n +
-        ' <span style="font-weight:400;font-size:11.5px;color:var(--text-dim);margin-left:8px;">' + htmlVolumeDesafio(semana) + '</span></summary>' +
-      '<p class="txt" style="font-size:11px;color:var(--text-faint);margin:6px 0 0;">Meta da estrutura (séries por semana): Quadríceps ' + m.quadriceps + ' · Posterior ' + m.posterior + ' · Glúteo médio ' + m.gluteoMedio + ' · Glúteo máximo ' + m.gluteoMaximo + '</p>' +
-      htmlDiasDaSemanaDesafio(semana) + '</details>';
+    if(sementesPreviewSecaEmpina[n] == null) sementesPreviewSecaEmpina[n] = 4242 + n;
+    html += htmlBlocoPreviewEstrutura(n, freq);
   }
   alvo.innerHTML = html;
+}
+
+function htmlBlocoPreviewEstrutura(n, freq){
+  const semana = gerarSemanaDesafio(n, freq, sementesPreviewSecaEmpina[n]);
+  const m = semana.metaVolume;
+  return '<details class="info-box" id="preview-estrutura-' + n + '" style="margin-bottom:8px;"><summary style="cursor:pointer;font-weight:600;font-size:13px;">Estrutura ' + n +
+      ' <span style="font-weight:400;font-size:11.5px;color:var(--text-dim);margin-left:8px;">' + htmlVolumeDesafio(semana) + '</span></summary>' +
+    '<p class="txt" style="font-size:11px;color:var(--text-faint);margin:6px 0 0;">Meta da estrutura (séries por semana): Quadríceps ' + m.quadriceps + ' · Posterior ' + m.posterior + ' · Glúteo médio ' + m.gluteoMedio + ' · Glúteo máximo ' + m.gluteoMaximo + '</p>' +
+    '<div style="display:flex;gap:8px;margin:8px 0;">' +
+      '<span class="acao-pill" onclick="regenerarPreviewEstrutura(' + n + ')"><i class="ti ti-refresh" style="margin-right:4px;"></i>Regenerar essa prévia</span>' +
+      '<span class="acao-pill" style="background:#6FA87C;" onclick="aplicarEstruturaParaTodasDoDesafio(' + n + ')"><i class="ti ti-check" style="margin-right:4px;"></i>Aplicar pra todas do desafio</span>' +
+    '</div>' +
+    htmlDiasDaSemanaDesafio(semana) + '</details>';
+}
+
+// Só sorteia uma semente nova e re-renderiza AQUELA estrutura — não mexe nas outras 9, e não afeta
+// nenhuma aluna de verdade, é só pra você conferir uma variação diferente antes de aplicar.
+function regenerarPreviewEstrutura(n){
+  const seletor = document.getElementById('se-preview-freq');
+  const freq = seletor ? parseInt(seletor.value, 10) : 5;
+  sementesPreviewSecaEmpina[n] = Math.floor(Math.random() * 100000);
+  const bloco = document.getElementById('preview-estrutura-' + n);
+  if(!bloco) return;
+  const estavaAberto = bloco.open;
+  bloco.outerHTML = htmlBlocoPreviewEstrutura(n, freq);
+  const blocoNovo = document.getElementById('preview-estrutura-' + n);
+  if(blocoNovo && estavaAberto) blocoNovo.open = true;
+}
+
+// Regenera de verdade o treino dessa estrutura específica, pra TODA aluna que já tenha recebido ela
+// (esteja usando agora ou não) — cada uma na própria frequência, já que a prévia mostra só uma de
+// cada vez. Útil depois de corrigir alguma regra do motor: aplica a correção em quem já recebeu, sem
+// precisar esperar os 30 dias ou mexer aluna por aluna.
+function aplicarEstruturaParaTodasDoDesafio(n){
+  const afetadas = alunasPersonal.filter(function(a){ return a.desafioTreinos && a.desafioTreinos[n]; });
+  if(afetadas.length === 0){ alert('Nenhuma aluna tem a Estrutura ' + n + ' ainda.'); return; }
+  if(!confirm('Isso vai REGERAR a Estrutura ' + n + ' pra ' + afetadas.length + ' aluna(s) que já têm ela, com as regras atuais do motor — o que elas tinham antes será substituído. Continuar?')) return;
+  afetadas.forEach(function(a){
+    a.desafioTreinos[n] = semanaDoDesafioParaAluna(a.nome, n, a.desafioAtivo ? a.desafioAtivo.frequencia : 5);
+    salvarPerfilAlunaNoSupabase(a.nome);
+  });
+  alert('Estrutura ' + n + ' regenerada pra ' + afetadas.length + ' aluna(s).');
 }
 
 function verTreinoDesafioDaAluna(nomeAluna){
