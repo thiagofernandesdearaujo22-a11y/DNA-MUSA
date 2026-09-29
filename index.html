@@ -4967,7 +4967,15 @@ function colocarElevacaoPelvicaPrimeiro(listaEx){
 // pra não estourar o tempo de sessão.
 function gerarDiasFullBody(perfil, numDias){
   const reps = perfil.bloco === 'deload' ? 14 : (perfil.bloco === 'choque' ? 7 : (perfil.fase === 'Desempenho' ? 9 : 11));
-  const seriesGrande = perfil.bloco === 'deload' ? 2 : (perfil.nivel === 'Avançado' ? 3 : 2);
+  // Baseado no que a pesquisa mostra: o que importa é o volume SEMANAL total por grupo, não quanto
+  // cada sessão isolada tem — a vantagem do Full Body é dar frequência alta naturalmente, não volume
+  // baixo por sessão como regra fixa (Pedersen et al. 2022, BMC Sports Science; revisões de Grgic et
+  // al. 2018 e Schoenfeld et al. 2016 convergem nisso). Por isso a série por sessão é calculada pra
+  // fechar uma meta semanal por grupo, dividida pelos dias de treino — em vez de um número fixo que,
+  // em frequências baixas (3x), fechava só 6 séries/semana, abaixo do que a maioria das referências
+  // usa como piso pra hipertrofia (~8-10+/semana).
+  const metaSemanalPorGrupo = perfil.bloco === 'deload' ? 6 : (perfil.nivel === 'Avançado' ? 14 : (perfil.nivel === 'Intermediário' ? 11 : 8));
+  const seriesGrande = perfil.bloco === 'deload' ? 2 : Math.max(2, Math.round(metaSemanalPorGrupo / numDias));
   const dias = [];
   const nomesDias = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
   const padroesPorGrupoNaSemana = {};
@@ -4978,17 +4986,31 @@ function gerarDiasFullBody(perfil, numDias){
   for(let d = 0; d < numDias; d++){
     const padroesNoDia = {};
     let ex = [];
+    let temUnilateralNoDia = false;
+
+    function escolherCandidatoSemDuplicarUnilateral(grupoBusca, chaveAluna, padroesDoGrupo){
+      // Pede várias opções e SEMPRE prefere uma que não seja unilateral, mesmo no primeiro grupo do
+      // dia — antes, o primeiro grupo pegava a primeira opção sem checar, e se ela já saísse
+      // unilateral por acaso, gastava a "vaga" de unilateral do dia à toa, fazendo o PRÓXIMO grupo
+      // que realmente só tivesse opção unilateral disponível ser descartado sem reposição.
+      const opcoes = selecionarExerciciosVariados(grupoBusca, chaveAluna, 8, (perfil.indiceCiclo || 0) + d, padroesDoGrupo, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
+      if(!opcoes || !opcoes[0]) return null;
+      const semUnilateral = opcoes.find(function(nome){ return !ehExercicioUnilateral(nome); });
+      if(semUnilateral) return semUnilateral;
+      return temUnilateralNoDia ? null : opcoes[0];
+    }
 
     gruposGrandes.forEach(function(grupoDisplay){
       const grupoBusca = grupoDisplay === 'Posterior' ? 'Posterior' : (grupoDisplay === 'Glúteo' ? 'Glúteo' : grupoDisplay);
       const padroesDoGrupo = {};
       if(padroesPorGrupoNaSemana[grupoDisplay]) Object.assign(padroesDoGrupo, padroesPorGrupoNaSemana[grupoDisplay]);
-      const candidato = selecionarExerciciosVariados(grupoBusca, (perfil.nomeAluna || '') + '_' + grupoDisplay, 1, (perfil.indiceCiclo || 0) + d, padroesDoGrupo, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
-      if(candidato && candidato[0]){
-        ex.push(candidato[0] + ' · ' + seriesGrande + 'x' + reps);
+      const escolhido = escolherCandidatoSemDuplicarUnilateral(grupoBusca, (perfil.nomeAluna || '') + '_' + grupoDisplay, padroesDoGrupo);
+      if(escolhido){
+        ex.push(escolhido + ' · ' + seriesGrande + 'x' + reps);
+        if(ehExercicioUnilateral(escolhido)) temUnilateralNoDia = true;
         padroesPorGrupoNaSemana[grupoDisplay] = padroesPorGrupoNaSemana[grupoDisplay] || {};
-        padroesPorGrupoNaSemana[grupoDisplay][obterPalavraChaveMovimento(candidato[0].toUpperCase())] = true;
-        padroesNoDia[obterPalavraChaveMovimento(candidato[0].toUpperCase())] = true;
+        padroesPorGrupoNaSemana[grupoDisplay][obterPalavraChaveMovimento(escolhido.toUpperCase())] = true;
+        padroesNoDia[obterPalavraChaveMovimento(escolhido.toUpperCase())] = true;
       }
     });
 
@@ -4997,11 +5019,12 @@ function gerarDiasFullBody(perfil, numDias){
     parDoDia.forEach(function(grupo){
       const padroesDoGrupo = {};
       if(padroesPorGrupoNaSemana[grupo]) Object.assign(padroesDoGrupo, padroesPorGrupoNaSemana[grupo]);
-      const candidato = selecionarExerciciosVariados(grupo, (perfil.nomeAluna || '') + '_' + grupo, 1, (perfil.indiceCiclo || 0) + d, padroesDoGrupo, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
-      if(candidato && candidato[0]){
-        ex.push(candidato[0] + ' · ' + (perfil.nivel === 'Avançado' ? 3 : 2) + 'x' + reps);
+      const escolhido = escolherCandidatoSemDuplicarUnilateral(grupo, (perfil.nomeAluna || '') + '_' + grupo, padroesDoGrupo);
+      if(escolhido){
+        ex.push(escolhido + ' · ' + (perfil.nivel === 'Avançado' ? 3 : 2) + 'x' + reps);
+        if(ehExercicioUnilateral(escolhido)) temUnilateralNoDia = true;
         padroesPorGrupoNaSemana[grupo] = padroesPorGrupoNaSemana[grupo] || {};
-        padroesPorGrupoNaSemana[grupo][obterPalavraChaveMovimento(candidato[0].toUpperCase())] = true;
+        padroesPorGrupoNaSemana[grupo][obterPalavraChaveMovimento(escolhido.toUpperCase())] = true;
       }
     });
 
@@ -5014,7 +5037,6 @@ function gerarDiasFullBody(perfil, numDias){
     removerUnilateraisExcedentesNoDia(dia);
     dias.push(dia);
   }
-  for(let d = numDias; d < 7; d++) dias.push({ n: nomesDias[d], foco: 'Descanso', ex: [], descanso: true });
   return dias;
 }
 
@@ -5360,7 +5382,10 @@ function gerarTreinoSemanal(perfil){
   semana.forEach(function(dia){
     // ITEM: reforço automático quando sobra tempo real (regra: usar quase 100% do tempo disponível)
     // No deload, a sessão mais curta é intencional, nunca reforça pra preencher tempo
-    if(perfil.tempoDisponivel && perfil.bloco !== 'deload' && !perfil.volumeReduzidoPorFadiga){
+    // Em Full Body, sessão mais curta TAMBÉM é intencional — o volume já é calculado pra fechar a
+    // meta semanal certa (ver comentário em gerarDiasFullBody). Sem essa exceção, esse reforço
+    // inflava as séries até a sessão preencher o tempo disponível, descaracterizando o método.
+    if(perfil.tempoDisponivel && perfil.bloco !== 'deload' && !perfil.volumeReduzidoPorFadiga && !ehFullBody){
       let tentativasReforco = 0;
       const jaTemExercicioNoTeto = { valor: false };
       while(calcularDuracaoDia(dia) < perfil.tempoDisponivel * 0.95 && tentativasReforco < 15){
@@ -5461,7 +5486,11 @@ function gerarTreinoSemanal(perfil){
   });
 
   // Progressão de reps por posição no dia: 8, 10, 12, 15 (do exercício principal pro final), só no bloco base
-  if(perfil.bloco !== 'choque' && perfil.bloco !== 'deload'){
+  // Não se aplica ao Full Body: aqui cada exercício é de um GRUPO diferente, não uma progressão dentro
+  // do mesmo grupo (squat pesado → isolador leve) — aplicar essa sequência por posição faria o grupo
+  // que caiu primeiro na lista sempre ficar em 8 reps e o último sempre em 15, sem nenhum motivo
+  // fisiológico, só por causa da ordem em que os grupos foram varridos.
+  if(perfil.bloco !== 'choque' && perfil.bloco !== 'deload' && !ehFullBody){
     const sequenciaReps = [8, 10, 12, 15];
     semana.forEach(function(dia){
       let posicao = 0;
@@ -6021,6 +6050,17 @@ function gerarDescricaoTreinoPorVolume(diaEx){
   const totais = calcularVolumePorGrupoNoDia(diaEx);
   const gruposOrdenados = Object.keys(totais).sort(function(g1, g2){ return totais[g2] - totais[g1]; });
   if(gruposOrdenados.length === 0) return 'Treino do dia'; // salvaguarda, não deveria acontecer com um dia de treino de verdade
+
+  // Full Body: os 4 grupos grandes (perna inteira + costas) aparecem juntos no MESMO dia, o que nunca
+  // acontece num dia de ênfase normal (um dia de perna não tem Costas, um dia de superiores não tem
+  // Quadríceps/Isquiotibiais/Glúteos). Sem essa checagem, o motor de nomenclatura escolhia o grupo de
+  // maior volume como se fosse "a ênfase do dia" e o nome Full Body nunca aparecia pra ninguém.
+  const GRUPOS_GRANDES_FULL_BODY = ['Quadríceps', 'Isquiotibiais', 'Glúteos', 'Costas'];
+  const quantosGrandesPresentes = GRUPOS_GRANDES_FULL_BODY.filter(function(g){ return (totais[g] || 0) > 0; }).length;
+  if(quantosGrandesPresentes === GRUPOS_GRANDES_FULL_BODY.length){
+    return 'Full Body · corpo inteiro';
+  }
+
   const enfaseLabel = LABEL_GRUPO_NOME_TREINO[gruposOrdenados[0]] || gruposOrdenados[0];
   const restantes = gruposOrdenados.slice(1).map(function(g){ return LABEL_GRUPO_NOME_TREINO[g] || g; });
   if(restantes.length === 0) return enfaseLabel;
