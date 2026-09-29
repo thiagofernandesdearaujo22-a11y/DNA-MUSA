@@ -1,4 +1,4 @@
-[dna_musa_75.html](https://github.com/user-attachments/files/32782660/dna_musa_75.html)
+[dna_musa_76.html](https://github.com/user-attachments/files/32809141/dna_musa_76.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -751,6 +751,8 @@
         <div id="replicas-treino-area"></div>
         <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="auditarVolumePosteriores()"><i class="ti ti-clipboard-check" style="margin-right:6px;"></i>Auditar volume mínimo de posteriores</button>
         <div id="auditoria-posteriores-area"></div>
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="auditarNomesDiasTreino()"><i class="ti ti-calendar-cog" style="margin-right:6px;"></i>Auditar nomes dos dias da semana</button>
+        <div id="auditoria-nomes-dias-area"></div>
         <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="mostrarConfigRanking()"><i class="ti ti-trophy" style="margin-right:6px;"></i>Configurar meta do Ranking</button>
         <div id="config-ranking-area"></div>
         <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:8px;" onclick="mostrarControleRanking()"><i class="ti ti-list-numbers" style="margin-right:6px;"></i>Acompanhamento completo do Ranking</button>
@@ -1354,6 +1356,67 @@ function renderControleRankingLista(){
       '<span class="tag" style="background:' + (pontos === 0 ? '#C9784A' : 'var(--gold-soft)') + ';color:#1A1409;font-weight:700;">' + pontos + ' pts</span>' +
     '</div>';
   }).join('');
+}
+
+// ===== AUDITORIA: nomes dos dias fora de ordem =====
+// Detecta treinos onde reordenações ANTIGAS (de antes da correção que fixou o nome do dia por
+// posição) deixaram o rótulo (Segunda, Terça...) fora da ordem certa pra cada posição. A correção
+// só protege movimentos NOVOS — o que já estava torto continua torto até alguém consertar. Corrige
+// só o RÓTULO de cada posição, na ordem oficial da semana; o conteúdo (foco, exercícios) não muda de
+// lugar nenhum, fica exatamente na ordem em que já estava.
+const NOMES_DIAS_OFICIAL = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+
+function encontrarAlunasComNomesDiasFora(){
+  return alunasPersonal.filter(function(a){
+    if(!a.treinoAtual || !a.treinoAtual.dias) return false;
+    return a.treinoAtual.dias.some(function(d, i){ return d.n !== NOMES_DIAS_OFICIAL[i]; });
+  });
+}
+
+function auditarNomesDiasTreino(){
+  const area = document.getElementById('auditoria-nomes-dias-area');
+  if(!area) return;
+  if(area.innerHTML){ area.innerHTML = ''; return; }
+
+  const afetadas = encontrarAlunasComNomesDiasFora();
+  if(afetadas.length === 0){
+    area.innerHTML = '<div class="info-box" style="border-color:var(--success);"><p class="lbl" style="color:var(--success);">✓ Nenhuma aluna com nome de dia fora de ordem.</p></div>';
+    return;
+  }
+
+  area.innerHTML = '<div class="info-box" style="border-color:#E2A33D;">' +
+    '<p class="lbl" style="color:#E2A33D;">⚠ ' + afetadas.length + ' aluna(s) com o nome do dia fora de ordem</p>' +
+    afetadas.map(function(a){
+      const ordemAtual = a.treinoAtual.dias.map(function(d){ return d.n; }).join(', ');
+      return '<div style="margin-top:8px;"><p class="txt" style="font-size:12px;margin:0;"><b>' + a.nome + '</b><br>ordem atual: ' + ordemAtual + '</p>' +
+        '<span class="acao-pill" style="margin-top:4px;display:inline-block;" onclick="corrigirNomesDiasAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Corrigir só ela</span></div>';
+    }).join('') +
+    '<button class="btn-gold" style="margin-top:12px;" onclick="corrigirNomesDiasTodas()">Corrigir todas as ' + afetadas.length + '</button>' +
+  '</div>';
+}
+
+function corrigirNomesDiasAluna(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !a.treinoAtual || !a.treinoAtual.dias) return;
+  a.treinoAtual.dias.forEach(function(d, i){ d.n = NOMES_DIAS_OFICIAL[i]; });
+  atualizarLetrasDosDias(a.treinoAtual.dias);
+  sincronizarTreinoComSupabase(a);
+  const area = document.getElementById('auditoria-nomes-dias-area');
+  if(area) area.innerHTML = '';
+  auditarNomesDiasTreino(); // reabre a lista já sem essa aluna, já que foi corrigida
+}
+
+function corrigirNomesDiasTodas(){
+  const afetadas = encontrarAlunasComNomesDiasFora();
+  if(!confirm('Isso vai corrigir o nome do dia (Segunda, Terça...) de ' + afetadas.length + ' aluna(s), deixando cada posição com o nome certo. O conteúdo do treino de cada uma não muda de lugar. Continuar?')) return;
+  afetadas.forEach(function(a){
+    a.treinoAtual.dias.forEach(function(d, i){ d.n = NOMES_DIAS_OFICIAL[i]; });
+    atualizarLetrasDosDias(a.treinoAtual.dias);
+    sincronizarTreinoComSupabase(a);
+  });
+  const area = document.getElementById('auditoria-nomes-dias-area');
+  if(area) area.innerHTML = '';
+  auditarNomesDiasTreino();
 }
 
 function abrirFichaDaAluna(nomeAluna){
