@@ -1,4 +1,4 @@
-[dna_musa_74.html](https://github.com/user-attachments/files/32782292/dna_musa_74.html)
+[dna_musa_75.html](https://github.com/user-attachments/files/32782660/dna_musa_75.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -570,6 +570,7 @@
         <span class="tag" id="resumo-dias-semana" style="background:rgba(0,0,0,0.15);color:#1A1409;"></span>
       </div>
       <div id="botao-desafio-area"></div>
+      <div id="botao-pergunta-perfil-area"></div>
 
       <div class="list-item" style="cursor:pointer;margin-top:10px;" onclick="openLevel2('progresso')">
         <span><i class="ti ti-trending-up" style="margin-right:8px;color:var(--gold-soft);"></i>Meu progresso</span>
@@ -631,6 +632,17 @@
       <p style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold);margin:0 0 4px;letter-spacing:0.5px;">Desafio Seca e Empina</p>
       <p class="page-sub" id="se-subtitulo-estrutura"></p>
       <div id="se-lista-dias"></div>
+    </div>
+
+    <!-- PERGUNTA DE PERFIL DNA -->
+    <div class="view" data-view="pergunta-perfil-dna">
+      <p style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold);margin:0 0 16px;letter-spacing:0.5px;">Uma pergunta rápida</p>
+      <div class="info-box">
+        <p class="txt" style="font-size:15px;font-weight:600;margin:0 0 14px;" id="pergunta-perfil-texto"></p>
+        <textarea class="form-input" id="pergunta-perfil-resposta" rows="4" placeholder="Escreve com suas palavras, sem pressa..."></textarea>
+        <button class="btn-gold" style="margin-top:12px;" onclick="confirmarRespostaPerguntaPerfil()">Enviar resposta</button>
+        <p class="txt" style="font-size:12px;color:var(--text-faint);text-align:center;margin-top:10px;cursor:pointer;" onclick="pularPerguntaPerfil()">Responder depois</p>
+      </div>
     </div>
 
     <!-- RODA DA VIDA -->
@@ -741,6 +753,8 @@
         <div id="auditoria-posteriores-area"></div>
         <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="mostrarConfigRanking()"><i class="ti ti-trophy" style="margin-right:6px;"></i>Configurar meta do Ranking</button>
         <div id="config-ranking-area"></div>
+        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:8px;" onclick="mostrarControleRanking()"><i class="ti ti-list-numbers" style="margin-right:6px;"></i>Acompanhamento completo do Ranking</button>
+        <div id="controle-ranking-area"></div>
         <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:14px;" onclick="verErrosRecentes()"><i class="ti ti-bug" style="margin-right:6px;"></i>Ver erros recentes do app</button>
         <div id="erros-recentes-area"></div>
         <button class="btn-gold" style="background:var(--card-2);color:#6FA87C;border:1px solid var(--border);margin-top:14px;" onclick="auditarAcessosAlunas()"><i class="ti ti-shield-check" style="margin-right:6px;"></i>Auditar acessos de TODAS as alunas</button>
@@ -1283,6 +1297,63 @@ async function executarAuditoriaAcessos(corrigir){
   } catch(erroDeRede){
     area.innerHTML = '<div class="info-box"><p class="txt">Erro ao auditar: ' + erroDeRede.message + '</p></div>';
   }
+}
+
+// ===== CONTROLE COMPLETO DO RANKING (pro Personal) — não é só o Top 10 público, mostra TODAS as
+// alunas, ordenadas por pontos, com status do plano e um alerta pra quem está zerada há tempo =====
+let filtroControleRanking = 'todas';
+
+function mostrarControleRanking(){
+  const area = document.getElementById('controle-ranking-area');
+  if(!area) return;
+  if(area.innerHTML){ area.innerHTML = ''; return; }
+  filtroControleRanking = 'todas';
+  area.innerHTML = '<div class="info-box">' +
+    '<div class="row" style="gap:8px;margin-bottom:10px;">' +
+      '<span class="chip active" id="filtro-rank-todas" style="cursor:pointer;" onclick="alternarFiltroControleRanking(\'todas\')">Todas</span>' +
+      '<span class="chip" id="filtro-rank-ativas" style="cursor:pointer;" onclick="alternarFiltroControleRanking(\'ativas\')">Só ativas</span>' +
+      '<span class="chip" id="filtro-rank-zeradas" style="cursor:pointer;" onclick="alternarFiltroControleRanking(\'zeradas\')">Zeradas (0 pontos)</span>' +
+    '</div>' +
+    '<div id="controle-ranking-lista"></div>' +
+  '</div>';
+  renderControleRankingLista();
+}
+
+function alternarFiltroControleRanking(filtro){
+  filtroControleRanking = filtro;
+  ['todas', 'ativas', 'zeradas'].forEach(function(f){
+    const el = document.getElementById('filtro-rank-' + f);
+    if(el) el.classList.toggle('active', f === filtro);
+  });
+  renderControleRankingLista();
+}
+
+function renderControleRankingLista(){
+  const area = document.getElementById('controle-ranking-lista');
+  if(!area) return;
+
+  let lista = alunasPersonal.slice();
+  if(filtroControleRanking === 'ativas') lista = lista.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  if(filtroControleRanking === 'zeradas') lista = lista.filter(function(a){ return (a.pontosRankingPublico || 0) === 0; });
+
+  lista.sort(function(a, b){ return (b.pontosRankingPublico || 0) - (a.pontosRankingPublico || 0); });
+
+  if(lista.length === 0){
+    area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Nenhuma aluna nesse filtro.</p>';
+    return;
+  }
+
+  area.innerHTML = lista.map(function(a, i){
+    const pontos = a.pontosRankingPublico || 0;
+    const corPosicao = i === 0 ? '#D4AF6E' : (i === 1 ? '#C0C0C0' : (i === 2 ? '#B87333' : 'var(--text-faint)'));
+    return '<div class="list-item" style="cursor:pointer;" onclick="abrirFichaDaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">' +
+      '<span style="display:flex;align-items:center;gap:10px;">' +
+        '<span style="font-weight:700;color:' + corPosicao + ';min-width:22px;">' + (i+1) + 'º</span>' +
+        '<span>' + a.nome + ' <span class="tag" style="background:var(--card-2);color:var(--text-faint);">' + statusDoPlano(a) + '</span></span>' +
+      '</span>' +
+      '<span class="tag" style="background:' + (pontos === 0 ? '#C9784A' : 'var(--gold-soft)') + ';color:#1A1409;font-weight:700;">' + pontos + ' pts</span>' +
+    '</div>';
+  }).join('');
 }
 
 function abrirFichaDaAluna(nomeAluna){
@@ -2968,6 +3039,29 @@ const CATALOGO_HABITOS_DIARIOS = [
   { id: 'sono', label: 'Sono de qualidade (7h+)', icone: 'ti-moon', pontos: 5 },
   { id: 'autocuidado', label: 'Momento de autocuidado', icone: 'ti-flower', pontos: 5 },
   { id: 'meditou', label: 'Meditou', icone: 'ti-yoga', pontos: 10 }
+];
+
+// ===== PERGUNTAS DE PERFIL DNA =====
+// Perguntas curtas e diretas, pensadas pra ir completando o perfil dela ao longo do tempo — não é
+// terapia nem anamnese de novo, é tipo bater um papo rápido que revela o que os números sozinhos não
+// mostram (rotina real, motivo de faltar treino, o que pesa mais no dia a dia). Categorizadas só pra
+// organização interna; pra ela, aparece só a pergunta, sem rótulo nenhum.
+const CATALOGO_PERGUNTAS_PERFIL_DNA = [
+  { id: 'rotina_horario', categoria: 'rotina', texto: 'Em qual horário do dia você treina melhor: bem cedo, no meio do dia, ou à noite?' },
+  { id: 'rotina_dificil', categoria: 'rotina', texto: 'Qual é o dia da semana mais difícil pra você conseguir treinar?' },
+  { id: 'motivacao_principal', categoria: 'motivacao', texto: 'Hoje, o que mais te motiva a continuar: estética, saúde, disposição, ou outra coisa?' },
+  { id: 'motivacao_baixa', categoria: 'motivacao', texto: 'Quando sua motivação cai, o que costuma te ajudar a voltar?' },
+  { id: 'obstaculo_treino', categoria: 'obstaculo', texto: 'O que mais atrapalha você de treinar quando planejado: cansaço, tempo, ou vontade mesmo?' },
+  { id: 'obstaculo_alimentacao', categoria: 'obstaculo', texto: 'Na alimentação, qual é o seu maior desafio no dia a dia?' },
+  { id: 'sono_qualidade', categoria: 'habito', texto: 'Como está seu sono ultimamente: dormindo bem, ou tem sido difícil?' },
+  { id: 'agua_dia', categoria: 'habito', texto: 'No seu dia normal, você costuma beber água o suficiente, ou esquece com frequência?' },
+  { id: 'estresse_nivel', categoria: 'bem_estar', texto: 'De um jeito geral, como está seu nível de estresse essas últimas semanas?' },
+  { id: 'apoio_social', categoria: 'bem_estar', texto: 'Você sente que tem apoio de quem convive com você pra manter seus treinos e sua alimentação?' },
+  { id: 'objetivo_prazo', categoria: 'objetivo', texto: 'Pensando nos próximos 3 meses, qual é a UMA coisa que mais te deixaria orgulhosa de ter conquistado?' },
+  { id: 'objetivo_progresso', categoria: 'objetivo', texto: 'Você sente que está vendo o progresso que esperava, ou a expectativa era diferente?' },
+  { id: 'corpo_relacao', categoria: 'autoimagem', texto: 'Hoje, como está sua relação com o espelho: mais leve, mais dura, ou nem pensa muito nisso?' },
+  { id: 'rotina_trabalho', categoria: 'rotina', texto: 'Como é a sua rotina de trabalho ou estudo — ela ajuda ou atrapalha seus treinos?' },
+  { id: 'alimentacao_fim_semana', categoria: 'obstaculo', texto: 'Nos fins de semana, sua alimentação costuma mudar muito em relação à semana?' }
 ];
 
 function getDataHojeISO(){
@@ -4699,6 +4793,86 @@ function marcarDiaDesafioFeito(numeroEstrutura, indiceDia){
 
 // Verifica se já passaram 30 dias desde a última virada de estrutura, e avança sozinho se sim —
 // chamado no login da aluna, então funciona mesmo sem o Personal precisar fazer nada manualmente
+// ===== PERGUNTAS DE PERFIL DNA: disparo, resposta, e exibição =====
+const INTERVALO_DIAS_PERGUNTA_PERFIL = 2; // "algumas vezes por semana" — ajustável aqui, um lugar só
+
+function verificarPerguntaPerfilPendente(){
+  const a = obterAlunaLogadaOuCriar();
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  if(!prog.perguntasPerfilDNA) prog.perguntasPerfilDNA = { respondidas: [], pendente: null, ultimaEm: null };
+  const pdna = prog.perguntasPerfilDNA;
+
+  if(pdna.pendente) return; // já tem uma esperando resposta, não empilha outra em cima
+
+  const diasDesdeUltima = pdna.ultimaEm ? Math.floor((Date.now() - new Date(pdna.ultimaEm).getTime()) / 86400000) : 999;
+  if(diasDesdeUltima < INTERVALO_DIAS_PERGUNTA_PERFIL) return;
+
+  const idsRespondidos = pdna.respondidas.map(function(r){ return r.perguntaId; });
+  let candidatas = CATALOGO_PERGUNTAS_PERFIL_DNA.filter(function(p){ return idsRespondidos.indexOf(p.id) === -1; });
+  if(candidatas.length === 0) candidatas = CATALOGO_PERGUNTAS_PERFIL_DNA; // já respondeu todas, começa a repetir o ciclo
+
+  const escolhida = candidatas[Math.floor(Math.random() * candidatas.length)];
+  pdna.pendente = { perguntaId: escolhida.id, texto: escolhida.texto, categoria: escolhida.categoria, enviadaEm: new Date().toISOString() };
+  pdna.ultimaEm = new Date().toISOString();
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+}
+
+function renderBotaoPerguntaPerfil(){
+  const area = document.getElementById('botao-pergunta-perfil-area');
+  if(!area) return;
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const pendente = prog.perguntasPerfilDNA && prog.perguntasPerfilDNA.pendente;
+  if(!pendente){ area.innerHTML = ''; return; }
+  area.innerHTML = '<div class="list-item" style="cursor:pointer;background:linear-gradient(135deg,#8B6FA8,#6B5490);border:none;margin-top:10px;" onclick="abrirTelaPerguntaPerfil()">' +
+    '<span style="color:#fff;font-weight:600;"><i class="ti ti-message-circle-2" style="margin-right:8px;"></i>Uma pergunta rápida pra você</span>' +
+    '<i class="ti ti-chevron-right" style="color:#fff;"></i>' +
+  '</div>';
+}
+
+function abrirTelaPerguntaPerfil(){
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const pendente = prog.perguntasPerfilDNA && prog.perguntasPerfilDNA.pendente;
+  if(!pendente) return;
+  openLevel2('pergunta-perfil-dna');
+  document.getElementById('pergunta-perfil-texto').textContent = pendente.texto;
+  document.getElementById('pergunta-perfil-resposta').value = '';
+}
+
+function pularPerguntaPerfil(){
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  if(prog.perguntasPerfilDNA) prog.perguntasPerfilDNA.pendente = null; // não marca como respondida — pode voltar num próximo ciclo
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  renderBotaoPerguntaPerfil();
+  openLevel2('home');
+}
+
+function confirmarRespostaPerguntaPerfil(){
+  const campo = document.getElementById('pergunta-perfil-resposta');
+  const resposta = campo ? campo.value.trim() : '';
+  if(!resposta){ alert('Escreve alguma coisa antes de enviar, mesmo que curta.'); return; }
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const pendente = prog.perguntasPerfilDNA.pendente;
+  if(!pendente) return;
+  prog.perguntasPerfilDNA.respondidas.push({ perguntaId: pendente.perguntaId, texto: pendente.texto, categoria: pendente.categoria, resposta: resposta, data: new Date().toISOString() });
+  prog.perguntasPerfilDNA.pendente = null;
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  renderBotaoPerguntaPerfil();
+  openLevel2('home');
+}
+
+// Pro Personal: lista as respostas dela na ficha, mais recente primeiro
+function htmlRespostasPerguntasPerfil(nomeAluna){
+  const prog = getProgressoAluna(nomeAluna);
+  const respondidas = (prog.perguntasPerfilDNA && prog.perguntasPerfilDNA.respondidas) || [];
+  if(respondidas.length === 0) return '<p class="txt" style="color:var(--text-faint);">Ainda sem nenhuma resposta.</p>';
+  return respondidas.slice().reverse().map(function(r){
+    const data = new Date(r.data).toLocaleDateString('pt-BR');
+    return '<div class="info-box" style="margin-bottom:6px;"><p class="txt" style="font-size:11.5px;color:var(--text-faint);margin:0 0 4px;">' + data + '</p>' +
+      '<p class="txt" style="font-size:12.5px;font-weight:600;margin:0 0 4px;">' + r.texto + '</p>' +
+      '<p class="txt" style="font-size:12.5px;">' + r.resposta + '</p></div>';
+  }).join('');
+}
+
 function verificarAvancoEstruturaDesafio(){
   const a = obterAlunaLogadaOuCriar();
   if(!a.desafioAtivo || a.desafioAtivo.estruturaAtual >= 10) return;
@@ -7574,6 +7748,7 @@ function abrirResumoCompletoAluna(nomeAluna){
     renderSecaoColapsavel('Plano fechado', renderPlanoFechadoConteudo(a), 'planofechado-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Transformar um dia em Tabata de casa', renderFerramentaTabata(a), 'tabata-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Calendário de treinos', renderCalendarioTreinos(a.nome), 'calendario-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderSecaoColapsavel('Respostas do Perfil DNA', htmlRespostasPerguntasPerfil(a.nome), 'perfildna-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Dados', '<div class="info-box">' +
       '<div class="form-group"><label class="form-label">Nome</label><input class="form-input" id="dados-nome-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" value="' + a.nome.replace(/"/g,'&quot;') + '"><button class="btn-gold" style="width:auto;padding:6px 14px;margin-top:6px;font-size:12px;" onclick="editarNomeAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Salvar nome</button></div>' +
       '<div class="form-group" style="margin-top:14px;"><label class="form-label">E-mail</label><input class="form-input" id="dados-email-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" value="' + (a.email || '').replace(/"/g,'&quot;') + '" placeholder="ainda sem e-mail cadastrado"><button class="btn-gold" style="width:auto;padding:6px 14px;margin-top:6px;font-size:12px;" onclick="editarEmailAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Salvar e-mail</button>' +
@@ -11004,7 +11179,7 @@ function openLevel2(which){
   if(phoneEl) phoneEl.classList.toggle('modo-personal', which === 'personal');
   if(which === 'personal'){ showPersonalView('dashboard'); carregarCatalogoPersonal(); iniciarPresencaEquipe(); iniciarRealtimeConversas(); }
   if(which === 'chatia'){ inicializarChatIA(); }
-  if(which === 'home' && typeof renderHome === 'function'){ renderHome(); verificarAvancoEstruturaDesafio(); renderBotaoDesafio(); }
+  if(which === 'home' && typeof renderHome === 'function'){ renderHome(); verificarAvancoEstruturaDesafio(); renderBotaoDesafio(); verificarPerguntaPerfilPendente(); renderBotaoPerguntaPerfil(); }
   if(which === 'dados' && typeof renderAvaliacoes === 'function'){ renderAvaliacoes(); }
   if(which === 'progresso' && typeof renderMeuProgresso === 'function'){ renderMeuProgresso(); }
   if(which === 'ranking' && typeof renderRanking === 'function'){ renderRanking(); renderRankingPublico(); }
