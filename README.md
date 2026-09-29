@@ -1,4 +1,4 @@
-[dna_musa_73.html](https://github.com/user-attachments/files/32782195/dna_musa_73.html)
+[dna_musa_74.html](https://github.com/user-attachments/files/32782292/dna_musa_74.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -4356,6 +4356,8 @@ function htmlVolumeDesafio(semana){
 
 // Semana de UMA estrutura pra UMA aluna (a mesma conta de sempre, então dá o mesmo resultado onde for gerada)
 function semanaDoDesafioParaAluna(nomeAluna, numeroEstrutura, frequencia){
+  const modelo = modelosMestreSecaEmpina[chaveModeloMestre(numeroEstrutura, frequencia)];
+  if(modelo) return JSON.parse(JSON.stringify(modelo)); // cópia de verdade, editar a dela não mexe no modelo
   return gerarSemanaDesafio(numeroEstrutura, frequencia, hashString(nomeAluna) + numeroEstrutura);
 }
 
@@ -4408,6 +4410,11 @@ function alternarPreviewSecaEmpina(){
 // re-renderiza (ex: trocar frequência) a semente mudaria sozinha, e o "Regenerar" de uma estrutura
 // não conseguiria saber qual era a semente ATUAL pra sortear uma diferente dela.
 let sementesPreviewSecaEmpina = {};
+// Modelo mestre: quando você edita e aplica uma estrutura, ela fica salva aqui (e no banco) — a
+// partir daí, QUALQUER aluna nova que receba essa estrutura+frequência recebe essa versão editada,
+// em vez do motor gerar uma aleatória do zero. Chave: "estrutura_frequencia", ex: "3_5".
+let modelosMestreSecaEmpina = {};
+function chaveModeloMestre(n, freq){ return n + '_' + freq; }
 
 function renderConteudoPreviewSecaEmpina(){
   const alvo = document.getElementById('preview-seca-empina-conteudo');
@@ -4416,31 +4423,135 @@ function renderConteudoPreviewSecaEmpina(){
   const freq = seletor ? parseInt(seletor.value, 10) : 5;
   let html = '';
   for(let n = 1; n <= 10; n++){
-    if(sementesPreviewSecaEmpina[n] == null) sementesPreviewSecaEmpina[n] = 4242 + n;
     html += htmlBlocoPreviewEstrutura(n, freq);
   }
   alvo.innerHTML = html;
 }
 
+// A semana que está sendo mostrada/editada na tela, por estrutura+frequência — é ESSE objeto que os
+// botões de trocar exercício e ajustar série mexem direto, e é ele que vira o modelo mestre quando
+// você aplica. Se já existe modelo mestre salvo, começa a partir dele; senão, sorteia do motor.
+function obterOuCriarSemanaEditavel(n, freq){
+  const chave = chaveModeloMestre(n, freq);
+  if(!semanasEditandoPreviewDesafio[chave]){
+    const modelo = modelosMestreSecaEmpina[chave];
+    if(sementesPreviewSecaEmpina[n] == null) sementesPreviewSecaEmpina[n] = 4242 + n;
+    semanasEditandoPreviewDesafio[chave] = modelo ? JSON.parse(JSON.stringify(modelo)) : gerarSemanaDesafio(n, freq, sementesPreviewSecaEmpina[n]);
+  }
+  return semanasEditandoPreviewDesafio[chave];
+}
+let semanasEditandoPreviewDesafio = {};
+
 function htmlBlocoPreviewEstrutura(n, freq){
-  const semana = gerarSemanaDesafio(n, freq, sementesPreviewSecaEmpina[n]);
-  const m = semana.metaVolume;
+  const chave = chaveModeloMestre(n, freq);
+  const semana = obterOuCriarSemanaEditavel(n, freq);
+  const m = semana.metaVolume || {};
+  const temModeloSalvo = !!modelosMestreSecaEmpina[chave];
   return '<details class="info-box" id="preview-estrutura-' + n + '" style="margin-bottom:8px;"><summary style="cursor:pointer;font-weight:600;font-size:13px;">Estrutura ' + n +
-      ' <span style="font-weight:400;font-size:11.5px;color:var(--text-dim);margin-left:8px;">' + htmlVolumeDesafio(semana) + '</span></summary>' +
+      (temModeloSalvo ? ' <span class="tag" style="background:#6FA87C;color:#fff;">modelo salvo</span>' : ' <span class="tag" style="background:var(--card-2);color:var(--text-faint);">sugestão automática</span>') +
+      ' <span id="preview-volume-' + n + '" style="font-weight:400;font-size:11.5px;color:var(--text-dim);margin-left:8px;">' + htmlVolumeDesafio(semana) + '</span></summary>' +
     '<p class="txt" style="font-size:11px;color:var(--text-faint);margin:6px 0 0;">Meta da estrutura (séries por semana): Quadríceps ' + m.quadriceps + ' · Posterior ' + m.posterior + ' · Glúteo médio ' + m.gluteoMedio + ' · Glúteo máximo ' + m.gluteoMaximo + '</p>' +
-    '<div style="display:flex;gap:8px;margin:8px 0;">' +
-      '<span class="acao-pill" onclick="regenerarPreviewEstrutura(' + n + ')"><i class="ti ti-refresh" style="margin-right:4px;"></i>Regenerar essa prévia</span>' +
-      '<span class="acao-pill" style="background:#6FA87C;" onclick="aplicarEstruturaParaTodasDoDesafio(' + n + ')"><i class="ti ti-check" style="margin-right:4px;"></i>Aplicar pra todas do desafio</span>' +
+    '<div style="display:flex;gap:8px;margin:8px 0;flex-wrap:wrap;">' +
+      '<span class="acao-pill" onclick="regenerarPreviewEstrutura(' + n + ')"><i class="ti ti-refresh" style="margin-right:4px;"></i>Regenerar do zero</span>' +
+      '<span class="acao-pill" style="background:#6FA87C;" onclick="aplicarEstruturaParaTodasDoDesafio(' + n + ')"><i class="ti ti-check" style="margin-right:4px;"></i>Salvar como modelo e aplicar</span>' +
     '</div>' +
-    htmlDiasDaSemanaDesafio(semana) + '</details>';
+    '<div id="preview-dias-' + n + '">' + htmlDiasEditaveisDesafio(n, freq) + '</div></details>';
+}
+
+function htmlDiasEditaveisDesafio(n, freq){
+  const semana = obterOuCriarSemanaEditavel(n, freq);
+  return semana.dias.filter(function(d){ return !d.descanso; }).map(function(d, di){
+    return '<p class="lbl" style="margin:10px 0 4px;">' + d.n + ' · ' + d.ex.length + ' exercícios · ' + seriesDaLinhaDesafioTotal(d.ex) + ' séries</p>' +
+      d.ex.map(function(linha, ei){
+        const nome = extrairNomeExercicioDeLinha(linha);
+        const url = (d.videos && d.videos[nome]) || '';
+        const series = seriesDaLinhaDesafio(linha);
+        return '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:4px 0;border-bottom:1px solid var(--border);">' +
+          '<span style="cursor:pointer;text-decoration:underline;text-decoration-color:var(--gold-soft);text-underline-offset:2px;font-size:12px;flex:1;" onclick="abrirVideoApenasExercicio(\'' + nome.replace(/'/g,"\\'") + '\', event, \'' + url.replace(/'/g,"\\'") + '\')">' + nome + '</span>' +
+          '<span style="display:flex;align-items:center;gap:4px;flex-shrink:0;">' +
+            '<span style="cursor:pointer;color:var(--gold-soft);padding:2px 6px;" onclick="ajustarSeriePreviewDesafio(' + n + ',' + freq + ',' + di + ',' + ei + ',-1)">−</span>' +
+            '<span style="font-size:11.5px;min-width:16px;text-align:center;">' + series + '</span>' +
+            '<span style="cursor:pointer;color:var(--gold-soft);padding:2px 6px;" onclick="ajustarSeriePreviewDesafio(' + n + ',' + freq + ',' + di + ',' + ei + ',1)">+</span>' +
+            '<span class="acao-pill" style="margin-left:6px;padding:3px 8px;font-size:11px;" onclick="abrirTrocaExercicioPreviewDesafio(' + n + ',' + freq + ',' + di + ',' + ei + ')">⇄</span>' +
+          '</span>' +
+        '</div>';
+      }).join('') +
+      '<div id="preview-troca-' + n + '-' + di + '"></div>';
+  }).join('');
+}
+
+function seriesDaLinhaDesafioTotal(listaEx){
+  return listaEx.reduce(function(soma, l){ return soma + seriesDaLinhaDesafio(l); }, 0);
+}
+
+function reRenderizarBlocoEstrutura(n, freq){
+  const bloco = document.getElementById('preview-dias-' + n);
+  const volumeEl = document.getElementById('preview-volume-' + n);
+  if(bloco) bloco.innerHTML = htmlDiasEditaveisDesafio(n, freq);
+  if(volumeEl) volumeEl.textContent = htmlVolumeDesafio(obterOuCriarSemanaEditavel(n, freq)).replace(/<[^>]+>/g, '');
+  if(volumeEl) volumeEl.innerHTML = htmlVolumeDesafio(obterOuCriarSemanaEditavel(n, freq));
+}
+
+function ajustarSeriePreviewDesafio(n, freq, diaIndex, exIndex, delta){
+  const semana = obterOuCriarSemanaEditavel(n, freq);
+  const diasComTreino = semana.dias.filter(function(d){ return !d.descanso; });
+  const dia = diasComTreino[diaIndex];
+  if(!dia) return;
+  const linha = dia.ex[exIndex];
+  const partes = linha.split(' · ');
+  const match = partes[1].match(/^(\d+)x(\d+)(.*)$/);
+  if(!match) return;
+  const novaSerie = Math.max(1, Math.min(6, parseInt(match[1], 10) + delta)); // nunca menos de 1, nem mais de 6 numa série só
+  dia.ex[exIndex] = partes[0] + ' · ' + novaSerie + 'x' + match[2] + (match[3] || '');
+  reRenderizarBlocoEstrutura(n, freq);
+}
+
+function abrirTrocaExercicioPreviewDesafio(n, freq, diaIndex, exIndex){
+  const area = document.getElementById('preview-troca-' + n + '-' + diaIndex);
+  if(!area) return;
+  if(area.innerHTML){ area.innerHTML = ''; return; }
+  const semana = obterOuCriarSemanaEditavel(n, freq);
+  const dia = semana.dias.filter(function(d){ return !d.descanso; })[diaIndex];
+  const nomeAtual = extrairNomeExercicioDeLinha(dia.ex[exIndex]);
+  const exAtualBanco = buscarExercicioNoBanco(nomeAtual);
+  const grupo = exAtualBanco ? (exAtualBanco.grupo || exAtualBanco.categoria) : null;
+  const opcoes = exerciciosBanco.filter(function(e){
+    const grupoDoEx = e.grupo || e.categoria;
+    const mesmoAmbiente = (e.ambiente || 'Academia') === 'Academia'; // desafio é sempre academia
+    return (!grupo || grupoDoEx === grupo) && mesmoAmbiente && e.nome.toUpperCase() !== nomeAtual.toUpperCase();
+  }).sort(function(x, y){ return x.nome.localeCompare(y.nome, 'pt-BR'); });
+
+  area.innerHTML = '<div style="margin:6px 0;"><select class="form-select" style="font-size:12px;padding:6px;" id="select-troca-' + n + '-' + diaIndex + '-' + exIndex + '">' +
+    opcoes.map(function(e){ return '<option value="' + e.nome.replace(/"/g,'&quot;') + '"' + (!e.video ? ' data-sem-video="1"' : '') + '>' + e.nome + (!e.video ? ' (sem vídeo)' : '') + '</option>'; }).join('') +
+    '</select> <span class="acao-pill" onclick="confirmarTrocaExercicioPreviewDesafio(' + n + ',' + freq + ',' + diaIndex + ',' + exIndex + ')">Trocar</span></div>';
+}
+
+function confirmarTrocaExercicioPreviewDesafio(n, freq, diaIndex, exIndex){
+  const select = document.getElementById('select-troca-' + n + '-' + diaIndex + '-' + exIndex);
+  if(!select) return;
+  const novoNome = select.value;
+  const semana = obterOuCriarSemanaEditavel(n, freq);
+  const dia = semana.dias.filter(function(d){ return !d.descanso; })[diaIndex];
+  const linhaAntiga = dia.ex[exIndex];
+  const partes = linhaAntiga.split(' · ');
+  dia.ex[exIndex] = novoNome + ' · ' + partes.slice(1).join(' · ');
+  const novoBanco = buscarExercicioNoBanco(novoNome);
+  if(!dia.videos) dia.videos = {};
+  if(novoBanco && novoBanco.video) dia.videos[novoNome] = novoBanco.video;
+  reRenderizarBlocoEstrutura(n, freq);
 }
 
 // Só sorteia uma semente nova e re-renderiza AQUELA estrutura — não mexe nas outras 9, e não afeta
 // nenhuma aluna de verdade, é só pra você conferir uma variação diferente antes de aplicar.
+// Descarta a edição atual (se tinha) e sorteia uma sugestão nova do zero, ignorando qualquer modelo
+// mestre salvo — é só uma sugestão pra você revisar, nada é salvo até clicar em "Salvar como modelo".
 function regenerarPreviewEstrutura(n){
   const seletor = document.getElementById('se-preview-freq');
   const freq = seletor ? parseInt(seletor.value, 10) : 5;
+  const chave = chaveModeloMestre(n, freq);
   sementesPreviewSecaEmpina[n] = Math.floor(Math.random() * 100000);
+  delete semanasEditandoPreviewDesafio[chave]; // força gerar do zero, ignorando o modelo mestre dessa vez
+  semanasEditandoPreviewDesafio[chave] = gerarSemanaDesafio(n, freq, sementesPreviewSecaEmpina[n]);
   const bloco = document.getElementById('preview-estrutura-' + n);
   if(!bloco) return;
   const estavaAberto = bloco.open;
@@ -4449,19 +4560,33 @@ function regenerarPreviewEstrutura(n){
   if(blocoNovo && estavaAberto) blocoNovo.open = true;
 }
 
-// Regenera de verdade o treino dessa estrutura específica, pra TODA aluna que já tenha recebido ela
-// (esteja usando agora ou não) — cada uma na própria frequência, já que a prévia mostra só uma de
-// cada vez. Útil depois de corrigir alguma regra do motor: aplica a correção em quem já recebeu, sem
-// precisar esperar os 30 dias ou mexer aluna por aluna.
+// Salva a versão que está na tela (com qualquer troca de exercício ou ajuste de série que você fez)
+// como MODELO MESTRE dessa estrutura+frequência, e aplica uma cópia pra toda aluna que já tenha
+// recebido essa estrutura — cada uma continua na própria frequência (o modelo só se aplica em quem
+// usa a MESMA frequência que você estava editando; as de outra frequência não são tocadas por essa ação).
 function aplicarEstruturaParaTodasDoDesafio(n){
-  const afetadas = alunasPersonal.filter(function(a){ return a.desafioTreinos && a.desafioTreinos[n]; });
-  if(afetadas.length === 0){ alert('Nenhuma aluna tem a Estrutura ' + n + ' ainda.'); return; }
-  if(!confirm('Isso vai REGERAR a Estrutura ' + n + ' pra ' + afetadas.length + ' aluna(s) que já têm ela, com as regras atuais do motor — o que elas tinham antes será substituído. Continuar?')) return;
+  const seletor = document.getElementById('se-preview-freq');
+  const freq = seletor ? parseInt(seletor.value, 10) : 5;
+  const chave = chaveModeloMestre(n, freq);
+  const semanaEditada = obterOuCriarSemanaEditavel(n, freq);
+
+  const afetadas = alunasPersonal.filter(function(a){ return a.desafioTreinos && a.desafioTreinos[n] && a.desafioAtivo && a.desafioAtivo.frequencia === freq; });
+  const mensagemConfirmacao = 'Isso vai salvar essa versão como modelo oficial da Estrutura ' + n + ' (' + freq + 'x), e aplicar pra ' +
+    afetadas.length + ' aluna(s) que já têm essa estrutura nessa mesma frequência — o que elas tinham antes será substituído. Continuar?';
+  if(!confirm(mensagemConfirmacao)) return;
+
+  modelosMestreSecaEmpina[chave] = JSON.parse(JSON.stringify(semanaEditada));
+  salvarCatalogoPersonal('modelo_mestre_desafio', chave, modelosMestreSecaEmpina[chave]);
+
   afetadas.forEach(function(a){
-    a.desafioTreinos[n] = semanaDoDesafioParaAluna(a.nome, n, a.desafioAtivo ? a.desafioAtivo.frequencia : 5);
+    a.desafioTreinos[n] = semanaDoDesafioParaAluna(a.nome, n, freq);
     salvarPerfilAlunaNoSupabase(a.nome);
   });
-  alert('Estrutura ' + n + ' regenerada pra ' + afetadas.length + ' aluna(s).');
+
+  const bloco = document.getElementById('preview-estrutura-' + n);
+  if(bloco){ const estavaAberto = bloco.open; bloco.outerHTML = htmlBlocoPreviewEstrutura(n, freq); const novo = document.getElementById('preview-estrutura-' + n); if(novo && estavaAberto) novo.open = true; }
+
+  alert('Modelo da Estrutura ' + n + ' (' + freq + 'x) salvo, e aplicado pra ' + afetadas.length + ' aluna(s).');
 }
 
 function verTreinoDesafioDaAluna(nomeAluna){
@@ -9517,6 +9642,8 @@ async function carregarCatalogoPersonal(){
         if(row.dados.recompensa) metaComunidadeRecompensa = row.dados.recompensa;
       } else if(row.tipo === 'config_meta_financeira'){
         if(row.dados.meta != null) metaFaturamentoMensal = row.dados.meta;
+      } else if(row.tipo === 'modelo_mestre_desafio'){
+        modelosMestreSecaEmpina[row.chave] = row.dados;
       } else if(row.tipo === 'relatorio_tendencias'){
         const jaExisteRelatorio = relatoriosTendencias.find(function(r){ return r.data === row.dados.data; });
         if(!jaExisteRelatorio) relatoriosTendencias.push(row.dados);
