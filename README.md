@@ -1,4 +1,4 @@
-[dna_musa_77.html](https://github.com/user-attachments/files/32810056/dna_musa_77.html)
+[dna_musa_78.html](https://github.com/user-attachments/files/32810672/dna_musa_78.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -388,7 +388,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-13-CORRECAO-TREINOS</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-FULLBODY-CORRECAO-REMOCAO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -7019,35 +7019,70 @@ function moverDiaTreino(nomeAluna, di, direcao){
 }
 
 function moverExercicioTreino(diaIndex, exIndex, direcao){
-  const a = alunaAberta;
-  const diaAtual = a.treinoAtual.dias[diaIndex];
-  const novoIndex = exIndex + direcao;
-  if(novoIndex < 0 || novoIndex >= diaAtual.ex.length) return; // já está na ponta, não faz nada
+  try {
+    const a = alunaAberta;
+    const diaAtual = a.treinoAtual.dias[diaIndex];
+    const novoIndex = exIndex + direcao;
+    if(novoIndex < 0 || novoIndex >= diaAtual.ex.length) return; // já está na ponta, não faz nada
 
-  function trocarPosicao(arr, i, j){
-    if(!arr) return;
-    const tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    function trocarPosicao(arr, i, j){
+      if(!arr) return;
+      const tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+
+    trocarPosicao(diaAtual.ex, exIndex, novoIndex);
+    trocarPosicao(diaAtual.metodos, exIndex, novoIndex); // o método aplicado acompanha o exercício, não fica preso na posição
+
+    if(typeof dias !== 'undefined' && dias[diaIndex]){
+      trocarPosicao(dias[diaIndex].ex, exIndex, novoIndex);
+      trocarPosicao(dias[diaIndex].metodos, exIndex, novoIndex);
+    }
+
+    sincronizarTreinoComSupabase(a);
+    atualizarDiaPersonalNaTela(diaIndex);
+  } catch(erroAoMover){
+    console.error('[Erro ao mover exercício]', erroAoMover);
+    registrarErroNoBanco(erroAoMover);
+    mostrarConfirmacaoSalvamento(false, 'Não consegui mover esse exercício agora. Fecha e abre a ficha dela de novo — nada foi perdido.');
   }
+}
 
-  trocarPosicao(diaAtual.ex, exIndex, novoIndex);
-  trocarPosicao(diaAtual.metodos, exIndex, novoIndex); // o método aplicado acompanha o exercício, não fica preso na posição
-
-  if(typeof dias !== 'undefined' && dias[diaIndex]){
-    trocarPosicao(dias[diaIndex].ex, exIndex, novoIndex);
-    trocarPosicao(dias[diaIndex].metodos, exIndex, novoIndex);
-  }
-
-  sincronizarTreinoComSupabase(a);
-  atualizarDiaPersonalNaTela(diaIndex);
+// Depois de remover um exercício do meio da lista, os que vinham DEPOIS dele mudam de posição — mas
+// o método (Bi-set/Tri-set/etc) fica preso à POSIÇÃO antiga em dia.metodos, não ao exercício. Sem
+// reindexar isso, o método passava a aparecer grudado no exercício ERRADO (o que empurrou pra trás).
+function reindexarMetodosAposRemocao(dia, exIndexRemovido){
+  if(!dia.metodos) return;
+  const metodosNovos = {};
+  Object.keys(dia.metodos).forEach(function(chaveStr){
+    const chave = parseInt(chaveStr, 10);
+    if(chave === exIndexRemovido) return; // o método do exercício removido não faz mais sentido, descarta
+    const novaChave = chave > exIndexRemovido ? chave - 1 : chave;
+    metodosNovos[novaChave] = dia.metodos[chaveStr];
+  });
+  dia.metodos = metodosNovos;
 }
 
 function removerExercicioTreino(diaIndex, exIndex){
-  const a = alunaAberta;
-  a.treinoAtual.dias[diaIndex].ex.splice(exIndex, 1);
-  if(typeof dias !== 'undefined' && dias[diaIndex]) dias[diaIndex].ex.splice(exIndex, 1);
-  sincronizarTreinoComSupabase(a);
-  atualizarDiaPersonalNaTela(diaIndex);
-  recalcularEAtualizarNomeDoDia(diaIndex);
+  try {
+    const a = alunaAberta;
+    if(!a || !a.treinoAtual || !a.treinoAtual.dias[diaIndex] || !a.treinoAtual.dias[diaIndex].ex[exIndex]){
+      mostrarConfirmacaoSalvamento(false, 'Não consegui identificar esse exercício pra remover. Fecha e abre a ficha dela de novo.');
+      return;
+    }
+    const dia = a.treinoAtual.dias[diaIndex];
+    dia.ex.splice(exIndex, 1);
+    reindexarMetodosAposRemocao(dia, exIndex);
+    if(typeof dias !== 'undefined' && dias[diaIndex] && dias[diaIndex].ex[exIndex] !== undefined) dias[diaIndex].ex.splice(exIndex, 1);
+    sincronizarTreinoComSupabase(a);
+    atualizarDiaPersonalNaTela(diaIndex);
+    recalcularEAtualizarNomeDoDia(diaIndex);
+  } catch(erroAoRemover){
+    // Nunca deixa uma falha aqui derrubar o app inteiro (a tela de "algo não carregou direito") —
+    // isso é só uma edição de treino, sempre recuperável fechando e abrindo a ficha de novo.
+    console.error('[Erro ao remover exercício]', erroAoRemover);
+    registrarErroNoBanco(erroAoRemover);
+    mostrarConfirmacaoSalvamento(false, 'Não consegui remover esse exercício agora. Fecha e abre a ficha dela de novo — nada foi perdido.');
+  }
 }
 
 function abrirSelecaoGrupoParaAdicionar(diaIndex){
@@ -7396,23 +7431,29 @@ function filtrarOpcoesTroca(termo, diaIndex, exIndex){
 }
 
 function confirmarSubstituicao(diaIndex, exIndex, novoNome){
-  const a = alunaAberta;
-  const linhaAtual = a.treinoAtual.dias[diaIndex].ex[exIndex];
-  const nomeAntigo = extrairNomeExercicioDeLinha(linhaAtual);
-  const setsReps = linhaAtual.split(' · ')[1] || '';
+  try {
+    const a = alunaAberta;
+    const linhaAtual = a.treinoAtual.dias[diaIndex].ex[exIndex];
+    const nomeAntigo = extrairNomeExercicioDeLinha(linhaAtual);
+    const setsReps = linhaAtual.split(' · ')[1] || '';
 
-  a.treinoAtual.dias[diaIndex].ex[exIndex] = novoNome + ' · ' + setsReps;
-  if(typeof dias !== 'undefined' && dias[diaIndex] && dias[diaIndex].ex[exIndex]){
-    dias[diaIndex].ex[exIndex] = novoNome + ' · ' + setsReps;
+    a.treinoAtual.dias[diaIndex].ex[exIndex] = novoNome + ' · ' + setsReps;
+    if(typeof dias !== 'undefined' && dias[diaIndex] && dias[diaIndex].ex[exIndex]){
+      dias[diaIndex].ex[exIndex] = novoNome + ' · ' + setsReps;
+    }
+
+    const prog = getProgressoAluna(a.nome);
+    prog.substituicoes.push({ semana: prog.semana, de: nomeAntigo, para: novoNome, motivo: null });
+
+    sincronizarTreinoComSupabase(a);
+    salvarProgressoNoSupabase(a.nome);
+    atualizarDiaPersonalNaTela(diaIndex);
+    recalcularEAtualizarNomeDoDia(diaIndex);
+  } catch(erroAoTrocar){
+    console.error('[Erro ao trocar exercício]', erroAoTrocar);
+    registrarErroNoBanco(erroAoTrocar);
+    mostrarConfirmacaoSalvamento(false, 'Não consegui trocar esse exercício agora. Fecha e abre a ficha dela de novo — nada foi perdido.');
   }
-
-  const prog = getProgressoAluna(a.nome);
-  prog.substituicoes.push({ semana: prog.semana, de: nomeAntigo, para: novoNome, motivo: null });
-
-  sincronizarTreinoComSupabase(a);
-  salvarProgressoNoSupabase(a.nome);
-  atualizarDiaPersonalNaTela(diaIndex);
-  recalcularEAtualizarNomeDoDia(diaIndex);
 }
 
 function calcularContagemRegressivaAvaliacao(a){
@@ -7679,34 +7720,40 @@ function alternarMetodoExercicio(di, ei){
 }
 
 function aplicarMetodoExercicio(di, ei, metodo){
-  const a = alunaAberta;
-  if(!a.treinoAtual.dias[di].metodos) a.treinoAtual.dias[di].metodos = {};
-  if(metodo === 'Nenhum'){
-    delete a.treinoAtual.dias[di].metodos[ei];
-  } else {
-    // Bi-set/Tri-set guardam também os exercícios parceiros — os outros métodos continuam como
-    // string simples (mesmo formato de sempre, sem quebrar nada que já existia).
-    const ehComboDeVarios = (metodo === 'Bi-set' || metodo === 'Tri-set');
-    a.treinoAtual.dias[di].metodos[ei] = ehComboDeVarios ? { tipo: metodo, parceiros: [] } : metodo;
-  }
-  sincronizarTreinoComSupabase(a);
+  try {
+    const a = alunaAberta;
+    if(!a.treinoAtual.dias[di].metodos) a.treinoAtual.dias[di].metodos = {};
+    if(metodo === 'Nenhum'){
+      delete a.treinoAtual.dias[di].metodos[ei];
+    } else {
+      // Bi-set/Tri-set guardam também os exercícios parceiros — os outros métodos continuam como
+      // string simples (mesmo formato de sempre, sem quebrar nada que já existia).
+      const ehComboDeVarios = (metodo === 'Bi-set' || metodo === 'Tri-set');
+      a.treinoAtual.dias[di].metodos[ei] = ehComboDeVarios ? { tipo: metodo, parceiros: [] } : metodo;
+    }
+    sincronizarTreinoComSupabase(a);
 
-  const nomeEx = a.treinoAtual.dias[di].ex[ei].split(' · ')[0];
-  const elNome = document.getElementById('nome-ex-' + di + '-' + ei);
-  const nomeMetodoExibir = (metodo !== 'Nenhum') ? metodo : null;
-  if(elNome){
-    elNome.innerHTML = nomeEx + (nomeMetodoExibir ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + nomeMetodoExibir + '</span>' : '');
-  }
-  const picker = document.getElementById('metodo-picker-' + di + '-' + ei);
-  if(picker){ picker.style.display = 'none'; picker.innerHTML = ''; }
+    const nomeEx = a.treinoAtual.dias[di].ex[ei].split(' · ')[0];
+    const elNome = document.getElementById('nome-ex-' + di + '-' + ei);
+    const nomeMetodoExibir = (metodo !== 'Nenhum') ? metodo : null;
+    if(elNome){
+      elNome.innerHTML = nomeEx + (nomeMetodoExibir ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + nomeMetodoExibir + '</span>' : '');
+    }
+    const picker = document.getElementById('metodo-picker-' + di + '-' + ei);
+    if(picker){ picker.style.display = 'none'; picker.innerHTML = ''; }
 
-  // Bi-set/Tri-set: abre na hora a caixinha pra escolher o(s) exercício(s) parceiro(s), do lado do
-  // que já está prescrito — mesma série/reps de sempre, ela só executa em sequência.
-  if(metodo === 'Bi-set') renderCaixasParceirosCombo(di, ei, 1);
-  if(metodo === 'Tri-set') renderCaixasParceirosCombo(di, ei, 2);
-  if(metodo !== 'Bi-set' && metodo !== 'Tri-set'){
-    const areaParceiros = document.getElementById('parceiros-combo-' + di + '-' + ei);
-    if(areaParceiros) areaParceiros.innerHTML = ''; // trocou pra um método sem combo, limpa qualquer parceiro que tivesse antes
+    // Bi-set/Tri-set: abre na hora a caixinha pra escolher o(s) exercício(s) parceiro(s), do lado do
+    // que já está prescrito — mesma série/reps de sempre, ela só executa em sequência.
+    if(metodo === 'Bi-set') renderCaixasParceirosCombo(di, ei, 1);
+    if(metodo === 'Tri-set') renderCaixasParceirosCombo(di, ei, 2);
+    if(metodo !== 'Bi-set' && metodo !== 'Tri-set'){
+      const areaParceiros = document.getElementById('parceiros-combo-' + di + '-' + ei);
+      if(areaParceiros) areaParceiros.innerHTML = ''; // trocou pra um método sem combo, limpa qualquer parceiro que tivesse antes
+    }
+  } catch(erroAoAplicarMetodo){
+    console.error('[Erro ao aplicar método]', erroAoAplicarMetodo);
+    registrarErroNoBanco(erroAoAplicarMetodo);
+    mostrarConfirmacaoSalvamento(false, 'Não consegui aplicar esse método agora. Fecha e abre a ficha dela de novo — nada foi perdido.');
   }
 }
 
