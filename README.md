@@ -1,4 +1,4 @@
-[Uploading dna_musa_95.html…]()
+[dna_musa_96.html](https://github.com/user-attachments/files/32880045/dna_musa_96.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -394,7 +394,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-O-AUDITOR-PATOLOGIA</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-P-ORQUESTRADOR-V1</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -6856,6 +6856,20 @@ async function construirEAtribuirTreino(nomeAluna){
   const saidaSalvamento = await sincronizarTreinoComSupabase(a);
 
   const resultado = validarPrescricao(perfil, semana);
+  // Orquestração: conecta o Auditor de Patologia no MESMO checklist que já roda após toda geração,
+  // em vez de deixar essa checagem isolada só na ficha. Se a aluna tem patologia confirmada e o
+  // treino recém-gerado carrega exercício da região afetada, isso agora reprova a prescrição
+  // automática — é uma checagem de segurança clínica, não só estrutural, então merece parar aqui.
+  const auditoriaPatologia = auditarPrescricaoPatologia(a);
+  if(auditoriaPatologia && auditoriaPatologia.encontrados.length > 0){
+    resultado.checklist.push({
+      item: 'Nenhum exercício na região da patologia confirmada (' + auditoriaPatologia.patologia.nome + ')',
+      ok: false,
+      detalhe: auditoriaPatologia.encontrados.map(function(e){ return e.nome; }).join(', ')
+    });
+    resultado.aprovado = false;
+  }
+
   avisarEquipeTreinoEntregue(nomeAluna); // avisa quem mais estiver online agora que um treino saiu
   return { ok: true, resultado: resultado, salvamento: saidaSalvamento };
 }
