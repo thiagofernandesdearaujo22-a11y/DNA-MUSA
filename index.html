@@ -393,7 +393,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-P-ORQUESTRADOR-V1</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-Q-EVOLUCAO-NIVEL</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -6079,12 +6079,30 @@ function obterEnfaseSecundariaEfetiva(a){
 function editarPiramideManual(nomeAluna, campo, valor){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
+  // Registra a mudança de prioridade ANTES de aplicar — fecha a rastreabilidade que faltava:
+  // "como essa aluna chegou até aqui" agora tem resposta. Só muda ênfase/volume, nunca reinicia fase
+  // nem mexe no nível — exatamente como combinado, isso aqui só documenta o que já acontecia.
+  const valorAnterior = obterEnfaseSecundariaEfetiva(a)[campo];
+  if(valorAnterior !== valor){
+    if(!a.historicoPrioridade) a.historicoPrioridade = [];
+    a.historicoPrioridade.push({ data: getDataHojeISO(), campo: campo, de: valorAnterior || null, para: valor || null });
+  }
   if(!a.piramideManual) a.piramideManual = {};
   a.piramideManual[campo] = valor || null;
   salvarPerfilAlunaNoSupabase(nomeAluna);
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
   mostrarPreviewMudancaTreino(nomeAluna);
+}
+
+function renderHistoricoPrioridade(a){
+  if(!a.historicoPrioridade || a.historicoPrioridade.length === 0) return '';
+  const nomeCampo = { enfase: 'Ênfase', secundario: 'Secundário' };
+  let html = '<p class="section-label" style="margin-top:22px;">Histórico de mudança de prioridade</p>';
+  html += a.historicoPrioridade.slice().reverse().map(function(h){
+    return '<div class="list-item"><span>' + (nomeCampo[h.campo] || h.campo) + ': ' + (h.de || '—') + ' → <b>' + (h.para || '—') + '</b></span><span class="tag">' + h.data + '</span></div>';
+  }).join('');
+  return html;
 }
 
 function resetarPiramideParaAutomatica(nomeAluna){
@@ -8270,7 +8288,7 @@ function openAlunaDetail(i){
     '<div id="treinos-arquivados-area"></div>' +
     treinoHtml +
     treinoAcoesHtml +
-    renderSecaoColapsavel('Acompanhamento e histórico', renderElegibilidadeFase(a) + renderFunilEngajamento(a) + renderLinhaDoTempo(a) + renderPromocaoNivel(a) + renderBlocoPeriodizacao(a) + renderTecnicaPendente(a) + renderProgressao(a), 'acompanhamento') +
+    renderSecaoColapsavel('Acompanhamento e histórico', renderElegibilidadeFase(a) + renderFunilEngajamento(a) + renderLinhaDoTempo(a) + renderPromocaoNivel(a) + renderBlocoPeriodizacao(a) + renderHistoricoPrioridade(a) + renderTecnicaPendente(a) + renderProgressao(a), 'acompanhamento') +
     '<p class="section-label" style="margin-top:22px;">Acesso ao app</p>' +
     (a.authId && a.senhaGerada
       ? '<div class="info-box"><p class="lbl" style="color:var(--success);">Acesso gerado pelo app (se ela não conseguir entrar, use "Alterar senha")</p>' +
@@ -8293,22 +8311,45 @@ function openAlunaDetail(i){
 }
 
 function renderPromocaoNivel(a){
-  const elegibilidade = calcularElegibilidadePromocaoNivel(a.nome);
+  const elegIntermediario = calcularElegibilidadePromocaoNivel(a.nome);
+  const elegAvancado = calcularElegibilidadePromocaoAvancado(a.nome);
+  const elegibilidade = elegIntermediario || elegAvancado;
   if(!elegibilidade) return '';
-  let html = '<p class="section-label" style="margin-top:22px;">Promoção de nível (iniciante → intermediário)</p>';
+  const proximoNivel = elegIntermediario ? 'intermediário' : 'avançado';
+  let html = '<p class="section-label" style="margin-top:22px;">Promoção de nível (' + a.nivel.toLowerCase() + ' → ' + proximoNivel + ')</p>';
   html += elegibilidade.criterios.map(function(c){
     return '<div class="list-item"><span><i class="ti ti-' + (c.atingido ? 'circle-check' : 'circle-x') + '" style="font-size:13px;color:' + (c.atingido ? 'var(--gold-soft)' : '#E2A33D') + ';vertical-align:-2px;margin-right:6px;"></i>' + c.nome + '</span><span class="tag">' + c.detalhe + '</span></div>';
   }).join('');
-  html += '<div class="' + (elegibilidade.elegivel ? 'insight' : 'info-box') + '" style="margin-top:8px;"><p' + (elegibilidade.elegivel ? '' : ' class="txt"') + '>' + (elegibilidade.elegivel ? 'Critérios atendidos, pode promover pra intermediário quando confirmar.' : 'Ainda faltam critérios pra promoção de nível.') + '</p></div>';
+  html += '<div class="' + (elegibilidade.elegivel ? 'insight' : 'info-box') + '" style="margin-top:8px;"><p' + (elegibilidade.elegivel ? '' : ' class="txt"') + '>' + (elegibilidade.elegivel ? 'Critérios atendidos, pode promover pra ' + proximoNivel + ' quando confirmar.' : 'Ainda faltam critérios pra promoção de nível.') + '</p></div>';
   return html;
 }
 
 function renderBlocoPeriodizacao(a){
   if(!a.treinoAtual) return '';
   const info = calcularBlocoAtual(a);
-  return '<p class="section-label" style="margin-top:22px;">Periodização</p>' +
+  let html = '<p class="section-label" style="margin-top:22px;">Periodização</p>' +
     '<div class="badge">' + info.bloco + '</div>' +
     '<p class="txt" style="font-size:12px;color:var(--text-faint);margin:6px 0 0;">' + info.descricao + '</p>';
+
+  // O calendário continua mandando de verdade — isso aqui NUNCA troca o bloco sozinho, só mostra a
+  // segunda opinião do Motor 8 ao lado, pra você decidir se segue o ciclo ou dá mais tempo na Base.
+  // Só aparece pro Choque/Deload AGENDADO pelo ciclo normal — o antecipado por fadiga já é, em si,
+  // uma decisão por evidência, não precisa de confirmação extra.
+  if(info.viaCalendario){
+    const m8 = avaliarMotor8(a.nome);
+    if(m8.veredito === 'continuar' && m8.texto.indexOf('respondendo bem') !== -1){
+      html += '<div class="info-box" style="margin-top:8px;border-color:var(--border-strong);">' +
+        '<p class="lbl">Segunda opinião · Motor 8</p>' +
+        '<p class="txt" style="margin-bottom:0;">Progressão ainda respondendo bem nas últimas semanas. O ciclo indica ' + info.bloco.toLowerCase() + ' agora, mas pode valer manter a Base mais um pouco antes de interromper.</p>' +
+      '</div>';
+    } else if(m8.veredito !== 'sem-dados'){
+      html += '<div class="info-box" style="margin-top:8px;border-color:var(--border-strong);">' +
+        '<p class="lbl">Segunda opinião · Motor 8</p>' +
+        '<p class="txt" style="margin-bottom:0;">' + m8.texto + ' O ciclo indica ' + info.bloco.toLowerCase() + ' agora — nesse caso, parece um bom momento pra seguir o calendário.</p>' +
+      '</div>';
+    }
+  }
+  return html;
 }
 
 function renderTecnicaPendente(a){
@@ -13824,10 +13865,12 @@ function calcularBlocoAtual(a){
   const ciclosCompletos = Math.floor((prog.semana - 1) / 5); // ciclo de reavaliação ~5 semanas
   const posicaoNoPadrao = ciclosCompletos % 4;
   if(posicaoNoPadrao === 2){
-    return { bloco: 'Bloco de Choque', descricao: 'Intensidade alta, volume mais baixo (2-3 semanas), foco em força e quebra de rotina.', blocoTecnico: 'choque' };
+    // viaCalendario:true marca que essa transição veio do ciclo agendado, não de fadiga real —
+    // é exatamente esse caso que passa pela segunda opinião do Motor 8 na renderização.
+    return { bloco: 'Bloco de Choque', descricao: 'Intensidade alta, volume mais baixo (2-3 semanas), foco em força e quebra de rotina.', blocoTecnico: 'choque', viaCalendario: true };
   }
   if(posicaoNoPadrao === 3){
-    return { bloco: 'Deload', descricao: 'Semana de recuperação ativa: volume reduzido, intensidade baixa, longe da falha. Sem métodos combinados.', blocoTecnico: 'deload' };
+    return { bloco: 'Deload', descricao: 'Semana de recuperação ativa: volume reduzido, intensidade baixa, longe da falha. Sem métodos combinados.', blocoTecnico: 'deload', viaCalendario: true };
   }
   if(fadiga.nivel === 'moderado'){
     return { bloco: 'Bloco de Base (volume reduzido por fadiga)', descricao: 'Sinais moderados de fadiga: ' + fadiga.motivos.join('; ') + '. Volume ajustado pra baixo nessa semana.', blocoTecnico: 'base', volumeReduzido: true };
@@ -13860,9 +13903,14 @@ function determinarFaseMacrociclo(a){
   };
 }
 
-/* ===== PROMOÇÃO DE NÍVEL (iniciante → intermediário) ===== */
-
-const SEMANAS_MINIMAS_INICIANTE = 12;
+/* ===== PROMOÇÃO DE NÍVEL (iniciante → intermediário → avançado) ===== */
+// Tempos mínimos ajustados pra bater com a literatura de referência (diretrizes ACSM 2009 e
+// convenção geral da área): ~6 meses de treino consistente pra intermediário, ~12 meses totais pra
+// avançado. Esses números são convenção estabelecida, não um limiar fisiológico exato — mas é o
+// consenso mais citado, e é o que ficou combinado. Antes o corte de iniciante usava 12 SEMANAS
+// (~2,75 meses), bem abaixo do que faz sentido — corrigido aqui pra 26 semanas (~6 meses).
+const SEMANAS_MINIMAS_INICIANTE = 26; // ~6 meses
+const SEMANAS_MINIMAS_INTERMEDIARIO = 52; // ~12 meses de treino total (não 12 meses a partir do intermediário)
 
 function calcularElegibilidadePromocaoNivel(nome){
   const a = alunasPersonal.find(function(x){ return x.nome === nome; });
@@ -13873,10 +13921,28 @@ function calcularElegibilidadePromocaoNivel(nome){
   const tecnicasAprovadas = a.tecnicaAprovada ? Object.keys(a.tecnicaAprovada).filter(function(k){ return a.tecnicaAprovada[k] === 'aprovado'; }).length : 0;
 
   const criterios = [
-    { nome: '12 semanas mínimas no programa', atingido: prog.semana >= SEMANAS_MINIMAS_INICIANTE, detalhe: prog.semana + ' de ' + SEMANAS_MINIMAS_INICIANTE + ' semanas' },
+    { nome: SEMANAS_MINIMAS_INICIANTE + ' semanas mínimas no programa (~6 meses)', atingido: prog.semana >= SEMANAS_MINIMAS_INICIANTE, detalhe: prog.semana + ' de ' + SEMANAS_MINIMAS_INICIANTE + ' semanas' },
     { nome: 'Constância ≥ 70%', atingido: pctConstancia >= 70, detalhe: pctConstancia + '%' },
     { nome: 'Técnica aprovada em ao menos 1 exercício principal', atingido: tecnicasAprovadas >= 1, detalhe: tecnicasAprovadas + ' exercício(s) aprovado(s)' },
     { nome: 'Progressões de carga reais registradas', atingido: stats.progressoes >= 1, detalhe: stats.progressoes + ' progressão(ões)' }
+  ];
+  return { elegivel: criterios.every(function(c){ return c.atingido; }), criterios: criterios };
+}
+
+// Espelha calcularElegibilidadePromocaoNivel, pro próximo degrau (Intermediário → Avançado).
+function calcularElegibilidadePromocaoAvancado(nome){
+  const a = alunasPersonal.find(function(x){ return x.nome === nome; });
+  if(!a || a.nivel !== 'Intermediário') return null;
+  const prog = getProgressoAluna(nome);
+  const stats = calcularEstatisticasAluna(nome);
+  const pctConstancia = stats.temDados ? Math.round((stats.totalConcluidos / stats.totalPlanejado) * 100) : 0;
+  const tecnicasAprovadas = a.tecnicaAprovada ? Object.keys(a.tecnicaAprovada).filter(function(k){ return a.tecnicaAprovada[k] === 'aprovado'; }).length : 0;
+
+  const criterios = [
+    { nome: SEMANAS_MINIMAS_INTERMEDIARIO + ' semanas mínimas de treino total (~12 meses)', atingido: prog.semana >= SEMANAS_MINIMAS_INTERMEDIARIO, detalhe: prog.semana + ' de ' + SEMANAS_MINIMAS_INTERMEDIARIO + ' semanas' },
+    { nome: 'Constância ≥ 70%', atingido: pctConstancia >= 70, detalhe: pctConstancia + '%' },
+    { nome: 'Técnica aprovada em ao menos 2 exercícios principais', atingido: tecnicasAprovadas >= 2, detalhe: tecnicasAprovadas + ' exercício(s) aprovado(s)' },
+    { nome: 'Progressões de carga reais registradas', atingido: stats.progressoes >= 2, detalhe: stats.progressoes + ' progressão(ões)' }
   ];
   return { elegivel: criterios.every(function(c){ return c.atingido; }), criterios: criterios };
 }
