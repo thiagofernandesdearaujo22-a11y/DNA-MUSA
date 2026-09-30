@@ -1,4 +1,4 @@
-[dna_musa_82.html](https://github.com/user-attachments/files/32838385/dna_musa_82.html)
+[Uploading dna_musa_83.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -388,7 +388,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-D-REGISTRAR-SEM-CARGA</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-E-PROTECAO-WHATSAPP</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -13460,13 +13460,33 @@ async function enviarAvisosEmLote(tipo){
 // nunca fixo, pra não criar um padrão robótico que os sistemas antispam do WhatsApp costumam pegar.
 // IMPORTANTE: nunca diminua esse intervalo pra deixar o envio "mais rápido" — o risco é o número
 // do Thiago ser banido ou restringido pelo WhatsApp, o que para TODO o envio automático do app.
+// Trava de segurança embutida no ENVIO em si, não em cada botão separado — garante um espaçamento
+// mínimo entre mensagens da MESMA instância (Thiago ou Bianca, cada um com seu próprio relógio),
+// mesmo quando o envio é individual (ex: responder na tela de Conversas), não só em massa. Antes,
+// a proteção só existia nos loops de envio em massa — um envio avulso atrás do outro, rápido, nunca
+// tinha pausa nenhuma, pra nenhum dos dois números.
+const ultimoEnvioPorInstancia = {};
+const MS_MINIMO_ENTRE_ENVIOS = 3000; // pelo menos 3s entre 2 mensagens da MESMA instância, mesmo fora de loop
+
+async function aguardarIntervaloMinimoDeEnvio(remetente){
+  const chave = remetente || 'Thiago';
+  const agora = Date.now();
+  const ultimo = ultimoEnvioPorInstancia[chave] || 0;
+  const faltam = MS_MINIMO_ENTRE_ENVIOS - (agora - ultimo);
+  if(faltam > 0) await new Promise(function(r){ setTimeout(r, faltam); });
+  ultimoEnvioPorInstancia[chave] = Date.now();
+}
+
+// Pausa MAIOR, usada explicitamente nos loops de envio em massa (além da trava mínima acima, que já
+// é automática) — mantém o espaçamento generoso quando são várias mensagens seguidas de propósito.
 function pausaEntreEnviosWhatsApp(){
-  const msAleatorio = 4000 + Math.floor(Math.random() * 4000); // entre 4000 e 8000ms
+  const msAleatorio = 5000 + Math.floor(Math.random() * 5000); // entre 5000 e 10000ms — aumentado por segurança
   return new Promise(function(r){ setTimeout(r, msAleatorio); });
 }
 
 async function enviarWhatsApp(telefone, mensagem, jaTentouDeNovo){
   if(!telefone) return { sucesso: false, motivo: 'sem telefone cadastrado' };
+  await aguardarIntervaloMinimoDeEnvio(NOME_PERSONAL_LOGADO); // protege TODO envio, individual ou em massa, pros dois números
   try {
     const resposta = await fetch(SUPABASE_URL + '/functions/v1/enviar-whatsapp', {
       method: 'POST',
