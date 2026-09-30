@@ -393,7 +393,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-L-PROGRESSO-E-LOGIN</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-M-SESSAO-BLINDADA</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -11439,13 +11439,12 @@ async function restaurarSessaoAtiva(){
 
   if(!supabaseClient){ mostrarDiagnostico('supabaseClient não existe (CDN não carregou).', true); return; }
 
-  // Se ela já disse explicitamente que não quer login salvo, desloga e mostra a tela normal,
-  // mesmo que o Supabase ainda tenha uma sessão guardada no navegador.
-  if(getPreferenciaLembrarLogin() === 'nao'){
-    try { await supabaseClient.auth.signOut(); } catch(e){}
-    mostrarDiagnostico('Login não fica salvo nesse aparelho (preferência da usuária). Mostrando tela normal.', false);
-    return;
-  }
+  // "Lembrar login = não" NÃO força mais logout de uma sessão ainda válida. Antes, essa trava
+  // desconectava a aluna ativamente mesmo no meio do uso — e um recarregamento inesperado do app
+  // (comum quando um vídeo em tela cheia é minimizado, principalmente no iPhone, que mata o app
+  // pra liberar memória) virava uma sessão perdida de verdade, com ela tendo que logar de novo e
+  // recomeçar o treino do zero. Agora essa preferência só governa se um login NOVO deve ser
+  // lembrado — nunca derruba uma sessão que ainda está de pé.
 
   try {
     const { data: sessaoData, error: erroSessao } = await supabaseClient.auth.getSession();
