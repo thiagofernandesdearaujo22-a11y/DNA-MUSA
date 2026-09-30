@@ -1,4 +1,4 @@
-[dna_musa_94.html](https://github.com/user-attachments/files/32879740/dna_musa_94.html)
+[Uploading dna_musa_95.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -394,7 +394,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-N-MOTOR8-V1</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-O-AUDITOR-PATOLOGIA</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1694,6 +1694,61 @@ function avaliarMotor8(nome){
     return { veredito: 'investigar', texto: 'Constância e recuperação estão boas, mas a carga está travada há ' + semanasComDado.length + ' semanas. Pode ser hora de reavaliar volume, intensidade ou método antes de trocar exercício.' };
   }
   return { veredito: 'continuar', texto: 'Dados ainda incompletos pra isolar a causa da estagnação — segue acompanhando mais um ciclo.' };
+}
+
+// ===== AUDITOR DE PRESCRIÇÃO (v1): patologia confirmada x exercícios do treino =====
+// Achado real na auditoria do código: quando uma patologia é confirmada na ficha, a lista "Evitar"
+// dela hoje só aparece como TEXTO informativo — nunca é checada contra o treino de verdade gerado.
+// Essa é exatamente a falha que os documentos descrevem ("anamnese diz limitação, treino contém
+// exercício incompatível"). Como "Evitar" é texto clínico livre (não uma lista exata de nomes de
+// exercício do banco), não dá pra bloquear automaticamente sem risco de errar — em vez disso, o
+// auditor SINALIZA pra revisão manual, mostrando o texto "Evitar" ao lado de cada exercício do
+// treino que carrega a região afetada. A decisão final continua sempre com o Personal.
+const MAPA_REGIAO_PARA_GRUPOS = {
+  'Joelho': ['Quadríceps', 'Posterior', 'Isquiotibiais', 'Isquitibiais'],
+  'Quadril': ['Glúteo', 'Glúteos', 'Glúteo Méd, Mín', 'Quadríceps', 'Posterior', 'Isquiotibiais', 'Isquitibiais', 'Adutores', 'Ilio Psoas', 'Ilio Psoas/ Adutores'],
+  'Ombro': ['Ombros', 'Peito', 'Costas', 'Cintura Escapular']
+};
+
+function auditarPrescricaoPatologia(a){
+  if(!a.patologiaConfirmada || a.patologiaConfirmada === 'tecnica') return null;
+  const p = patologiasCatalogo.find(function(x){ return x.id === a.patologiaConfirmada; });
+  if(!p || !a.treinoAtual || !a.treinoAtual.dias) return null;
+  const gruposAfetados = MAPA_REGIAO_PARA_GRUPOS[p.regiao] || [];
+  if(gruposAfetados.length === 0) return null;
+
+  const encontrados = [];
+  a.treinoAtual.dias.forEach(function(dia){
+    (dia.ex || []).forEach(function(linha){
+      // linha pode ser bi-set/tri-set ("Bi-set|||Nome1 · 3x12|||Nome2 · 3x12") — audita cada parte
+      const partes = linha.indexOf('|||') !== -1 ? linha.split('|||').slice(1) : [linha];
+      partes.forEach(function(parte){
+        const nomeEx = parte.trim().split(' · ')[0];
+        const exBanco = exerciciosBanco.find(function(e){ return e.nome === nomeEx; });
+        if(exBanco && gruposAfetados.indexOf(exBanco.grupo) !== -1){
+          if(!encontrados.some(function(e){ return e.nome === nomeEx && e.dia === dia.n; })){
+            encontrados.push({ nome: nomeEx, dia: dia.n, grupo: exBanco.grupo });
+          }
+        }
+      });
+    });
+  });
+
+  return { patologia: p, encontrados: encontrados };
+}
+
+function renderAuditorPatologia(a){
+  const resultado = auditarPrescricaoPatologia(a);
+  if(!resultado) return '';
+  if(resultado.encontrados.length === 0) return '';
+  return '<div class="info-box" style="margin-bottom:14px;border-color:#E2A33D;">' +
+    '<p class="lbl" style="color:#E2A33D;">⚠ Auditor de prescrição · revisar</p>' +
+    '<p class="txt">Patologia confirmada: <b>' + resultado.patologia.nome + '</b>. Esses exercícios do treino atual carregam a região afetada — vale conferir se algum entra na lista de evitar antes de manter:</p>' +
+    '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-bottom:8px;"><b>Evitar (segundo o catálogo):</b> ' + resultado.patologia.evitar + '</p>' +
+    resultado.encontrados.map(function(e){
+      return '<p class="txt" style="font-size:12px;margin:2px 0;">• ' + e.nome + ' <span style="color:var(--text-faint);">(' + e.dia + ')</span></p>';
+    }).join('') +
+  '</div>';
 }
 
 function renderMotor8(nome){
@@ -8195,6 +8250,7 @@ function openAlunaDetail(i){
         (a.telefone ? '<a href="https://wa.me/55' + a.telefone.replace(/\D/g,'') + '" target="_blank" rel="noopener" class="btn-gold" style="display:inline-block;text-decoration:none;text-align:center;margin-top:8px;padding:10px 16px;width:auto;"><i class="ti ti-brand-whatsapp" style="margin-right:6px;"></i>Chamar no WhatsApp</a>' : '') +
       '</div>'
     ) : '') +
+    renderAuditorPatologia(a) +
     renderMotor8(a.nome) +
     '<p class="section-label" style="margin-top:24px;">Treino atual</p>' +
     '<p style="font-size:12px;color:var(--gold-soft);margin:6px 0 12px;cursor:pointer;" onclick="abrirTreinosArquivados(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-archive" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Ver treinos arquivados (histórico)</p>' +
