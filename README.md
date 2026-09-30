@@ -1,4 +1,4 @@
-[Uploading dna_musa_91.html…]()
+[dna_musa_94.html](https://github.com/user-attachments/files/32879740/dna_musa_94.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -394,7 +394,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-L-PROGRESSO-E-LOGIN</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-N-MOTOR8-V1</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1625,6 +1625,87 @@ function calcularComparativoSemanal(nome){
   }
 
   return resultado;
+}
+
+// ===== MOTOR 8: diagnóstico de trajetória (v1) =====
+// Não decide nada sozinho, nunca troca treino ou exercício. Só responde uma pergunta: "diante do que
+// essa aluna vem alimentando nas últimas semanas, seguimos a mesma linha ou vale a pena investigar?".
+// Segue a hierarquia combinada: só aponta "Investigar" quando constância e recuperação já estão boas
+// e MESMO ASSIM a progressão de carga não avança — senão, o gargalo é outra coisa, não a estratégia.
+function avaliarMotor8(nome){
+  const prog = getProgressoAluna(nome);
+  if(!prog.nutricao) prog.nutricao = {};
+  const semanaAtual = prog.semana;
+  const JANELA = 4; // últimas 4 semanas, evidência acumulada — nunca calendário fixo pra trocar nada sozinho
+  const semanasComDado = [];
+  for(let s = semanaAtual; s > 0 && semanasComDado.length < JANELA; s--){
+    if(prog.diasConcluidos[s] != null || prog.nutricao[s] != null) semanasComDado.push(s);
+  }
+  if(semanasComDado.length < 3){
+    return { veredito: 'sem-dados', texto: 'Ainda sem dados suficientes pra avaliar — precisa de pelo menos 3 semanas de histórico.' };
+  }
+
+  // Progressão de carga: entre os registros dessas semanas, proporção de "Aumentar carga" vs estagnado/reduzido
+  let totalRegistros = 0, registrosPositivos = 0;
+  Object.keys(prog.historico).forEach(function(ex){
+    prog.historico[ex].forEach(function(r){
+      if(semanasComDado.indexOf(r.semana) !== -1){
+        totalRegistros++;
+        if(r.sugestao && r.sugestao.texto === 'Aumentar carga') registrosPositivos++;
+      }
+    });
+  });
+  const progressaoRespondendo = totalRegistros === 0 ? null : (registrosPositivos / totalRegistros) >= 0.35;
+
+  // Constância: média de dias concluídos / planejados nas semanas da janela
+  const totalDia = totalDiasDeTreino();
+  let somaPct = 0, semanasComConstancia = 0;
+  semanasComDado.forEach(function(s){
+    if(prog.diasConcluidos[s] && totalDia > 0){
+      somaPct += prog.diasConcluidos[s].length / totalDia;
+      semanasComConstancia++;
+    }
+  });
+  const constanciaMedia = semanasComConstancia > 0 ? somaPct / semanasComConstancia : null;
+  const constanciaBoa = constanciaMedia == null ? null : constanciaMedia >= 0.7;
+
+  // Recuperação: média do ajuste de recuperação de sono relatado nos check-ins de nutrição da janela
+  let somaRecuperacao = 0, semanasComRecuperacao = 0;
+  semanasComDado.forEach(function(s){
+    if(prog.nutricao[s] && prog.nutricao[s].resultado && prog.nutricao[s].resultado.ajusteRecuperacaoSono != null){
+      somaRecuperacao += prog.nutricao[s].resultado.ajusteRecuperacaoSono;
+      semanasComRecuperacao++;
+    }
+  });
+  const recuperacaoBoa = semanasComRecuperacao === 0 ? null : (somaRecuperacao / semanasComRecuperacao) >= 0;
+
+  // Hierarquia: só aponta "Investigar" quando progressão estagnada, MAS constância e recuperação já
+  // estão boas — senão, o gargalo mais provável é constância ou recuperação, não a estratégia em si.
+  if(progressaoRespondendo === true || progressaoRespondendo === null){
+    return { veredito: 'continuar', texto: 'Progressão de carga respondendo bem nas últimas ' + semanasComDado.length + ' semanas.' };
+  }
+  if(constanciaBoa === false){
+    return { veredito: 'continuar', texto: 'Progressão de carga estagnada, mas a constância caiu nas últimas semanas (' + Math.round((constanciaMedia||0)*100) + '%) — esse é o gargalo mais provável, não a estratégia de treino.' };
+  }
+  if(recuperacaoBoa === false){
+    return { veredito: 'continuar', texto: 'Progressão de carga estagnada, mas os check-ins apontam recuperação/sono comprometidos nas últimas semanas — vale olhar isso antes de mexer no treino.' };
+  }
+  if(constanciaBoa === true && recuperacaoBoa !== false){
+    return { veredito: 'investigar', texto: 'Constância e recuperação estão boas, mas a carga está travada há ' + semanasComDado.length + ' semanas. Pode ser hora de reavaliar volume, intensidade ou método antes de trocar exercício.' };
+  }
+  return { veredito: 'continuar', texto: 'Dados ainda incompletos pra isolar a causa da estagnação — segue acompanhando mais um ciclo.' };
+}
+
+function renderMotor8(nome){
+  const r = avaliarMotor8(nome);
+  if(r.veredito === 'sem-dados'){
+    return '<div class="info-box" style="margin-bottom:14px;opacity:0.7;"><p class="lbl">Motor 8 · Diagnóstico</p><p class="txt" style="margin-bottom:0;color:var(--text-faint);">' + r.texto + '</p></div>';
+  }
+  const investigar = r.veredito === 'investigar';
+  return '<div class="info-box" style="margin-bottom:14px;' + (investigar ? 'border-color:#E2A33D;' : 'border-color:var(--success);') + '">' +
+    '<p class="lbl" style="color:' + (investigar ? '#E2A33D' : 'var(--success)') + ';">' + (investigar ? '⚠ Investigar' : '● Continuar') + ' · Motor 8</p>' +
+    '<p class="txt" style="margin-bottom:0;">' + r.texto + '</p>' +
+  '</div>';
 }
 
 const iconesIndicadorSvg = {
@@ -8114,6 +8195,7 @@ function openAlunaDetail(i){
         (a.telefone ? '<a href="https://wa.me/55' + a.telefone.replace(/\D/g,'') + '" target="_blank" rel="noopener" class="btn-gold" style="display:inline-block;text-decoration:none;text-align:center;margin-top:8px;padding:10px 16px;width:auto;"><i class="ti ti-brand-whatsapp" style="margin-right:6px;"></i>Chamar no WhatsApp</a>' : '') +
       '</div>'
     ) : '') +
+    renderMotor8(a.nome) +
     '<p class="section-label" style="margin-top:24px;">Treino atual</p>' +
     '<p style="font-size:12px;color:var(--gold-soft);margin:6px 0 12px;cursor:pointer;" onclick="abrirTreinosArquivados(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-archive" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Ver treinos arquivados (histórico)</p>' +
     '<div id="treinos-arquivados-area"></div>' +
@@ -11440,13 +11522,12 @@ async function restaurarSessaoAtiva(){
 
   if(!supabaseClient){ mostrarDiagnostico('supabaseClient não existe (CDN não carregou).', true); return; }
 
-  // Se ela já disse explicitamente que não quer login salvo, desloga e mostra a tela normal,
-  // mesmo que o Supabase ainda tenha uma sessão guardada no navegador.
-  if(getPreferenciaLembrarLogin() === 'nao'){
-    try { await supabaseClient.auth.signOut(); } catch(e){}
-    mostrarDiagnostico('Login não fica salvo nesse aparelho (preferência da usuária). Mostrando tela normal.', false);
-    return;
-  }
+  // "Lembrar login = não" NÃO força mais logout de uma sessão ainda válida. Antes, essa trava
+  // desconectava a aluna ativamente mesmo no meio do uso — e um recarregamento inesperado do app
+  // (comum quando um vídeo em tela cheia é minimizado, principalmente no iPhone, que mata o app
+  // pra liberar memória) virava uma sessão perdida de verdade, com ela tendo que logar de novo e
+  // recomeçar o treino do zero. Agora essa preferência só governa se um login NOVO deve ser
+  // lembrado — nunca derruba uma sessão que ainda está de pé.
 
   try {
     const { data: sessaoData, error: erroSessao } = await supabaseClient.auth.getSession();
