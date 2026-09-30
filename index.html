@@ -346,6 +346,7 @@
     <button onclick="pausarOuRetomarCronometro()" id="cronometro-fullscreen-btn" class="btn-gold" style="width:auto;padding:12px 28px;margin:0;">Pausar</button>
     <button onclick="pararCronometroFullscreen()" style="width:auto;padding:12px 28px;background:transparent;border:1px solid var(--border);color:var(--text-faint);border-radius:100px;font-size:14px;cursor:pointer;">Encerrar</button>
   </div>
+  <div id="pergunta-descanso-overlay-area"></div>
 </div>
 
 <div id="banner-notificacao-simulada" style="display:none;position:fixed;top:16px;left:16px;right:16px;max-width:358px;margin:0 auto;background:var(--card-2);border:1px solid var(--border-strong);border-radius:16px;padding:14px;z-index:10000;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
@@ -392,7 +393,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-H-RODA-VIDA-GRADUAL</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-I-PERGUNTAS-NO-DESCANSO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -12232,6 +12233,7 @@ function iniciarDescanso(idx, segundosTotais){
   if(descansoIntervals[idx]) clearInterval(descansoIntervals[idx]);
   cronometroDescansoAtivo = { idx: idx, restante: segundosTotais, total: segundosTotais, pausado: false, horarioFim: Date.now() + segundosTotais * 1000 };
   salvarCronometroNoLocalStorage();
+  registrarDescansoParaPerguntaDoDia(); // conta mais um descanso — se bater com o sorteio de hoje, a pergunta aparece
 
   const display = document.getElementById('descanso-display-' + idx);
   if(display){ display.style.color = 'var(--gold-soft)'; display.textContent = segundosTotais + 's'; }
@@ -14300,6 +14302,160 @@ function calcularEstatisticasAluna(nome){
   return { totalConcluidos: totalConcluidos, totalPlanejado: totalPlanejado, progressoes: progressoes, temDados: totalConcluidos > 0 };
 }
 
+// ===== PERGUNTAS DURANTE O DESCANSO: sorteio diário, garantindo que sempre dispare =====
+// Uma vez por dia de treino (nunca mais de uma), sorteia ALEATORIAMENTE em qual descanso do dia (não
+// sempre a 1ª nem a 2ª série) vai aparecer uma pergunta — de Perfil DNA ou Roda da Vida, também por
+// sorteio. Ela responde ali mesmo, sem sair da tela do cronômetro, com tempo de sobra no descanso.
+
+// Conta quantos descansos esse dia de treino realmente vai disparar — usa a MESMA lógica de leitura
+// de séries que o resto da tela usa, senão o sorteio podia cair num número que nunca seria alcançado
+// (ex: sortear a 9ª série num dia que só tem 6), e a pergunta nunca apareceria de verdade.
+function contarTotalDescansosDoDia(d){
+  let total = 0;
+  d.ex.forEach(function(linha){
+    let linhaBase = linha;
+    if(linha.indexOf('|||') !== -1){
+      linhaBase = linha.split('|||')[1].trim(); // bi-set/tri-set só descansa 1x por rodada, no final
+    }
+    const partes = linhaBase.split(' · ');
+    const repsMatch = (partes[1] || '').match(/^(\d+)x/);
+    if(repsMatch) total += parseInt(repsMatch[1], 10);
+  });
+  return total;
+}
+
+// Escolhe o conteúdo de uma pergunta de Perfil DNA sem mexer no estado "pendente" da tela inicial —
+// esse sorteio é próprio do descanso, independente do banner da home (que continua existindo pros
+// dias sem treino, como reforço, nunca os dois brigando pela mesma resposta no mesmo dia).
+function sortearConteudoPerguntaDNA(nome){
+  const prog = getProgressoAluna(nome);
+  const respondidas = (prog.perguntasPerfilDNA && prog.perguntasPerfilDNA.respondidas) || [];
+  const idsRespondidos = respondidas.map(function(r){ return r.perguntaId; });
+  let candidatas = CATALOGO_PERGUNTAS_PERFIL_DNA.filter(function(p){ return idsRespondidos.indexOf(p.id) === -1; });
+  if(candidatas.length === 0) candidatas = CATALOGO_PERGUNTAS_PERFIL_DNA;
+  const escolhida = candidatas[Math.floor(Math.random() * candidatas.length)];
+  return { perguntaId: escolhida.id, texto: escolhida.texto, categoria: escolhida.categoria };
+}
+
+// Mesma ideia, mas respeitando a trava de 2 meses e só entre as áreas que ainda faltam nesse ciclo —
+// se ela estiver em descanso do ciclo, ou já tiver respondido as 10, devolve null (esse dia fica só
+// com Perfil DNA, ou sem pergunta nenhuma, nunca força uma resposta que não devia estar liberada).
+function sortearConteudoPerguntaRoda(nome){
+  if(diasParaProximaRodaDaVida(nome) > 0) return null;
+  const mesISO = getMesAtualISO();
+  const registro = getRodaDaVidaMes(nome, mesISO);
+  const areasFaltando = AREAS_RODA_DA_VIDA.filter(function(a){ return registro.areas[a.id] == null; });
+  if(areasFaltando.length === 0) return null;
+  const escolhida = areasFaltando[Math.floor(Math.random() * areasFaltando.length)];
+  return { areaId: escolhida.id, label: escolhida.label, icone: escolhida.icone };
+}
+
+// O sorteio do dia: roda 1x só, na primeira vez que ela abre o treino naquele dia (guardado por
+// data, então reabrir a tela ou o app no mesmo dia nunca sorteia de novo nem perde o que já foi
+// sorteado). Sempre tenta os DOIS tipos antes de desistir — só fica sem pergunta no dia se nenhum
+// dos dois tiver conteúdo disponível (caso raro: Roda em descanso E Perfil— o que nunca deveria
+// faltar, já que o catálogo dele recomeça o ciclo sozinho).
+function sortearPerguntaDescansoDoDia(d){
+  const nome = NOME_ALUNA_LOGADA;
+  const prog = getProgressoAluna(nome);
+  const hojeISO = getDataHojeISO();
+  if(prog.perguntaDescansoSorteio && prog.perguntaDescansoSorteio.data === hojeISO) return; // já sorteou hoje
+
+  const totalDescansos = contarTotalDescansosDoDia(d);
+  if(totalDescansos === 0){ prog.perguntaDescansoSorteio = { data: hojeISO, semAlvo: true }; return; } // dia sem nenhuma série de verdade (ex: só descanso), não tem onde encaixar
+
+  const serieAlvo = 1 + Math.floor(Math.random() * totalDescansos); // entre 1 e o total do dia, garantido alcançável
+
+  let tipo = Math.random() < 0.5 ? 'dna' : 'roda';
+  let conteudo = tipo === 'roda' ? sortearConteudoPerguntaRoda(nome) : sortearConteudoPerguntaDNA(nome);
+  if(!conteudo){ // o tipo sorteado não tinha nada disponível agora — tenta o outro antes de desistir
+    tipo = tipo === 'roda' ? 'dna' : 'roda';
+    conteudo = tipo === 'roda' ? sortearConteudoPerguntaRoda(nome) : sortearConteudoPerguntaDNA(nome);
+  }
+
+  prog.perguntaDescansoSorteio = conteudo
+    ? { data: hojeISO, serieAlvo: serieAlvo, contador: 0, tipo: tipo, conteudo: conteudo, mostrada: false }
+    : { data: hojeISO, semAlvo: true };
+  salvarProgressoNoSupabase(nome);
+}
+
+// Chamado toda vez que um descanso de verdade começa (iniciarDescanso) — conta mais 1, e se bater
+// com o alvo sorteado pra hoje, mostra a pergunta dentro do próprio cronômetro em tela cheia.
+function registrarDescansoParaPerguntaDoDia(){
+  const areaOverlay = document.getElementById('pergunta-descanso-overlay-area');
+  if(areaOverlay) areaOverlay.innerHTML = ''; // cada descanso novo começa limpo — sem isso, "resposta salva" do descanso anterior ficava presa na tela
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const sorteio = prog.perguntaDescansoSorteio;
+  if(!sorteio || sorteio.semAlvo || sorteio.mostrada) return;
+  sorteio.contador = (sorteio.contador || 0) + 1;
+  if(sorteio.contador !== sorteio.serieAlvo) { salvarProgressoNoSupabase(NOME_ALUNA_LOGADA); return; }
+  sorteio.mostrada = true;
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  renderPerguntaNoDescanso();
+}
+
+function renderPerguntaNoDescanso(){
+  const area = document.getElementById('pergunta-descanso-overlay-area');
+  if(!area) return;
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const sorteio = prog.perguntaDescansoSorteio;
+  if(!sorteio || !sorteio.conteudo){ area.innerHTML = ''; return; }
+
+  if(sorteio.tipo === 'roda'){
+    area.innerHTML = '<div class="info-box" style="margin-top:20px;max-width:280px;text-align:left;">' +
+      '<p class="txt" style="font-size:11px;color:var(--text-faint);margin:0 0 6px;"><i class="ti ' + sorteio.conteudo.icone + '" style="margin-right:4px;"></i>Roda da Vida · aproveita o descanso</p>' +
+      '<p class="txt" style="font-size:13px;font-weight:600;margin:0 0 10px;">' + sorteio.conteudo.label + '</p>' +
+      '<div class="row" style="gap:6px;justify-content:center;">' +
+        [0,1,2,3,4,5].map(function(n){ return '<span class="chip" style="cursor:pointer;" onclick="confirmarRespostaDescansoRoda(' + n + ')">' + n + '</span>'; }).join('') +
+      '</div>' +
+      '<p class="txt" style="font-size:10px;color:var(--text-faint);text-align:center;margin-top:8px;cursor:pointer;" onclick="pularPerguntaDescanso()">Pular</p>' +
+    '</div>';
+  } else {
+    area.innerHTML = '<div class="info-box" style="margin-top:20px;max-width:280px;text-align:left;">' +
+      '<p class="txt" style="font-size:11px;color:var(--text-faint);margin:0 0 6px;">Uma pergunta rápida · aproveita o descanso</p>' +
+      '<p class="txt" style="font-size:13px;font-weight:600;margin:0 0 8px;">' + sorteio.conteudo.texto + '</p>' +
+      '<textarea class="form-input" id="resposta-descanso-dna" rows="2" placeholder="Sua resposta..." style="font-size:12px;"></textarea>' +
+      '<button class="btn-gold" style="margin-top:8px;padding:8px;font-size:12px;" onclick="confirmarRespostaDescansoDNA()">Enviar</button>' +
+      '<p class="txt" style="font-size:10px;color:var(--text-faint);text-align:center;margin-top:6px;cursor:pointer;" onclick="pularPerguntaDescanso()">Pular</p>' +
+    '</div>';
+  }
+}
+
+function confirmarRespostaDescansoRoda(valor){
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const sorteio = prog.perguntaDescansoSorteio;
+  if(!sorteio || !sorteio.conteudo) return;
+  salvarCampoRodaDaVida(NOME_ALUNA_LOGADA, sorteio.conteudo.areaId, valor); // já salva e fecha o ciclo sozinho se for a última área
+  sorteio.conteudo = null; // limpa só o conteúdo, mantém "mostrada:true" pra não sortear de novo hoje
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  const area = document.getElementById('pergunta-descanso-overlay-area');
+  if(area) area.innerHTML = '<p class="txt" style="font-size:11px;color:var(--success);margin-top:16px;">✓ Resposta salva, obrigada!</p>';
+}
+
+function confirmarRespostaDescansoDNA(){
+  const campo = document.getElementById('resposta-descanso-dna');
+  const resposta = campo ? campo.value.trim() : '';
+  if(!resposta) return; // sem alert aqui de propósito — ela tá descansando, se não quiser responder, "Pular" já resolve
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const sorteio = prog.perguntaDescansoSorteio;
+  if(!sorteio || !sorteio.conteudo) return;
+  if(!prog.perguntasPerfilDNA) prog.perguntasPerfilDNA = { respondidas: [], pendente: null, ultimaEm: null };
+  prog.perguntasPerfilDNA.respondidas.push({ perguntaId: sorteio.conteudo.perguntaId, texto: sorteio.conteudo.texto, categoria: sorteio.conteudo.categoria, resposta: resposta, data: new Date().toISOString() });
+  sorteio.conteudo = null;
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  const area = document.getElementById('pergunta-descanso-overlay-area');
+  if(area) area.innerHTML = '<p class="txt" style="font-size:11px;color:var(--success);margin-top:16px;">✓ Resposta salva, obrigada!</p>';
+}
+
+function pularPerguntaDescanso(){
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  if(prog.perguntaDescansoSorteio) prog.perguntaDescansoSorteio.conteudo = null; // não conta como respondida, só não insiste mais hoje
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  const area = document.getElementById('pergunta-descanso-overlay-area');
+  if(area) area.innerHTML = '';
+}
+
+
 function openDetail(type, arg){
   const el = document.getElementById('detail-content');
 
@@ -14450,6 +14606,7 @@ if(type === 'central'){
     } else if(!d.descanso){
       const alunaAtual = obterAlunaLogadaOuCriar();
       const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+      sortearPerguntaDescansoDoDia(d); // 1x por dia de treino — decide aqui, na primeira vez que ela abre esse dia hoje
 
       // Barra de progresso segmentada: 1 segmento por exercício do dia
       const totalExerciciosDia = d.ex.length;
