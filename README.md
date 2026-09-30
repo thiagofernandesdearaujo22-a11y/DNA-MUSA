@@ -1,4 +1,4 @@
-[dna_musa_87.html](https://github.com/user-attachments/files/32839559/dna_musa_87.html)
+[dna_musa_89.html](https://github.com/user-attachments/files/32839756/dna_musa_89.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -394,7 +394,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-I-PERGUNTAS-NO-DESCANSO</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-J-HIERARQUIA-ALUNA-COMPLETA</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1883,7 +1883,7 @@ function avancarParaMassaMagra(){
     '<div class="form-group"><input class="form-input" id="input-composicao-massamagra" type="text" inputmode="decimal" step="0.1" placeholder="Ex: 47.2"></div>' +
     '<div style="display:flex;gap:8px;">' +
       '<button class="btn-gold" style="flex:1;" onclick="avancarParaPesoMuscular()">Continuar</button>' +
-      '<button class="btn-gold" style="flex:1;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="pularEIrParaPesoMuscular()">Pular</button>' +
+      '<button class="btn-secondary" style="flex:1;" onclick="pularEIrParaPesoMuscular()">Pular</button>' +
     '</div>';
 }
 
@@ -1903,7 +1903,7 @@ function avancarParaPesoMuscular(pulou){
     '<div class="form-group"><input class="form-input" id="input-composicao-pesomuscular" type="text" inputmode="decimal" step="0.1" placeholder="Ex: 24.8"></div>' +
     '<div style="display:flex;gap:8px;">' +
       '<button class="btn-gold" style="flex:1;" onclick="finalizarComGorduraEMassa()">Salvar</button>' +
-      '<button class="btn-gold" style="flex:1;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="finalizarRegistroComposicao()">Pular e salvar</button>' +
+      '<button class="btn-secondary" style="flex:1;" onclick="finalizarRegistroComposicao()">Pular e salvar</button>' +
     '</div>';
 }
 
@@ -14851,7 +14851,7 @@ function renderCardBiset(linha, j, prog){
         '<input class="form-input" data-carga="' + subId + '" type="text" inputmode="decimal" placeholder="Carga (kg)" style="flex:1;">' +
         '<input class="form-input" data-reps="' + subId + '" type="number" placeholder="Reps · 1ª série" style="flex:1;">' +
       '</div>' +
-      '<button class="btn-gold" style="margin-top:8px;padding:8px;font-size:12px;" onclick="confirmarSerieExercicio(\'' + subId + '\',\'' + nomeEx.replace(/'/g,"\\'") + '\')">Confirmar</button>' +
+      '<button class="btn-secondary" style="margin-top:8px;padding:8px;font-size:12px;" onclick="confirmarSerieExercicio(\'' + subId + '\',\'' + nomeEx.replace(/'/g,"\\'") + '\')">Confirmar</button>' +
       '<div id="confirmado-serie-' + subId + '"></div>' +
     '</div>';
   });
@@ -15150,8 +15150,8 @@ function renderPerguntaCiclo(){
     '<p class="txt">Notamos um desempenho um pouco mais baixo hoje, e tudo bem, isso acontece. Sabemos que o período pode influenciar a força em alguns momentos. Se quiser, pode nos contar há quantos dias foi sua última menstruação? Isso ajuda a deixar nossas análises mais precisas pra você.</p>' +
     '<div class="form-group"><input class="form-input" id="ciclo-dias" type="number" placeholder="Ex: 20 dias atrás"></div>' +
     '<div class="form-group"><label class="form-label">Usa algum medicamento/anticoncepcional?</label><select class="form-select" id="ciclo-medicamento"><option>Não</option><option>Sim</option></select></div>' +
-    '<button class="btn-secondary" style="" onclick="registrarCiclo()">Enviar</button>' +
-    '<button class="btn-gold" onclick="pularCiclo()">Prefiro não responder</button>' +
+    '<button class="btn-gold" style="" onclick="registrarCiclo()">Enviar</button>' +
+    '<button class="btn-secondary" onclick="pularCiclo()">Prefiro não responder</button>' +
     '</div>';
 }
 
