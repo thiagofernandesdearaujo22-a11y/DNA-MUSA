@@ -1,4 +1,4 @@
-[dna_musa_81.html](https://github.com/user-attachments/files/32838092/dna_musa_81.html)
+[dna_musa_82.html](https://github.com/user-attachments/files/32838385/dna_musa_82.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -388,7 +388,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-C-AUTOCORRIGE-DIAS</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-D-REGISTRAR-SEM-CARGA</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -14826,26 +14826,26 @@ function registrarTreinoDia(diaIndex){
       });
     });
 
-    let resultadoSemana = null;
-    if(registrados > 0){
-      if(!prog.diasConcluidos[prog.semana]) prog.diasConcluidos[prog.semana] = [];
-      if(prog.diasConcluidos[prog.semana].indexOf(d.n) === -1) prog.diasConcluidos[prog.semana].push(d.n);
-      if(!prog.horariosTreino) prog.horariosTreino = [];
-      const agora = new Date();
-      prog.horariosTreino.push({ dia: d.n, hora: agora.getHours(), minuto: agora.getMinutes(), data: agora.toISOString() });
-      resultadoSemana = checarConclusaoSemana(NOME_ALUNA_LOGADA);
-    }
+    // Marca o dia como feito INDEPENDENTE de carga — a aluna não precisa anotar peso nenhum pra
+    // registrar que treinou. Cargas preenchidas (por exercício, acima) continuam sendo salvas e
+    // usadas pra sugestão de progressão; só deixaram de ser obrigatórias pra fechar o dia.
+    if(!prog.diasConcluidos[prog.semana]) prog.diasConcluidos[prog.semana] = [];
+    if(prog.diasConcluidos[prog.semana].indexOf(d.n) === -1) prog.diasConcluidos[prog.semana].push(d.n);
+    if(!prog.horariosTreino) prog.horariosTreino = [];
+    const agora = new Date();
+    prog.horariosTreino.push({ dia: d.n, hora: agora.getHours(), minuto: agora.getMinutes(), data: agora.toISOString() });
+    const resultadoSemana = checarConclusaoSemana(NOME_ALUNA_LOGADA);
 
-    if(registrados > 0){ salvarProgressoNoSupabase(NOME_ALUNA_LOGADA); avisarPersonalTreinoRegistrado(d.n, false); }
+    salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+    avisarPersonalTreinoRegistrado(d.n, false);
 
     openDetail('dia', diaIndex);
     const conf = document.getElementById('registro-confirmacao');
-    if(registrados === 0){
-      if(conf) conf.innerHTML = '<div class="insight"><p>Preencha ao menos um exercício com carga e repetições pra registrar.</p></div>';
-      return;
-    }
 
-    let msg = registrados + ' exercício(s) registrado(s).';
+    // Antes, sem nenhuma carga preenchida, o clique não registrava nada e só mostrava um aviso pedindo
+    // pra preencher — mesmo quando ela já tinha confirmado cada exercício individualmente antes. Agora
+    // o dia sempre é marcado como feito; a mensagem só muda o texto conforme teve carga ou não.
+    let msg = registrados > 0 ? (registrados + ' exercício(s) com carga registrada.') : 'Treino registrado!';
     if(resultadoSemana && resultadoSemana.avancou){
       msg += ' Semana concluída (' + resultadoSemana.total + '/' + resultadoSemana.total + '), suas progressões de carga já estão calculadas pra próxima semana! 🎉';
     } else if(resultadoSemana){
