@@ -1,4 +1,4 @@
-[Uploading dna_musa_90.html…]()
+[Uploading dna_musa_91.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -394,7 +394,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-K-ACESSO-BIANCA</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-L-PROGRESSO-E-LOGIN</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -516,7 +516,10 @@
             <p class="profile-name">Personal</p>
             <p class="profile-desc">Painel administrativo</p>
           </div>
-          <p style="font-size:11px;color:var(--text-faint);cursor:pointer;margin-top:6px;" onclick="alternarPreferenciaLembrarLogin()"><i class="ti ti-key" style="margin-right:4px;"></i>Lembrar login neste aparelho</p>
+          <p style="font-size:11px;color:var(--text-faint);cursor:pointer;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="alternarPreferenciaLembrarLogin()">
+            <span id="checkbox-lembrar-login" style="width:13px;height:13px;border-radius:3px;border:1px solid var(--text-faint);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"></span>
+            Lembrar login neste aparelho
+          </p>
           <p style="font-size:11px;color:var(--text-faint);cursor:pointer;margin-top:6px;" onclick="confirmarSairDaConta()"><i class="ti ti-logout" style="margin-right:4px;"></i>Sair da conta</p>
         </div>
       </div>
@@ -615,6 +618,12 @@
 
       <p class="section-label" style="margin-top:22px;">Minha evolução</p>
       <div id="area-minha-evolucao"></div>
+
+      <p class="section-label" style="margin-top:22px;">Shape Analysis</p>
+      <div class="info-box" style="opacity:0.6;">
+        <p class="lbl">Em breve</p>
+        <p class="txt">Comparação visual de fotos ao longo do tempo. Estamos preparando esse material — assim que estiver pronto, avisamos por aqui.</p>
+      </div>
     </div>
 
     <!-- MEU PROGRESSO -->
@@ -11181,9 +11190,22 @@ function alternarPreferenciaLembrarLogin(){
   const atual = getPreferenciaLembrarLogin();
   const novoValor = atual === 'sim' ? 'nao' : 'sim';
   salvarPreferenciaLembrarLogin(novoValor);
+  atualizarVisualCheckboxLembrarLogin();
   alert(novoValor === 'sim'
     ? 'Pronto! Da próxima vez que você abrir o app nesse aparelho, não vai precisar digitar a senha de novo.'
     : 'Pronto, a partir de agora vai pedir sua senha toda vez que você abrir o app.');
+}
+
+// Antes, essa opção era só um texto sem nenhum indicativo visual de estado — dava pra passar reto
+// sem perceber que dava pra clicar, e a pessoa ficava digitando login toda vez à toa. Essa caixinha
+// mostra claramente se está marcada, e atualiza sozinha sempre que o launcher aparece na tela.
+function atualizarVisualCheckboxLembrarLogin(){
+  const caixinha = document.getElementById('checkbox-lembrar-login');
+  if(!caixinha) return;
+  const marcado = getPreferenciaLembrarLogin() === 'sim';
+  caixinha.style.background = marcado ? 'var(--gold-soft)' : 'transparent';
+  caixinha.style.borderColor = marcado ? 'var(--gold-soft)' : 'var(--text-faint)';
+  caixinha.innerHTML = marcado ? '<i class="ti ti-check" style="font-size:10px;color:#1A1409;"></i>' : '';
 }
 
 function confirmarSairDaConta(){
@@ -11349,6 +11371,7 @@ function setActive(name){
   document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
   document.querySelector('[data-view="' + name + '"]').classList.add('active');
   try { localStorage.setItem('musaUltimaTela', JSON.stringify({ view: name, detailDia: (name === 'detail' ? detailDiaAtual : null) })); } catch(e){}
+  if(name === 'launcher') atualizarVisualCheckboxLembrarLogin(); // sempre reflete o estado real, não importa por onde chegou aqui
 }
 
 const abasFixasAluna = ['home', 'dados', 'mentoria', 'progresso', 'ranking', 'rodadavida'];
@@ -14199,7 +14222,6 @@ function renderMeuProgressoConteudo(container, nome, a){
   const score = calcularProbabilidadeSucesso(nome);
   const comparativoScore = calcularComparativoScore(nome);
   const prog = getProgressoAluna(nome);
-  const comparativoSemana = calcularComparativoSemanal(nome);
 
   let html = '';
 
@@ -14240,23 +14262,10 @@ function renderMeuProgressoConteudo(container, nome, a){
     }).join('');
   }
 
-  // Evolução por pilares, reaproveitando o comparativo semanal já calculado
-  html += '<p class="section-label" style="margin-top:20px;">Evolução por pilares</p>';
-  const pilares = [
-    { nome: 'Constância', valor: comparativoSemana.constancia },
-    { nome: 'Progressão de carga', valor: comparativoSemana.progressao },
-    { nome: 'Nutrição', valor: comparativoSemana.nutricao },
-    { nome: 'Recuperação', valor: comparativoSemana.recuperacao }
-  ];
-  html += pilares.map(function(p){
-    const semDado = p.valor == null || isNaN(p.valor);
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">' +
-      '<span style="font-size:13px;">' + p.nome + '</span>' +
-      '<span style="font-size:13px;font-weight:600;color:' + (semDado ? 'var(--text-faint)' : (p.valor >= 0 ? 'var(--success)' : 'var(--gold-soft)')) + ';">' +
-        (semDado ? 'sem dado ainda' : (p.valor > 0 ? '▲ +' : (p.valor < 0 ? '▼ ' : '')) + p.valor + '%') +
-      '</span>' +
-    '</div>';
-  }).join('');
+  // "Evolução por pilares" foi removida daqui — eram praticamente os mesmos números (Constância,
+  // Progressão, Nutrição, Recuperação) que já aparecem na tela Início, nos cards de indicadores,
+  // só que numa lista de texto simples. Repetir o mesmo dado em formatos diferentes não ajuda,
+  // só empilha mais uma seção na tela.
 
   // Gráfico simples de evolução do DNA Score
   html += '<p class="section-label" style="margin-top:20px;">Evolução do DNA Score</p>';
@@ -14278,12 +14287,8 @@ function renderMeuProgressoConteudo(container, nome, a){
     '</div>';
   }
 
-  // Botão pro Shape Analysis, desligado por enquanto
-  html += '<p class="section-label" style="margin-top:20px;">Shape Analysis</p>' +
-    '<div class="info-box" style="opacity:0.6;">' +
-      '<p class="lbl">Em breve</p>' +
-      '<p class="txt">Comparação visual de fotos ao longo do tempo. Estamos preparando esse material — assim que estiver pronto, avisamos por aqui.</p>' +
-    '</div>';
+  // Shape Analysis foi movido pra aba Composição corporal — faz mais sentido lá, já que é sobre
+  // fotos/comparação visual do corpo, e o Progresso não precisa segurar um "em breve" todo dia.
 
   container.innerHTML = html;
   renderCheckInEHabitos(nome);
