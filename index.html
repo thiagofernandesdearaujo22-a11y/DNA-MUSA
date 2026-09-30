@@ -392,7 +392,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-F-HIERARQUIA-VISUAL-1</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-G-HIERARQUIA-VISUAL-2</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -707,11 +707,11 @@
         <button class="btn-gold" style="background:#25D366;color:#fff;border:none;margin-bottom:8px;" onclick="mostrarPainelEnvio('whatsapp')"><i class="ti ti-brand-whatsapp" style="margin-right:6px;"></i>Mandar via WhatsApp</button>
         <div id="painel-envio-whatsapp"></div>
 
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;margin-top:8px;" onclick="mostrarPainelEnvio('app')"><i class="ti ti-device-mobile" style="margin-right:6px;"></i>Mandar via Aplicativo</button>
+        <button class="btn-secondary" style="margin-bottom:14px;margin-top:8px;" onclick="mostrarPainelEnvio('app')"><i class="ti ti-device-mobile" style="margin-right:6px;"></i>Mandar via Aplicativo</button>
         <div id="painel-envio-app"></div>
 
         <p class="section-label" style="margin-top:18px;">Ferramenta específica</p>
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="mostrarFormularioAvisarTreinoAjustado()"><i class="ti ti-barbell" style="margin-right:6px;"></i>Avisar treino ajustado (WhatsApp + Aplicativo juntos)</button>
+        <button class="btn-secondary" style="margin-bottom:14px;" onclick="mostrarFormularioAvisarTreinoAjustado()"><i class="ti ti-barbell" style="margin-right:6px;"></i>Avisar treino ajustado (WhatsApp + Aplicativo juntos)</button>
         <div id="avisar-treino-ajustado-area"></div>
       </div>
 
@@ -751,27 +751,31 @@
           </div>
         </div>
 
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="verificarReplicasDeTreino()"><i class="ti ti-copy-check" style="margin-right:6px;"></i>Verificar réplicas de treino</button>
+        <p class="section-label" style="margin-top:22px;">Auditorias e ferramentas</p>
+        <p class="txt" style="font-size:11px;color:var(--text-faint);margin:-4px 0 10px;">Uso ocasional — confere de vez em quando, não precisa entrar toda hora aqui</p>
+        <button class="btn-secondary" style="margin-bottom:10px;" onclick="verificarReplicasDeTreino()"><i class="ti ti-copy-check" style="margin-right:6px;"></i>Verificar réplicas de treino</button>
         <div id="replicas-treino-area"></div>
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="auditarVolumePosteriores()"><i class="ti ti-clipboard-check" style="margin-right:6px;"></i>Auditar volume mínimo de posteriores</button>
+        <button class="btn-secondary" style="margin-bottom:10px;" onclick="auditarVolumePosteriores()"><i class="ti ti-clipboard-check" style="margin-right:6px;"></i>Auditar volume mínimo de posteriores</button>
         <div id="auditoria-posteriores-area"></div>
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="auditarNomesDiasTreino()"><i class="ti ti-calendar-cog" style="margin-right:6px;"></i>Auditar nomes dos dias da semana</button>
+        <button class="btn-secondary" style="margin-bottom:10px;" onclick="auditarNomesDiasTreino()"><i class="ti ti-calendar-cog" style="margin-right:6px;"></i>Auditar nomes dos dias da semana</button>
         <div id="auditoria-nomes-dias-area"></div>
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="mostrarConfigRanking()"><i class="ti ti-trophy" style="margin-right:6px;"></i>Configurar meta do Ranking</button>
-        <div id="config-ranking-area"></div>
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:8px;" onclick="mostrarControleRanking()"><i class="ti ti-list-numbers" style="margin-right:6px;"></i>Acompanhamento completo do Ranking</button>
-        <div id="controle-ranking-area"></div>
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:14px;" onclick="verErrosRecentes()"><i class="ti ti-bug" style="margin-right:6px;"></i>Ver erros recentes do app</button>
-        <div id="erros-recentes-area"></div>
-        <button class="btn-gold" style="background:var(--card-2);color:#6FA87C;border:1px solid var(--border);margin-top:14px;" onclick="auditarAcessosAlunas()"><i class="ti ti-shield-check" style="margin-right:6px;"></i>Auditar acessos de TODAS as alunas</button>
+        <button class="btn-secondary" style="margin-bottom:10px;" onclick="auditarAcessosAlunas()"><i class="ti ti-shield-check" style="margin-right:6px;"></i>Auditar acessos de TODAS as alunas</button>
         <div id="auditoria-acessos-area"></div>
+        <button class="btn-secondary" onclick="verErrosRecentes()"><i class="ti ti-bug" style="margin-right:6px;"></i>Ver erros recentes do app</button>
+        <div id="erros-recentes-area"></div>
+
+        <p class="section-label" style="margin-top:22px;">Ranking</p>
+        <button class="btn-secondary" style="margin-bottom:10px;" onclick="mostrarConfigRanking()"><i class="ti ti-trophy" style="margin-right:6px;"></i>Configurar meta do Ranking</button>
+        <div id="config-ranking-area"></div>
+        <button class="btn-secondary" onclick="mostrarControleRanking()"><i class="ti ti-list-numbers" style="margin-right:6px;"></i>Acompanhamento completo do Ranking</button>
+        <div id="controle-ranking-area"></div>
       </div>
 
       <div id="personal-inteligencia" style="display:none;">
         <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
         <h1 class="page-title" style="margin-top:0;">Inteligência de mercado</h1>
         <p class="page-sub" style="margin-top:-6px;">O que está bombando agora no nicho de estética feminina/fitness</p>
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:12px;" onclick="gerarRelatorioTendencias()"><i class="ti ti-trending-up" style="margin-right:6px;"></i>🔎 Gerar novo relatório de tendências</button>
+        <button class="btn-secondary" style="margin-bottom:12px;" onclick="gerarRelatorioTendencias()"><i class="ti ti-trending-up" style="margin-right:6px;"></i>🔎 Gerar novo relatório de tendências</button>
         <div id="relatorio-tendencias-area"></div>
       </div>
 
@@ -780,19 +784,19 @@
         <h1 class="page-title" style="margin-top:0;">Relatórios da semana</h1>
         <p class="page-sub" style="margin-top:-6px;">Só considera alunas Ativas. Bom pra fechar a semana, toda sexta-feira</p>
 
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:8px;" onclick="gerarRelatorioFrequenciaSemanal()"><i class="ti ti-calendar-stats" style="margin-right:6px;"></i>Relatório de frequência de treino</button>
+        <button class="btn-secondary" style="margin-bottom:8px;" onclick="gerarRelatorioFrequenciaSemanal()"><i class="ti ti-calendar-stats" style="margin-right:6px;"></i>Relatório de frequência de treino</button>
         <div id="relatorio-frequencia-area" style="margin-bottom:14px;"></div>
 
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:8px;" onclick="gerarRelatorioRespostas()"><i class="ti ti-message-2" style="margin-right:6px;"></i>Relatório de respostas e comentários</button>
+        <button class="btn-secondary" style="margin-bottom:8px;" onclick="gerarRelatorioRespostas()"><i class="ti ti-message-2" style="margin-right:6px;"></i>Relatório de respostas e comentários</button>
         <div id="relatorio-respostas-area" style="margin-bottom:14px;"></div>
 
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:8px;" onclick="gerarResumoFechamentoSemana()"><i class="ti ti-clipboard-text" style="margin-right:6px;"></i>Resumo de fechamento da semana</button>
+        <button class="btn-secondary" style="margin-bottom:8px;" onclick="gerarResumoFechamentoSemana()"><i class="ti ti-clipboard-text" style="margin-right:6px;"></i>Resumo de fechamento da semana</button>
         <div id="resumo-fechamento-area" style="margin-bottom:14px;"></div>
 
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="gerarEPublicarDestaquesSemana()"><i class="ti ti-sparkles" style="margin-right:6px;"></i>Publicar destaques da semana (Ranking)</button>
+        <button class="btn-secondary" style="" onclick="gerarEPublicarDestaquesSemana()"><i class="ti ti-sparkles" style="margin-right:6px;"></i>Publicar destaques da semana (Ranking)</button>
         <div id="destaques-semana-area" style="margin-bottom:14px;"></div>
 
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="gerarRelatorioSuporteSemanal()"><i class="ti ti-headset" style="margin-right:6px;"></i>Relatório de suporte da semana</button>
+        <button class="btn-secondary" style="" onclick="gerarRelatorioSuporteSemanal()"><i class="ti ti-headset" style="margin-right:6px;"></i>Relatório de suporte da semana</button>
         <div id="relatorio-suporte-area"></div>
       </div>
 
@@ -956,7 +960,7 @@
         <h1 class="page-title" style="margin-top:0;">Biblioteca de conteúdo</h1>
         <p class="page-sub">Isso alimenta diretamente a Mentoria das alunas</p>
 
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:14px;" onclick="mostrarFormularioCurso()"><i class="ti ti-school" style="margin-right:6px;"></i>Criar curso</button>
+        <button class="btn-secondary" style="margin-bottom:14px;" onclick="mostrarFormularioCurso()"><i class="ti ti-school" style="margin-right:6px;"></i>Criar curso</button>
         <div id="cursos-list-personal"></div>
         <div id="form-curso-area"></div>
 
@@ -1035,7 +1039,7 @@
         <div class="form-group"><label class="form-label">Adicionar exercício do banco</label>
           <select class="form-select" id="tp-exercicio-select"></select>
         </div>
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="addExercicioAoTemplate()">+ Adicionar à lista</button>
+        <button class="btn-secondary" style="" onclick="addExercicioAoTemplate()">+ Adicionar à lista</button>
         <div class="chip-list" id="tp-exercicios-selecionados" style="margin:12px 0;"></div>
         <button class="btn-gold" onclick="salvarTemplate()">Salvar template</button>
       </div>
@@ -1055,7 +1059,7 @@
         <div id="lista-seca-empina"></div>
         <button class="btn-gold" onclick="mostrarFormularioInscricaoSecaEmpina()" style="margin-bottom:22px;">Inscrever aluna no Seca e Empina</button>
         <div id="form-inscricao-seca-empina"></div>
-        <button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:10px;" onclick="alternarPreviewSecaEmpina()"><i class="ti ti-eye" style="margin-right:6px;"></i>Ver as 10 estruturas do Seca e Empina</button>
+        <button class="btn-secondary" style="margin-top:10px;" onclick="alternarPreviewSecaEmpina()"><i class="ti ti-eye" style="margin-right:6px;"></i>Ver as 10 estruturas do Seca e Empina</button>
         <div id="preview-seca-empina"></div>
 
         <p class="page-sub" style="margin-top:22px;">Crie um treino e gere um link de inscrição, quem entra participa só do desafio, sem acesso ao restante do app</p>
@@ -3469,7 +3473,7 @@ function mostrarFormularioAvisarTreinoAjustado(){
   }).join('');
   html += '<p id="sem-resultado-treino-ajustado" class="txt" style="display:none;color:var(--text-faint);text-align:center;padding:8px;">Nenhuma aluna encontrada.</p>';
   html += '</div>';
-  html += '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="confirmarAvisarTreinoAjustado()">Enviar (WhatsApp + app)</button>';
+  html += '<button class="btn-secondary" style="" onclick="confirmarAvisarTreinoAjustado()">Enviar (WhatsApp + app)</button>';
   html += '<div id="resultado-treino-ajustado" style="margin-top:10px;"></div>';
   area.innerHTML = html;
 }
@@ -3781,7 +3785,7 @@ function renderPerguntaPeso(mes){
     '<p class="lbl">Check-in mensal de peso</p>' +
     '<p class="txt">Já faz um mês! Pode me passar seu peso atual? Isso ajuda a calibrar quando é hora de avançar de fase.</p>' +
     '<div class="form-group"><input class="form-input" id="peso-atual-input" type="text" inputmode="decimal" step="0.1" placeholder="Ex: 98.5"></div>' +
-    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="registrarPesoMensal(' + mes + ')">Enviar</button>' +
+    '<button class="btn-secondary" style="" onclick="registrarPesoMensal(' + mes + ')">Enviar</button>' +
     '</div>';
 }
 
@@ -4784,7 +4788,7 @@ function renderListaSecaEmpina(){
       '<span class="acao-pill" style="background:var(--danger);" onclick="removerAlunaDoSecaEmpina(\'' + a.nome.replace(/'/g,"\\'") + '\')">Remover</span></span>' +
     '</div><div id="ver-desafio-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '"></div>';
   }).join('') +
-  '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:8px;" onclick="avancarTodasEstruturaSecaEmpina()">Avançar todas pra próxima estrutura agora</button>';
+  '<button class="btn-secondary" style="margin-top:8px;" onclick="avancarTodasEstruturaSecaEmpina()">Avançar todas pra próxima estrutura agora</button>';
 }
 
 // ===== ALUNA: botão condicional na home, tela do desafio, marcar dia como feito =====
@@ -5762,7 +5766,7 @@ function renderProgressao(a){
     logHtml +
     reavaliacaoHtml +
     volumeHtml +
-    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:14px;" onclick="exportarRelatorioEvolucao(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-file-export" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>Exportar relatório de evolução</button>' +
+    '<button class="btn-secondary" style="margin-top:14px;" onclick="exportarRelatorioEvolucao(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-file-export" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>Exportar relatório de evolução</button>' +
     '<p style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:16px;cursor:pointer;" onclick="resetarDadosTeste()">Resetar dados de teste (antes do lançamento)</p>';
 }
 
@@ -5816,8 +5820,8 @@ function renderListaFeedbackGerador(nomeAluna){
     html += '<div class="info-box" style="margin-bottom:8px;"><p class="txt" style="margin-bottom:2px;">' + f.texto + '</p><p style="font-size:11px;color:var(--text-faint);margin:0;">' + f.aluna + ' · ' + f.data + '</p></div>';
   });
   html += '<div style="display:flex;gap:8px;">' +
-    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);font-size:12px;width:auto;flex:1;" onclick="copiarFeedbackGerador(\'' + (nomeAluna || '').replace(/'/g,"\\'") + '\')">Copiar tudo</button>' +
-    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);font-size:12px;width:auto;flex:1;" onclick="baixarFeedbackGerador(\'' + (nomeAluna || '').replace(/'/g,"\\'") + '\')"><i class="ti ti-download" style="font-size:12px;vertical-align:-2px;margin-right:4px;"></i>Baixar arquivo</button>' +
+    '<button class="btn-secondary" style="font-size:12px;width:auto;flex:1;" onclick="copiarFeedbackGerador(\'' + (nomeAluna || '').replace(/'/g,"\\'") + '\')">Copiar tudo</button>' +
+    '<button class="btn-secondary" style="font-size:12px;width:auto;flex:1;" onclick="baixarFeedbackGerador(\'' + (nomeAluna || '').replace(/'/g,"\\'") + '\')"><i class="ti ti-download" style="font-size:12px;vertical-align:-2px;margin-right:4px;"></i>Baixar arquivo</button>' +
   '</div>';
   container.innerHTML = html;
 }
@@ -7969,7 +7973,7 @@ function openAlunaDetail(i){
   let treinoAcoesHtml = '';
   if(a.treinoAtual){
     treinoHtml = '<button class="btn-gold" style="background:linear-gradient(135deg,#6FA87C,#4C8058);color:#fff;margin-bottom:8px;" onclick="abrirModoAulaPresencial(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-device-mobile" style="margin-right:6px;"></i>Modo Aula Presencial — editar cargas agora</button>' +
-      '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:12px;" onclick="mostrarFormularioCopiarTreino(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-copy" style="margin-right:6px;"></i>Copiar esse treino para...</button>' +
+      '<button class="btn-secondary" style="margin-bottom:12px;" onclick="mostrarFormularioCopiarTreino(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-copy" style="margin-right:6px;"></i>Copiar esse treino para...</button>' +
       '<div id="copiar-treino-form"></div>' +
       '<div class="badge">' + a.treinoAtual.fase + '</div>' +
       '<p class="page-sub" style="margin:2px 0 10px;">' + a.treinoAtual.volume + '</p>';
@@ -7991,7 +7995,7 @@ function openAlunaDetail(i){
   const diagnostico = gerarDiagnosticoInterno(a);
   const prog = getProgressoAluna(a.nome);
   if(a.treinoAtual){
-    treinoAcoesHtml = '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:10px;" onclick="mostrarDiagnosticoParaProgredir(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-trending-up" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>Progredir treino</button>';
+    treinoAcoesHtml = '<button class="btn-secondary" style="margin-top:10px;" onclick="mostrarDiagnosticoParaProgredir(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-trending-up" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>Progredir treino</button>';
     treinoAcoesHtml += '<div id="diagnostico-progressao-area"></div>';
   } else {
     treinoAcoesHtml = '<div class="info-box" style="margin-top:10px;">' +
@@ -8000,13 +8004,13 @@ function openAlunaDetail(i){
       '<p class="txt" style="font-size:11px;color:var(--text-faint);">' + diagnostico.justificativaEstrategia + '</p>' +
       '<p class="txt" style="margin-top:4px;"><b>Fase:</b> ' + diagnostico.faseAtual + '</p>' +
       '</div>';
-    treinoAcoesHtml += '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:10px;" onclick="gerarTreinoAutomaticoParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-wand" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>Prescrever treino automaticamente</button>';
+    treinoAcoesHtml += '<button class="btn-secondary" style="margin-top:10px;" onclick="gerarTreinoAutomaticoParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-wand" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>Prescrever treino automaticamente</button>';
   }
   treinoAcoesHtml += '<div id="validacao-treino-area"></div>';
   treinoAcoesHtml += '<p class="section-label" style="margin-top:18px;">Seu feedback sobre esse treino</p>' +
     '<p class="page-sub" style="margin-top:-4px;">Anote aqui o que achou estranho ou errado, isso fica guardado organizado pra você trazer numa próxima conversa e a gente transformar em regra permanente.</p>' +
     '<div class="form-group"><textarea class="form-input" id="feedback-gerador-texto" rows="3" placeholder="Ex: achei o volume de posterior baixo demais pra essa aluna..."></textarea></div>' +
-    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="salvarFeedbackGerador(\'' + a.nome.replace(/'/g,"\\'") + '\')">Salvar feedback</button>' +
+    '<button class="btn-secondary" style="" onclick="salvarFeedbackGerador(\'' + a.nome.replace(/'/g,"\\'") + '\')">Salvar feedback</button>' +
     '<div id="lista-feedback-gerador"></div>';
 
   let queixaHtml = '';
@@ -8064,8 +8068,8 @@ function openAlunaDetail(i){
     '</div>' +
     '<p style="font-size:11px;color:var(--text-faint);margin:-8px 0 12px;">Ajustar aqui atualiza automaticamente toda a estrutura de treino gerada — o gerador nunca mistura exercício de academia com exercício de casa</p>' +
     '<div id="preview-mudanca-area"></div>' +
-    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:18px;" onclick="abrirResumoCompletoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-file-description" style="margin-right:6px;"></i>📋 Resumo completo (diagnóstico, avaliação, plano)</button>' +
-    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-bottom:8px;" onclick="gerarResumoPerformanceAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-sparkles" style="margin-right:6px;"></i>🤖 Resumir performance com IA</button>' +
+    '<button class="btn-secondary" style="margin-bottom:18px;" onclick="abrirResumoCompletoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-file-description" style="margin-right:6px;"></i>📋 Resumo completo (diagnóstico, avaliação, plano)</button>' +
+    '<button class="btn-secondary" style="margin-bottom:8px;" onclick="gerarResumoPerformanceAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-sparkles" style="margin-right:6px;"></i>🤖 Resumir performance com IA</button>' +
     '<div id="resumo-ia-area" style="margin-bottom:18px;"></div>' +
     (objetivoSugereTabata(a) && !a.tabataSugestaoRespondida ? (
       '<div class="info-box" style="margin-bottom:12px;border-color:var(--border-strong);">' +
@@ -8102,7 +8106,7 @@ function openAlunaDetail(i){
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 0 0;font-size:13px;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="mostrarAvisoAjusteIndividual(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-barbell" style="vertical-align:-2px;margin-right:6px;"></i>Avisar ajuste de treino</button>' +
         '<div id="aviso-ajuste-individual"></div>' +
         '<div id="alterar-senha-resultado" style="margin-top:8px;"></div>'
-      : '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="criarLoginParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-key" style="font-size:14px;vertical-align:-2px;margin-right:6px;"></i>Gerar acesso ao app</button>'
+      : '<button class="btn-secondary" style="" onclick="criarLoginParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-key" style="font-size:14px;vertical-align:-2px;margin-right:6px;"></i>Gerar acesso ao app</button>'
     ) +
     '<div id="acesso-gerado-area"></div>' +
     '<p class="page-sub" style="margin-top:10px;">Anamnese respondida em ' + (a.dataAnamnese || 'data desconhecida') + '</p>';
@@ -8672,7 +8676,7 @@ function renderFunilEngajamento(a){
     '<div class="badge">' + info.fase + '</div>' +
     '<p class="txt" style="font-size:12px;color:var(--text-faint);margin:6px 0;">' + info.mensagem + ' (dia ' + info.dias + ' de ' + duracaoPlano + ')</p>' +
     avisoSemPlano +
-    (!a.dataFechouPlano ? '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="avancarDiasFunil(\'' + a.nome.replace(/'/g,"\\'") + '\', 10)">Simular +10 dias</button>' : '');
+    (!a.dataFechouPlano ? '<button class="btn-secondary" style="" onclick="avancarDiasFunil(\'' + a.nome.replace(/'/g,"\\'") + '\', 10)">Simular +10 dias</button>' : '');
 }
 
 function renderDuvidasSinalizadas(a){
@@ -9636,7 +9640,7 @@ function playExercicioVideo(nome){
       : '<div class="video-block"><i class="ti ti-player-play"></i></div>') +
     '<h1 class="page-title" style="margin-top:0;">' + e.nome + '</h1>' +
     '<p class="page-sub">' + e.categoria + (e.nivel ? ' · ' + e.nivel : '') + '</p>' +
-    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="abrirEdicaoExercicio(\'' + nome.replace(/'/g,"\\'") + '\')">Editar</button>' +
+    '<button class="btn-secondary" style="" onclick="abrirEdicaoExercicio(\'' + nome.replace(/'/g,"\\'") + '\')">Editar</button>' +
     '<div id="ex-edicao-form"></div>';
   document.getElementById('ex-lista-view').style.display = 'none';
   document.getElementById('ex-video-view').style.display = 'block';
@@ -12003,7 +12007,7 @@ async function gerarResumoPerformanceAluna(nomeAluna){
     const idTextoEscapado = 'resumo-ia-texto-' + nomeAluna.replace(/[^a-zA-Z0-9]/g,'');
     area.innerHTML = '<div class="info-box">' +
       '<p id="' + idTextoEscapado + '" class="txt" style="white-space:pre-wrap;">' + (textoResumo || 'Não consegui gerar o resumo agora, tenta de novo.') + '</p>' +
-      '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);margin-top:8px;" onclick="copiarResumoIA(\'' + idTextoEscapado + '\')">Copiar texto</button>' +
+      '<button class="btn-secondary" style="margin-top:8px;" onclick="copiarResumoIA(\'' + idTextoEscapado + '\')">Copiar texto</button>' +
     '</div>';
   } catch(erro){
     console.error('[Resumo IA] erro real:', erro);
@@ -12616,7 +12620,7 @@ function renderPerguntaNutricao(semanaFechada){
     '<div class="form-group"><label class="form-label">Tempo total, em minutos, somando todos os dias</label><input class="form-input" id="nutri-cardio-minutos" type="number" placeholder="Ex: 60"></div>' +
     '<p class="txt" style="margin-top:10px;">Por último, em média, quantas horas você dormiu por noite essa semana?</p>' +
     '<div class="form-group"><input class="form-input" id="nutri-sono" type="text" inputmode="decimal" step="0.5" placeholder="Ex: 7"></div>' +
-    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="registrarNutricaoSemana()">Enviar</button>' +
+    '<button class="btn-secondary" style="" onclick="registrarNutricaoSemana()">Enviar</button>' +
     '</div>';
 }
 
@@ -13152,7 +13156,7 @@ function renderMetaFinanceiraConteudo(m){
     return '<div class="info-box" style="margin-bottom:14px;">' +
       '<p class="lbl" style="margin-bottom:8px;">Meta do mês</p>' +
       '<div class="form-group"><input class="form-input" id="input-meta-faturamento" type="text" inputmode="decimal" step="0.01" placeholder="Quanto você quer faturar esse mês?"></div>' +
-      '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="salvarMetaFaturamento()">Definir meta</button>' +
+      '<button class="btn-secondary" style="" onclick="salvarMetaFaturamento()">Definir meta</button>' +
     '</div>';
   }
 
@@ -14907,7 +14911,7 @@ function renderPerguntaCiclo(){
     '<p class="txt">Notamos um desempenho um pouco mais baixo hoje, e tudo bem, isso acontece. Sabemos que o período pode influenciar a força em alguns momentos. Se quiser, pode nos contar há quantos dias foi sua última menstruação? Isso ajuda a deixar nossas análises mais precisas pra você.</p>' +
     '<div class="form-group"><input class="form-input" id="ciclo-dias" type="number" placeholder="Ex: 20 dias atrás"></div>' +
     '<div class="form-group"><label class="form-label">Usa algum medicamento/anticoncepcional?</label><select class="form-select" id="ciclo-medicamento"><option>Não</option><option>Sim</option></select></div>' +
-    '<button class="btn-gold" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="registrarCiclo()">Enviar</button>' +
+    '<button class="btn-secondary" style="" onclick="registrarCiclo()">Enviar</button>' +
     '<button class="btn-gold" onclick="pularCiclo()">Prefiro não responder</button>' +
     '</div>';
 }
