@@ -1,4 +1,4 @@
-[dna_musa_85.html](https://github.com/user-attachments/files/32839170/dna_musa_85.html)
+[Uploading dna_musa_86.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -393,7 +393,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-G-HIERARQUIA-VISUAL-2</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-H-RODA-VIDA-GRADUAL</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -576,6 +576,7 @@
       </div>
       <div id="botao-desafio-area"></div>
       <div id="botao-pergunta-perfil-area"></div>
+      <div id="botao-pergunta-roda-vida-area"></div>
 
       <div class="list-item" style="cursor:pointer;margin-top:10px;" onclick="openLevel2('progresso')">
         <span><i class="ti ti-trending-up" style="margin-right:8px;color:var(--gold-soft);"></i>Meu progresso</span>
@@ -647,6 +648,17 @@
         <textarea class="form-input" id="pergunta-perfil-resposta" rows="4" placeholder="Escreve com suas palavras, sem pressa..."></textarea>
         <button class="btn-gold" style="margin-top:12px;" onclick="confirmarRespostaPerguntaPerfil()">Enviar resposta</button>
         <p class="txt" style="font-size:12px;color:var(--text-faint);text-align:center;margin-top:10px;cursor:pointer;" onclick="pularPerguntaPerfil()">Responder depois</p>
+      </div>
+    </div>
+
+    <!-- PERGUNTA DE RODA DA VIDA (uma área por vez) -->
+    <div class="view" data-view="pergunta-roda-vida">
+      <p style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold);margin:0 0 6px;letter-spacing:0.5px;">Roda da Vida</p>
+      <p class="page-sub" style="margin:0 0 16px;">De 0 a 5, como está essa área da sua vida agora?</p>
+      <div class="info-box">
+        <p class="txt" style="font-size:15px;font-weight:600;margin:0 0 14px;" id="pergunta-roda-vida-texto"></p>
+        <div class="row" style="gap:6px;justify-content:center;" id="pergunta-roda-vida-notas"></div>
+        <p class="txt" style="font-size:12px;color:var(--text-faint);text-align:center;margin-top:14px;cursor:pointer;" onclick="pularPerguntaRodaDaVida()">Responder depois</p>
       </div>
     </div>
 
@@ -11353,7 +11365,7 @@ function openLevel2(which){
   if(phoneEl) phoneEl.classList.toggle('modo-personal', which === 'personal');
   if(which === 'personal'){ showPersonalView('dashboard'); carregarCatalogoPersonal(); iniciarPresencaEquipe(); iniciarRealtimeConversas(); }
   if(which === 'chatia'){ inicializarChatIA(); }
-  if(which === 'home' && typeof renderHome === 'function'){ renderHome(); verificarAvancoEstruturaDesafio(); renderBotaoDesafio(); verificarPerguntaPerfilPendente(); renderBotaoPerguntaPerfil(); }
+  if(which === 'home' && typeof renderHome === 'function'){ renderHome(); verificarAvancoEstruturaDesafio(); renderBotaoDesafio(); verificarPerguntaPerfilPendente(); renderBotaoPerguntaPerfil(); verificarPerguntaRodaDaVidaPendente(); renderBotaoPerguntaRodaDaVida(); }
   if(which === 'dados' && typeof renderAvaliacoes === 'function'){ renderAvaliacoes(); }
   if(which === 'progresso' && typeof renderMeuProgresso === 'function'){ renderMeuProgresso(); }
   if(which === 'ranking' && typeof renderRanking === 'function'){ renderRanking(); renderRankingPublico(); }
@@ -13922,19 +13934,27 @@ function getUltimaFinalizacaoRodaDaVida(nome){
 }
 
 // Retorna quantos dias faltam pra liberar um novo preenchimento (0 ou negativo = já liberado)
+const DIAS_COOLDOWN_RODA_DA_VIDA = 60; // ~2 meses, como combinado — depois de completar um ciclo inteiro
 function diasParaProximaRodaDaVida(nome){
   const ultima = getUltimaFinalizacaoRodaDaVida(nome);
   if(!ultima) return 0;
   const dataBase = new Date(ultima.dataFinalizacao + 'T00:00:00');
   const hoje = new Date();
   const diasPassados = Math.floor((hoje - dataBase) / (1000*60*60*24));
-  return Math.max(0, 30 - diasPassados);
+  return Math.max(0, DIAS_COOLDOWN_RODA_DA_VIDA - diasPassados);
 }
 
 function salvarCampoRodaDaVida(nome, areaId, valor){
   const mesISO = getMesAtualISO();
   const registro = getRodaDaVidaMes(nome, mesISO);
   registro.areas[areaId] = valor;
+  // Assim que a última área do ciclo é respondida, finaliza sozinho — sem precisar de nenhum botão
+  // "concluir" manual. É isso que dispara a trava de 2 meses e guarda esse ciclo pra comparar depois.
+  const faltamAreas = AREAS_RODA_DA_VIDA.some(function(a){ return registro.areas[a.id] == null; });
+  if(!faltamAreas && !registro.finalizado){
+    registro.finalizado = true;
+    registro.dataFinalizacao = getDataHojeISO();
+  }
   salvarProgressoNoSupabase(nome);
   renderRodaDaVidaAluna();
 }
@@ -13948,6 +13968,76 @@ function finalizarRodaDaVida(nome){
   registro.dataFinalizacao = getDataHojeISO();
   salvarProgressoNoSupabase(nome);
   renderRodaDaVidaAluna();
+}
+
+// ===== RODA DA VIDA: perguntas entregues aos poucos, uma área por vez =====
+// Em vez de uma tela com os 10 campos pra preencher de uma vez, pergunta UMA área aleatória (das
+// que ainda faltam nesse ciclo) a cada poucos dias, do mesmo jeito que as Perguntas de Perfil DNA.
+// Ao responder a última área que faltava, o ciclo fecha sozinho (ver salvarCampoRodaDaVida acima),
+// e ela só recebe pergunta nova depois do descanso de 2 meses.
+const INTERVALO_DIAS_PERGUNTA_RODA_DA_VIDA = 2;
+
+function verificarPerguntaRodaDaVidaPendente(){
+  const nome = NOME_ALUNA_LOGADA;
+  const prog = getProgressoAluna(nome);
+  if(diasParaProximaRodaDaVida(nome) > 0) return; // ainda no período de descanso de 2 meses, não pergunta nada
+
+  if(!prog.rodaDaVidaPendente) prog.rodaDaVidaPendente = null;
+  if(prog.rodaDaVidaPendente) return; // já tem uma esperando resposta, não empilha outra
+
+  const diasDesdeUltima = prog.rodaDaVidaUltimaPerguntaEm ? Math.floor((Date.now() - new Date(prog.rodaDaVidaUltimaPerguntaEm).getTime()) / 86400000) : 999;
+  if(diasDesdeUltima < INTERVALO_DIAS_PERGUNTA_RODA_DA_VIDA) return;
+
+  const mesISO = getMesAtualISO();
+  const registro = getRodaDaVidaMes(nome, mesISO);
+  const areasFaltando = AREAS_RODA_DA_VIDA.filter(function(a){ return registro.areas[a.id] == null; });
+  if(areasFaltando.length === 0) return; // não deveria acontecer (já teria finalizado sozinho), mas por segurança
+
+  const escolhida = areasFaltando[Math.floor(Math.random() * areasFaltando.length)];
+  prog.rodaDaVidaPendente = { areaId: escolhida.id, label: escolhida.label, icone: escolhida.icone };
+  prog.rodaDaVidaUltimaPerguntaEm = new Date().toISOString();
+  salvarProgressoNoSupabase(nome);
+}
+
+function renderBotaoPerguntaRodaDaVida(){
+  const area = document.getElementById('botao-pergunta-roda-vida-area');
+  if(!area) return;
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const pendente = prog.rodaDaVidaPendente;
+  if(!pendente){ area.innerHTML = ''; return; }
+  area.innerHTML = '<div class="list-item" style="cursor:pointer;background:linear-gradient(135deg,#6FA87C,#4C8058);border:none;margin-top:10px;" onclick="abrirTelaPerguntaRodaDaVida()">' +
+    '<span style="color:#fff;font-weight:600;"><i class="ti ' + pendente.icone + '" style="margin-right:8px;"></i>Roda da Vida: uma área rápida</span>' +
+    '<i class="ti ti-chevron-right" style="color:#fff;"></i>' +
+  '</div>';
+}
+
+function abrirTelaPerguntaRodaDaVida(){
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const pendente = prog.rodaDaVidaPendente;
+  if(!pendente) return;
+  openLevel2('pergunta-roda-vida');
+  document.getElementById('pergunta-roda-vida-texto').innerHTML = '<i class="ti ' + pendente.icone + '" style="margin-right:8px;color:var(--gold-soft);"></i>' + pendente.label;
+  document.getElementById('pergunta-roda-vida-notas').innerHTML = [0,1,2,3,4,5].map(function(n){
+    return '<span class="chip" style="cursor:pointer;" onclick="confirmarRespostaRodaDaVida(' + n + ')">' + n + '</span>';
+  }).join('');
+}
+
+function pularPerguntaRodaDaVida(){
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  prog.rodaDaVidaPendente = null; // não marca a área como respondida — pode voltar num próximo ciclo de perguntas
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  renderBotaoPerguntaRodaDaVida();
+  openLevel2('home');
+}
+
+function confirmarRespostaRodaDaVida(valor){
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const pendente = prog.rodaDaVidaPendente;
+  if(!pendente) return;
+  prog.rodaDaVidaPendente = null;
+  salvarCampoRodaDaVida(NOME_ALUNA_LOGADA, pendente.areaId, valor); // já salva e checa sozinho se fechou o ciclo
+  renderBotaoPerguntaRodaDaVida();
+  openLevel2('home');
 }
 
 function calcularPontoForteEAreaFraca(areasObj){
@@ -14056,7 +14146,9 @@ function renderRodaDaVidaAluna(){
     return;
   }
 
-  // Liberado pra preencher (primeira vez, ou já passaram os 30 dias)
+  // Liberado (primeira vez, ou já passaram os 2 meses) — mas agora não é mais um formulário pra
+  // preencher tudo de uma vez: as perguntas chegam aos poucos (ver verificarPerguntaRodaDaVidaPendente).
+  // Essa tela só mostra o progresso do ciclo atual e o gráfico parcial, se já tiver alguma resposta.
   const mesISO = getMesAtualISO();
   const registro = getRodaDaVidaMes(nome, mesISO);
   const nomeDoMes = new Date(mesISO + '-01T00:00:00').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
@@ -14064,10 +14156,10 @@ function renderRodaDaVidaAluna(){
 
   let html = '<p class="section-label" style="margin-top:0;">' + nomeDoMes.charAt(0).toUpperCase() + nomeDoMes.slice(1) + ' <span class="tag">' + totalPreenchido + ' de ' + AREAS_RODA_DA_VIDA.length + '</span></p>';
 
-  if(!jaPreencheuAlgumaVez){
-    html += '<div class="info-box" style="margin-bottom:16px;background:var(--success-soft);border-color:var(--success);"><p class="txt" style="font-size:12px;">A Roda da Vida avalia como está sua vida além do treino, saúde, trabalho, família, financeiro e mais. Isso ajuda seu personal a te entender melhor como um todo, não só o que acontece na academia. Leva menos de 2 minutos, uma vez por mês.</p></div>';
-  } else {
-    html += '<div class="info-box" style="margin-bottom:16px;"><p class="txt" style="font-size:12px;color:var(--text-faint);">Já passaram os 30 dias, pode preencher de novo. <span style="color:var(--gold-soft);cursor:pointer;text-decoration:underline;" onclick="alternarHistoricoRodaDaVida()">Ver meses anteriores</span></p></div>';
+  if(!jaPreencheuAlgumaVez && totalPreenchido === 0){
+    html += '<div class="info-box" style="margin-bottom:16px;background:var(--success-soft);border-color:var(--success);"><p class="txt" style="font-size:12px;">A Roda da Vida avalia como está sua vida além do treino: saúde, trabalho, família, financeiro e mais. Isso ajuda seu personal a te entender melhor como um todo. De vez em quando, uma área aparece pra você responder — leva 5 segundos cada uma.</p></div>';
+  } else if(totalPreenchido < AREAS_RODA_DA_VIDA.length){
+    html += '<div class="info-box" style="margin-bottom:16px;"><p class="txt" style="font-size:12px;color:var(--text-faint);">Faltam ' + (AREAS_RODA_DA_VIDA.length - totalPreenchido) + ' área(s) pra fechar esse ciclo. Elas vão aparecendo aos poucos pra você responder — nenhuma pressa.</p></div>';
   }
 
   if(totalPreenchido > 0){
@@ -14081,20 +14173,9 @@ function renderRodaDaVidaAluna(){
     }
   }
 
-  AREAS_RODA_DA_VIDA.forEach(function(a){
-    const valorAtual = registro.areas[a.id];
-    html += '<div class="info-box" style="margin-bottom:8px;">' +
-      '<p class="txt" style="font-size:12px;margin-bottom:6px;"><i class="ti ' + a.icone + '" style="margin-right:6px;color:var(--gold-soft);"></i>' + a.label + '</p>' +
-      '<div class="row" style="gap:6px;">' +
-        [0,1,2,3,4,5].map(function(n){
-          return '<span class="chip" style="' + (valorAtual === n ? 'background:var(--gold-soft);color:#1A1409;border-color:var(--gold-soft);' : '') + '" onclick="salvarCampoRodaDaVida(\'' + nome.replace(/'/g,"\\'") + '\',\'' + a.id + '\',' + n + ')">' + n + '</span>';
-        }).join('') +
-      '</div>' +
-    '</div>';
-  });
-
-  html += '<button class="btn-gold" style="margin-top:10px;" onclick="finalizarRodaDaVida(\'' + nome.replace(/'/g,"\\'") + '\')">Salvar e concluir esse mês</button>' +
-    '<p class="txt" style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:6px;">Depois de salvar, um novo preenchimento só libera em 30 dias.</p>';
+  if(jaPreencheuAlgumaVez){
+    html += '<span class="chip" style="cursor:pointer;" onclick="alternarHistoricoRodaDaVida()">Ver meses anteriores</span>';
+  }
 
   container.innerHTML = html;
 }
