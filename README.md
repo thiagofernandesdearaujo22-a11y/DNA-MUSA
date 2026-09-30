@@ -1,4 +1,4 @@
-[dna_musa_89.html](https://github.com/user-attachments/files/32839756/dna_musa_89.html)
+[Uploading dna_musa_90.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -394,7 +394,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-J-HIERARQUIA-ALUNA-COMPLETA</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-K-ACESSO-BIANCA</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -831,6 +831,9 @@
 
         <p class="section-label" style="margin-top:6px;">Ferramentas do painel</p>
         <div id="atalhos-dashboard-area-2"></div>
+
+        <p class="section-label" style="margin-top:22px;">Outras ferramentas</p>
+        <div id="atalhos-extras-bianca-area"></div>
 
         <p class="section-label" style="margin-top:22px;">Central de Suporte</p>
         <p class="page-sub" style="margin-top:-6px;">Prioridades de hoje, com sugestão pronta pra cada uma. Ciclo reinicia toda Segunda, Quarta e Sexta.</p>
@@ -8747,7 +8750,6 @@ function renderElegibilidadeFase(a){
 
 const ferramentasPersonal = [
   { titulo: 'Alunas', icone: 'ti-users', view: 'alunas' },
-  { titulo: 'Painel de Suporte (2ª Dashboard)', icone: 'ti-layout-dashboard', view: 'dashboard-suporte' },
   { titulo: 'Sinalizações', icone: 'ti-heart-handshake', view: 'sinalizacoes' },
   { titulo: 'Conversas', icone: 'ti-brand-whatsapp', view: 'conversas' },
   { titulo: 'Controle de Treinos', icone: 'ti-list-check', view: 'controle' },
@@ -13161,9 +13163,20 @@ function renderAtalhosDashboard(){
   }
   const area = document.getElementById('atalhos-dashboard-area');
   if(area) area.innerHTML = montarHtml(atalhosBase);
-  // Versão da colaboradora: sem "Ferramentas de treino" por enquanto (ela ainda não mexe em treino)
+  // Versão da colaboradora: já pode usar Ferramentas de treino também — só Inteligência de mercado
+  // continua de fora (não é uma ferramenta operacional do dia a dia com as alunas)
   const area2 = document.getElementById('atalhos-dashboard-area-2');
-  if(area2) area2.innerHTML = montarHtml(atalhosBase.filter(function(a){ return a.view !== 'ferramentas-treino' && a.view !== 'inteligencia'; }));
+  if(area2) area2.innerHTML = montarHtml(atalhosBase.filter(function(a){ return a.view !== 'inteligencia'; }));
+
+  // Liberado especificamente pra ela: as mesmas fontes de conteúdo/controle que o Thiago usa, puxando
+  // direto de ferramentasPersonal (mesma lista de sempre) pra nunca ficar desalinhado se algo mudar lá.
+  const areaExtrasBianca = document.getElementById('atalhos-extras-bianca-area');
+  if(areaExtrasBianca){
+    const viewsLiberadasPraBianca = ['controle', 'exercicios', 'treinos', 'mobilidade', 'desafios', 'sinalizacoes'];
+    const itensExtras = ferramentasPersonal.filter(function(f){ return viewsLiberadasPraBianca.indexOf(f.view) !== -1; })
+      .map(function(f){ return { view: f.view, icone: f.icone, titulo: f.titulo, desc: '' }; });
+    areaExtrasBianca.innerHTML = montarHtml(itensExtras);
+  }
 }
 
 function renderMetaFinanceiraConteudo(m){
