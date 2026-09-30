@@ -314,6 +314,11 @@
   .form-input, .form-select{width:100%;background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:9px 11px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;}
   .form-input:focus, .form-select:focus{outline:none;border-color:var(--border-strong);}
   .btn-gold{width:100%;background:linear-gradient(135deg,#F4D9A5,#E8C58A 55%,#4C3E25);color:#0B0B0C;font-weight:600;font-size:13px;border:none;border-radius:10px;padding:11px;cursor:pointer;margin-top:6px;}
+  /* Hierarquia visual: dourado só pra ação que fecha uma etapa (iniciar treino, registrar o dia).
+     Ações intermediárias (confirmar 1 exercício de vários, opções secundárias) usam este estilo
+     neutro — sem isso, uma tela com 5 exercícios mostrava 5 botões da MESMA cor de destaque,
+     competindo entre si e com a ação final, o que deixa a tela "gritando" inteira. */
+  .btn-secondary{width:100%;background:var(--card-2);color:var(--gold-soft);font-weight:600;font-size:13px;border:1px solid var(--border-strong);border-radius:10px;padding:10px;cursor:pointer;margin-top:6px;}
   .exercicio-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 13px;margin-bottom:8px;}
   .exercicio-item .ex-name{font-size:13px;font-weight:600;margin:0 0 3px;}
   .exercicio-item .ex-meta{font-size:11px;color:var(--text-faint);margin:0;}
@@ -387,7 +392,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-E-PROTECAO-WHATSAPP</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-F-HIERARQUIA-VISUAL-1</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -14447,7 +14452,7 @@ if(type === 'central'){
             '<input class="form-input" data-carga="' + j + '" type="text" inputmode="decimal" placeholder="Carga (kg)" style="flex:1;">' +
             '<input class="form-input" data-reps="' + j + '" type="number" placeholder="Reps · 1ª série" style="flex:1;">' +
           '</div>' +
-          '<button class="btn-gold" style="margin-top:8px;padding:8px;font-size:12px;" onclick="confirmarSerieExercicio(\'' + j + '\',\'' + nomeEx.replace(/'/g,"\\'") + '\')">Confirmar</button>' +
+          '<button class="btn-secondary" style="margin-top:8px;padding:8px;font-size:12px;" onclick="confirmarSerieExercicio(\'' + j + '\',\'' + nomeEx.replace(/'/g,"\\'") + '\')">Confirmar</button>' +
           '<div id="confirmado-serie-' + j + '"></div>';
 
         corpoTreino += '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;">' +
