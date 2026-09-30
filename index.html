@@ -387,7 +387,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-B-DROPDOWN-PRIORIDADE</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-C-AUTOCORRIGE-DIAS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -7945,6 +7945,18 @@ function confirmarTransformarEmTabata(nomeAluna){
 function openAlunaDetail(i){
   const a = alunasPersonal[i];
   alunaAberta = a;
+  // Corrige sozinho, sem precisar de nenhum botão: se o nome do dia (Segunda, Terça...) estiver fora
+  // da posição certa — sequela de reordenações feitas antes da correção que fixou o nome por posição —
+  // já resolve na hora de abrir a ficha, silenciosamente. Isso roda de novo quando o treino real chega
+  // do banco (buscarTreinoRealDaAluna chama openAlunaDetail outra vez), então pega os dois casos.
+  if(a.treinoAtual && a.treinoAtual.dias){
+    const foraDeOrdem = a.treinoAtual.dias.some(function(d, idx){ return d.n !== NOMES_DIAS_OFICIAL[idx]; });
+    if(foraDeOrdem){
+      a.treinoAtual.dias.forEach(function(d, idx){ d.n = NOMES_DIAS_OFICIAL[idx]; });
+      atualizarLetrasDosDias(a.treinoAtual.dias);
+      sincronizarTreinoComSupabase(a);
+    }
+  }
   const el = document.getElementById('aluna-detail-content');
   buscarTreinoRealDaAluna(a, i);
 
