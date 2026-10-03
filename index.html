@@ -393,7 +393,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-Y-LINK-POSTURAL-PRESCRICAO</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-Z-MENTORIA-SECOES</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -2259,19 +2259,71 @@ const conteudos = [
 const categorias = ['Todos', 'Cursos completos', 'Introdução', 'Métodos de treino', 'Exercícios de coxa', 'Exercícios de glúteo', 'Nutrição', 'Alongamentos', 'Mobilidades', 'Manobras respiratórias', 'Ajustes e orientações', 'Curso: Fit 30', 'Curso: Corpo de Musa', 'Curso: Seca barriga', 'Conteúdo geral'];
 let filtroAtivo = 'Todos';
 
-const filterRow = document.getElementById('filter-row');
-categorias.forEach(function(cat){
-  const chip = document.createElement('div');
-  chip.className = 'chip' + (cat === filtroAtivo ? ' active' : '');
-  chip.textContent = cat;
-  chip.onclick = function(){
-    filtroAtivo = cat;
-    document.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
-    chip.classList.add('active');
-    renderGrid();
-  };
-  filterRow.appendChild(chip);
-});
+// Reorganização da Mentoria: as 13 categorias ficavam soltas numa lista só (155 itens), sem
+// hierarquia — difícil de navegar e com itens repetidos entre os atalhos do topo e a biblioteca.
+// Agora existe um nível acima: a aluna escolhe uma "seção" primeiro (Cursos, Métodos, Execução,
+// Mobilidade, Nutrição, Geral), e só então vê os filtros de categoria, já restritos àquela seção.
+const MAPA_CATEGORIA_PARA_SECAO = {
+  'Cursos completos': 'Cursos completos', 'Curso: Corpo de Musa': 'Cursos completos', 'Curso: Fit 30': 'Cursos completos',
+  'Curso: Seca barriga': 'Cursos completos', 'Manobras respiratórias': 'Cursos completos', 'Introdução': 'Cursos completos',
+  'Métodos de treino': 'Métodos de treino',
+  'Exercícios de coxa': 'Execução e técnica', 'Exercícios de glúteo': 'Execução e técnica', 'Ajustes e orientações': 'Execução e técnica',
+  'Mobilidades': 'Mobilidade e postura', 'Alongamentos': 'Mobilidade e postura',
+  'Nutrição': 'Nutrição',
+  'Conteúdo geral': 'Conteúdo geral'
+};
+const ICONE_SECAO_MENTORIA = {
+  'Cursos completos': 'ti-school', 'Métodos de treino': 'ti-list-numbers', 'Execução e técnica': 'ti-player-play',
+  'Mobilidade e postura': 'ti-stretching', 'Nutrição': 'ti-apple', 'Conteúdo geral': 'ti-video'
+};
+let secaoMentoriaAberta = null; // null = mostra o grid de seções; com valor = mostra os itens daquela seção
+
+function obterSecaoDoConteudo(c){ return MAPA_CATEGORIA_PARA_SECAO[c.cat] || 'Conteúdo geral'; }
+
+function renderSecoesMentoria(){
+  const grid = document.getElementById('poster-grid');
+  const filterRowEl = document.getElementById('filter-row');
+  filterRowEl.innerHTML = '';
+  const contagemPorSecao = {};
+  conteudos.forEach(function(c){
+    if(sessaoTipo === 'aluna' && !alunaTemAcessoAoConteudo(c)) return;
+    const secao = obterSecaoDoConteudo(c);
+    contagemPorSecao[secao] = (contagemPorSecao[secao] || 0) + 1;
+  });
+  grid.innerHTML = Object.keys(ICONE_SECAO_MENTORIA).filter(function(s){ return contagemPorSecao[s] > 0; }).map(function(secao){
+    return '<div class="vposter" style="aspect-ratio:auto;padding:16px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;" onclick="abrirSecaoMentoria(\'' + secao + '\')">' +
+      '<i class="ti ' + ICONE_SECAO_MENTORIA[secao] + '" style="font-size:26px;color:var(--gold-soft);"></i>' +
+      '<p class="vtitle" style="text-align:center;">' + secao + '</p>' +
+      '<p style="font-size:11px;color:var(--text-faint);margin:0;">' + contagemPorSecao[secao] + ' item(ns)</p>' +
+    '</div>';
+  }).join('');
+}
+
+function abrirSecaoMentoria(secao){
+  secaoMentoriaAberta = secao;
+  filtroAtivo = 'Todos';
+  const categoriasDaSecao = ['Todos'].concat(categorias.filter(function(c){ return c !== 'Todos' && MAPA_CATEGORIA_PARA_SECAO[c] === secao; }));
+  const filterRowEl = document.getElementById('filter-row');
+  filterRowEl.innerHTML = '<span class="chip" style="background:var(--card-2);" onclick="voltarParaSecoesMentoria()"><i class="ti ti-arrow-left" style="margin-right:4px;"></i>Seções</span>';
+  categoriasDaSecao.forEach(function(cat){
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (cat === filtroAtivo ? ' active' : '');
+    chip.textContent = cat;
+    chip.onclick = function(){
+      filtroAtivo = cat;
+      filterRowEl.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
+      chip.classList.add('active');
+      renderGrid();
+    };
+    filterRowEl.appendChild(chip);
+  });
+  renderGrid();
+}
+
+function voltarParaSecoesMentoria(){
+  secaoMentoriaAberta = null;
+  renderSecoesMentoria();
+}
 
 function alunaTemAcessoAoConteudo(c){
   if(!c.exclusivoDeCurso) return true; // conteúdo solto normal, sempre visível
@@ -2287,6 +2339,7 @@ function renderGrid(){
   const grid = document.getElementById('poster-grid');
   grid.innerHTML = '';
   const lista = conteudos.filter(function(c){
+    if(secaoMentoriaAberta && obterSecaoDoConteudo(c) !== secaoMentoriaAberta) return false;
     if(filtroAtivo !== 'Todos' && c.cat !== filtroAtivo) return false;
     if(sessaoTipo === 'aluna' && !alunaTemAcessoAoConteudo(c)) return false;
     return true;
@@ -2305,7 +2358,7 @@ function renderGrid(){
     grid.appendChild(el);
   });
 }
-renderGrid();
+renderSecoesMentoria(); // mostra as seções primeiro, não a lista plana de 155 itens
 
 /* ===== PERSONAL ===== */
 
