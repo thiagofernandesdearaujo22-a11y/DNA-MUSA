@@ -393,7 +393,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-S-APLICA-NA-HORA</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-T-ENFASE-SUPERIORES</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -5416,9 +5416,20 @@ function aplicarVolumeMinimoTerciario(diasInferiores, perfil, reps){
 
 function gerarDiasSuperiores(perfil, numDias){
   const reps = perfil.bloco === 'deload' ? 14 : (perfil.bloco === 'choque' ? 7 : (perfil.fase === 'Desempenho' ? 9 : 11));
-  const ehEnfaseCostas = perfil.enfase === 'Costas';
-  const ehEnfasePeito = perfil.enfase === 'Peito';
-  const seriesCostas = (perfil.bloco === 'deload' ? 2 : (perfil.nivel === 'Avançado' ? 3 : 2)) + (ehEnfaseCostas ? 1 : 0);
+  // Ênfase de superiores: campo PRÓPRIO e independente da pirâmide de baixo (perfil.enfase, que é só
+  // Glúteo/Quadríceps/Posterior). Antes, Costas/Peito "roubavam" o mesmo campo da pirâmide de baixo —
+  // nunca dava pra ter ênfase de cima E de baixo ao mesmo tempo, e Ombro/Bíceps/Tríceps nunca podiam
+  // ser escolhidos como prioridade. Agora qualquer um dos 5 grupos de cima pode ser a ênfase, dirigido
+  // por perfil.enfaseSuperiores, sem depender nem interferir na ênfase de baixo.
+  const enfaseSuperiores = ['Costas','Peito','Ombros','Bíceps','Tríceps'].indexOf(perfil.enfaseSuperiores) !== -1 ? perfil.enfaseSuperiores : null;
+  const ehEnfaseCostas = enfaseSuperiores === 'Costas';
+  // Conecta ao mesmo multiplicador de estratégia que Inferiores já usa (achado da auditoria: Superiores
+  // nunca respondia a isso — uma aluna em "Manutenção" por fadiga tinha o treino de baixo corretamente
+  // mais leve, mas o de cima continuava com o volume de sempre, sem nenhum ajuste).
+  const multEstrategia = perfil.estrategiaVolumeMultiplicador || 1;
+  function comEstrategia(series){ return Math.max(1, Math.round(series * multEstrategia)); }
+
+  const seriesCostas = comEstrategia((perfil.bloco === 'deload' ? 2 : (perfil.nivel === 'Avançado' ? 3 : 2)) + (ehEnfaseCostas ? 1 : 0));
   const inclureGluteoMedio = perfil.enfase === 'Glúteo';
   const dias = [];
   const padroesUsadosPorGrupoNaSemana = {}; // "Costas"/"Ombro"/"Peito"/"Bíceps"/"Tríceps" -> padrões já usados em dias anteriores
@@ -5443,33 +5454,44 @@ function gerarDiasSuperiores(perfil, numDias){
       ex.push(nomesCostas[2] + ' · ' + Math.max(2, seriesCostas - 1) + 'x' + reps);
     }
 
-    // Ombro/Peito/Bíceps/Tríceps reais, alternando qual par recebe ênfase a cada dia (garante ≥2x/semana pra cada, em 3+ dias).
-    // Cada grupo também herda os padrões já usados nele mesmo em dias anteriores dessa semana.
-    // Se a ênfase é Peito, ele entra TODO dia de superiores (em vez de alternar com Ombro), e ganha
-    // uma segunda opção nos dias em que sobraria só pro par Ombro/Peito — igual à lógica de Costas.
-    const gruposSecundarios = ehEnfasePeito ? ['Peito'] : ((d % 2 === 0) ? ['Ombro', 'Peito'] : ['Bíceps', 'Tríceps']);
-    gruposSecundarios.forEach(function(grupo){
-      const ehGrupoDaEnfase = ehEnfasePeito && grupo === 'Peito';
+    // Ombro/Peito/Bíceps/Tríceps: por padrão (sem ênfase escolhida), alterna qual par aparece a cada
+    // dia, igual sempre foi. Se uma ênfase de superiores foi escolhida (e não é Costas, já tratado
+    // acima), esse grupo específico entra em TODO dia, com uma 2ª opção e um bônus de série — mesmo
+    // tratamento que só Peito ganhava antes, agora generalizado pros 4 grupos restantes.
+    let gruposSecundarios;
+    if(enfaseSuperiores && enfaseSuperiores !== 'Costas'){
+      gruposSecundarios = [enfaseSuperiores];
+    } else {
+      gruposSecundarios = (d % 2 === 0) ? ['Ombro', 'Peito'] : ['Bíceps', 'Tríceps'];
+    }
+    // Mapeia o nome escolhido na ficha ("Ombros"/"Bíceps"/"Tríceps") pro nome interno do banco
+    // ("Ombro"/"Bíceps"/"Tríceps" sem plural, exceto Ombro) usado no restante do motor.
+    const nomeInternoGrupo = { 'Ombros': 'Ombro', 'Bíceps': 'Bíceps', 'Tríceps': 'Tríceps', 'Peito': 'Peito' };
+    gruposSecundarios.forEach(function(grupoEscolha){
+      const grupo = nomeInternoGrupo[grupoEscolha] || grupoEscolha;
+      const ehGrupoDaEnfase = enfaseSuperiores && enfaseSuperiores !== 'Costas' && grupoEscolha === enfaseSuperiores;
       const padroesDesseGrupo = {};
       if(padroesUsadosPorGrupoNaSemana[grupo]) Object.assign(padroesDesseGrupo, padroesUsadosPorGrupoNaSemana[grupo]);
       const quantidade = ehGrupoDaEnfase ? 2 : 1;
       const candidatos = selecionarExerciciosVariados(grupo, (perfil.nomeAluna || '') + '_' + grupo, quantidade, perfil.indiceCiclo, padroesDesseGrupo, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
       (candidatos || []).forEach(function(nomeEx, pos){
-        const seriesDoExercicio = (perfil.nivel === 'Avançado' ? 3 : 2) + (ehGrupoDaEnfase && pos === 0 ? 1 : 0);
+        const seriesDoExercicio = comEstrategia((perfil.nivel === 'Avançado' ? 3 : 2) + (ehGrupoDaEnfase && pos === 0 ? 1 : 0));
         ex.push(nomeEx + ' · ' + seriesDoExercicio + 'x' + reps);
         padroesUsadosPorGrupoNaSemana[grupo] = padroesUsadosPorGrupoNaSemana[grupo] || {};
         padroesUsadosPorGrupoNaSemana[grupo][obterPalavraChaveMovimento(nomeEx.toUpperCase())] = true;
       });
-      if(ehEnfasePeito && grupo === 'Peito'){
-        // Ainda garante Ombro de vez em quando (metade dos dias), só que sempre depois do Peito
-        if(d % 2 === 0){
-          const padroesOmbro = {};
-          if(padroesUsadosPorGrupoNaSemana['Ombro']) Object.assign(padroesOmbro, padroesUsadosPorGrupoNaSemana['Ombro']);
-          const candOmbro = selecionarExerciciosVariados('Ombro', (perfil.nomeAluna || '') + '_Ombro', 1, perfil.indiceCiclo, padroesOmbro, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
-          if(candOmbro && candOmbro[0]){
-            ex.push(candOmbro[0] + ' · ' + (perfil.nivel === 'Avançado' ? 3 : 2) + 'x' + reps);
-            padroesUsadosPorGrupoNaSemana['Ombro'] = padroesUsadosPorGrupoNaSemana['Ombro'] || {};
-            padroesUsadosPorGrupoNaSemana['Ombro'][obterPalavraChaveMovimento(candOmbro[0].toUpperCase())] = true;
+      // Quando a ênfase é um grupo "sozinho" (Ombros, Bíceps ou Tríceps, que normalmente vêm em par),
+      // ainda garante o parceiro de par de vez em quando (metade dos dias), sempre depois do prioritário.
+      if(ehGrupoDaEnfase){
+        const parceiroDoPar = { 'Peito': 'Ombro', 'Ombro': 'Peito', 'Bíceps': 'Tríceps', 'Tríceps': 'Bíceps' }[grupo];
+        if(parceiroDoPar && d % 2 === 0){
+          const padroesParceiro = {};
+          if(padroesUsadosPorGrupoNaSemana[parceiroDoPar]) Object.assign(padroesParceiro, padroesUsadosPorGrupoNaSemana[parceiroDoPar]);
+          const candParceiro = selecionarExerciciosVariados(parceiroDoPar, (perfil.nomeAluna || '') + '_' + parceiroDoPar, 1, perfil.indiceCiclo, padroesParceiro, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel);
+          if(candParceiro && candParceiro[0]){
+            ex.push(candParceiro[0] + ' · ' + comEstrategia(perfil.nivel === 'Avançado' ? 3 : 2) + 'x' + reps);
+            padroesUsadosPorGrupoNaSemana[parceiroDoPar] = padroesUsadosPorGrupoNaSemana[parceiroDoPar] || {};
+            padroesUsadosPorGrupoNaSemana[parceiroDoPar][obterPalavraChaveMovimento(candParceiro[0].toUpperCase())] = true;
           }
         }
       }
@@ -6093,9 +6115,24 @@ function editarPiramideManual(nomeAluna, campo, valor){
   return aplicarEdicaoEregenerarTreino(nomeAluna);
 }
 
+// Prioridade de Superiores: campo próprio, nunca lido nem escrito pela pirâmide de baixo — uma aluna
+// pode ter ênfase em Glúteo embaixo E em Ombros em cima ao mesmo tempo, sem um pisar no outro.
+function editarEnfaseSuperioresAluna(nomeAluna, valor){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  const valorAnterior = a.enfaseSuperioresManual || null;
+  const valorNovo = valor || null;
+  if(valorAnterior !== valorNovo){
+    if(!a.historicoPrioridade) a.historicoPrioridade = [];
+    a.historicoPrioridade.push({ data: getDataHojeISO(), campo: 'enfaseSuperiores', de: valorAnterior, para: valorNovo });
+  }
+  a.enfaseSuperioresManual = valorNovo;
+  return aplicarEdicaoEregenerarTreino(nomeAluna);
+}
+
 function renderHistoricoPrioridade(a){
   if(!a.historicoPrioridade || a.historicoPrioridade.length === 0) return '';
-  const nomeCampo = { enfase: 'Ênfase', secundario: 'Secundário' };
+  const nomeCampo = { enfase: 'Ênfase', secundario: 'Secundário', enfaseSuperiores: 'Ênfase de Superiores' };
   let html = '<p class="section-label" style="margin-top:22px;">Histórico de mudança de prioridade</p>';
   html += a.historicoPrioridade.slice().reverse().map(function(h){
     return '<div class="list-item"><span>' + (nomeCampo[h.campo] || h.campo) + ': ' + (h.de || '—') + ' → <b>' + (h.para || '—') + '</b></span><span class="tag">' + h.data + '</span></div>';
@@ -6202,7 +6239,14 @@ function construirPerfilAluna(a){
     riscoAbandonoPorConstancia: detectarRiscoAbandonoPorConstancia(a.nome),
     ambienteTreino: a.ambienteTreino === 'Casa' ? 'Casa' : 'Academia',
     // Regra da metodologia: dor no joelho relatada (confirmada ou só no texto de restrições) tira pliométrico do treino
-    evitarPliometrico: a.regiaoQueixa === 'Joelho' || (a.restricoes && a.restricoes.toLowerCase().indexOf('joelho') !== -1)
+    evitarPliometrico: a.regiaoQueixa === 'Joelho' || (a.restricoes && a.restricoes.toLowerCase().indexOf('joelho') !== -1),
+    // Prioridade de SUPERIORES — campo próprio e independente da pirâmide de baixo (enfase/secundario
+    // acima), escolhido manualmente na ficha. null = automático (alterna os pares como sempre fez).
+    // Compatibilidade: antes dessa separação, Costas/Peito podiam ser escolhidos no MESMO seletor de
+    // baixo só pra dar esse reforço em Superiores (a Inferiores ignorava, caindo pra Glúteo sozinha).
+    // Se a aluna já estava assim e ninguém escolheu nada no campo novo ainda, herda esse valor antigo,
+    // pra não perder o reforço que já estava configurado.
+    enfaseSuperiores: a.enfaseSuperioresManual || (['Costas','Peito'].indexOf(enfase) !== -1 ? enfase : null)
   };
 }
 
@@ -8218,6 +8262,13 @@ function openAlunaDetail(i){
           ['Glúteo','Quadríceps','Posterior'].map(function(g){ return '<option value="' + g + '"' + (obterEnfaseSecundariaEfetiva(a).secundario === g ? ' selected' : '') + '>' + g + ' (secundário)</option>'; }).join('') +
         '</select>' +
         (a.piramideManual ? '<p style="font-size:10px;color:var(--gold-soft);cursor:pointer;margin-top:4px;" onclick="resetarPiramideParaAutomatica(\'' + a.nome.replace(/'/g,"\\'") + '\')">↺ Voltar pra automático (anamnese)</p>' : '<p style="font-size:10px;color:var(--text-faint);margin-top:4px;">Vindo da anamnese</p>') +
+      '</div>' +
+      '<div class="stat-card"><p class="stat-label">Prioridade de Superiores</p>' +
+        '<select class="form-select" style="font-size:12px;padding:6px;margin-top:4px;" onchange="editarEnfaseSuperioresAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)">' +
+          '<option value="">Automático (revezam Ombro/Peito e Bíceps/Tríceps)</option>' +
+          ['Costas','Peito','Ombros','Bíceps','Tríceps'].map(function(g){ return '<option value="' + g + '"' + ((a.enfaseSuperioresManual || '') === g ? ' selected' : '') + '>' + g + ' (ênfase)</option>'; }).join('') +
+        '</select>' +
+        '<p style="font-size:10px;color:var(--text-faint);margin-top:4px;">Independente da pirâmide de baixo — pode ter ênfase embaixo E em cima ao mesmo tempo</p>' +
       '</div>' +
     '</div>' +
     '<p style="font-size:11px;color:var(--text-faint);margin:-8px 0 12px;">Ajustar aqui atualiza automaticamente toda a estrutura de treino gerada — o gerador nunca mistura exercício de academia com exercício de casa</p>' +
