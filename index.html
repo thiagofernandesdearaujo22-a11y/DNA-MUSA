@@ -403,7 +403,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-30-F-METODO-COMBINAR</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-30-G-LIMITE-REPETICAO-DIAS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -5830,7 +5830,52 @@ function gerarTreinoSemanal(perfil){
   // ÚLTIMA etapa de todas: garante que nenhum dia saiu raso, depois de toda limpeza/corte possível.
   semana.forEach(function(dia){ garantirMinimoDeExerciciosPorDia(dia, perfil); });
 
+  // Achado real de auditoria (varredura ampla): o rastreamento de variedade só evitava repetir
+  // exercício DENTRO do mesmo grupo entre dias — mas um grupo que é "principal" num dia e "estímulo"
+  // (secundário) em outro podia repetir os MESMOS exercícios sem nenhuma proteção, fazendo até 100%
+  // de sobreposição em cerca de 1/3 dos cenários testados. Regra combinada: no máximo 2 exercícios
+  // repetidos entre 2 dias quando o maior deles tem até 5 exercícios, no máximo 3 quando tem 6+ — os
+  // exercícios base (Prancha ventral, Panturrilha, Abdução de quadril) não contam nesse limite, são
+  // recorrentes por decisão de metodologia, não por falta de variedade.
+  limitarRepeticaoEntreDias(semana, perfil);
+
   return semana;
+}
+
+const EXERCICIOS_BASE_RECORRENTES = ['PRANCHA VENTRAL', 'PANTURRILHA SENTADO NA MÁQUINA', 'ABDUÇÃO DE QUADRIL'];
+
+function limitarRepeticaoEntreDias(semana, perfil){
+  const diasAtivos = semana.filter(function(d){ return !d.descanso; });
+  for(let i = 0; i < diasAtivos.length; i++){
+    for(let j = i + 1; j < diasAtivos.length; j++){
+      const diaI = diasAtivos[i], diaJ = diasAtivos[j];
+      const nomesI = diaI.ex.map(extrairNomeExercicioDeLinha);
+      const nomesJ = diaJ.ex.map(extrairNomeExercicioDeLinha);
+      const ehBase = function(n){ return EXERCICIOS_BASE_RECORRENTES.some(function(b){ return n.toUpperCase().indexOf(b) !== -1; }); };
+      const comuns = nomesI.filter(function(n){ return !ehBase(n) && nomesJ.indexOf(n) !== -1; });
+
+      const maiorDia = Math.max(diaI.ex.length, diaJ.ex.length);
+      const limite = maiorDia >= 6 ? 3 : 2;
+      if(comuns.length <= limite) continue;
+
+      // Passa do limite: troca o excesso no segundo dia (diaJ) por outro candidato do mesmo grupo,
+      // ainda não usado em nenhum dos dois dias — mantém a quantidade de exercícios igual, só varia.
+      const excesso = comuns.slice(limite);
+      excesso.forEach(function(nomeRepetido){
+        const exBanco = buscarExercicioNoBanco(nomeRepetido);
+        if(!exBanco) return;
+        const jaUsados = nomesI.concat(nomesJ).map(function(n){ return n.toUpperCase(); });
+        const candidatos = selecionarExerciciosVariados(exBanco.grupo, (perfil.nomeAluna || '') + '_div' + i + j, 6, (perfil.indiceCiclo || 0) + i + j, {}, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel) || [];
+        const substituto = candidatos.find(function(c){ return jaUsados.indexOf(c.toUpperCase()) === -1; });
+        if(!substituto) return; // não achou opção nova, deixa como está — repetir é melhor que ficar sem exercício
+        const idx = diaJ.ex.findIndex(function(linha){ return extrairNomeExercicioDeLinha(linha) === nomeRepetido; });
+        if(idx === -1) return;
+        const seriesReps = diaJ.ex[idx].split(' · ')[1] || '3x12';
+        diaJ.ex[idx] = substituto + ' · ' + seriesReps;
+        nomesJ[idx] = substituto; // atualiza a referência local, caso o mesmo par de dias seja revisado de novo no loop
+      });
+    }
+  }
 }
 
 /* ===== VALIDADOR DE PRESCRIÇÃO, investigação rigorosa automática ===== */
