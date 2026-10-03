@@ -1,4 +1,4 @@
-[Uploading dna_musa_97.html…]()
+[Uploading dna_musa_98.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -394,7 +394,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-Q-EVOLUCAO-NIVEL</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-R-FIX-TEMPO-AVANCADO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -4055,11 +4055,12 @@ function estimarDuracaoExercicio(series, descansoTexto, unilateral){
   return Math.round((series * segundosPorSerie) / 60 * 10) / 10; // minutos
 }
 
-const PALAVRAS_UNILATERAL = ['UNILATERAL', 'JOELHOS EM PÉ', 'NA POLIA', 'AFUNDO', 'BÚLGARO', 'BULGARO', 'STEP UP'];
-function ehExercicioUnilateral(nomeExercicio){
-  const upper = nomeExercicio.toUpperCase();
-  return PALAVRAS_UNILATERAL.some(function(p){ return upper.indexOf(p) !== -1; });
-}
+// BUG DE CÓDIGO encontrado e corrigido: existia uma SEGUNDA função "ehExercicioUnilateral" mais
+// abaixo neste arquivo (perto de removerUnilateraisExcedentesNoDia), com lógica mais completa
+// (consulta o banco de exercícios primeiro, mais palavras-chave). Em JavaScript, a declaração mais
+// abaixo sobrescreve essa aqui silenciosamente — ou seja, esta versão nunca rodava de verdade, mas
+// ficava no arquivo como código morto, confundindo qualquer leitura futura. Removida; a versão real
+// e funcionando continua mais abaixo.
 
 /* ===== ITEM 4: Volume do Bloco de Choque (corte de 15-20%, nunca 40-50%) ===== */
 function calcularVolumeChoque(volumeBase){
@@ -6154,9 +6155,17 @@ function calcularTempoRealDeMusculacao(a, blocoInfo){
   const tetoPorNivel = { 'Iniciante': 60, 'Intermediário': 60, 'Avançado': 70 };
   const teto = tetoPorNivel[a.nivel] || 60;
   const prog = getProgressoAluna(a.nome);
-  // Retomando após pausa, ou ainda nas primeiras semanas: começa conservador (45min), sobe conforme o feedback for vindo
-  const emTransicaoOuInicio = prog.semana <= 4;
-  if(emTransicaoOuInicio) return Math.min(45, teto);
+  // BUG REAL encontrado e corrigido: isso aplicava o teto conservador de 45min pras primeiras 4
+  // semanas de QUALQUER nível — inclusive Avançado. Faz sentido pra uma Iniciante genuína se
+  // adaptando ao exercício pela primeira vez, mas uma aluna "nova no aplicativo" com nível Avançado
+  // já confirmado não é iniciante nenhuma; capar o tempo dela gerava treino raso (ex: dia secundário
+  // caindo pra 2 exercícios só), inadequado pro nível dela. Agora só ramp-up conservador pra quem é
+  // Iniciante de verdade, ou pra qualquer nível retomando depois de uma pausa (essa sim é uma razão
+  // legítima de começar mais devagar, independente do nível).
+  const prog_semana = prog.semana || 1;
+  const retomandoPosPausa = definirEstrategiaAtual(a).nome === 'Retorno pós-pausa';
+  const precisaComecarConservador = (a.nivel === 'Iniciante' && prog_semana <= 4) || retomandoPosPausa;
+  if(precisaComecarConservador) return Math.min(45, teto);
   return teto; // o tempo declarado pela aluna vira teto do que sobra pra cardio, nunca aumenta a musculação além disso
 }
 
