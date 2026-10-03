@@ -1,4 +1,4 @@
-[dna_musa_100.html](https://github.com/user-attachments/files/32987108/dna_musa_100.html)
+[dna_musa_101.html](https://github.com/user-attachments/files/32987387/dna_musa_101.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -394,7 +394,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-T-ENFASE-SUPERIORES</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-U-LINK-PARCEIRO-METODO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -14922,7 +14922,11 @@ if(type === 'central'){
           ? '<div class="info-box" style="margin-bottom:8px;">' +
               '<p class="lbl" style="margin-bottom:4px;">Sobre o método: ' + nomeMetodoExibicao + '</p>' +
               '<p class="txt" style="margin-bottom:8px;">' + (descricoesMetodo[nomeMetodoExibicao] || '') + '</p>' +
-              (parceirosDoCombo.length > 0 ? '<p class="txt" style="margin-bottom:8px;color:var(--gold-soft);">Faça em sequência, sem descanso, junto com: ' + parceirosDoCombo.join(' e ') + '</p>' : '') +
+              (parceirosDoCombo.length > 0 ? '<p class="txt" style="margin-bottom:8px;color:var(--gold-soft);">Faça em sequência, sem descanso, junto com: ' +
+                parceirosDoCombo.map(function(nomeParceiro){
+                  return '<span style="text-decoration:underline;cursor:pointer;" onclick="abrirVideoApenasExercicio(\'' + nomeParceiro.replace(/'/g,"\\'") + '\', event)">' + nomeParceiro + '</span>';
+                }).join(' e ') +
+              '</p>' : '') +
               '<div id="metodo-pergunta-' + j + '"><p class="txt" style="font-size:12px;margin-bottom:6px;">Você entendeu como funciona esse método?</p>' +
                 '<div style="display:flex;gap:8px;">' +
                   '<span class="chip" style="cursor:pointer;" onclick="responderEntendimentoMetodo(' + j + ',true)">Sim, entendi</span>' +
