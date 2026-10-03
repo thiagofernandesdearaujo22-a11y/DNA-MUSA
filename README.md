@@ -1,4 +1,4 @@
-[dna_musa_111.html](https://github.com/user-attachments/files/33004494/dna_musa_111.html)
+[dna_musa_112.html](https://github.com/user-attachments/files/33004805/dna_musa_112.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -404,7 +404,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-30-E-MINIMO4-E-SPLIT-ENFASE</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-30-F-METODO-COMBINAR</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -7880,6 +7880,7 @@ const descricoesMetodo = {
   'Cluster set': 'Divide a série em blocos pequenos com descanso curto entre eles, permite mover mais carga total. Usado no bloco de choque.',
   'Bi-set': 'Dois exercícios seguidos, sem descanso entre eles, só depois do segundo. Economiza tempo e aumenta o estímulo metabólico.',
   'Tri-set': 'Três exercícios seguidos sem descanso. Mais intenso que o bi-set, usar com cuidado no volume total do dia.',
+  'Combinar': 'Dois exercícios seguidos, sem descanso entre eles — igual ao bi-set, mas livre: pode juntar exercícios de QUALQUER grupo muscular, não só do mesmo grupo do principal.',
   'Pirâmide crescente': 'Aumenta a carga e reduz as reps a cada série. Bom pra quem já tem técnica consolidada.'
 };
 
@@ -7893,21 +7894,21 @@ function metodosPermitidosAgora(a){
   if(faseInfo.blocoTecnico === 'deload') return ['Nenhum'];
 
   // Recuperação comprometida: só o básico, não empilha mais fadiga
-  if(classificacao.capacidadeRecuperacao === 'reduzida') return ['Nenhum', 'Bi-set'];
+  if(classificacao.capacidadeRecuperacao === 'reduzida') return ['Nenhum', 'Bi-set', 'Combinar'];
 
   if(classificacao.nivel === 'Iniciante' || classificacao.experienciaTecnica === 'iniciante'){
     return ['Nenhum']; // iniciante foca em técnica e progressão de carga simples primeiro
   }
 
   if(classificacao.nivel === 'Intermediário'){
-    return ['Nenhum', 'Bi-set', 'Restpause'];
+    return ['Nenhum', 'Bi-set', 'Combinar', 'Restpause'];
   }
 
   // Avançado: libera tudo, mas Cluster/Tri-set só fazem sentido de verdade no bloco de choque
   if(faseInfo.blocoTecnico === 'choque'){
-    return ['Nenhum', 'Bi-set', 'Restpause', 'Dropset', 'Cluster set', 'Tri-set', 'Pirâmide crescente'];
+    return ['Nenhum', 'Bi-set', 'Combinar', 'Restpause', 'Dropset', 'Cluster set', 'Tri-set', 'Pirâmide crescente'];
   }
-  return ['Nenhum', 'Bi-set', 'Restpause', 'Dropset', 'Pirâmide crescente'];
+  return ['Nenhum', 'Bi-set', 'Combinar', 'Restpause', 'Dropset', 'Pirâmide crescente'];
 }
 
 async function abrirTreinosArquivados(nomeAluna){
@@ -8008,7 +8009,7 @@ function renderConteudoDiaPersonal(a, di){
             '<span onclick="abrirSubstituicao(' + di + ',' + ei + ')" style="cursor:pointer;color:var(--text-faint);padding:4px;font-size:15px;" title="Trocar exercício">⇄</span>' +
           '</span>' +
         '</div>' +
-        '<div id="parceiros-combo-' + di + '-' + ei + '">' + ((nomeMetodoParaTag === 'Bi-set' || nomeMetodoParaTag === 'Tri-set') ? htmlCaixasParceirosCombo(nomeEdit, nomeMetodoParaTag === 'Bi-set' ? 1 : 2, metodoAplicado.parceiros).replace(/THIS_DI/g, di).replace(/THIS_EI/g, ei) : '') + '</div>' +
+        '<div id="parceiros-combo-' + di + '-' + ei + '">' + ((nomeMetodoParaTag === 'Bi-set' || nomeMetodoParaTag === 'Tri-set' || nomeMetodoParaTag === 'Combinar') ? htmlCaixasParceirosCombo(nomeEdit, nomeMetodoParaTag === 'Tri-set' ? 2 : 1, metodoAplicado.parceiros, nomeMetodoParaTag !== 'Combinar').replace(/THIS_DI/g, di).replace(/THIS_EI/g, ei) : '') + '</div>' +
         '<div id="metodo-picker-' + di + '-' + ei + '" style="display:none;"></div>' +
         '<div id="sub-picker-' + di + '-' + ei + '" style="display:none;"></div>' +
         '<div style="display:flex;gap:6px;">' +
@@ -8073,7 +8074,7 @@ function aplicarMetodoExercicio(di, ei, metodo){
     } else {
       // Bi-set/Tri-set guardam também os exercícios parceiros — os outros métodos continuam como
       // string simples (mesmo formato de sempre, sem quebrar nada que já existia).
-      const ehComboDeVarios = (metodo === 'Bi-set' || metodo === 'Tri-set');
+      const ehComboDeVarios = (metodo === 'Bi-set' || metodo === 'Tri-set' || metodo === 'Combinar');
       a.treinoAtual.dias[di].metodos[ei] = ehComboDeVarios ? { tipo: metodo, parceiros: [] } : metodo;
     }
     sincronizarTreinoComSupabase(a);
@@ -8087,11 +8088,12 @@ function aplicarMetodoExercicio(di, ei, metodo){
     const picker = document.getElementById('metodo-picker-' + di + '-' + ei);
     if(picker){ picker.style.display = 'none'; picker.innerHTML = ''; }
 
-    // Bi-set/Tri-set: abre na hora a caixinha pra escolher o(s) exercício(s) parceiro(s), do lado do
-    // que já está prescrito — mesma série/reps de sempre, ela só executa em sequência.
-    if(metodo === 'Bi-set') renderCaixasParceirosCombo(di, ei, 1);
+    // Bi-set/Tri-set/Combinar: abre na hora a caixinha pra escolher o(s) exercício(s) parceiro(s), do
+    // lado do que já está prescrito — mesma série/reps de sempre, ela só executa em sequência.
+    // Combinar funciona igual ao Bi-set (1 parceiro), só que sem restringir ao mesmo grupo muscular.
+    if(metodo === 'Bi-set' || metodo === 'Combinar') renderCaixasParceirosCombo(di, ei, 1);
     if(metodo === 'Tri-set') renderCaixasParceirosCombo(di, ei, 2);
-    if(metodo !== 'Bi-set' && metodo !== 'Tri-set'){
+    if(metodo !== 'Bi-set' && metodo !== 'Tri-set' && metodo !== 'Combinar'){
       const areaParceiros = document.getElementById('parceiros-combo-' + di + '-' + ei);
       if(areaParceiros) areaParceiros.innerHTML = ''; // trocou pra um método sem combo, limpa qualquer parceiro que tivesse antes
     }
@@ -8104,12 +8106,16 @@ function aplicarMetodoExercicio(di, ei, metodo){
 
 // Gera só o HTML das caixinhas de parceiro (puro, sem mexer na tela) — usado tanto na primeira
 // renderização do dia (quando já tem um combo salvo) quanto ao escolher o método na hora.
-function htmlCaixasParceirosCombo(nomePrincipal, quantosParceiros, parceirosAtuais){
+// restringirMesmoGrupo=true (padrão, Bi-set/Tri-set): só mostra parceiro do MESMO grupo muscular do
+// principal. O método "Combinar" passa false aqui de propósito — é exatamente a diferença dele pros
+// outros dois: pode juntar qualquer exercício de qualquer grupo, sem essa restrição.
+function htmlCaixasParceirosCombo(nomePrincipal, quantosParceiros, parceirosAtuais, restringirMesmoGrupo){
+  if(restringirMesmoGrupo === undefined) restringirMesmoGrupo = true;
   const exPrincipalBanco = exerciciosBanco.find(function(e){ return e.nome.toUpperCase() === nomePrincipal.toUpperCase(); });
   const grupo = exPrincipalBanco ? (exPrincipalBanco.grupo || exPrincipalBanco.categoria) : null;
   const opcoes = exerciciosBanco.filter(function(e){
     const grupoDoEx = e.grupo || e.categoria;
-    return (!grupo || grupoDoEx === grupo) && e.nome.toUpperCase() !== nomePrincipal.toUpperCase();
+    return (!restringirMesmoGrupo || !grupo || grupoDoEx === grupo) && e.nome.toUpperCase() !== nomePrincipal.toUpperCase();
   }).sort(function(x, y){ return x.nome.localeCompare(y.nome, 'pt-BR'); });
 
   // Achado real de auditoria: a prescrição mostra o exercício principal com nome sublinhado e
@@ -8139,7 +8145,8 @@ function renderCaixasParceirosCombo(di, ei, quantosParceiros){
   const nomePrincipal = extrairNomeExercicioDeLinha(a.treinoAtual.dias[di].ex[ei]);
   const metodoAtual = a.treinoAtual.dias[di].metodos[ei];
   const parceirosAtuais = (metodoAtual && metodoAtual.parceiros) || [];
-  area.innerHTML = htmlCaixasParceirosCombo(nomePrincipal, quantosParceiros, parceirosAtuais)
+  const ehCombinar = metodoAtual && metodoAtual.tipo === 'Combinar';
+  area.innerHTML = htmlCaixasParceirosCombo(nomePrincipal, quantosParceiros, parceirosAtuais, !ehCombinar)
     .replace(/THIS_DI/g, di).replace(/THIS_EI/g, ei);
 }
 
@@ -8164,7 +8171,7 @@ function definirParceiroCombo(di, ei, posicao, nomeEscolhido){
   // Re-renderiza na hora pra mostrar o link de vídeo do parceiro assim que ele é escolhido, sem
   // precisar fechar e abrir a ficha de novo.
   const metodoAtual = a.treinoAtual.dias[di].metodos[ei];
-  renderCaixasParceirosCombo(di, ei, metodoAtual.tipo === 'Tri-set' ? 2 : 1);
+  renderCaixasParceirosCombo(di, ei, metodoAtual.tipo === 'Tri-set' ? 2 : 1); // Combinar também usa 1 parceiro, mesmo caminho do Bi-set
 }
 
 let treinoJaBuscadoPara = {};
@@ -15321,7 +15328,8 @@ function renderCardBiset(linha, j, prog){
 
   const descricoes = {
     'Bi-set': 'Bi-set: execute os dois exercícios em sequência, sem descanso entre eles, descanse só depois do segundo.',
-    'Tri-set': 'Tri-set: execute os três exercícios em sequência, sem descanso entre eles, descanse só depois do último.'
+    'Tri-set': 'Tri-set: execute os três exercícios em sequência, sem descanso entre eles, descanse só depois do último.',
+    'Combinar': 'Combinar: execute os dois exercícios em sequência, sem descanso entre eles, descanse só depois do segundo.'
   };
 
   let html = '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:6px;border:1px solid var(--gold-deep);">' +
