@@ -1,4 +1,4 @@
-[dna_musa_110.html](https://github.com/user-attachments/files/33004478/dna_musa_110.html)
+[dna_musa_111.html](https://github.com/user-attachments/files/33004494/dna_musa_111.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -404,7 +404,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-30-D-MINIMO-EXERCICIOS-DIA</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-30-E-MINIMO4-E-SPLIT-ENFASE</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -4323,33 +4323,59 @@ function ehExercicioUnilateral(nome){
 }
 
 // Regra real de trabalho do Thiago: nunca dois exercícios unilaterais no mesmo treino (ex: afundo +
-// búlgaro, ou dois tipos de afundo) — mantém o primeiro que aparecer, remove os demais.
-// PROTEÇÃO (achado real de auditoria, caso da Tacianne): essa regra, sozinha, podia deixar um dia
-// com só 1 exercício — quando a maioria dos candidatos sorteados pro dia calhava de ser unilateral.
-// Um dia raso desse jeito é um problema muito pior do que ter 2 exercícios unilaterais juntos, então
-// agora a regra nunca remove a ponto de deixar o dia com menos de MINIMO_EXERCICIOS_NO_DIA no total.
-const MINIMO_EXERCICIOS_NO_DIA = 3;
+// búlgaro, ou dois tipos de afundo) — mantém o primeiro que aparecer, remove os demais. Essa regra em
+// si volta a ser pura, sem exceção — quem garante que o dia não fique raso por causa dela é a função
+// garantirMinimoDeExerciciosPorDia, chamada depois, no fim de gerarTreinoSemanal.
 function removerUnilateraisExcedentesNoDia(dia){
-  const ehUnilateralPorIndice = dia.ex.map(function(linha){
+  let jaTemUnilateral = false;
+  dia.ex = dia.ex.filter(function(linha){
     const nomes = extrairTodosNomesDeLinha(linha);
-    return nomes.some(function(n){ return ehExercicioUnilateral(n); });
+    const algumUnilateral = nomes.some(function(n){ return ehExercicioUnilateral(n); });
+    if(!algumUnilateral) return true;
+    if(jaTemUnilateral) return false; // já tem um unilateral no dia, esse aqui sai
+    jaTemUnilateral = true;
+    return true;
   });
-  const totalUnilaterais = ehUnilateralPorIndice.filter(Boolean).length;
-  if(totalUnilaterais <= 1) return; // nada a fazer, não tem excesso
+}
 
-  const unilateraisQueDeviamSair = totalUnilaterais - 1; // mantém sempre o 1º, tentaria remover o resto
-  const removerNoMaximo = Math.max(0, dia.ex.length - MINIMO_EXERCICIOS_NO_DIA); // nunca mais que isso
-  const removerDeVerdade = Math.min(unilateraisQueDeviamSair, removerNoMaximo);
+// REGRA NOVA (pedido explícito, achado real de auditoria no caso da Tacianne): nenhum dia de treino
+// pode ter menos de 4 exercícios, nunca — não importa o motivo que deixou ele raso (unilateral
+// removido, corte por tempo, pool pequeno). Roda por ÚLTIMO, depois de toda limpeza/corte, pra
+// garantir que nada desfaça essa garantia depois. Prioriza completar com exercícios NORMAIS
+// (bilaterais) do mesmo grupo do dia — só usa unilateral de novo se não sobrar bilateral nenhum.
+// Extrapolar um pouco o tempo/volume normal é aceitável aqui, por decisão explícita: um dia completo
+// vale mais que respeitar o teto de tempo à risca.
+const MINIMO_EXERCICIOS_NO_DIA = 4;
+function garantirMinimoDeExerciciosPorDia(dia, perfil){
+  if(dia.descanso) return;
+  if(dia.ex.length >= MINIMO_EXERCICIOS_NO_DIA) return;
 
-  let unilateraisVistos = 0;
-  let removidos = 0;
-  dia.ex = dia.ex.filter(function(linha, i){
-    if(!ehUnilateralPorIndice[i]) return true;
-    unilateraisVistos++;
-    if(unilateraisVistos === 1) return true; // sempre mantém o primeiro
-    if(removidos < removerDeVerdade){ removidos++; return false; }
-    return true; // já bateu no limite seguro de remoção, mantém o resto mesmo sendo unilateral
+  const nomesJaNoDia = {};
+  dia.ex.forEach(function(linha){
+    extrairTodosNomesDeLinha(linha).forEach(function(n){ nomesJaNoDia[n.toUpperCase()] = true; });
   });
+
+  // Descobre o grupo dominante do dia pelo primeiro exercício (já presente, veio de algum motor
+  // real) — evita qualquer suposição sobre se é dia de inferiores, superiores ou full body.
+  const primeiroNome = extrairTodosNomesDeLinha(dia.ex[0] || '')[0];
+  const exBancoPrimeiro = primeiroNome ? buscarExercicioNoBanco(primeiroNome) : null;
+  const grupoDominante = exBancoPrimeiro ? exBancoPrimeiro.grupo : null;
+  if(!grupoDominante) return; // sem grupo pra buscar mais candidatos, não força nada arriscado
+
+  const repsPadrao = dia.ex[0] ? (dia.ex[0].match(/x(\d+)/) || [,'12'])[1] : '12';
+  let tentativasSemSucesso = 0;
+  while(dia.ex.length < MINIMO_EXERCICIOS_NO_DIA && tentativasSemSucesso < 10){
+    const candidatos = selecionarExerciciosVariados(grupoDominante, (perfil.nomeAluna || '') + '_minimo' + dia.ex.length, 6, (perfil.indiceCiclo || 0) + dia.ex.length, {}, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel) || [];
+    // Prioriza um candidato NORMAL (bilateral) que ainda não esteja no dia; só aceita unilateral se
+    // realmente não sobrar outra opção bilateral nos candidatos retornados.
+    const candidatoBilateral = candidatos.find(function(n){ return !nomesJaNoDia[n.toUpperCase()] && !ehExercicioUnilateral(n); });
+    const candidatoQualquer = candidatos.find(function(n){ return !nomesJaNoDia[n.toUpperCase()]; });
+    const escolhido = candidatoBilateral || candidatoQualquer;
+    if(!escolhido){ tentativasSemSucesso++; continue; }
+    dia.ex.push(escolhido + ' · 3x' + repsPadrao);
+    nomesJaNoDia[escolhido.toUpperCase()] = true;
+    tentativasSemSucesso++; // mesmo em caso de sucesso, limita o total de voltas do while por segurança
+  }
 }
 
 function removerVariacoesDuplicadasDeAfundo(dia){
@@ -5602,8 +5628,23 @@ function gerarDiasSuperiores(perfil, numDias){
 
 function gerarTreinoSemanal(perfil){
   // perfil: { nivel, enfase, secundario, frequencia, bloco, tempoDisponivel, indiceCiclo, semanaAtual, pausouRetomou }
-  const numInferiores = Math.ceil(perfil.frequencia / 2);
-  const numSuperiores = perfil.frequencia - numInferiores;
+  // REGRA NOVA (pedido explícito, achado real de auditoria): com o split antigo (metade/metade), uma
+  // aluna com ênfase em inferiores e só 3-4 dias na semana acabava com o MESMO volume de superiores e
+  // de inferiores — dividido assim, não sobra volume suficiente pra dar ênfase de verdade em nada,
+  // nem pra fechar os 50% de secundário que a metodologia exige. Com ênfase em Glúteo/Quadríceps/
+  // Posterior e frequência de 3 ou 4 dias, só 1 dia vira Superiores — o resto é todo Inferiores, dando
+  // espaço de verdade pra ênfase e pro secundário. Com 5-6 dias, ou ênfase de Superiores, mantém a
+  // divisão de sempre (tem dias de sobra pros dois lados nesses casos).
+  const GRUPOS_INFERIORES_PARA_SPLIT = ['Glúteo', 'Quadríceps', 'Posterior'];
+  const ehEnfaseDeInferiores = GRUPOS_INFERIORES_PARA_SPLIT.indexOf(perfil.enfase) !== -1;
+  let numInferiores, numSuperiores;
+  if(ehEnfaseDeInferiores && (perfil.frequencia === 3 || perfil.frequencia === 4)){
+    numSuperiores = 1;
+    numInferiores = perfil.frequencia - 1;
+  } else {
+    numInferiores = Math.ceil(perfil.frequencia / 2);
+    numSuperiores = perfil.frequencia - numInferiores;
+  }
 
   const seriesTotais = calcularTetoVolume(perfil.nivel, perfil.semanaAtual || 1, !!perfil.pausouRetomou).teto *
     (perfil.bloco === 'deload' ? 0.5 : (perfil.bloco === 'choque' ? 0.82 : (perfil.volumeReduzidoPorFadiga ? 0.85 : 1))) *
@@ -5786,6 +5827,9 @@ function gerarTreinoSemanal(perfil){
       });
     });
   }
+
+  // ÚLTIMA etapa de todas: garante que nenhum dia saiu raso, depois de toda limpeza/corte possível.
+  semana.forEach(function(dia){ garantirMinimoDeExerciciosPorDia(dia, perfil); });
 
   return semana;
 }
