@@ -1,4 +1,4 @@
-[dna_musa_101.html](https://github.com/user-attachments/files/32987387/dna_musa_101.html)
+[dna_musa_103.html](https://github.com/user-attachments/files/32987472/dna_musa_103.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -394,7 +394,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-U-LINK-PARCEIRO-METODO</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-V-COMBO-MANUAL-CARD-COMPLETO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -14874,6 +14874,22 @@ if(type === 'central'){
           corpoTreino += renderCardBiset(linha, j, prog);
           return;
         }
+        // Bi-set/Tri-set MANUAL (escolhido na ficha, não gerado pelo motor): antes só mostrava o
+        // parceiro como uma frase de texto, sem série/carga/histórico próprios. Agora monta a MESMA
+        // linha combinada "Tipo|||Principal|||Parceiro" que o motor automático já usa, e reaproveita
+        // o renderCardBiset de sempre — o parceiro ganha exatamente o mesmo card completo (série,
+        // carga, vídeo, histórico), sem duplicar nenhuma lógica nova. O parceiro usa a mesma série e
+        // repetição do exercício principal, já que são feitos em sequência, sem descanso entre eles.
+        const metodoDesseDia = d.metodos && d.metodos[j];
+        const ehComboManual = metodoDesseDia && typeof metodoDesseDia === 'object' && Array.isArray(metodoDesseDia.parceiros);
+        const parceirosPreenchidos = ehComboManual ? metodoDesseDia.parceiros.filter(function(p){ return !!p; }) : [];
+        if(ehComboManual && parceirosPreenchidos.length > 0){
+          const seriesRepsPrincipal = linha.split(' · ')[1] || '3x12';
+          const linhaCombinada = metodoDesseDia.tipo + '|||' + linha + '|||' +
+            parceirosPreenchidos.map(function(nomeParceiro){ return nomeParceiro + ' · ' + seriesRepsPrincipal; }).join('|||');
+          corpoTreino += renderCardBiset(linhaCombinada, j, prog);
+          return;
+        }
         const partes = linha.split(' · ');
         const nomeEx = partes[0];
         let notaSemanaAnterior = '';
@@ -15064,7 +15080,15 @@ function renderCardBiset(linha, j, prog){
 
   let html = '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:6px;border:1px solid var(--gold-deep);">' +
     '<span class="badge" style="align-self:flex-start;">' + metodoNome + '</span>' +
-    '<p style="font-size:11px;color:var(--text-faint);margin:0 0 4px;">' + (descricoes[metodoNome] || '') + '</p>';
+    '<p style="font-size:11px;color:var(--text-faint);margin:0 0 4px;">' + (descricoes[metodoNome] || '') + '</p>' +
+    // Pergunta de entendimento — antes só existia no card de exercício único, nunca em combo (nem o
+    // automático, nem o manual). Reaproveita a mesma função de sempre; "idx" é o índice do exercício
+    // no dia (mesmo "j" usado em todo o resto), então funciona igual pros dois tipos de combo.
+    '<div id="metodo-pergunta-' + j + '"><p class="txt" style="font-size:12px;margin-bottom:6px;">Você entendeu como funciona esse método?</p>' +
+      '<div style="display:flex;gap:8px;">' +
+        '<span class="chip" style="cursor:pointer;" onclick="responderEntendimentoMetodo(' + j + ',true)">Sim, entendi</span>' +
+        '<span class="chip" style="cursor:pointer;" onclick="responderEntendimentoMetodo(' + j + ',false)">Não, tenho dúvida</span>' +
+      '</div></div>';
 
   exercicios.forEach(function(exLinha, sub){
     const partes = exLinha.trim().split(' · ');
