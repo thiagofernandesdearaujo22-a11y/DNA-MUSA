@@ -1,4 +1,4 @@
-[dna_musa_104.html](https://github.com/user-attachments/files/32987756/dna_musa_104.html)
+[dna_musa_105.html](https://github.com/user-attachments/files/32988467/dna_musa_105.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -394,7 +394,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-X-LINK-DROPDOWN-PRESCRICAO</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-Y-LINK-POSTURAL-PRESCRICAO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -7608,7 +7608,11 @@ function mostrarOpcoesDeTrocaMesmoAssim(diaIndex, exIndex){
 
 function abrirVideoApenasExercicio(nomeExercicio, ev, urlAlternativa){
   if(ev) ev.stopPropagation(); // nunca deixa o clique no nome também disparar a troca do exercício
-  const exBanco = buscarExercicioNoBanco(nomeExercicio);
+  // Achado de auditoria: buscarExercicioNoBanco só olha o banco principal — exercícios de
+  // mobilidade/correção postural (que só existem em mobilidadeBanco) sempre caíam no "vídeo ainda
+  // não disponível", mesmo quando o vídeo existia de verdade lá. Agora checa os dois.
+  let exBanco = buscarExercicioNoBanco(nomeExercicio);
+  if(!exBanco) exBanco = (typeof mobilidadeBanco !== 'undefined' ? mobilidadeBanco : []).find(function(m){ return m.nome.toUpperCase() === nomeExercicio.toUpperCase(); });
   const urlDoVideo = (exBanco && exBanco.video) ? exBanco.video : (urlAlternativa || '');
   const embed = urlDoVideo ? getEmbedUrl(urlDoVideo) : '';
   const overlay = document.createElement('div');
@@ -8471,8 +8475,14 @@ function renderAvaliacaoPostural(a){
 
   if(a.desviosPosturaisConfirmados.length > 0){
     const bloco = obterBlocoPostural(a.desviosPosturaisConfirmados);
+    // Achado real de auditoria: isso mostrava só texto puro (nome, volume, descanso), sem link
+    // nenhum — ao marcar um desvio, o Personal não tinha como ver na hora o que estava sendo
+    // adicionado de verdade. Agora cada nome é clicável, abrindo o mesmo player de vídeo que a
+    // aluna vê no treino dela (ou o aviso de "ainda não disponível", quando for o caso).
     conteudoInterno += '<div class="info-box"><p class="lbl">Bloco de mobilidade/correção que vai aparecer no treino dela</p>';
-    bloco.forEach(function(ex){ conteudoInterno += '<p class="txt">• ' + ex.nome + ', ' + ex.volume + ' · descanso ' + ex.descanso + '</p>'; });
+    bloco.forEach(function(ex){
+      conteudoInterno += '<p class="txt" style="cursor:pointer;" onclick="abrirVideoApenasExercicio(\'' + ex.nome.replace(/'/g,"\\'") + '\', event)">• <span style="text-decoration:underline;text-decoration-color:var(--gold-soft);">' + ex.nome + '</span>, ' + ex.volume + ' · descanso ' + ex.descanso + '</p>';
+    });
     conteudoInterno += '</div>';
   }
 
