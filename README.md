@@ -1,4 +1,4 @@
-[Uploading dna_musa_98.html…]()
+[dna_musa_99.html](https://github.com/user-attachments/files/32986406/dna_musa_99.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -394,7 +394,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-R-FIX-TEMPO-AVANCADO</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-S-APLICA-NA-HORA</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -6091,10 +6091,7 @@ function editarPiramideManual(nomeAluna, campo, valor){
   }
   if(!a.piramideManual) a.piramideManual = {};
   a.piramideManual[campo] = valor || null;
-  salvarPerfilAlunaNoSupabase(nomeAluna);
-  const i = alunasPersonal.indexOf(a);
-  openAlunaDetail(i);
-  mostrarPreviewMudancaTreino(nomeAluna);
+  return aplicarEdicaoEregenerarTreino(nomeAluna);
 }
 
 function renderHistoricoPrioridade(a){
@@ -6111,10 +6108,7 @@ function resetarPiramideParaAutomatica(nomeAluna){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
   a.piramideManual = null;
-  salvarPerfilAlunaNoSupabase(nomeAluna);
-  const i = alunasPersonal.indexOf(a);
-  openAlunaDetail(i);
-  mostrarPreviewMudancaTreino(nomeAluna);
+  return aplicarEdicaoEregenerarTreino(nomeAluna);
 }
 
 function extrairEnfaseSecundaria(piramideTexto){
@@ -6310,42 +6304,6 @@ function calcularSnapshotVolume(diasSemana){
   return { totais: totais, duracaoTotal: Math.round(duracaoTotal) };
 }
 
-let treinoPreviewPendente = null;
-
-function mostrarPreviewMudancaTreino(nomeAluna){
-  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
-  if(!a) return;
-  const area = document.getElementById('preview-mudanca-area');
-  if(!area) return;
-
-  const snapshotAntes = a.treinoAtual ? calcularSnapshotVolume(a.treinoAtual.dias) : { totais: {}, duracaoTotal: 0 };
-  const perfil = construirPerfilAluna(a);
-  const semanaPreview = gerarTreinoSemanal(perfil);
-  const snapshotDepois = calcularSnapshotVolume(semanaPreview);
-  const resultadoValidacao = validarPrescricao(perfil, semanaPreview);
-
-  treinoPreviewPendente = { nomeAluna: nomeAluna, semana: semanaPreview };
-
-  const categorias = Array.from(new Set(Object.keys(snapshotAntes.totais).concat(Object.keys(snapshotDepois.totais))));
-  let comparativoHtml = '<div class="info-box">';
-  if(categorias.length === 0){
-    comparativoHtml += '<p class="txt">Ainda sem treino anterior pra comparar, esse será o primeiro.</p>';
-  } else {
-    categorias.forEach(function(cat){
-      const antes = snapshotAntes.totais[cat] || 0;
-      const depois = snapshotDepois.totais[cat] || 0;
-      const seta = depois > antes ? '↑' : (depois < antes ? '↓' : '=');
-      comparativoHtml += '<p class="txt">' + cat + ': ' + antes + ' → ' + depois + ' séries ' + seta + '</p>';
-    });
-  }
-  comparativoHtml += '<p class="txt" style="color:var(--gold-soft);margin-top:6px;">Duração total da semana: ' + snapshotAntes.duracaoTotal + 'min → ' + snapshotDepois.duracaoTotal + 'min</p></div>';
-
-  area.innerHTML = '<p class="section-label" style="margin-top:14px;">O que vai mudar com esse ajuste</p>' +
-    comparativoHtml +
-    renderChecklistPrescricao(resultadoValidacao) +
-    '<button class="btn-gold" onclick="confirmarGerarTreinoPreview()">Confirmar e gerar esse novo treino</button>';
-}
-
 function mostrarAvisoSessaoInvalida(){
   if(document.getElementById('overlay-sessao-invalida')) return; // já está mostrando, não duplica
   const overlay = document.createElement('div');
@@ -6433,23 +6391,6 @@ async function sincronizarTreinoComSupabase(a){
   }
 }
 
-function confirmarGerarTreinoPreview(){
-  if(!treinoPreviewPendente) return;
-  const a = alunasPersonal.find(function(x){ return x.nome === treinoPreviewPendente.nomeAluna; });
-  if(!a) return;
-  const nomesDias = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
-  const semanaComNome = nomesDias.map(function(nome, i){
-    if(i < treinoPreviewPendente.semana.length) return Object.assign({ n: nome }, treinoPreviewPendente.semana[i]);
-    return { n: nome, foco: 'Descanso', descanso: true, ex: [] };
-  });
-  a.treinoAtual = { fase: rotuloFaseParaAluna(a), volume: 'Gerado automaticamente, revise antes de confirmar', dias: semanaComNome };
-  sincronizarTreinoComSupabase(a);
-  marcarStatusControleCiclo(a.nome, 'amarelo');
-  treinoPreviewPendente = null;
-  const i = alunasPersonal.indexOf(a);
-  openAlunaDetail(i);
-}
-
 const timersSalvamentoPerfil = {};
 
 function salvarPerfilAlunaNoSupabase(nomeAluna){
@@ -6522,34 +6463,45 @@ async function executarSalvamentoPerfilAluna(nomeAluna){
   }
 }
 
+// Achado real de auditoria: mudar nível/ambiente/frequência só gerava uma PRÉVIA — o treino de
+// verdade só mudava se um botão separado ("Confirmar e gerar esse novo treino") fosse clicado depois.
+// Isso é fácil de esquecer: o campo mostra o valor novo, mas a aluna continua com o treino antigo até
+// esse clique extra. Agora aplica na hora, reaproveitando o MESMO pipeline completo de geração
+// (construirEAtribuirTreino), que já inclui o Auditor de Patologia conectado — nenhum desses ajustes
+// pula essa checagem de segurança.
+async function aplicarEdicaoEregenerarTreino(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+  const i = alunasPersonal.indexOf(a);
+  openAlunaDetail(i);
+  const saida = await construirEAtribuirTreino(nomeAluna);
+  if(!saida.ok) return;
+  marcarStatusControleCiclo(nomeAluna, 'amarelo');
+  openAlunaDetail(alunasPersonal.indexOf(a));
+  const areaValidacao = document.getElementById('validacao-treino-area');
+  if(areaValidacao) areaValidacao.innerHTML = renderChecklistPrescricao(saida.resultado);
+}
+
 function editarNivelAluna(nomeAluna, novoNivel){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
   a.nivel = novoNivel;
-  const i = alunasPersonal.indexOf(a);
-  openAlunaDetail(i);
-  mostrarPreviewMudancaTreino(nomeAluna);
-  salvarPerfilAlunaNoSupabase(nomeAluna);
+  return aplicarEdicaoEregenerarTreino(nomeAluna);
 }
 
 function editarAmbienteTreinoAluna(nomeAluna, novoAmbiente){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
   a.ambienteTreino = novoAmbiente;
-  const i = alunasPersonal.indexOf(a);
-  openAlunaDetail(i);
-  mostrarPreviewMudancaTreino(nomeAluna);
-  salvarPerfilAlunaNoSupabase(nomeAluna);
+  return aplicarEdicaoEregenerarTreino(nomeAluna);
 }
 
 function editarFrequenciaAluna(nomeAluna, novaFreq){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
   a.freq = novaFreq;
-  const i = alunasPersonal.indexOf(a);
-  openAlunaDetail(i);
-  mostrarPreviewMudancaTreino(nomeAluna);
-  salvarPerfilAlunaNoSupabase(nomeAluna);
+  return aplicarEdicaoEregenerarTreino(nomeAluna);
 }
 
 function editarDataNascimentoAluna(nomeAluna, novaData){
@@ -8270,7 +8222,6 @@ function openAlunaDetail(i){
       '</div>' +
     '</div>' +
     '<p style="font-size:11px;color:var(--text-faint);margin:-8px 0 12px;">Ajustar aqui atualiza automaticamente toda a estrutura de treino gerada — o gerador nunca mistura exercício de academia com exercício de casa</p>' +
-    '<div id="preview-mudanca-area"></div>' +
     '<button class="btn-secondary" style="margin-bottom:18px;" onclick="abrirResumoCompletoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-file-description" style="margin-right:6px;"></i>📋 Resumo completo (diagnóstico, avaliação, plano)</button>' +
     '<button class="btn-secondary" style="margin-bottom:8px;" onclick="gerarResumoPerformanceAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-sparkles" style="margin-right:6px;"></i>🤖 Resumir performance com IA</button>' +
     '<div id="resumo-ia-area" style="margin-bottom:18px;"></div>' +
