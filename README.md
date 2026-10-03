@@ -1,4 +1,4 @@
-[dna_musa_103.html](https://github.com/user-attachments/files/32987472/dna_musa_103.html)
+[dna_musa_104.html](https://github.com/user-attachments/files/32987756/dna_musa_104.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -394,7 +394,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-V-COMBO-MANUAL-CARD-COMPLETO</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-29-X-LINK-DROPDOWN-PRESCRICAO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -7466,7 +7466,8 @@ function renderModoAulaPresencial(){
         const metodoDoEx = d.metodos && d.metodos[ei];
         const parceiros = (metodoDoEx && typeof metodoDoEx === 'object' && metodoDoEx.parceiros) ? metodoDoEx.parceiros.filter(function(p){ return !!p; }) : [];
         return '<div style="border-top:1px solid var(--border);padding:10px 0;">' +
-          '<p style="font-size:12.5px;font-weight:600;margin:0 0 6px;">' + linha + (parceiros.length > 0 ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + metodoDoEx.tipo + '</span>' : '') + '</p>' +
+          '<p style="font-size:12.5px;font-weight:600;margin:0 0 6px;cursor:pointer;text-decoration:underline;text-decoration-color:var(--gold-soft);" onclick="abrirVideoApenasExercicio(\'' + nome.replace(/'/g,"\\'") + '\', event)">' + linha + '</p>' +
+          (parceiros.length > 0 ? '<span class="tag" style="background:var(--gold-soft);color:#1A1409;margin-bottom:6px;display:inline-block;">' + metodoDoEx.tipo + '</span>' : '') +
           (ultimo ? '<p class="txt" style="font-size:10.5px;color:var(--text-faint);margin:0 0 6px;">Último registrado: ' + ultimo.carga + 'kg x ' + ultimo.reps + '</p>' : '') +
           '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
             '<input type="text" inputmode="decimal" placeholder="kg" id="ap-carga-' + di + '-' + ei + '" class="form-input" style="width:70px;padding:8px;" value="' + (ultimo ? ultimo.carga : '') + '">' +
@@ -7480,7 +7481,7 @@ function renderModoAulaPresencial(){
             const historicoParceiro = (prog.historico[nomeParceiro] || []);
             const ultimoParceiro = historicoParceiro.length > 0 ? historicoParceiro[historicoParceiro.length - 1] : null;
             return '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);">' +
-              '<p style="font-size:12px;font-weight:600;margin:0 0 6px;color:var(--gold-soft);">↳ ' + nomeParceiro + '</p>' +
+              '<p style="font-size:12px;font-weight:600;margin:0 0 6px;color:var(--gold-soft);cursor:pointer;text-decoration:underline;" onclick="abrirVideoApenasExercicio(\'' + nomeParceiro.replace(/'/g,"\\'") + '\', event)">↳ ' + nomeParceiro + '</p>' +
               (ultimoParceiro ? '<p class="txt" style="font-size:10.5px;color:var(--text-faint);margin:0 0 6px;">Último registrado: ' + ultimoParceiro.carga + 'kg x ' + ultimoParceiro.reps + '</p>' : '') +
               '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
                 '<input type="text" inputmode="decimal" placeholder="kg" id="ap-carga-' + di + '-' + ei + '-p' + p + '" class="form-input" style="width:70px;padding:8px;" value="' + (ultimoParceiro ? ultimoParceiro.carga : '') + '">' +
@@ -7977,12 +7978,21 @@ function htmlCaixasParceirosCombo(nomePrincipal, quantosParceiros, parceirosAtua
     return (!grupo || grupoDoEx === grupo) && e.nome.toUpperCase() !== nomePrincipal.toUpperCase();
   }).sort(function(x, y){ return x.nome.localeCompare(y.nome, 'pt-BR'); });
 
+  // Achado real de auditoria: a prescrição mostra o exercício principal com nome sublinhado e
+  // clicável pro vídeo, mas o parceiro escolhido aqui no dropdown nunca tinha esse mesmo link em
+  // lugar nenhum — o nome dele só existia dentro da opção selecionada do <select>, que não é
+  // clicável. Agora, assim que um parceiro é escolhido, aparece embaixo do dropdown o nome dele,
+  // sublinhado, igual ao principal, abrindo o mesmo player de vídeo.
   let html = '<div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">';
   for(let p = 0; p < quantosParceiros; p++){
+    const nomeEscolhido = (parceirosAtuais||[])[p];
     html += '<select class="form-select" style="font-size:12px;padding:8px;" onchange="definirParceiroCombo(THIS_DI,THIS_EI,' + p + ',this.value)">' +
       '<option value="">+ escolher exercício parceiro ' + (quantosParceiros > 1 ? (p+1) : '') + '</option>' +
-      opcoes.map(function(e){ return '<option value="' + e.nome.replace(/"/g,'&quot;') + '"' + ((parceirosAtuais||[])[p] === e.nome ? ' selected' : '') + '>' + e.nome + '</option>'; }).join('') +
+      opcoes.map(function(e){ return '<option value="' + e.nome.replace(/"/g,'&quot;') + '"' + (nomeEscolhido === e.nome ? ' selected' : '') + '>' + e.nome + '</option>'; }).join('') +
     '</select>';
+    if(nomeEscolhido){
+      html += '<span style="font-size:11px;color:var(--gold-soft);cursor:pointer;text-decoration:underline;text-decoration-color:var(--gold-soft);text-underline-offset:2px;margin-top:-2px;" onclick="abrirVideoApenasExercicio(\'' + nomeEscolhido.replace(/'/g,"\\'") + '\', event)"><i class="ti ti-player-play" style="font-size:11px;vertical-align:-1px;margin-right:3px;"></i>Ver vídeo de ' + nomeEscolhido + '</span>';
+    }
   }
   html += '</div>';
   return html;
@@ -8017,6 +8027,10 @@ function definirParceiroCombo(di, ei, posicao, nomeEscolhido){
 
   a.treinoAtual.dias[di].metodos[ei].parceiros[posicao] = nomeEscolhido;
   sincronizarTreinoComSupabase(a);
+  // Re-renderiza na hora pra mostrar o link de vídeo do parceiro assim que ele é escolhido, sem
+  // precisar fechar e abrir a ficha de novo.
+  const metodoAtual = a.treinoAtual.dias[di].metodos[ei];
+  renderCaixasParceirosCombo(di, ei, metodoAtual.tipo === 'Tri-set' ? 2 : 1);
 }
 
 let treinoJaBuscadoPara = {};
