@@ -262,6 +262,13 @@
   .vcover .lock-icon i{font-size:11px;color:var(--gold-soft);}
   .vtitle{font-size:11.5px;font-weight:600;text-align:left;margin:0;line-height:1.25;color:var(--text);}
 
+  /* Tour guiado de primeira visita */
+  .tour-spotlight{position:fixed;z-index:99999991;border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,0.8);transition:top .3s ease,left .3s ease,width .3s ease,height .3s ease;pointer-events:none;}
+  .tour-caixa{position:fixed;z-index:99999992;background:var(--card);border:1px solid var(--border-strong);border-radius:14px;padding:16px;max-width:300px;box-shadow:0 10px 30px rgba(0,0,0,0.5);transition:top .3s ease,left .3s ease;}
+  .tour-caixa p.tour-texto{font-size:13px;color:var(--text);margin:0 0 12px;line-height:1.4;}
+  .tour-caixa .tour-rodape{display:flex;justify-content:space-between;align-items:center;}
+  .tour-caixa .tour-passo-num{font-size:11px;color:var(--text-faint);}
+
   .ferramenta-compacta{background:linear-gradient(155deg,var(--card) 0%,var(--card-2) 100%);border:1px solid var(--border);border-radius:16px;padding:14px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;transition:border-color .2s ease,transform .2s ease,box-shadow .2s ease;}
   .ferramenta-compacta:active{transform:scale(0.96);}
   .ferramenta-compacta:hover{border-color:var(--border-strong);box-shadow:0 4px 16px rgba(232,197,138,0.12);}
@@ -396,7 +403,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-30-A-CARDS-MENTORIA-PROPORCAO</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-30-B-TOUR-GUIADO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -576,7 +583,7 @@
       <p class="section-label" style="margin-top:22px;">Seus indicadores</p>
       <div class="indicadores-grid" id="home-indicadores-grid"></div>
 
-      <div class="list-item" style="cursor:pointer;background:linear-gradient(135deg,var(--gold-soft),#B4741F);border:none;margin-top:18px;" onclick="abrirListaDeTreinosDaSemana()">
+      <div class="list-item" id="link-ver-treinos-semana" style="cursor:pointer;background:linear-gradient(135deg,var(--gold-soft),#B4741F);border:none;margin-top:18px;" onclick="abrirListaDeTreinosDaSemana()">
         <span style="color:#1A1409;font-weight:600;"><i class="ti ti-calendar-week" style="margin-right:8px;"></i>Ver treinos da semana</span>
         <span class="tag" id="resumo-dias-semana" style="background:rgba(0,0,0,0.15);color:#1A1409;"></span>
       </div>
@@ -588,6 +595,7 @@
         <span><i class="ti ti-trending-up" style="margin-right:8px;color:var(--gold-soft);"></i>Meu progresso</span>
         <i class="ti ti-chevron-right" style="color:var(--text-faint);"></i>
       </div>
+      <p style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:16px;cursor:pointer;" onclick="reverTour()">Rever tutorial do aplicativo</p>
     </div>
 
     <div id="botao-flutuante-sol" style="display:none;position:fixed;bottom:90px;right:16px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.4);z-index:500;" onclick="openLevel2('chatia')">
@@ -11381,6 +11389,98 @@ function finalizarOnboardingEIr(destino){
   else if(destino === 'sol'){ openLevel2('chatia'); }
 }
 
+// ===== TOUR GUIADO DE PRIMEIRA VISITA =====
+// Destaque (spotlight) + caixa de texto apontando pras funcionalidades principais, uma de cada vez.
+// Usa só âncoras já visíveis a partir da Início (cartão do DNA Score, indicadores, "ver treinos da
+// semana", e os itens da barra de navegação inferior, que é fixa e aparece em toda aba da aluna) —
+// não precisa trocar de tela durante o tour, ela mesma explora depois.
+const PASSOS_TOUR = [
+  { seletor: '.dna-score-card', titulo: 'Seu DNA Score', texto: 'Esse número resume como seu treino está indo essa semana — constância, progressão, recuperação, tudo junto. Toca nele pra ver o detalhe de cada parte.' },
+  { seletor: '#home-indicadores-grid', titulo: 'Seus indicadores', texto: 'Aqui você acompanha constância, hipertrofia, nutrição, recuperação e progressão, separados — pra entender o que está puxando seu resultado pra cima ou pra baixo.' },
+  { seletor: '#link-ver-treinos-semana', titulo: 'Seus treinos da semana', texto: 'Aqui está o seu treino prescrito, dia a dia. É onde você registra as séries e acompanha sua carga.' },
+  { seletor: '[data-nav="dados"]', titulo: 'Composição corporal', texto: 'Aqui você registra peso, medidas e fotos pra acompanhar sua evolução ao longo do tempo.' },
+  { seletor: '[data-nav="mentoria"]', titulo: 'Mentoria', texto: 'Cursos completos, explicação de métodos de treino, mobilidade e muito mais — organizado por seção.' },
+  { seletor: '[data-nav="progresso"]', titulo: 'Progresso', texto: 'Seu calendário de treinos, linha do tempo e gráfico de evolução, tudo num só lugar.' },
+  { seletor: '[data-nav="ranking"]', titulo: 'Ranking', texto: 'Veja como você está em relação à comunidade, e o que falta pra bater a próxima meta.' },
+  { seletor: '[data-nav="rodadavida"]', titulo: 'Roda da Vida', texto: 'De vez em quando, uma área da sua vida aparece aqui pra você avaliar — ajuda seu personal a te entender além do treino.' },
+  { seletor: '#botao-flutuante-sol', titulo: 'Fale com a Sol', texto: 'Sua treinadora digital, sempre disponível pra tirar dúvidas rápidas sobre o treino.' }
+];
+let indiceTourAtual = 0;
+
+function iniciarTour(){
+  indiceTourAtual = 0;
+  mostrarPassoTour(0);
+}
+
+function reverTour(){ iniciarTour(); }
+
+function mostrarPassoTour(indice){
+  if(indice >= PASSOS_TOUR.length){ finalizarTour(); return; }
+  indiceTourAtual = indice; // mantém sincronizado mesmo quando um passo é pulado por baixo (ver abaixo),
+                            // senão "Próximo" reexibiria o mesmo passo em vez de avançar de verdade
+  const passo = PASSOS_TOUR[indice];
+  const alvo = document.querySelector(passo.seletor);
+  if(!alvo){ mostrarPassoTour(indice + 1); return; } // elemento não existe nessa tela/sessão, pula sem travar o tour
+
+  let spotlight = document.getElementById('tour-spotlight-el');
+  let caixa = document.getElementById('tour-caixa-el');
+  if(!spotlight){
+    spotlight = document.createElement('div');
+    spotlight.id = 'tour-spotlight-el';
+    spotlight.className = 'tour-spotlight';
+    document.body.appendChild(spotlight);
+  }
+  if(!caixa){
+    caixa = document.createElement('div');
+    caixa.id = 'tour-caixa-el';
+    caixa.className = 'tour-caixa';
+    document.body.appendChild(caixa);
+  }
+
+  const rect = alvo.getBoundingClientRect();
+  const folga = 8;
+  spotlight.style.top = (rect.top - folga) + 'px';
+  spotlight.style.left = (rect.left - folga) + 'px';
+  spotlight.style.width = (rect.width + folga * 2) + 'px';
+  spotlight.style.height = (rect.height + folga * 2) + 'px';
+
+  const caixaAbaixo = rect.top < (window.innerHeight / 2);
+  caixa.style.top = caixaAbaixo ? (rect.bottom + 16) + 'px' : '';
+  caixa.style.bottom = caixaAbaixo ? '' : (window.innerHeight - rect.top + 16) + 'px';
+  caixa.style.left = Math.max(16, Math.min(rect.left, window.innerWidth - 316)) + 'px';
+
+  const ehUltimo = indice === PASSOS_TOUR.length - 1;
+  caixa.innerHTML = '<p style="font-family:\'Playfair Display\',serif;font-weight:700;color:var(--gold);font-size:15px;margin:0 0 6px;">' + passo.titulo + '</p>' +
+    '<p class="tour-texto">' + passo.texto + '</p>' +
+    '<div class="tour-rodape">' +
+      '<span class="tour-passo-num">' + (indice + 1) + ' de ' + PASSOS_TOUR.length + '</span>' +
+      '<div style="display:flex;gap:10px;align-items:center;">' +
+        '<span style="font-size:12px;color:var(--text-faint);cursor:pointer;" onclick="finalizarTour()">Pular</span>' +
+        '<button class="btn-gold" style="width:auto;padding:8px 18px;margin:0;" onclick="avancarTour()">' + (ehUltimo ? 'Concluir' : 'Próximo') + '</button>' +
+      '</div>' +
+    '</div>';
+}
+
+function avancarTour(){
+  indiceTourAtual++;
+  mostrarPassoTour(indiceTourAtual);
+}
+
+function finalizarTour(){
+  const spotlight = document.getElementById('tour-spotlight-el');
+  const caixa = document.getElementById('tour-caixa-el');
+  if(spotlight) spotlight.remove();
+  if(caixa) caixa.remove();
+  try { localStorage.setItem('musaTourVisto', 'sim'); } catch(e){}
+}
+
+function verificarEIniciarTourPrimeiraVez(){
+  let jaViu = false;
+  try { jaViu = localStorage.getItem('musaTourVisto') === 'sim'; } catch(e){}
+  if(jaViu) return;
+  setTimeout(function(){ iniciarTour(); }, 600); // pequena espera pra tela de home terminar de renderizar
+}
+
 let timerIntroAtual = null;
 
 function mostrarBannerInstalarApp(){
@@ -11674,7 +11774,7 @@ function openLevel2(which){
   if(phoneEl) phoneEl.classList.toggle('modo-personal', which === 'personal');
   if(which === 'personal'){ showPersonalView('dashboard'); carregarCatalogoPersonal(); iniciarPresencaEquipe(); iniciarRealtimeConversas(); }
   if(which === 'chatia'){ inicializarChatIA(); }
-  if(which === 'home' && typeof renderHome === 'function'){ renderHome(); verificarAvancoEstruturaDesafio(); renderBotaoDesafio(); verificarPerguntaPerfilPendente(); renderBotaoPerguntaPerfil(); verificarPerguntaRodaDaVidaPendente(); renderBotaoPerguntaRodaDaVida(); }
+  if(which === 'home' && typeof renderHome === 'function'){ renderHome(); verificarAvancoEstruturaDesafio(); renderBotaoDesafio(); verificarPerguntaPerfilPendente(); renderBotaoPerguntaPerfil(); verificarPerguntaRodaDaVidaPendente(); renderBotaoPerguntaRodaDaVida(); verificarEIniciarTourPrimeiraVez(); }
   if(which === 'dados' && typeof renderAvaliacoes === 'function'){ renderAvaliacoes(); }
   if(which === 'progresso' && typeof renderMeuProgresso === 'function'){ renderMeuProgresso(); }
   if(which === 'ranking' && typeof renderRanking === 'function'){ renderRanking(); renderRankingPublico(); }
