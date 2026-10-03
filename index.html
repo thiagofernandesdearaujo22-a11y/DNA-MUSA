@@ -403,7 +403,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-30-B-TOUR-GUIADO</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-30-D-MINIMO-EXERCICIOS-DIA</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -4190,7 +4190,11 @@ function sugerirExerciciosGluteo(direcionamento){
 
 /* ===== ITEM 10: Reforço cruzado (grupo carente recebe volume leve em dia do "outro grupo") ===== */
 function sugerirReforcoCruzado(nomeExercicioLeve){
-  return nomeExercicioLeve + ' · 4x15-20 (carga baixa, longe da falha, estímulo, não sobrecarga)';
+  // Antes essa anotação ("carga baixa, longe da falha...") ia junto do texto que a aluna vê no
+  // treino, junto com os números de série/repetição — era uma nota interna de por que o exercício
+  // tinha entrado, nunca deveria ter chegado até a tela dela. Removida; a série/repetição continua
+  // igual, só sem o texto extra.
+  return nomeExercicioLeve + ' · 4x15-20';
 }
 
 /* ===== ITEM 11: Famílias de movimento, rotação entre ciclos ===== */
@@ -4319,15 +4323,31 @@ function ehExercicioUnilateral(nome){
 
 // Regra real de trabalho do Thiago: nunca dois exercícios unilaterais no mesmo treino (ex: afundo +
 // búlgaro, ou dois tipos de afundo) — mantém o primeiro que aparecer, remove os demais.
+// PROTEÇÃO (achado real de auditoria, caso da Tacianne): essa regra, sozinha, podia deixar um dia
+// com só 1 exercício — quando a maioria dos candidatos sorteados pro dia calhava de ser unilateral.
+// Um dia raso desse jeito é um problema muito pior do que ter 2 exercícios unilaterais juntos, então
+// agora a regra nunca remove a ponto de deixar o dia com menos de MINIMO_EXERCICIOS_NO_DIA no total.
+const MINIMO_EXERCICIOS_NO_DIA = 3;
 function removerUnilateraisExcedentesNoDia(dia){
-  let jaTemUnilateral = false;
-  dia.ex = dia.ex.filter(function(linha){
+  const ehUnilateralPorIndice = dia.ex.map(function(linha){
     const nomes = extrairTodosNomesDeLinha(linha);
-    const algumUnilateral = nomes.some(function(n){ return ehExercicioUnilateral(n); });
-    if(!algumUnilateral) return true;
-    if(jaTemUnilateral) return false; // já tem um unilateral no dia, esse aqui sai
-    jaTemUnilateral = true;
-    return true;
+    return nomes.some(function(n){ return ehExercicioUnilateral(n); });
+  });
+  const totalUnilaterais = ehUnilateralPorIndice.filter(Boolean).length;
+  if(totalUnilaterais <= 1) return; // nada a fazer, não tem excesso
+
+  const unilateraisQueDeviamSair = totalUnilaterais - 1; // mantém sempre o 1º, tentaria remover o resto
+  const removerNoMaximo = Math.max(0, dia.ex.length - MINIMO_EXERCICIOS_NO_DIA); // nunca mais que isso
+  const removerDeVerdade = Math.min(unilateraisQueDeviamSair, removerNoMaximo);
+
+  let unilateraisVistos = 0;
+  let removidos = 0;
+  dia.ex = dia.ex.filter(function(linha, i){
+    if(!ehUnilateralPorIndice[i]) return true;
+    unilateraisVistos++;
+    if(unilateraisVistos === 1) return true; // sempre mantém o primeiro
+    if(removidos < removerDeVerdade){ removidos++; return false; }
+    return true; // já bateu no limite seguro de remoção, mantém o resto mesmo sendo unilateral
   });
 }
 
@@ -5472,9 +5492,11 @@ function aplicarVolumeMinimoTerciario(diasInferiores, perfil, reps){
 
     // Insere no PRIMEIRO dia da lista (não no último) — o corte por tempo remove sempre do fim pra
     // início, então começar pelo primeiro dia protege melhor esse exercício de ser cortado depois.
+    // (A nota "volume mínimo garantido pela metodologia" que existia aqui era outra anotação interna
+    // vazando direto pra tela da aluna, junto da série — removida, igual as outras duas desta auditoria.)
     const diaAlvo = diasInferiores[0];
-    diaAlvo.ex.push(nomeBanco === 'Isquiotibiais' ? (opcaoEscolhida + ' · ' + seriesDoExercicio + 'x' + Math.min(15, reps + 2) + ' (volume mínimo de ' + grupoInterno.toLowerCase() + ': 50% do volume de ' + primario.toLowerCase() + ', garantido pela metodologia)')
-      : (opcaoEscolhida + ' · ' + seriesDoExercicio + 'x' + reps + ' (volume mínimo de ' + grupoInterno.toLowerCase() + ': 50% do volume de ' + primario.toLowerCase() + ', garantido pela metodologia)'));
+    diaAlvo.ex.push(nomeBanco === 'Isquiotibiais' ? (opcaoEscolhida + ' · ' + seriesDoExercicio + 'x' + Math.min(15, reps + 2))
+      : (opcaoEscolhida + ' · ' + seriesDoExercicio + 'x' + reps));
   });
 }
 
@@ -5696,7 +5718,7 @@ function gerarTreinoSemanal(perfil){
           if(!escolhido) break; // sem candidato novo e distinto, para de tentar
           const tetoPorNivel = { 'Iniciante': 3, 'Intermediário': 4, 'Avançado': 5 };
           const seriesNovoEx = (tetoPorNivel[perfil.nivel] || 4) - 1; // nunca reivindica o teto máximo, esse já está ocupado
-          dia.ex.push(escolhido + ' · ' + seriesNovoEx + 'x' + (perfil.bloco === 'choque' ? 7 : 11) + ' (reforço da ênfase, tempo disponível permitia mais)');
+          dia.ex.push(escolhido + ' · ' + seriesNovoEx + 'x' + (perfil.bloco === 'choque' ? 7 : 11));
           tentativasAdicionar++;
         }
       }
