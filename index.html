@@ -263,9 +263,11 @@
   .vtitle{font-size:11.5px;font-weight:600;text-align:left;margin:0;line-height:1.25;color:var(--text);}
 
   /* Tour guiado de primeira visita */
-  .tour-spotlight{position:fixed;z-index:99999991;border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,0.8);transition:top .3s ease,left .3s ease,width .3s ease,height .3s ease;pointer-events:none;}
-  .tour-caixa{position:fixed;z-index:99999992;background:var(--card);border:1px solid var(--border-strong);border-radius:14px;padding:16px;max-width:300px;box-shadow:0 10px 30px rgba(0,0,0,0.5);transition:top .3s ease,left .3s ease;}
-  .tour-caixa p.tour-texto{font-size:13px;color:var(--text);margin:0 0 12px;line-height:1.4;}
+  .tour-bloqueio{position:fixed;inset:0;z-index:99999990;touch-action:none;background:transparent;}
+  .tour-spotlight{position:fixed;z-index:99999991;border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,0.8);transition:top .25s ease,left .25s ease,width .25s ease,height .25s ease;pointer-events:none;}
+  .tour-caixa{position:fixed;z-index:99999992;background:var(--card);border:1px solid var(--border-strong);border-radius:14px;padding:16px;width:min(320px,calc(100vw - 32px));box-sizing:border-box;box-shadow:0 10px 30px rgba(0,0,0,0.5);}
+  .tour-caixa p.tour-parte{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-faint);margin:0 0 6px;}
+  .tour-caixa p.tour-texto{font-size:13px;color:var(--text);margin:0 0 12px;line-height:1.45;}
   .tour-caixa .tour-rodape{display:flex;justify-content:space-between;align-items:center;}
   .tour-caixa .tour-passo-num{font-size:11px;color:var(--text-faint);}
 
@@ -403,7 +405,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-30-I-RELATORIO-AUDITORIA</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-30-J-TOUR-COMPLETO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1593,7 +1595,7 @@ function abrirListaDeTreinosDaSemana(){
   lista.innerHTML = dias.map(function(d, i){
     const abrev = abreviacoes[d.n] || d.n.slice(0,3).toUpperCase();
     const foiRegistrado = diasRegistradosEssaSemana.indexOf(d.n) !== -1;
-    return '<div style="display:flex;align-items:center;gap:14px;padding:16px;margin-bottom:10px;border-radius:16px;background:' + (foiRegistrado ? 'var(--success-soft)' : (d.hoje ? 'linear-gradient(135deg,rgba(217,139,46,0.18),rgba(92,56,20,0.12))' : 'var(--card)')) + ';border:1px solid ' + (foiRegistrado ? 'var(--success)' : (d.hoje ? 'var(--gold-soft)' : 'var(--border)')) + ';cursor:pointer;user-select:none;-webkit-user-select:none;" ' +
+    return '<div data-feito="' + (foiRegistrado ? 'sim' : 'nao') + '" data-descanso="' + (d.descanso ? 'sim' : 'nao') + '" style="display:flex;align-items:center;gap:14px;padding:16px;margin-bottom:10px;border-radius:16px;background:' + (foiRegistrado ? 'var(--success-soft)' : (d.hoje ? 'linear-gradient(135deg,rgba(217,139,46,0.18),rgba(92,56,20,0.12))' : 'var(--card)')) + ';border:1px solid ' + (foiRegistrado ? 'var(--success)' : (d.hoje ? 'var(--gold-soft)' : 'var(--border)')) + ';cursor:pointer;user-select:none;-webkit-user-select:none;" ' +
       'onclick="abrirDiaDaSemana(' + i + ')" ' +
       'onmousedown="iniciarPressionarDia(' + i + ')" onmouseup="cancelarPressionarDia()" onmouseleave="cancelarPressionarDia()" ' +
       'ontouchstart="iniciarPressionarDia(' + i + ')" ontouchend="cancelarPressionarDia()" ontouchmove="cancelarPressionarDia()">' +
@@ -3525,8 +3527,8 @@ function renderCheckInEHabitos(nome){
   let html = '<p class="section-label" style="margin-top:0;margin-bottom:10px;">' + (editandoOntem ? 'Preenchendo o dia de ontem (' + dataFormatadaEmEdicao + ')' : 'Meu progresso hoje') + '</p>' +
     (editandoOntem
       ? '<span class="chip" style="cursor:pointer;margin-bottom:16px;display:inline-block;" onclick="voltarParaPreenchimentoDeHoje(\'' + nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-arrow-back" style="font-size:11px;vertical-align:-1px;margin-right:4px;"></i>Voltar pra hoje</span>'
-      : '<span class="chip" style="cursor:pointer;margin-bottom:16px;display:inline-block;" onclick="abrirPreenchimentoDeOntem(\'' + nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-calendar-time" style="font-size:11px;vertical-align:-1px;margin-right:4px;"></i>Esqueci de preencher ontem</span>') +
-    '<div class="info-box" style="margin-bottom:14px;">' +
+      : '<span class="chip" id="tour-chip-ontem" style="cursor:pointer;margin-bottom:16px;display:inline-block;" onclick="abrirPreenchimentoDeOntem(\'' + nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-calendar-time" style="font-size:11px;vertical-align:-1px;margin-right:4px;"></i>Esqueci de preencher ontem</span>') +
+    '<div class="info-box" id="tour-checkin-box" style="margin-bottom:14px;">' +
       '<p class="txt" style="font-size:12px;margin-bottom:8px;text-align:center;">Humor</p><div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;">' + botaoEscala('humor', checkin.humor) + '</div>' +
       '<p class="txt" style="font-size:12px;margin-bottom:8px;text-align:center;">Ansiedade</p><div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;">' + botaoEscala('ansiedade', checkin.ansiedade) + '</div>' +
       '<p class="txt" style="font-size:12px;margin-bottom:8px;text-align:center;">Disposição</p><div style="display:flex;justify-content:center;gap:10px;">' + botaoEscala('disposicao', checkin.disposicao) + '</div>' +
@@ -7763,7 +7765,7 @@ function confirmarSerieComoPersonal(diaIndex, exIndex, nomeExercicio){
   salvarProgressoNoSupabase(a.nome);
 
   const elResultado = document.getElementById('ap-resultado-' + diaIndex + '-' + exIndex);
-  if(elResultado) elResultado.innerHTML = '<p style="font-size:11px;color:var(--success);margin-top:4px;">✓ Salvo — sugestão pra próxima: ' + sugestao.valor + 'kg</p>';
+  if(elResultado) elResultado.innerHTML = '<p style="font-size:11px;color:var(--success);margin-top:4px;">✓ Salvo, sugestão pra próxima: ' + sugestao.valor + 'kg</p>';
 }
 
 // Uma linha normal é "Nome · 3x12". Um bi-set é "Bi-set|||Nome1 · 3x12|||Nome2 · 3x12" — sem essa
@@ -7996,9 +7998,30 @@ const descricoesMetodo = {
   'Cluster set': 'Divide a série em blocos pequenos com descanso curto entre eles, permite mover mais carga total. Usado no bloco de choque.',
   'Bi-set': 'Dois exercícios seguidos, sem descanso entre eles, só depois do segundo. Economiza tempo e aumenta o estímulo metabólico.',
   'Tri-set': 'Três exercícios seguidos sem descanso. Mais intenso que o bi-set, usar com cuidado no volume total do dia.',
-  'Combinar': 'Dois exercícios seguidos, sem descanso entre eles — igual ao bi-set, mas livre: pode juntar exercícios de QUALQUER grupo muscular, não só do mesmo grupo do principal.',
+  'Combinar': 'Dois exercícios seguidos, sem descanso entre eles. Igual ao bi-set, mas livre: pode juntar exercícios de qualquer grupo muscular, não só do mesmo grupo do principal.',
   'Pirâmide crescente': 'Aumenta a carga e reduz as reps a cada série. Bom pra quem já tem técnica consolidada.'
 };
+
+// Toque na etiqueta dourada do método (linha do exercício) abre essa explicação, sem precisar abrir o
+// exercício inteiro. Antes, o texto "Sobre o método" só aparecia depois de expandir o exercício, e a
+// etiqueta da linha era só um rótulo, sem toque nenhum.
+function mostrarInfoMetodo(nomeMetodo, ev){
+  if(ev) ev.stopPropagation(); // não deixa o toque também abrir/fechar o exercício
+  const descricao = descricoesMetodo[nomeMetodo];
+  if(!descricao) return;
+  const antigo = document.getElementById('overlay-info-metodo');
+  if(antigo) antigo.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'overlay-info-metodo';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999000;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;padding:24px;';
+  overlay.onclick = function(){ overlay.remove(); };
+  overlay.innerHTML = '<div class="info-box" style="max-width:320px;margin:0;" onclick="event.stopPropagation()">' +
+    '<p class="lbl" style="margin-bottom:6px;">Método: ' + nomeMetodo + '</p>' +
+    '<p class="txt" style="margin-bottom:12px;">' + descricao + '</p>' +
+    '<button class="btn-gold" style="margin:0;" onclick="document.getElementById(\'overlay-info-metodo\').remove()">Entendi</button>' +
+  '</div>';
+  document.body.appendChild(overlay);
+}
 
 // ===== MOTOR 6: MÉTODOS — decide automaticamente quais métodos fazem sentido oferecer agora =====
 // Nunca libera método avançado pra quem não tem base técnica/nível pra isso.
@@ -11580,91 +11603,309 @@ function finalizarOnboardingEIr(destino){
 }
 
 // ===== TOUR GUIADO DE PRIMEIRA VISITA =====
-// Destaque (spotlight) + caixa de texto apontando pras funcionalidades principais, uma de cada vez.
-// Usa só âncoras já visíveis a partir da Início (cartão do DNA Score, indicadores, "ver treinos da
-// semana", e os itens da barra de navegação inferior, que é fixa e aparece em toda aba da aluna) —
-// não precisa trocar de tela durante o tour, ela mesma explora depois.
-const PASSOS_TOUR = [
-  { seletor: '.dna-score-card', titulo: 'Seu DNA Score', texto: 'Esse número resume como seu treino está indo essa semana — constância, progressão, recuperação, tudo junto. Toca nele pra ver o detalhe de cada parte.' },
-  { seletor: '#home-indicadores-grid', titulo: 'Seus indicadores', texto: 'Aqui você acompanha constância, hipertrofia, nutrição, recuperação e progressão, separados — pra entender o que está puxando seu resultado pra cima ou pra baixo.' },
-  { seletor: '#link-ver-treinos-semana', titulo: 'Seus treinos da semana', texto: 'Aqui está o seu treino prescrito, dia a dia. É onde você registra as séries e acompanha sua carga.' },
-  { seletor: '[data-nav="dados"]', titulo: 'Composição corporal', texto: 'Aqui você registra peso, medidas e fotos pra acompanhar sua evolução ao longo do tempo.' },
-  { seletor: '[data-nav="mentoria"]', titulo: 'Mentoria', texto: 'Cursos completos, explicação de métodos de treino, mobilidade e muito mais — organizado por seção.' },
-  { seletor: '[data-nav="progresso"]', titulo: 'Progresso', texto: 'Seu calendário de treinos, linha do tempo e gráfico de evolução, tudo num só lugar.' },
-  { seletor: '[data-nav="ranking"]', titulo: 'Ranking', texto: 'Veja como você está em relação à comunidade, e o que falta pra bater a próxima meta.' },
-  { seletor: '[data-nav="rodadavida"]', titulo: 'Roda da Vida', texto: 'De vez em quando, uma área da sua vida aparece aqui pra você avaliar — ajuda seu personal a te entender além do treino.' },
-  { seletor: '#botao-flutuante-sol', titulo: 'Fale com a Sol', texto: 'Sua treinadora digital, sempre disponível pra tirar dúvidas rápidas sobre o treino.' }
-];
+// Destaque (spotlight) + caixa de texto, passo a passo, em 4 partes: Tela inicial, Treinos da semana,
+// Dentro do treino e Progresso. O tour NAVEGA sozinho entre as telas (abre a lista, abre um dia, abre um
+// exercício, vai pro Progresso) e volta pra Início no fim. Durante o tour, qualquer toque fora da caixinha
+// é bloqueado, pra ela não registrar treino nem confirmar exercício sem querer.
+//
+// Cada passo pode ter:
+//  - preparar: função que leva o app até a tela certa (sempre idempotente, só navega se ainda não estiver lá)
+//  - seletor: o que destacar (texto CSS ou função que devolve o elemento)
+//  - textoCentro: texto alternativo, usado quando o elemento NÃO está na tela naquele momento (ex: ela
+//    ainda não tem treino, ou já respondeu a pergunta rápida), aí o passo vira um cartão no centro
+//  - fallback 'pular': em vez de virar cartão no centro, o passo some (ex: desafio, pra quem não está em um)
+//  - condicao: se devolver falso, o passo nem entra na contagem
+//  - rolar: false pra elementos fixos na tela (barra de baixo, botão da Sol)
+const TOTAL_PARTES_TOUR = 4;
+const NOMES_PARTES_TOUR = { 1: 'Tela inicial', 2: 'Treinos da semana', 3: 'Dentro do treino', 4: 'Progresso' };
 let indiceTourAtual = 0;
+let tourEmAndamento = false;
+let tourOcupado = false;
+
+function tourEsperar(ms){ return new Promise(function(resolver){ setTimeout(resolver, ms); }); }
+function tourTelaAtiva(nome){
+  const v = document.querySelector('.view.active');
+  return !!v && v.getAttribute('data-view') === nome;
+}
+
+async function tourIrParaInicio(){
+  if(!tourTelaAtiva('home')){ openLevel2('home'); await tourEsperar(350); }
+}
+async function tourIrParaListaSemana(){
+  if(!tourTelaAtiva('semana-treinos')){ abrirListaDeTreinosDaSemana(); await tourEsperar(350); }
+}
+function tourEscolherDiaDeTreino(){
+  if(typeof dias === 'undefined' || !dias) return -1;
+  let i = dias.findIndex(function(d){ return d.hoje && !d.descanso && d.ex && d.ex.length; });
+  if(i === -1) i = dias.findIndex(function(d){ return !d.descanso && d.ex && d.ex.length; });
+  return i;
+}
+async function tourIrParaTreino(){
+  const i = tourEscolherDiaDeTreino();
+  if(i === -1) return; // sem treino ainda: os passos de dentro do treino viram cartões no centro
+  if(!tourTelaAtiva('detail')){ abrirDiaDaSemana(i); await tourEsperar(450); }
+}
+// Um elemento que existe no código mas está escondido (de uma tela que já saiu, por exemplo) tem tamanho
+// zero. Destacar isso desenharia o spotlight no canto da tela, então conta como "não está na tela".
+function tourElementoVisivel(el){
+  if(!el || !el.getBoundingClientRect) return false;
+  const r = el.getBoundingClientRect();
+  return r.width > 0 && r.height > 0;
+}
+function tourPrimeiroExpandido(){ return document.querySelector('[id^="ex-expandido-"]'); }
+async function tourExpandirExercicio(){
+  await tourIrParaTreino();
+  if(!tourTelaAtiva('detail')) return; // sem treino: não mexe em conteúdo antigo que possa estar escondido na tela
+  const alvo = tourPrimeiroExpandido();
+  if(alvo && alvo.style.display === 'none'){
+    alternarExercicioExpandido(parseInt(alvo.id.replace('ex-expandido-', ''), 10));
+    await tourEsperar(200);
+  }
+}
+async function tourIrParaProgresso(){
+  if(!tourTelaAtiva('progresso')){ openLevel2('progresso'); await tourEsperar(450); }
+}
+function tourDentroDoExpandido(css){
+  return function(){ const e = tourPrimeiroExpandido(); return e ? e.querySelector(css) : null; };
+}
+
+const PASSOS_TOUR = [
+  // ===== PARTE 1: TELA INICIAL =====
+  { parte: 1, preparar: tourIrParaInicio, seletor: '.dna-score-card', titulo: 'Seu DNA Score',
+    texto: 'Esse número resume como seu treino está indo essa semana, juntando constância, progressão, recuperação e mais. Toque nele pra ver o detalhe de cada parte.' },
+  { parte: 1, preparar: tourIrParaInicio, seletor: '#home-indicadores-grid', titulo: 'Seus indicadores',
+    texto: 'Aqui você acompanha constância, hipertrofia, nutrição, recuperação e progressão separadamente, pra entender o que está puxando seu resultado pra cima ou pra baixo.' },
+  { parte: 1, preparar: tourIrParaInicio, seletor: '#link-ver-treinos-semana', titulo: 'Seus treinos da semana',
+    texto: 'Aqui está o seu treino prescrito, dia a dia. É por aqui que você abre o treino, registra as séries e acompanha a sua carga.' },
+  { parte: 1, preparar: tourIrParaInicio, seletor: '#botao-pergunta-perfil-area > div', titulo: 'Pergunta rápida',
+    texto: 'Esse botão roxo traz uma pergunta curta sobre a sua rotina, o que te motiva ou o que atrapalha. Ele aparece de tempos em tempos, e às vezes também durante o descanso do treino. Suas respostas ajudam seu personal a te conhecer melhor e a ajustar o seu acompanhamento. Se não puder responder agora, é só tocar em "Responder depois".',
+    textoCentro: 'Às vezes aparece um botão roxo com uma pergunta curta sobre a sua rotina, o que te motiva ou o que atrapalha. Ele surge de tempos em tempos, e às vezes também durante o descanso do treino. Suas respostas ajudam seu personal a te conhecer melhor e a ajustar o seu acompanhamento. Se não puder responder na hora, é só tocar em "Responder depois".' },
+  { parte: 1, preparar: tourIrParaInicio, seletor: '#botao-pergunta-roda-vida-area > div', titulo: 'Roda da Vida',
+    texto: 'Esse botão verde traz uma área da sua vida pra você avaliar de 0 a 5, como saúde, trabalho, família e finanças. Aparece uma área de cada vez, e leva poucos segundos. Quando você completa as 10 áreas, o seu gráfico fica pronto e o botão some por cerca de 2 meses, até começar uma nova rodada pra você comparar.',
+    textoCentro: 'Às vezes aparece um botão verde com uma área da sua vida pra você avaliar de 0 a 5, como saúde, trabalho, família e finanças. Aparece uma área de cada vez, e leva poucos segundos. Quando você completa as 10 áreas, o seu gráfico fica pronto e o botão some por cerca de 2 meses, até começar uma nova rodada pra você comparar.' },
+  { parte: 1, preparar: tourIrParaInicio, seletor: '#botao-desafio-area > div', titulo: 'Seu desafio', fallback: 'pular',
+    condicao: function(){ try { return !!obterAlunaLogadaOuCriar().desafioAtivo; } catch(e){ return false; } },
+    texto: 'Como você está num desafio, esse botão leva aos treinos dele e mostra em qual estrutura você está. Você pode treinar qualquer estrutura que já tenha sido liberada.' },
+  { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="dados"]', rolar: false, titulo: 'Composição corporal',
+    texto: 'Aqui você registra peso, medidas e fotos pra acompanhar sua evolução ao longo do tempo.' },
+  { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="mentoria"]', rolar: false, titulo: 'Mentoria',
+    texto: 'Cursos completos, explicação de métodos de treino, mobilidade e muito mais, organizado por seção.' },
+  { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="progresso"]', rolar: false, titulo: 'Progresso',
+    texto: 'Seu calendário de treinos, linha do tempo e gráfico de evolução, tudo num só lugar. Daqui a pouco a gente olha essa tela por dentro.' },
+  { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="ranking"]', rolar: false, titulo: 'Ranking',
+    texto: 'Veja como você está em relação à comunidade, e o que falta pra bater a próxima meta.' },
+  { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="rodadavida"]', rolar: false, titulo: 'Roda da Vida',
+    texto: 'Aqui fica o gráfico da sua Roda da Vida. Ele vai se formando conforme você responde as áreas, e cada ciclo completo fica guardado pra você comparar com os próximos.' },
+  { parte: 1, preparar: tourIrParaInicio, seletor: '#botao-flutuante-sol', rolar: false, titulo: 'Fale com a Sol',
+    texto: 'Sua treinadora digital, sempre disponível pra tirar dúvidas rápidas sobre o treino.' },
+
+  // ===== PARTE 2: TREINOS DA SEMANA =====
+  { parte: 2, preparar: tourIrParaListaSemana, seletor: '#lista-dias-semana', titulo: 'Seus dias da semana',
+    texto: 'Aqui estão os seus dias, de segunda a domingo. O dia de hoje aparece com a etiqueta "hoje", e os dias que você já registrou ficam verdes. Toque num dia pra abrir o treino completo.',
+    textoCentro: 'Na tela de treinos da semana ficam os seus dias, de segunda a domingo. O dia de hoje aparece com a etiqueta "hoje", e os dias que você já registrou ficam verdes. Toque num dia pra abrir o treino completo.' },
+  { parte: 2, preparar: tourIrParaListaSemana, titulo: 'Esqueceu de registrar?',
+    seletor: function(){
+      return document.querySelector('#lista-dias-semana [data-feito="nao"][data-descanso="nao"]')
+          || document.querySelector('#lista-dias-semana [data-feito="nao"]')
+          || document.querySelector('#lista-dias-semana > div');
+    },
+    texto: 'Treinou e esqueceu de registrar? Não precisa abrir o treino. Segure o dia por meio segundo e confirme: ele fica marcado como feito. Em cada dia ainda não registrado aparece o lembrete "segure pra marcar como feito".',
+    textoCentro: 'Treinou e esqueceu de registrar? Não precisa abrir o treino. Segure o dia por meio segundo e confirme: ele fica marcado como feito. Em cada dia ainda não registrado aparece o lembrete "segure pra marcar como feito".' },
+
+  // ===== PARTE 3: DENTRO DO TREINO =====
+  { parte: 3, preparar: tourIrParaTreino, seletor: '#cronometro-btn', titulo: 'Iniciar treino',
+    texto: 'Toque aqui quando começar o treino. O cronômetro conta o tempo total, e você pode pausar e retomar quando precisar.',
+    textoCentro: 'Dentro de cada treino, o botão "Iniciar treino" no topo liga o cronômetro do treino todo. Você pode pausar e retomar quando precisar.' },
+  { parte: 3, preparar: tourIrParaTreino, seletor: '[onclick^="alternarExercicioExpandido("]', titulo: 'Seus exercícios',
+    texto: 'Cada linha é um exercício, com as séries, as repetições e o tempo de descanso. Toque no nome pra abrir: dentro ficam o vídeo, as séries e os campos de carga.',
+    textoCentro: 'Cada linha do treino é um exercício, com as séries, as repetições e o tempo de descanso. Toque no nome pra abrir: dentro ficam o vídeo, as séries e os campos de carga.' },
+  { parte: 3, preparar: tourIrParaTreino, seletor: '.tag-metodo', titulo: 'Métodos de treino',
+    texto: 'Alguns exercícios têm uma etiqueta dourada com o nome de um método, como Bi-set, Dropset ou Restpause. Toque nela pra ver como o método funciona. Nos combos (Bi-set, Tri-set e Combinar), você faz os exercícios em sequência, sem descanso entre eles.',
+    textoCentro: 'Alguns exercícios têm uma etiqueta dourada com o nome de um método, como Bi-set, Dropset ou Restpause. Toque nela pra ver como o método funciona. Nos combos (Bi-set, Tri-set e Combinar), você faz os exercícios em sequência, sem descanso entre eles.' },
+  { parte: 3, preparar: tourExpandirExercicio, seletor: tourDentroDoExpandido('.video-block'), titulo: 'Vídeo de execução',
+    texto: 'Aqui está o vídeo de como executar o exercício. Assista antes da primeira série, principalmente se for um exercício novo pra você.',
+    textoCentro: 'Quando você abre um exercício, aparece o vídeo de como executá-lo. Assista antes da primeira série, principalmente se for um exercício novo pra você.' },
+  { parte: 3, preparar: tourExpandirExercicio, titulo: 'Séries e descanso',
+    seletor: function(){ const e = tourPrimeiroExpandido(); const p = e && e.querySelector('[id^="serie-pill-"]'); return p ? p.parentElement : null; },
+    texto: 'Cada bolinha é uma série. Toque numa quando terminar: o cronômetro de descanso abre sozinho e avisa quando acabar, com o tempo certo pro seu exercício. Às vezes uma pergunta rápida aparece durante o descanso, é só responder ou pular.',
+    textoCentro: 'Cada bolinha dentro do exercício é uma série. Toque numa quando terminar: o cronômetro de descanso abre sozinho e avisa quando acabar, com o tempo certo pro seu exercício. Às vezes uma pergunta rápida aparece durante o descanso, é só responder ou pular.' },
+  { parte: 3, preparar: tourExpandirExercicio, titulo: 'Carga e repetições',
+    seletor: function(){ const e = tourPrimeiroExpandido(); const i = e && e.querySelector('[data-carga]'); return i ? i.parentElement : null; },
+    texto: 'Anote a carga e as repetições da 1ª série. É isso que o sistema usa pra acompanhar a sua evolução e sugerir a carga da próxima semana.',
+    textoCentro: 'Em cada exercício, anote a carga e as repetições da 1ª série. É isso que o sistema usa pra acompanhar a sua evolução e sugerir a carga da próxima semana.' },
+  { parte: 3, preparar: tourExpandirExercicio, seletor: tourDentroDoExpandido('[onclick^="confirmarSerieExercicio("]'), titulo: 'Confirmar',
+    texto: 'Ao confirmar, o exercício fica travado e o sistema já mostra a carga sugerida pra próxima semana. Na semana seguinte, essa sugestão (aumentar, manter ou reduzir a carga) aparece aqui dentro, junto com o que você fez da última vez.',
+    textoCentro: 'Ao tocar em Confirmar, o exercício fica travado e o sistema já mostra a carga sugerida pra próxima semana. Na semana seguinte, essa sugestão (aumentar, manter ou reduzir a carga) aparece dentro do exercício, junto com o que você fez da última vez.' },
+  { parte: 3, preparar: tourIrParaTreino, seletor: '[title="Ver opções parecidas"]', titulo: 'Opções parecidas',
+    texto: 'Essa barrinha dourada no canto de cada exercício mostra opções parecidas da mesma região, com vídeo. É só pra referência: o seu treino oficial continua o mesmo até o seu personal ajustar.',
+    textoCentro: 'Na lateral de cada exercício tem uma barrinha dourada que mostra opções parecidas da mesma região, com vídeo. É só pra referência: o seu treino oficial continua o mesmo até o seu personal ajustar.' },
+  { parte: 3, preparar: tourExpandirExercicio, seletor: tourDentroDoExpandido('[onclick^="mostrarAlternativaEmergencia("]'), titulo: 'Equipamento ocupado',
+    texto: 'Se o equipamento estiver ocupado, toque em "Ver alternativa". O app mostra uma opção, geralmente com halteres, pra você não perder o exercício.',
+    textoCentro: 'Se o equipamento estiver ocupado, dentro do exercício tem o link "Ver alternativa". O app mostra uma opção, geralmente com halteres, pra você não perder o exercício.' },
+  { parte: 3, preparar: tourIrParaTreino, seletor: '#btn-registrar-treino-dia', titulo: 'Registrar o treino',
+    texto: 'Quando terminar, toque em "Registrar treino de hoje". É ele que conta o dia como feito: alimenta a sua constância e o seu DNA Score, e deixa seu personal acompanhar. Você não precisa anotar a carga pra registrar, mas anotar é o que gera a sugestão de progressão. Se você confirmar 3 exercícios, o treino já é registrado sozinho.',
+    textoCentro: 'Quando terminar, toque em "Registrar treino de hoje", no fim do treino. É ele que conta o dia como feito: alimenta a sua constância e o seu DNA Score, e deixa seu personal acompanhar. Você não precisa anotar a carga pra registrar, mas anotar é o que gera a sugestão de progressão. Se você confirmar 3 exercícios, o treino já é registrado sozinho.' },
+  { parte: 3, titulo: 'Como foi o treino?',
+    texto: 'Depois de registrar, aparece o formulário "Como foi o treino de hoje?". Conte se sentiu desconforto em algum exercício e qual foi a intensidade do treino, e deixe um comentário se quiser. Seu personal usa isso pra ajustar o seu treino.' },
+
+  // ===== PARTE 4: PROGRESSO =====
+  { parte: 4, preparar: tourIrParaProgresso, seletor: '#tour-checkin-box', titulo: 'Meu progresso hoje',
+    texto: 'Aqui você registra como está hoje: humor, ansiedade, disposição, sono e os hábitos do dia. Seu personal usa essas informações pra entender como você está além do treino, e cada dia preenchido soma pontos no ranking.',
+    textoCentro: 'Na tela de Progresso, em "Meu progresso hoje", você registra como está: humor, ansiedade, disposição, sono e os hábitos do dia. Seu personal usa essas informações pra entender como você está além do treino, e cada dia preenchido soma pontos no ranking.' },
+  { parte: 4, preparar: tourIrParaProgresso, seletor: '#tour-chip-ontem', titulo: 'Esqueci de preencher ontem',
+    texto: 'Esqueceu de preencher ontem? Toque aqui pra preencher o dia de ontem, que fica guardado na data certa. Manter os dias completos deixa o seu acompanhamento muito mais preciso.',
+    textoCentro: 'Esqueceu de preencher ontem? Na tela de Progresso, o botão "Esqueci de preencher ontem" deixa você preencher o dia de ontem, que fica guardado na data certa. Manter os dias completos deixa o seu acompanhamento muito mais preciso.' },
+  { parte: 4, titulo: 'Tudo pronto',
+    texto: 'Uma dica final: na tela de entrada do app, marque a caixinha "Lembrar login neste aparelho" pra não precisar digitar e-mail e senha toda vez. Se quiser rever este tutorial, toque em "Rever tutorial do aplicativo" no fim da tela Início.' }
+];
+
+function passosAtivosDaParte(parte){
+  return PASSOS_TOUR.filter(function(p){ return p.parte === parte && (!p.condicao || p.condicao()); });
+}
+
+function tourCriarCamadas(){
+  if(!document.getElementById('tour-bloqueio-el')){
+    const b = document.createElement('div');
+    b.id = 'tour-bloqueio-el';
+    b.className = 'tour-bloqueio';
+    b.addEventListener('wheel', function(e){ e.preventDefault(); }, { passive: false });
+    b.addEventListener('touchmove', function(e){ e.preventDefault(); }, { passive: false });
+    document.body.appendChild(b);
+  }
+  if(!document.getElementById('tour-spotlight-el')){
+    const sp = document.createElement('div');
+    sp.id = 'tour-spotlight-el';
+    sp.className = 'tour-spotlight';
+    document.body.appendChild(sp);
+  }
+  if(!document.getElementById('tour-caixa-el')){
+    const cx = document.createElement('div');
+    cx.id = 'tour-caixa-el';
+    cx.className = 'tour-caixa';
+    document.body.appendChild(cx);
+  }
+}
+
+function tourAoRedimensionar(){
+  if(tourEmAndamento && !tourOcupado) mostrarPassoTour(indiceTourAtual);
+}
 
 function iniciarTour(){
+  if(tourEmAndamento) return;
+  tourEmAndamento = true;
   indiceTourAtual = 0;
+  tourCriarCamadas();
+  try { window.addEventListener('resize', tourAoRedimensionar); } catch(e){}
   mostrarPassoTour(0);
 }
 
 function reverTour(){ iniciarTour(); }
 
-function mostrarPassoTour(indice){
-  if(indice >= PASSOS_TOUR.length){ finalizarTour(); return; }
-  indiceTourAtual = indice; // mantém sincronizado mesmo quando um passo é pulado por baixo (ver abaixo),
-                            // senão "Próximo" reexibiria o mesmo passo em vez de avançar de verdade
-  const passo = PASSOS_TOUR[indice];
-  const alvo = document.querySelector(passo.seletor);
-  if(!alvo){ mostrarPassoTour(indice + 1); return; } // elemento não existe nessa tela/sessão, pula sem travar o tour
-
-  let spotlight = document.getElementById('tour-spotlight-el');
-  let caixa = document.getElementById('tour-caixa-el');
-  if(!spotlight){
-    spotlight = document.createElement('div');
-    spotlight.id = 'tour-spotlight-el';
-    spotlight.className = 'tour-spotlight';
-    document.body.appendChild(spotlight);
+async function mostrarPassoTour(indice){
+  if(!tourEmAndamento) return;
+  tourOcupado = true;
+  try {
+    while(indice < PASSOS_TOUR.length){
+      const passo = PASSOS_TOUR[indice];
+      if(passo.condicao && !passo.condicao()){ indice++; continue; }
+      if(passo.preparar){
+        try { await passo.preparar(); } catch(erroPreparo){ console.warn('[tour] não consegui preparar o passo', indice, erroPreparo); }
+      }
+      let alvo = typeof passo.seletor === 'function' ? passo.seletor() : (passo.seletor ? document.querySelector(passo.seletor) : null);
+      if(alvo && !tourElementoVisivel(alvo)) alvo = null;
+      if(!alvo && passo.fallback === 'pular'){ indice++; continue; }
+      indiceTourAtual = indice; // mantém sincronizado mesmo quando passos são pulados por baixo
+      await tourDesenharPasso(passo, alvo, indice);
+      tourOcupado = false;
+      return;
+    }
+    await finalizarTour();
+  } catch(erroTour){
+    console.error('[tour] erro inesperado, encerrando o tour sem travar o app:', erroTour);
+    await finalizarTour();
   }
-  if(!caixa){
-    caixa = document.createElement('div');
-    caixa.id = 'tour-caixa-el';
-    caixa.className = 'tour-caixa';
-    document.body.appendChild(caixa);
-  }
+  tourOcupado = false;
+}
 
-  const rect = alvo.getBoundingClientRect();
-  const folga = 8;
-  spotlight.style.top = (rect.top - folga) + 'px';
-  spotlight.style.left = (rect.left - folga) + 'px';
-  spotlight.style.width = (rect.width + folga * 2) + 'px';
-  spotlight.style.height = (rect.height + folga * 2) + 'px';
+async function tourDesenharPasso(passo, alvo, indice){
+  const bloqueio = document.getElementById('tour-bloqueio-el');
+  const spotlight = document.getElementById('tour-spotlight-el');
+  const caixa = document.getElementById('tour-caixa-el');
+  if(!bloqueio || !spotlight || !caixa) return;
 
-  const caixaAbaixo = rect.top < (window.innerHeight / 2);
-  caixa.style.top = caixaAbaixo ? (rect.bottom + 16) + 'px' : '';
-  caixa.style.bottom = caixaAbaixo ? '' : (window.innerHeight - rect.top + 16) + 'px';
-  caixa.style.left = Math.max(16, Math.min(rect.left, window.innerWidth - 316)) + 'px';
+  const ativosDaParte = passosAtivosDaParte(passo.parte);
+  const posicao = ativosDaParte.indexOf(passo) + 1;
+  const restantes = PASSOS_TOUR.slice(indice + 1).filter(function(p){ return !p.condicao || p.condicao(); });
+  const ehUltimoGeral = restantes.length === 0;
+  const ehUltimoDaParte = posicao === ativosDaParte.length;
+  const rotuloBotao = ehUltimoGeral ? 'Concluir' : (ehUltimoDaParte ? 'Próxima parte' : 'Próximo');
+  const texto = (!alvo && passo.textoCentro) ? passo.textoCentro : passo.texto;
 
-  const ehUltimo = indice === PASSOS_TOUR.length - 1;
-  caixa.innerHTML = '<p style="font-family:\'Playfair Display\',serif;font-weight:700;color:var(--gold);font-size:15px;margin:0 0 6px;">' + passo.titulo + '</p>' +
-    '<p class="tour-texto">' + passo.texto + '</p>' +
+  caixa.innerHTML = '<p class="tour-parte">Parte ' + passo.parte + ' de ' + TOTAL_PARTES_TOUR + ' · ' + NOMES_PARTES_TOUR[passo.parte] + '</p>' +
+    '<p style="font-family:\'Playfair Display\',serif;font-weight:700;color:var(--gold);font-size:15px;margin:0 0 6px;">' + passo.titulo + '</p>' +
+    '<p class="tour-texto">' + texto + '</p>' +
     '<div class="tour-rodape">' +
-      '<span class="tour-passo-num">' + (indice + 1) + ' de ' + PASSOS_TOUR.length + '</span>' +
-      '<div style="display:flex;gap:10px;align-items:center;">' +
-        '<span style="font-size:12px;color:var(--text-faint);cursor:pointer;" onclick="finalizarTour()">Pular</span>' +
-        '<button class="btn-gold" style="width:auto;padding:8px 18px;margin:0;" onclick="avancarTour()">' + (ehUltimo ? 'Concluir' : 'Próximo') + '</button>' +
+      '<span class="tour-passo-num">' + posicao + ' de ' + ativosDaParte.length + '</span>' +
+      '<div style="display:flex;gap:12px;align-items:center;">' +
+        '<span style="font-size:12px;color:var(--text-faint);cursor:pointer;" onclick="finalizarTour()">Pular tudo</span>' +
+        '<button class="btn-gold" style="width:auto;padding:8px 18px;margin:0;" onclick="avancarTour()">' + rotuloBotao + '</button>' +
       '</div>' +
     '</div>';
+
+  if(alvo){
+    if(passo.rolar !== false && alvo.scrollIntoView){
+      const alto = alvo.getBoundingClientRect().height > window.innerHeight * 0.5;
+      alvo.scrollIntoView({ block: alto ? 'start' : 'center', behavior: 'auto' });
+      await tourEsperar(120);
+    }
+    const rect = alvo.getBoundingClientRect();
+    const folga = 8;
+    spotlight.style.display = 'block';
+    spotlight.style.top = (rect.top - folga) + 'px';
+    spotlight.style.left = (rect.left - folga) + 'px';
+    spotlight.style.width = (rect.width + folga * 2) + 'px';
+    spotlight.style.height = (rect.height + folga * 2) + 'px';
+    bloqueio.style.background = 'transparent'; // quem escurece a tela, nesse caso, é a sombra do spotlight
+    caixa.style.transform = 'none';
+    caixa.style.left = Math.max(16, Math.min(rect.left, window.innerWidth - 336)) + 'px';
+    const alvoGrande = rect.height > window.innerHeight * 0.6;
+    const abaixo = (window.innerHeight - rect.bottom) >= rect.top;
+    if(alvoGrande){ caixa.style.top = ''; caixa.style.bottom = '16px'; }
+    else if(abaixo){ caixa.style.top = (rect.bottom + 16) + 'px'; caixa.style.bottom = ''; }
+    else { caixa.style.top = ''; caixa.style.bottom = (window.innerHeight - rect.top + 16) + 'px'; }
+  } else {
+    // Sem elemento na tela (ainda não tem treino, já respondeu a pergunta etc): vira um cartão no centro
+    spotlight.style.display = 'none';
+    bloqueio.style.background = 'rgba(0,0,0,0.8)';
+    caixa.style.top = '50%';
+    caixa.style.bottom = '';
+    caixa.style.left = '50%';
+    caixa.style.transform = 'translate(-50%, -50%)';
+  }
 }
 
 function avancarTour(){
+  if(!tourEmAndamento || tourOcupado) return;
   indiceTourAtual++;
-  mostrarPassoTour(indiceTourAtual);
+  return mostrarPassoTour(indiceTourAtual);
 }
 
-function finalizarTour(){
-  const spotlight = document.getElementById('tour-spotlight-el');
-  const caixa = document.getElementById('tour-caixa-el');
-  if(spotlight) spotlight.remove();
-  if(caixa) caixa.remove();
+async function finalizarTour(){
+  tourOcupado = true;
+  ['tour-bloqueio-el', 'tour-spotlight-el', 'tour-caixa-el'].forEach(function(id){
+    const e = document.getElementById(id);
+    if(e) e.remove();
+  });
+  try { window.removeEventListener('resize', tourAoRedimensionar); } catch(e){}
+  tourEmAndamento = false;
   try { localStorage.setItem('musaTourVisto', 'sim'); } catch(e){}
+  veioDaListaDeTreinosDaSemana = false; // senão o "voltar" de outra tela cairia na lista de treinos por engano
+  try { await tourIrParaInicio(); } catch(e){}
+  tourOcupado = false;
 }
 
 function verificarEIniciarTourPrimeiraVez(){
+  if(tourEmAndamento) return; // o tour navega pelas telas, e uma delas é a Início: não pode reiniciar a si mesmo
   let jaViu = false;
   try { jaViu = localStorage.getItem('musaTourVisto') === 'sim'; } catch(e){}
   if(jaViu) return;
@@ -15336,7 +15577,7 @@ if(type === 'central'){
         corpoTreino += '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;">' +
           '<div style="display:flex;">' +
             '<div style="flex:1;display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:14px 12px;" onclick="alternarExercicioExpandido(' + j + ')">' +
-              '<span>' + nomeEx + (nomeMetodoExibicao ? ' <span class="tag" style="background:var(--gold-soft);color:#1A1409;">' + nomeMetodoExibicao + '</span>' : '') + '</span>' +
+              '<span>' + nomeEx + (nomeMetodoExibicao ? ' <span class="tag tag-metodo" style="background:var(--gold-soft);color:#1A1409;cursor:pointer;" onclick="mostrarInfoMetodo(\'' + nomeMetodoExibicao.replace(/'/g,"\\'") + '\', event)">' + nomeMetodoExibicao + ' <i class="ti ti-info-circle" style="font-size:11px;vertical-align:-1px;"></i></span>' : '') + '</span>' +
               '<span class="tag">' + (partes[1] || '') + (descanso ? ' · ⏱ ' + descanso : '') + '</span>' +
             '</div>' +
             '<div style="width:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--card-2);" title="Ver opções parecidas" onclick="event.stopPropagation();alternarSubstituicoesInline(' + j + ',\'' + nomeEx.replace(/'/g,"\\'") + '\')">' +
@@ -15690,7 +15931,7 @@ function confirmarSerieExercicio(idx, nomeExercicio){
   cargaEl.disabled = true;
   repsEl.disabled = true;
   const elResultado = document.getElementById('confirmado-serie-' + idx);
-  if(elResultado) elResultado.innerHTML = '<p style="font-size:11px;color:var(--success);margin-top:4px;">✓ Salvo — sugestão pra próxima: ' + sugestao.valor + 'kg</p>';
+  if(elResultado) elResultado.innerHTML = '<p style="font-size:11px;color:var(--success);margin-top:4px;">✓ Salvo, sugestão pra próxima: ' + sugestao.valor + 'kg</p>';
 
   // Registro automático: a partir do 3º exercício confirmado nesse treino, já registra o dia sozinha,
   // sem precisar clicar no botão. Continua podendo clicar em "Registrar treino" manualmente também,
