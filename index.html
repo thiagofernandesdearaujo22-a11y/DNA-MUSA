@@ -405,7 +405,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-30-J-TOUR-COMPLETO</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-01-A-DESAFIO-SUPERIORES</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -544,6 +544,9 @@
           <p style="font-size:9.5px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin:2px 0 0;">Team Fernandes</p>
         </div>
         <div style="display:flex;gap:8px;align-items:center;position:relative;">
+          <div id="botao-tutorial-home" role="button" aria-label="Ver tutorial do aplicativo" title="Ver tutorial" style="width:36px;height:36px;border-radius:50%;background:var(--card-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;" onclick="reverTour()">
+            <span style="font-size:15px;font-weight:600;color:var(--gold-soft);line-height:1;">?</span>
+          </div>
           <div style="width:36px;height:36px;border-radius:50%;background:var(--card-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;position:relative;" onclick="togglePainelAvisos()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold-soft)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5a2 2 0 0 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg>
             <span id="badge-avisos" style="display:none;position:absolute;top:-2px;right:-2px;background:var(--gold-soft);color:#1A1409;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;"></span>
@@ -597,7 +600,6 @@
         <span><i class="ti ti-trending-up" style="margin-right:8px;color:var(--gold-soft);"></i>Meu progresso</span>
         <i class="ti ti-chevron-right" style="color:var(--text-faint);"></i>
       </div>
-      <p style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:16px;cursor:pointer;" onclick="reverTour()">Rever tutorial do aplicativo</p>
     </div>
 
     <div id="botao-flutuante-sol" style="display:none;position:fixed;bottom:90px;right:16px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.4);z-index:500;" onclick="openLevel2('chatia')">
@@ -4632,14 +4634,51 @@ function poolDesafio(grupoBanco, restringirGluteoMedio){
 
 const SERIES_POR_EXERCICIO_DESAFIO = 3;
 
-// Quantos exercícios cada dia recebe de um grupo, preservando o volume SEMANAL da meta (em vez de
-// arredondar dia a dia e perder/ganhar séries). O que sobra da divisão vai pros dias das pontas
-// primeiro (primeiro e último), nunca todo empilhado nos dias do meio.
-function planoExerciciosPorDia(metaSeries, numDias){
-  const total = Math.max(1, Math.round(metaSeries / SERIES_POR_EXERCICIO_DESAFIO));
+// ===== TREINO DE SUPERIORES DENTRO DO DESAFIO =====
+// Antes, todos os dias do desafio eram de inferiores, sem nenhum descanso pras pernas. Agora cada semana
+// tem dia(s) de superiores, no MEIO da semana, separando os treinos de inferiores:
+//   3x por semana: inferiores, SUPERIORES, inferiores
+//   5x por semana: inferiores, inferiores, SUPERIORES, inferiores, inferiores
+// O dia de superiores também leva alguns exercícios de glúteo no fim. O volume semanal de glúteo da meta
+// continua o mesmo: o que vai pro dia de superiores SAI dos dias de inferiores, não é somado por cima.
+// Tudo ajustável aqui, em um lugar só.
+const DIAS_SUPERIORES_DESAFIO = { 3: 1, 5: 1 }; // quantos dias de superiores por semana, por faixa de frequência
+const GLUTEOS_NO_DIA_SUPERIOR_DESAFIO = { // quantos exercícios de glúteo cada dia de superiores recebe
+  3: { gluteoMaximo: 2, gluteoMedio: 1 },
+  5: { gluteoMaximo: 1, gluteoMedio: 1 }
+};
+// O dia de superiores existe pra dar descanso às pernas, então os exercícios de glúteo que entram nele
+// precisam ser leves pra coxa e posterior: o banco classifica terra e stiff como "glúteo", mas eles
+// cansam a cadeia posterior inteira, o contrário de descansar. Esses ficam de fora só desse dia.
+const PESADO_DE_POSTERIOR_DESAFIO = /TERRA|STIFF|BOM DIA|AGACHAMENTO|AFUNDO|PASSADA|STEP UP|SUMÔ|SUMO|BÚLGARO|BULGARO|LEG PRESS|HACK/i;
+const EXERCICIOS_SUPERIORES_DESAFIO = [ // o que entra no dia de superiores, nessa ordem (composto antes de isolado)
+  { chave: 'costas',  grupoBanco: 'Costas',  quantidade: 2, offset: 4 },
+  { chave: 'peito',   grupoBanco: 'Peito',   quantidade: 1, offset: 5 },
+  { chave: 'ombro',   grupoBanco: 'Ombros',  quantidade: 1, offset: 6 },
+  { chave: 'biceps',  grupoBanco: 'Bíceps',  quantidade: 1, offset: 7 },
+  { chave: 'triceps', grupoBanco: 'Tríceps', quantidade: 1, offset: 8 }
+];
+
+function faixaDeFrequenciaDoDesafio(frequencia){ return frequencia >= 5 ? 5 : 3; } // mesma regra de obterMetaVolumeDesafio
+
+// Em que posição da semana ficam os dias de superiores: espalhados, nunca nas pontas (as pernas descansam)
+function posicoesDosDiasSuperioresDesafio(frequencia){
+  const qtd = DIAS_SUPERIORES_DESAFIO[faixaDeFrequenciaDoDesafio(frequencia)] || 0;
+  const posicoes = [];
+  for(let k = 0; k < qtd; k++){
+    posicoes.push(Math.min(frequencia - 1, Math.max(0, Math.round((k + 1) * frequencia / (qtd + 1) - 0.5))));
+  }
+  return posicoes;
+}
+
+// Reparte um total de exercícios entre os dias, preservando o total (em vez de arredondar dia a dia e
+// perder/ganhar séries). O que sobra da divisão vai pros dias das pontas primeiro (primeiro e último),
+// nunca todo empilhado nos dias do meio.
+function distribuirExerciciosPorDia(total, numDias){
+  const plano = [];
+  if(numDias <= 0) return plano;
   const base = Math.floor(total / numDias);
   const resto = total % numDias;
-  const plano = [];
   for(let d = 0; d < numDias; d++) plano.push(base);
   for(let k = 0; k < resto; k++){
     const posicao = resto === 1 ? 0 : Math.round(k * (numDias - 1) / (resto - 1));
@@ -4648,15 +4687,56 @@ function planoExerciciosPorDia(metaSeries, numDias){
   return plano;
 }
 
+// Reparte os 4 grupos de inferiores olhando a SEMANA TODA, não cada grupo sozinho. Cada grupo divide o
+// total igualmente e a sobra é entregue ao dia que está mais leve naquele momento (empate: pontas primeiro,
+// depois o meio). Antes, cada grupo repartia a sobra por conta própria e todos escolhiam as mesmas pontas:
+// saía um dia com 10 exercícios e outro com 3. O volume semanal de cada grupo não muda, só a distribuição.
+function planoBalanceadoDosGrupos(totaisPorGrupo, numDias){
+  const planos = [];
+  if(numDias <= 0) return totaisPorGrupo.map(function(){ return []; });
+  const cargaDoDia = [];
+  for(let d = 0; d < numDias; d++) cargaDoDia.push(0);
+  totaisPorGrupo.forEach(function(total){
+    const base = Math.floor(total / numDias);
+    const plano = [];
+    for(let d = 0; d < numDias; d++){ plano.push(base); cargaDoDia[d] += base; }
+    planos.push(plano);
+  });
+  const prioridade = []; // 0, último, 1, penúltimo, ...
+  for(let i = 0, j = numDias - 1; i <= j; i++, j--){ prioridade.push(i); if(j !== i) prioridade.push(j); }
+  totaisPorGrupo.forEach(function(total, gi){
+    let resto = total % numDias;
+    const jaRecebeu = {}; // no máximo +1 por dia pra cada grupo
+    while(resto > 0){
+      let escolhido = -1;
+      prioridade.forEach(function(d){
+        if(jaRecebeu[d]) return;
+        if(escolhido === -1 || cargaDoDia[d] < cargaDoDia[escolhido]) escolhido = d;
+      });
+      planos[gi][escolhido]++; cargaDoDia[escolhido]++; jaRecebeu[escolhido] = true; resto--;
+    }
+  });
+  return planos;
+}
+
+// Quantos exercícios cada dia recebe de um grupo, a partir da meta semanal em séries
+function planoExerciciosPorDia(metaSeries, numDias){
+  return distribuirExerciciosPorDia(Math.max(1, Math.round(metaSeries / SERIES_POR_EXERCICIO_DESAFIO)), numDias);
+}
+
 // Gera a semana inteira do desafio pra uma estrutura + frequência específicas. Aplica as regras da
 // casa dia a dia, olhando o dia INTEIRO (todos os grupos juntos): nunca 2 unilaterais no dia, nunca
 // exercício repetido em dias diferentes (única exceção: as cadeiras abdutoras do glúteo médio, que a
-// metodologia permite repetir), elevação pélvica sempre primeiro, nunca 2 Leg Press.
+// metodologia permite repetir), elevação pélvica sempre primeiro (nos dias de inferiores), nunca 2 Leg Press.
 function gerarSemanaDesafio(numeroEstrutura, frequencia, seedVariacao){
   const meta = obterMetaVolumeDesafio(numeroEstrutura, frequencia);
   if(!meta) return null;
   const numDias = frequencia;
   const nomesDias = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+  const posicoesSup = posicoesDosDiasSuperioresDesafio(frequencia);
+  const numSup = posicoesSup.length;
+  const numInf = numDias - numSup;
+  const gluteosNoSuperior = GLUTEOS_NO_DIA_SUPERIOR_DESAFIO[faixaDeFrequenciaDoDesafio(frequencia)] || {};
 
   const grupos = [
     { chave: 'gluteoMaximo', pool: poolDesafio('Glúteos', false), repeteNaSemana: false, offset: 3 },
@@ -4664,49 +4744,79 @@ function gerarSemanaDesafio(numeroEstrutura, frequencia, seedVariacao){
     { chave: 'posterior',    pool: poolDesafio('Isquiotibiais', false), repeteNaSemana: false, offset: 1 },
     { chave: 'gluteoMedio',  pool: poolDesafio(null, true), repeteNaSemana: true, offset: 2 }
   ];
-  grupos.forEach(function(g){ g.plano = planoExerciciosPorDia(meta[g.chave], numDias); });
+  const totaisInferiores = [];
+  grupos.forEach(function(g){
+    const total = Math.max(1, Math.round(meta[g.chave] / SERIES_POR_EXERCICIO_DESAFIO));
+    const reservado = Math.min(total, (gluteosNoSuperior[g.chave] || 0) * numSup); // o que vai pros dias de superiores
+    totaisInferiores.push(total - reservado);
+    g.planoSuperior = distribuirExerciciosPorDia(reservado, numSup);   // por dia de superiores
+  });
+  const planosInferiores = planoBalanceadoDosGrupos(totaisInferiores, numInf); // por dia de inferiores, semana toda
+  grupos.forEach(function(g, i){ g.plano = planosInferiores[i]; });
+  const gruposSuperiores = EXERCICIOS_SUPERIORES_DESAFIO.map(function(g){
+    return { chave: g.chave, pool: poolDesafio(g.grupoBanco, false), repeteNaSemana: false, offset: g.offset, quantidade: g.quantidade, evitarPadrao: true };
+  });
+  const gluteosDoSuperior = grupos.filter(function(g){ return g.chave === 'gluteoMaximo' || g.chave === 'gluteoMedio'; }).map(function(g){
+    return g.chave === 'gluteoMaximo'
+      ? Object.assign({}, g, { pool: g.pool.filter(function(n){ return !PESADO_DE_POSTERIOR_DESAFIO.test(n); }) })
+      : g;
+  });
 
   const usadosNaSemana = {};
   const dias = [];
+  let indiceInf = 0, indiceSup = 0;
   for(let d = 0; d < numDias; d++){
-    const usadosNoDia = {};
-    let temUnilateralNoDia = false;
-    let legPressNoDia = 0;
-    let temAfundoNoDia = false;
-    let exDoDia = [];
+    const ehSuperior = posicoesSup.indexOf(d) !== -1;
+    const estado = { usadosNoDia: {}, padroesNoDia: {}, temUnilateralNoDia: false, legPressNoDia: 0, temAfundoNoDia: false, exDoDia: [] };
 
-    grupos.forEach(function(g){
-      let escolhidos = 0;
-      const n = g.plano[d];
+    const preencher = function(g, n){
       const tamanho = g.pool.length;
+      if(!n || tamanho === 0) return;
+      let escolhidos = 0;
       // 1ª passada respeita tudo (inclusive não repetir na semana); 2ª relaxa só a repetição
       // semanal, se o banco daquele grupo acabou — mas nunca relaxa repetição no dia nem unilateral
       for(let passada = 0; passada < 2 && escolhidos < n; passada++){
         for(let t = 0; t < tamanho && escolhidos < n; t++){
           const nome = g.pool[(seedVariacao + g.offset + d * 5 + t) % tamanho];
-          if(usadosNoDia[nome]) continue;
+          if(estado.usadosNoDia[nome]) continue;
           if(passada === 0 && !g.repeteNaSemana && usadosNaSemana[nome]) continue;
           const ehUni = ehExercicioUnilateral(nome);
-          if(ehUni && temUnilateralNoDia) continue;
+          if(ehUni && estado.temUnilateralNoDia) continue;
           const nomeUpper = nome.toUpperCase();
           const ehLeg = nomeUpper.indexOf('LEG PRESS') !== -1;
           const ehAfundo = nomeUpper.indexOf('AFUNDO') !== -1;
           // Já respeita na hora de escolher (2 Leg Press só se um for unilateral, 1 afundo por dia) —
           // antes o filtro removia DEPOIS de escolhido e a meta de volume ficava alguns pontos abaixo
-          if(ehLeg && !ehUni && legPressNoDia >= 1) continue;
-          if(ehAfundo && temAfundoNoDia) continue;
-          usadosNoDia[nome] = true;
+          if(ehLeg && !ehUni && estado.legPressNoDia >= 1) continue;
+          if(ehAfundo && estado.temAfundoNoDia) continue;
+          // Nos grupos de superiores, evita 2 exercícios do mesmo padrão de movimento no dia (ex: duas
+          // puxadas frontais); se não tiver outra opção, a 2ª passada relaxa isso
+          const padrao = g.evitarPadrao ? obterPalavraChaveMovimento(nomeUpper) : null;
+          if(passada === 0 && padrao && estado.padroesNoDia[padrao]) continue;
+          estado.usadosNoDia[nome] = true;
+          if(padrao) estado.padroesNoDia[padrao] = true;
           usadosNaSemana[nome] = true;
-          if(ehUni) temUnilateralNoDia = true;
-          if(ehLeg) legPressNoDia++;
-          if(ehAfundo) temAfundoNoDia = true;
-          exDoDia.push(nome + ' · ' + SERIES_POR_EXERCICIO_DESAFIO + 'x12');
+          if(ehUni) estado.temUnilateralNoDia = true;
+          if(ehLeg) estado.legPressNoDia++;
+          if(ehAfundo) estado.temAfundoNoDia = true;
+          estado.exDoDia.push(nome + ' · ' + SERIES_POR_EXERCICIO_DESAFIO + 'x12');
           escolhidos++;
         }
       }
-    });
+    };
 
-    exDoDia = colocarElevacaoPelvicaPrimeiro(exDoDia);
+    if(ehSuperior){
+      // Superiores primeiro, glúteo por último (é um complemento no fim do treino, não o foco do dia)
+      gruposSuperiores.forEach(function(g){ preencher(g, g.quantidade); });
+      gluteosDoSuperior.forEach(function(g){ preencher(g, g.planoSuperior[indiceSup]); });
+      indiceSup++;
+    } else {
+      grupos.forEach(function(g){ preencher(g, g.plano[indiceInf]); });
+      indiceInf++;
+    }
+
+    let exDoDia = estado.exDoDia;
+    if(!ehSuperior) exDoDia = colocarElevacaoPelvicaPrimeiro(exDoDia);
     // Guarda o link do vídeo de cada exercício junto do dia: o celular da aluna só conhece o banco
     // que vem no arquivo, não os exercícios que você cadastrou pelo app. Sem isso, o player dela
     // diria "vídeo indisponível" justamente nesses.
@@ -4716,7 +4826,12 @@ function gerarSemanaDesafio(numeroEstrutura, frequencia, seedVariacao){
       const exBanco = buscarExercicioNoBanco(nomeEx);
       if(exBanco && exBanco.video) videosDoDia[nomeEx] = exBanco.video;
     });
-    const dia = { n: nomesDias[d], foco: 'Seca e Empina · Estrutura ' + numeroEstrutura, ex: exDoDia, descanso: false, videos: videosDoDia };
+    const dia = {
+      n: nomesDias[d],
+      foco: 'Seca e Empina · Estrutura ' + numeroEstrutura + (ehSuperior ? ' · Superiores' : ''),
+      ex: exDoDia, descanso: false, videos: videosDoDia,
+      tipo: ehSuperior ? 'superior' : 'inferior'
+    };
     removerLegsExcedentesNoDia(dia);
     removerVariacoesDuplicadasDeAfundo(dia);
     dias.push(dia);
@@ -4901,7 +5016,7 @@ function htmlLinhaExercicioDesafio(linha, dia){
 function htmlDiasDaSemanaDesafio(semana){
   return semana.dias.filter(function(d){ return !d.descanso; }).map(function(d){
     const seriesDoDia = d.ex.reduce(function(soma, linha){ return soma + seriesDaLinhaDesafio(linha); }, 0);
-    return '<p class="lbl" style="margin:10px 0 4px;">' + d.n + ' · ' + d.ex.length + ' exercícios · ' + seriesDoDia + ' séries</p>' +
+    return '<p class="lbl" style="margin:10px 0 4px;">' + d.n + (d.tipo === 'superior' ? ' · Superiores' : '') + ' · ' + d.ex.length + ' exercícios · ' + seriesDoDia + ' séries</p>' +
       d.ex.map(function(linha){ return '<p class="txt" style="font-size:12px;margin:2px 0;">' + htmlLinhaExercicioDesafio(linha, d) + '</p>'; }).join('');
   }).join('');
 }
@@ -4958,10 +5073,15 @@ function htmlBlocoPreviewEstrutura(n, freq){
   const semana = obterOuCriarSemanaEditavel(n, freq);
   const m = semana.metaVolume || {};
   const temModeloSalvo = !!modelosMestreSecaEmpina[chave];
+  // Modelo salvo antes de o desafio ter dia de superiores só tem dias de inferiores. Ele continua valendo
+  // (é a sua edição), mas fica sinalizado, senão as alunas novas continuariam recebendo semana sem descanso.
+  const semSuperiores = temModeloSalvo && !semana.dias.some(function(d){ return d.tipo === 'superior'; });
   return '<details class="info-box" id="preview-estrutura-' + n + '" style="margin-bottom:8px;"><summary style="cursor:pointer;font-weight:600;font-size:13px;">Estrutura ' + n +
       (temModeloSalvo ? ' <span class="tag" style="background:#6FA87C;color:#fff;">modelo salvo</span>' : ' <span class="tag" style="background:var(--card-2);color:var(--text-faint);">sugestão automática</span>') +
+      (semSuperiores ? ' <span class="tag" style="background:#C9784A;color:#fff;">sem superiores</span>' : '') +
       ' <span id="preview-volume-' + n + '" style="font-weight:400;font-size:11.5px;color:var(--text-dim);margin-left:8px;">' + htmlVolumeDesafio(semana) + '</span></summary>' +
     '<p class="txt" style="font-size:11px;color:var(--text-faint);margin:6px 0 0;">Meta da estrutura (séries por semana): Quadríceps ' + m.quadriceps + ' · Posterior ' + m.posterior + ' · Glúteo médio ' + m.gluteoMedio + ' · Glúteo máximo ' + m.gluteoMaximo + '</p>' +
+    (semSuperiores ? '<p class="txt" style="font-size:11px;color:#C9784A;margin:6px 0 0;">Esse modelo salvo é de antes de o desafio ter treino de superiores, então só tem dias de inferiores. Toque em "Regenerar do zero" e depois em "Salvar como modelo e aplicar" pra incluir o dia de superiores.</p>' : '') +
     '<div style="display:flex;gap:8px;margin:8px 0;flex-wrap:wrap;">' +
       '<span class="acao-pill" onclick="regenerarPreviewEstrutura(' + n + ')"><i class="ti ti-refresh" style="margin-right:4px;"></i>Regenerar do zero</span>' +
       '<span class="acao-pill" style="background:#6FA87C;" onclick="aplicarEstruturaParaTodasDoDesafio(' + n + ')"><i class="ti ti-check" style="margin-right:4px;"></i>Salvar como modelo e aplicar</span>' +
@@ -4972,7 +5092,8 @@ function htmlBlocoPreviewEstrutura(n, freq){
 function htmlDiasEditaveisDesafio(n, freq){
   const semana = obterOuCriarSemanaEditavel(n, freq);
   return semana.dias.filter(function(d){ return !d.descanso; }).map(function(d, di){
-    return '<p class="lbl" style="margin:10px 0 4px;">' + d.n + ' · ' + d.ex.length + ' exercícios · ' + seriesDaLinhaDesafioTotal(d.ex) + ' séries</p>' +
+    const tipoDoDia = d.tipo === 'superior' ? ' · Superiores' : (d.tipo === 'inferior' ? ' · Inferiores' : '');
+    return '<p class="lbl" style="margin:10px 0 4px;">' + d.n + tipoDoDia + ' · ' + d.ex.length + ' exercícios · ' + seriesDaLinhaDesafioTotal(d.ex) + ' séries</p>' +
       d.ex.map(function(linha, ei){
         const nome = extrairNomeExercicioDeLinha(linha);
         const url = (d.videos && d.videos[nome]) || '';
@@ -4980,6 +5101,9 @@ function htmlDiasEditaveisDesafio(n, freq){
         return '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:4px 0;border-bottom:1px solid var(--border);">' +
           '<span style="cursor:pointer;text-decoration:underline;text-decoration-color:var(--gold-soft);text-underline-offset:2px;font-size:12px;flex:1;" onclick="abrirVideoApenasExercicio(\'' + nome.replace(/'/g,"\\'") + '\', event, \'' + url.replace(/'/g,"\\'") + '\')">' + nome + '</span>' +
           '<span style="display:flex;align-items:center;gap:4px;flex-shrink:0;">' +
+            // Subir/descer o exercício dentro do dia. Na ponta (primeiro não sobe, último não desce) o botão fica apagado.
+            '<span title="Subir" style="cursor:pointer;color:var(--gold-soft);padding:2px 5px;font-size:11px;' + (ei === 0 ? 'opacity:.25;pointer-events:none;' : '') + '" onclick="moverExercicioPreviewDesafio(' + n + ',' + freq + ',' + di + ',' + ei + ',-1)">▲</span>' +
+            '<span title="Descer" style="cursor:pointer;color:var(--gold-soft);padding:2px 5px;font-size:11px;margin-right:4px;' + (ei === d.ex.length - 1 ? 'opacity:.25;pointer-events:none;' : '') + '" onclick="moverExercicioPreviewDesafio(' + n + ',' + freq + ',' + di + ',' + ei + ',1)">▼</span>' +
             '<span style="cursor:pointer;color:var(--gold-soft);padding:2px 6px;" onclick="ajustarSeriePreviewDesafio(' + n + ',' + freq + ',' + di + ',' + ei + ',-1)">−</span>' +
             '<span style="font-size:11.5px;min-width:16px;text-align:center;">' + series + '</span>' +
             '<span style="cursor:pointer;color:var(--gold-soft);padding:2px 6px;" onclick="ajustarSeriePreviewDesafio(' + n + ',' + freq + ',' + di + ',' + ei + ',1)">+</span>' +
@@ -5014,6 +5138,21 @@ function ajustarSeriePreviewDesafio(n, freq, diaIndex, exIndex, delta){
   if(!match) return;
   const novaSerie = Math.max(1, Math.min(6, parseInt(match[1], 10) + delta)); // nunca menos de 1, nem mais de 6 numa série só
   dia.ex[exIndex] = partes[0] + ' · ' + novaSerie + 'x' + match[2] + (match[3] || '');
+  reRenderizarBlocoEstrutura(n, freq);
+}
+
+// Sobe (direcao -1) ou desce (direcao +1) um exercício dentro do mesmo dia, trocando de lugar com o vizinho.
+// Mexe na semana que está sendo editada na tela, igual trocar exercício e ajustar série: a nova ordem só
+// vira modelo (e vai pras alunas) quando você clica em "Salvar como modelo e aplicar".
+function moverExercicioPreviewDesafio(n, freq, diaIndex, exIndex, direcao){
+  const semana = obterOuCriarSemanaEditavel(n, freq);
+  const dia = semana.dias.filter(function(d){ return !d.descanso; })[diaIndex];
+  if(!dia) return;
+  const destino = exIndex + direcao;
+  if(destino < 0 || destino >= dia.ex.length) return; // já está na ponta, não tem pra onde ir
+  const guardado = dia.ex[exIndex];
+  dia.ex[exIndex] = dia.ex[destino];
+  dia.ex[destino] = guardado;
   reRenderizarBlocoEstrutura(n, freq);
 }
 
@@ -5188,7 +5327,7 @@ function abrirEstruturaDesafio(numeroEstrutura){
     if(d.descanso) return '';
     const feito = feitosNessaEstrutura.indexOf(d.n) !== -1;
     return '<div class="info-box" style="margin-bottom:10px;' + (feito ? 'border-color:var(--success);' : '') + '">' +
-      '<p class="lbl" style="margin:0 0 6px;">' + d.n + (feito ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">feito</span>' : '') + '</p>' +
+      '<p class="lbl" style="margin:0 0 6px;">' + d.n + (d.tipo === 'superior' ? ' <span class="tag">Superiores</span>' : '') + (feito ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">feito</span>' : '') + '</p>' +
       d.ex.map(function(linha){ return '<p class="txt" style="font-size:12.5px;margin:3px 0;">' + htmlLinhaExercicioDesafio(linha, d) + '</p>'; }).join('') +
       '<button class="btn-gold" style="margin-top:10px;' + (feito ? 'background:var(--success);color:#fff;' : '') + '" onclick="marcarDiaDesafioFeito(' + numeroEstrutura + ',' + i + ')">' + (feito ? '✓ Treino registrado' : 'Registrar treino de hoje') + '</button>' +
     '</div>';
@@ -11616,11 +11755,35 @@ function finalizarOnboardingEIr(destino){
 //  - fallback 'pular': em vez de virar cartão no centro, o passo some (ex: desafio, pra quem não está em um)
 //  - condicao: se devolver falso, o passo nem entra na contagem
 //  - rolar: false pra elementos fixos na tela (barra de baixo, botão da Sol)
+// Versão do tour. Quando o conteúdo mudar de forma relevante, é só trocar esse valor: todas as alunas
+// voltam a ver o tour uma vez, no próximo acesso à tela Início. Quem tinha visto só a versão antiga
+// (marcada como "sim") também vê de novo, de propósito.
+const VERSAO_TOUR = 'v2-completo';
 const TOTAL_PARTES_TOUR = 4;
 const NOMES_PARTES_TOUR = { 1: 'Tela inicial', 2: 'Treinos da semana', 3: 'Dentro do treino', 4: 'Progresso' };
 let indiceTourAtual = 0;
 let tourEmAndamento = false;
 let tourOcupado = false;
+
+// "Já viu" é guardado POR ALUNA, em dois lugares: no progresso dela (vai pro banco e acompanha ela em
+// qualquer aparelho, inclusive depois de "Sair da conta", que limpa o localStorage inteiro) e no
+// aparelho (cópia rápida, por nome, pra cobrir o caso de estar sem internet na hora de salvar).
+function tourJaVisto(){
+  try { if(localStorage.getItem('musaTourVisto_' + NOME_ALUNA_LOGADA) === VERSAO_TOUR) return true; } catch(e){}
+  try {
+    const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+    if(prog && prog.tourVistoVersao === VERSAO_TOUR) return true;
+  } catch(e){}
+  return false;
+}
+function marcarTourComoVisto(){
+  try { localStorage.setItem('musaTourVisto_' + NOME_ALUNA_LOGADA, VERSAO_TOUR); } catch(e){}
+  try {
+    const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+    prog.tourVistoVersao = VERSAO_TOUR;
+    salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  } catch(e){}
+}
 
 function tourEsperar(ms){ return new Promise(function(resolver){ setTimeout(resolver, ms); }); }
 function tourTelaAtiva(nome){
@@ -11755,8 +11918,9 @@ const PASSOS_TOUR = [
   { parte: 4, preparar: tourIrParaProgresso, seletor: '#tour-chip-ontem', titulo: 'Esqueci de preencher ontem',
     texto: 'Esqueceu de preencher ontem? Toque aqui pra preencher o dia de ontem, que fica guardado na data certa. Manter os dias completos deixa o seu acompanhamento muito mais preciso.',
     textoCentro: 'Esqueceu de preencher ontem? Na tela de Progresso, o botão "Esqueci de preencher ontem" deixa você preencher o dia de ontem, que fica guardado na data certa. Manter os dias completos deixa o seu acompanhamento muito mais preciso.' },
-  { parte: 4, titulo: 'Tudo pronto',
-    texto: 'Uma dica final: na tela de entrada do app, marque a caixinha "Lembrar login neste aparelho" pra não precisar digitar e-mail e senha toda vez. Se quiser rever este tutorial, toque em "Rever tutorial do aplicativo" no fim da tela Início.' }
+  { parte: 4, nomeParte: 'Pra terminar', preparar: tourIrParaInicio, seletor: '#botao-tutorial-home', titulo: 'Tudo pronto',
+    texto: 'Pra rever este tutorial quando quiser, toque nesse botão com o ponto de interrogação. Uma dica final: na tela de entrada do app, marque a caixinha "Lembrar login neste aparelho" pra não precisar digitar e-mail e senha toda vez.',
+    textoCentro: 'Pra rever este tutorial quando quiser, toque no botão com o ponto de interrogação, no canto de cima da tela Início. Uma dica final: na tela de entrada do app, marque a caixinha "Lembrar login neste aparelho" pra não precisar digitar e-mail e senha toda vez.' }
 ];
 
 function passosAtivosDaParte(parte){
@@ -11841,7 +12005,7 @@ async function tourDesenharPasso(passo, alvo, indice){
   const rotuloBotao = ehUltimoGeral ? 'Concluir' : (ehUltimoDaParte ? 'Próxima parte' : 'Próximo');
   const texto = (!alvo && passo.textoCentro) ? passo.textoCentro : passo.texto;
 
-  caixa.innerHTML = '<p class="tour-parte">Parte ' + passo.parte + ' de ' + TOTAL_PARTES_TOUR + ' · ' + NOMES_PARTES_TOUR[passo.parte] + '</p>' +
+  caixa.innerHTML = '<p class="tour-parte">Parte ' + passo.parte + ' de ' + TOTAL_PARTES_TOUR + ' · ' + (passo.nomeParte || NOMES_PARTES_TOUR[passo.parte]) + '</p>' +
     '<p style="font-family:\'Playfair Display\',serif;font-weight:700;color:var(--gold);font-size:15px;margin:0 0 6px;">' + passo.titulo + '</p>' +
     '<p class="tour-texto">' + texto + '</p>' +
     '<div class="tour-rodape">' +
@@ -11898,7 +12062,7 @@ async function finalizarTour(){
   });
   try { window.removeEventListener('resize', tourAoRedimensionar); } catch(e){}
   tourEmAndamento = false;
-  try { localStorage.setItem('musaTourVisto', 'sim'); } catch(e){}
+  marcarTourComoVisto(); // vale tanto pra quem concluiu quanto pra quem tocou em "Pular tudo"
   veioDaListaDeTreinosDaSemana = false; // senão o "voltar" de outra tela cairia na lista de treinos por engano
   try { await tourIrParaInicio(); } catch(e){}
   tourOcupado = false;
@@ -11906,10 +12070,15 @@ async function finalizarTour(){
 
 function verificarEIniciarTourPrimeiraVez(){
   if(tourEmAndamento) return; // o tour navega pelas telas, e uma delas é a Início: não pode reiniciar a si mesmo
-  let jaViu = false;
-  try { jaViu = localStorage.getItem('musaTourVisto') === 'sim'; } catch(e){}
-  if(jaViu) return;
-  setTimeout(function(){ iniciarTour(); }, 600); // pequena espera pra tela de home terminar de renderizar
+  if(sessaoTipo && sessaoTipo !== 'aluna') return; // o tour é só das alunas
+  if(tourJaVisto()) return;
+  setTimeout(function(){ // pequena espera pra tela de home terminar de renderizar
+    if(tourEmAndamento || tourJaVisto()) return;
+    // Não interrompe quem está no meio de um treino (cronômetro do treino ou descanso rodando). Tenta
+    // de novo na próxima vez que ela passar pela Início.
+    if(cronometroRodando || cronometroDescansoAtivo) return;
+    iniciarTour();
+  }, 600);
 }
 
 let timerIntroAtual = null;
