@@ -1,4 +1,4 @@
-[dna_musa_114.html](https://github.com/user-attachments/files/33040503/dna_musa_114.html)
+[dna_musa_115.html](https://github.com/user-attachments/files/33040829/dna_musa_115.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -404,7 +404,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-30-H-ENDERECO-AUDITORIA</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-30-I-RELATORIO-AUDITORIA</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1281,15 +1281,15 @@ function auditarAcessosAlunas(){
   executarAuditoriaAcessos(false);
 }
 
-async function executarAuditoriaAcessos(corrigir){
+async function executarAuditoriaAcessos(corrigir, soltarVinculos){
   const area = document.getElementById('auditoria-acessos-area');
   if(!area) return;
-  area.innerHTML = '<p class="txt" style="color:var(--text-faint);">' + (corrigir ? 'Recriando as contas que faltam...' : 'Conferindo todas as alunas contra a Authentication de verdade...') + ' pode levar alguns segundos.</p>';
+  area.innerHTML = '<p class="txt" style="color:var(--text-faint);">' + (soltarVinculos ? 'Soltando o vínculo errado dessas fichas...' : (corrigir ? 'Recriando as contas que faltam...' : 'Conferindo todas as alunas contra a Authentication de verdade...')) + ' pode levar alguns segundos.</p>';
   try {
     const resposta = await fetch(SUPABASE_URL + '/functions/v1/super-action', { // super-action = endereço real da função "auditar-acessos-alunas" no Supabase (o nome exibido no painel e o endereço real são diferentes, igual alterar-senha-aluna = bright-function)
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-      body: JSON.stringify({ corrigir: !!corrigir })
+      body: JSON.stringify({ corrigir: !!corrigir, soltarVinculos: !!soltarVinculos })
     });
     const dados = await resposta.json();
     if(!resposta.ok || dados.error){
@@ -1297,47 +1297,119 @@ async function executarAuditoriaAcessos(corrigir){
       return;
     }
 
-    // Atualiza as fichas que estão na memória, senão elas continuariam mostrando a senha antiga
+    // Trava de segurança: se a função publicada no Supabase ainda for a versão antiga, ela mistura
+    // "conta dividida" com "e-mail diferente", e o relatório mandaria usar "Alterar senha" onde isso
+    // derrubaria o login de outra aluna. Melhor não dar instrução nenhuma do que dar a errada.
+    if(!('contasDivididas' in dados)){
+      area.innerHTML = '<div class="info-box" style="border-color:#C9784A;"><p class="lbl" style="color:#C9784A;">Função de auditoria desatualizada</p>' +
+        '<p class="txt" style="font-size:12px;">A função publicada no Supabase ainda é a versão antiga, que não separa os casos com segurança. Cole a versão nova (arquivo auditar-acessos-alunas_index.ts) na função e publique antes de usar este relatório.</p></div>';
+      return;
+    }
+
+    // Atualiza as fichas que estão na memória, senão elas continuariam mostrando a senha/vínculo antigos
     (dados.criadas || []).forEach(function(c){
       const a = alunasPersonal.find(function(x){ return x.email === c.email; });
       if(a){ a.senhaGerada = c.senha; if(c.authId) a.authId = c.authId; }
     });
+    (dados.soltos || []).forEach(function(s){
+      const a = alunasPersonal.find(function(x){ return x.email === s.email; });
+      if(a){ a.authId = null; }
+    });
 
     const linha = function(texto, cor){ return '<p class="txt" style="font-size:12px;margin-top:4px;' + (cor ? 'color:' + cor + ';' : '') + '">' + texto + '</p>'; };
-    let html = '<div class="info-box" style="border-color:var(--success);">' +
-      '<p class="lbl" style="color:var(--success);">Auditoria concluída · ' + dados.totalVerificadas + ' alunas com e-mail</p>' +
-      linha('✓ ' + dados.ok + ' com acesso ok, nada a fazer') +
-      linha(dados.semAcessoAinda + ' nunca tiveram acesso criado (normal, não é erro)', 'var(--text-faint)') +
-    '</div>';
+    const abrirFicha = function(nome, texto){
+      return '<span class="acao-pill" style="margin-top:6px;display:inline-block;" onclick="abrirFichaDaAluna(\'' + nome.replace(/'/g, "\\'") + '\')">' + texto + '</span>';
+    };
 
-    if(dados.vinculoQuebrado && dados.vinculoQuebrado.length > 0){
-      html += '<div class="info-box" style="border-color:#E2A33D;margin-top:8px;"><p class="lbl" style="color:#E2A33D;">🔧 ' + dados.vinculoQuebrado.length + ' com vínculo desalinhado, já corrigido agora</p>' +
-        dados.vinculoQuebrado.map(function(v){ return linha(v.nome); }).join('') + '</div>';
+    const contasDivididas = dados.contasDivididas || [];
+    const soltos = dados.soltos || [];
+    const emailDiferente = dados.emailDiferente || [];
+    const ambiguos = dados.ambiguos || [];
+    const acessoQuebrado = dados.acessoQuebrado || [];
+    const vinculoQuebrado = dados.vinculoQuebrado || [];
+    const criadas = dados.criadas || [];
+    const falhas = dados.falhas || [];
+
+    let html = '<div class="info-box" style="border-color:var(--success);"><p class="lbl" style="color:var(--success);">Auditoria concluída · ' + dados.totalVerificadas + ' alunas com e-mail</p></div>';
+
+    // ===== FAZER AGORA =====
+    let blocosFazer = '';
+
+    if(contasDivididas.length > 0){
+      blocosFazer += '<div class="info-box" style="border-color:#E2A33D;margin-top:8px;"><p class="lbl" style="color:#E2A33D;">1º passo: tem conta de login com mais de uma ficha presa nela</p>' +
+        contasDivididas.map(function(c){
+          return '<div style="margin-top:8px;"><p class="txt" style="font-size:12px;margin:0;">Conta <b>' + c.contaEmail + '</b><br>' +
+            'Dona da conta: <b>' + c.dona.nome + '</b> (não precisa fazer nada)<br>' +
+            'Fichas presas nela por engano: ' + c.outras.map(function(o){ return '<b>' + o.nome + '</b>'; }).join(', ') + '</p></div>';
+        }).join('') +
+        '<button class="btn-gold" style="margin-top:10px;" onclick="executarAuditoriaAcessos(false, true)">Corrigir: soltar o vínculo errado dessas fichas</button>' +
+        '<p class="txt" style="font-size:11px;color:#C9784A;margin-top:6px;">Não use "Alterar senha" nessas fichas antes de clicar aqui: isso trocaria o e-mail da conta da dona e ela perderia o login. Depois de corrigir, o relatório mostra o que fazer em cada ficha.</p></div>';
     }
 
-    if(dados.acessoQuebrado && dados.acessoQuebrado.length > 0){
-      html += '<div class="info-box" style="border-color:#C9784A;margin-top:8px;"><p class="lbl" style="color:#C9784A;">⚠ ' + dados.acessoQuebrado.length + ' com acesso "criado" na ficha, mas SEM conta real (o caso da Olayne)</p>' +
-        dados.acessoQuebrado.map(function(v){ return linha(v.nome + ' · ' + v.email); }).join('') +
+    if(soltos.length > 0){
+      blocosFazer += '<div class="info-box" style="border-color:var(--success);margin-top:8px;"><p class="lbl" style="color:var(--success);">✓ Vínculo errado solto em ' + soltos.length + ' ficha(s). Agora faça:</p>' +
+        soltos.map(function(s){
+          return '<div style="margin-top:8px;"><p class="txt" style="font-size:12px;margin:0;"><b>' + s.nome + '</b>: Alterar senha<br>' +
+            '<span style="color:var(--text-faint);">Cria uma conta própria com o e-mail da ficha (' + s.email + '). A conta de ' + s.dona + ' não é afetada. Se for ficha de teste, pode ignorar.</span></p>' +
+            abrirFicha(s.nome, 'Abrir a ficha e alterar a senha') + '</div>';
+        }).join('') + '</div>';
+    }
+
+    if(emailDiferente.length > 0){
+      blocosFazer += '<div class="info-box" style="border-color:#E2A33D;margin-top:8px;"><p class="lbl" style="color:#E2A33D;">' + emailDiferente.length + ' com a conta em outro e-mail: Alterar senha</p>' +
+        emailDiferente.map(function(v){
+          return '<div style="margin-top:8px;"><p class="txt" style="font-size:12px;margin:0;"><b>' + v.nome + '</b><br>na ficha: ' + v.emailFicha + '<br>na conta de login: ' + v.emailConta + '<br>' +
+            '<span style="color:var(--text-faint);">Só essa ficha usa a conta, então Alterar senha é seguro: corrige o e-mail da conta e troca a senha, sem criar outra.</span></p>' +
+            abrirFicha(v.nome, 'Abrir a ficha e alterar a senha') + '</div>';
+        }).join('') + '</div>';
+    }
+
+    if(acessoQuebrado.length > 0){
+      blocosFazer += '<div class="info-box" style="border-color:#C9784A;margin-top:8px;"><p class="lbl" style="color:#C9784A;">' + acessoQuebrado.length + ' com acesso "criado" na ficha, mas SEM conta real: recriar o acesso</p>' +
+        acessoQuebrado.map(function(v){ return linha(v.nome + ' · ' + v.email); }).join('') +
         '<button class="btn-gold" style="margin-top:10px;" onclick="executarAuditoriaAcessos(true)">Recriar o acesso de todas essas agora</button>' +
         '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:6px;">Cria a conta de verdade e gera senha nova pra cada uma. Como a conta não existia, ninguém perde acesso nenhum.</p></div>';
     }
 
-    if(dados.emailDiferente && dados.emailDiferente.length > 0){
-      html += '<div class="info-box" style="border-color:#E2A33D;margin-top:8px;"><p class="lbl" style="color:#E2A33D;">⚠ ' + dados.emailDiferente.length + ' com a conta em OUTRO e-mail (decisão sua)</p>' +
-        dados.emailDiferente.map(function(v){
-          return '<div style="margin-top:8px;"><p class="txt" style="font-size:12px;margin:0;"><b>' + v.nome + '</b><br>na ficha: ' + v.emailFicha + '<br>na conta de login: ' + v.emailConta + '</p>' +
-            '<span class="acao-pill" style="margin-top:6px;display:inline-block;" onclick="abrirFichaDaAluna(\'' + v.nome.replace(/'/g,"\\'") + '\')">Abrir a ficha (use "Alterar senha" pra alinhar)</span></div>';
-        }).join('') + '</div>';
+    if(ambiguos.length > 0){
+      blocosFazer += '<div class="info-box" style="border-color:#C9784A;margin-top:8px;"><p class="lbl" style="color:#C9784A;">Decisão sua: não mexa ainda</p>' +
+        ambiguos.map(function(c){
+          return '<p class="txt" style="font-size:12px;margin-top:8px;">Conta <b>' + c.contaEmail + '</b>: as fichas ' + c.fichas.map(function(f){ return '<b>' + f.nome + '</b>'; }).join(', ') + ' estão ligadas a ela e nenhuma tem esse e-mail. Não dá pra saber quem é a dona.</p>';
+        }).join('') +
+        '<p class="txt" style="font-size:11px;color:#C9784A;margin-top:6px;">Não use "Alterar senha" nessas fichas. Me avise que a gente confere caso a caso.</p></div>';
     }
 
-    if(dados.criadas && dados.criadas.length > 0){
-      html += '<div class="info-box" style="border-color:var(--success);margin-top:8px;"><p class="lbl" style="color:var(--success);">✓ ' + dados.criadas.length + ' conta(s) criada(s) de verdade</p>' +
-        dados.criadas.map(function(c){ return linha('<b>' + c.nome + '</b><br>' + c.email + '<br>senha: ' + c.senha); }).join('') +
+    if(criadas.length > 0){
+      blocosFazer += '<div class="info-box" style="border-color:var(--success);margin-top:8px;"><p class="lbl" style="color:var(--success);">✓ ' + criadas.length + ' conta(s) criada(s) de verdade</p>' +
+        criadas.map(function(c){ return linha('<b>' + c.nome + '</b><br>' + c.email + '<br>senha: ' + c.senha); }).join('') +
         '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:6px;">Já está atualizado na ficha de cada uma. É só mandar o login pelo botão "Mandar login e senha por WhatsApp".</p></div>';
     }
-    if(dados.falhas && dados.falhas.length > 0){
-      html += '<div class="info-box" style="border-color:#C9784A;margin-top:8px;"><p class="lbl" style="color:#C9784A;">✗ ' + dados.falhas.length + ' que não consegui criar</p>' +
-        dados.falhas.map(function(f){ return linha(f.nome + ': ' + f.motivo); }).join('') + '</div>';
+    if(falhas.length > 0){
+      blocosFazer += '<div class="info-box" style="border-color:#C9784A;margin-top:8px;"><p class="lbl" style="color:#C9784A;">' + falhas.length + ' que não consegui resolver</p>' +
+        falhas.map(function(f){ return linha(f.nome + ': ' + f.motivo); }).join('') + '</div>';
+    }
+
+    if(blocosFazer){
+      html += '<p class="section-label" style="margin-top:16px;">Fazer agora</p>' + blocosFazer;
+    }
+
+    // ===== NÃO PRECISA FAZER NADA =====
+    const donas = [];
+    contasDivididas.forEach(function(c){ if(donas.indexOf(c.dona.nome) === -1) donas.push(c.dona.nome); });
+    soltos.forEach(function(s){ if(donas.indexOf(s.dona) === -1) donas.push(s.dona); });
+
+    let naoFazer = '<div class="info-box" style="margin-top:8px;"><p class="lbl">Não precisa fazer nada</p>' +
+      linha('✓ ' + dados.ok + ' com acesso ok') +
+      linha(dados.semAcessoAinda + ' nunca tiveram acesso criado (normal, não é erro)', 'var(--text-faint)');
+    donas.forEach(function(nome){ naoFazer += linha('<b>' + nome + '</b>: a conta é dela, está tudo certo'); });
+    if(vinculoQuebrado.length > 0){
+      naoFazer += linha('Vínculo estava desalinhado e a auditoria já corrigiu: ' + vinculoQuebrado.map(function(v){ return '<b>' + v.nome + '</b>'; }).join(', '));
+    }
+    naoFazer += '</div>';
+    html += '<p class="section-label" style="margin-top:16px;">Sem ação</p>' + naoFazer;
+
+    if(!blocosFazer){
+      html += '<div class="info-box" style="border-color:var(--success);margin-top:8px;"><p class="txt" style="font-size:12px;margin:0;">Nenhum perfil precisa de ação agora.</p></div>';
     }
 
     area.innerHTML = html;
