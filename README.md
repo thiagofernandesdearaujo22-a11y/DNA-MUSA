@@ -1,4 +1,4 @@
-[dna_musa_113.html](https://github.com/user-attachments/files/33007268/dna_musa_113.html)
+[dna_musa_114.html](https://github.com/user-attachments/files/33040503/dna_musa_114.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -404,7 +404,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-30-G-LIMITE-REPETICAO-DIAS</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-09-30-H-ENDERECO-AUDITORIA</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1286,7 +1286,7 @@ async function executarAuditoriaAcessos(corrigir){
   if(!area) return;
   area.innerHTML = '<p class="txt" style="color:var(--text-faint);">' + (corrigir ? 'Recriando as contas que faltam...' : 'Conferindo todas as alunas contra a Authentication de verdade...') + ' pode levar alguns segundos.</p>';
   try {
-    const resposta = await fetch(SUPABASE_URL + '/functions/v1/auditar-acessos-alunas', {
+    const resposta = await fetch(SUPABASE_URL + '/functions/v1/super-action', { // super-action = endereço real da função "auditar-acessos-alunas" no Supabase (o nome exibido no painel e o endereço real são diferentes, igual alterar-senha-aluna = bright-function)
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
       body: JSON.stringify({ corrigir: !!corrigir })
