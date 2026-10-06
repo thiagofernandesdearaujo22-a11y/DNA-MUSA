@@ -1,4 +1,4 @@
-[dna_musa_118.html](https://github.com/user-attachments/files/33082110/dna_musa_118.html)
+[dna_musa_119.html](https://github.com/user-attachments/files/33103946/dna_musa_119.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -406,7 +406,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-01-B-EDICAO-E-DESFAZER</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-01-D-SALVAMENTO-SEGURO-E-FICHAS-REPETIDAS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -7287,7 +7287,6 @@ async function sincronizarTreinoComSupabase(a){
 }
 
 const timersSalvamentoPerfil = {};
-
 function salvarPerfilAlunaNoSupabase(nomeAluna){
   // Espera inteligente: se chamar de novo antes de 500ms, cancela o anterior e reinicia a espera.
   // Isso garante que, mesmo mexendo em várias coisas rápido, só sai UM salvamento por vez, sempre com o estado mais completo e atual.
@@ -7295,73 +7294,275 @@ function salvarPerfilAlunaNoSupabase(nomeAluna){
   if(timersSalvamentoPerfil[nomeAluna]) clearTimeout(timersSalvamentoPerfil[nomeAluna]);
   timersSalvamentoPerfil[nomeAluna] = setTimeout(function(){
     delete timersSalvamentoPerfil[nomeAluna];
-    executarSalvamentoPerfilAluna(nomeAluna);
+    salvarPerfilNaFila(nomeAluna, 0);
   }, 500);
 }
 
+// ===== SALVAMENTO DO PERFIL, À PROVA DE "QUEM SALVA POR ÚLTIMO APAGA O OUTRO" =====
+// Antes, cada salvamento gravava a ficha INTEIRA a partir da cópia que estava na tela, inclusive o que ninguém
+// mexeu. Aí uma aluna com o app aberto desde cedo (ou a Bianca, ou o seu outro aparelho) salvava QUALQUER coisa
+// e desfazia, sem avisar, o "entregue" ou o "vencida" que você tinha marcado depois que ela carregou. Além disso,
+// o resultado da gravação nunca era conferido: se o servidor recusasse, o app seguia como se tivesse salvado.
+// Agora: (1) cada tela lembra o que o servidor tinha quando carregou ("baseline"); (2) só grava as chaves que
+// ELA mudou desde então; (3) junta com o que está no servidor agora; (4) confere o resultado, avisa e tenta de novo.
+function normalizarParaComparar(v){ return JSON.stringify(v === undefined ? null : v); }
+
+function montarColunasDaAluna(a){
+  return {
+    nome: a.nome,
+    telefone: a.telefone || '',
+    nivel: a.nivel || 'Iniciante',
+    freq: a.freq || '3x por semana',
+    piramide: a.piramide || '',
+    objetivo: a.objetivo || '',
+    restricoes: a.restricoes || '',
+    academia: a.academia || '',
+    idade: a.idade || null
+  };
+}
+
+function montarDadosExtrasDaAluna(a){
+  return {
+    estagioFunilManual: a.estagioFunilManual || null,
+    statusPlanoManual: a.statusPlanoManual || null,
+    patologiaConfirmada: a.patologiaConfirmada || null,
+    duvidasSinalizadas: a.duvidasSinalizadas || [],
+    diasNoProgramaFunil: a.diasNoProgramaFunil || null,
+    tecnicaAprovada: a.tecnicaAprovada || {},
+    cicloPerguntado: a.cicloPerguntado || false,
+    cicloInfo: a.cicloInfo || null,
+    direcionamentoQuadriceps: a.direcionamentoQuadriceps || null,
+    direcionamentoGluteo: a.direcionamentoGluteo || null,
+    desviosPosturaisConfirmados: a.desviosPosturaisConfirmados || [],
+    dataFechouPlano: a.dataFechouPlano || null,
+    duracaoPlanoDias: a.duracaoPlanoDias || null,
+    valorPlano: a.valorPlano != null ? a.valorPlano : null,
+    statusPagamento: a.statusPagamento || null,
+    tabataSugestaoRespondida: a.tabataSugestaoRespondida || false,
+    composicaoAtual: a.composicaoAtual || null,
+    queixaDor: a.queixaDor || false,
+    regiaoQueixa: a.regiaoQueixa || null,
+    ambienteTreino: a.ambienteTreino || 'Academia',
+    dataNascimento: a.dataNascimento || null,
+    aceitaAvisos: a.aceitaAvisos != null ? a.aceitaAvisos : null,
+    contadorAberturas: a.contadorAberturas || 0,
+    sinalRiscoEmocional: a.sinalRiscoEmocional || null,
+    progressaoManualForcada: a.progressaoManualForcada || 0,
+    composicaoHistorico: a.composicaoHistorico || [],
+    pesoHistorico: a.pesoHistorico || [],
+    // Peso e altura iniciais (e o IMC calculado deles) nunca eram salvos: ao carregar alunas do banco o app
+    // não tinha esses três campos, então qualquer valor digitado na ficha sumiria ao recarregar.
+    peso: a.peso || null,
+    altura: a.altura || null,
+    imc: a.imc || null,
+    statusControleCiclo: a.statusControleCiclo || null,
+    dataFicouVerde: a.dataFicouVerde || null,
+    ordemConclusaoCicloAtual: a.ordemConclusaoCicloAtual || null,
+    ordemUltimoCiclo: a.ordemUltimoCiclo || null,
+    suporteUltimoContato: a.suporteUltimoContato || null,
+    suporteHistorico: a.suporteHistorico || [],
+    desafioAtivo: a.desafioAtivo || null,
+    desafioTreinos: a.desafioTreinos || null
+  };
+}
+
+function fotografarPerfil(a){
+  const colunas = {}, extras = {};
+  const c = montarColunasDaAluna(a), e = montarDadosExtrasDaAluna(a);
+  Object.keys(c).forEach(function(k){ colunas[k] = normalizarParaComparar(c[k]); });
+  Object.keys(e).forEach(function(k){ extras[k] = normalizarParaComparar(e[k]); });
+  return { colunas: colunas, extras: extras };
+}
+
+const baselinesPerfil = {}; // e-mail (minúsculo) -> o que o servidor tinha dessa aluna quando ESTA tela carregou/salvou
+function chaveDoPerfil(a){ return (a.email || '').toLowerCase().trim(); }
+
+// ===== DUAS FICHAS COM O MESMO E-MAIL =====
+// A lista de alunas que vem escrita no código tem fichas duplicadas (a mesma pessoa duas vezes, em geral uma
+// "vencida" e outra "ativa") dividindo o MESMO e-mail. O servidor só tem UMA linha por e-mail, então só uma das
+// duas fichas pode conversar com ele. Antes, o que vinha do servidor ia sempre pra PRIMEIRA ficha encontrada (a
+// vencida, que nem aparece no Controle), e o que você marcava na ativa parecia nunca ter sido salvo. Agora uma
+// ficha é a PRINCIPAL do e-mail (a ativa; se não houver ou houver várias, a última) e é ela que sincroniza e salva.
+// A escolha fica fixa durante a sessão, mesmo que o plano dela mude depois de carregar do servidor.
+const fichaPrincipalPorEmail = {};
+function escolherFichaPrincipal(email){
+  if(!email) return null;
+  const chave = String(email).toLowerCase().trim();
+  const candidatas = alunasPersonal.filter(function(a){ return a.email && String(a.email).toLowerCase().trim() === chave; });
+  if(candidatas.length === 0) return null;
+  const atual = fichaPrincipalPorEmail[chave];
+  if(atual && candidatas.indexOf(atual) !== -1) return atual;
+  const ativas = candidatas.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  const universo = ativas.length > 0 ? ativas : candidatas;
+  fichaPrincipalPorEmail[chave] = universo[universo.length - 1];
+  return fichaPrincipalPorEmail[chave];
+}
+function ehFichaDuplicada(a){
+  return !!a.email && escolherFichaPrincipal(a.email) !== a;
+}
+
+// O que esta tela mudou desde que carregou. Sem baseline (ficha criada nesta tela), compara com o "vazio":
+// assim só o que foi realmente preenchido é gravado, nunca os valores padrão por cima do que está no servidor.
+function calcularMudancasDoPerfil(a){
+  const atual = fotografarPerfil(a);
+  const base = baselinesPerfil[chaveDoPerfil(a)] || fotografarPerfil({});
+  const c = montarColunasDaAluna(a), e = montarDadosExtrasDaAluna(a);
+  const colunas = {}, extras = {};
+  Object.keys(atual.colunas).forEach(function(k){ if(atual.colunas[k] !== base.colunas[k]) colunas[k] = c[k] === undefined ? null : c[k]; });
+  Object.keys(atual.extras).forEach(function(k){ if(atual.extras[k] !== base.extras[k]) extras[k] = e[k] === undefined ? null : e[k]; });
+  return { atual: atual, colunas: colunas, extras: extras, temMudanca: Object.keys(colunas).length > 0 || Object.keys(extras).length > 0 };
+}
+
+// Quem tem mudança que esta tela fez e o servidor ainda não recebeu (só conta ficha que veio do servidor)
+function nomesComMudancaPendente(){
+  return alunasPersonal.filter(function(a){
+    return a.email && baselinesPerfil[chaveDoPerfil(a)] && calcularMudancasDoPerfil(a).temMudanca;
+  }).map(function(a){ return a.nome; });
+}
+
+const filaSalvamentoPerfil = {};
+const ATRASOS_NOVA_TENTATIVA_MS = [4000, 15000, 45000];
+const errosSalvamentoPerfil = {}; // nome -> { erro, em } das fichas que NÃO conseguiram salvar
+function nomesComErroDeSalvamento(){ return Object.keys(errosSalvamentoPerfil); }
+
+// Salva uma ficha por vez (as chamadas da mesma aluna entram na fila, pra um salvamento não pisar no outro)
+function salvarPerfilNaFila(nomeAluna, tentativa){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  const chave = (a && a.email) ? a.email.toLowerCase() : nomeAluna;
+  const anterior = filaSalvamentoPerfil[chave] || Promise.resolve();
+  const proxima = anterior.then(function(){ return executarSalvamentoPerfilAluna(nomeAluna); }).then(function(resultado){
+    if(resultado && resultado.ok === false){
+      tratarFalhaDeSalvamento(nomeAluna, resultado.erro, tentativa, resultado.permanente);
+    } else if(errosSalvamentoPerfil[nomeAluna]){
+      delete errosSalvamentoPerfil[nomeAluna];
+      atualizarAvisoDeSalvamentoNoControle();
+    }
+    return resultado;
+  });
+  filaSalvamentoPerfil[chave] = proxima.catch(function(){});
+  return proxima;
+}
+
+function tratarFalhaDeSalvamento(nomeAluna, motivo, tentativa, permanente){
+  errosSalvamentoPerfil[nomeAluna] = { erro: motivo, em: new Date().toISOString() };
+  if(permanente){
+    // Erro que tentar de novo não resolve (ficha sem e-mail, ficha repetida): avisa uma vez, com o motivo
+    mostrarConfirmacaoSalvamento(false, 'NÃO salvou ' + nomeAluna + ': ' + motivo + '.');
+  } else if(tentativa < ATRASOS_NOVA_TENTATIVA_MS.length){
+    mostrarConfirmacaoSalvamento(false, 'Não consegui salvar ' + nomeAluna + ' no servidor (' + motivo + '). Vou tentar de novo.');
+    setTimeout(function(){ salvarPerfilNaFila(nomeAluna, tentativa + 1); }, ATRASOS_NOVA_TENTATIVA_MS[tentativa]);
+  } else {
+    mostrarConfirmacaoSalvamento(false, 'NÃO salvou ' + nomeAluna + ' no servidor (' + motivo + '). A mudança está só nesta tela. Não saia da conta antes de resolver.');
+  }
+  atualizarAvisoDeSalvamentoNoControle();
+}
+
+function atualizarAvisoDeSalvamentoNoControle(){
+  if(document.getElementById('area-controle-treinos')) renderControleTreinos();
+}
+
+// Devolve { ok: true } se gravou (ou não havia o que gravar), ou { ok: false, erro } se o servidor não aceitou
 async function executarSalvamentoPerfilAluna(nomeAluna){
-  if(!supabaseClient) return;
+  if(!supabaseClient) return { ok: true, nada: true };
   try {
     const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
-    if(!a || !a.email) return;
-    await supabaseClient.from('alunas').upsert({
-      email: a.email,
-      nome: a.nome,
-      telefone: a.telefone || '',
-      nivel: a.nivel || 'Iniciante',
-      freq: a.freq || '3x por semana',
-      piramide: a.piramide || '',
-      objetivo: a.objetivo || '',
-      restricoes: a.restricoes || '',
-      academia: a.academia || '',
-      idade: a.idade || null,
-      dados_extras: {
-        estagioFunilManual: a.estagioFunilManual || null,
-        statusPlanoManual: a.statusPlanoManual || null,
-        patologiaConfirmada: a.patologiaConfirmada || null,
-        duvidasSinalizadas: a.duvidasSinalizadas || [],
-        diasNoProgramaFunil: a.diasNoProgramaFunil || null,
-        tecnicaAprovada: a.tecnicaAprovada || {},
-        cicloPerguntado: a.cicloPerguntado || false,
-        cicloInfo: a.cicloInfo || null,
-        direcionamentoQuadriceps: a.direcionamentoQuadriceps || null,
-        direcionamentoGluteo: a.direcionamentoGluteo || null,
-        desviosPosturaisConfirmados: a.desviosPosturaisConfirmados || [],
-        dataFechouPlano: a.dataFechouPlano || null,
-        duracaoPlanoDias: a.duracaoPlanoDias || null,
-        valorPlano: a.valorPlano != null ? a.valorPlano : null,
-        statusPagamento: a.statusPagamento || null,
-        tabataSugestaoRespondida: a.tabataSugestaoRespondida || false,
-        composicaoAtual: a.composicaoAtual || null,
-        queixaDor: a.queixaDor || false,
-        regiaoQueixa: a.regiaoQueixa || null,
-        ambienteTreino: a.ambienteTreino || 'Academia',
-        dataNascimento: a.dataNascimento || null,
-        aceitaAvisos: a.aceitaAvisos != null ? a.aceitaAvisos : null,
-        contadorAberturas: a.contadorAberturas || 0,
-        sinalRiscoEmocional: a.sinalRiscoEmocional || null,
-        progressaoManualForcada: a.progressaoManualForcada || 0,
-        composicaoHistorico: a.composicaoHistorico || [],
-        pesoHistorico: a.pesoHistorico || [],
-        // Peso e altura iniciais (e o IMC calculado deles) nunca eram salvos: ao carregar alunas do banco o app
-        // não tinha esses três campos, então qualquer valor digitado na ficha sumiria ao recarregar.
-        peso: a.peso || null,
-        altura: a.altura || null,
-        imc: a.imc || null,
-        statusControleCiclo: a.statusControleCiclo || null,
-        dataFicouVerde: a.dataFicouVerde || null,
-        ordemConclusaoCicloAtual: a.ordemConclusaoCicloAtual || null,
-        ordemUltimoCiclo: a.ordemUltimoCiclo || null,
-        suporteUltimoContato: a.suporteUltimoContato || null,
-        suporteHistorico: a.suporteHistorico || [],
-        desafioAtivo: a.desafioAtivo || null,
-        desafioTreinos: a.desafioTreinos || null
-      }
-    }, { onConflict: 'email' });
+    if(!a) return { ok: true, nada: true };
+    // Antes, ficha sem e-mail era pulada em silêncio: a mudança parecia salva e sumia ao logar de novo.
+    if(!a.email) return { ok: false, permanente: true, erro: 'essa ficha não tem e-mail cadastrado. Preencha o e-mail dela na ficha, na seção Dados' };
+    if(ehFichaDuplicada(a)){
+      const principal = escolherFichaPrincipal(a.email);
+      return { ok: false, permanente: true, erro: 'essa ficha é repetida: o mesmo e-mail é usado por "' + principal.nome + '", que é a que guarda as mudanças. Faça a mudança nela' };
+    }
+    const m = calcularMudancasDoPerfil(a); // a fotografia é tirada ANTES de esperar o servidor: o que mudar durante a espera fica pro próximo salvamento
+    if(!m.temMudanca) return { ok: true, nada: true };
+
+    const leitura = await supabaseClient.from('alunas').select('dados_extras').eq('email', a.email).maybeSingle();
+    if(leitura.error) return { ok: false, erro: leitura.error.message || 'não consegui ler o servidor' };
+
+    if(!leitura.data){
+      // Ficha ainda não existe no servidor: cria com tudo
+      const criacao = await supabaseClient.from('alunas').upsert(
+        Object.assign({ email: a.email }, montarColunasDaAluna(a), { dados_extras: montarDadosExtrasDaAluna(a) }),
+        { onConflict: 'email' });
+      if(criacao.error) return { ok: false, erro: criacao.error.message || 'o servidor não aceitou' };
+    } else {
+      // Ficha existe: grava SÓ o que esta tela mudou, somado ao que está no servidor agora
+      const extrasDoServidor = (leitura.data.dados_extras && typeof leitura.data.dados_extras === 'object') ? leitura.data.dados_extras : {};
+      const carga = Object.assign({}, m.colunas);
+      if(Object.keys(m.extras).length > 0) carga.dados_extras = Object.assign({}, extrasDoServidor, m.extras);
+      const gravacao = await supabaseClient.from('alunas').update(carga).eq('email', a.email).select('email');
+      if(gravacao.error) return { ok: false, erro: gravacao.error.message || 'o servidor não aceitou' };
+      if(!gravacao.data || gravacao.data.length === 0) return { ok: false, erro: 'o servidor não gravou (sem permissão, ou a ficha não foi encontrada)' };
+    }
+    baselinesPerfil[chaveDoPerfil(a)] = m.atual;
+    return { ok: true };
   } catch(erroDeRede){
-    console.warn('Sem conexão agora, edição ficou salva só localmente por enquanto:', erroDeRede);
+    return { ok: false, erro: 'sem conexão' };
   }
 }
+
+// Aplica na ficha local o que o servidor tem. Nas chaves em que ESTA tela tem mudança ainda não salva, não pisa.
+// Devolve true se algo mudou na ficha. Usada na sincronização das alunas e no login da aluna.
+function aplicarPerfilDoBancoNaAluna(a, row){
+  if(!a || !row) return false;
+  const chave = chaveDoPerfil(a);
+  const base = baselinesPerfil[chave]; // vazio = primeira vez que esta tela vê o servidor dessa aluna: o servidor manda
+  const padroes = montarDadosExtrasDaAluna({});
+  const pendentes = {};
+  let mudou = false;
+
+  // colunas do perfil (regra de sempre: só adota valor preenchido)
+  ['nivel','freq','telefone','objetivo','restricoes','academia','idade'].forEach(function(campo){
+    const valorBanco = row[campo];
+    if(valorBanco == null || valorBanco === '') return;
+    if(base && normalizarParaComparar(montarColunasDaAluna(a)[campo]) !== base.colunas[campo]){ pendentes['colunas.' + campo] = true; return; }
+    if(a[campo] !== valorBanco){ a[campo] = valorBanco; mudou = true; }
+  });
+
+  const extrasDb = (row.dados_extras && typeof row.dados_extras === 'object') ? row.dados_extras : {};
+  Object.keys(extrasDb).forEach(function(campo){
+    const valorBanco = extrasDb[campo];
+    const conhecido = Object.prototype.hasOwnProperty.call(padroes, campo);
+    if(!conhecido){
+      // campo que o salvamento não conhece: mantém o jeito antigo (só adota valor preenchido)
+      if(valorBanco != null && JSON.stringify(a[campo]) !== JSON.stringify(valorBanco)){ a[campo] = valorBanco; mudou = true; }
+      return;
+    }
+    const localAntes = normalizarParaComparar(montarDadosExtrasDaAluna(a)[campo]);
+    if(base && localAntes !== base.extras[campo]){ pendentes['extras.' + campo] = true; return; } // mudança local ainda não salva
+    if(valorBanco == null && padroes[campo] != null) return; // o padrão desse campo não é nulo: um nulo do servidor não diz nada
+    a[campo] = valorBanco; // inclusive nulo: é assim que um "desmarcado" feito em outro lugar chega aqui
+    if(normalizarParaComparar(montarDadosExtrasDaAluna(a)[campo]) !== localAntes) mudou = true;
+  });
+
+  // atualiza a "lembrança do servidor" nas chaves que não estão pendentes
+  const depois = fotografarPerfil(a);
+  const novaBase = base || { colunas: {}, extras: {} };
+  ['colunas', 'extras'].forEach(function(tipo){
+    Object.keys(depois[tipo]).forEach(function(k){
+      if(!pendentes[tipo + '.' + k]) novaBase[tipo][k] = depois[tipo][k];
+    });
+  });
+  baselinesPerfil[chave] = novaBase;
+  return mudou;
+}
+
+// Salva na hora tudo que estiver esperando (antes de sair da conta). Devolve os nomes que NÃO foram salvos.
+async function descarregarSalvamentosPendentes(){
+  const nomes = new Set(Object.keys(timersSalvamentoPerfil));
+  Object.keys(timersSalvamentoPerfil).forEach(function(n){ clearTimeout(timersSalvamentoPerfil[n]); delete timersSalvamentoPerfil[n]; });
+  nomesComMudancaPendente().forEach(function(n){ nomes.add(n); });
+  const lista = Array.from(nomes);
+  const resultados = await Promise.all(lista.map(function(n){ return salvarPerfilNaFila(n, ATRASOS_NOVA_TENTATIVA_MS.length); }));
+  return lista.filter(function(n, i){ return resultados[i] && resultados[i].ok === false; });
+}
+
+window.addEventListener('beforeunload', function(e){
+  if(Object.keys(timersSalvamentoPerfil).length > 0 || nomesComMudancaPendente().length > 0){
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
 
 // Achado real de auditoria: mudar nível/ambiente/frequência só gerava uma PRÉVIA — o treino de
 // verdade só mudava se um botão separado ("Confirmar e gerar esse novo treino") fosse clicado depois.
@@ -9821,6 +10022,10 @@ function verificarEResetarCicloSeCompleto(){
   const todasVerdes = ativas.every(function(a){ return a.statusControleCiclo === 'verde'; });
   if(!todasVerdes) return;
 
+  // Quando a última aluna ativa fica "entregue", o Controle recomeça sozinho e todo mundo volta pra pendente. Isso
+  // é o combinado, mas dá a impressão de que as suas marcações sumiram (a lista volta ao começo). Agora o app
+  // AVISA que reiniciou e guarda o estado de antes por 3 dias, com um botão pra desfazer o reinício.
+  guardarCicloFechado(ativas);
   ativas.forEach(function(a){
     a.ordemUltimoCiclo = a.ordemConclusaoCicloAtual || null;
     a.statusControleCiclo = null;
@@ -9828,6 +10033,80 @@ function verificarEResetarCicloSeCompleto(){
     a.ordemConclusaoCicloAtual = null;
     salvarPerfilAlunaNoSupabase(a.nome);
   });
+  mostrarConfirmacaoSalvamento(true, 'Todas as ativas foram entregues: o Controle começou um novo ciclo. Dá pra desfazer na própria tela.');
+}
+
+const CHAVE_CICLO_FECHADO = 'musaUltimoCicloFechado';
+function guardarCicloFechado(ativas){
+  try {
+    localStorage.setItem(CHAVE_CICLO_FECHADO, JSON.stringify({
+      em: new Date().toISOString(),
+      itens: ativas.map(function(a){ return { nome: a.nome, statusControleCiclo: a.statusControleCiclo || null, dataFicouVerde: a.dataFicouVerde || null, ordemConclusaoCicloAtual: a.ordemConclusaoCicloAtual || null, ordemUltimoCiclo: a.ordemUltimoCiclo || null }; })
+    }));
+  } catch(e){}
+}
+function lerUltimoCicloFechado(){
+  try {
+    const ciclo = JSON.parse(localStorage.getItem(CHAVE_CICLO_FECHADO) || 'null');
+    if(!ciclo || !ciclo.em || (Date.now() - new Date(ciclo.em).getTime()) > 3 * 86400000) return null;
+    return ciclo;
+  } catch(e){ return null; }
+}
+function desfazerReinicioDoCiclo(){
+  const ciclo = lerUltimoCicloFechado();
+  if(!ciclo) return;
+  if(!confirm('Voltar o Controle de Treinos ao estado de antes do reinício? O que você marcou depois do reinício será desfeito.')) return;
+  ciclo.itens.forEach(function(item){
+    const a = alunasPersonal.find(function(x){ return x.nome === item.nome; });
+    if(!a) return;
+    a.statusControleCiclo = item.statusControleCiclo;
+    a.dataFicouVerde = item.dataFicouVerde;
+    a.ordemConclusaoCicloAtual = item.ordemConclusaoCicloAtual;
+    a.ordemUltimoCiclo = item.ordemUltimoCiclo;
+    salvarPerfilAlunaNoSupabase(a.nome);
+  });
+  try { localStorage.removeItem(CHAVE_CICLO_FECHADO); } catch(e){}
+  renderControleTreinos();
+  mostrarConfirmacaoSalvamento(true, 'Controle de Treinos voltou ao estado de antes do reinício.');
+}
+
+// Avisos no topo do Controle: o que NÃO foi salvo, o reinício do ciclo e o botão de buscar o que está no servidor
+function htmlAvisosDoControle(){
+  let html = '';
+  const nomesComProblema = Array.from(new Set(nomesComMudancaPendente().concat(nomesComErroDeSalvamento())));
+  if(nomesComProblema.length > 0){
+    const motivos = nomesComErroDeSalvamento().map(function(n){ return escaparHtmlFicha(n) + ': ' + escaparHtmlFicha(errosSalvamentoPerfil[n].erro); }).join(' · ');
+    html += '<div class="info-box" style="border-color:#C9784A;margin-bottom:10px;"><p class="txt" style="font-size:12px;color:#C9784A;margin:0;">⚠ ' +
+      nomesComProblema.length + ' aluna(s) com mudança que ainda NÃO foi salva no servidor: ' + escaparHtmlFicha(nomesComProblema.join(', ')) + '.' +
+      (motivos ? ' Motivo: ' + motivos + '.' : '') + ' Não saia da conta antes de resolver.</p></div>';
+  }
+  // Fichas ativas que, por como estão cadastradas, NUNCA conseguem guardar uma mudança (mostra antes de você mexer)
+  const ativasAgora = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  const ativasSemEmail = ativasAgora.filter(function(a){ return !a.email; }).map(function(a){ return a.nome; });
+  const ativasRepetidas = ativasAgora.filter(function(a){ return a.email && ehFichaDuplicada(a); }).map(function(a){ return a.nome; });
+  if(ativasSemEmail.length > 0 || ativasRepetidas.length > 0){
+    html += '<div class="info-box" style="margin-bottom:10px;"><p class="txt" style="font-size:12px;margin:0;">ℹ Estas fichas ativas não conseguem guardar mudanças no servidor. ' +
+      (ativasSemEmail.length > 0 ? '<b>Sem e-mail:</b> ' + escaparHtmlFicha(ativasSemEmail.join(', ')) + ' (preencha o e-mail na ficha, seção Dados). ' : '') +
+      (ativasRepetidas.length > 0 ? '<b>Repetidas (mesmo e-mail de outra ficha):</b> ' + escaparHtmlFicha(ativasRepetidas.join(', ')) + ' (mexa na outra ficha da mesma pessoa).' : '') +
+      '</p></div>';
+  }
+  const ciclo = lerUltimoCicloFechado();
+  if(ciclo){
+    html += '<div class="info-box" style="margin-bottom:10px;"><p class="txt" style="font-size:12px;margin:0 0 6px;">O ciclo anterior fechou em ' +
+      new Date(ciclo.em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) +
+      ' porque todas as ativas foram entregues, e o Controle recomeçou.</p><span class="acao-pill" onclick="desfazerReinicioDoCiclo()">Desfazer o reinício</span></div>';
+  }
+  html += '<p style="text-align:center;margin:0 0 10px;"><span style="cursor:pointer;font-size:12px;text-decoration:underline;color:var(--gold-soft);" onclick="atualizarControleDoServidor()">Atualizar do servidor</span></p>';
+  return html;
+}
+
+// Busca no servidor o que está gravado de verdade e mostra na tela (respeita o que ainda não foi salvo daqui)
+async function atualizarControleDoServidor(){
+  mostrarConfirmacaoSalvamento(true, 'Buscando o que está gravado no servidor...');
+  const resultado = await sincronizarListaAlunasDoSupabase();
+  renderControleTreinos();
+  if(resultado.erro) mostrarConfirmacaoSalvamento(false, 'Não consegui buscar do servidor: ' + resultado.erro);
+  else mostrarConfirmacaoSalvamento(true, 'Atualizado do servidor: ' + (resultado.atualizadas || 0) + ' ficha(s) mudaram' + (resultado.novas ? ' e ' + resultado.novas + ' nova(s) chegaram' : '') + '.');
 }
 
 function renderControleTreinos(){
@@ -9852,6 +10131,8 @@ function renderControleTreinos(){
   let html = '<div class="info-box" style="text-align:center;margin-bottom:12px;">' +
     '<p class="txt" style="font-size:12px;color:var(--text-faint);">🟡 ' + amarelos.length + ' geradas · 🟢 ' + verdes.length + ' enviadas · ⚪ ' + incolores.length + ' pendentes de ' + ativas.length + '</p>' +
   '</div>';
+
+  html += htmlAvisosDoControle();
 
   html += linhas.map(function(a){
     const i = alunasPersonal.indexOf(a);
@@ -10147,17 +10428,10 @@ async function sincronizarListaAlunasDoSupabase(){
     let novas = 0;
     let atualizadas = 0;
     linhas.forEach(function(row){
-      const jaExiste = alunasPersonal.find(function(a){ return a.email && row.email && a.email.toLowerCase() === row.email.toLowerCase(); });
+      const jaExiste = row.email ? escolherFichaPrincipal(row.email) : null; // com e-mail repetido, a ficha PRINCIPAL (antes era sempre a primeira da lista)
       if(jaExiste){
         // Já existe localmente: traz de volta os campos que podem ter sido editados e salvos em outro dispositivo/sessão
         let mudou = false;
-        ['nivel','freq','telefone','objetivo','restricoes','academia','idade'].forEach(function(campo){
-          const valorBanco = row[campo];
-          if(valorBanco != null && valorBanco !== '' && jaExiste[campo] !== valorBanco){
-            jaExiste[campo] = valorBanco;
-            mudou = true;
-          }
-        });
         if(row.data_fechou_plano && jaExiste.dataFechouPlano !== row.data_fechou_plano){
           jaExiste.dataFechouPlano = row.data_fechou_plano;
           mudou = true;
@@ -10171,22 +10445,16 @@ async function sincronizarListaAlunasDoSupabase(){
           jaExiste.dataNascimento = dataNascConvertida;
           mudou = true;
         }
-        if(row.dados_extras && typeof row.dados_extras === 'object'){
-          Object.keys(row.dados_extras).forEach(function(campo){
-            const valorBanco = row.dados_extras[campo];
-            if(valorBanco != null && JSON.stringify(jaExiste[campo]) !== JSON.stringify(valorBanco)){
-              jaExiste[campo] = valorBanco;
-              mudou = true;
-            }
-          });
-        }
+        // colunas e dados_extras (plano manual, "entregue" do Controle, desafio...): o servidor manda, menos nas
+        // chaves em que esta tela tem mudança ainda não salva
+        if(aplicarPerfilDoBancoNaAluna(jaExiste, row)) mudou = true;
         if(row.auth_id && jaExiste.authId !== row.auth_id){ jaExiste.authId = row.auth_id; mudou = true; }
         if(row.senha_gerada && jaExiste.senhaGerada !== row.senha_gerada){ jaExiste.senhaGerada = row.senha_gerada; mudou = true; }
         if(mudou) atualizadas++;
         return;
       }
 
-      alunasPersonal.push({
+      const alunaNova = {
         nome: row.nome,
         email: row.email,
         telefone: row.telefone || '',
@@ -10206,7 +10474,11 @@ async function sincronizarListaAlunasDoSupabase(){
         recemChegadaDaAnamnese: true,
         authId: row.auth_id || null,
         senhaGerada: row.senha_gerada || null
-      });
+      };
+      alunasPersonal.push(alunaNova);
+      // Antes a aluna nova era montada só com as colunas e o dados_extras era IGNORADO: o "vencida", o "entregue"
+      // e tudo que fica ali só aparecia depois de uma segunda sincronização.
+      aplicarPerfilDoBancoNaAluna(alunaNova, row);
       novas++;
     });
 
@@ -12107,11 +12379,7 @@ async function loginAluna(){
     // Sempre traz o que o Personal ajustou depois (postura, patologia, direcionamento, etc.), mesmo
     // pra aluna que já existia antes — antes só acontecia pra aluna totalmente nova, e por isso os
     // ajustes feitos na ficha nunca chegavam em quem já estava cadastrada.
-    if(alunaLocal && alunaRow && alunaRow.dados_extras && typeof alunaRow.dados_extras === 'object'){
-      Object.keys(alunaRow.dados_extras).forEach(function(campo){
-        if(alunaRow.dados_extras[campo] != null) alunaLocal[campo] = alunaRow.dados_extras[campo];
-      });
-    }
+    if(alunaLocal && alunaRow) aplicarPerfilDoBancoNaAluna(alunaLocal, alunaRow);
     if(alunaLocal && alunaLocal.treinoAtual && alunaLocal.treinoAtual.dias){
       dias = alunaLocal.treinoAtual.dias;
     }
@@ -12499,8 +12767,8 @@ const PASSOS_TOUR = [
           || document.querySelector('#lista-dias-semana [data-feito="nao"]')
           || document.querySelector('#lista-dias-semana > div');
     },
-    texto: 'Treinou e esqueceu de registrar? Não precisa abrir o treino. Segure o dia por meio segundo e confirme: ele fica marcado como feito. Em cada dia ainda não registrado aparece o lembrete "segure pra marcar como feito".',
-    textoCentro: 'Treinou e esqueceu de registrar? Não precisa abrir o treino. Segure o dia por meio segundo e confirme: ele fica marcado como feito. Em cada dia ainda não registrado aparece o lembrete "segure pra marcar como feito".' },
+    texto: 'Treinou e esqueceu de registrar? Não precisa abrir o treino. Segure o dia por meio segundo e confirme: ele fica marcado como feito. Em cada dia ainda não registrado aparece o lembrete "segure pra marcar como feito". Registrou um dia sem querer? No mesmo dia, segure de novo o dia registrado e confirme pra desfazer.',
+    textoCentro: 'Treinou e esqueceu de registrar? Não precisa abrir o treino. Segure o dia por meio segundo e confirme: ele fica marcado como feito. Em cada dia ainda não registrado aparece o lembrete "segure pra marcar como feito". Registrou um dia sem querer? No mesmo dia, segure de novo o dia registrado e confirme pra desfazer.' },
 
   // ===== PARTE 3: DENTRO DO TREINO =====
   { parte: 3, preparar: tourIrParaTreino, seletor: '#cronometro-btn', titulo: 'Iniciar treino',
@@ -12524,8 +12792,8 @@ const PASSOS_TOUR = [
     texto: 'Anote a carga e as repetições da 1ª série. É isso que o sistema usa pra acompanhar a sua evolução e sugerir a carga da próxima semana.',
     textoCentro: 'Em cada exercício, anote a carga e as repetições da 1ª série. É isso que o sistema usa pra acompanhar a sua evolução e sugerir a carga da próxima semana.' },
   { parte: 3, preparar: tourExpandirExercicio, seletor: tourDentroDoExpandido('[onclick^="confirmarSerieExercicio("]'), titulo: 'Confirmar',
-    texto: 'Ao confirmar, o exercício fica travado e o sistema já mostra a carga sugerida pra próxima semana. Na semana seguinte, essa sugestão (aumentar, manter ou reduzir a carga) aparece aqui dentro, junto com o que você fez da última vez.',
-    textoCentro: 'Ao tocar em Confirmar, o exercício fica travado e o sistema já mostra a carga sugerida pra próxima semana. Na semana seguinte, essa sugestão (aumentar, manter ou reduzir a carga) aparece dentro do exercício, junto com o que você fez da última vez.' },
+    texto: 'Ao confirmar, o exercício fica travado e o sistema já mostra a carga sugerida pra próxima semana. Na semana seguinte, essa sugestão (aumentar, manter ou reduzir a carga) aparece aqui dentro, junto com o que você fez da última vez. Errou a carga ou as repetições? Toque em "Editar" ao lado do aviso de salvo e corrija.',
+    textoCentro: 'Ao tocar em Confirmar, o exercício fica travado e o sistema já mostra a carga sugerida pra próxima semana. Na semana seguinte, essa sugestão (aumentar, manter ou reduzir a carga) aparece dentro do exercício, junto com o que você fez da última vez. Errou a carga ou as repetições? Toque em "Editar" ao lado do aviso de salvo e corrija.' },
   { parte: 3, preparar: tourIrParaTreino, seletor: '[title="Ver opções parecidas"]', titulo: 'Opções parecidas',
     texto: 'Essa barrinha dourada no canto de cada exercício mostra opções parecidas da mesma região, com vídeo. É só pra referência: o seu treino oficial continua o mesmo até o seu personal ajustar.',
     textoCentro: 'Na lateral de cada exercício tem uma barrinha dourada que mostra opções parecidas da mesma região, com vídeo. É só pra referência: o seu treino oficial continua o mesmo até o seu personal ajustar.' },
@@ -12533,8 +12801,8 @@ const PASSOS_TOUR = [
     texto: 'Se o equipamento estiver ocupado, toque em "Ver alternativa". O app mostra uma opção, geralmente com halteres, pra você não perder o exercício.',
     textoCentro: 'Se o equipamento estiver ocupado, dentro do exercício tem o link "Ver alternativa". O app mostra uma opção, geralmente com halteres, pra você não perder o exercício.' },
   { parte: 3, preparar: tourIrParaTreino, seletor: '#btn-registrar-treino-dia', titulo: 'Registrar o treino',
-    texto: 'Quando terminar, toque em "Registrar treino de hoje". É ele que conta o dia como feito: alimenta a sua constância e o seu DNA Score, e deixa seu personal acompanhar. Você não precisa anotar a carga pra registrar, mas anotar é o que gera a sugestão de progressão. Se você confirmar 3 exercícios, o treino já é registrado sozinho.',
-    textoCentro: 'Quando terminar, toque em "Registrar treino de hoje", no fim do treino. É ele que conta o dia como feito: alimenta a sua constância e o seu DNA Score, e deixa seu personal acompanhar. Você não precisa anotar a carga pra registrar, mas anotar é o que gera a sugestão de progressão. Se você confirmar 3 exercícios, o treino já é registrado sozinho.' },
+    texto: 'Quando terminar, toque em "Registrar treino de hoje". É ele que conta o dia como feito: alimenta a sua constância e o seu DNA Score, e deixa seu personal acompanhar. Você não precisa anotar a carga pra registrar, mas anotar é o que gera a sugestão de progressão. Se você confirmar 3 exercícios, o treino já é registrado sozinho. Se registrar sem querer, no mesmo dia aparece "Registrei sem querer. Desfazer" logo abaixo do botão.',
+    textoCentro: 'Quando terminar, toque em "Registrar treino de hoje", no fim do treino. É ele que conta o dia como feito: alimenta a sua constância e o seu DNA Score, e deixa seu personal acompanhar. Você não precisa anotar a carga pra registrar, mas anotar é o que gera a sugestão de progressão. Se você confirmar 3 exercícios, o treino já é registrado sozinho. Se registrar sem querer, no mesmo dia aparece "Registrei sem querer. Desfazer" logo abaixo do botão.' },
   { parte: 3, titulo: 'Como foi o treino?',
     texto: 'Depois de registrar, aparece o formulário "Como foi o treino de hoje?". Conte se sentiu desconforto em algum exercício e qual foi a intensidade do treino, e deixe um comentário se quiser. Seu personal usa isso pra ajustar o seu treino.' },
 
@@ -12545,6 +12813,9 @@ const PASSOS_TOUR = [
   { parte: 4, preparar: tourIrParaProgresso, seletor: '#tour-chip-ontem', titulo: 'Esqueci de preencher ontem',
     texto: 'Esqueceu de preencher ontem? Toque aqui pra preencher o dia de ontem, que fica guardado na data certa. Manter os dias completos deixa o seu acompanhamento muito mais preciso.',
     textoCentro: 'Esqueceu de preencher ontem? Na tela de Progresso, o botão "Esqueci de preencher ontem" deixa você preencher o dia de ontem, que fica guardado na data certa. Manter os dias completos deixa o seu acompanhamento muito mais preciso.' },
+  { parte: 4, preparar: tourIrParaProgresso, seletor: '#hub-corrigir-registros', titulo: 'Corrigir meus registros',
+    texto: 'Preencheu algo errado? Aqui no fim da tela você corrige o check-in de nutrição, os feedbacks de treino e as respostas do Perfil DNA. O peso e a composição se corrigem na aba Composição, em "Minha evolução", e a Roda da Vida tem "Corrigir uma resposta" na própria aba.',
+    textoCentro: 'Preencheu algo errado? Na tela de Progresso, no fim, o bloco "Corrigir meus registros" deixa você corrigir o check-in de nutrição, os feedbacks de treino e as respostas do Perfil DNA. O peso e a composição se corrigem na aba Composição, em "Minha evolução", e a Roda da Vida tem "Corrigir uma resposta" na própria aba.' },
   { parte: 4, nomeParte: 'Pra terminar', preparar: tourIrParaInicio, seletor: '#botao-tutorial-home', titulo: 'Tudo pronto',
     texto: 'Pra rever este tutorial quando quiser, toque nesse botão com o ponto de interrogação. Uma dica final: na tela de entrada do app, marque a caixinha "Lembrar login neste aparelho" pra não precisar digitar e-mail e senha toda vez.',
     textoCentro: 'Pra rever este tutorial quando quiser, toque no botão com o ponto de interrogação, no canto de cima da tela Início. Uma dica final: na tela de entrada do app, marque a caixinha "Lembrar login neste aparelho" pra não precisar digitar e-mail e senha toda vez.' }
@@ -13116,11 +13387,7 @@ async function restaurarSessaoAtiva(){
       }
       // Mesma correção do login normal: sempre traz os ajustes mais recentes do Personal, mesmo pra
       // aluna que já existia antes de logar.
-      if(alunaLocal && alunaRow && alunaRow.dados_extras && typeof alunaRow.dados_extras === 'object'){
-        Object.keys(alunaRow.dados_extras).forEach(function(campo){
-          if(alunaRow.dados_extras[campo] != null) alunaLocal[campo] = alunaRow.dados_extras[campo];
-        });
-      }
+      if(alunaLocal && alunaRow) aplicarPerfilDoBancoNaAluna(alunaLocal, alunaRow);
       if(alunaLocal && alunaLocal.treinoAtual && alunaLocal.treinoAtual.dias){
         dias = alunaLocal.treinoAtual.dias;
       }
@@ -16027,9 +16294,11 @@ function renderMeuProgressoConteudo(container, nome, a){
     const max = Math.max.apply(null, historicoScore.map(function(r){ return r.score; }));
     const min = Math.min.apply(null, historicoScore.map(function(r){ return r.score; }));
     const faixa = Math.max(1, max - min);
-    html += '<div style="display:flex;align-items:flex-end;gap:6px;height:80px;padding:10px 0;">' +
+    // Sem altura fixa: o contêiner cresce com o conteúdo (barra mais o rótulo "S4" embaixo). Antes ele tinha 80px
+    // fixos e a barra mais alta chegava a 100px, então vazava pra fora e podia sobrepor a seção de baixo.
+    html += '<div style="display:flex;align-items:flex-end;gap:6px;padding:10px 0;">' +
       historicoScore.map(function(r){
-        const alturaPct = 20 + ((r.score - min) / faixa) * 80;
+        const alturaPct = 20 + ((r.score - min) / faixa) * 60; // de 20px (menor score) até 80px (maior)
         return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">' +
           '<div style="width:100%;height:' + alturaPct + 'px;background:linear-gradient(180deg,#F4D9A5,#E8C58A);border-radius:4px 4px 0 0;"></div>' +
           '<span style="font-size:9px;color:var(--text-faint);">S' + r.semana + '</span>' +
@@ -17415,6 +17684,12 @@ function resetarDadosTeste(){
 
 let veioDaListaDeTreinosDaSemana = false;
 async function sairDeVerdade(){
+  // Antes de sair, salva o que estiver esperando (o salvamento tem uma pequena espera de 500ms e, depois do signOut,
+  // não teria mais permissão pra gravar). Se alguma coisa NÃO conseguir ser salva, avisa em vez de perder em silêncio.
+  try {
+    const naoSalvas = await descarregarSalvamentosPendentes();
+    if(naoSalvas.length > 0 && !confirm('Algumas mudanças NÃO foram salvas no servidor: ' + naoSalvas.join(', ') + '.\n\nSe você sair agora, elas serão perdidas. Quer sair mesmo assim?')) return;
+  } catch(e){}
   try {
     if(supabaseClient) await supabaseClient.auth.signOut();
   } catch(e){}
