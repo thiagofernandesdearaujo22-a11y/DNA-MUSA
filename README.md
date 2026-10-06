@@ -1,4 +1,4 @@
-[dna_musa_117.html](https://github.com/user-attachments/files/33064114/dna_musa_117.html)
+[dna_musa_118.html](https://github.com/user-attachments/files/33082110/dna_musa_118.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -406,7 +406,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-01-A-DESAFIO-SUPERIORES</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-01-B-EDICAO-E-DESFAZER</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1607,7 +1607,7 @@ function abrirListaDeTreinosDaSemana(){
       '</div>' +
       '<div style="flex:1;min-width:0;">' +
         '<p style="font-size:13px;font-weight:600;margin:0 0 2px;">' + d.n + (d.hoje ? ' <span class="tag" style="margin-left:4px;">hoje</span>' : '') + (foiRegistrado ? ' <span class="tag" style="margin-left:4px;background:var(--success-soft);color:var(--success);">registrado</span>' : '') + '</p>' +
-        '<p style="font-size:12px;color:var(--text-faint);margin:0;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.foco + (foiRegistrado ? '' : ' · segure pra marcar como feito') + '</p>' +
+        '<p style="font-size:12px;color:var(--text-faint);margin:0;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.foco + (foiRegistrado ? (alunaPodeDesfazerDia(prog, d.n) ? ' · segure pra desfazer' : '') : ' · segure pra marcar como feito') + '</p>' +
       '</div>' +
       (foiRegistrado ? '<i class="ti ti-circle-check" style="color:var(--success);font-size:20px;flex-shrink:0;"></i>' : '<i class="ti ti-chevron-right" style="color:var(--text-faint);font-size:18px;flex-shrink:0;"></i>') +
     '</div>';
@@ -1631,9 +1631,77 @@ function cancelarPressionarDia(){
 }
 function confirmarRegistroRapidoDoDia(indice){
   const d = dias[indice];
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const jaRegistrado = (prog.diasConcluidos[prog.semana] || []).indexOf(d.n) !== -1;
+  if(jaRegistrado){
+    // Dia que já está feito: segurar passa a oferecer o DESFAZER (antes só registrava de novo, à toa)
+    if(alunaPodeDesfazerDia(prog, d.n)) desfazerRegistroDoDia(indice, 'lista');
+    else alert('Esse dia já está registrado. Se foi um engano, fala com o seu personal pra desfazer.');
+    return;
+  }
   if(confirm('Marcar "' + d.n + '" como feito, sem abrir o treino?')){
     registrarDiaRapido(indice);
   }
+}
+
+// ===== DESFAZER O REGISTRO DE UM DIA =====
+// Achado: nenhum caminho do app tirava um dia de "feito". Isso ficou mais arriscado com o segurar o dia e
+// com o registro automático no 3º exercício confirmado. Regra: a aluna desfaz só no MESMO DIA em que
+// registrou; o Personal desfaz sempre. Pra mudar a regra da aluna, é só trocar o valor abaixo:
+//   'mesmo-dia' (padrão) | 'sempre' | 'nunca' (só o Personal desfaz)
+const REGRA_DESFAZER_DIA_ALUNA = 'mesmo-dia';
+
+function mesmaDataLocal(iso, referencia){
+  const a = new Date(iso), b = referencia || new Date();
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+// A aluna pode desfazer esse dia? Só se está registrado nessa semana e a regra deixa
+function alunaPodeDesfazerDia(prog, nomeDia){
+  if(REGRA_DESFAZER_DIA_ALUNA === 'nunca') return false;
+  if((prog.diasConcluidos[prog.semana] || []).indexOf(nomeDia) === -1) return false;
+  if(REGRA_DESFAZER_DIA_ALUNA === 'sempre') return true;
+  return (prog.horariosTreino || []).some(function(h){ return h.dia === nomeDia && h.data && mesmaDataLocal(h.data); });
+}
+
+// Início e fim (em milissegundos) da semana do progresso, contando de segunda a segunda
+function intervaloDaSemanaDoProgresso(prog, semana){
+  const inicioAtual = prog.semanaIniciadaEm ? new Date(prog.semanaIniciadaEm) : obterInicioSemanaCalendario(new Date());
+  const inicio = new Date(inicioAtual.getTime() - (prog.semana - semana) * 7 * 86400000);
+  return { inicio: inicio.getTime(), fim: inicio.getTime() + 7 * 86400000 };
+}
+
+// Tira o dia de "feito" e também o(s) horário(s) desse registro, pra não sujar o padrão de horário de
+// treino dela. Pontos do ranking, constância e DNA são recalculados do estado, então se corrigem sozinhos.
+// As cargas confirmadas nos exercícios NÃO são apagadas (são dela, e continuam alimentando a progressão).
+function removerRegistroDoDia(prog, semana, nomeDia){
+  const lista = prog.diasConcluidos[semana] || [];
+  const i = lista.indexOf(nomeDia);
+  if(i === -1) return false;
+  lista.splice(i, 1);
+  if(prog.horariosTreino){
+    const faixa = intervaloDaSemanaDoProgresso(prog, semana);
+    prog.horariosTreino = prog.horariosTreino.filter(function(h){
+      if(h.dia !== nomeDia || !h.data) return true;
+      const t = new Date(h.data).getTime();
+      return !(t >= faixa.inicio && t < faixa.fim);
+    });
+  }
+  return true;
+}
+
+function desfazerRegistroDoDia(indice, origem){
+  const d = dias[indice];
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  if(!alunaPodeDesfazerDia(prog, d.n)){
+    alert('Esse registro só pode ser desfeito pelo seu personal.');
+    return;
+  }
+  if(!confirm('Desfazer o registro de "' + d.n + '"? O dia volta a ficar como não feito. As cargas que você confirmou nos exercícios continuam salvas.')) return;
+  removerRegistroDoDia(prog, prog.semana, d.n);
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  if(origem === 'detalhe') openDetail('dia', indice);
+  else abrirListaDeTreinosDaSemana();
 }
 // Avisa a EQUIPE (grupo de WhatsApp só de vocês, nunca o WhatsApp pessoal de ninguém) sempre que uma
 // aluna registra um treino — mais confiável que notificação de navegador (que no iPhone só funciona
@@ -2033,7 +2101,8 @@ function renderMinhaEvolucao(a){
   const container = document.getElementById('area-minha-evolucao');
   if(!container) return;
   const historico = (a && a.composicaoHistorico) || [];
-  if(historico.length === 0){
+  const temRegistros = a && (linhaDoTempoComposicao(a).length > 0 || indicesDosPesosMensais(a).length > 0);
+  if(!temRegistros){
     container.innerHTML = '<p class="txt" style="color:var(--text-faint);">Ainda sem histórico. Assim que você registrar novas informações, os valores anteriores ficam guardados aqui pra comparar.</p>';
     return;
   }
@@ -2050,16 +2119,300 @@ function renderMinhaEvolucao(a){
     html += '</div>';
   }
 
-  html += historico.slice().reverse().map(function(reg){
-    let linha = reg.data || ('Semana ' + reg.semana);
+  // Lista dos registros (o atual e os anteriores), agora com Editar e Apagar em cada um
+  html += htmlEditorPesoComposicao(a, 'aluna');
+  container.innerHTML = html;
+}
+
+// ===== PESO E COMPOSIÇÃO: EDITAR E APAGAR REGISTROS (aluna e Personal) =====
+// Achado: um peso ou uma composição digitados errado ficavam registrados pra sempre. Cada tentativa de
+// corrigir só criava OUTRO ponto no histórico, e o valor errado continuava alimentando o gráfico de peso e
+// a elegibilidade de mudança de fase. Agora cada registro tem Editar e Apagar. Editar SUBSTITUI o valor
+// (não cria outro). A aluna corrige o que registrou há pouco; o Personal corrige qualquer um.
+const JANELA_EDICAO_COMPOSICAO_ALUNA_DIAS = 31;  // composição: o que foi registrado nos últimos 31 dias
+const JANELA_EDICAO_PESO_ALUNA_SEMANAS = 4;      // peso do check-in mensal: o das últimas 4 semanas
+// Valores fora disso quase sempre são erro de digitação (625 em vez de 62,5): a edição pede pra conferir
+const LIMITES_VALORES_CORPORAIS = { peso: [20, 400], gordura: [3, 70], massaMagra: [10, 300], pesoMuscular: [5, 200] };
+const CAMPOS_COMPOSICAO = [
+  { chave: 'peso', rotulo: 'Peso (kg)', sufixo: 'peso' },
+  { chave: 'gordura', rotulo: '% de gordura', sufixo: 'gordura' },
+  { chave: 'massaMagra', rotulo: 'Massa magra (kg)', sufixo: 'massa' },
+  { chave: 'pesoMuscular', rotulo: 'Peso muscular (kg)', sufixo: 'muscular' }
+];
+
+function valorCorporalPlausivel(chave, valor){
+  const limites = LIMITES_VALORES_CORPORAIS[chave];
+  return !limites || (valor >= limites[0] && valor <= limites[1]);
+}
+
+// A aluna edita a própria ficha (obterAlunaLogadaOuCriar); o Personal edita a da aluna que está aberta
+function alunaDoEditorDePeso(nome){
+  const da = alunasPersonal.find(function(x){ return x.nome === nome; });
+  if(da) return da;
+  return nome === NOME_ALUNA_LOGADA ? obterAlunaLogadaOuCriar() : null;
+}
+
+// Junta o histórico e o registro atual numa lista só, do mais antigo pro mais novo
+function linhaDoTempoComposicao(a){
+  const lista = (a.composicaoHistorico || []).map(function(r, i){ return { ref: 'historico', indice: i, reg: r }; });
+  const atual = a.composicaoAtual;
+  if(atual && (atual.peso != null || atual.gordura != null || atual.massaMagra != null || atual.pesoMuscular != null)){
+    lista.push({ ref: 'atual', indice: -1, reg: atual });
+  }
+  return lista;
+}
+
+// Acha, no histórico de peso, o peso que nasceu junto com um registro de composição. Os registros novos
+// carregam a marca de origem ("composicao" ou "mensal"). Nos antigos, a "semana" do histórico de composição
+// guarda quando o registro foi SUBSTITUÍDO (não quando nasceu), então não serve pra casar: casa pelo valor,
+// na ordem em que aparecem. Se não achar com segurança, devolve -1 e nada do histórico de peso é tocado.
+function indicePesoPareado(a, item){
+  const pesos = a.pesoHistorico || [];
+  const alvo = item.reg.peso;
+  if(alvo == null) return -1;
+  const candidatos = [];
+  pesos.forEach(function(p, i){ if(p.peso === alvo && p.origem !== 'mensal') candidatos.push(i); });
+  if(candidatos.length === 0) return -1;
+  let ocorrencia = 0; // quantos registros ANTES desse tinham o mesmo peso
+  const linha = linhaDoTempoComposicao(a);
+  for(let k = 0; k < linha.length; k++){
+    if(linha[k].reg === item.reg) break;
+    if(linha[k].reg.peso === alvo) ocorrencia++;
+  }
+  return candidatos[Math.min(ocorrencia, candidatos.length - 1)];
+}
+
+// Pesos do histórico que NÃO nasceram de um registro de composição: os do check-in mensal (marcados) e os
+// antigos sem marca que não casam com nenhum registro de composição
+function indicesDosPesosMensais(a){
+  const pesos = a.pesoHistorico || [];
+  const usados = {};
+  linhaDoTempoComposicao(a).forEach(function(item){
+    const i = indicePesoPareado(a, item);
+    if(i !== -1) usados[i] = true;
+  });
+  const resultado = [];
+  pesos.forEach(function(p, i){
+    if(p.origem === 'mensal' || (!p.origem && !usados[i])) resultado.push(i);
+  });
+  return resultado;
+}
+
+function podeAlunaEditarRegistroComposicao(reg){
+  const d = converterDataBrParaDate(reg.data);
+  if(!d) return false; // sem data não dá pra saber se é recente: só o Personal mexe
+  return (Date.now() - d.getTime()) <= JANELA_EDICAO_COMPOSICAO_ALUNA_DIAS * 86400000;
+}
+
+function podeAlunaEditarPeso(a, p){
+  const prog = getProgressoAluna(a.nome);
+  return p.semana != null && (prog.semana - p.semana) <= JANELA_EDICAO_PESO_ALUNA_SEMANAS;
+}
+
+// Muda os valores de um registro (ref 'atual' ou 'historico'). novos = { peso, gordura, massaMagra,
+// pesoMuscular }, cada um número, null (limpar) ou ausente (não mexer). O peso, se mudou, também é
+// corrigido no histórico de peso (gráfico e elegibilidade de fase leem de lá).
+function editarRegistroComposicao(a, ref, indice, novos){
+  const reg = ref === 'atual' ? a.composicaoAtual : (a.composicaoHistorico || [])[indice];
+  if(!reg) return false;
+  const pesoAntigo = reg.peso;
+  // acha o peso pareado ANTES de mudar o registro (o casamento usa o valor antigo)
+  const iPareado = (novos.peso != null && pesoAntigo != null && novos.peso !== pesoAntigo) ? indicePesoPareado(a, { ref: ref, indice: indice, reg: reg }) : -1;
+  CAMPOS_COMPOSICAO.forEach(function(c){ if(novos[c.chave] !== undefined) reg[c.chave] = novos[c.chave]; });
+  reg.editadoEm = new Date().toISOString();
+  if(iPareado !== -1){
+    a.pesoHistorico[iPareado].peso = novos.peso;
+    a.pesoHistorico[iPareado].editadoEm = reg.editadoEm;
+  }
+  if(ref === 'atual' && novos.peso != null) a.pesoAtual = novos.peso; // usado no IMC, na mesma sessão
+  return true;
+}
+
+// Apaga um registro. Se for o ATUAL, o registro anterior volta a ser o atual (senão a tela ficaria sem peso).
+function apagarRegistroComposicao(a, ref, indice){
+  const reg = ref === 'atual' ? a.composicaoAtual : (a.composicaoHistorico || [])[indice];
+  if(!reg) return false;
+  const iPareado = indicePesoPareado(a, { ref: ref, indice: indice, reg: reg }); // antes de remover
+  if(ref === 'atual'){
+    a.composicaoAtual = (a.composicaoHistorico && a.composicaoHistorico.length) ? a.composicaoHistorico.pop() : null;
+    a.pesoAtual = (a.composicaoAtual && a.composicaoAtual.peso != null) ? a.composicaoAtual.peso : null;
+  } else {
+    a.composicaoHistorico.splice(indice, 1);
+  }
+  if(iPareado !== -1) a.pesoHistorico.splice(iPareado, 1);
+  return true;
+}
+
+function editarPesoMensal(a, indice, novoPeso){
+  const p = (a.pesoHistorico || [])[indice];
+  if(!p) return false;
+  p.peso = novoPeso;
+  p.editadoEm = new Date().toISOString();
+  return true;
+}
+function apagarPesoMensal(a, indice){
+  if(!a.pesoHistorico || !a.pesoHistorico[indice]) return false;
+  a.pesoHistorico.splice(indice, 1);
+  return true;
+}
+
+function dataCurtaEditado(iso){
+  return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+}
+
+function htmlEditorPesoComposicao(a, ctx){
+  const ehPersonal = ctx === 'personal';
+  const nomeSeguro = a.nome.replace(/'/g, "\\'");
+  const linkAcao = 'cursor:pointer;font-size:12px;text-decoration:underline;';
+  let html = '';
+
+  const registros = linhaDoTempoComposicao(a).slice().reverse(); // mais recente primeiro
+  html += registros.map(function(item){
+    const reg = item.reg;
+    const idBase = 'edit-comp-' + ctx + '-' + item.ref + '-' + item.indice;
     const partes = [];
     if(reg.peso != null) partes.push(String(reg.peso).replace('.', ',') + ' kg');
     if(reg.gordura != null) partes.push(String(reg.gordura).replace('.', ',') + '% gordura');
     if(reg.massaMagra != null) partes.push(String(reg.massaMagra).replace('.', ',') + ' kg massa magra');
     if(reg.pesoMuscular != null) partes.push(String(reg.pesoMuscular).replace('.', ',') + ' kg peso muscular');
-    return '<div class="info-box" style="margin-bottom:8px;"><p class="lbl">' + linha + '</p><p class="txt">' + (partes.join(' · ') || 'sem detalhe') + '</p></div>';
+    const titulo = (item.ref === 'atual' ? 'Registro atual · ' : '') + (reg.data || ('Semana ' + reg.semana));
+    const pode = ehPersonal || podeAlunaEditarRegistroComposicao(reg);
+    const editado = reg.editadoEm ? ' <span style="font-weight:400;color:var(--text-faint);">· editado em ' + dataCurtaEditado(reg.editadoEm) + '</span>' : '';
+    let acoes = '';
+    if(pode){
+      acoes = '<div style="display:flex;gap:14px;margin-top:6px;">' +
+          '<span style="' + linkAcao + 'color:var(--gold-soft);" onclick="abrirEdicaoComp(\'' + idBase + '\')">Editar</span>' +
+          '<span style="' + linkAcao + 'color:#C9784A;" onclick="apagarComp(\'' + ctx + '\',\'' + nomeSeguro + '\',\'' + item.ref + '\',' + item.indice + ')">Apagar</span>' +
+        '</div>' +
+        '<div id="' + idBase + '-form" style="display:none;margin-top:8px;">' +
+          CAMPOS_COMPOSICAO.map(function(c){
+            return '<div class="form-group" style="margin-bottom:6px;"><label class="form-label" style="font-size:11px;">' + c.rotulo + '</label>' +
+              '<input class="form-input" id="' + idBase + '-' + c.sufixo + '" type="text" inputmode="decimal" value="' + (reg[c.chave] != null ? String(reg[c.chave]).replace('.', ',') : '') + '"></div>';
+          }).join('') +
+          '<div style="display:flex;gap:8px;"><button class="btn-gold" style="flex:1;margin:0;padding:8px;" onclick="salvarEdicaoComp(\'' + ctx + '\',\'' + nomeSeguro + '\',\'' + item.ref + '\',' + item.indice + ')">Salvar</button>' +
+          '<button class="btn-secondary" style="flex:1;margin:0;padding:8px;" onclick="abrirEdicaoComp(\'' + idBase + '\')">Cancelar</button></div>' +
+        '</div>';
+    } else {
+      acoes = '<p class="txt" style="font-size:11px;color:var(--text-faint);margin:6px 0 0;">Registro antigo: pra corrigir, fala com o seu personal.</p>';
+    }
+    return '<div class="info-box" style="margin-bottom:8px;"><p class="lbl">' + titulo + editado + '</p><p class="txt">' + (partes.join(' · ') || 'sem detalhe') + '</p>' + acoes + '</div>';
   }).join('');
-  container.innerHTML = html;
+
+  // Pesos do check-in mensal (não fazem parte de um registro de composição)
+  const mensais = indicesDosPesosMensais(a);
+  if(mensais.length > 0){
+    html += '<p class="lbl" style="margin:14px 0 6px;">Pesos do check-in mensal</p>';
+    html += mensais.slice().reverse().map(function(i){
+      const p = a.pesoHistorico[i];
+      const idBase = 'edit-pesomensal-' + ctx + '-' + i;
+      const pode = ehPersonal || podeAlunaEditarPeso(a, p);
+      const editado = p.editadoEm ? ' <span style="color:var(--text-faint);">· editado em ' + dataCurtaEditado(p.editadoEm) + '</span>' : '';
+      let acoes = '';
+      if(pode){
+        acoes = '<span style="display:flex;gap:14px;flex-shrink:0;">' +
+            '<span style="' + linkAcao + 'color:var(--gold-soft);" onclick="abrirEdicaoComp(\'' + idBase + '\')">Editar</span>' +
+            '<span style="' + linkAcao + 'color:#C9784A;" onclick="apagarPesoMensalComp(\'' + ctx + '\',\'' + nomeSeguro + '\',' + i + ')">Apagar</span></span>';
+      }
+      return '<div class="list-item" style="flex-wrap:wrap;"><span>Semana ' + p.semana + ' · ' + String(p.peso).replace('.', ',') + ' kg' + editado + '</span>' + acoes + '</div>' +
+        (pode ? '<div id="' + idBase + '-form" style="display:none;margin:4px 0 8px;"><div class="form-group" style="margin-bottom:6px;"><input class="form-input" id="' + idBase + '-peso" type="text" inputmode="decimal" value="' + String(p.peso).replace('.', ',') + '"></div>' +
+          '<div style="display:flex;gap:8px;"><button class="btn-gold" style="flex:1;margin:0;padding:8px;" onclick="salvarEdicaoPesoMensalComp(\'' + ctx + '\',\'' + nomeSeguro + '\',' + i + ')">Salvar</button>' +
+          '<button class="btn-secondary" style="flex:1;margin:0;padding:8px;" onclick="abrirEdicaoComp(\'' + idBase + '\')">Cancelar</button></div></div>' : '');
+    }).join('');
+  }
+  return html;
+}
+
+function reRenderizarEditorPesoComposicao(ctx, a){
+  if(ctx === 'aluna'){ renderComposicaoAtual(a); renderMinhaEvolucao(a); }
+  else {
+    const area = document.getElementById('editor-peso-composicao-personal');
+    if(area) area.innerHTML = htmlEditorPesoComposicao(a, 'personal');
+  }
+}
+
+function abrirEdicaoComp(idBase){
+  const f = document.getElementById(idBase + '-form');
+  if(f) f.style.display = (f.style.display === 'none') ? 'block' : 'none';
+}
+
+function lerCampoCorporal(idCampo, chave){
+  const el = document.getElementById(idCampo);
+  const texto = el ? String(el.value).trim() : '';
+  if(texto === '') return { vazio: true };
+  const n = parseCargaBR(texto);
+  if(isNaN(n)) return { invalido: true };
+  if(!valorCorporalPlausivel(chave, n)) return { foraDoNormal: true, valor: n };
+  return { valor: n };
+}
+
+function salvarEdicaoComp(ctx, nomeAluna, ref, indice){
+  const a = alunaDoEditorDePeso(nomeAluna);
+  if(!a) return;
+  const idBase = 'edit-comp-' + ctx + '-' + ref + '-' + indice;
+  const novos = {};
+  for(let k = 0; k < CAMPOS_COMPOSICAO.length; k++){
+    const c = CAMPOS_COMPOSICAO[k];
+    const leitura = lerCampoCorporal(idBase + '-' + c.sufixo, c.chave);
+    if(leitura.invalido){ alert('Confere o campo "' + c.rotulo + '": use só números (com vírgula ou ponto).'); return; }
+    if(leitura.foraDoNormal){ alert('O valor de "' + c.rotulo + '" (' + String(leitura.valor).replace('.', ',') + ') parece fora do normal. Confere se não foi erro de digitação.'); return; }
+    novos[c.chave] = leitura.vazio ? null : leitura.valor;
+  }
+  if(novos.peso == null){ alert('O peso não pode ficar vazio. Se o registro está errado e você quer tirar, use "Apagar".'); return; }
+  if(ctx === 'aluna'){
+    const reg = ref === 'atual' ? a.composicaoAtual : (a.composicaoHistorico || [])[indice];
+    if(!reg || !podeAlunaEditarRegistroComposicao(reg)){ alert('Esse registro só pode ser corrigido pelo seu personal.'); return; }
+  }
+  if(!editarRegistroComposicao(a, ref, indice, novos)) return;
+  salvarPerfilAlunaNoSupabase(a.nome);
+  reRenderizarEditorPesoComposicao(ctx, a);
+}
+
+function apagarComp(ctx, nomeAluna, ref, indice){
+  const a = alunaDoEditorDePeso(nomeAluna);
+  if(!a) return;
+  const reg = ref === 'atual' ? a.composicaoAtual : (a.composicaoHistorico || [])[indice];
+  if(!reg) return;
+  if(ctx === 'aluna' && !podeAlunaEditarRegistroComposicao(reg)){ alert('Esse registro só pode ser apagado pelo seu personal.'); return; }
+  const msg = ref === 'atual'
+    ? 'Apagar o registro atual? O registro anterior volta a ser o atual.'
+    : 'Apagar esse registro do histórico?';
+  if(!confirm(msg)) return;
+  if(!apagarRegistroComposicao(a, ref, indice)) return;
+  salvarPerfilAlunaNoSupabase(a.nome);
+  reRenderizarEditorPesoComposicao(ctx, a);
+}
+
+function salvarEdicaoPesoMensalComp(ctx, nomeAluna, indice){
+  const a = alunaDoEditorDePeso(nomeAluna);
+  if(!a) return;
+  const p = (a.pesoHistorico || [])[indice];
+  if(!p) return;
+  if(ctx === 'aluna' && !podeAlunaEditarPeso(a, p)){ alert('Esse peso só pode ser corrigido pelo seu personal.'); return; }
+  const leitura = lerCampoCorporal('edit-pesomensal-' + ctx + '-' + indice + '-peso', 'peso');
+  if(leitura.vazio || leitura.invalido){ alert('Confere o peso: use só números (com vírgula ou ponto).'); return; }
+  if(leitura.foraDoNormal){ alert('O peso (' + String(leitura.valor).replace('.', ',') + ') parece fora do normal. Confere se não foi erro de digitação.'); return; }
+  editarPesoMensal(a, indice, leitura.valor);
+  salvarPerfilAlunaNoSupabase(a.nome);
+  reRenderizarEditorPesoComposicao(ctx, a);
+}
+
+function apagarPesoMensalComp(ctx, nomeAluna, indice){
+  const a = alunaDoEditorDePeso(nomeAluna);
+  if(!a) return;
+  const p = (a.pesoHistorico || [])[indice];
+  if(!p) return;
+  if(ctx === 'aluna' && !podeAlunaEditarPeso(a, p)){ alert('Esse peso só pode ser apagado pelo seu personal.'); return; }
+  if(!confirm('Apagar esse peso do histórico?')) return;
+  apagarPesoMensal(a, indice);
+  salvarPerfilAlunaNoSupabase(a.nome);
+  reRenderizarEditorPesoComposicao(ctx, a);
+}
+
+// Bloco na ficha do Personal: os mesmos registros da aluna, com Editar e Apagar sem limite de prazo
+function renderEditorPesoComposicaoPersonal(a){
+  const conteudo = htmlEditorPesoComposicao(a, 'personal');
+  return '<p class="section-label" style="margin-top:22px;">Peso e composição (corrigir registros)</p>' +
+    '<div id="editor-peso-composicao-personal">' + (conteudo || '<p class="txt" style="color:var(--text-faint);">Ela ainda não registrou peso nem composição.</p>') + '</div>';
 }
 
 // ===== Fluxo de registro de novas informações de composição =====
@@ -2082,7 +2435,8 @@ function avancarRegistroComposicao(){
 
   if(estado.etapa === 'peso'){
     const peso = parseCargaBR(document.getElementById('input-composicao-peso').value);
-    if(isNaN(peso)) return;
+    if(isNaN(peso)){ alert('Digita o seu peso em números, por exemplo 62,5.'); return; }
+    if(!valorCorporalPlausivel('peso', peso)){ alert('O peso digitado (' + String(peso).replace('.', ',') + ') parece fora do normal. Confere se não foi erro de digitação.'); return; }
     estado.peso = peso;
     estado.etapa = 'avaliacao';
     container.innerHTML = '<p class="lbl">Foi feita alguma avaliação física recentemente?</p>' +
@@ -2174,13 +2528,13 @@ function finalizarRegistroComposicao(){
   // Cruza com o resto do sistema: mantém a.peso/a.pesoAtual atualizados, usados no cálculo de IMC e DNA
   a.pesoAtual = estado.peso;
   if(!a.pesoHistorico) a.pesoHistorico = [];
-  a.pesoHistorico.push({ semana: prog.semana, peso: estado.peso });
+  a.pesoHistorico.push({ semana: prog.semana, peso: estado.peso, origem: 'composicao' });
 
   salvarPerfilAlunaNoSupabase(a.nome);
 
   registroComposicaoEmAndamento = null;
   const container = document.getElementById('area-registro-composicao');
-  container.innerHTML = '<p class="txt" style="color:var(--success);">Registrado! Isso já entra nos seus cálculos de composição e evolução.</p>';
+  container.innerHTML = '<p class="txt" style="color:var(--success);">Registrado! Isso já entra nos seus cálculos de composição e evolução. Se digitou algo errado, dá pra corrigir logo abaixo, em Minha evolução.</p>';
   renderComposicaoAtual(a);
   renderMinhaEvolucao(a);
 }
@@ -4095,14 +4449,15 @@ function registrarPesoMensal(mes){
   const alunaAtual = obterAlunaLogadaOuCriar();
   const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
   const peso = parseCargaBR(document.getElementById('peso-atual-input').value);
-  if(isNaN(peso)) return;
+  if(isNaN(peso)){ alert('Digita o seu peso em números, por exemplo 62,5.'); return; }
+  if(!valorCorporalPlausivel('peso', peso)){ alert('O peso digitado (' + String(peso).replace('.', ',') + ') parece fora do normal. Confere se não foi erro de digitação.'); return; }
   if(!prog.pesoChecks) prog.pesoChecks = {};
   prog.pesoChecks[mes] = true;
   if(!alunaAtual.pesoHistorico) alunaAtual.pesoHistorico = [];
-  alunaAtual.pesoHistorico.push({ semana: prog.semana, peso: peso });
+  alunaAtual.pesoHistorico.push({ semana: prog.semana, peso: peso, origem: 'mensal' });
   salvarPerfilAlunaNoSupabase(NOME_ALUNA_LOGADA);
   const el = document.getElementById('area-peso');
-  if(el) el.innerHTML = '<p class="txt">Peso registrado! Isso já entra no cálculo de elegibilidade de mudança de fase.</p>';
+  if(el) el.innerHTML = '<p class="txt">Peso registrado! Isso já entra no cálculo de elegibilidade de mudança de fase. Se digitou errado, dá pra corrigir na aba Composição, em Minha evolução.</p>';
 }
 
 function extrairExercicios(a){
@@ -4921,6 +5276,83 @@ function avancarTodasEstruturaSecaEmpina(){
   renderListaSecaEmpina();
 }
 
+// ===== EDITAR A INSCRIÇÃO NO DESAFIO (frequência e estrutura atual) =====
+// Antes, depois de inscrita, frequência e estrutura inicial não mudavam mais: o único caminho pra corrigir
+// um erro era REMOVER a aluna e inscrever de novo, o que apagava os treinos do desafio dela.
+function idDaAlunaNoDesafio(nome){ return nome.replace(/[^a-zA-Z0-9]/g, ''); }
+
+function htmlFormEdicaoInscricaoDesafio(a){
+  const id = idDaAlunaNoDesafio(a.nome);
+  const nomeSeguro = a.nome.replace(/'/g, "\\'");
+  let opcoesEstrutura = '';
+  for(let k = 1; k <= 10; k++){
+    opcoesEstrutura += '<option value="' + k + '"' + (a.desafioAtivo.estruturaAtual === k ? ' selected' : '') + '>Estrutura ' + k + '</option>';
+  }
+  return '<div id="editar-desafio-' + id + '" style="display:none;margin:0 0 8px;" class="info-box">' +
+    '<div class="form-group"><label class="form-label">Frequência</label><select class="form-select" id="se-edit-freq-' + id + '">' +
+      '<option value="5"' + (a.desafioAtivo.frequencia !== 3 ? ' selected' : '') + '>5x por semana</option>' +
+      '<option value="3"' + (a.desafioAtivo.frequencia === 3 ? ' selected' : '') + '>3x por semana</option></select></div>' +
+    '<div class="form-group"><label class="form-label">Estrutura atual</label><select class="form-select" id="se-edit-estrutura-' + id + '">' + opcoesEstrutura + '</select></div>' +
+    '<div style="display:flex;gap:8px;"><button class="btn-gold" style="flex:1;margin:0;padding:8px;" onclick="salvarEdicaoInscricaoDesafio(\'' + nomeSeguro + '\')">Salvar</button>' +
+    '<button class="btn-secondary" style="flex:1;margin:0;padding:8px;" onclick="abrirEdicaoInscricaoDesafio(\'' + nomeSeguro + '\')">Cancelar</button></div>' +
+  '</div>';
+}
+
+function abrirEdicaoInscricaoDesafio(nomeAluna){
+  const f = document.getElementById('editar-desafio-' + idDaAlunaNoDesafio(nomeAluna));
+  if(f) f.style.display = (f.style.display === 'none') ? 'block' : 'none';
+}
+
+// O que vai acontecer, em frases, pra mostrar na confirmação ANTES de aplicar
+function descreverEdicaoInscricaoDesafio(a, novos){
+  const d = a.desafioAtivo;
+  const freqNova = novos.frequencia === 3 ? 3 : 5;
+  const estNova = Math.max(1, Math.min(10, parseInt(novos.estruturaAtual, 10) || d.estruturaAtual));
+  const linhas = [];
+  if(d.frequencia !== freqNova){
+    linhas.push('Frequência: de ' + d.frequencia + 'x para ' + freqNova + 'x. As semanas dela serão geradas de novo pra ' + freqNova + 'x. Os dias que ela já marcou como feitos continuam marcados, mas o treino de cada dia muda.');
+  }
+  if(d.estruturaAtual !== estNova){
+    linhas.push('Estrutura: da ' + d.estruturaAtual + ' para a ' + estNova + '.' + (estNova < d.estruturaAtual ? ' As estruturas acima da ' + estNova + ' ficam guardadas, mas ela só vê até a ' + estNova + '.' : '') + ' A contagem dos 30 dias até a próxima estrutura recomeça de hoje.');
+  }
+  return linhas;
+}
+
+// Aplica a edição. Frequência nova: as semanas são geradas de novo. Estrutura nova: as que faltam são geradas
+// e as que já existem não são mexidas. Mexer na estrutura reinicia a contagem dos 30 dias: sem isso, uma
+// correção pra baixo seria desfeita no próximo acesso dela pelo avanço automático.
+function editarInscricaoDesafio(a, novos){
+  if(!a || !a.desafioAtivo) return null;
+  const d = a.desafioAtivo;
+  const freqNova = novos.frequencia === 3 ? 3 : 5;
+  const estNova = Math.max(1, Math.min(10, parseInt(novos.estruturaAtual, 10) || d.estruturaAtual));
+  const resumo = { frequenciaMudou: d.frequencia !== freqNova, estruturaMudou: d.estruturaAtual !== estNova };
+  if(!resumo.frequenciaMudou && !resumo.estruturaMudou) return resumo;
+  d.frequencia = freqNova;
+  d.estruturaAtual = estNova;
+  if(resumo.estruturaMudou) d.dataUltimaVirada = new Date().toISOString();
+  d.editadoEm = new Date().toISOString();
+  if(resumo.frequenciaMudou) a.desafioTreinos = {}; // semanas de outra frequência não servem mais
+  garantirEstruturasDoDesafio(a);
+  return resumo;
+}
+
+function salvarEdicaoInscricaoDesafio(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !a.desafioAtivo) return;
+  const id = idDaAlunaNoDesafio(nomeAluna);
+  const novos = {
+    frequencia: parseInt(document.getElementById('se-edit-freq-' + id).value, 10),
+    estruturaAtual: parseInt(document.getElementById('se-edit-estrutura-' + id).value, 10)
+  };
+  const linhas = descreverEdicaoInscricaoDesafio(a, novos);
+  if(linhas.length === 0){ abrirEdicaoInscricaoDesafio(nomeAluna); return; } // nada mudou, só fecha
+  if(!confirm('Editar a inscrição de ' + nomeAluna + ' no desafio?\n\n' + linhas.join('\n\n'))) return;
+  editarInscricaoDesafio(a, novos);
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+  renderListaSecaEmpina();
+}
+
 function removerAlunaDoSecaEmpina(nomeAluna){
   if(!confirm('Tirar ' + nomeAluna + ' do desafio Seca e Empina?')) return;
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
@@ -5271,8 +5703,9 @@ function renderListaSecaEmpina(){
     return '<div class="list-item" style="margin-bottom:6px;">' +
       '<span>' + a.nome + ' <span class="tag">Estrutura ' + a.desafioAtivo.estruturaAtual + '/10 · ' + a.desafioAtivo.frequencia + 'x · dia ' + diasNoDesafio + '</span></span>' +
       '<span style="display:flex;gap:6px;"><span class="acao-pill" onclick="verTreinoDesafioDaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Ver treino</span>' +
+      '<span class="acao-pill" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="abrirEdicaoInscricaoDesafio(\'' + a.nome.replace(/'/g,"\\'") + '\')">Editar</span>' +
       '<span class="acao-pill" style="background:var(--danger);" onclick="removerAlunaDoSecaEmpina(\'' + a.nome.replace(/'/g,"\\'") + '\')">Remover</span></span>' +
-    '</div><div id="ver-desafio-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '"></div>';
+    '</div>' + htmlFormEdicaoInscricaoDesafio(a) + '<div id="ver-desafio-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '"></div>';
   }).join('') +
   '<button class="btn-secondary" style="margin-top:8px;" onclick="avancarTodasEstruturaSecaEmpina()">Avançar todas pra próxima estrutura agora</button>';
 }
@@ -5331,6 +5764,7 @@ function abrirEstruturaDesafio(numeroEstrutura){
       '<p class="lbl" style="margin:0 0 6px;">' + d.n + (d.tipo === 'superior' ? ' <span class="tag">Superiores</span>' : '') + (feito ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">feito</span>' : '') + '</p>' +
       d.ex.map(function(linha){ return '<p class="txt" style="font-size:12.5px;margin:3px 0;">' + htmlLinhaExercicioDesafio(linha, d) + '</p>'; }).join('') +
       '<button class="btn-gold" style="margin-top:10px;' + (feito ? 'background:var(--success);color:#fff;' : '') + '" onclick="marcarDiaDesafioFeito(' + numeroEstrutura + ',' + i + ')">' + (feito ? '✓ Treino registrado' : 'Registrar treino de hoje') + '</button>' +
+      (feito && alunaPodeDesfazerDiaDesafio(prog, numeroEstrutura, d.n) ? '<p class="txt" style="font-size:11.5px;text-align:center;color:var(--text-faint);margin:8px 0 0;cursor:pointer;text-decoration:underline;" onclick="desfazerDiaDesafio(' + numeroEstrutura + ',' + i + ')">Registrei sem querer. Desfazer</p>' : '') +
     '</div>';
   }).join('');
 }
@@ -5344,8 +5778,37 @@ function marcarDiaDesafioFeito(numeroEstrutura, indiceDia){
   const chaveEstrutura = 'estrutura' + numeroEstrutura;
   if(!prog.desafioDiasConcluidos[chaveEstrutura]) prog.desafioDiasConcluidos[chaveEstrutura] = [];
   if(prog.desafioDiasConcluidos[chaveEstrutura].indexOf(d.n) === -1) prog.desafioDiasConcluidos[chaveEstrutura].push(d.n);
+  // Carimbo de quando registrou: é com ele que o desfazer sabe se ainda é "o mesmo dia"
+  if(!prog.desafioRegistroEm) prog.desafioRegistroEm = {};
+  prog.desafioRegistroEm[chaveEstrutura + '|' + d.n] = new Date().toISOString();
   salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
   abrirEstruturaDesafio(numeroEstrutura); // recarrega já mostrando o dia verde
+}
+
+function alunaPodeDesfazerDiaDesafio(prog, numeroEstrutura, nomeDia){
+  if(REGRA_DESFAZER_DIA_ALUNA === 'nunca') return false;
+  const chave = 'estrutura' + numeroEstrutura;
+  if(((prog.desafioDiasConcluidos || {})[chave] || []).indexOf(nomeDia) === -1) return false;
+  if(REGRA_DESFAZER_DIA_ALUNA === 'sempre') return true;
+  const quando = (prog.desafioRegistroEm || {})[chave + '|' + nomeDia];
+  return !!quando && mesmaDataLocal(quando);
+}
+
+function desfazerDiaDesafio(numeroEstrutura, indiceDia){
+  const a = obterAlunaLogadaOuCriar();
+  const d = a.desafioTreinos[numeroEstrutura].dias[indiceDia];
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  if(!alunaPodeDesfazerDiaDesafio(prog, numeroEstrutura, d.n)){
+    alert('Esse registro só pode ser desfeito pelo seu personal.');
+    return;
+  }
+  if(!confirm('Desfazer o registro de "' + d.n + '"? O dia volta a ficar como não feito.')) return;
+  const chave = 'estrutura' + numeroEstrutura;
+  const lista = prog.desafioDiasConcluidos[chave];
+  lista.splice(lista.indexOf(d.n), 1);
+  if(prog.desafioRegistroEm) delete prog.desafioRegistroEm[chave + '|' + d.n];
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  abrirEstruturaDesafio(numeroEstrutura);
 }
 
 // Verifica se já passaram 30 dias desde a última virada de estrutura, e avança sozinho se sim —
@@ -5424,9 +5887,9 @@ function htmlRespostasPerguntasPerfil(nomeAluna){
   if(respondidas.length === 0) return '<p class="txt" style="color:var(--text-faint);">Ainda sem nenhuma resposta.</p>';
   return respondidas.slice().reverse().map(function(r){
     const data = new Date(r.data).toLocaleDateString('pt-BR');
-    return '<div class="info-box" style="margin-bottom:6px;"><p class="txt" style="font-size:11.5px;color:var(--text-faint);margin:0 0 4px;">' + data + '</p>' +
-      '<p class="txt" style="font-size:12.5px;font-weight:600;margin:0 0 4px;">' + r.texto + '</p>' +
-      '<p class="txt" style="font-size:12.5px;">' + r.resposta + '</p></div>';
+    return '<div class="info-box" style="margin-bottom:6px;"><p class="txt" style="font-size:11.5px;color:var(--text-faint);margin:0 0 4px;">' + data + (r.editadoEm ? ' · editada pela aluna em ' + new Date(r.editadoEm).toLocaleDateString('pt-BR') : '') + '</p>' +
+      '<p class="txt" style="font-size:12.5px;font-weight:600;margin:0 0 4px;">' + escaparHtmlFicha(r.texto) + '</p>' +
+      '<p class="txt" style="font-size:12.5px;">' + escaparHtmlFicha(r.resposta) + '</p></div>';
   }).join('');
 }
 
@@ -6880,6 +7343,11 @@ async function executarSalvamentoPerfilAluna(nomeAluna){
         progressaoManualForcada: a.progressaoManualForcada || 0,
         composicaoHistorico: a.composicaoHistorico || [],
         pesoHistorico: a.pesoHistorico || [],
+        // Peso e altura iniciais (e o IMC calculado deles) nunca eram salvos: ao carregar alunas do banco o app
+        // não tinha esses três campos, então qualquer valor digitado na ficha sumiria ao recarregar.
+        peso: a.peso || null,
+        altura: a.altura || null,
+        imc: a.imc || null,
         statusControleCiclo: a.statusControleCiclo || null,
         dataFicouVerde: a.dataFicouVerde || null,
         ordemConclusaoCicloAtual: a.ordemConclusaoCicloAtual || null,
@@ -6981,6 +7449,93 @@ function editarEmailAluna(nomeAluna){
   const i = alunasPersonal.indexOf(a);
   openAlunaDetail(i);
   renderInfoCardGerarTreino(); // atualiza na hora o card "gerar/progredir" — se ela tava fora por falta de e-mail, já reflete que agora entra
+}
+
+// ===== FICHA: EDITAR OBJETIVO, RESTRIÇÕES, ACADEMIA, PESO E ALTURA =====
+// Achado: nome, e-mail, telefone e nascimento tinham como corrigir, mas objetivo, restrições, academia, peso e
+// altura não. Um erro de digitação na anamnese ficava na ficha pra sempre. Peso e altura são TEXTO na ficha
+// ("101 kg", "1,69 m") e o IMC também: ao mudar um deles, o IMC é recalculado (ele aciona a Fase de Emagrecimento).
+function escaparHtmlFicha(t){
+  return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function idDaFichaDaAluna(nome){ return nome.replace(/[^a-zA-Z0-9]/g, ''); }
+
+function htmlEditorTextoDaFicha(a, campo, rotulo){
+  const id = 'edit-ficha-' + campo + '-' + idDaFichaDaAluna(a.nome);
+  const nomeSeguro = a.nome.replace(/'/g, "\\'");
+  // "Nenhuma relatada" é a convenção do app pra "sem restrição": no campo de edição aparece vazio
+  const valor = (campo === 'restricoes' && /nenhuma/i.test(a[campo] || '')) ? '' : (a[campo] || '');
+  return '<p style="font-size:12px;color:var(--gold-soft);cursor:pointer;margin-top:10px;text-decoration:underline;" onclick="abrirEdicaoCampoFicha(\'' + id + '\')">Editar ' + rotulo + '</p>' +
+    '<div id="' + id + '-form" style="display:none;margin-top:6px;">' +
+      '<textarea class="form-input" id="' + id + '-campo" style="min-height:70px;font-size:13px;">' + escaparHtmlFicha(valor) + '</textarea>' +
+      (campo === 'restricoes' ? '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:4px;">Aqui você corrige o texto inteiro. Deixe vazio se ela não tem restrição. Pra acrescentar algo novo com a data de hoje, use "Relatar nova restrição" acima.</p>' : '') +
+      '<div style="display:flex;gap:8px;margin-top:6px;">' +
+        '<button class="btn-gold" style="flex:1;margin:0;padding:8px;font-size:12px;" onclick="salvarCampoTextoFicha(\'' + nomeSeguro + '\',\'' + campo + '\')">Salvar</button>' +
+        '<button class="btn-secondary" style="flex:1;margin:0;padding:8px;font-size:12px;" onclick="abrirEdicaoCampoFicha(\'' + id + '\')">Cancelar</button>' +
+      '</div>' +
+    '</div>';
+}
+
+function abrirEdicaoCampoFicha(id){
+  const f = document.getElementById(id + '-form');
+  if(f) f.style.display = (f.style.display === 'none') ? 'block' : 'none';
+}
+
+function salvarCampoTextoFicha(nomeAluna, campo){
+  if(['objetivo', 'restricoes', 'academia'].indexOf(campo) === -1) return;
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  const el = document.getElementById('edit-ficha-' + campo + '-' + idDaFichaDaAluna(nomeAluna) + '-campo');
+  let texto = el ? String(el.value).trim() : '';
+  if(campo === 'restricoes' && !texto) texto = 'Nenhuma relatada';
+  a[campo] = texto || null;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+  openAlunaDetail(alunasPersonal.indexOf(a));
+}
+
+function numeroDeTextoFicha(t){
+  const n = parseFloat(String(t == null ? '' : t).replace(',', '.').replace(/[^0-9.]/g, ''));
+  return isNaN(n) ? null : n;
+}
+function alturaDaFichaEmMetros(a){
+  const n = numeroDeTextoFicha(a.altura);
+  if(n == null) return null;
+  return n > 3 ? n / 100 : n; // quem digitou 169 queria dizer 1,69 m
+}
+function recalcularImcDaFicha(a){
+  const peso = a.peso ? numeroDeTextoFicha(a.peso) : null;
+  const altura = alturaDaFichaEmMetros(a);
+  if(!peso || !altura) return;
+  // Guarda só o número (ex: "28,3"). O texto antigo trazia uma anotação ("fase 1: ...") que ficaria errada.
+  a.imc = String(Math.round(peso / (altura * altura) * 10) / 10).replace('.', ',');
+}
+
+function editarPesoDaAluna(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  const campo = document.getElementById('dados-peso-' + idDaFichaDaAluna(nomeAluna));
+  const n = parseCargaBR(campo ? campo.value : '');
+  if(isNaN(n)){ alert('Digita o peso em números, por exemplo 62,5.'); return; }
+  if(!valorCorporalPlausivel('peso', n)){ alert('O peso (' + String(n).replace('.', ',') + ') parece fora do normal. Confere se não foi erro de digitação.'); return; }
+  a.peso = String(n).replace('.', ',') + ' kg';
+  recalcularImcDaFicha(a);
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+  openAlunaDetail(alunasPersonal.indexOf(a));
+}
+
+function editarAlturaDaAluna(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  const campo = document.getElementById('dados-altura-' + idDaFichaDaAluna(nomeAluna));
+  let n = parseCargaBR(campo ? campo.value : '');
+  if(isNaN(n)){ alert('Digita a altura em números, por exemplo 1,65.'); return; }
+  if(n > 3) n = n / 100; // 165 vira 1,65
+  if(n < 1 || n > 2.3){ alert('A altura (' + n.toFixed(2).replace('.', ',') + ' m) parece fora do normal. Confere se não foi erro de digitação.'); return; }
+  a.altura = n.toFixed(2).replace('.', ',') + ' m';
+  recalcularImcDaFicha(a);
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+  openAlunaDetail(alunasPersonal.indexOf(a));
 }
 
 function editarTelefoneAluna(nomeAluna){
@@ -8536,9 +9091,9 @@ function abrirResumoCompletoAluna(nomeAluna){
     renderSecaoColapsavel('Diagnóstico da metodologia', htmlDiagnostico, 'resumocompleto-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderAvaliacaoPostural(a) +
     renderSecaoColapsavel('Pirâmide de prioridade (resposta original)', '<div class="info-box"><p class="txt">' + (a.piramide || 'Não respondida') + '</p></div>', 'piramideorig-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
-    renderSecaoColapsavel('Objetivo com a consultoria', '<div class="info-box"><p class="txt">' + (a.objetivo || 'Não informado') + '</p></div>', 'objetivo-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
-    renderSecaoColapsavel('Restrições / lesões relatadas', '<div class="info-box"><p class="txt">' + a.restricoes + '</p></div>' + queixaHtml + renderFormularioRelatarRestricao(a.nome), 'restricoes-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
-    renderSecaoColapsavel('Academia', '<div class="info-box"><p class="txt">' + (a.academia || 'Não informado') + '</p></div>', 'academia-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderSecaoColapsavel('Objetivo com a consultoria', '<div class="info-box"><p class="txt">' + (a.objetivo || 'Não informado') + '</p></div>' + htmlEditorTextoDaFicha(a, 'objetivo', 'o objetivo'), 'objetivo-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderSecaoColapsavel('Restrições / lesões relatadas', '<div class="info-box"><p class="txt">' + a.restricoes + '</p></div>' + queixaHtml + renderFormularioRelatarRestricao(a.nome) + htmlEditorTextoDaFicha(a, 'restricoes', 'as restrições'), 'restricoes-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
+    renderSecaoColapsavel('Academia', '<div class="info-box"><p class="txt">' + (a.academia || 'Não informado') + '</p></div>' + htmlEditorTextoDaFicha(a, 'academia', 'a academia'), 'academia-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Plano fechado', renderPlanoFechadoConteudo(a), 'planofechado-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Transformar um dia em Tabata de casa', renderFerramentaTabata(a), 'tabata-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Calendário de treinos', renderCalendarioTreinos(a.nome), 'calendario-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
@@ -8549,6 +9104,8 @@ function abrirResumoCompletoAluna(nomeAluna){
         (!a.email ? '<p class="txt" style="font-size:11px;color:#E2A33D;margin-top:4px;">Sem e-mail, ela não entra na geração/progressão em massa até isso ser preenchido</p>' : '') +
       '</div>' +
       '<div class="form-group" style="margin-top:14px;"><label class="form-label">Telefone</label><input class="form-input" id="dados-telefone-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" value="' + (a.telefone || '').replace(/"/g,'&quot;') + '" placeholder="ainda sem telefone cadastrado"><button class="btn-gold" style="width:auto;padding:6px 14px;margin-top:6px;font-size:12px;" onclick="editarTelefoneAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Salvar telefone</button></div>' +
+      '<div class="form-group" style="margin-top:14px;"><label class="form-label">Peso inicial (kg)</label><input class="form-input" id="dados-peso-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" type="text" inputmode="decimal" value="' + (numeroDeTextoFicha(a.peso) != null ? String(numeroDeTextoFicha(a.peso)).replace('.', ',') : '') + '" placeholder="ainda sem peso cadastrado"><button class="btn-gold" style="width:auto;padding:6px 14px;margin-top:6px;font-size:12px;" onclick="editarPesoDaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Salvar peso</button></div>' +
+      '<div class="form-group" style="margin-top:14px;"><label class="form-label">Altura (m)</label><input class="form-input" id="dados-altura-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" type="text" inputmode="decimal" value="' + (alturaDaFichaEmMetros(a) != null ? alturaDaFichaEmMetros(a).toFixed(2).replace('.', ',') : '') + '" placeholder="ainda sem altura cadastrada"><button class="btn-gold" style="width:auto;padding:6px 14px;margin-top:6px;font-size:12px;" onclick="editarAlturaDaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Salvar altura</button><p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:4px;">Ao salvar peso ou altura, o IMC é recalculado. O peso que ela registra no app fica na aba Composição, e o histórico dele se corrige em "Peso e composição".</p></div>' +
       '<div id="dados-resultado-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" style="margin-top:8px;"></div>' +
     '</div>', 'dados-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Data de nascimento', '<div class="info-box"><input type="date" class="form-input" value="' + (a.dataNascimento || '') + '" onchange="editarDataNascimentoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)"><p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:6px;">Normalmente já vem sozinha da anamnese. Só preencha aqui se ela respondeu antes da gente ativar isso.</p></div>', 'nascimento-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
@@ -8734,7 +9291,7 @@ function openAlunaDetail(i){
     '<div id="treinos-arquivados-area"></div>' +
     treinoHtml +
     treinoAcoesHtml +
-    renderSecaoColapsavel('Acompanhamento e histórico', renderElegibilidadeFase(a) + renderFunilEngajamento(a) + renderLinhaDoTempo(a) + renderPromocaoNivel(a) + renderBlocoPeriodizacao(a) + renderHistoricoPrioridade(a) + renderTecnicaPendente(a) + renderProgressao(a), 'acompanhamento') +
+    renderSecaoColapsavel('Acompanhamento e histórico', renderElegibilidadeFase(a) + renderFunilEngajamento(a) + renderLinhaDoTempo(a) + renderPromocaoNivel(a) + renderBlocoPeriodizacao(a) + renderHistoricoPrioridade(a) + renderEditorPesoComposicaoPersonal(a) + renderTecnicaPendente(a) + renderProgressao(a), 'acompanhamento') +
     '<p class="section-label" style="margin-top:22px;">Acesso ao app</p>' +
     (a.authId && a.senhaGerada
       ? '<div class="info-box"><p class="lbl" style="color:var(--success);">Acesso gerado pelo app (se ela não conseguir entrar, use "Alterar senha")</p>' +
@@ -8742,6 +9299,9 @@ function openAlunaDetail(i){
         '</div>' +
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 8px 0 0;font-size:13px;background:#25D366;color:#fff;border:none;" onclick="enviarCredenciaisPorWhatsApp(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-brand-whatsapp" style="vertical-align:-2px;margin-right:6px;"></i>Mandar login e senha por WhatsApp</button>' +
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 8px 0 0;font-size:13px;background:var(--success);color:#fff;border:none;" onclick="marcarTreinoFeitoManualmente(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-check" style="vertical-align:-2px;margin-right:6px;"></i>Treino feito</button>' +
+        (a.statusControleCiclo === 'verde' ? '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 8px 0 0;font-size:13px;background:var(--card-2);color:#C9784A;border:1px solid var(--border);" onclick="desmarcarTreinoFeitoManualmente(\'' + a.nome.replace(/'/g,"\\'") + '\')">Desmarcar treino feito</button>' : '') +
+        '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 8px 0 0;font-size:13px;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="abrirDiasRegistradosDaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Treinos que ela registrou</button>' +
+        '<div id="dias-registrados-area" style="margin-top:8px;"></div>' +
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 0 0;font-size:13px;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="navigator.clipboard.writeText(\'E-mail: ' + a.email + ' - Senha: ' + a.senhaGerada + ' - Link: ' + (LINK_DO_APP) + '\')">Copiar dados</button>' +
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 0 0;font-size:13px;background:var(--card-2);color:#C9784A;border:1px solid var(--border);" onclick="alterarSenhaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-key" style="vertical-align:-2px;margin-right:6px;"></i>Alterar senha</button>' +
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 0 0;font-size:13px;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="mostrarAvisoAjusteIndividual(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-barbell" style="vertical-align:-2px;margin-right:6px;"></i>Avisar ajuste de treino</button>' +
@@ -9183,6 +9743,62 @@ async function criarLoginParaAluna(nomeAluna){
 function marcarTreinoFeitoManualmente(nomeAluna){
   marcarStatusControleCiclo(nomeAluna, 'verde');
   mostrarConfirmacaoSalvamento(true, 'Marcado como feito. ' + nomeAluna + ' já aparece verde no Controle de Treinos.');
+}
+
+// Desfaz o "Treino feito" do Controle de Treinos (o verde), caso tenha sido clicado na aluna errada.
+// Volta pra "geradas" (amarelo) se ela tem treino montado, ou pra pendente se não tem. Só aparece
+// enquanto ela está verde: se o ciclo já reiniciou sozinho (todas verdes), não há o que desfazer.
+function desmarcarTreinoFeitoManualmente(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || a.statusControleCiclo !== 'verde') return;
+  a.statusControleCiclo = a.treinoAtual ? 'amarelo' : null;
+  a.dataFicouVerde = null;
+  a.ordemConclusaoCicloAtual = null;
+  salvarPerfilAlunaNoSupabase(a.nome);
+  renderControleTreinos();
+  openAlunaDetail(alunasPersonal.indexOf(a));
+  mostrarConfirmacaoSalvamento(true, 'Desmarcado. ' + nomeAluna + ' voltou pra ' + (a.treinoAtual ? '"geradas"' : '"pendentes"') + ' no Controle de Treinos.');
+}
+
+// ===== PERSONAL: ver e desfazer os treinos que a aluna registrou =====
+// Sempre carrega o progresso REAL dela do banco antes de mostrar e antes de mexer: o que está na memória
+// do Personal pode estar velho, e salvar em cima disso apagaria registros que ela fez depois.
+async function abrirDiasRegistradosDaAluna(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  const area = document.getElementById('dias-registrados-area');
+  if(!a || !area) return;
+  if(area.innerHTML){ area.innerHTML = ''; return; }
+  area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Buscando o que ela registrou...</p>';
+  if(a.authId) await carregarProgressoDoSupabase(a.authId, a.nome);
+  area.innerHTML = htmlDiasRegistradosDaAluna(a);
+}
+
+function htmlDiasRegistradosDaAluna(a){
+  const prog = getProgressoAluna(a.nome);
+  const semanas = Object.keys(prog.diasConcluidos || {}).map(Number).filter(function(n){ return (prog.diasConcluidos[n] || []).length > 0; }).sort(function(x, y){ return y - x; }).slice(0, 4);
+  if(semanas.length === 0) return '<div class="info-box"><p class="txt" style="color:var(--text-faint);">Ela ainda não registrou nenhum treino.</p></div>';
+  const nomeSeguro = a.nome.replace(/'/g, "\\'");
+  return '<div class="info-box">' + semanas.map(function(sem){
+    return '<p class="lbl" style="margin:6px 0 4px;">Semana ' + sem + (sem === prog.semana ? ' (atual)' : '') + '</p>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;">' +
+      prog.diasConcluidos[sem].map(function(dia){
+        return '<span class="acao-pill" style="background:var(--card-2);color:var(--text);border:1px solid var(--border);" onclick="desfazerDiaComoPersonal(\'' + nomeSeguro + '\',' + sem + ',\'' + dia + '\')">' + dia + ' <span style="color:#C9784A;margin-left:4px;">✕ desfazer</span></span>';
+      }).join('') + '</div>';
+  }).join('') + '</div>';
+}
+
+async function desfazerDiaComoPersonal(nomeAluna, semana, nomeDia){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  if(!confirm('Desfazer o registro de "' + nomeDia + '" (semana ' + semana + ') de ' + nomeAluna + '? O dia volta a ficar como não feito pra ela.')) return;
+  if(a.authId) await carregarProgressoDoSupabase(a.authId, a.nome); // pega o estado atual dela, não o da memória
+  const prog = getProgressoAluna(a.nome);
+  if(removerRegistroDoDia(prog, semana, nomeDia)){
+    salvarProgressoNoSupabase(a.nome);
+    mostrarConfirmacaoSalvamento(true, 'Registro de ' + nomeDia + ' desfeito.');
+  }
+  const area = document.getElementById('dias-registrados-area');
+  if(area) area.innerHTML = htmlDiasRegistradosDaAluna(a);
 }
 
 function marcarStatusControleCiclo(nomeAluna, novoStatus){
@@ -11706,6 +12322,16 @@ async function executarSalvamentoProgresso(nomeAluna){
       seriesConcluidas: seriesConcluidas,
       diaDoSeriesConcluidas: detailDiaAtual
     };
+    // Quando é o PERSONAL salvando o progresso de OUTRA pessoa (corrigir um registro dela, por exemplo),
+    // "seriesConcluidas" e "detailDiaAtual" são da tela DELE, não da dela: gravar isso zeraria as séries
+    // que ela marcou hoje. Então mantém o que já está no banco pra esse estado.
+    if(sessaoTipo === 'personal'){
+      const { data: linhaAtual } = await supabaseClient.from('progresso_aluna').select('dados').eq('aluna_id', alunaRow.auth_id).maybeSingle();
+      if(linhaAtual && linhaAtual.dados){
+        pacote.seriesConcluidas = linhaAtual.dados.seriesConcluidas;
+        pacote.diaDoSeriesConcluidas = linhaAtual.dados.diaDoSeriesConcluidas;
+      }
+    }
     await supabaseClient.from('progresso_aluna').upsert({
       aluna_id: alunaRow.auth_id,
       dados: pacote,
@@ -13653,7 +14279,12 @@ function converterAlcoolParaDoses(){
   const litro = parseCargaBR(document.getElementById('nutri-alc-litro').value) || 0;
   const copoCerveja = parseFloat(document.getElementById('nutri-alc-copo-cerveja').value) || 0;
   const lataCerveja = parseFloat(document.getElementById('nutri-alc-lata-cerveja').value) || 0;
-  // 1 dose ≈ 150ml de vinho ou ~330ml de cerveja
+  return dosesDeAlcool(taca, garrafa, litro, copoCerveja, lataCerveja);
+}
+
+// 1 dose ≈ 150ml de vinho ou ~330ml de cerveja. Separada da leitura dos campos pra a edição recalcular com
+// as mesmas contas do registro original.
+function dosesDeAlcool(taca, garrafa, litro, copoCerveja, lataCerveja){
   const doses = (taca * 1) + (garrafa * 5) + (litro * 6.7) + (copoCerveja * 1) + (lataCerveja * 1);
   return Math.round(doses * 10) / 10;
 }
@@ -13669,38 +14300,150 @@ function calcularMetaAguaLitros(pesoTexto){
   return Math.round(peso * 32.5) / 1000;
 }
 
+// ===== NUTRIÇÃO: registrar e corrigir o check-in da semana =====
+// Antes, só o RESULTADO calculado era guardado, e as respostas (taças, garrafas, água...) se perdiam. Agora as
+// respostas cruas também ficam ("entradas"), que é o que permite reabrir o check-in pra corrigir e recalcular.
+const JANELA_EDICAO_NUTRICAO_ALUNA_SEMANAS = 2; // a aluna corrige o check-in dessa semana e da anterior
+const LIMITES_NUTRICAO = { fugas: [0, 50], aguaLitros: [0, 15], cardioMinutos: [0, 2000], horasSono: [0, 24], doses: [0, 200] };
+
+// Lê o formulário. prefixo '' é a pergunta da semana (ids "nutri-fugas"...); 'ed12-' é a edição da semana 12.
+function lerEntradasNutricaoDoFormulario(prefixo){
+  const v = function(id){ return document.getElementById('nutri-' + prefixo + id); };
+  const tipos = [];
+  if(v('mais').checked) tipos.push('mais');
+  if(v('menos').checked) tipos.push('menos');
+  if(v('doce').checked) tipos.push('doce');
+  const aguaInput = parseCargaBR(v('agua').value);
+  const sonoInput = parseCargaBR(v('sono').value);
+  return {
+    fugas: parseInt(v('fugas').value, 10) || 0,
+    tipos: tipos,
+    taca: parseFloat(v('alc-taca').value) || 0,
+    garrafa: parseFloat(v('alc-garrafa').value) || 0,
+    litro: parseCargaBR(v('alc-litro').value) || 0,
+    copoCerveja: parseFloat(v('alc-copo-cerveja').value) || 0,
+    lataCerveja: parseFloat(v('alc-lata-cerveja').value) || 0,
+    aguaLitros: isNaN(aguaInput) ? null : aguaInput,
+    cardioDias: parseFloat(v('cardio-dias').value) || 0,
+    cardioMinutos: parseFloat(v('cardio-minutos').value) || 0,
+    horasSono: isNaN(sonoInput) ? null : sonoInput
+  };
+}
+
+function dosesDasEntradasNutricao(e){
+  return dosesDeAlcool(e.taca, e.garrafa, e.litro, e.copoCerveja, e.lataCerveja);
+}
+
+// Devolve uma frase de erro se algum valor parece digitado errado (água 25 em vez de 2,5), ou null se está ok
+function validarEntradasNutricao(e){
+  const checar = function(valor, chave, rotulo){
+    if(valor == null) return null;
+    const lim = LIMITES_NUTRICAO[chave];
+    if(valor < lim[0] || valor > lim[1]) return 'O valor de "' + rotulo + '" (' + String(valor).replace('.', ',') + ') parece fora do normal. Confere se não foi erro de digitação.';
+    return null;
+  };
+  return checar(e.fugas, 'fugas', 'vezes que fugiu da dieta') ||
+    checar(e.aguaLitros, 'aguaLitros', 'litros de água por dia') ||
+    checar(e.cardioMinutos, 'cardioMinutos', 'minutos de cardio') ||
+    checar(e.horasSono, 'horasSono', 'horas de sono') ||
+    checar(dosesDasEntradasNutricao(e), 'doses', 'álcool');
+}
+
+// O resultado da semana a partir das respostas. É a MESMA conta do registro original, agora reaproveitada na edição.
+function calcularResultadoNutricaoDaSemana(prog, alunaObj, semana, e){
+  const dosesAlcool = dosesDasEntradasNutricao(e);
+  const metaAgua = calcularMetaAguaLitros(alunaObj.peso);
+  const totalDias = totalDiasDeTreino();
+  const concluidosNaSemana = (prog.diasConcluidos[semana] || []).length;
+  const boaConstancia = concluidosNaSemana >= totalDias;
+  const semanasAnteriores = [semana - 1, semana - 2].filter(function(sm){ return prog.nutricao && prog.nutricao[sm]; });
+  const semanasComAlcoolRecente = semanasAnteriores.filter(function(sm){ return prog.nutricao[sm].resultado.dosesAlcool > 0; }).length;
+  const alcoolFrequente = dosesAlcool > 0 && semanasComAlcoolRecente >= 1;
+  return calcularNutricaoSemana(e.fugas, e.tipos, boaConstancia, dosesAlcool, alcoolFrequente, e.aguaLitros, metaAgua, e.cardioMinutos, e.horasSono);
+}
+
 function registrarNutricaoSemana(){
   const alunaAtual = obterAlunaLogadaOuCriar();
   if(semanaNutricaoPendente === null) return;
   const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
-  const fugas = parseInt(document.getElementById('nutri-fugas').value, 10) || 0;
-  const tipos = [];
-  if(document.getElementById('nutri-mais').checked) tipos.push('mais');
-  if(document.getElementById('nutri-menos').checked) tipos.push('menos');
-  if(document.getElementById('nutri-doce').checked) tipos.push('doce');
-  const dosesAlcool = converterAlcoolParaDoses();
-  const aguaLitros = parseCargaBR(document.getElementById('nutri-agua').value);
-  const metaAgua = calcularMetaAguaLitros(alunaAtual.peso);
-  const cardioMinutos = parseFloat(document.getElementById('nutri-cardio-minutos').value) || 0;
-  const horasSonoInput = parseCargaBR(document.getElementById('nutri-sono').value);
-  const horasSono = isNaN(horasSonoInput) ? null : horasSonoInput;
+  const entradas = lerEntradasNutricaoDoFormulario('');
+  const erroValor = validarEntradasNutricao(entradas);
+  if(erroValor){ alert(erroValor); return; } // o erro de digitação é barrado antes de entrar nos cálculos
 
-  const totalDias = totalDiasDeTreino();
-  const concluidosNaSemana = (prog.diasConcluidos[semanaNutricaoPendente] || []).length;
-  const boaConstancia = concluidosNaSemana >= totalDias;
-
-  const semanasAnteriores = [semanaNutricaoPendente - 1, semanaNutricaoPendente - 2].filter(function(s){ return prog.nutricao && prog.nutricao[s]; });
-  const semanasComAlcoolRecente = semanasAnteriores.filter(function(s){ return prog.nutricao[s].resultado.dosesAlcool > 0; }).length;
-  const alcoolFrequente = dosesAlcool > 0 && semanasComAlcoolRecente >= 1;
-
-  const resultado = calcularNutricaoSemana(fugas, tipos, boaConstancia, dosesAlcool, alcoolFrequente, isNaN(aguaLitros) ? null : aguaLitros, metaAgua, cardioMinutos, horasSono);
+  const resultado = calcularResultadoNutricaoDaSemana(prog, alunaAtual, semanaNutricaoPendente, entradas);
   if(!prog.nutricao) prog.nutricao = {};
-  prog.nutricao[semanaNutricaoPendente] = { fugas: fugas, tipos: tipos, resultado: resultado };
+  prog.nutricao[semanaNutricaoPendente] = { fugas: entradas.fugas, tipos: entradas.tipos, resultado: resultado, entradas: entradas };
   semanaNutricaoPendente = null;
   salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
 
   const el = document.getElementById('area-nutricao') || document.getElementById('nutri-confirmacao');
-  if(el) el.innerHTML = '<p class="txt">Obrigada! Isso já ajustou sua Resposta Nutricional, Potencial de Hipertrofia, Potencial de Ganho de Gordura e Retenção Hídrica no DNA MUSA.</p>';
+  if(el) el.innerHTML = '<p class="txt">Obrigada! Isso já ajustou sua Resposta Nutricional, Potencial de Hipertrofia, Potencial de Ganho de Gordura e Retenção Hídrica no DNA MUSA. Se digitou algo errado, dá pra corrigir na aba Progresso, no fim da tela, em "Corrigir meus registros".</p>';
+}
+
+// ---- edição ----
+function entradasParaEdicaoDaNutricao(reg){
+  if(reg.entradas) return Object.assign({ antigo: false }, reg.entradas);
+  // Registro de antes de guardarmos as respostas cruas: recupera o que dá (fugas, tipos, cardio e sono estão no
+  // resultado). Álcool e água não têm como separar, então voltam em branco e o formulário avisa.
+  const r = reg.resultado || {};
+  return { antigo: true, fugas: reg.fugas || 0, tipos: reg.tipos || [], taca: 0, garrafa: 0, litro: 0, copoCerveja: 0, lataCerveja: 0,
+    aguaLitros: null, cardioDias: 0, cardioMinutos: r.cardioMinutos || 0, horasSono: r.horasSono != null ? r.horasSono : null };
+}
+
+function htmlFormEdicaoNutricao(semana, reg){
+  const e = entradasParaEdicaoDaNutricao(reg);
+  const p = 'ed' + semana + '-';
+  const num = function(x){ return x ? String(x).replace('.', ',') : ''; };
+  const campo = function(id, rotulo, valor, tipo){
+    return '<div class="form-group" style="margin-bottom:6px;"><label class="form-label" style="font-size:11px;">' + rotulo + '</label><input class="form-input" id="nutri-' + p + id + '" type="' + (tipo || 'text') + '" inputmode="decimal" value="' + valor + '"></div>';
+  };
+  const marca = function(id, rotulo, ligado){
+    return '<label style="display:block;font-size:12px;margin:3px 0;"><input type="checkbox" id="nutri-' + p + id + '"' + (ligado ? ' checked' : '') + '> ' + rotulo + '</label>';
+  };
+  return '<div id="nutri-ed-' + semana + '-form" style="display:none;margin-top:8px;">' +
+    (e.antigo ? '<p class="txt" style="font-size:11px;color:#E2A33D;margin-bottom:6px;">Esse check-in é de antes de o app guardar os detalhes de álcool e água. Se você tinha informado álcool ou água, preencha de novo aqui.</p>' : '') +
+    campo('fugas', 'Quantas vezes fugiu do planejado?', num(e.fugas || 0)) +
+    '<div style="margin:6px 0;">' + marca('mais', 'Comi mais do que o prescrito', e.tipos.indexOf('mais') !== -1) + marca('menos', 'Comi menos do que o prescrito', e.tipos.indexOf('menos') !== -1) + marca('doce', 'Doces, frituras ou lanches fora do prescrito', e.tipos.indexOf('doce') !== -1) + '</div>' +
+    campo('alc-taca', 'Taças de vinho (150ml cada)', num(e.taca)) + campo('alc-garrafa', 'Garrafas de vinho (750ml cada)', num(e.garrafa)) + campo('alc-litro', 'Litros de vinho', num(e.litro)) +
+    campo('alc-copo-cerveja', 'Copos de cerveja (chope, 300ml cada)', num(e.copoCerveja)) + campo('alc-lata-cerveja', 'Latas de cerveja (350ml cada)', num(e.lataCerveja)) +
+    campo('agua', 'Litros de água por dia, em média', e.aguaLitros != null ? num(e.aguaLitros) : '') +
+    campo('cardio-dias', 'Dias de cardio', num(e.cardioDias)) + campo('cardio-minutos', 'Minutos de cardio, somando todos os dias', num(e.cardioMinutos)) +
+    campo('sono', 'Horas de sono por noite, em média', e.horasSono != null ? num(e.horasSono) : '') +
+    '<div style="display:flex;gap:8px;margin-top:6px;"><button class="btn-gold" style="flex:1;margin:0;padding:8px;" onclick="salvarEdicaoNutricao(' + semana + ')">Salvar correção</button>' +
+    '<button class="btn-secondary" style="flex:1;margin:0;padding:8px;" onclick="abrirEdicaoComp(\'nutri-ed-' + semana + '\')">Cancelar</button></div>' +
+  '</div>';
+}
+
+function salvarEdicaoNutricao(semana){
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const a = obterAlunaLogadaOuCriar();
+  const reg = prog.nutricao && prog.nutricao[semana];
+  if(!reg) return;
+  if(prog.semana - semana > JANELA_EDICAO_NUTRICAO_ALUNA_SEMANAS){ alert('Esse check-in só pode ser corrigido pelo seu personal.'); return; }
+  const entradas = lerEntradasNutricaoDoFormulario('ed' + semana + '-');
+  const erroValor = validarEntradasNutricao(entradas);
+  if(erroValor){ alert(erroValor); return; }
+  // Registro antigo tinha álcool, e o formulário voltou em branco: confirma pra ninguém zerar sem querer
+  if(!reg.entradas && reg.resultado && reg.resultado.dosesAlcool > 0 && dosesDasEntradasNutricao(entradas) === 0){
+    if(!confirm('Esse check-in tinha álcool informado e agora está zerado. Confirma que quer zerar?')) return;
+  }
+  const resultado = calcularResultadoNutricaoDaSemana(prog, a, semana, entradas);
+  prog.nutricao[semana] = { fugas: entradas.fugas, tipos: entradas.tipos, resultado: resultado, entradas: entradas, editadoEm: new Date().toISOString() };
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  renderHubCorrigirRegistros(NOME_ALUNA_LOGADA);
+  mostrarConfirmacaoSalvamento(true, 'Check-in corrigido. Seus indicadores foram recalculados.');
+}
+
+function htmlHubNutricao(prog){
+  const semanas = Object.keys(prog.nutricao || {}).map(Number).filter(function(sm){ return prog.semana - sm <= JANELA_EDICAO_NUTRICAO_ALUNA_SEMANAS; }).sort(function(x, y){ return y - x; });
+  if(semanas.length === 0) return '';
+  return '<p class="lbl" style="margin:14px 0 6px;">Check-in de nutrição</p>' + semanas.map(function(sm){
+    const reg = prog.nutricao[sm];
+    const editado = reg.editadoEm ? ' <span style="color:var(--text-faint);">· editado em ' + dataCurtaEditado(reg.editadoEm) + '</span>' : '';
+    return '<div class="info-box" style="margin-bottom:8px;"><p class="txt" style="margin:0;">Semana ' + sm + ' · ' + (reg.fugas === 0 ? 'seguiu a dieta' : reg.fugas + ' vez(es) fora do planejado') + editado + '</p>' +
+      '<div style="margin-top:6px;"><span style="cursor:pointer;font-size:12px;text-decoration:underline;color:var(--gold-soft);" onclick="abrirEdicaoComp(\'nutri-ed-' + sm + '\')">Editar</span></div>' +
+      htmlFormEdicaoNutricao(sm, reg) + '</div>';
+  }).join('');
 }
 
 
@@ -15144,7 +15887,7 @@ function abrirMesHistoricoRodaDaVida(mesISO){
   renderRodaDaVidaAluna();
 }
 
-function renderRodaDaVidaAluna(){
+function renderRodaDaVidaAlunaBase(){
   const container = document.getElementById('area-rodadavida-conteudo');
   if(!container) return;
   const nome = NOME_ALUNA_LOGADA;
@@ -15298,9 +16041,11 @@ function renderMeuProgressoConteudo(container, nome, a){
   // Shape Analysis foi movido pra aba Composição corporal — faz mais sentido lá, já que é sobre
   // fotos/comparação visual do corpo, e o Progresso não precisa segurar um "em breve" todo dia.
 
+  html += '<p class="section-label" style="margin-top:24px;">Corrigir meus registros</p><div id="hub-corrigir-registros"></div>';
   container.innerHTML = html;
   renderCheckInEHabitos(nome);
   renderCalendarioTreinosAluna(nome);
+  renderHubCorrigirRegistros(nome);
 }
 
 // Versão do calendário pro login da própria aluna: o progresso dela já está carregado nesse momento
@@ -15675,7 +16420,7 @@ if(type === 'central'){
         let notaSemanaAnterior = '';
         if(prog && prog.historico[nomeEx] && prog.historico[nomeEx].length){
           const ultimo = prog.historico[nomeEx][prog.historico[nomeEx].length - 1];
-          notaSemanaAnterior = '<p style="font-size:11px;color:var(--gold-soft);margin:4px 0 8px;">Semana ' + ultimo.semana + ': ' + ultimo.carga + 'kg × ' + ultimo.reps + ' reps · ' + ultimo.sugestao.texto + ' → sugestão hoje: ' + ultimo.sugestao.valor + 'kg</p>';
+          notaSemanaAnterior = '<p style="font-size:11px;color:var(--gold-soft);margin:4px 0 8px;">Semana ' + ultimo.semana + ': ' + ultimo.carga + 'kg × ' + ultimo.reps + ' reps' + (ultimo.sugestao ? ' · ' + ultimo.sugestao.texto + ' → sugestão hoje: ' + ultimo.sugestao.valor + 'kg' : '') + '</p>';
         }
         const exBanco = buscarExercicioNoBanco(nomeEx);
         const repsMatch = (partes[1] || '').match(/x(\d+)/);
@@ -15737,12 +16482,7 @@ if(type === 'central'){
           avisoTecnica +
           alternativaHtml +
           notaSemanaAnterior +
-          '<div style="display:flex;gap:8px;">' +
-            '<input class="form-input" data-carga="' + j + '" type="text" inputmode="decimal" placeholder="Carga (kg)" style="flex:1;">' +
-            '<input class="form-input" data-reps="' + j + '" type="number" placeholder="Reps · 1ª série" style="flex:1;">' +
-          '</div>' +
-          '<button class="btn-secondary" style="margin-top:8px;padding:8px;font-size:12px;" onclick="confirmarSerieExercicio(\'' + j + '\',\'' + nomeEx.replace(/'/g,"\\'") + '\')">Confirmar</button>' +
-          '<div id="confirmado-serie-' + j + '"></div>';
+          htmlBlocoConfirmarExercicio(j, nomeEx, prog);
 
         corpoTreino += '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;">' +
           '<div style="display:flex;">' +
@@ -15760,6 +16500,7 @@ if(type === 'central'){
       });
       const jaRegistradoHoje = prog && (prog.diasConcluidos[prog.semana] || []).indexOf(d.n) !== -1;
       corpoTreino += '<button class="btn-gold" id="btn-registrar-treino-dia" style="margin-top:10px;' + (jaRegistradoHoje ? 'background:var(--success);color:#fff;' : '') + '" onclick="registrarTreinoDia(' + arg + ')">' + (jaRegistradoHoje ? '✓ Treino registrado' : 'Registrar treino de hoje') + '</button>' +
+        (jaRegistradoHoje && alunaPodeDesfazerDia(prog, d.n) ? '<p class="txt" style="font-size:11.5px;text-align:center;color:var(--text-faint);margin:8px 0 0;cursor:pointer;text-decoration:underline;" onclick="desfazerRegistroDoDia(' + arg + ', \'detalhe\')">Registrei sem querer. Desfazer</p>' : '') +
         '<div id="registro-confirmacao" style="margin-top:10px;"></div>';
     }
     el.innerHTML =
@@ -15893,7 +16634,7 @@ function renderCardBiset(linha, j, prog){
     let nota = '';
     if(prog && prog.historico[nomeEx] && prog.historico[nomeEx].length){
       const ultimo = prog.historico[nomeEx][prog.historico[nomeEx].length - 1];
-      nota = '<p style="font-size:11px;color:var(--gold-soft);margin:2px 0 6px;">Semana ' + ultimo.semana + ': ' + ultimo.carga + 'kg × ' + ultimo.reps + ' reps → sugestão: ' + ultimo.sugestao.valor + 'kg</p>';
+      nota = '<p style="font-size:11px;color:var(--gold-soft);margin:2px 0 6px;">Semana ' + ultimo.semana + ': ' + ultimo.carga + 'kg × ' + ultimo.reps + ' reps' + (ultimo.sugestao ? ' → sugestão: ' + ultimo.sugestao.valor + 'kg' : '') + '</p>';
     }
     html += '<div style="border-top:1px dashed var(--border);padding-top:8px;margin-top:4px;">' +
       '<div style="display:flex;justify-content:space-between;"><span>' + nomeEx + '</span><span class="tag">' + (partes[1] || '') + (ehUltimoDoPar && descansoBiset ? ' · ⏱ ' + descansoBiset + ' após o par' : ' · sem descanso →') + '</span></div>' +
@@ -15902,12 +16643,7 @@ function renderCardBiset(linha, j, prog){
       '<p style="font-size:12px;color:var(--gold-soft);margin:2px 0 6px;cursor:pointer;" onclick="toggleVideoExercicioDia(\'' + subId + '\')"><i class="ti ti-player-play" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Ver execução</p>' +
       '<div id="video-ex-dia-' + subId + '" style="display:none;margin-bottom:6px;"></div>' +
       nota +
-      '<div style="display:flex;gap:8px;">' +
-        '<input class="form-input" data-carga="' + subId + '" type="text" inputmode="decimal" placeholder="Carga (kg)" style="flex:1;">' +
-        '<input class="form-input" data-reps="' + subId + '" type="number" placeholder="Reps · 1ª série" style="flex:1;">' +
-      '</div>' +
-      '<button class="btn-secondary" style="margin-top:8px;padding:8px;font-size:12px;" onclick="confirmarSerieExercicio(\'' + subId + '\',\'' + nomeEx.replace(/'/g,"\\'") + '\')">Confirmar</button>' +
-      '<div id="confirmado-serie-' + subId + '"></div>' +
+      htmlBlocoConfirmarExercicio(subId, nomeEx, prog) +
     '</div>';
   });
 
@@ -16001,33 +16737,38 @@ function toggleVideoExercicioDia(idx){
   }
 }
 
-function renderPerguntaFeedbackTreino(diaIndex){
-  const d = dias[diaIndex];
+// valores e indiceEdicao são opcionais: quando vêm, o formulário abre preenchido pra CORRIGIR um feedback já
+// enviado (e salvar substitui ele, em vez de criar outro). origem 'hub' = aberto dentro de "Corrigir meus registros".
+function renderPerguntaFeedbackTreino(diaIndex, valores, indiceEdicao, origem){
+  const editando = indiceEdicao != null;
+  const v = valores || {};
+  // Se o dia do feedback não existe mais na semana atual, oferece os exercícios de todos os dias
+  const linhasDoDia = (diaIndex >= 0 && dias[diaIndex]) ? dias[diaIndex].ex : dias.reduce(function(todos, d){ return todos.concat(d.ex); }, []);
   let opcoesExercicios = '<option value="">Selecione...</option>';
-  d.ex.forEach(function(linha){
+  const adicionarOpcao = function(nome){
+    opcoesExercicios += '<option value="' + escaparHtmlFicha(nome) + '"' + (v.exercicio === nome ? ' selected' : '') + '>' + escaparHtmlFicha(nome) + '</option>';
+  };
+  linhasDoDia.forEach(function(linha){
     if(linha.indexOf('|||') !== -1){
-      linha.split('|||').slice(1).forEach(function(sub){
-        const nome = sub.trim().split(' · ')[0];
-        opcoesExercicios += '<option value="' + nome + '">' + nome + '</option>';
-      });
+      linha.split('|||').slice(1).forEach(function(sub){ adicionarOpcao(sub.trim().split(' · ')[0]); });
     } else {
-      const nome = linha.split(' · ')[0];
-      opcoesExercicios += '<option value="' + nome + '">' + nome + '</option>';
+      adicionarOpcao(linha.split(' · ')[0]);
     }
   });
+  const desc = !!v.desconforto;
 
   return '<div class="info-box" id="area-feedback" style="margin-top:10px;">' +
-    '<p class="lbl">Como foi o treino de hoje?</p>' +
+    '<p class="lbl">' + (editando ? 'Corrigir o feedback do treino' : 'Como foi o treino de hoje?') + '</p>' +
     '<div class="form-group"><label class="form-label">Sentiu desconforto em algum exercício?</label>' +
-      '<select class="form-select" id="feedback-desconforto" onchange="alternarCampoExercicioFeedback()"><option>Não</option><option>Sim</option></select></div>' +
-    '<div class="form-group" id="feedback-exercicio-group" style="display:none;">' +
+      '<select class="form-select" id="feedback-desconforto" onchange="alternarCampoExercicioFeedback()"><option' + (desc ? '' : ' selected') + '>Não</option><option' + (desc ? ' selected' : '') + '>Sim</option></select></div>' +
+    '<div class="form-group" id="feedback-exercicio-group" style="display:' + (desc ? 'block' : 'none') + ';">' +
       '<label class="form-label">Qual exercício?</label>' +
       '<select class="form-select" id="feedback-exercicio-desconforto">' + opcoesExercicios + '</select>' +
     '</div>' +
-    '<div class="form-group" id="feedback-escala-group" style="display:none;"><label class="form-label">Numa escala de 0 a 10, qual a intensidade do desconforto?</label><input class="form-input" id="feedback-escala-desconforto" type="number" min="0" max="10" placeholder="0-10"></div>' +
-    '<div class="form-group"><label class="form-label">E a intensidade geral do treino, de 0 a 10?</label><input class="form-input" id="feedback-intensidade" type="number" min="0" max="10" placeholder="0-10"></div>' +
-    '<div class="form-group"><label class="form-label">Quer deixar algum comentário? (opcional)</label><textarea class="form-input" id="feedback-comentario" rows="2" placeholder="Como se sentiu, alguma observação..."></textarea></div>' +
-    '<button class="btn-gold" onclick="registrarFeedbackTreino(' + diaIndex + ')">Enviar</button>' +
+    '<div class="form-group" id="feedback-escala-group" style="display:' + (desc ? 'block' : 'none') + ';"><label class="form-label">Numa escala de 0 a 10, qual a intensidade do desconforto?</label><input class="form-input" id="feedback-escala-desconforto" type="number" min="0" max="10" placeholder="0-10" value="' + (v.escalaDesconforto != null ? v.escalaDesconforto : '') + '"></div>' +
+    '<div class="form-group"><label class="form-label">E a intensidade geral do treino, de 0 a 10?</label><input class="form-input" id="feedback-intensidade" type="number" min="0" max="10" placeholder="0-10" value="' + (v.intensidade != null ? v.intensidade : '') + '"></div>' +
+    '<div class="form-group"><label class="form-label">Quer deixar algum comentário? (opcional)</label><textarea class="form-input" id="feedback-comentario" rows="2" placeholder="Como se sentiu, alguma observação...">' + escaparHtmlFicha(v.comentario || '') + '</textarea></div>' +
+    '<button class="btn-gold" onclick="registrarFeedbackTreino(' + diaIndex + ',' + (editando ? indiceEdicao : 'null') + ',' + (origem === 'hub' ? "'hub'" : 'null') + ')">' + (editando ? 'Salvar correção' : 'Enviar') + '</button>' +
     '</div>';
 }
 
@@ -16037,7 +16778,9 @@ function alternarCampoExercicioFeedback(){
   document.getElementById('feedback-escala-group').style.display = val === 'Sim' ? 'block' : 'none';
 }
 
-function registrarFeedbackTreino(diaIndex){
+const JANELA_EDICAO_FEEDBACK_ALUNA_DIAS = 7; // a aluna corrige o feedback dos últimos 7 dias
+
+function registrarFeedbackTreino(diaIndex, indiceEdicao, origem){
   const alunaAtual = obterAlunaLogadaOuCriar();
   const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
   const desconforto = document.getElementById('feedback-desconforto').value === 'Sim';
@@ -16047,34 +16790,236 @@ function registrarFeedbackTreino(diaIndex){
   const comentario = (document.getElementById('feedback-comentario').value || '').trim();
 
   if(!prog.feedbackTreino) prog.feedbackTreino = [];
-  prog.feedbackTreino.push({
-    semana: prog.semana,
-    dia: dias[diaIndex].n,
-    data: new Date().toISOString(),
+  const anterior = (indiceEdicao != null && prog.feedbackTreino[indiceEdicao]) ? prog.feedbackTreino[indiceEdicao] : null;
+  const registro = {
+    semana: anterior ? anterior.semana : prog.semana,
+    dia: anterior ? anterior.dia : dias[diaIndex].n,
+    data: anterior ? anterior.data : new Date().toISOString(),
     desconforto: desconforto,
     exercicio: exercicioDesconforto,
     escalaDesconforto: escalaDesconforto,
     intensidade: isNaN(intensidadeInput) ? null : intensidadeInput,
     comentario: comentario || null
-  });
+  };
+  let indiceDoRegistro;
+  if(anterior){
+    registro.editadoEm = new Date().toISOString(); // correção: substitui o registro, não cria outro
+    prog.feedbackTreino[indiceEdicao] = registro;
+    indiceDoRegistro = indiceEdicao;
+  } else {
+    prog.feedbackTreino.push(registro);
+    indiceDoRegistro = prog.feedbackTreino.length - 1;
+  }
   salvarProgressoNoSupabase(NOME_ALUNA_LOGADA); // faltava isso — sem essa linha, o feedback nunca chegava a ser salvo de verdade
 
-  let msg = 'Obrigada pelo feedback! Isso ajuda a calibrar seus próximos treinos.';
+  let msg = anterior ? 'Feedback corrigido!' : 'Obrigada pelo feedback! Isso ajuda a calibrar seus próximos treinos.';
 
   // EXCEÇÃO: desconforto relatado num exercício específico dispara pedido de vídeo NA HORA,
-  // sem esperar a regra de semana sim/semana não
-  if(desconforto && exercicioDesconforto){
+  // sem esperar a regra de semana sim/semana não. Numa correção, só pede de novo se o desconforto é NOVO
+  // (antes não tinha) ou se mudou de exercício: corrigir a nota do mesmo exercício não repete o pedido.
+  const desconfortoNovo = desconforto && exercicioDesconforto && (!anterior || !anterior.desconforto || anterior.exercicio !== exercicioDesconforto);
+  if(desconfortoNovo){
     solicitarVideoTecnica(alunaAtual.nome, exercicioDesconforto);
     msg += ' Como você relatou desconforto no ' + exercicioDesconforto + ', já pedimos um vídeo desse exercício pra revisar a técnica com você.';
   }
 
+  if(origem === 'hub'){
+    renderHubCorrigirRegistros(NOME_ALUNA_LOGADA);
+    mostrarConfirmacaoSalvamento(true, msg);
+    return;
+  }
   const el = document.getElementById('area-feedback');
-  if(el) el.innerHTML = '<p class="txt">' + msg + '</p>';
+  if(el) el.innerHTML = '<p class="txt">' + msg + ' <span style="cursor:pointer;text-decoration:underline;color:var(--text-faint);" onclick="editarFeedbackTreino(' + indiceDoRegistro + ',' + diaIndex + ')">Editar</span></p>';
+}
+
+// Reabre o formulário já preenchido com o que foi enviado, pra corrigir
+function editarFeedbackTreino(indice, diaIndex, origem){
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const fb = prog.feedbackTreino && prog.feedbackTreino[indice];
+  if(!fb) return;
+  const html = renderPerguntaFeedbackTreino(diaIndex, fb, indice, origem);
+  const alvo = document.getElementById(origem === 'hub' ? 'hub-feedback-form' : 'area-feedback');
+  if(!alvo) return;
+  if(origem === 'hub') alvo.innerHTML = html;
+  else alvo.outerHTML = html;
+}
+
+function apagarFeedbackTreino(indice){
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const fb = prog.feedbackTreino && prog.feedbackTreino[indice];
+  if(!fb) return;
+  if(!confirm('Apagar esse feedback do treino?')) return;
+  prog.feedbackTreino.splice(indice, 1);
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  renderHubCorrigirRegistros(NOME_ALUNA_LOGADA);
+}
+
+function htmlHubFeedback(prog){
+  const lista = (prog.feedbackTreino || []).map(function(fb, i){ return { fb: fb, i: i }; })
+    .filter(function(it){ return it.fb.data && (Date.now() - new Date(it.fb.data).getTime()) <= JANELA_EDICAO_FEEDBACK_ALUNA_DIAS * 86400000; })
+    .sort(function(a, b){ return new Date(b.fb.data) - new Date(a.fb.data); }).slice(0, 5);
+  if(lista.length === 0) return '';
+  return '<p class="lbl" style="margin:14px 0 6px;">Feedbacks de treino</p>' + lista.map(function(it){
+    const fb = it.fb;
+    const partes = [fb.dia, new Date(fb.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })];
+    if(fb.intensidade != null) partes.push('intensidade ' + fb.intensidade + '/10');
+    if(fb.desconforto) partes.push('desconforto: ' + (fb.exercicio || 'sem exercício') + (fb.escalaDesconforto != null ? ' (' + fb.escalaDesconforto + '/10)' : ''));
+    const diaIdx = dias.findIndex(function(d){ return d.n === fb.dia; });
+    const editado = fb.editadoEm ? ' <span style="color:var(--text-faint);">· editado em ' + dataCurtaEditado(fb.editadoEm) + '</span>' : '';
+    return '<div class="list-item" style="flex-wrap:wrap;"><span style="font-size:12px;">' + escaparHtmlFicha(partes.join(' · ')) + editado + '</span>' +
+      '<span style="display:flex;gap:14px;flex-shrink:0;">' +
+        '<span style="cursor:pointer;font-size:12px;text-decoration:underline;color:var(--gold-soft);" onclick="editarFeedbackTreino(' + it.i + ',' + diaIdx + ',\'hub\')">Editar</span>' +
+        '<span style="cursor:pointer;font-size:12px;text-decoration:underline;color:#C9784A;" onclick="apagarFeedbackTreino(' + it.i + ')">Apagar</span>' +
+      '</span></div>';
+  }).join('') + '<div id="hub-feedback-form"></div>';
+}
+
+// =====================================================================================
+// 5d) PERFIL DNA: a aluna corrige as próprias respostas. Roda da Vida: corrige uma área do ciclo mais recente.
+// São respostas subjetivas dela (sem prazo pra corrigir), e cada uma guarda "editado em" pra equipe ver.
+// =====================================================================================
+function htmlHubPerfilDna(prog){
+  const respondidas = (prog.perguntasPerfilDNA && prog.perguntasPerfilDNA.respondidas) || [];
+  if(respondidas.length === 0) return '';
+  const itens = respondidas.map(function(r, i){ return { r: r, i: i }; }).reverse().slice(0, 8);
+  return '<p class="lbl" style="margin:14px 0 6px;">Minhas respostas do Perfil DNA</p>' + itens.map(function(it){
+    const r = it.r;
+    const idBase = 'hub-perfil-' + it.i;
+    const editado = r.editadoEm ? ' <span style="color:var(--text-faint);">· editada em ' + dataCurtaEditado(r.editadoEm) + '</span>' : '';
+    return '<div class="info-box" style="margin-bottom:8px;">' +
+      '<p class="txt" style="font-size:12px;font-weight:600;margin:0 0 4px;">' + escaparHtmlFicha(r.texto) + '</p>' +
+      '<p class="txt" style="font-size:12.5px;margin:0;">' + escaparHtmlFicha(r.resposta) + editado + '</p>' +
+      '<div style="margin-top:6px;"><span style="cursor:pointer;font-size:12px;text-decoration:underline;color:var(--gold-soft);" onclick="abrirEdicaoComp(\'' + idBase + '\')">Editar</span></div>' +
+      '<div id="' + idBase + '-form" style="display:none;margin-top:6px;">' +
+        '<textarea class="form-input" id="' + idBase + '-campo" style="min-height:70px;font-size:13px;">' + escaparHtmlFicha(r.resposta) + '</textarea>' +
+        '<div style="display:flex;gap:8px;margin-top:6px;"><button class="btn-gold" style="flex:1;margin:0;padding:8px;" onclick="salvarEdicaoRespostaPerfil(' + it.i + ')">Salvar</button>' +
+        '<button class="btn-secondary" style="flex:1;margin:0;padding:8px;" onclick="abrirEdicaoComp(\'' + idBase + '\')">Cancelar</button></div>' +
+      '</div></div>';
+  }).join('');
+}
+
+function salvarEdicaoRespostaPerfil(indice){
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const r = prog.perguntasPerfilDNA && prog.perguntasPerfilDNA.respondidas && prog.perguntasPerfilDNA.respondidas[indice];
+  if(!r) return;
+  const campo = document.getElementById('hub-perfil-' + indice + '-campo');
+  const texto = campo ? String(campo.value).trim() : '';
+  if(!texto){ alert('A resposta não pode ficar vazia.'); return; }
+  if(texto === r.resposta){ abrirEdicaoComp('hub-perfil-' + indice); return; } // nada mudou, só fecha
+  r.resposta = texto;
+  r.editadoEm = new Date().toISOString();
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  renderHubCorrigirRegistros(NOME_ALUNA_LOGADA);
+}
+
+let rodaEdicaoAberta = false;
+function alternarEdicaoRodaDaVida(){
+  rodaEdicaoAberta = !rodaEdicaoAberta;
+  renderRodaDaVidaAluna();
+}
+
+function htmlEdicaoRodaDaVida(registro){
+  const respondidas = AREAS_RODA_DA_VIDA.filter(function(ar){ return registro.areas[ar.id] != null; });
+  if(respondidas.length === 0) return '';
+  let html = '<p style="font-size:12px;color:var(--gold-soft);cursor:pointer;margin:16px 0 6px;text-decoration:underline;" onclick="alternarEdicaoRodaDaVida()">' + (rodaEdicaoAberta ? 'Fechar a correção' : 'Corrigir uma resposta') + '</p>';
+  if(!rodaEdicaoAberta) return html;
+  html += respondidas.map(function(ar){
+    const atual = registro.areas[ar.id];
+    const editado = registro.editadoEm && registro.editadoEm[ar.id] ? ' <span style="color:var(--text-faint);font-weight:400;">· editada em ' + dataCurtaEditado(registro.editadoEm[ar.id]) + '</span>' : '';
+    let chips = '';
+    for(let n = 0; n <= 5; n++){
+      chips += '<span class="chip" style="cursor:pointer;min-width:34px;text-align:center;' + (n === atual ? 'background:var(--gold-soft);color:#1A1409;border-color:var(--gold-soft);' : '') + '" onclick="corrigirAreaRodaDaVida(\'' + registro.mes + '\',\'' + ar.id + '\',' + n + ')">' + n + '</span>';
+    }
+    return '<div class="info-box" style="margin-bottom:6px;"><p class="lbl" style="font-size:12px;margin:0 0 6px;">' + ar.label + editado + '</p><div style="display:flex;gap:6px;flex-wrap:wrap;">' + chips + '</div></div>';
+  }).join('');
+  return html;
+}
+
+// Corrige a nota de UMA área que ela já tinha respondido (de 0 a 5). Vale pro ciclo mais recente.
+function corrigirAreaRodaDaVida(mesISO, areaId, valor){
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const registro = prog.rodaDaVida && prog.rodaDaVida[mesISO];
+  if(!registro || registro.areas[areaId] == null) return; // só corrige o que já foi respondido
+  if(valor < 0 || valor > 5 || registro.areas[areaId] === valor) return;
+  registro.areas[areaId] = valor;
+  if(!registro.editadoEm) registro.editadoEm = {};
+  registro.editadoEm[areaId] = new Date().toISOString();
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  renderRodaDaVidaAluna();
+}
+
+// A tela original da Roda da Vida continua igual: só ganha a opção de correção embaixo
+function renderRodaDaVidaAluna(){
+  renderRodaDaVidaAlunaBase();
+  if(mostrandoHistoricoRodaDaVida) return; // olhando meses antigos: nada de editar
+  const container = document.getElementById('area-rodadavida-conteudo');
+  if(!container) return;
+  const registro = getUltimaRodaDaVidaPreenchida(NOME_ALUNA_LOGADA);
+  if(!registro) return;
+  container.innerHTML += htmlEdicaoRodaDaVida(registro);
+}
+
+// =====================================================================================
+// BLOCO "CORRIGIR MEUS REGISTROS" na tela de Progresso: nutrição, feedback de treino e respostas do Perfil DNA
+// (peso e composição se corrigem na aba Composição; dia registrado sem querer, na lista dos treinos da semana)
+// =====================================================================================
+function htmlHubCorrigirRegistros(nome){
+  const prog = getProgressoAluna(nome);
+  const partes = htmlHubNutricao(prog) + htmlHubFeedback(prog) + htmlHubPerfilDna(prog);
+  return '<div class="info-box" style="margin-bottom:10px;"><p class="txt" style="font-size:12px;color:var(--text-faint);margin:0;">Preencheu algo errado? Aqui você corrige. O peso e a composição se corrigem na aba Composição, em "Minha evolução". Um treino registrado sem querer dá pra desfazer na lista dos treinos da semana, segurando o dia.</p></div>' +
+    (partes || '<p class="txt" style="color:var(--text-faint);">Quando você tiver registros pra corrigir, eles aparecem aqui.</p>');
+}
+
+function renderHubCorrigirRegistros(nome){
+  const area = document.getElementById('hub-corrigir-registros');
+  if(area) area.innerHTML = htmlHubCorrigirRegistros(nome);
 }
 
 // Salva CADA exercício assim que ela confirma, ao invés de só juntar tudo no final. Isso resolve o
 // problema de perder tudo se a tela recarregar no meio do treino — o que já foi confirmado fica
 // salvo de verdade, só o que ainda não foi confirmado é que corre risco.
+// ===== CAMPOS DE CARGA E REPETIÇÕES (exercício comum e cada exercício do Bi-set/Tri-set) =====
+// Antes: ao reabrir o treino os campos voltavam VAZIOS (ela não via o que já tinha salvo na semana), e na
+// hora de confirmar eles travavam de vez, sem como corrigir um erro de digitação. Agora, se o exercício já
+// foi confirmado NESSA semana, os campos voltam preenchidos e travados, com um "Editar" ao lado do aviso
+// de salvo. Confirmar de novo (depois de editar) SUBSTITUI o registro da semana, nunca cria outro.
+function registroDaSemanaDoExercicio(prog, nomeEx){
+  if(!prog || !prog.historico || !prog.historico[nomeEx]) return null;
+  return prog.historico[nomeEx].find(function(r){ return r.semana === prog.semana; }) || null;
+}
+
+function htmlMensagemExercicioConfirmado(idx, valorSugestao, corrigido){
+  return '<p style="font-size:11px;color:var(--success);margin-top:4px;">✓ ' + (corrigido ? 'Corrigido' : 'Salvo') +
+    (valorSugestao != null && valorSugestao !== '' ? ', sugestão pra próxima: ' + valorSugestao + 'kg' : '') +
+    ' · <span style="cursor:pointer;text-decoration:underline;color:var(--text-faint);" onclick="editarExercicioConfirmado(\'' + idx + '\')">Editar</span></p>';
+}
+
+function htmlBlocoConfirmarExercicio(idx, nomeEx, prog){
+  const reg = registroDaSemanaDoExercicio(prog, nomeEx);
+  const valorCarga = reg ? String(reg.carga).replace('.', ',') : '';
+  const valorReps = reg ? String(reg.reps) : '';
+  const trava = reg ? ' disabled' : '';
+  return '<div style="display:flex;gap:8px;">' +
+      '<input class="form-input" data-carga="' + idx + '" type="text" inputmode="decimal" placeholder="Carga (kg)" style="flex:1;" value="' + valorCarga + '"' + trava + '>' +
+      '<input class="form-input" data-reps="' + idx + '" type="number" placeholder="Reps · 1ª série" style="flex:1;" value="' + valorReps + '"' + trava + '>' +
+    '</div>' +
+    '<button class="btn-secondary" style="margin-top:8px;padding:8px;font-size:12px;" onclick="confirmarSerieExercicio(\'' + idx + '\',\'' + nomeEx.replace(/'/g, "\\'") + '\')">Confirmar</button>' +
+    '<div id="confirmado-serie-' + idx + '">' + (reg ? htmlMensagemExercicioConfirmado(idx, reg.sugestao ? reg.sugestao.valor : null, !!reg.editadoEm) : '') + '</div>';
+}
+
+// Destrava os campos de um exercício já confirmado pra ela corrigir. O aviso de "salvo" some enquanto
+// edita (e volta, como "Corrigido", quando ela confirma de novo).
+function editarExercicioConfirmado(idx){
+  const cargaEl = document.querySelector('[data-carga="' + idx + '"]');
+  const repsEl = document.querySelector('[data-reps="' + idx + '"]');
+  if(!cargaEl || !repsEl) return;
+  cargaEl.disabled = false;
+  repsEl.disabled = false;
+  const elResultado = document.getElementById('confirmado-serie-' + idx);
+  if(elResultado) elResultado.innerHTML = '';
+  if(cargaEl.focus) cargaEl.focus();
+}
+
 function confirmarSerieExercicio(idx, nomeExercicio){
   const cargaEl = document.querySelector('[data-carga="' + idx + '"]');
   const repsEl = document.querySelector('[data-reps="' + idx + '"]');
@@ -16093,6 +17038,19 @@ function confirmarSerieExercicio(idx, nomeExercicio){
   const sugestao = sugerirAjusteCarga(carga, reps);
   const registro = { semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao };
   const idxExistente = prog.historico[nomeExercicio].findIndex(function(r){ return r.semana === prog.semana; });
+  const existente = idxExistente !== -1 ? prog.historico[nomeExercicio][idxExistente] : null;
+
+  // Tocou em Confirmar sem mudar nada (campos travados com o que já estava salvo): não regrava, não marca
+  // como "corrigido", só garante que continua travado e mostrando o aviso.
+  if(existente && existente.carga === carga && existente.reps === reps){
+    cargaEl.disabled = true;
+    repsEl.disabled = true;
+    const elIgual = document.getElementById('confirmado-serie-' + idx);
+    if(elIgual) elIgual.innerHTML = htmlMensagemExercicioConfirmado(idx, existente.sugestao ? existente.sugestao.valor : null, !!existente.editadoEm);
+    return;
+  }
+
+  if(existente){ registro.editadoEm = new Date().toISOString(); } // era uma correção: guarda que foi editado
   if(idxExistente !== -1) prog.historico[nomeExercicio][idxExistente] = registro;
   else prog.historico[nomeExercicio].push(registro);
 
@@ -16101,7 +17059,7 @@ function confirmarSerieExercicio(idx, nomeExercicio){
   cargaEl.disabled = true;
   repsEl.disabled = true;
   const elResultado = document.getElementById('confirmado-serie-' + idx);
-  if(elResultado) elResultado.innerHTML = '<p style="font-size:11px;color:var(--success);margin-top:4px;">✓ Salvo, sugestão pra próxima: ' + sugestao.valor + 'kg</p>';
+  if(elResultado) elResultado.innerHTML = htmlMensagemExercicioConfirmado(idx, sugestao.valor, !!existente);
 
   // Registro automático: a partir do 3º exercício confirmado nesse treino, já registra o dia sozinha,
   // sem precisar clicar no botão. Continua podendo clicar em "Registrar treino" manualmente também,
