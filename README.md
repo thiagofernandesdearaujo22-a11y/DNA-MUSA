@@ -1,4 +1,4 @@
-[dna_musa_120.html](https://github.com/user-attachments/files/33177806/dna_musa_120.html)
+[dna_musa_121.html](https://github.com/user-attachments/files/33178557/dna_musa_121.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -406,7 +406,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-01-F-AVISO-SEM-FALSO-ALARME</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-01-G-SITUACAO-E-EXCLUIR</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -3480,12 +3480,141 @@ function statusDoPlano(a){
   return 'ativas';
 }
 
+// ===== SITUAÇÃO DA ALUNA: ativa / por vencer / vencida, e EXCLUIR (que é reversível) =====
+// Ficha COM e-mail guarda na linha dela no servidor. Ficha SEM e-mail (leads antigos da lista do código, ex: "Patrícia
+// Silva (0000)") não tem linha no servidor pra isso, então o plano manual e a exclusão dela ficam no catálogo do
+// Personal (tabela catalogo_personal), que não depende de e-mail. Cada registro leva a hora (em): se o servidor devolver
+// o mesmo registro duas vezes, vale o mais recente.
+const alunasExcluidas = [];        // fichas tiradas da lista (dá pra restaurar)
+const registroExclusoes = {};      // chave -> { ativa, email, nomeNorm, nome, soPorNome, em }
+const registroStatusSemEmail = {}; // '|nome' -> { nomeNorm, nome, status, em }
+
+function normEmailFicha(f){ return f.email ? String(f.email).toLowerCase().trim() : ''; }
+function nomeNormDaFicha(f){ return semAcentoMinusculo(f.nomeBase || f.nome).trim(); }
+
+async function salvarCatalogoPersonalConferindo(tipo, chave, dados){
+  if(!supabaseClient) return { ok: true };
+  try {
+    const r = await supabaseClient.from('catalogo_personal').upsert({ tipo: tipo, chave: chave, dados: dados, updated_at: new Date().toISOString() });
+    if(r && r.error){
+      mostrarConfirmacaoSalvamento(false, 'Não consegui salvar no servidor (' + (r.error.message || 'erro') + '). A mudança vale só nesta tela por enquanto.');
+      return { ok: false, erro: r.error.message };
+    }
+    return { ok: true };
+  } catch(e){
+    mostrarConfirmacaoSalvamento(false, 'Sem conexão pra salvar no servidor. A mudança vale só nesta tela por enquanto.');
+    return { ok: false, erro: 'sem conexão' };
+  }
+}
+
+function persistirStatusManualDaFicha(a){
+  if(a.email){ salvarPerfilAlunaNoSupabase(a.nome); return; }
+  const nomeNorm = nomeNormDaFicha(a);
+  const reg = { nomeNorm: nomeNorm, nome: a.nomeBase || a.nome, status: a.statusPlanoManual || null, em: new Date().toISOString() };
+  registroStatusSemEmail['|' + nomeNorm] = reg;
+  salvarCatalogoPersonalConferindo('aluna_status', '|' + nomeNorm, reg);
+}
+
+function fichaCasaComExclusao(f, reg){
+  const e = normEmailFicha(f);
+  if(reg.email && !reg.soPorNome) return e === reg.email; // e-mail só dessa ficha: vale pra qualquer ficha com ele
+  return e === (reg.email || '') && nomeNormDaFicha(f) === reg.nomeNorm; // e-mail dividido com outra ficha (ou sem e-mail): só ESTA, pelo nome
+}
+
+function moverFichaParaExcluidas(f){
+  const idx = alunasPersonal.indexOf(f);
+  if(idx !== -1) alunasPersonal.splice(idx, 1);
+  const jaTem = alunasExcluidas.some(function(x){ return normEmailFicha(x) === normEmailFicha(f) && nomeNormDaFicha(x) === nomeNormDaFicha(f); });
+  if(!jaTem) alunasExcluidas.push(f);
+}
+
+// Aplica o que o catálogo guardou: exclusões e plano manual das fichas sem e-mail. Roda quando o catálogo carrega e
+// depois de cada sincronização (a sincronização pode trazer de volta uma ficha que você já excluiu). Devolve quantas mudaram.
+function aplicarRegistrosDeFichasDoCatalogo(){
+  let mudou = 0;
+  alunasPersonal.filter(function(f){ return !f.email; }).forEach(function(f){
+    const reg = registroStatusSemEmail['|' + nomeNormDaFicha(f)];
+    if(reg && (f.statusPlanoManual || null) !== (reg.status || null)){ f.statusPlanoManual = reg.status || null; mudou++; }
+  });
+  const regsAtivos = Object.keys(registroExclusoes).map(function(k){ return registroExclusoes[k]; }).filter(function(r){ return r.ativa !== false; });
+  if(regsAtivos.length > 0){
+    alunasPersonal.slice().forEach(function(f){
+      if(regsAtivos.some(function(r){ return fichaCasaComExclusao(f, r); })){ moverFichaParaExcluidas(f); mudou++; }
+    });
+  }
+  return mudou;
+}
+
+function registrarFichaDoCatalogo(row){
+  if(!row.dados) return;
+  const alvo = row.tipo === 'aluna_excluida' ? registroExclusoes : registroStatusSemEmail;
+  const atual = alvo[row.chave];
+  if(!atual || (row.dados.em || '') >= (atual.em || '')) alvo[row.chave] = row.dados; // o mais recente vence
+}
+
+// O controle da ficha: Ativa, Por vencer, Vencida, voltar ao automático, ou excluir
+function mudarSituacaoDaAluna(nomeAluna, valor){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !valor) return;
+  if(valor === 'excluir'){ excluirAlunaDaLista(nomeAluna); return; }
+  moverAlunaDeStatus(nomeAluna, valor);
+  openAlunaDetail(alunasPersonal.indexOf(a));
+}
+
+function excluirAlunaDaLista(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  const voltarParaFicha = function(){ openAlunaDetail(alunasPersonal.indexOf(a)); }; // o seletor volta pro valor de antes
+  if(!confirm('Excluir ' + nomeAluna + '?\n\nEla some da lista de alunas, do Controle de Treinos e dos avisos. Os dados dela NÃO são apagados do servidor, e dá pra restaurar depois em "Excluídas", no fim da lista de alunas.' + (a.email ? '\n\nO acesso dela ao app continua funcionando.' : ''))){ voltarParaFicha(); return; }
+  const email = normEmailFicha(a);
+  const nomeNorm = nomeNormDaFicha(a);
+  const compartilha = !!email && alunasPersonal.some(function(x){ return x !== a && normEmailFicha(x) === email; });
+  const reg = { ativa: true, email: email, nomeNorm: nomeNorm, nome: a.nomeBase || a.nome, soPorNome: compartilha, em: new Date().toISOString() };
+  const chave = email + '|' + nomeNorm;
+  registroExclusoes[chave] = reg;
+  salvarCatalogoPersonalConferindo('aluna_excluida', chave, reg);
+  moverFichaParaExcluidas(a);
+  renderAlunas();
+  renderControleTreinos();
+  showPersonalView('alunas');
+}
+
+function alternarPainelExcluidas(){ window.mostrarExcluidas = !window.mostrarExcluidas; renderAlunas(); }
+
+function restaurarAlunaExcluida(indice){
+  const f = alunasExcluidas[indice];
+  if(!f) return;
+  const chave = Object.keys(registroExclusoes).find(function(k){ return registroExclusoes[k].ativa !== false && fichaCasaComExclusao(f, registroExclusoes[k]); });
+  if(chave){
+    const reg = Object.assign({}, registroExclusoes[chave], { ativa: false, em: new Date().toISOString() });
+    registroExclusoes[chave] = reg;
+    salvarCatalogoPersonalConferindo('aluna_excluida', chave, reg);
+  }
+  // restaura todas as fichas que esse registro cobria (o e-mail pode ter coberto mais de uma)
+  const alvo = chave ? alunasExcluidas.filter(function(x){ return fichaCasaComExclusao(x, Object.assign({}, registroExclusoes[chave], { ativa: true })); }) : [f];
+  alvo.forEach(function(x){ alunasExcluidas.splice(alunasExcluidas.indexOf(x), 1); alunasPersonal.push(x); });
+  renderAlunas();
+  renderControleTreinos();
+}
+
+function renderPainelDeExcluidas(list){
+  if(alunasExcluidas.length === 0) return;
+  const bloco = document.createElement('div');
+  bloco.style.cssText = 'margin-top:14px;';
+  bloco.innerHTML = '<p class="txt" style="font-size:12px;color:var(--text-faint);cursor:pointer;text-decoration:underline;" onclick="alternarPainelExcluidas()">' + (window.mostrarExcluidas ? '▾' : '▸') + ' Excluídas (' + alunasExcluidas.length + ')</p>' +
+    (window.mostrarExcluidas ? alunasExcluidas.map(function(f, i){
+      return '<div class="list-item" style="margin-bottom:6px;"><span style="font-size:12px;color:var(--text-faint);">' + escaparHtmlFicha(f.nome) + '</span>' +
+        '<span class="chip" style="cursor:pointer;" onclick="restaurarAlunaExcluida(' + i + ')">Restaurar</span></div>';
+    }).join('') : '');
+  list.appendChild(bloco);
+}
+
 function moverAlunaDeStatus(nomeAluna, novoStatus){
   if(!novoStatus) return;
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
   a.statusPlanoManual = novoStatus === 'auto' ? null : novoStatus;
-  salvarPerfilAlunaNoSupabase(nomeAluna);
+  persistirStatusManualDaFicha(a);
   renderAlunas();
   renderControleTreinos(); // se essa aluna virou Ativa (ou deixou de ser), a lista de Controle de Treinos já reflete na hora
 }
@@ -3518,7 +3647,7 @@ function confirmarMoverAlunasSelecionadas(){
   if(!confirm('Mover ' + alunasSelecionadas.size + ' aluna(s) pra "' + rotulos[destino] + '"?')) return;
   alunasSelecionadas.forEach(function(nome){
     const a = alunasPersonal.find(function(x){ return x.nome === nome; });
-    if(a){ a.statusPlanoManual = destino; salvarPerfilAlunaNoSupabase(nome); }
+    if(a){ a.statusPlanoManual = destino; persistirStatusManualDaFicha(a); }
   });
   renderControleTreinos();
   alternarModoSelecaoAlunas(); // já limpa a seleção, esconde a barra e re-renderiza
@@ -3590,6 +3719,7 @@ function renderAlunas(){
     note.textContent = 'Mostrando 80 de ' + filtradas.length + ', refine a busca para ver outras.';
     list.appendChild(note);
   }
+  renderPainelDeExcluidas(list);
 }
 renderAlunas();
 
@@ -9553,6 +9683,14 @@ function openAlunaDetail(i){
         '</select>' +
         '<p style="font-size:10px;color:var(--text-faint);margin-top:4px;">Independente da pirâmide de baixo — pode ter ênfase embaixo E em cima ao mesmo tempo</p>' +
       '</div>' +
+      '<div class="stat-card"><p class="stat-label">Situação do plano</p>' +
+        '<select class="form-select" style="font-size:13px;padding:6px;margin-top:4px;" onchange="mudarSituacaoDaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)">' +
+          [['ativas','Ativa'],['porvencer','Por vencer'],['vencidas','Vencida']].map(function(o){ return '<option value="' + o[0] + '"' + (statusDoPlano(a) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') +
+          (a.statusPlanoManual ? '<option value="auto">Voltar ao automático (pelo vencimento)</option>' : '') +
+          '<option value="excluir">🗑 Excluir aluna...</option>' +
+        '</select>' +
+        '<p style="font-size:10px;color:var(--text-faint);margin-top:4px;">' + (a.statusPlanoManual ? 'Definida por você. ' : 'Calculada pelo vencimento do plano. ') + 'Excluir tira da lista, mas dá pra restaurar.</p>' +
+      '</div>' +
     '</div>' +
     '<p style="font-size:11px;color:var(--text-faint);margin:-8px 0 12px;">Ajustar aqui atualiza automaticamente toda a estrutura de treino gerada — o gerador nunca mistura exercício de academia com exercício de casa</p>' +
     '<button class="btn-secondary" style="margin-bottom:18px;" onclick="abrirResumoCompletoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-file-description" style="margin-right:6px;"></i>📋 Resumo completo (diagnóstico, avaliação, plano)</button>' +
@@ -10579,8 +10717,9 @@ async function sincronizarListaAlunasDoSupabase(){
       novas++;
     });
 
+    const reaplicadas = aplicarRegistrosDeFichasDoCatalogo(); // a sincronização pode trazer de volta uma ficha que você excluiu
     desambiguarNomesDuplicados();
-    if(novas > 0 || atualizadas > 0) renderAlunas();
+    if(novas > 0 || atualizadas > 0 || reaplicadas > 0) renderAlunas();
     return { novas: novas, atualizadas: atualizadas, erro: null };
   } catch(erroDeRede){
     return { novas: 0, erro: 'sem conexão com o Supabase agora' };
@@ -11644,6 +11783,8 @@ async function carregarCatalogoPersonal(){
         if(row.dados.recompensa) metaComunidadeRecompensa = row.dados.recompensa;
       } else if(row.tipo === 'config_meta_financeira'){
         if(row.dados.meta != null) metaFaturamentoMensal = row.dados.meta;
+      } else if(row.tipo === 'aluna_excluida' || row.tipo === 'aluna_status'){
+        registrarFichaDoCatalogo(row);
       } else if(row.tipo === 'modelo_mestre_desafio'){
         modelosMestreSecaEmpina[row.chave] = row.dados;
       } else if(row.tipo === 'relatorio_tendencias'){
@@ -11660,6 +11801,7 @@ async function carregarCatalogoPersonal(){
       }
     });
 
+    if(aplicarRegistrosDeFichasDoCatalogo() > 0){ renderAlunas(); renderControleTreinos(); }
     normalizarAmbientesDoBanco();
     renderExerciciosChips();
     const listaEstaVisivel = document.getElementById('ex-lista-view') && document.getElementById('ex-lista-view').style.display !== 'none' && document.getElementById('ex-lista') && document.getElementById('ex-lista').style.display !== 'none';
