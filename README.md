@@ -1,4 +1,4 @@
-[dna_musa_121.html](https://github.com/user-attachments/files/33178557/dna_musa_121.html)
+[dna_musa_122.html](https://github.com/user-attachments/files/33178945/dna_musa_122.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -406,7 +406,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-01-G-SITUACAO-E-EXCLUIR</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-01-H-CONTROLE-POR-PRAZO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -931,7 +931,7 @@
       <div id="personal-controle" style="display:none;">
         <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Dashboard</span></div>
         <h1 class="page-title" style="margin-top:0;">Controle de Treinos</h1>
-        <p class="page-sub" style="margin-top:-6px;">⚪ pendente · 🟡 treino gerado/progredido · 🟢 já enviado. Quando todo mundo ficar verde, reseta sozinho pro próximo ciclo, com rodízio justo (quem terminou por último começa em primeiro).</p>
+        <p class="page-sub" style="margin-top:-6px;">⚪ pendente · 🟡 treino gerado/progredido · 🟢 já enviado. A aluna que fica verde volta pro branco sozinha depois do prazo abaixo, contando da data em que ficou verde. No branco, quem espera há mais tempo fica em primeiro.</p>
         <div id="area-controle-treinos"></div>
       </div>
 
@@ -8462,7 +8462,7 @@ async function iniciarProgressaoParaComTreino(){
 // adicionada no motor: roda isso uma vez e pega todo mundo que ainda está pendente de receber a
 // atualização, sem precisar separar manualmente quem já tinha treino de quem não tinha.
 async function iniciarGeracaoOuProgressaoParaNaoEnviados(){
-  const naoEnviadas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas' && a.statusControleCiclo !== 'verde'; });
+  const naoEnviadas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas' && statusEfetivoDoControle(a) !== 'verde'; });
   const elegiveis = naoEnviadas.filter(function(a){ return a.email; });
   const semEmail = naoEnviadas.length - elegiveis.length;
   if(elegiveis.length === 0){
@@ -9728,7 +9728,7 @@ function openAlunaDetail(i){
         '</div>' +
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 8px 0 0;font-size:13px;background:#25D366;color:#fff;border:none;" onclick="enviarCredenciaisPorWhatsApp(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-brand-whatsapp" style="vertical-align:-2px;margin-right:6px;"></i>Mandar login e senha por WhatsApp</button>' +
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 8px 0 0;font-size:13px;background:var(--success);color:#fff;border:none;" onclick="marcarTreinoFeitoManualmente(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-check" style="vertical-align:-2px;margin-right:6px;"></i>Treino feito</button>' +
-        (a.statusControleCiclo === 'verde' ? '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 8px 0 0;font-size:13px;background:var(--card-2);color:#C9784A;border:1px solid var(--border);" onclick="desmarcarTreinoFeitoManualmente(\'' + a.nome.replace(/'/g,"\\'") + '\')">Desmarcar treino feito</button>' : '') +
+        (statusEfetivoDoControle(a) === 'verde' ? '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 8px 0 0;font-size:13px;background:var(--card-2);color:#C9784A;border:1px solid var(--border);" onclick="desmarcarTreinoFeitoManualmente(\'' + a.nome.replace(/'/g,"\\'") + '\')">Desmarcar treino feito</button>' : '') +
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 8px 0 0;font-size:13px;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="abrirDiasRegistradosDaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Treinos que ela registrou</button>' +
         '<div id="dias-registrados-area" style="margin-top:8px;"></div>' +
         '<button class="btn-gold" style="width:auto;padding:10px 16px;margin:8px 0 0;font-size:13px;background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="navigator.clipboard.writeText(\'E-mail: ' + a.email + ' - Senha: ' + a.senhaGerada + ' - Link: ' + (LINK_DO_APP) + '\')">Copiar dados</button>' +
@@ -10176,10 +10176,10 @@ function marcarTreinoFeitoManualmente(nomeAluna){
 
 // Desfaz o "Treino feito" do Controle de Treinos (o verde), caso tenha sido clicado na aluna errada.
 // Volta pra "geradas" (amarelo) se ela tem treino montado, ou pra pendente se não tem. Só aparece
-// enquanto ela está verde: se o ciclo já reiniciou sozinho (todas verdes), não há o que desfazer.
+// enquanto ela está verde: se o prazo já passou e ela voltou pro branco, não há o que desfazer.
 function desmarcarTreinoFeitoManualmente(nomeAluna){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
-  if(!a || a.statusControleCiclo !== 'verde') return;
+  if(!a || statusEfetivoDoControle(a) !== 'verde') return;
   a.statusControleCiclo = a.treinoAtual ? 'amarelo' : null;
   a.dataFicouVerde = null;
   a.ordemConclusaoCicloAtual = null;
@@ -10230,6 +10230,56 @@ async function desfazerDiaComoPersonal(nomeAluna, semana, nomeDia){
   if(area) area.innerHTML = htmlDiasRegistradosDaAluna(a);
 }
 
+// ===== CONTROLE DE TREINOS: a aluna volta pro BRANCO por PRAZO =====
+// Antes, o único gatilho era "todas as ativas ficaram verdes": aí o Controle zerava todo mundo de uma vez (e só checava
+// isso no momento em que você marcava alguém como entregue). Agora cada aluna volta pro branco sozinha, depois de N dias
+// contados da data em que ficou verde (padrão: 35). O branco é CALCULADO pela data na hora de mostrar: nada é regravado
+// nas fichas, então não há risco de apagar marcação de ninguém. Marcar de novo como entregue recomeça a contagem.
+let diasParaVoltarAoBranco = 35;
+let configControleEm = ''; // hora da última configuração vista (a mais recente vale)
+
+// Dias de calendário entre a entrega e hoje (virou o dia, conta 1; não depende da hora em que foi marcado)
+function diasCorridosDesde(iso, agora){
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return null;
+  const hoje = new Date(agora);
+  const ini = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const fim = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  return Math.round((fim - ini) / 86400000);
+}
+
+// O status que vale AGORA. Verde que já passou do prazo vale como branco. Verde sem data (não dá pra contar) continua verde.
+function statusEfetivoDoControle(a, agora){
+  const s = a.statusControleCiclo || null;
+  if(s !== 'verde' || !a.dataFicouVerde) return s;
+  const dias = diasCorridosDesde(a.dataFicouVerde, agora === undefined ? Date.now() : agora);
+  if(dias === null) return s;
+  return dias >= diasParaVoltarAoBranco ? null : 'verde';
+}
+function entregaVenceuPorPrazo(a, agora){
+  return a.statusControleCiclo === 'verde' && !!a.dataFicouVerde && statusEfetivoDoControle(a, agora) === null;
+}
+
+function htmlPrazoDoControle(){
+  return '<div class="info-box" style="margin-bottom:10px;"><p class="txt" style="font-size:12px;margin:0;">Quem fica verde volta pro branco depois de ' +
+    '<input type="number" id="dias-controle" min="1" max="365" value="' + diasParaVoltarAoBranco + '" style="width:60px;text-align:center;" onchange="definirDiasDoControle(this.value)"> ' +
+    'dias, contando da data em que ficou verde.</p></div>';
+}
+
+function definirDiasDoControle(valor){
+  const n = Number(String(valor).trim().replace(',', '.'));
+  if(!Number.isInteger(n) || n < 1 || n > 365){
+    alert('Digite um número inteiro de dias, entre 1 e 365.');
+    renderControleTreinos();
+    return;
+  }
+  diasParaVoltarAoBranco = n;
+  configControleEm = new Date().toISOString();
+  salvarCatalogoPersonalConferindo('config_controle', 'prazo', { dias: n, em: configControleEm });
+  renderControleTreinos();
+  mostrarConfirmacaoSalvamento(true, 'Pronto: quem fica verde volta pro branco depois de ' + n + ' dia(s).');
+}
+
 function marcarStatusControleCiclo(nomeAluna, novoStatus){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
@@ -10240,39 +10290,12 @@ function marcarStatusControleCiclo(nomeAluna, novoStatus){
     a.ordemConclusaoCicloAtual = maiorOrdemAtual + 1;
   }
   salvarPerfilAlunaNoSupabase(a.nome);
-  verificarEResetarCicloSeCompleto();
   renderControleTreinos();
 }
 
-function verificarEResetarCicloSeCompleto(){
-  const ativas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
-  if(ativas.length === 0) return;
-  const todasVerdes = ativas.every(function(a){ return a.statusControleCiclo === 'verde'; });
-  if(!todasVerdes) return;
-
-  // Quando a última aluna ativa fica "entregue", o Controle recomeça sozinho e todo mundo volta pra pendente. Isso
-  // é o combinado, mas dá a impressão de que as suas marcações sumiram (a lista volta ao começo). Agora o app
-  // AVISA que reiniciou e guarda o estado de antes por 3 dias, com um botão pra desfazer o reinício.
-  guardarCicloFechado(ativas);
-  ativas.forEach(function(a){
-    a.ordemUltimoCiclo = a.ordemConclusaoCicloAtual || null;
-    a.statusControleCiclo = null;
-    a.dataFicouVerde = null;
-    a.ordemConclusaoCicloAtual = null;
-    salvarPerfilAlunaNoSupabase(a.nome);
-  });
-  mostrarConfirmacaoSalvamento(true, 'Todas as ativas foram entregues: o Controle começou um novo ciclo. Dá pra desfazer na própria tela.');
-}
-
+// (O reinício automático quando todas as ativas ficavam verdes foi retirado: agora é por prazo, acima.)
+// Fica só a leitura do estado guardado nos últimos 3 dias, pra quem teve um reinício antigo poder desfazer.
 const CHAVE_CICLO_FECHADO = 'musaUltimoCicloFechado';
-function guardarCicloFechado(ativas){
-  try {
-    localStorage.setItem(CHAVE_CICLO_FECHADO, JSON.stringify({
-      em: new Date().toISOString(),
-      itens: ativas.map(function(a){ return { nome: a.nome, statusControleCiclo: a.statusControleCiclo || null, dataFicouVerde: a.dataFicouVerde || null, ordemConclusaoCicloAtual: a.ordemConclusaoCicloAtual || null, ordemUltimoCiclo: a.ordemUltimoCiclo || null }; })
-    }));
-  } catch(e){}
-}
 function lerUltimoCicloFechado(){
   try {
     const ciclo = JSON.parse(localStorage.getItem(CHAVE_CICLO_FECHADO) || 'null');
@@ -10347,34 +10370,61 @@ async function atualizarControleDoServidor(){
 function renderControleTreinos(){
   const container = document.getElementById('area-controle-treinos');
   if(!container) return;
+  const agora = Date.now();
   const ativas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  const efetivo = function(a){ return statusEfetivoDoControle(a, agora); };
+  const tempoDaEntrega = function(a){ const t = new Date(a.dataFicouVerde).getTime(); return isNaN(t) ? 0 : t; };
 
-  const verdes = ativas.filter(function(a){ return a.statusControleCiclo === 'verde'; })
-    .sort(function(x, y){ return new Date(y.dataFicouVerde) - new Date(x.dataFicouVerde); });
-  const amarelos = ativas.filter(function(a){ return a.statusControleCiclo === 'amarelo'; });
-  const incolores = ativas.filter(function(a){ return !a.statusControleCiclo; })
-    .sort(function(x, y){ return (y.ordemUltimoCiclo || 0) - (x.ordemUltimoCiclo || 0); });
+  const verdes = ativas.filter(function(a){ return efetivo(a) === 'verde'; })
+    .sort(function(x, y){ return tempoDaEntrega(y) - tempoDaEntrega(x); });
+  const amarelos = ativas.filter(function(a){ return efetivo(a) === 'amarelo'; });
+  // Brancos: primeiro os que não têm data de entrega registrada (estão brancos desde antes, seguem o rodízio de antes),
+  // depois os que voltaram ao branco por prazo, do que espera há mais tempo pro que acabou de voltar
+  const incolores = ativas.filter(function(a){ return !efetivo(a); })
+    .sort(function(x, y){
+      const vx = entregaVenceuPorPrazo(x, agora), vy = entregaVenceuPorPrazo(y, agora);
+      if(!vx && !vy) return (y.ordemUltimoCiclo || 0) - (x.ordemUltimoCiclo || 0);
+      if(!vx) return -1;
+      if(!vy) return 1;
+      return tempoDaEntrega(x) - tempoDaEntrega(y);
+    });
 
   const linhas = verdes.concat(amarelos).concat(incolores);
 
   const cor = function(a){
-    if(a.statusControleCiclo === 'verde') return 'var(--success)';
-    if(a.statusControleCiclo === 'amarelo') return '#E2C13D';
+    if(efetivo(a) === 'verde') return 'var(--success)';
+    if(efetivo(a) === 'amarelo') return '#E2C13D';
     return 'var(--text)';
   };
+  const formatarData = function(iso){ return new Date(iso).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }); };
 
   let html = '<div class="info-box" style="text-align:center;margin-bottom:12px;">' +
     '<p class="txt" style="font-size:12px;color:var(--text-faint);">🟡 ' + amarelos.length + ' geradas · 🟢 ' + verdes.length + ' enviadas · ⚪ ' + incolores.length + ' pendentes de ' + ativas.length + '</p>' +
   '</div>';
 
+  html += htmlPrazoDoControle();
   html += htmlAvisosDoControle();
 
   html += linhas.map(function(a){
     const i = alunasPersonal.indexOf(a);
-    const dataFormatada = a.dataFicouVerde ? new Date(a.dataFicouVerde).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
+    const dias = a.dataFicouVerde ? diasCorridosDesde(a.dataFicouVerde, agora) : null;
+    let etiquetas = '';
+    if(efetivo(a) === 'verde'){
+      if(a.dataFicouVerde && dias !== null){
+        const faltam = diasParaVoltarAoBranco - dias;
+        etiquetas = '<span class="tag" style="font-size:10px;">' + formatarData(a.dataFicouVerde) + '</span>' +
+          '<span class="tag" style="font-size:10px;">volta ao branco em ' + faltam + (faltam === 1 ? ' dia' : ' dias') + '</span>';
+      } else {
+        etiquetas = '<span class="tag" style="font-size:10px;">sem data de entrega</span>';
+      }
+    } else if(entregaVenceuPorPrazo(a, agora)){
+      etiquetas = '<span class="tag" style="font-size:10px;">entregue em ' + formatarData(a.dataFicouVerde).slice(0, 5) + ' · há ' + dias + ' dias</span>';
+    } else if(a.dataFicouVerde){
+      etiquetas = '<span class="tag" style="font-size:10px;">' + formatarData(a.dataFicouVerde) + '</span>';
+    }
     return '<div class="list-item" style="cursor:pointer;margin-bottom:6px;" onclick="openAlunaDetail(' + i + ')">' +
-      '<span style="color:' + cor(a) + ';font-weight:600;">' + a.nome + '</span>' +
-      (dataFormatada ? '<span class="tag" style="font-size:10px;">' + dataFormatada + '</span>' : '') +
+      '<span style="color:' + cor(a) + ';font-weight:600;">' + escaparHtmlFicha(a.nome) + '</span>' +
+      (etiquetas ? '<span style="display:flex;gap:6px;">' + etiquetas + '</span>' : '') +
     '</div>';
   }).join('');
 
@@ -11783,6 +11833,9 @@ async function carregarCatalogoPersonal(){
         if(row.dados.recompensa) metaComunidadeRecompensa = row.dados.recompensa;
       } else if(row.tipo === 'config_meta_financeira'){
         if(row.dados.meta != null) metaFaturamentoMensal = row.dados.meta;
+      } else if(row.tipo === 'config_controle'){
+        const d = row.dados || {};
+        if(Number.isInteger(d.dias) && d.dias >= 1 && d.dias <= 365 && (d.em || '') >= configControleEm){ diasParaVoltarAoBranco = d.dias; configControleEm = d.em || ''; }
       } else if(row.tipo === 'aluna_excluida' || row.tipo === 'aluna_status'){
         registrarFichaDoCatalogo(row);
       } else if(row.tipo === 'modelo_mestre_desafio'){
@@ -11801,7 +11854,8 @@ async function carregarCatalogoPersonal(){
       }
     });
 
-    if(aplicarRegistrosDeFichasDoCatalogo() > 0){ renderAlunas(); renderControleTreinos(); }
+    if(aplicarRegistrosDeFichasDoCatalogo() > 0){ renderAlunas(); }
+    renderControleTreinos(); // o prazo do Controle pode ter vindo do catálogo
     normalizarAmbientesDoBanco();
     renderExerciciosChips();
     const listaEstaVisivel = document.getElementById('ex-lista-view') && document.getElementById('ex-lista-view').style.display !== 'none' && document.getElementById('ex-lista') && document.getElementById('ex-lista').style.display !== 'none';
