@@ -405,7 +405,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-01-D-SALVAMENTO-SEGURO-E-FICHAS-REPETIDAS</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-01-F-AVISO-SEM-FALSO-ALARME</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -593,6 +593,7 @@
         <span class="tag" id="resumo-dias-semana" style="background:rgba(0,0,0,0.15);color:#1A1409;"></span>
       </div>
       <div id="botao-desafio-area"></div>
+<div id="botoes-cursos-area"></div>
       <div id="botao-pergunta-perfil-area"></div>
       <div id="botao-pergunta-roda-vida-area"></div>
 
@@ -2719,6 +2720,68 @@ const ICONE_SECAO_MENTORIA = {
 };
 let secaoMentoriaAberta = null; // null = mostra o grid de seções; com valor = mostra os itens daquela seção
 
+// ===== CURSOS DO APP (SECA 21 e os próximos) =====
+// Achado: o catálogo de cursos criado pela tela do Personal (cursosPersonal) NUNCA é carregado no celular da aluna
+// (carregarCatalogoPersonal só roda do lado do Personal), então "curso exclusivo / liberar pra alunas" não chegava
+// até elas. Aqui o desenho é outro: as AULAS ficam dentro do app, e a LIBERAÇÃO fica na própria ficha da aluna
+// (campo cursosLiberados, que ela já lê no login e que é salvo pelo caminho seguro). Curso nasce FECHADO pra todas.
+//
+// PARA AJUSTAR O SECA 21: preencha o "titulo" de cada aula e arrume a ORDEM da lista abaixo. Aula sem título aparece
+// como "Aula 01", "Aula 02"... (na ordem em que está aqui).
+const CURSOS_DO_APP = [
+  {
+    id: 'seca21',
+    nome: 'SECA 21',
+    cat: 'Cursos completos',
+    descricao: 'Sequência completa de aulas do desafio SECA 21.',
+    aulas: [
+    { titulo: '', video: 'https://youtu.be/ICo3PN906oQ' },
+    { titulo: '', video: 'https://youtu.be/PdaKs5k0bIg' },
+    { titulo: '', video: 'https://youtu.be/2JXIG1RyFl4' },
+    { titulo: '', video: 'https://youtu.be/69LcB0U4d8I' },
+    { titulo: '', video: 'https://youtu.be/6iSIgs6yLG0' },
+    { titulo: '', video: 'https://youtu.be/8SptyN6pn3c' },
+    { titulo: '', video: 'https://youtu.be/QmibbQ35G3k' },
+    { titulo: '', video: 'https://youtu.be/Sk0WB0fwZV4' },
+    { titulo: '', video: 'https://youtu.be/Zfsub2Bp_zY' },
+    { titulo: '', video: 'https://youtu.be/fzhKDrTnnWw' },
+    { titulo: '', video: 'https://youtu.be/kA4xW9dS74k' },
+    { titulo: '', video: 'https://youtu.be/kU02vDZQhio' },
+    { titulo: '', video: 'https://youtu.be/q8eOM9lxOws' },
+    { titulo: '', video: 'https://youtu.be/sBGsIucgkjQ' },
+    { titulo: '', video: 'https://youtu.be/uF5a0v1ydRo' },
+    { titulo: '', video: 'https://youtu.be/umhBmppjYXc' },
+    { titulo: '', video: 'https://youtu.be/Nc9ab-ZYzIo' },
+    { titulo: '', video: 'https://youtu.be/XYEMyNvN1Gg' },
+    { titulo: '', video: 'https://youtu.be/_AC-W4KgM6Q' }
+    ]
+  }
+];
+
+function tituloDaAula(a, i){ return (a.titulo && a.titulo.trim()) ? a.titulo : 'Aula ' + String(i + 1).padStart(2, '0'); }
+function cursoDoAppPorId(id){ return CURSOS_DO_APP.find(function(c){ return c.id === id; }) || null; }
+function alunaTemCursoLiberado(aluna, idCurso){ return !!aluna && (aluna.cursosLiberados || []).indexOf(idCurso) !== -1; }
+// Mesmo formato dos itens da Mentoria, pra reaproveitar a grade, a playlist e o player que já existem
+function cursoDoAppComoConteudo(curso){
+  return { n: curso.nome, cat: curso.cat, locked: false, desc: curso.descricao + ' ' + curso.aulas.length + ' aulas.', aulas: curso.aulas, cursoDoAppId: curso.id };
+}
+// Aluna: só os cursos liberados pra ela. Personal: todos. Antes de saber quem está logado: nenhum.
+function cursosDoAppVisiveis(){
+  if(sessaoTipo === 'aluna'){
+    const a = obterAlunaLogadaOuCriar();
+    return CURSOS_DO_APP.filter(function(c){ return alunaTemCursoLiberado(a, c.id); });
+  }
+  if(sessaoTipo === 'personal') return CURSOS_DO_APP.slice();
+  return [];
+}
+function listaDeConteudosDaMentoria(){
+  return conteudos.concat(cursosDoAppVisiveis().map(cursoDoAppComoConteudo));
+}
+// A lista de seções só era montada na carga da página (quando ainda não se sabe quem está logada): redesenha ao abrir
+function atualizarMentoriaAoAbrir(){
+  if(secaoMentoriaAberta) renderGrid(); else renderSecoesMentoria();
+}
+
 function obterSecaoDoConteudo(c){ return MAPA_CATEGORIA_PARA_SECAO[c.cat] || 'Conteúdo geral'; }
 
 function renderSecoesMentoria(){
@@ -2726,7 +2789,7 @@ function renderSecoesMentoria(){
   const filterRowEl = document.getElementById('filter-row');
   filterRowEl.innerHTML = '';
   const contagemPorSecao = {};
-  conteudos.forEach(function(c){
+  listaDeConteudosDaMentoria().forEach(function(c){
     if(sessaoTipo === 'aluna' && !alunaTemAcessoAoConteudo(c)) return;
     const secao = obterSecaoDoConteudo(c);
     contagemPorSecao[secao] = (contagemPorSecao[secao] || 0) + 1;
@@ -2779,7 +2842,7 @@ function alunaTemAcessoAoConteudo(c){
 function renderGrid(){
   const grid = document.getElementById('poster-grid');
   grid.innerHTML = '';
-  const lista = conteudos.filter(function(c){
+  const lista = listaDeConteudosDaMentoria().filter(function(c){
     if(secaoMentoriaAberta && obterSecaoDoConteudo(c) !== secaoMentoriaAberta) return false;
     if(filtroAtivo !== 'Todos' && c.cat !== filtroAtivo) return false;
     if(sessaoTipo === 'aluna' && !alunaTemAcessoAoConteudo(c)) return false;
@@ -7308,7 +7371,9 @@ function normalizarParaComparar(v){ return JSON.stringify(v === undefined ? null
 
 function montarColunasDaAluna(a){
   return {
-    nome: a.nome,
+    // nomeBase = o nome sem o sufixo "(6740)" que desambiguarNomesDuplicados põe só na TELA pra diferenciar duas alunas de nome igual.
+    // Sem isso, esse sufixo contava como "mudança pendente" e, ao salvar, seria gravado como o nome da aluna no banco.
+    nome: a.nomeBase || a.nome,
     telefone: a.telefone || '',
     nivel: a.nivel || 'Iniciante',
     freq: a.freq || '3x por semana',
@@ -7361,7 +7426,8 @@ function montarDadosExtrasDaAluna(a){
     suporteUltimoContato: a.suporteUltimoContato || null,
     suporteHistorico: a.suporteHistorico || [],
     desafioAtivo: a.desafioAtivo || null,
-    desafioTreinos: a.desafioTreinos || null
+    desafioTreinos: a.desafioTreinos || null,
+    cursosLiberados: a.cursosLiberados || [] // cursos do app liberados pra ela (ex: 'seca21'). Ela lê a própria ficha no login
   };
 }
 
@@ -7415,7 +7481,9 @@ function calcularMudancasDoPerfil(a){
 // Quem tem mudança que esta tela fez e o servidor ainda não recebeu (só conta ficha que veio do servidor)
 function nomesComMudancaPendente(){
   return alunasPersonal.filter(function(a){
-    return a.email && baselinesPerfil[chaveDoPerfil(a)] && calcularMudancasDoPerfil(a).temMudanca;
+    // Ficha repetida (mesmo e-mail de outra) fica de fora: ela tem dados diferentes da principal, mas ninguém editou nada
+    // nela e ela nem pode ser salva. Contá-la dava alarme falso logo depois do login.
+    return a.email && !ehFichaDuplicada(a) && baselinesPerfil[chaveDoPerfil(a)] && calcularMudancasDoPerfil(a).temMudanca;
   }).map(function(a){ return a.nome; });
 }
 
@@ -7454,6 +7522,25 @@ function tratarFalhaDeSalvamento(nomeAluna, motivo, tentativa, permanente){
     mostrarConfirmacaoSalvamento(false, 'NÃO salvou ' + nomeAluna + ' no servidor (' + motivo + '). A mudança está só nesta tela. Não saia da conta antes de resolver.');
   }
   atualizarAvisoDeSalvamentoNoControle();
+}
+
+// O que mudou numa ficha desde que veio do servidor (campo, valor de antes, valor de agora)
+function detalhesDaMudancaPendente(a){
+  const m = calcularMudancasDoPerfil(a);
+  const base = baselinesPerfil[chaveDoPerfil(a)];
+  const curto = function(json){ const t = String(json === undefined ? 'null' : json); return t.length > 60 ? t.slice(0, 57) + '...' : t; };
+  const itens = [];
+  Object.keys(m.colunas).forEach(function(k){ itens.push({ campo: k, de: curto(base ? base.colunas[k] : null), para: curto(m.atual.colunas[k]) }); });
+  Object.keys(m.extras).forEach(function(k){ itens.push({ campo: k, de: curto(base ? base.extras[k] : null), para: curto(m.atual.extras[k]) }); });
+  return itens;
+}
+
+async function salvarPendenciasAgora(){
+  mostrarConfirmacaoSalvamento(true, 'Salvando no servidor...');
+  const naoSalvas = await descarregarSalvamentosPendentes();
+  renderControleTreinos();
+  if(naoSalvas.length > 0) mostrarConfirmacaoSalvamento(false, 'Não consegui salvar: ' + naoSalvas.join(', ') + '. O motivo está no aviso vermelho.');
+  else mostrarConfirmacaoSalvamento(true, 'Tudo salvo no servidor.');
 }
 
 function atualizarAvisoDeSalvamentoNoControle(){
@@ -7626,7 +7713,10 @@ function editarNomeAluna(nomeAntigo){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAntigo; });
   if(!a) return;
 
+  // Salvar sem mexer no nome (o campo vem preenchido com o nome da tela, que pode ter o sufixo "(6740)") não é renomear
+  if(a.nomeBase && novoNome === a.nome){ openAlunaDetail(alunasPersonal.indexOf(a)); return; }
   a.nome = novoNome;
+  if(a.nomeBase) a.nomeBase = novoNome; // renomeou de propósito: este passa a ser o nome de verdade (é o que vai pro servidor)
   // Migra o progresso guardado (histórico de carga, check-ins, semana atual, etc.) pro nome novo —
   // sem isso, esse histórico ficaria "órfão", preso debaixo do nome antigo que não existe mais.
   if(typeof progressoesPorAluna !== 'undefined' && progressoesPorAluna[nomeAntigo]){
@@ -10077,7 +10167,14 @@ function htmlAvisosDoControle(){
     const motivos = nomesComErroDeSalvamento().map(function(n){ return escaparHtmlFicha(n) + ': ' + escaparHtmlFicha(errosSalvamentoPerfil[n].erro); }).join(' · ');
     html += '<div class="info-box" style="border-color:#C9784A;margin-bottom:10px;"><p class="txt" style="font-size:12px;color:#C9784A;margin:0;">⚠ ' +
       nomesComProblema.length + ' aluna(s) com mudança que ainda NÃO foi salva no servidor: ' + escaparHtmlFicha(nomesComProblema.join(', ')) + '.' +
-      (motivos ? ' Motivo: ' + motivos + '.' : '') + ' Não saia da conta antes de resolver.</p></div>';
+      (motivos ? ' Motivo: ' + motivos + '.' : '') + ' Não saia da conta antes de resolver.</p>' +
+      '<details style="margin-top:6px;"><summary style="cursor:pointer;font-size:12px;">Ver o que mudou em cada uma</summary>' +
+      nomesComMudancaPendente().map(function(n){
+        const aluna = alunasPersonal.find(function(x){ return x.nome === n; });
+        return '<p class="txt" style="font-size:11px;margin:6px 0 0;"><b>' + escaparHtmlFicha(n) + '</b>: ' +
+          detalhesDaMudancaPendente(aluna).map(function(d){ return escaparHtmlFicha(d.campo) + ' (' + escaparHtmlFicha(d.de) + ' → ' + escaparHtmlFicha(d.para) + ')'; }).join(', ') + '</p>';
+      }).join('') + '</details>' +
+      '<span class="acao-pill" style="margin-top:8px;display:inline-block;" onclick="salvarPendenciasAgora()">Salvar agora</span></div>';
   }
   // Fichas ativas que, por como estão cadastradas, NUNCA conseguem guardar uma mudança (mostra antes de você mexer)
   const ativasAgora = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
@@ -11970,14 +12067,140 @@ function alternarExclusividadeItemCurso(idxConteudo){
   renderCursosPersonal();
 }
 
+// ===== PERSONAL: cursos do app (SECA 21). Liberação por aluna, ou pra todas as ativas, ou fechar tudo =====
+function semAcentoMinusculo(t){ return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+
+function textoResumoCursoDoApp(curso){
+  const liberadas = alunasPersonal.filter(function(a){ return alunaTemCursoLiberado(a, curso.id); }).length;
+  return curso.nome + ' · ' + curso.aulas.length + ' aulas · ' + (liberadas === 0 ? 'Fechado pra todas' : 'liberado pra ' + liberadas + ' aluna(s)');
+}
+
+function htmlCursosDoAppPersonal(){
+  return CURSOS_DO_APP.map(function(curso){
+    const semTitulo = curso.aulas.filter(function(a){ return !(a.titulo || '').trim(); }).length;
+    const chip = function(texto, acao){ return '<span class="chip" style="cursor:pointer;" onclick="' + acao + '">' + texto + '</span>'; };
+    return '<div class="info-box" style="margin-bottom:10px;border-color:var(--gold-soft);">' +
+      '<p class="lbl" id="resumo-curso-' + curso.id + '">' + textoResumoCursoDoApp(curso) + '</p>' +
+      (semTitulo > 0 ? '<p class="txt" style="font-size:11px;color:#E2A33D;margin:4px 0 0;">' + semTitulo + ' aula(s) ainda sem título: aparecem como "Aula 01", "Aula 02"... na ordem em que estão cadastradas.</p>' : '') +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">' +
+        chip('Liberar pra alunas', "abrirPickerLiberacaoCurso('" + curso.id + "')") +
+        chip('Liberar pra todas as ativas', "liberarCursoParaTodasAtivas('" + curso.id + "')") +
+        chip('Fechar pra todas', "fecharCursoParaTodas('" + curso.id + "')") +
+        chip('Ver aulas', "verAulasDoCursoDoApp('" + curso.id + "')") +
+      '</div>' +
+      '<div id="area-liberacao-' + curso.id + '"></div>' +
+      '<div id="area-aulas-' + curso.id + '"></div>' +
+    '</div>';
+  }).join('');
+}
+
+function atualizarResumoCursoDoApp(idCurso){
+  const curso = cursoDoAppPorId(idCurso);
+  const el = document.getElementById('resumo-curso-' + idCurso);
+  if(curso && el) el.textContent = textoResumoCursoDoApp(curso);
+}
+
+function verAulasDoCursoDoApp(idCurso){
+  const curso = cursoDoAppPorId(idCurso);
+  const area = document.getElementById('area-aulas-' + idCurso);
+  if(!curso || !area) return;
+  if(area.innerHTML){ area.innerHTML = ''; return; }
+  area.innerHTML = '<div style="margin-top:8px;">' + curso.aulas.map(function(a, i){
+    return '<p class="txt" style="font-size:12px;margin:0 0 4px;">' + String(i + 1).padStart(2, '0') + ' · ' + escaparHtmlFicha(tituloDaAula(a, i)) + (a.titulo ? '' : ' <span style="color:var(--text-faint);">(sem título)</span>') +
+      ' <a href="' + a.video + '" target="_blank" rel="noopener" style="color:var(--gold-soft);">abrir</a></p>';
+  }).join('') + '</div>';
+}
+
+function abrirPickerLiberacaoCurso(idCurso){
+  const area = document.getElementById('area-liberacao-' + idCurso);
+  if(!area) return;
+  if(area.innerHTML){ area.innerHTML = ''; return; }
+  area.innerHTML = '<div style="margin-top:10px;">' +
+    '<input class="form-input" id="busca-liberacao-' + idCurso + '" placeholder="Buscar aluna pelo nome" oninput="renderListaLiberacaoCurso(\'' + idCurso + '\')">' +
+    '<div id="lista-liberacao-' + idCurso + '" style="max-height:260px;overflow-y:auto;margin-top:8px;"></div></div>';
+  renderListaLiberacaoCurso(idCurso);
+}
+
+const LIMITE_LISTA_LIBERACAO = 40;
+function renderListaLiberacaoCurso(idCurso){
+  const lista = document.getElementById('lista-liberacao-' + idCurso);
+  if(!lista) return;
+  const campo = document.getElementById('busca-liberacao-' + idCurso);
+  const termo = semAcentoMinusculo(campo ? campo.value : '').trim();
+  // Fichas repetidas (mesmo e-mail de outra ficha) ficam de fora: a liberação vai pra ficha principal
+  const casadas = alunasPersonal.filter(function(a){
+    return (!a.email || !ehFichaDuplicada(a)) && (!termo || semAcentoMinusculo(a.nome).indexOf(termo) !== -1);
+  });
+  const peso = function(a){ return (alunaTemCursoLiberado(a, idCurso) ? 0 : 2) + (statusDoPlano(a) === 'ativas' ? 0 : 1); };
+  casadas.sort(function(x, y){ return peso(x) - peso(y) || x.nome.localeCompare(y.nome, 'pt-BR'); });
+  const mostradas = casadas.slice(0, LIMITE_LISTA_LIBERACAO);
+  lista.innerHTML = mostradas.map(function(a){
+    const plano = statusDoPlano(a);
+    const avisoPlano = plano === 'ativas' ? '' : ' <span class="tag" style="font-size:9px;">' + (plano === 'vencidas' ? 'plano vencido' : 'perto de vencer') + '</span>';
+    const avisoEmail = a.email ? '' : ' <span class="tag" style="font-size:9px;background:#C9784A;color:#fff;">sem e-mail, não consegue entrar</span>';
+    return '<label style="display:flex;align-items:center;gap:8px;font-size:12px;padding:3px 0;">' +
+      '<input type="checkbox" ' + (alunaTemCursoLiberado(a, idCurso) ? 'checked ' : '') + (a.email ? '' : 'disabled ') + 'onchange="alternarLiberacaoDoCurso(\'' + a.nome.replace(/'/g, "\\'") + '\',\'' + idCurso + '\')"> ' +
+      escaparHtmlFicha(a.nome) + avisoPlano + avisoEmail + '</label>';
+  }).join('') +
+    (casadas.length === 0 ? '<p class="txt" style="font-size:12px;color:var(--text-faint);">Nenhuma aluna com esse nome.</p>' : '') +
+    (casadas.length > LIMITE_LISTA_LIBERACAO ? '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:6px;">Mostrando ' + LIMITE_LISTA_LIBERACAO + ' de ' + casadas.length + '. Digite mais letras do nome pra achar a aluna.</p>' : '');
+}
+
+function alternarLiberacaoDoCurso(nomeAluna, idCurso){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !cursoDoAppPorId(idCurso)) return;
+  // A liberação mora na ficha dela e é salva pelo e-mail: sem e-mail ela nem consegue entrar no app
+  if(!a.email){ alert(nomeAluna + ' não tem e-mail cadastrado, então não consegue entrar no app. Preencha o e-mail na ficha dela (seção Dados) e libere de novo.'); renderListaLiberacaoCurso(idCurso); return; }
+  if(ehFichaDuplicada(a)){ alert('Essa ficha é repetida (o mesmo e-mail de "' + escolherFichaPrincipal(a.email).nome + '"). Libere pela outra ficha da mesma pessoa.'); renderListaLiberacaoCurso(idCurso); return; }
+  const atual = (a.cursosLiberados || []).slice();
+  const i = atual.indexOf(idCurso);
+  if(i === -1) atual.push(idCurso); else atual.splice(i, 1);
+  a.cursosLiberados = atual;
+  salvarPerfilAlunaNoSupabase(a.nome);
+  renderListaLiberacaoCurso(idCurso);
+  atualizarResumoCursoDoApp(idCurso);
+}
+
+function liberarCursoParaTodasAtivas(idCurso){
+  const curso = cursoDoAppPorId(idCurso);
+  if(!curso) return;
+  const ativas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas' && !ehFichaDuplicada(a); });
+  const comEmail = ativas.filter(function(a){ return a.email; });
+  const semEmail = ativas.length - comEmail.length;
+  const faltam = comEmail.filter(function(a){ return !alunaTemCursoLiberado(a, idCurso); });
+  if(faltam.length === 0){ alert('Todas as ativas que têm e-mail já estão com o ' + curso.nome + ' liberado.'); return; }
+  if(!confirm('Liberar o ' + curso.nome + ' pra ' + faltam.length + ' aluna(s) ativa(s)?' + (semEmail > 0 ? '\n\n' + semEmail + ' ativa(s) sem e-mail ficam de fora, porque não conseguem entrar no app.' : ''))) return;
+  faltam.forEach(function(a){
+    a.cursosLiberados = (a.cursosLiberados || []).concat([idCurso]);
+    salvarPerfilAlunaNoSupabase(a.nome);
+  });
+  renderListaLiberacaoCurso(idCurso);
+  atualizarResumoCursoDoApp(idCurso);
+}
+
+function fecharCursoParaTodas(idCurso){
+  const curso = cursoDoAppPorId(idCurso);
+  if(!curso) return;
+  const liberadas = alunasPersonal.filter(function(a){ return alunaTemCursoLiberado(a, idCurso); });
+  if(liberadas.length === 0){ alert('O ' + curso.nome + ' já está fechado pra todas.'); return; }
+  if(!confirm('Fechar o ' + curso.nome + ' pra ' + liberadas.length + ' aluna(s)? Elas deixam de ver o curso na Mentoria.')) return;
+  liberadas.forEach(function(a){
+    a.cursosLiberados = (a.cursosLiberados || []).filter(function(id){ return id !== idCurso; });
+    salvarPerfilAlunaNoSupabase(a.nome);
+  });
+  renderListaLiberacaoCurso(idCurso);
+  atualizarResumoCursoDoApp(idCurso);
+}
+
 function renderCursosPersonal(){
   const container = document.getElementById('cursos-list-personal');
   if(!container) return;
+  const blocoDoApp = htmlCursosDoAppPersonal();
   if(cursosPersonal.length === 0){
-    container.innerHTML = '';
+    container.innerHTML = blocoDoApp;
     return;
   }
-  container.innerHTML = cursosPersonal.map(function(curso){
+  container.innerHTML = blocoDoApp + cursosPersonal.map(function(curso){
     const qtdItens = (curso.itensIds || []).length;
     const qtdAlunas = (curso.alunasLiberadas || []).length;
     return '<div class="info-box" style="margin-bottom:10px;">' +
@@ -13271,7 +13494,8 @@ function openLevel2(which){
   if(phoneEl) phoneEl.classList.toggle('modo-personal', which === 'personal');
   if(which === 'personal'){ showPersonalView('dashboard'); carregarCatalogoPersonal(); iniciarPresencaEquipe(); iniciarRealtimeConversas(); }
   if(which === 'chatia'){ inicializarChatIA(); }
-  if(which === 'home' && typeof renderHome === 'function'){ renderHome(); verificarAvancoEstruturaDesafio(); renderBotaoDesafio(); verificarPerguntaPerfilPendente(); renderBotaoPerguntaPerfil(); verificarPerguntaRodaDaVidaPendente(); renderBotaoPerguntaRodaDaVida(); verificarEIniciarTourPrimeiraVez(); }
+  if(which === 'mentoria'){ atualizarMentoriaAoAbrir(); }
+  if(which === 'home' && typeof renderHome === 'function'){ renderHome(); verificarAvancoEstruturaDesafio(); renderBotaoDesafio(); renderBotoesCursosLiberados(); verificarPerguntaPerfilPendente(); renderBotaoPerguntaPerfil(); verificarPerguntaRodaDaVidaPendente(); renderBotaoPerguntaRodaDaVida(); verificarEIniciarTourPrimeiraVez(); }
   if(which === 'dados' && typeof renderAvaliacoes === 'function'){ renderAvaliacoes(); }
   if(which === 'progresso' && typeof renderMeuProgresso === 'function'){ renderMeuProgresso(); }
   if(which === 'ranking' && typeof renderRanking === 'function'){ renderRanking(); renderRankingPublico(); }
@@ -14380,7 +14604,13 @@ let currentCursoMeta = null;
 
 function abrirCurso(c){
   currentCursoMeta = c;
+  if(c.cursoDoAppId) marcarCursoComoVisto(c.cursoDoAppId);
   renderPlaylist();
+}
+
+// Na lista: aula com título leva o número na frente; aula sem título já é "Aula 01" (não repete o número)
+function rotuloDaAulaNaLista(a, i){
+  return (a.titulo && a.titulo.trim()) ? (i + 1) + '. ' + a.titulo : tituloDaAula(a, i);
 }
 
 function renderPlaylist(){
@@ -14388,10 +14618,10 @@ function renderPlaylist(){
   const c = currentCursoMeta;
   let itens = '';
   c.aulas.forEach(function(a, i){
-    itens += '<div class="list-item" style="cursor:pointer;" onclick="playAula(' + i + ')"><span>' + (i+1) + '. ' + a.titulo + '</span><i class="ti ti-player-play" style="font-size:13px;color:var(--gold-soft);"></i></div>';
+    itens += '<div class="list-item" style="cursor:pointer;" onclick="playAula(' + i + ')"><span>' + rotuloDaAulaNaLista(a, i) + '</span><i class="ti ti-player-play" style="font-size:13px;color:var(--gold-soft);"></i></div>';
   });
   el.innerHTML =
-    '<p class="page-sub" style="margin-top:14px;">' + c.cat + ' · Grátis</p>' +
+    '<p class="page-sub" style="margin-top:14px;">' + c.cat + (c.cursoDoAppId ? ' · Liberado pra você' : ' · Grátis') + '</p>' +
     '<h1 class="page-title" style="margin-top:0;">' + c.n + '</h1>' +
     '<div class="info-box"><p class="txt">' + c.desc + '</p></div>' +
     '<p class="section-label">Aulas (' + c.aulas.length + ')</p>' +
@@ -14399,15 +14629,52 @@ function renderPlaylist(){
 }
 
 function playAula(i){
-  const a = currentCursoMeta.aulas[i];
+  const c = currentCursoMeta;
+  const a = c.aulas[i];
   const embed = getEmbedUrl(a.video);
+  const titulo = tituloDaAula(a, i);
   const el = document.getElementById('detail-content');
   el.innerHTML =
     '<div class="local-back" style="margin-top:14px;" onclick="renderPlaylist()"><i class="ti ti-arrow-left"></i><span>Lista de aulas</span></div>' +
     (embed
-      ? '<div class="video-block"><iframe src="' + embed + '" title="' + a.titulo + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>' + ytFallback(a.video)
+      // O link do YouTube fica logo abaixo: se o player não carregar (vídeo com incorporação desligada, por exemplo), ela ainda assiste
+      ? '<div class="video-block"><iframe src="' + embed + '" title="' + titulo + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>' + ytFallback(a.video)
       : '<div class="video-block"><i class="ti ti-player-play"></i></div>') +
-    '<h1 class="page-title" style="margin-top:0;">' + a.titulo + '</h1>';
+    '<p class="page-sub" style="margin:10px 0 0;">Aula ' + (i + 1) + ' de ' + c.aulas.length + '</p>' +
+    '<h1 class="page-title" style="margin-top:0;">' + titulo + '</h1>' +
+    (i < c.aulas.length - 1 ? '<button class="btn-gold" style="margin-top:12px;" onclick="playAula(' + (i + 1) + ')">Próxima aula: ' + tituloDaAula(c.aulas[i + 1], i + 1) + '</button>' : '');
+}
+
+// Aviso na Início: aparece uma vez por curso liberado, e some quando ela abre
+function marcarCursoComoVisto(idCurso){
+  if(sessaoTipo !== 'aluna') return;
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  if(!prog.cursosVistos) prog.cursosVistos = {};
+  if(prog.cursosVistos[idCurso]) return;
+  prog.cursosVistos[idCurso] = new Date().toISOString();
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  renderBotoesCursosLiberados();
+}
+
+function renderBotoesCursosLiberados(){
+  const area = document.getElementById('botoes-cursos-area');
+  if(!area) return;
+  if(sessaoTipo !== 'aluna'){ area.innerHTML = ''; return; }
+  const a = obterAlunaLogadaOuCriar();
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const novos = CURSOS_DO_APP.filter(function(c){ return alunaTemCursoLiberado(a, c.id) && !(prog.cursosVistos && prog.cursosVistos[c.id]); });
+  area.innerHTML = novos.map(function(c){
+    return '<div class="list-item" style="cursor:pointer;background:linear-gradient(135deg,#E8C58A,#B8893F);border:none;margin-top:10px;" onclick="abrirCursoDoApp(\'' + c.id + '\')">' +
+      '<span style="color:#1A1409;font-weight:600;"><i class="ti ti-gift" style="margin-right:8px;"></i>Novo curso liberado: ' + c.nome + '</span>' +
+      '<span class="tag" style="background:rgba(0,0,0,0.12);color:#1A1409;">' + c.aulas.length + ' aulas</span>' +
+    '</div>';
+  }).join('');
+}
+
+function abrirCursoDoApp(idCurso){
+  const curso = cursoDoAppPorId(idCurso);
+  if(!curso) return;
+  openDetail('conteudo', cursoDoAppComoConteudo(curso));
 }
 
 function calcularEfeitoCardio(minutosSemana){
