@@ -405,7 +405,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-08-I-DATA-LOCAL</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-08-J-ERROS-SEGUROS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1200,7 +1200,8 @@
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold-soft)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M10.363 3.591l-8.106 13.535a1.914 1.914 0 0 0 1.636 2.874h16.214a1.914 1.914 0 0 0 1.636 -2.874l-8.106 -13.535a1.914 1.914 0 0 0 -3.274 0z"/><path d="M12 16h.01"/></svg>
   </div>
   <p style="font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--text);margin:0 0 8px;">Algo não carregou direito</p>
-  <p style="font-size:13px;color:var(--text-dim);margin:0 0 22px;max-width:280px;">Pode ter sido uma queda de internet momentânea. Tenta recarregar — seus dados estão salvos.</p>
+  <p style="font-size:13px;color:var(--text-dim);margin:0 0 10px;max-width:280px;">Toca em recarregar pra abrir de novo. Seus dados estão salvos e o seu personal já foi avisado.</p>
+  <p id="codigo-erro-generico" style="font-size:11px;color:var(--text-faint);margin:0 0 20px;letter-spacing:1px;"></p>
   <button class="btn-gold" style="width:auto;padding:12px 28px;" onclick="window.location.reload()">Recarregar</button>
 </div>
 
@@ -1224,35 +1225,146 @@
 </div>
 
 <script>
-window.addEventListener('error', function(evento){
-  // Só reage a erro de JavaScript de verdade (tem stack de erro real).
-  // Erro de carregar fonte/imagem/CDN não deve travar o app inteiro — isso já é tratado visualmente em cada lugar específico.
-  if(!evento.error) return;
-  console.error('[Erro capturado]', evento.error);
-  registrarErroNoBanco(evento.error);
+// ===== ERROS DO APP: registrar sempre, travar a tela só quando não tem outro jeito =====
+// Antes: QUALQUER erro de código, mesmo num botão só, cobria o app inteiro com "Algo não carregou
+// direito" e a aluna ficava presa. E o registro ia pra uma tabela (erros_app) que nem existia no
+// Supabase, então nenhum erro jamais foi guardado. Agora:
+// 1) erro depois que o app já abriu vira só um aviso pequeno embaixo, e ela continua usando;
+// 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
+// 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
+//    fica guardado no aparelho e é reenviado depois.
+const VERSAO_APP = '2026-10-08-J-ERROS-SEGUROS';
+const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
+const LIMITE_ERROS_SEGUIDOS = 3;
+const CHAVE_FILA_ERROS = 'musaFilaErros';
+let appTerminouDeAbrir = false;
+let instantesDosErros = [];
+const ultimoEnvioPorErro = {};
+window.addEventListener('load', function(){ setTimeout(function(){ appTerminouDeAbrir = true; }, 0); });
+
+// Código curto que aparece na tela da aluna: com o print dela dá pra achar o erro exato no registro
+function codigoDoErro(mensagem){
+  let h = 0; const t = String(mensagem || '');
+  for(let i = 0; i < t.length; i++){ h = ((h << 5) - h + t.charCodeAt(i)) | 0; }
+  return ('0000' + Math.abs(h).toString(36).toUpperCase()).slice(-4);
+}
+
+function decidirComoMostrarErro(agora){
+  instantesDosErros = instantesDosErros.filter(function(t){ return agora - t < JANELA_ERROS_SEGUIDOS_MS; });
+  instantesDosErros.push(agora);
+  if(!appTerminouDeAbrir) return 'tela-cheia';
+  if(instantesDosErros.length >= LIMITE_ERROS_SEGUIDOS) return 'tela-cheia';
+  return 'aviso';
+}
+
+function mostrarAvisoDeErroLeve(codigo){
+  try {
+    if(document.getElementById('aviso-erro-leve')) return; // um aviso por vez
+    const el = document.createElement('div');
+    el.id = 'aviso-erro-leve';
+    el.style.cssText = 'position:fixed;bottom:76px;left:12px;right:12px;padding:11px 14px;border-radius:12px;font-size:12px;text-align:center;z-index:99990;background:#2a2116;color:#E8C58A;border:1px solid #4C3E25;';
+    el.textContent = 'Essa parte não abriu direito. Tenta de novo ou volta pra tela anterior. Seu personal já foi avisado. (código ' + codigo + ')';
+    document.body.appendChild(el);
+    setTimeout(function(){ try { el.remove(); } catch(e){} }, 7000);
+  } catch(e){}
+}
+
+function mostrarTelaCheiaDeErro(codigo){
   const tela = document.getElementById('tela-erro-generica');
-  if(tela && tela.style.display !== 'flex') tela.style.display = 'flex';
+  if(!tela) return;
+  const cod = document.getElementById('codigo-erro-generico');
+  if(cod) cod.textContent = 'Código ' + codigo;
+  if(tela.style.display !== 'flex') tela.style.display = 'flex';
+}
+
+function tratarErroDoApp(erro){
+  const mensagem = erro && erro.message ? erro.message : String(erro);
+  const codigo = codigoDoErro(mensagem);
+  try { console.error('[Erro capturado]', erro); } catch(e){}
+  registrarErroNoBanco(erro, codigo);
+  const forma = decidirComoMostrarErro(Date.now());
+  if(forma === 'tela-cheia') mostrarTelaCheiaDeErro(codigo); else mostrarAvisoDeErroLeve(codigo);
+  return forma;
+}
+
+window.addEventListener('error', function(evento){
+  // Só reage a erro de JavaScript de verdade (tem objeto de erro).
+  // Falha de fonte, imagem ou CDN não trava nada: já é tratada em cada lugar.
+  if(!evento.error) return;
+  tratarErroDoApp(evento.error);
 });
 window.addEventListener('unhandledrejection', function(evento){
-  console.error('[Promessa rejeitada sem tratamento]', evento.reason);
-  registrarErroNoBanco(evento.reason);
-  // Erros de rede do Supabase já têm tratamento próprio (try/catch), então aqui só logamos,
-  // não mostramos a tela cheia pra não interromper por uma falha que o próprio código já absorveu.
+  // Promessa sem tratamento: só registra. Falha de rede do Supabase já tem tratamento próprio.
+  try { console.error('[Promessa rejeitada sem tratamento]', evento.reason); } catch(e){}
+  const r = evento.reason;
+  registrarErroNoBanco(r, codigoDoErro(r && r.message ? r.message : String(r)));
 });
 
-// Guarda o erro no banco automaticamente, pra revisão depois — sem depender de ninguém mandar print.
-// Nunca deixa um problema AQUI quebrar mais nada (por isso o try/catch envolvendo tudo).
-function registrarErroNoBanco(erro){
+function lerFilaErros(){
+  try { return JSON.parse(localStorage.getItem(CHAVE_FILA_ERROS) || '[]') || []; } catch(e){ return []; }
+}
+function gravarFilaErros(fila){
+  try { localStorage.setItem(CHAVE_FILA_ERROS, JSON.stringify(fila.slice(-20))); } catch(e){}
+}
+
+function montarRegistroDeErro(erro, codigo){
+  const mensagem = erro && erro.message ? erro.message : String(erro);
+  const pilha = erro && erro.stack ? String(erro.stack).slice(0, 2000) : null;
+  const tela = (typeof level2 !== 'undefined' && level2) ? level2 : (typeof sessaoTipo !== 'undefined' && sessaoTipo ? sessaoTipo : 'desconhecida');
+  const quem = (typeof NOME_ALUNA_LOGADA !== 'undefined' && NOME_ALUNA_LOGADA && typeof sessaoTipo !== 'undefined' && sessaoTipo === 'aluna') ? NOME_ALUNA_LOGADA
+    : ((typeof NOME_PERSONAL_LOGADO !== 'undefined' && NOME_PERSONAL_LOGADO) ? NOME_PERSONAL_LOGADO : 'não identificado');
+  let aparelho = '';
+  try { aparelho = String((navigator && navigator.userAgent) || '').slice(0, 300); } catch(e){}
+  return { mensagem: String(mensagem).slice(0, 1000), pilha: pilha, tela: String(tela), quem: String(quem), versao: VERSAO_APP, aparelho: aparelho, codigo: codigo || codigoDoErro(mensagem), ocorrido_em: new Date().toISOString() };
+}
+
+async function enviarRegistroDeErro(registro){
+  if(typeof supabaseClient === 'undefined' || !supabaseClient) return false;
   try {
-    if(!supabaseClient) return;
-    const mensagem = erro && erro.message ? erro.message : String(erro);
-    const pilha = erro && erro.stack ? String(erro.stack).slice(0, 2000) : null;
-    const tela = (typeof level2 !== 'undefined' && level2) ? level2 : (typeof sessaoTipo !== 'undefined' ? sessaoTipo : 'desconhecida');
-    const quem = (typeof NOME_ALUNA_LOGADA !== 'undefined' && NOME_ALUNA_LOGADA) ? NOME_ALUNA_LOGADA : ((typeof NOME_PERSONAL_LOGADO !== 'undefined' && NOME_PERSONAL_LOGADO) ? NOME_PERSONAL_LOGADO : 'não identificado');
-    supabaseClient.from('erros_app').insert({ mensagem: mensagem, pilha: pilha, tela: String(tela), quem: quem }).then(function(){}).catch(function(){});
-  } catch(erroAoRegistrar){
-    // Se até registrar o erro falhar, só desiste silenciosamente — nunca pode causar um segundo erro
-  }
+    const r = await supabaseClient.from('erros_app').insert(registro);
+    return !(r && r.error); // o Supabase não dá exceção quando recusa: devolve { error }
+  } catch(e){ return false; }
+}
+
+// Guarda o erro no banco, pra revisão depois, sem depender de ninguém mandar print.
+// Nada aqui pode causar um segundo erro (tudo dentro de try/catch).
+function registrarErroNoBanco(erro, codigo){
+  try {
+    const registro = montarRegistroDeErro(erro, codigo);
+    const agora = Date.now();
+    if(ultimoEnvioPorErro[registro.codigo] && agora - ultimoEnvioPorErro[registro.codigo] < 60000) return; // o mesmo erro repetido em 1 min conta uma vez só
+    ultimoEnvioPorErro[registro.codigo] = agora;
+    enviarRegistroDeErro(registro).then(function(foi){
+      if(!foi){ const fila = lerFilaErros(); fila.push(registro); gravarFilaErros(fila); }
+    }).catch(function(){});
+  } catch(erroAoRegistrar){}
+}
+
+// Reenvia o que ficou guardado no aparelho (sem internet, ou tabela ainda não criada). Roda no login.
+async function reenviarErrosGuardados(){
+  try {
+    const fila = lerFilaErros();
+    if(!fila.length) return 0;
+    const sobraram = [];
+    let enviados = 0;
+    for(const registro of fila){
+      if(await enviarRegistroDeErro(registro)) enviados++; else sobraram.push(registro);
+    }
+    gravarFilaErros(sobraram);
+    return enviados;
+  } catch(e){ return 0; }
+}
+
+function escaparTextoErro(t){
+  return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+}
+
+// Primeira linha da pilha que aponta pro código do app: diz ONDE quebrou
+function ondeQuebrou(pilha){
+  if(!pilha) return '';
+  const linhas = String(pilha).split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+  const util = linhas.find(function(l){ return /at |@/.test(l); });
+  return util ? util.slice(0, 160) : '';
 }
 
 async function verErrosRecentes(){
@@ -1262,19 +1374,29 @@ async function verErrosRecentes(){
   area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Carregando...</p>';
   try {
     const { data, error } = await supabaseClient.from('erros_app').select('*').order('data_hora', { ascending: false }).limit(30);
-    if(error || !data || data.length === 0){
-      area.innerHTML = '<div class="info-box"><p class="txt" style="color:var(--text-faint);">Nenhum erro registrado — ótimo sinal.</p></div>';
+    // Antes, um erro aqui (ex: tabela que não existe) aparecia como "nenhum erro, ótimo sinal". Era mentira.
+    if(error){
+      const faltaTabela = /erros_app|does not exist|relation/i.test(error.message || '');
+      area.innerHTML = '<div class="info-box" style="border-color:#C9784A;"><p class="txt" style="color:#E2A33D;">' +
+        (faltaTabela ? 'A tabela de erros ainda não existe no Supabase, então nenhum erro está sendo guardado. Rode o arquivo sql_criar_tabela_erros_app.sql no SQL Editor.' : 'Não consegui ler os erros: ' + escaparTextoErro(error.message)) +
+        '</p></div>';
+      return;
+    }
+    if(!data || data.length === 0){
+      area.innerHTML = '<div class="info-box"><p class="txt" style="color:var(--text-faint);">Nenhum erro registrado.</p></div>';
       return;
     }
     area.innerHTML = data.map(function(e){
       const dataFormatada = new Date(e.data_hora).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+      const onde = ondeQuebrou(e.pilha);
       return '<div class="info-box" style="margin-bottom:6px;border-color:#C9784A;">' +
-        '<p class="txt" style="font-size:12px;color:#C9784A;margin:0;">' + e.mensagem + '</p>' +
-        '<p class="txt" style="font-size:10.5px;color:var(--text-faint);margin:4px 0 0;">' + (e.quem || '?') + ' · ' + (e.tela || '?') + ' · ' + dataFormatada + '</p>' +
+        '<p class="txt" style="font-size:12px;color:#C9784A;margin:0;">' + (e.codigo ? '[' + escaparTextoErro(e.codigo) + '] ' : '') + escaparTextoErro(e.mensagem) + '</p>' +
+        (onde ? '<p class="txt" style="font-size:10.5px;color:var(--text-dim);margin:4px 0 0;">Onde: ' + escaparTextoErro(onde) + '</p>' : '') +
+        '<p class="txt" style="font-size:10.5px;color:var(--text-faint);margin:4px 0 0;">' + escaparTextoErro(e.quem || '?') + ' · ' + escaparTextoErro(e.tela || '?') + ' · ' + dataFormatada + (e.versao ? ' · versão ' + escaparTextoErro(e.versao) : '') + '</p>' +
       '</div>';
     }).join('');
   } catch(erroDeRede){
-    area.innerHTML = '<div class="info-box"><p class="txt">Erro ao carregar: ' + erroDeRede.message + '</p></div>';
+    area.innerHTML = '<div class="info-box"><p class="txt">Erro ao carregar: ' + escaparTextoErro(erroDeRede.message) + '</p></div>';
   }
 }
 
@@ -13858,6 +13980,8 @@ async function restaurarSessaoAtiva(){
   }
 }
 restaurarSessaoAtiva();
+// Erros que ficaram guardados no aparelho (sem internet na hora) vão pro registro alguns segundos depois de abrir
+setTimeout(reenviarErrosGuardados, 8000);
 
 const TELEFONE_PERSONAL = '5551986396740'; // WhatsApp do Thiago, pra onde vão os avisos automáticos
 const GRUPO_WHATSAPP_EQUIPE = ''; // ⚠️ PREENCHER: ID do grupo de WhatsApp só da equipe (formato "120363xxxxxxxxxxxx-group")
