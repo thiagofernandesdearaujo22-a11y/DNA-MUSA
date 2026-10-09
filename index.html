@@ -130,6 +130,15 @@
   .home-tarefa .ht-txt small{display:block;color:var(--text-faint);font-size:11px;margin-top:2px;}
 
 
+
+  /* ===== MODO TREINO (um exercício por vez) ===== */
+  .foco-topo{display:flex;justify-content:space-between;align-items:center;margin:0 0 10px;font-size:11px;letter-spacing:1.6px;color:var(--gold);font-weight:600;text-transform:uppercase;}
+  .foco-topo .foco-lista{letter-spacing:0;text-transform:none;font-weight:500;font-size:12px;color:var(--text-faint);text-decoration:underline;cursor:pointer;}
+  .barra-foco{position:sticky;bottom:0;display:flex;gap:10px;padding:12px 0 6px;margin-top:12px;background:linear-gradient(180deg,rgba(12,12,13,0),var(--bg) 30%);z-index:5;}
+  .barra-foco button{height:48px;border-radius:13px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;}
+  .barra-foco .foco-ant{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text-dim);}
+  .barra-foco .foco-prox{flex:1.7;border:none;background:linear-gradient(135deg,#F4D9A5,#C9A063);color:#1A1409;font-weight:700;}
+
   /* ===== PARTE 3: menu de 5 itens, Evolução com abas, Treino da semana e Composição ===== */
   .nav-traco{fill:none !important;stroke:var(--text-faint);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
   .bottom-nav-item.ativo .nav-traco{stroke:var(--gold-soft);fill:none !important;}
@@ -556,7 +565,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-09-N-MENU-EVOLUCAO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-09-O-MODO-TREINO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1414,7 +1423,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-09-N-MENU-EVOLUCAO';
+const VERSAO_APP = '2026-10-09-O-MODO-TREINO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -14903,6 +14912,83 @@ let seriesConcluidas = {};
 let seriesConcluidasSalvasNoBanco = null;
 let diaDasSeriesConcluidasSalvas = null;
 
+
+// ===== MODO TREINO: um exercício por vez =====
+// Antes do treino ela vê a lista completa. Ao tocar em "Iniciar treino", a tela mostra só o exercício atual, já aberto
+// (vídeo, séries, carga), com "Exercício 3 de 7" em cima e Anterior/Próximo embaixo. "Ver lista completa" volta pra lista.
+// Nada do registro muda: é só o que aparece na tela (cada card continua o mesmo de antes).
+let modoFocoTreino = false;
+let exercicioDoFoco = 0;
+
+function nomeCompletoDoDia(n){
+  return ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'].indexOf(n) !== -1 ? n + '-feira' : String(n || '');
+}
+
+function envolverCardExercicio(j, html){
+  return '<div class="ex-card" data-ex-idx="' + j + '">' + html + '</div>';
+}
+
+function exercicioEstaFeito(idx){
+  const series = seriesConcluidas[idx];
+  return !!(series && series.length > 0 && series.every(function(v){ return v; }));
+}
+
+function primeiroExercicioPorFazer(d){
+  const total = (d && d.ex) ? d.ex.length : 0;
+  for(let i = 0; i < total; i++){ if(!exercicioEstaFeito(i)) return i; }
+  return Math.max(0, total - 1);
+}
+
+function entrarModoFocoTreino(){
+  const d = dias[detailDiaAtual];
+  if(!d || d.descanso || d.tabata || !d.ex || d.ex.length === 0) return;
+  modoFocoTreino = true;
+  exercicioDoFoco = primeiroExercicioPorFazer(d);
+  aplicarModoFocoTreino();
+}
+
+function sairModoFocoTreino(){
+  modoFocoTreino = false;
+  aplicarModoFocoTreino();
+}
+
+function irParaExercicioDoFoco(passo){
+  const d = dias[detailDiaAtual];
+  if(!d || !d.ex) return;
+  const total = d.ex.length;
+  if(passo > 0 && exercicioDoFoco >= total - 1){ registrarTreinoDia(detailDiaAtual); return; } // no último, o botão registra o treino
+  exercicioDoFoco = exercicioDoFoco + passo; // o limite (primeiro e último) fica num lugar só: aplicarModoFocoTreino
+  aplicarModoFocoTreino();
+  try { const topo = document.getElementById('foco-topo'); if(topo && topo.scrollIntoView) topo.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch(e){}
+}
+
+function aplicarModoFocoTreino(){
+  const d = dias[detailDiaAtual];
+  const ativo = !!(modoFocoTreino && d && !d.descanso && d.ex && d.ex.length);
+  const total = ativo ? d.ex.length : 0;
+  if(ativo) exercicioDoFoco = Math.max(0, Math.min(total - 1, exercicioDoFoco));
+  let cards = [];
+  try { cards = Array.prototype.slice.call(document.querySelectorAll('.ex-card') || []); } catch(e){}
+  cards.forEach(function(c){
+    const idx = parseInt(c.getAttribute('data-ex-idx'), 10);
+    c.style.display = (!ativo || idx === exercicioDoFoco) ? '' : 'none';
+  });
+  if(ativo){
+    const aberto = document.getElementById('ex-expandido-' + exercicioDoFoco);
+    if(aberto) aberto.style.display = 'block'; // o exercício atual já vem aberto
+  }
+  const topo = document.getElementById('foco-topo');
+  if(topo) topo.style.display = ativo ? 'flex' : 'none';
+  const rot = document.getElementById('foco-rotulo');
+  if(rot) rot.textContent = ativo ? 'Exercício ' + (exercicioDoFoco + 1) + ' de ' + total + (exercicioEstaFeito(exercicioDoFoco) ? ' · feito' : '') : '';
+  const barra = document.getElementById('barra-foco');
+  if(barra) barra.style.display = ativo ? 'flex' : 'none';
+  const dica = document.getElementById('dica-lista-treino'); // a dica de "clique no nome" só faz sentido na lista
+  if(dica) dica.style.display = ativo ? 'none' : '';
+  const prox = document.getElementById('foco-prox');
+  if(prox) prox.textContent = (ativo && exercicioDoFoco >= total - 1) ? 'Registrar treino de hoje' : 'Próximo exercício';
+}
+
 function alternarExercicioExpandido(idx){
   const container = document.getElementById('ex-expandido-' + idx);
   if(!container) return;
@@ -15270,6 +15356,7 @@ function alternarCronometro(){
   if(!cronometroRodando){
     cronometroRodando = true;
     btn.textContent = 'Pausar';
+    if(!modoFocoTreino) entrarModoFocoTreino(); // "Iniciar treino" passa a mostrar um exercício por vez
     cronometroInterval = setInterval(function(){
       cronometroSegundos++;
       const display = document.getElementById('cronometro-display');
@@ -17990,6 +18077,7 @@ if(type === 'central'){
   } else if(type === 'dia'){
     const d = dias[arg];
     if(detailDiaAtual !== arg){
+      modoFocoTreino = false; // outro dia: começa pela lista completa
       if(seriesConcluidasSalvasNoBanco && diaDasSeriesConcluidasSalvas === arg){
         // Tem checklist salvo do banco, e é exatamente o mesmo dia que ela tinha marcado antes de fechar o app
         seriesConcluidas = seriesConcluidasSalvasNoBanco;
@@ -18023,14 +18111,15 @@ if(type === 'central'){
       corpoTreino = '<div class="badge">' + faseAtual + '</div>' +
         '<button class="btn-gold" style="padding:16px;font-size:15px;margin:10px 0 4px;" id="cronometro-btn" onclick="alternarCronometro()">' + (cronometroRodando ? 'Pausar' : (cronometroSegundos > 0 ? 'Retomar' : 'Iniciar treino')) + '</button>' +
         '<p style="text-align:center;font-size:11px;color:var(--text-faint);margin:0 0 4px;" id="cronometro-display" data-modo-cronometro="1">' + String(Math.floor(cronometroSegundos/60)).padStart(2,'0') + ':' + String(cronometroSegundos%60).padStart(2,'0') + '</p>' +
-        '<p style="text-align:center;font-size:11.5px;color:var(--text-faint);margin:0 0 14px;">Clique no nome de cada exercício pra ver o vídeo de execução</p>' +
+        '<p id="dica-lista-treino" style="text-align:center;font-size:11.5px;color:var(--text-faint);margin:0 0 14px;">Clique no nome de cada exercício pra ver o vídeo de execução</p>' +
         '<div id="toast-celebracao-area"></div>' +
         renderBlocoPosturalDia(alunaAtual) +
         '<p class="section-label">Treino do dia</p>' +
-        barraProgresso;
+        barraProgresso +
+        '<div class="foco-topo" id="foco-topo" style="display:none;"><span id="foco-rotulo"></span><span class="foco-lista" onclick="sairModoFocoTreino()">Ver lista completa</span></div>';
       d.ex.forEach(function(linha, j){
         if(linha.indexOf('|||') !== -1){
-          corpoTreino += renderCardBiset(linha, j, prog);
+          corpoTreino += envolverCardExercicio(j, renderCardBiset(linha, j, prog));
           return;
         }
         // Bi-set/Tri-set MANUAL (escolhido na ficha, não gerado pelo motor): antes só mostrava o
@@ -18046,7 +18135,7 @@ if(type === 'central'){
           const seriesRepsPrincipal = linha.split(' · ')[1] || '3x12';
           const linhaCombinada = metodoDesseDia.tipo + '|||' + linha + '|||' +
             parceirosPreenchidos.map(function(nomeParceiro){ return nomeParceiro + ' · ' + seriesRepsPrincipal; }).join('|||');
-          corpoTreino += renderCardBiset(linhaCombinada, j, prog);
+          corpoTreino += envolverCardExercicio(j, renderCardBiset(linhaCombinada, j, prog));
           return;
         }
         const partes = linha.split(' · ');
@@ -18118,7 +18207,7 @@ if(type === 'central'){
           notaSemanaAnterior +
           htmlBlocoConfirmarExercicio(j, nomeEx, prog);
 
-        corpoTreino += '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;">' +
+        corpoTreino += '<div class="ex-card" data-ex-idx="' + j + '">' + '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;">' +
           '<div style="display:flex;">' +
             '<div style="flex:1;display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:14px 12px;" onclick="alternarExercicioExpandido(' + j + ')">' +
               '<span>' + nomeEx + (nomeMetodoExibicao ? ' <span class="tag tag-metodo" style="background:var(--gold-soft);color:#1A1409;cursor:pointer;" onclick="mostrarInfoMetodo(\'' + nomeMetodoExibicao.replace(/'/g,"\\'") + '\', event)">' + nomeMetodoExibicao + ' <i class="ti ti-info-circle" style="font-size:11px;vertical-align:-1px;"></i></span>' : '') + '</span>' +
@@ -18130,17 +18219,27 @@ if(type === 'central'){
           '</div>' +
           '<div id="subs-inline-' + j + '" style="display:none;padding:0 12px;"></div>' +
           '<div id="ex-expandido-' + j + '" style="display:none;padding:0 12px 12px;">' + conteudoExpandido + '</div>' +
-        '</div>';
+        '</div>' + '</div>';
       });
       const jaRegistradoHoje = prog && (prog.diasConcluidos[prog.semana] || []).indexOf(d.n) !== -1;
       corpoTreino += '<button class="btn-gold" id="btn-registrar-treino-dia" style="margin-top:10px;' + (jaRegistradoHoje ? 'background:var(--success);color:#fff;' : '') + '" onclick="registrarTreinoDia(' + arg + ')">' + (jaRegistradoHoje ? '✓ Treino registrado' : 'Registrar treino de hoje') + '</button>' +
         (jaRegistradoHoje && alunaPodeDesfazerDia(prog, d.n) ? '<p class="txt" style="font-size:11.5px;text-align:center;color:var(--text-faint);margin:8px 0 0;cursor:pointer;text-decoration:underline;" onclick="desfazerRegistroDoDia(' + arg + ', \'detalhe\')">Registrei sem querer. Desfazer</p>' : '') +
-        '<div id="registro-confirmacao" style="margin-top:10px;"></div>';
+        '<div id="registro-confirmacao" style="margin-top:10px;"></div>' +
+        '<div class="barra-foco" id="barra-foco" style="display:none;">' +
+          '<button class="foco-ant" onclick="irParaExercicioDoFoco(-1)">Anterior</button>' +
+          '<button class="foco-prox" id="foco-prox" onclick="irParaExercicioDoFoco(1)">Próximo exercício</button>' +
+        '</div>';
     }
+    // Antes juntava "-feira" em qualquer dia ("Sábado-feira", "Domingo-feira")
+    const qtdEx = (d.ex || []).length;
+    const infoDia = (!d.descanso && !d.tabata && qtdEx) ? qtdEx + (qtdEx === 1 ? ' exercício' : ' exercícios') + (d.duracaoEstimadaMin ? ' · cerca de ' + Math.round(d.duracaoEstimadaMin) + ' min' : '') : '';
     el.innerHTML =
-      '<p class="page-sub" style="margin-top:14px;">' + d.n + '-feira' + (d.hoje ? ' · hoje' : '') + '</p>' +
+      '<p class="page-sub" style="margin-top:14px;margin-bottom:2px;">' + nomeCompletoDoDia(d.n) + (d.hoje ? ' · hoje' : '') + '</p>' +
+      (!d.descanso && d.foco ? '<h1 class="page-title" style="margin:0 0 4px;font-size:24px;">' + escaparHtmlFicha(d.foco) + '</h1>' : '') +
+      (infoDia ? '<p style="font-size:12px;color:var(--text-faint);margin:0 0 12px;">' + infoDia + '</p>' : '') +
       corpoTreino;
     if(!d.descanso) atualizarBarraProgressoDia(d);
+    aplicarModoFocoTreino();
   } else if(type === 'conteudo'){
     const c = arg;
     if(c.aulas){
