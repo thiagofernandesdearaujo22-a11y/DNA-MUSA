@@ -1,4 +1,4 @@
-[dna_musa_122.html](https://github.com/user-attachments/files/33178945/dna_musa_122.html)
+[dna_musa_123.html](https://github.com/user-attachments/files/33230231/dna_musa_123.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -406,7 +406,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-01-H-CONTROLE-POR-PRAZO</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-08-I-DATA-LOCAL</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -3984,8 +3984,16 @@ const CATALOGO_PERGUNTAS_PERFIL_DNA = [
   { id: 'alimentacao_fim_semana', categoria: 'obstaculo', texto: 'Nos fins de semana, sua alimentação costuma mudar muito em relação à semana?' }
 ];
 
+// Data no fuso do APARELHO (Brasil), no formato AAAA-MM-DD.
+// Antes usava toISOString(), que é o horário de Londres: depois das 21h de Brasília
+// o app já achava que era o dia seguinte (check-in, Roda da Vida, sorteio do dia...).
+function dataLocalISO(d){
+  const x = d || new Date();
+  return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0');
+}
+
 function getDataHojeISO(){
-  return new Date().toISOString().slice(0,10);
+  return dataLocalISO(new Date());
 }
 
 let dataEmEdicaoCheckIn = null; // null = editando hoje; senão, uma data ISO específica (ex: preenchendo ontem, esquecido)
@@ -4025,7 +4033,7 @@ function alternarHabitoDoDia(nome, habitoId){
 function getDataOntemISO(){
   const ontem = new Date();
   ontem.setDate(ontem.getDate() - 1);
-  return ontem.toISOString().slice(0,10);
+  return dataLocalISO(ontem);
 }
 
 // Troca pra editar o dia de ONTEM (caso ela tenha esquecido de preencher), sem tocar no de hoje.
@@ -7070,7 +7078,7 @@ function baixarFeedbackGerador(nomeAluna){
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'musa_feedbacks_' + (nomeAluna ? nomeAluna.replace(/[^a-zA-Z0-9]/g,'_') + '_' : '') + new Date().toISOString().slice(0,10) + '.txt';
+  link.download = 'musa_feedbacks_' + (nomeAluna ? nomeAluna.replace(/[^a-zA-Z0-9]/g,'_') + '_' : '') + dataLocalISO(new Date()) + '.txt';
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -10753,7 +10761,7 @@ async function sincronizarListaAlunasDoSupabase(){
         dataNascimento: converterDataNascimentoParaISO(row.data_nascimento),
         dataFechouPlano: row.data_fechou_plano || null,
         duracaoPlanoDias: row.duracao_plano_dias || null,
-        dataAnamnese: row.data_anamnese || new Date().toISOString().slice(0,10),
+        dataAnamnese: row.data_anamnese || dataLocalISO(new Date()),
         status: 'ok',
         statusLabel: 'Ativa recente',
         recemChegadaDaAnamnese: true,
@@ -12745,7 +12753,7 @@ async function loginAluna(){
       await supabaseClient.from('perfis').insert({ id: data.user.id, tipo: 'aluna', nome: nomeNovaAluna });
       await supabaseClient.from('alunas').upsert({ email: email, auth_id: data.user.id, nome: nomeNovaAluna }, { onConflict: 'email' });
       // Garante que ela também exista localmente, pra todas as telas já funcionarem
-      alunasPersonal.push({ nome: nomeNovaAluna, status: 'ok', statusLabel: 'Ativa recente', nivel: 'Iniciante', freq: '3x por semana', email: email, telefone: '', piramide: '', objetivo: '', restricoes: '', academia: '', dataAnamnese: new Date().toISOString().slice(0,10) });
+      alunasPersonal.push({ nome: nomeNovaAluna, status: 'ok', statusLabel: 'Ativa recente', nivel: 'Iniciante', freq: '3x por semana', email: email, telefone: '', piramide: '', objetivo: '', restricoes: '', academia: '', dataAnamnese: dataLocalISO(new Date()) });
     }
 
     sessaoUsuarioAtual = data.user;
@@ -12789,7 +12797,7 @@ async function loginAluna(){
         restricoes: alunaRow.restricoes || 'Nenhuma relatada',
         academia: alunaRow.academia || '',
         idade: alunaRow.idade || null,
-        dataAnamnese: alunaRow.data_anamnese || new Date().toISOString().slice(0,10),
+        dataAnamnese: alunaRow.data_anamnese || dataLocalISO(new Date()),
         status: 'ok',
         statusLabel: 'Ativa recente'
       };
@@ -13800,7 +13808,7 @@ async function restaurarSessaoAtiva(){
           nivel: alunaRow.nivel || 'Iniciante', freq: alunaRow.freq || '3x por semana',
           piramide: alunaRow.piramide || '', objetivo: alunaRow.objetivo || '',
           restricoes: alunaRow.restricoes || 'Nenhuma relatada', academia: alunaRow.academia || '',
-          idade: alunaRow.idade || null, dataAnamnese: alunaRow.data_anamnese || new Date().toISOString().slice(0,10),
+          idade: alunaRow.idade || null, dataAnamnese: alunaRow.data_anamnese || dataLocalISO(new Date()),
           status: 'ok', statusLabel: 'Ativa recente'
         };
         alunasPersonal.push(alunaLocal);
@@ -15213,7 +15221,7 @@ function registrarHistoricoDnaScore(nome, score){
   if(jaTemEssaSemana){
     jaTemEssaSemana.score = score; // atualiza, caso o score tenha mudado dentro da mesma semana
   } else {
-    prog.dnaScoreHistorico.push({ semana: prog.semana, score: score, data: new Date().toISOString().slice(0,10) });
+    prog.dnaScoreHistorico.push({ semana: prog.semana, score: score, data: dataLocalISO(new Date()) });
   }
 }
 
