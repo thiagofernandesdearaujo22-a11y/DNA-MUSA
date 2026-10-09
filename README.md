@@ -1,4 +1,4 @@
-[dna_musa_125.html](https://github.com/user-attachments/files/33231566/dna_musa_125.html)
+[Uploading dna_musa_126.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-title" content="DNA Musa">
   <link rel="apple-touch-icon" href="/icon-192.png">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MUSA+, Protótipo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>DNA Musa</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <!-- Ícones: pacote oficial no jsDelivr (o mesmo servidor que já carrega o Supabase). O endereço antigo do cdnjs ficou como reserva. -->
@@ -91,6 +91,78 @@
   .sidebar-personal .side-item.ativo i{ color:var(--gold-soft); }
   .sidebar-personal .side-sair{ margin-top:auto; }
 
+
+
+  /* ===== CELULAR DE VERDADE: o app ocupa a tela inteira =====
+     Antes o app desenhava um "celular de mentira" (borda arredondada e ilha preta falsa) dentro do celular
+     de verdade. No celular isso sai: tela cheia, respeitando a ilha/status do iPhone e a barra de baixo. */
+  @media (max-width: 600px){
+    body{ display:block; padding:0; padding-top:env(safe-area-inset-top); background:var(--bg); min-height:100vh; }
+    .phone{ width:100%; border:none; border-radius:0; box-shadow:none; }
+    .notch{ display:none; }
+    .screen{ height:calc(100vh - env(safe-area-inset-top)); height:calc(100dvh - env(safe-area-inset-top)); }
+    .bottom-nav-fixa{ padding-bottom:env(safe-area-inset-bottom); }
+    #carimbo-versao{ position:static !important; padding:2px 0 0; font-size:8px !important; opacity:0.55; }
+  }
+
+
+  /* ===== INÍCIO DA ALUNA (nova): treino de hoje primeiro, semana em bolinhas, score enxuto, tarefas no mesmo estilo ===== */
+  .home-hero{border-radius:22px;padding:18px;margin:4px 0 14px;background:linear-gradient(150deg,rgba(232,197,138,0.22),rgba(232,197,138,0.04) 55%,var(--card));border:1px solid var(--border-strong);}
+  .home-hero .hh-lbl{font-size:10.5px;letter-spacing:2px;color:var(--gold);font-weight:600;margin:0;text-transform:uppercase;}
+  .home-hero .hh-tit{font-family:'Playfair Display',serif;font-weight:600;font-size:22px;margin:6px 0 0;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .home-hero .hh-info{font-size:12.5px;color:var(--text-dim);margin:7px 0 0;display:flex;gap:14px;flex-wrap:wrap;}
+  .home-hero .hh-info span{display:inline-flex;align-items:center;gap:5px;}
+  .home-hero .hh-btn{height:48px;border-radius:14px;background:linear-gradient(135deg,#F4D9A5,#C9A063);color:#1A1409;font-weight:700;font-size:14.5px;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;cursor:pointer;border:none;width:100%;font-family:inherit;}
+  .home-semana{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px 16px;margin-bottom:14px;cursor:pointer;}
+  .home-semana-topo{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--text-dim);}
+  .home-semana-topo b{color:var(--text);font-weight:600;}
+  .home-bolinhas{display:flex;justify-content:space-between;margin-top:12px;}
+  .home-dia{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:10.5px;color:var(--text-faint);}
+  .home-bol{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;border:1px solid var(--border);color:var(--text-faint);box-sizing:border-box;}
+  .home-bol.feito{background:rgba(143,174,125,0.18);border-color:rgba(143,174,125,0.5);color:var(--success);}
+  .home-bol.hoje{border:2px solid var(--gold);color:var(--gold-soft);}
+  .home-bol.descanso{border-style:dashed;}
+  [data-view="home"] .dna-score-card{margin-bottom:4px;}
+  [data-view="home"] .dna-score-helix,[data-view="home"] #home-score-numero{display:none;}
+  .home-tarefa{cursor:pointer;margin-top:10px;gap:12px;justify-content:flex-start !important;}
+  .home-tarefa .ht-ic{width:32px;height:32px;border-radius:10px;background:rgba(232,197,138,0.1);color:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;}
+  .home-tarefa .ht-txt{flex:1;min-width:0;}
+  .home-tarefa .ht-txt p{margin:0;font-size:13px;font-weight:500;color:var(--text);}
+  .home-tarefa .ht-txt small{display:block;color:var(--text-faint);font-size:11px;margin-top:2px;}
+
+
+  /* ===== PARTE 3: menu de 5 itens, Evolução com abas, Treino da semana e Composição ===== */
+  .nav-traco{fill:none !important;stroke:var(--text-faint);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+  .bottom-nav-item.ativo .nav-traco{stroke:var(--gold-soft);fill:none !important;}
+  .evo-abas{display:flex;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:4px;margin:10px 0 12px;}
+  .evo-aba{flex:1;text-align:center;font-size:12.5px;padding:8px 4px;border-radius:9px;color:var(--text-faint);cursor:pointer;}
+  .evo-aba.on{background:var(--card-2);color:var(--gold-soft);font-weight:600;}
+  .evo-reav{border-radius:18px;padding:16px;margin:0 0 14px;border:1px solid rgba(226,163,61,0.35);background:linear-gradient(150deg,rgba(226,163,61,0.12),var(--card) 60%);}
+  .evo-reav p{font-size:13px;line-height:1.45;color:var(--text-dim);margin:0;}
+  .evo-reav p strong{color:var(--text);display:block;font-size:14.5px;margin-bottom:4px;}
+  .evo-registrar{color:var(--gold);cursor:pointer;}
+  .evo-graf-vazio{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;}
+  .evo-breve{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 14px;font-size:12.5px;color:var(--text-dim);}
+  .evo-breve span{flex:1;min-width:0;}
+  .evo-breve small{display:block;font-size:11px;color:var(--text-faint);margin-top:3px;}
+  .evo-breve b{font-size:9.5px;letter-spacing:1.5px;color:var(--gold);border:1px solid var(--border-strong);border-radius:6px;padding:3px 6px;white-space:nowrap;}
+  .sem-dia{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 14px;margin-bottom:10px;cursor:pointer;flex-wrap:wrap;}
+  .sem-dia .sem-sig{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;letter-spacing:.5px;background:var(--card-2);color:var(--text-dim);flex-shrink:0;}
+  .sem-dia .sem-txt{flex:1;min-width:0;}
+  .sem-dia .sem-tit{font-size:13.5px;font-weight:600;margin:0;display:flex;align-items:center;min-width:0;}
+  .sem-dia .sem-nome{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
+  .sem-dia .sem-tit .sem-tag{flex-shrink:0;}
+  .sem-dia .sem-sub{font-size:11.5px;color:var(--text-faint);margin:3px 0 0;line-height:1.4;}
+  .sem-dia.feito{opacity:.8;}
+  .sem-dia.feito .sem-sig{background:rgba(143,174,125,0.16);color:var(--success);}
+  .sem-dia.alvo{border-color:var(--border-strong);background:linear-gradient(150deg,rgba(232,197,138,0.16),var(--card) 60%);}
+  .sem-dia.alvo .sem-sig{background:linear-gradient(135deg,#F4D9A5,#C9A063);color:#1A1409;}
+  .sem-dia.descanso{background:transparent;border-style:dashed;padding:9px 14px;}
+  .sem-dia.descanso .sem-sig{width:36px;height:36px;background:transparent;border:1px dashed var(--border);}
+  .sem-tag{font-size:9.5px;font-weight:700;letter-spacing:1px;color:#1A1409;background:var(--gold);border-radius:6px;padding:2px 6px;margin-left:6px;vertical-align:2px;}
+  .sem-btn{width:100%;height:44px;border-radius:12px;background:linear-gradient(135deg,#F4D9A5,#C9A063);color:#1A1409;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;margin-top:4px;}
+  .launcher.modo-conta .satelite{display:none;}
+  .launcher.modo-conta .estrela-launcher{height:130px;}
 
   /* ===== PAINEL DO PERSONAL (novo): resumo do dia, números, "precisa de você hoje", controle e ferramentas ===== */
   .pn-ic{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;display:inline-block;vertical-align:middle;}
@@ -485,7 +557,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-08-K-PAINEL-NOVO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-09-N-MENU-EVOLUCAO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -574,7 +646,7 @@
       <div class="launcher">
         <p class="brand" id="launcher-brand" style="opacity:0;animation:introMusaFade 1s ease forwards;">DNA MUSA</p>
         <p class="brand-sub" style="animation:introMusaFade 1s ease forwards .2s;opacity:0;">Team Fernandes</p>
-        <p class="sub">Escolha uma opção</p>
+        <p class="sub" id="launcher-sub">Escolha uma opção</p>
         <div id="banner-instalar-app" style="display:none;background:var(--card-2);border:1px solid var(--border-strong);border-radius:12px;padding:10px 14px;margin:0 0 14px;max-width:320px;font-size:11.5px;color:var(--text-dim);text-align:center;">
           <span id="banner-instalar-texto"></span>
           <span style="display:block;margin-top:6px;color:var(--gold-soft);cursor:pointer;font-size:11px;" onclick="document.getElementById('banner-instalar-app').style.display='none';try{localStorage.setItem('musaBannerInstalarFechado','sim');}catch(e){}">Já sei, obrigada</span>
@@ -637,9 +709,16 @@
           </div>
         </div>
       </div>
-      <h1 class="page-title">Olá, Andriele</h1>
-      <p class="page-sub">Sua Central de Inteligência</p>
-      <div style="width:36px;height:2px;background:linear-gradient(90deg,var(--gold),transparent);margin:8px 0 26px;"></div>
+      <h1 class="page-title" id="home-saudacao">Olá, Andriele</h1>
+      <p class="page-sub" id="home-data">Sua Central de Inteligência</p>
+
+      <!-- Início nova: o que ela veio fazer (o treino) primeiro. Preenchido por renderInicioDaAluna(). -->
+      <div class="home-hero" id="home-treino-hoje"></div>
+
+      <div class="home-semana" id="link-ver-treinos-semana" onclick="abrirListaDeTreinosDaSemana()">
+        <div class="home-semana-topo"><span>Sua semana</span><b id="resumo-dias-semana"></b></div>
+        <div class="home-bolinhas" id="home-bolinhas"></div>
+      </div>
 
       <div class="dna-score-card" onclick="openDetail('dna')">
         <div class="dna-score-helix">
@@ -665,17 +744,13 @@
         </div>
       </div>
 
-      <p class="section-label" style="margin-top:22px;">Seus indicadores</p>
-      <div class="indicadores-grid" id="home-indicadores-grid"></div>
-
-      <div class="list-item" id="link-ver-treinos-semana" style="cursor:pointer;background:linear-gradient(135deg,var(--gold-soft),#B4741F);border:none;margin-top:18px;" onclick="abrirListaDeTreinosDaSemana()">
-        <span style="color:#1A1409;font-weight:600;"><i class="ti ti-calendar-week" style="margin-right:8px;"></i>Ver treinos da semana</span>
-        <span class="tag" id="resumo-dias-semana" style="background:rgba(0,0,0,0.15);color:#1A1409;"></span>
-      </div>
       <div id="botao-desafio-area"></div>
-<div id="botoes-cursos-area"></div>
+      <div id="botoes-cursos-area"></div>
       <div id="botao-pergunta-perfil-area"></div>
       <div id="botao-pergunta-roda-vida-area"></div>
+
+      <p class="section-label" style="margin-top:22px;">Seus indicadores</p>
+      <div class="indicadores-grid" id="home-indicadores-grid"></div>
 
       <div class="list-item" style="cursor:pointer;margin-top:10px;" onclick="openLevel2('progresso')">
         <span><i class="ti ti-trending-up" style="margin-right:8px;color:var(--gold-soft);"></i>Meu progresso</span>
@@ -689,8 +764,10 @@
 
     <!-- DADOS (composição corporal) -->
     <div class="view" data-view="dados">
-      <h1 class="page-title">Composição corporal</h1>
-      <p class="page-sub">Seus dados de peso e composição, atualizados por você</p>
+      <h1 class="page-title">Sua evolução</h1>
+      <div class="evo-abas"><div class="evo-aba on" data-evo="dados" onclick="trocarAbaEvolucao('dados')">Corpo</div><div class="evo-aba" data-evo="progresso" onclick="trocarAbaEvolucao('progresso')">Treino</div><div class="evo-aba" data-evo="rodadavida" onclick="trocarAbaEvolucao('rodadavida')">Roda da Vida</div></div>
+      <p class="page-sub">Seu peso e sua composição, atualizados por você</p>
+      <div id="card-reavaliacao"></div>
 
       <div class="stat-grid">
         <div class="stat-card">
@@ -701,7 +778,7 @@
         <div class="stat-card">
           <p class="stat-label">% gordura</p>
           <p class="stat-value" id="stat-gordura-atual">--</p>
-          <p class="stat-meta gold" id="stat-gordura-data">Ainda não informado</p>
+          <p class="stat-meta" id="stat-gordura-data">Ainda não informado</p>
         </div>
       </div>
 
@@ -714,17 +791,18 @@
       <p class="section-label" style="margin-top:22px;">Minha evolução</p>
       <div id="area-minha-evolucao"></div>
 
-      <p class="section-label" style="margin-top:22px;">Shape Analysis</p>
-      <div class="info-box" style="opacity:0.6;">
-        <p class="lbl">Em breve</p>
-        <p class="txt">Comparação visual de fotos ao longo do tempo. Estamos preparando esse material — assim que estiver pronto, avisamos por aqui.</p>
+      <div class="evo-breve" style="margin-top:22px;">
+        <i class="ti ti-camera" style="color:var(--gold);font-size:18px;"></i>
+        <span>Comparação de fotos (Shape Analysis)<small>Estamos preparando esse material. Assim que estiver pronto, avisamos por aqui.</small></span>
+        <b>EM BREVE</b>
       </div>
     </div>
 
     <!-- MEU PROGRESSO -->
     <div class="view" data-view="progresso">
-      <h1 class="page-title">Meu progresso</h1>
-      <p class="page-sub">Sua evolução desde o início</p>
+      <h1 class="page-title">Sua evolução</h1>
+      <div class="evo-abas"><div class="evo-aba" data-evo="dados" onclick="trocarAbaEvolucao('dados')">Corpo</div><div class="evo-aba on" data-evo="progresso" onclick="trocarAbaEvolucao('progresso')">Treino</div><div class="evo-aba" data-evo="rodadavida" onclick="trocarAbaEvolucao('rodadavida')">Roda da Vida</div></div>
+      <p class="page-sub">Seus treinos desde o início</p>
       <div id="area-progresso-conteudo"></div>
     </div>
 
@@ -769,7 +847,8 @@
 
     <!-- RODA DA VIDA -->
     <div class="view" data-view="rodadavida">
-      <h1 class="page-title">Roda da vida</h1>
+      <h1 class="page-title">Sua evolução</h1>
+      <div class="evo-abas"><div class="evo-aba" data-evo="dados" onclick="trocarAbaEvolucao('dados')">Corpo</div><div class="evo-aba" data-evo="progresso" onclick="trocarAbaEvolucao('progresso')">Treino</div><div class="evo-aba on" data-evo="rodadavida" onclick="trocarAbaEvolucao('rodadavida')">Roda da Vida</div></div>
       <p class="page-sub">Avalie 10 áreas da sua vida, uma vez por mês</p>
       <div id="area-rodadavida-conteudo"></div>
     </div>
@@ -1246,13 +1325,14 @@
     <!-- LISTA DE TREINOS DA SEMANA -->
 
     <div class="view" data-view="semana-treinos">
-      <h1 class="page-title">Treinos da semana</h1>
-      <p class="page-sub">Toque num dia pra abrir o treino completo</p>
-      <div class="info-box" style="margin-bottom:14px;">
+      <h1 class="page-title">Sua semana</h1>
+      <p class="page-sub" id="semana-sub">Toque num dia pra abrir o treino completo</p>
+      <div class="pn-barra" style="margin:10px 0 16px;"><i id="semana-barra" style="width:0%"></i></div>
+      <div id="lista-dias-semana"></div>
+      <div class="info-box" style="margin:6px 0 14px;">
         <p class="lbl" style="margin-bottom:6px;">Como funciona esse treino</p>
         <p class="txt" style="margin-bottom:0;">Faça as séries de cada exercício na ordem. Registre a carga e as repetições da <b>1ª série</b>, é isso que ajusta sua carga sugerida pra próxima vez. O descanso entre séries já está calculado pra cada exercício, é só seguir o cronômetro.</p>
       </div>
-      <div id="lista-dias-semana"></div>
     </div>
 
     <!-- DETAIL -->
@@ -1276,23 +1356,22 @@
     </div>
 
     <div id="bottom-nav-fixa" class="bottom-nav-fixa" style="display:none;">
+      <!-- 5 itens (antes eram 6 e "Roda da vida" quebrava em duas linhas). Composição, Progresso e Roda da Vida
+           ficaram juntos em "Evolução", com abas no topo da tela. -->
       <div class="bottom-nav-item" data-nav="home" onclick="irParaAbaFixa('home')">
-        <svg class="nav-icon-svg" width="22" height="22" viewBox="0 0 24 24"><path d="M2 9h2v6H2zm3-2h2v10H5zm3-1h8v14H8zm9 1h2v10h-2zm3 2h2v6h-2z"/></svg><span>Treino</span>
+        <svg class="nav-icon-svg nav-traco" width="22" height="22" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg><span>Início</span>
       </div>
-      <div class="bottom-nav-item" data-nav="dados" onclick="irParaAbaFixa('dados')">
-        <svg class="nav-icon-svg" width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="12" width="4" height="8" rx="1"/><rect x="10" y="7" width="4" height="13" rx="1"/><rect x="17" y="3" width="4" height="17" rx="1"/></svg><span>Composição</span>
+      <div class="bottom-nav-item" data-nav="treino" onclick="irParaAbaFixa('treino')">
+        <svg class="nav-icon-svg nav-traco" width="22" height="22" viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M3 9h3M18 9h3M3 15h3M18 15h3M6 12h12"/></svg><span>Treino</span>
+      </div>
+      <div class="bottom-nav-item" data-nav="evolucao" onclick="irParaAbaFixa('evolucao')">
+        <svg class="nav-icon-svg nav-traco" width="22" height="22" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg><span>Evolução</span>
       </div>
       <div class="bottom-nav-item" data-nav="mentoria" onclick="irParaAbaFixa('mentoria')">
-        <svg class="nav-icon-svg" width="22" height="22" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 8.5v7l6-3.5z" fill="var(--bg)"/></svg><span>Mentoria</span>
-      </div>
-      <div class="bottom-nav-item" data-nav="progresso" onclick="irParaAbaFixa('progresso')">
-        <svg class="nav-icon-svg" width="22" height="22" viewBox="0 0 24 24"><path d="M3 17l5-6 4 3 6-8 3 3v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg><span>Progresso</span>
+        <svg class="nav-icon-svg nav-traco" width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/></svg><span>Mentoria</span>
       </div>
       <div class="bottom-nav-item" data-nav="ranking" onclick="irParaAbaFixa('ranking')">
-        <svg class="nav-icon-svg" width="22" height="22" viewBox="0 0 24 24"><path d="M6 3h12v4a6 6 0 0 1-5 5.92V15h3v2H8v-2h3v-2.08A6 6 0 0 1 6 7zm-4 1h3v3a4 4 0 0 1-3-3zm17 0h3a4 4 0 0 1-3 3z"/></svg><span>Ranking</span>
-      </div>
-      <div class="bottom-nav-item" data-nav="rodadavida" onclick="irParaAbaFixa('rodadavida')">
-        <svg class="nav-icon-svg" width="22" height="22" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10h-2a8 8 0 1 1-8-8z"/><path d="M12 6a6 6 0 1 0 6 6h-2a4 4 0 1 1-4-4z"/><circle cx="12" cy="12" r="2"/></svg><span>Roda da vida</span>
+        <svg class="nav-icon-svg nav-traco" width="22" height="22" viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M12 13v4M8 21h8M9 17h6"/></svg><span>Ranking</span>
       </div>
     </div>
   </div>
@@ -1336,7 +1415,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-08-K-PAINEL-NOVO';
+const VERSAO_APP = '2026-10-09-N-MENU-EVOLUCAO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -1820,24 +1899,73 @@ function abrirListaDeTreinosDaSemana(){
   const abreviacoes = { 'Segunda':'SEG', 'Terça':'TER', 'Quarta':'QUA', 'Quinta':'QUI', 'Sexta':'SEX', 'Sábado':'SÁB', 'Domingo':'DOM' };
   const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
   const diasRegistradosEssaSemana = prog.diasConcluidos[prog.semana] || [];
+  // Mesmo cálculo da Início: qual é o próximo treino (fica em destaque) e quantos já foram
+  const resumo = montarResumoDaSemanaDaAluna(prog, dias, Date.now());
+  const indiceAlvo = resumo.alvo ? resumo.alvo.indice : -1;
+  // Hora em que cada dia foi feito nesta semana (pra mostrar "Feito na segunda, 19:42")
+  const faixa = intervaloDaSemanaDoProgresso(prog, prog.semana);
+  const quandoFoiFeito = {};
+  (prog.horariosTreino || []).forEach(function(h){
+    if(!h || !h.dia || !h.data) return;
+    const t = new Date(h.data).getTime();
+    if(t >= faixa.inicio && t < faixa.fim && (!quandoFoiFeito[h.dia] || t > quandoFoiFeito[h.dia])) quandoFoiFeito[h.dia] = t;
+  });
+  const textoFeito = function(nomeDia){
+    const t = quandoFoiFeito[nomeDia];
+    if(!t) return 'Feito';
+    const d = new Date(t);
+    const hora = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    if(mesmaDataLocal(d.toISOString())) return 'Feito hoje, ' + hora;
+    const nomeDia2 = NOMES_DIA_POR_GETDAY[d.getDay()].toLowerCase();
+    return 'Feito ' + (d.getDay() === 0 || d.getDay() === 6 ? 'no ' : 'na ') + nomeDia2 + ', ' + hora; // "no sábado", "na segunda"
+  };
+
   lista.innerHTML = dias.map(function(d, i){
-    const abrev = abreviacoes[d.n] || d.n.slice(0,3).toUpperCase();
+    const abrev = abreviacoes[d.n] || String(d.n || '').slice(0,3).toUpperCase();
     const foiRegistrado = diasRegistradosEssaSemana.indexOf(d.n) !== -1;
-    return '<div data-feito="' + (foiRegistrado ? 'sim' : 'nao') + '" data-descanso="' + (d.descanso ? 'sim' : 'nao') + '" style="display:flex;align-items:center;gap:14px;padding:16px;margin-bottom:10px;border-radius:16px;background:' + (foiRegistrado ? 'var(--success-soft)' : (d.hoje ? 'linear-gradient(135deg,rgba(217,139,46,0.18),rgba(92,56,20,0.12))' : 'var(--card)')) + ';border:1px solid ' + (foiRegistrado ? 'var(--success)' : (d.hoje ? 'var(--gold-soft)' : 'var(--border)')) + ';cursor:pointer;user-select:none;-webkit-user-select:none;" ' +
+    const ehAlvo = i === indiceAlvo;
+    const classe = 'sem-dia' + (foiRegistrado ? ' feito' : '') + (d.descanso && !foiRegistrado ? ' descanso' : '') + (ehAlvo ? ' alvo' : '');
+    const qtd = (d.ex || []).length;
+    let titulo, sub;
+    if(d.descanso){
+      titulo = '<span class="sem-nome">' + escaparHtmlFicha(d.n) + ' · Descanso</span>';
+      sub = foiRegistrado ? textoFeito(d.n) + (alunaPodeDesfazerDia(prog, d.n) ? ' · segure pra desfazer' : '') : 'segure pra marcar como feito';
+    } else {
+      titulo = '<span class="sem-nome">' + escaparHtmlFicha(d.foco || d.n) + '</span>' + (ehAlvo ? '<span class="sem-tag">' + (resumo.alvo.modo === 'hoje' ? 'HOJE' : 'PRÓXIMO') + '</span>' : '');
+      if(foiRegistrado){
+        sub = textoFeito(d.n) + (alunaPodeDesfazerDia(prog, d.n) ? ' · segure pra desfazer' : '');
+      } else {
+        const partes = [];
+        if(qtd > 0) partes.push(qtd + (qtd === 1 ? ' exercício' : ' exercícios'));
+        if(d.duracaoEstimadaMin) partes.push('cerca de ' + Math.round(d.duracaoEstimadaMin) + ' min');
+        partes.push('segure pra marcar como feito');
+        sub = partes.join(' · ');
+      }
+    }
+    return '<div class="' + classe + '" data-feito="' + (foiRegistrado ? 'sim' : 'nao') + '" data-descanso="' + (d.descanso ? 'sim' : 'nao') + '" ' +
       'onclick="abrirDiaDaSemana(' + i + ')" ' +
       'onmousedown="iniciarPressionarDia(' + i + ')" onmouseup="cancelarPressionarDia()" onmouseleave="cancelarPressionarDia()" ' +
       'ontouchstart="iniciarPressionarDia(' + i + ')" ontouchend="cancelarPressionarDia()" ontouchmove="cancelarPressionarDia()">' +
-      '<div style="width:48px;height:48px;border-radius:14px;background:' + (foiRegistrado ? 'var(--success)' : 'linear-gradient(135deg,#F4D9A5,#E8C58A)') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
-        '<span style="font-size:11px;font-weight:700;letter-spacing:0.5px;color:#1A1409;">' + abrev + '</span>' +
-      '</div>' +
-      '<div style="flex:1;min-width:0;">' +
-        '<p style="font-size:13px;font-weight:600;margin:0 0 2px;">' + d.n + (d.hoje ? ' <span class="tag" style="margin-left:4px;">hoje</span>' : '') + (foiRegistrado ? ' <span class="tag" style="margin-left:4px;background:var(--success-soft);color:var(--success);">registrado</span>' : '') + '</p>' +
-        '<p style="font-size:12px;color:var(--text-faint);margin:0;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.foco + (foiRegistrado ? (alunaPodeDesfazerDia(prog, d.n) ? ' · segure pra desfazer' : '') : ' · segure pra marcar como feito') + '</p>' +
-      '</div>' +
-      (foiRegistrado ? '<i class="ti ti-circle-check" style="color:var(--success);font-size:20px;flex-shrink:0;"></i>' : '<i class="ti ti-chevron-right" style="color:var(--text-faint);font-size:18px;flex-shrink:0;"></i>') +
+      '<div class="sem-sig">' + (d.descanso && !foiRegistrado ? '' : abrev) + '</div>' +
+      '<div class="sem-txt"><p class="sem-tit">' + titulo + '</p><p class="sem-sub">' + sub + '</p></div>' +
+      (foiRegistrado ? '<i class="ti ti-circle-check" style="color:var(--success);font-size:20px;flex-shrink:0;"></i>' : (d.descanso ? '' : '<i class="ti ti-chevron-right" style="color:var(--text-faint);font-size:18px;flex-shrink:0;"></i>')) +
+      (ehAlvo && !d.descanso ? '<div class="sem-btn">Abrir treino</div>' : '') +
     '</div>';
   }).join('');
+
+  const elSub = document.getElementById('semana-sub');
+  if(elSub) elSub.textContent = resumo.totalTreinos > 0 ? 'Semana ' + prog.semana + ' · ' + resumo.totalFeitos + ' de ' + resumo.totalTreinos + ' treinos feitos' : 'Toque num dia pra abrir o treino completo';
+  const elBarra = document.getElementById('semana-barra');
+  if(elBarra) elBarra.style.width = (resumo.totalTreinos > 0 ? Math.round(resumo.totalFeitos / resumo.totalTreinos * 100) : 0) + '%';
+
   setActive('semana-treinos');
+  // Agora a lista da semana é a aba "Treino" do menu de baixo
+  if(sessaoTipo === 'aluna'){
+    level2 = 'semana-treinos';
+    const nav = document.getElementById('bottom-nav-fixa');
+    if(nav) nav.style.display = 'flex';
+    atualizarNavAtiva('semana-treinos');
+  }
 }
 
 // Segurar pressionado um dia (qualquer um, inclusive descanso) por meio segundo já pergunta se quer
@@ -1963,8 +2091,6 @@ function abrirDiaDaSemana(i){
   openDetail('dia', i);
 }
 
-const resumoDias = document.getElementById('resumo-dias-semana');
-if(resumoDias) resumoDias.textContent = dias.length + ' dias';
 
 function calcularComparativoSemanal(nome){
   const prog = getProgressoAluna(nome);
@@ -2172,7 +2298,136 @@ function qualidadeDoScore(score){
   return 'Em construção';
 }
 
+// ===== INÍCIO DA ALUNA (nova) =====
+// O primeiro card é o treino que ela tem pra fazer (hoje, o próximo, ou um que ficou pra trás). Embaixo, a semana
+// em bolinhas. A aluna abre o app direto aqui (antes caía na tela "Escolha uma opção", que era um passo a mais).
+const NOMES_DIA_POR_GETDAY = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+
+function letraDoTreino(d){
+  const m = String((d && d.foco) || '').match(/Treino\s+([A-Z])\b/);
+  return m ? m[1] : '';
+}
+
+// Calcula tudo a partir da lista de dias e do progresso, sem mexer em nada
+function montarResumoDaSemanaDaAluna(prog, listaDias, agora){
+  const lista = listaDias || [];
+  const feitos = (prog && prog.diasConcluidos && prog.diasConcluidos[prog.semana]) || [];
+  const nomeHoje = NOMES_DIA_POR_GETDAY[new Date(agora === undefined ? Date.now() : agora).getDay()];
+  const idxHoje = lista.findIndex(function(d){ return d && d.n === nomeHoje; });
+  const ehTreino = function(d){ return d && !d.descanso; };
+  const feito = function(d){ return !!d.n && feitos.indexOf(d.n) !== -1; }; // dia sem nome nunca conta como feito
+  const treinos = lista.filter(ehTreino);
+  const totalFeitos = treinos.filter(feito).length;
+
+  let alvo = null;
+  if(idxHoje !== -1 && ehTreino(lista[idxHoje]) && !feito(lista[idxHoje])){
+    alvo = { indice: idxHoje, modo: 'hoje' };
+  } else {
+    const inicio = idxHoje === -1 ? 0 : idxHoje + 1;
+    for(let i = inicio; i < lista.length; i++){
+      if(ehTreino(lista[i]) && !feito(lista[i])){ alvo = { indice: i, modo: (idxHoje !== -1 && i === idxHoje + 1) ? 'amanha' : 'proximo' }; break; }
+    }
+    if(!alvo){
+      for(let i = 0; i < lista.length; i++){
+        if(ehTreino(lista[i]) && !feito(lista[i])){ alvo = { indice: i, modo: 'pendente' }; break; }
+      }
+    }
+  }
+  const hojeDescanso = idxHoje !== -1 && lista[idxHoje] && lista[idxHoje].descanso;
+
+  return {
+    totalTreinos: treinos.length,
+    totalFeitos: totalFeitos,
+    idxHoje: idxHoje,
+    hojeDescanso: !!hojeDescanso,
+    alvo: alvo,
+    semanaCompleta: treinos.length > 0 && totalFeitos === treinos.length,
+    bolinhas: lista.map(function(d, i){
+      return { letra: String(d.n || '').charAt(0).toUpperCase(), feito: ehTreino(d) && feito(d), hoje: i === idxHoje, descanso: !!(d && d.descanso), letraTreino: letraDoTreino(d) };
+    })
+  };
+}
+
+function rotuloDoAlvoDoInicio(r, d){
+  const dia = String(d.n || '').toUpperCase();
+  if(r.alvo.modo === 'hoje') return 'Treino de hoje · ' + dia;
+  if(r.alvo.modo === 'amanha') return (r.hojeDescanso ? 'Hoje é descanso · amanhã: ' : 'Treino de amanhã · ') + dia;
+  if(r.alvo.modo === 'proximo') return (r.hojeDescanso ? 'Hoje é descanso · próximo: ' : 'Próximo treino · ') + dia;
+  return 'Ficou pra trás nesta semana · ' + dia;
+}
+
+function renderInicioDaAluna(agora){
+  if(agora === undefined) agora = Date.now();
+  const nome = NOME_ALUNA_LOGADA;
+  const primeiroNome = String(nome || '').split(' ')[0];
+  const elSaud = document.getElementById('home-saudacao');
+  if(elSaud) elSaud.textContent = saudacaoDoPainel(agora) + (primeiroNome ? ', ' + primeiroNome : '');
+  const elData = document.getElementById('home-data');
+  if(elData){
+    const t = new Date(agora).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+    elData.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+  }
+
+  const prog = getProgressoAluna(nome);
+  const r = montarResumoDaSemanaDaAluna(prog, dias, agora);
+
+  const elHero = document.getElementById('home-treino-hoje');
+  if(elHero){
+    if(r.totalTreinos === 0){
+      elHero.innerHTML = '<p class="hh-lbl">Seu treino</p><p class="hh-tit">Seu personal está preparando o seu treino</p><p class="hh-info">Assim que estiver pronto, ele aparece aqui.</p>';
+    } else if(r.semanaCompleta){
+      elHero.innerHTML = '<p class="hh-lbl">Semana completa</p><p class="hh-tit">Você fez os ' + r.totalTreinos + ' treinos da semana</p>' +
+        '<p class="hh-info">Na segunda começa uma semana nova.</p>' +
+        '<button class="hh-btn" onclick="abrirListaDeTreinosDaSemana()">Ver minha semana</button>';
+    } else {
+      const d = dias[r.alvo.indice];
+      const qtd = (d.ex || []).length;
+      const info = [];
+      if(qtd > 0) info.push('<span>' + iconePainel('halter', 'width:14px;height:14px;') + qtd + (qtd === 1 ? ' exercício' : ' exercícios') + '</span>');
+      if(d.duracaoEstimadaMin) info.push('<span>' + iconePainel('relogio', 'width:14px;height:14px;') + 'cerca de ' + Math.round(d.duracaoEstimadaMin) + ' min</span>');
+      elHero.innerHTML = '<p class="hh-lbl">' + escaparHtmlFicha(rotuloDoAlvoDoInicio(r, d)) + '</p>' +
+        '<p class="hh-tit">' + escaparHtmlFicha(d.foco || d.n) + '</p>' +
+        (info.length ? '<p class="hh-info">' + info.join('') + '</p>' : '') +
+        '<button class="hh-btn" onclick="abrirTreinoDaHome(' + r.alvo.indice + ')">Abrir treino</button>';
+    }
+  }
+
+  const elResumo = document.getElementById('resumo-dias-semana');
+  if(elResumo) elResumo.textContent = r.totalTreinos > 0 ? r.totalFeitos + ' de ' + r.totalTreinos + ' treinos' : '';
+  const elBol = document.getElementById('home-bolinhas');
+  if(elBol){
+    elBol.innerHTML = r.bolinhas.map(function(b){
+      const classes = 'home-bol' + (b.feito ? ' feito' : '') + (b.hoje ? ' hoje' : '') + (b.descanso ? ' descanso' : '');
+      const dentro = b.feito ? '✓' : (b.descanso ? '' : escaparHtmlFicha(b.letraTreino));
+      return '<div class="home-dia"><div class="' + classes + '">' + dentro + '</div>' + escaparHtmlFicha(b.letra) + '</div>';
+    }).join('');
+  }
+  return r;
+}
+
+// Abre o treino direto do card da Início; o "voltar" traz de volta pra Início
+function abrirTreinoDaHome(i){
+  veioDaListaDeTreinosDaSemana = false;
+  setActive('detail');
+  document.getElementById('backlabel').textContent = 'Início';
+  openDetail('dia', i);
+}
+
+function irParaInicioDaAluna(){
+  openLevel2('home');
+}
+
+// Mesmo visual pra todos os atalhos da Início (antes cada um tinha uma cor: roxo, verde...)
+function htmlTarefaHome(iconeTi, titulo, subtitulo, onclick, extraDireita){
+  return '<div class="list-item home-tarefa" onclick="' + onclick + '">' +
+    '<span class="ht-ic"><i class="ti ' + iconeTi + '"></i></span>' +
+    '<span class="ht-txt"><p>' + titulo + '</p>' + (subtitulo ? '<small>' + subtitulo + '</small>' : '') + '</span>' +
+    (extraDireita || '<i class="ti ti-chevron-right" style="color:var(--text-faint);"></i>') +
+  '</div>';
+}
+
 function renderHome(){
+  renderInicioDaAluna();
   const stats = calcularEstatisticasAluna(NOME_ALUNA_LOGADA);
   const nutriStats = calcularNutricaoStats(NOME_ALUNA_LOGADA);
   const elNumero = document.getElementById('home-score-numero');
@@ -2208,7 +2463,8 @@ function renderHome(){
         elComparativo.textContent = 'Estável vs. semana anterior';
         elComparativo.style.color = 'var(--text-faint)';
       } else {
-        elComparativo.textContent = (deltaScore > 0 ? '▲ +' : '▼ ') + deltaScore + '% vs. semana anterior';
+        // Semana pior: frase de incentivo no lugar do "▼ -19%" em destaque (o número continua nos detalhes do DNA)
+        elComparativo.textContent = deltaScore > 0 ? '▲ +' + deltaScore + '% vs. semana anterior' : 'Cada treino registrado ajuda a subir esse número.';
         elComparativo.style.color = deltaScore > 0 ? 'var(--success)' : 'var(--text-faint)';
       }
     }
@@ -2274,6 +2530,17 @@ function renderAvaliacoes(){
   };
   poster(rowAval, 'Avaliação física', subAval, function(){ openDetail('conteudo', conteudoAvaliacaoFisica); });
 
+  // Passou dos 90 dias: o aviso vira um card no topo, com o botão pra registrar (antes era só um texto pequeno)
+  const cardReav = document.getElementById('card-reavaliacao');
+  if(cardReav){
+    const precisa = alunaObj && alunaObj.dataAnamnese && subAval.indexOf('já está na hora de reavaliar') !== -1;
+    const diasDesde = precisa ? Math.floor((new Date() - new Date(alunaObj.dataAnamnese)) / 86400000) : 0;
+    cardReav.innerHTML = precisa
+      ? '<div class="evo-reav"><p><strong>Hora de reavaliar</strong>Sua última avaliação física foi há ' + diasDesde + ' dias. Registrar peso e medidas agora mostra o quanto você já mudou.</p>' +
+        '<button class="btn-gold" style="margin-top:12px;" onclick="iniciarRegistroComposicaoNova()">Registrar peso e medidas</button></div>'
+      : '';
+  }
+
   renderComposicaoAtual(alunaObj);
   renderMinhaEvolucao(alunaObj);
 }
@@ -2290,7 +2557,7 @@ function renderComposicaoAtual(a){
     elPesoData.textContent = a.composicaoAtual.data ? 'Atualizado em ' + a.composicaoAtual.data : 'Atualizado';
   } else {
     elPeso.textContent = '--';
-    elPesoData.textContent = 'Ainda não informado';
+    elPesoData.innerHTML = 'Ainda não informado<br><span class="evo-registrar" onclick="iniciarRegistroComposicaoNova()">+ Registrar</span>';
   }
 
   if(a.composicaoAtual && a.composicaoAtual.gordura != null){
@@ -2298,7 +2565,7 @@ function renderComposicaoAtual(a){
     elGorduraData.textContent = 'Via avaliação física';
   } else {
     elGordura.textContent = '--';
-    elGorduraData.textContent = 'Ainda não informado';
+    elGorduraData.innerHTML = 'Ainda não informado<br><span class="evo-registrar" onclick="iniciarRegistroComposicaoNova()">+ Registrar</span>';
   }
 }
 
@@ -2328,7 +2595,11 @@ function renderMinhaEvolucao(a){
   const historico = (a && a.composicaoHistorico) || [];
   const temRegistros = a && (linhaDoTempoComposicao(a).length > 0 || indicesDosPesosMensais(a).length > 0);
   if(!temRegistros){
-    container.innerHTML = '<p class="txt" style="color:var(--text-faint);">Ainda sem histórico. Assim que você registrar novas informações, os valores anteriores ficam guardados aqui pra comparar.</p>';
+    // Sem registros: um gráfico tracejado mostra onde a evolução vai aparecer
+    container.innerHTML = '<div class="evo-graf-vazio">' +
+      '<svg viewBox="0 0 300 80" width="100%" height="80" style="display:block;"><path d="M5 65 C 60 60, 90 46, 140 48 S 230 26, 295 16" fill="none" stroke="#3A3A3A" stroke-width="2" stroke-dasharray="5 6"/></svg>' +
+      '<p class="txt" style="color:var(--text-faint);font-size:12px;margin:8px 0 0;">Ainda sem histórico. Assim que você registrar novas informações, os valores anteriores ficam guardados aqui pra comparar.</p>' +
+    '</div>';
     return;
   }
 
@@ -4882,7 +5153,7 @@ function registrarPesoMensal(mes){
   alunaAtual.pesoHistorico.push({ semana: prog.semana, peso: peso, origem: 'mensal' });
   salvarPerfilAlunaNoSupabase(NOME_ALUNA_LOGADA);
   const el = document.getElementById('area-peso');
-  if(el) el.innerHTML = '<p class="txt">Peso registrado! Isso já entra no cálculo de elegibilidade de mudança de fase. Se digitou errado, dá pra corrigir na aba Composição, em Minha evolução.</p>';
+  if(el) el.innerHTML = '<p class="txt">Peso registrado! Isso já entra no cálculo de elegibilidade de mudança de fase. Se digitou errado, dá pra corrigir em Evolução > Corpo, em Minha evolução.</p>';
 }
 
 function extrairExercicios(a){
@@ -6143,10 +6414,7 @@ function renderBotaoDesafio(){
   if(!area) return;
   const a = obterAlunaLogadaOuCriar();
   if(!a.desafioAtivo){ area.innerHTML = ''; return; }
-  area.innerHTML = '<div class="list-item" style="cursor:pointer;background:linear-gradient(135deg,#6FA87C,#4C8058);border:none;margin-top:10px;" onclick="abrirTelaDesafioSecaEmpina()">' +
-    '<span style="color:#fff;font-weight:600;"><i class="ti ti-flag" style="margin-right:8px;"></i>Desafio Seca e Empina</span>' +
-    '<span class="tag" style="background:rgba(0,0,0,0.15);color:#fff;">Estrutura ' + a.desafioAtivo.estruturaAtual + '/10</span>' +
-  '</div>';
+  area.innerHTML = htmlTarefaHome('ti-flag', 'Desafio Seca e Empina', 'Estrutura ' + a.desafioAtivo.estruturaAtual + '/10 liberada', 'abrirTelaDesafioSecaEmpina()');
 }
 
 function abrirTelaDesafioSecaEmpina(){
@@ -6268,10 +6536,7 @@ function renderBotaoPerguntaPerfil(){
   const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
   const pendente = prog.perguntasPerfilDNA && prog.perguntasPerfilDNA.pendente;
   if(!pendente){ area.innerHTML = ''; return; }
-  area.innerHTML = '<div class="list-item" style="cursor:pointer;background:linear-gradient(135deg,#8B6FA8,#6B5490);border:none;margin-top:10px;" onclick="abrirTelaPerguntaPerfil()">' +
-    '<span style="color:#fff;font-weight:600;"><i class="ti ti-message-circle-2" style="margin-right:8px;"></i>Uma pergunta rápida pra você</span>' +
-    '<i class="ti ti-chevron-right" style="color:#fff;"></i>' +
-  '</div>';
+  area.innerHTML = htmlTarefaHome('ti-message-circle-2', 'Uma pergunta rápida pra você', 'leva menos de 1 minuto', 'abrirTelaPerguntaPerfil()');
 }
 
 function abrirTelaPerguntaPerfil(){
@@ -9758,7 +10023,7 @@ function abrirResumoCompletoAluna(nomeAluna){
       '</div>' +
       '<div class="form-group" style="margin-top:14px;"><label class="form-label">Telefone</label><input class="form-input" id="dados-telefone-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" value="' + (a.telefone || '').replace(/"/g,'&quot;') + '" placeholder="ainda sem telefone cadastrado"><button class="btn-gold" style="width:auto;padding:6px 14px;margin-top:6px;font-size:12px;" onclick="editarTelefoneAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Salvar telefone</button></div>' +
       '<div class="form-group" style="margin-top:14px;"><label class="form-label">Peso inicial (kg)</label><input class="form-input" id="dados-peso-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" type="text" inputmode="decimal" value="' + (numeroDeTextoFicha(a.peso) != null ? String(numeroDeTextoFicha(a.peso)).replace('.', ',') : '') + '" placeholder="ainda sem peso cadastrado"><button class="btn-gold" style="width:auto;padding:6px 14px;margin-top:6px;font-size:12px;" onclick="editarPesoDaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Salvar peso</button></div>' +
-      '<div class="form-group" style="margin-top:14px;"><label class="form-label">Altura (m)</label><input class="form-input" id="dados-altura-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" type="text" inputmode="decimal" value="' + (alturaDaFichaEmMetros(a) != null ? alturaDaFichaEmMetros(a).toFixed(2).replace('.', ',') : '') + '" placeholder="ainda sem altura cadastrada"><button class="btn-gold" style="width:auto;padding:6px 14px;margin-top:6px;font-size:12px;" onclick="editarAlturaDaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Salvar altura</button><p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:4px;">Ao salvar peso ou altura, o IMC é recalculado. O peso que ela registra no app fica na aba Composição, e o histórico dele se corrige em "Peso e composição".</p></div>' +
+      '<div class="form-group" style="margin-top:14px;"><label class="form-label">Altura (m)</label><input class="form-input" id="dados-altura-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" type="text" inputmode="decimal" value="' + (alturaDaFichaEmMetros(a) != null ? alturaDaFichaEmMetros(a).toFixed(2).replace('.', ',') : '') + '" placeholder="ainda sem altura cadastrada"><button class="btn-gold" style="width:auto;padding:6px 14px;margin-top:6px;font-size:12px;" onclick="editarAlturaDaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Salvar altura</button><p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:4px;">Ao salvar peso ou altura, o IMC é recalculado. O peso que ela registra no app fica em Evolução > Corpo, e o histórico dele se corrige em "Peso e composição".</p></div>' +
       '<div id="dados-resultado-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '" style="margin-top:8px;"></div>' +
     '</div>', 'dados-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
     renderSecaoColapsavel('Data de nascimento', '<div class="info-box"><input type="date" class="form-input" value="' + (a.dataNascimento || '') + '" onchange="editarDataNascimentoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)"><p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:6px;">Normalmente já vem sozinha da anamnese. Só preencha aqui se ela respondeu antes da gente ativar isso.</p></div>', 'nascimento-' + a.nome.replace(/[^a-zA-Z0-9]/g,'')) +
@@ -13054,9 +13319,9 @@ async function loginAluna(){
       timerIntroAtual = setTimeout(function(){ setActive('onboarding'); }, 4000);
     } else if(dentroDoLimiteDeIntro){
       setActive('intro');
-      timerIntroAtual = setTimeout(function(){ setActive('launcher'); }, 4000);
+      timerIntroAtual = setTimeout(function(){ irParaInicioDaAluna(); }, 4000);
     } else {
-      setActive('launcher');
+      irParaInicioDaAluna(); // direto pra Início (antes caía na tela "Escolha uma opção")
     }
     perguntarSeQuerLembrarLogin();
   } catch(erroDeRede){
@@ -13080,7 +13345,7 @@ function entrarLocalPorEmail(email){
   renderBadgeAvisos();
   sessaoTipo = 'aluna';
   document.getElementById('card-personal-launcher').style.display = 'none';
-  setActive('launcher');
+  irParaInicioDaAluna();
 }
 
 async function carregarELigarTreinoDaAluna(userId){
@@ -13107,26 +13372,13 @@ async function carregarELigarTreinoDaAluna(userId){
       .channel('treino-da-aluna-' + userId)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'treinos', filter: 'aluna_id=eq.' + userId }, function(payload){
         console.log('[Tempo real] Evento recebido:', payload);
-        const aviso = document.createElement('div');
-        aviso.style.cssText = 'position:fixed;top:8px;left:8px;right:8px;background:#1a3a1a;color:#8FAE7D;padding:10px;border-radius:10px;font-size:11px;text-align:center;z-index:99999;';
-        aviso.textContent = '[Diagnóstico] Treino atualizado em tempo real, chegou agora.';
-        document.body.appendChild(aviso);
-        setTimeout(function(){ aviso.remove(); }, 6000);
+        // Aviso pra aluna em linguagem normal (antes era um "[Diagnóstico]" técnico)
+        mostrarConfirmacaoSalvamento(true, 'Seu personal acabou de atualizar o seu treino.');
         if(payload.new) aplicarTreinoRecebidoDoSupabase(payload.new);
       })
       .subscribe(function(status){
+        // Só no console: a aluna não precisa ver o estado da conexão (antes ficava uma faixa verde fixa por cima do menu)
         console.log('[Tempo real] Status da inscrição:', status);
-        const aviso = document.createElement('div');
-        aviso.id = 'diagnostico-realtime-status';
-        aviso.style.cssText = 'position:fixed;bottom:8px;left:8px;right:8px;padding:8px;border-radius:10px;font-size:10px;text-align:center;z-index:99999;';
-        if(status === 'SUBSCRIBED'){
-          aviso.style.cssText += 'background:#1a3a1a;color:#8FAE7D;';
-          aviso.textContent = '[Diagnóstico] Conectado ao tempo real com sucesso.';
-        } else {
-          aviso.style.cssText += 'background:#3a1a1a;color:#E2A33D;';
-          aviso.textContent = '[Diagnóstico] Status da conexão em tempo real: ' + status;
-        }
-        document.body.appendChild(aviso);
       });
   } catch(erroDeRede){
     // Sem treino sincronizado por enquanto, continua com o que já está carregado localmente
@@ -13279,11 +13531,11 @@ async function carregarProgressoDoSupabase(authId, nomeAluna){
 }
 
 function finalizarOnboarding(){
-  setActive('launcher');
+  irParaInicioDaAluna();
 }
 
 function finalizarOnboardingEIr(destino){
-  setActive('launcher');
+  irParaInicioDaAluna();
   if(destino === 'treino'){ openLevel2('home'); abrirListaDeTreinosDaSemana(); }
   else if(destino === 'dna'){ openLevel2('home'); openDetail('dna'); }
   else if(destino === 'sol'){ openLevel2('chatia'); }
@@ -13306,7 +13558,7 @@ function finalizarOnboardingEIr(destino){
 // Versão do tour. Quando o conteúdo mudar de forma relevante, é só trocar esse valor: todas as alunas
 // voltam a ver o tour uma vez, no próximo acesso à tela Início. Quem tinha visto só a versão antiga
 // (marcada como "sim") também vê de novo, de propósito.
-const VERSAO_TOUR = 'v2-completo';
+const VERSAO_TOUR = 'v3-telas-novas'; // trocado nas telas novas (Início, menu de 5 itens, Evolução): todas veem o tour de novo
 const TOTAL_PARTES_TOUR = 4;
 const NOMES_PARTES_TOUR = { 1: 'Tela inicial', 2: 'Treinos da semana', 3: 'Dentro do treino', 4: 'Progresso' };
 let indiceTourAtual = 0;
@@ -13382,31 +13634,31 @@ function tourDentroDoExpandido(css){
 
 const PASSOS_TOUR = [
   // ===== PARTE 1: TELA INICIAL =====
+  { parte: 1, preparar: tourIrParaInicio, seletor: '#home-treino-hoje', titulo: 'Seu treino de hoje',
+    texto: 'O primeiro card mostra o treino que você tem pra fazer: o de hoje, o próximo, ou um que ficou pra trás na semana. Toque em "Abrir treino" pra começar.' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '.dna-score-card', titulo: 'Seu DNA Score',
     texto: 'Esse número resume como seu treino está indo essa semana, juntando constância, progressão, recuperação e mais. Toque nele pra ver o detalhe de cada parte.' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '#home-indicadores-grid', titulo: 'Seus indicadores',
     texto: 'Aqui você acompanha constância, hipertrofia, nutrição, recuperação e progressão separadamente, pra entender o que está puxando seu resultado pra cima ou pra baixo.' },
-  { parte: 1, preparar: tourIrParaInicio, seletor: '#link-ver-treinos-semana', titulo: 'Seus treinos da semana',
-    texto: 'Aqui está o seu treino prescrito, dia a dia. É por aqui que você abre o treino, registra as séries e acompanha a sua carga.' },
+  { parte: 1, preparar: tourIrParaInicio, seletor: '#link-ver-treinos-semana', titulo: 'Sua semana',
+    texto: 'Cada bolinha é um dia da semana. Os treinos feitos ficam marcados, e o de hoje fica com o contorno dourado. Toque aqui pra ver a lista completa.' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '#botao-pergunta-perfil-area > div', titulo: 'Pergunta rápida',
-    texto: 'Esse botão roxo traz uma pergunta curta sobre a sua rotina, o que te motiva ou o que atrapalha. Ele aparece de tempos em tempos, e às vezes também durante o descanso do treino. Suas respostas ajudam seu personal a te conhecer melhor e a ajustar o seu acompanhamento. Se não puder responder agora, é só tocar em "Responder depois".',
-    textoCentro: 'Às vezes aparece um botão roxo com uma pergunta curta sobre a sua rotina, o que te motiva ou o que atrapalha. Ele surge de tempos em tempos, e às vezes também durante o descanso do treino. Suas respostas ajudam seu personal a te conhecer melhor e a ajustar o seu acompanhamento. Se não puder responder na hora, é só tocar em "Responder depois".' },
+    texto: 'Esse atalho traz uma pergunta curta sobre a sua rotina, o que te motiva ou o que atrapalha. Ele aparece de tempos em tempos, e às vezes também durante o descanso do treino. Suas respostas ajudam seu personal a te conhecer melhor e a ajustar o seu acompanhamento. Se não puder responder agora, é só tocar em "Responder depois".',
+    textoCentro: 'Às vezes aparece um atalho com uma pergunta curta sobre a sua rotina, o que te motiva ou o que atrapalha. Ele surge de tempos em tempos, e às vezes também durante o descanso do treino. Suas respostas ajudam seu personal a te conhecer melhor e a ajustar o seu acompanhamento. Se não puder responder na hora, é só tocar em "Responder depois".' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '#botao-pergunta-roda-vida-area > div', titulo: 'Roda da Vida',
-    texto: 'Esse botão verde traz uma área da sua vida pra você avaliar de 0 a 5, como saúde, trabalho, família e finanças. Aparece uma área de cada vez, e leva poucos segundos. Quando você completa as 10 áreas, o seu gráfico fica pronto e o botão some por cerca de 2 meses, até começar uma nova rodada pra você comparar.',
-    textoCentro: 'Às vezes aparece um botão verde com uma área da sua vida pra você avaliar de 0 a 5, como saúde, trabalho, família e finanças. Aparece uma área de cada vez, e leva poucos segundos. Quando você completa as 10 áreas, o seu gráfico fica pronto e o botão some por cerca de 2 meses, até começar uma nova rodada pra você comparar.' },
+    texto: 'Esse atalho traz uma área da sua vida pra você avaliar de 0 a 5, como saúde, trabalho, família e finanças. Aparece uma área de cada vez, e leva poucos segundos. Quando você completa as 10 áreas, o seu gráfico fica pronto e o botão some por cerca de 2 meses, até começar uma nova rodada pra você comparar.',
+    textoCentro: 'Às vezes aparece um atalho com uma área da sua vida pra você avaliar de 0 a 5, como saúde, trabalho, família e finanças. Aparece uma área de cada vez, e leva poucos segundos. Quando você completa as 10 áreas, o seu gráfico fica pronto e o botão some por cerca de 2 meses, até começar uma nova rodada pra você comparar.' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '#botao-desafio-area > div', titulo: 'Seu desafio', fallback: 'pular',
     condicao: function(){ try { return !!obterAlunaLogadaOuCriar().desafioAtivo; } catch(e){ return false; } },
     texto: 'Como você está num desafio, esse botão leva aos treinos dele e mostra em qual estrutura você está. Você pode treinar qualquer estrutura que já tenha sido liberada.' },
-  { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="dados"]', rolar: false, titulo: 'Composição corporal',
-    texto: 'Aqui você registra peso, medidas e fotos pra acompanhar sua evolução ao longo do tempo.' },
+  { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="treino"]', rolar: false, titulo: 'Treino',
+    texto: 'A lista completa da sua semana, dia a dia. É por aqui que você abre qualquer treino, registra as séries e acompanha a sua carga.' },
+  { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="evolucao"]', rolar: false, titulo: 'Evolução',
+    texto: 'Tudo da sua evolução num lugar só, em três abas: Corpo (peso, medidas e avaliação), Treino (calendário e progresso) e Roda da Vida.' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="mentoria"]', rolar: false, titulo: 'Mentoria',
     texto: 'Cursos completos, explicação de métodos de treino, mobilidade e muito mais, organizado por seção.' },
-  { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="progresso"]', rolar: false, titulo: 'Progresso',
-    texto: 'Seu calendário de treinos, linha do tempo e gráfico de evolução, tudo num só lugar. Daqui a pouco a gente olha essa tela por dentro.' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="ranking"]', rolar: false, titulo: 'Ranking',
     texto: 'Veja como você está em relação à comunidade, e o que falta pra bater a próxima meta.' },
-  { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="rodadavida"]', rolar: false, titulo: 'Roda da Vida',
-    texto: 'Aqui fica o gráfico da sua Roda da Vida. Ele vai se formando conforme você responde as áreas, e cada ciclo completo fica guardado pra você comparar com os próximos.' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '#botao-flutuante-sol', rolar: false, titulo: 'Fale com a Sol',
     texto: 'Sua treinadora digital, sempre disponível pra tirar dúvidas rápidas sobre o treino.' },
 
@@ -13462,13 +13714,13 @@ const PASSOS_TOUR = [
   // ===== PARTE 4: PROGRESSO =====
   { parte: 4, preparar: tourIrParaProgresso, seletor: '#tour-checkin-box', titulo: 'Meu progresso hoje',
     texto: 'Aqui você registra como está hoje: humor, ansiedade, disposição, sono e os hábitos do dia. Seu personal usa essas informações pra entender como você está além do treino, e cada dia preenchido soma pontos no ranking.',
-    textoCentro: 'Na tela de Progresso, em "Meu progresso hoje", você registra como está: humor, ansiedade, disposição, sono e os hábitos do dia. Seu personal usa essas informações pra entender como você está além do treino, e cada dia preenchido soma pontos no ranking.' },
+    textoCentro: 'Em Evolução > Treino, em "Meu progresso hoje", você registra como está: humor, ansiedade, disposição, sono e os hábitos do dia. Seu personal usa essas informações pra entender como você está além do treino, e cada dia preenchido soma pontos no ranking.' },
   { parte: 4, preparar: tourIrParaProgresso, seletor: '#tour-chip-ontem', titulo: 'Esqueci de preencher ontem',
     texto: 'Esqueceu de preencher ontem? Toque aqui pra preencher o dia de ontem, que fica guardado na data certa. Manter os dias completos deixa o seu acompanhamento muito mais preciso.',
-    textoCentro: 'Esqueceu de preencher ontem? Na tela de Progresso, o botão "Esqueci de preencher ontem" deixa você preencher o dia de ontem, que fica guardado na data certa. Manter os dias completos deixa o seu acompanhamento muito mais preciso.' },
+    textoCentro: 'Esqueceu de preencher ontem? Em Evolução > Treino, o botão "Esqueci de preencher ontem" deixa você preencher o dia de ontem, que fica guardado na data certa. Manter os dias completos deixa o seu acompanhamento muito mais preciso.' },
   { parte: 4, preparar: tourIrParaProgresso, seletor: '#hub-corrigir-registros', titulo: 'Corrigir meus registros',
-    texto: 'Preencheu algo errado? Aqui no fim da tela você corrige o check-in de nutrição, os feedbacks de treino e as respostas do Perfil DNA. O peso e a composição se corrigem na aba Composição, em "Minha evolução", e a Roda da Vida tem "Corrigir uma resposta" na própria aba.',
-    textoCentro: 'Preencheu algo errado? Na tela de Progresso, no fim, o bloco "Corrigir meus registros" deixa você corrigir o check-in de nutrição, os feedbacks de treino e as respostas do Perfil DNA. O peso e a composição se corrigem na aba Composição, em "Minha evolução", e a Roda da Vida tem "Corrigir uma resposta" na própria aba.' },
+    texto: 'Preencheu algo errado? Aqui no fim da tela você corrige o check-in de nutrição, os feedbacks de treino e as respostas do Perfil DNA. O peso e a composição se corrigem em Evolução > Corpo, em "Minha evolução", e a Roda da Vida tem "Corrigir uma resposta" na própria aba.',
+    textoCentro: 'Preencheu algo errado? Em Evolução > Treino, no fim, o bloco "Corrigir meus registros" deixa você corrigir o check-in de nutrição, os feedbacks de treino e as respostas do Perfil DNA. O peso e a composição se corrigem em Evolução > Corpo, em "Minha evolução", e a Roda da Vida tem "Corrigir uma resposta" na própria aba.' },
   { parte: 4, nomeParte: 'Pra terminar', preparar: tourIrParaInicio, seletor: '#botao-tutorial-home', titulo: 'Tudo pronto',
     texto: 'Pra rever este tutorial quando quiser, toque nesse botão com o ponto de interrogação. Uma dica final: na tela de entrada do app, marque a caixinha "Lembrar login neste aparelho" pra não precisar digitar e-mail e senha toda vez.',
     textoCentro: 'Pra rever este tutorial quando quiser, toque no botão com o ponto de interrogação, no canto de cima da tela Início. Uma dica final: na tela de entrada do app, marque a caixinha "Lembrar login neste aparelho" pra não precisar digitar e-mail e senha toda vez.' }
@@ -13905,18 +14157,34 @@ async function loginPersonal(){
 function setActive(name){
   document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
   document.querySelector('[data-view="' + name + '"]').classList.add('active');
+  // Aluna: nas abas do menu de baixo some a barra "Voltar" (o menu já leva pra qualquer lugar); nas outras telas ela volta
+  if(sessaoTipo === 'aluna'){
+    const barra = document.getElementById('backbar');
+    if(barra && abasFixasAluna.indexOf(name) !== -1) barra.style.display = 'none';
+    else if(barra && name === 'detail') barra.style.display = 'flex';
+  }
+  // Tela do ícone de pessoa: pra aluna vira "Sua conta" (os atalhos em volta repetiam o menu de baixo)
+  const telaLauncher = document.querySelector('[data-view="launcher"] .launcher');
+  if(name === 'launcher' && telaLauncher){
+    const ehAluna = sessaoTipo === 'aluna';
+    telaLauncher.classList.toggle('modo-conta', ehAluna);
+    const sub = document.getElementById('launcher-sub');
+    if(sub) sub.textContent = ehAluna ? 'Sua conta' : 'Escolha uma opção';
+  }
   try { localStorage.setItem('musaUltimaTela', JSON.stringify({ view: name, detailDia: (name === 'detail' ? detailDiaAtual : null) })); } catch(e){}
   if(name === 'launcher') atualizarVisualCheckboxLembrarLogin(); // sempre reflete o estado real, não importa por onde chegou aqui
 }
 
-const abasFixasAluna = ['home', 'dados', 'mentoria', 'progresso', 'ranking', 'rodadavida'];
+const abasFixasAluna = ['home', 'semana-treinos', 'dados', 'mentoria', 'progresso', 'ranking', 'rodadavida'];
+// Qual item do menu de baixo fica aceso em cada tela (Corpo, Treino e Roda da Vida ficam dentro de "Evolução")
+const ITEM_DO_MENU_POR_TELA = { home: 'home', 'semana-treinos': 'treino', dados: 'evolucao', progresso: 'evolucao', rodadavida: 'evolucao', mentoria: 'mentoria', ranking: 'ranking' };
 
 function openLevel2(which){
   level2 = which;
   setActive(which);
 
   const ehAbaFixaDaAluna = sessaoTipo === 'aluna' && abasFixasAluna.indexOf(which) !== -1;
-  document.getElementById('backbar').style.display = 'flex';
+  document.getElementById('backbar').style.display = ehAbaFixaDaAluna ? 'none' : 'flex';
   document.getElementById('top-logo-fixa').style.display = 'none';
   document.getElementById('bottom-nav-fixa').style.display = ehAbaFixaDaAluna ? 'flex' : 'none';
   if(ehAbaFixaDaAluna) atualizarNavAtiva(which);
@@ -13932,16 +14200,25 @@ function openLevel2(which){
   if(which === 'progresso' && typeof renderMeuProgresso === 'function'){ renderMeuProgresso(); }
   if(which === 'ranking' && typeof renderRanking === 'function'){ renderRanking(); renderRankingPublico(); }
   if(which === 'rodadavida'){ renderRodaDaVidaAluna(); }
+  if(which === 'semana-treinos'){ abrirListaDeTreinosDaSemana(); }
 }
 
 function atualizarNavAtiva(which){
+  const item = ITEM_DO_MENU_POR_TELA[which] || which;
   document.querySelectorAll('.bottom-nav-item').forEach(function(el){
-    el.classList.toggle('ativo', el.getAttribute('data-nav') === which);
+    el.classList.toggle('ativo', el.getAttribute('data-nav') === item);
   });
 }
 
 function irParaAbaFixa(which){
+  if(which === 'treino'){ openLevel2('semana-treinos'); return; }
+  if(which === 'evolucao'){ openLevel2('dados'); return; } // Evolução abre em "Corpo"
   openLevel2(which);
+}
+
+// Abas do topo da Evolução (Corpo, Treino, Roda da Vida)
+function trocarAbaEvolucao(tela){
+  openLevel2(tela);
 }
 
 /* ===== CHAT DE IA REAL ===== */
@@ -13967,11 +14244,12 @@ function obterAlunaLogadaOuCriar(){
 
 async function restaurarSessaoAtiva(){
   function mostrarDiagnostico(texto, ehErro){
-    const el = document.createElement('div');
-    el.style.cssText = 'position:fixed;top:14px;left:8px;right:8px;background:' + (ehErro ? '#3a1a1a' : '#1a2a3a') + ';color:' + (ehErro ? '#E2A33D' : '#9ec5e8') + ';padding:8px;border-radius:8px;font-size:10px;text-align:center;z-index:999998;';
-    el.textContent = '[Sessão] ' + texto;
-    document.body.appendChild(el);
-    setTimeout(function(){ el.remove(); }, 9000);
+    // Antes cada passo aparecia numa faixa "[Sessão] ..." na tela da aluna. Agora o passo a passo fica só no
+    // console; quando dá problema de verdade, ela vê um aviso curto e o detalhe vai pro registro de erros.
+    try { console.log('[Sessão] ' + texto); } catch(e){}
+    if(!ehErro) return;
+    registrarErroNoBanco(new Error('[Sessão] ' + texto));
+    mostrarConfirmacaoSalvamento(false, 'Não consegui abrir sua conta automaticamente. Confira a internet e, se precisar, entre de novo.');
   }
 
   if(!supabaseClient){ mostrarDiagnostico('supabaseClient não existe (CDN não carregou).', true); return; }
@@ -14060,7 +14338,7 @@ async function restaurarSessaoAtiva(){
       const dentroDoLimiteDeIntroRestaurada = deveExibirEEIncrementarIntro(NOME_ALUNA_LOGADA);
       if(dentroDoLimiteDeIntroRestaurada){
         setActive('intro');
-        timerIntroAtual = setTimeout(function(){ setActive('launcher'); }, 4000);
+        timerIntroAtual = setTimeout(function(){ irParaInicioDaAluna(); }, 4000);
         perguntarSeQuerLembrarLogin();
         return;
       }
@@ -14073,11 +14351,13 @@ async function restaurarSessaoAtiva(){
         openLevel2('home'); // garante dados/dias carregados antes de qualquer tela específica
         if(telaSalva.view === 'detail' && telaSalva.detailDia != null && dias[telaSalva.detailDia]){
           openDetail('dia', telaSalva.detailDia);
-        } else if(telaSalva.view !== 'home'){
+        } else if(abasFixasAluna.indexOf(telaSalva.view) !== -1 && telaSalva.view !== 'home'){
+          openLevel2(telaSalva.view); // aba do menu de baixo: abre do jeito certo (menu e topo certos)
+        } else if(telaSalva.view !== 'home' && telaSalva.view !== 'launcher'){
           setActive(telaSalva.view);
         }
       } else {
-        setActive('launcher');
+        irParaInicioDaAluna();
       }
       perguntarSeQuerLembrarLogin();
     }
@@ -14982,7 +15262,7 @@ function aplicarIdentidadeVisual(nome){
   }
   if(nomeProfileEl) nomeProfileEl.textContent = primeiroNome;
   const tituloHomeEl = document.querySelector('[data-view="home"] .page-title');
-  if(tituloHomeEl) tituloHomeEl.textContent = 'Olá, ' + primeiroNome;
+  if(tituloHomeEl) tituloHomeEl.textContent = saudacaoDoPainel(Date.now()) + ', ' + primeiroNome;
 }
 aplicarIdentidadeVisual(NOME_ALUNA_LOGADA);
 
@@ -15344,7 +15624,7 @@ function registrarNutricaoSemana(){
   salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
 
   const el = document.getElementById('area-nutricao') || document.getElementById('nutri-confirmacao');
-  if(el) el.innerHTML = '<p class="txt">Obrigada! Isso já ajustou sua Resposta Nutricional, Potencial de Hipertrofia, Potencial de Ganho de Gordura e Retenção Hídrica no DNA MUSA. Se digitou algo errado, dá pra corrigir na aba Progresso, no fim da tela, em "Corrigir meus registros".</p>';
+  if(el) el.innerHTML = '<p class="txt">Obrigada! Isso já ajustou sua Resposta Nutricional, Potencial de Hipertrofia, Potencial de Ganho de Gordura e Retenção Hídrica no DNA MUSA. Se digitou algo errado, dá pra corrigir em Evolução > Treino, no fim da tela, em "Corrigir meus registros".</p>';
 }
 
 // ---- edição ----
@@ -15934,7 +16214,8 @@ const ICONES_PAINEL = {
   dinheiro: '<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M7 9.5v5M17 9.5v5"/>',
   calendario: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   sair: '<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5"/><path d="M5 12h11"/>',
-  estrela: '<path d="M12 3l2.2 5.3L20 9l-4.4 3.8L17 18.5 12 15.6 7 18.5l1.4-5.7L4 9l5.8-.7z"/>'
+  estrela: '<path d="M12 3l2.2 5.3L20 9l-4.4 3.8L17 18.5 12 15.6 7 18.5l1.4-5.7L4 9l5.8-.7z"/>',
+  relogio: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/>'
 };
 function iconePainel(nome, estiloExtra){
   return '<svg class="pn-ic" viewBox="0 0 24 24"' + (estiloExtra ? ' style="' + estiloExtra + '"' : '') + '>' + (ICONES_PAINEL[nome] || ICONES_PAINEL.lista) + '</svg>';
@@ -17147,10 +17428,9 @@ function renderBotaoPerguntaRodaDaVida(){
   const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
   const pendente = prog.rodaDaVidaPendente;
   if(!pendente){ area.innerHTML = ''; return; }
-  area.innerHTML = '<div class="list-item" style="cursor:pointer;background:linear-gradient(135deg,#6FA87C,#4C8058);border:none;margin-top:10px;" onclick="abrirTelaPerguntaRodaDaVida()">' +
-    '<span style="color:#fff;font-weight:600;"><i class="ti ' + pendente.icone + '" style="margin-right:8px;"></i>Roda da Vida: uma área rápida</span>' +
-    '<i class="ti ti-chevron-right" style="color:#fff;"></i>' +
-  '</div>';
+  const registroMes = getRodaDaVidaMes(NOME_ALUNA_LOGADA, getMesAtualISO());
+  const respondidas = AREAS_RODA_DA_VIDA.filter(function(ar){ return registroMes && registroMes.areas && registroMes.areas[ar.id] != null; }).length;
+  area.innerHTML = htmlTarefaHome(pendente.icone, 'Roda da Vida: uma área rápida', respondidas + ' de ' + AREAS_RODA_DA_VIDA.length + ' respondidas', 'abrirTelaPerguntaRodaDaVida()');
 }
 
 function abrirTelaPerguntaRodaDaVida(){
@@ -17352,7 +17632,7 @@ function renderMeuProgressoConteudo(container, nome, a){
   const historico = (a.composicaoHistorico || []).slice();
   if(a.composicaoAtual) historico.push(Object.assign({ semana: prog.semana, atual: true }, a.composicaoAtual));
   if(historico.length === 0){
-    html += '<p class="txt" style="color:var(--text-faint);">Ainda sem registros de composição pra montar a linha do tempo. Registra na aba Composição corporal.</p>';
+    html += '<p class="txt" style="color:var(--text-faint);">Ainda sem registros de composição pra montar a linha do tempo. Registra em Evolução, na aba Corpo.</p>';
   } else {
     html += historico.map(function(reg, i){
       const label = reg.atual ? 'Hoje' : (reg.data || ('Semana ' + reg.semana));
@@ -17393,7 +17673,7 @@ function renderMeuProgressoConteudo(container, nome, a){
     '</div>';
   }
 
-  // Shape Analysis foi movido pra aba Composição corporal — faz mais sentido lá, já que é sobre
+  // Shape Analysis foi movido pra Evolução > Corpo, faz mais sentido lá, já que é sobre
   // fotos/comparação visual do corpo, e o Progresso não precisa segurar um "em breve" todo dia.
 
   html += '<p class="section-label" style="margin-top:24px;">Corrigir meus registros</p><div id="hub-corrigir-registros"></div>';
@@ -18315,13 +18595,13 @@ function renderRodaDaVidaAluna(){
 }
 
 // =====================================================================================
-// BLOCO "CORRIGIR MEUS REGISTROS" na tela de Progresso: nutrição, feedback de treino e respostas do Perfil DNA
-// (peso e composição se corrigem na aba Composição; dia registrado sem querer, na lista dos treinos da semana)
+// BLOCO "CORRIGIR MEUS REGISTROS" em Evolução > Treino: nutrição, feedback de treino e respostas do Perfil DNA
+// (peso e composição se corrigem em Evolução > Corpo; dia registrado sem querer, na lista dos treinos da semana)
 // =====================================================================================
 function htmlHubCorrigirRegistros(nome){
   const prog = getProgressoAluna(nome);
   const partes = htmlHubNutricao(prog) + htmlHubFeedback(prog) + htmlHubPerfilDna(prog);
-  return '<div class="info-box" style="margin-bottom:10px;"><p class="txt" style="font-size:12px;color:var(--text-faint);margin:0;">Preencheu algo errado? Aqui você corrige. O peso e a composição se corrigem na aba Composição, em "Minha evolução". Um treino registrado sem querer dá pra desfazer na lista dos treinos da semana, segurando o dia.</p></div>' +
+  return '<div class="info-box" style="margin-bottom:10px;"><p class="txt" style="font-size:12px;color:var(--text-faint);margin:0;">Preencheu algo errado? Aqui você corrige. O peso e a composição se corrigem em Evolução > Corpo, em "Minha evolução". Um treino registrado sem querer dá pra desfazer na lista dos treinos da semana, segurando o dia.</p></div>' +
     (partes || '<p class="txt" style="color:var(--text-faint);">Quando você tiver registros pra corrigir, eles aparecem aqui.</p>');
 }
 
@@ -18795,6 +19075,8 @@ function goBack(){
     document.getElementById('backlabel').textContent = 'Voltar para o início';
   } else if(document.getElementById('backlabel').textContent === 'Sair'){
     sairDeVerdade();
+  } else if(sessaoTipo === 'aluna'){
+    irParaInicioDaAluna(); // antes voltava pra tela "Escolha uma opção"
   } else {
     setActive('launcher');
     document.getElementById('backbar').style.display = 'none';
