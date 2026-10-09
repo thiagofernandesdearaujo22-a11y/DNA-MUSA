@@ -131,6 +131,22 @@
 
 
 
+
+  /* ===== TREINO CONCLUÍDO ===== */
+  .tc-card{border-radius:20px;padding:20px 16px 14px;margin-bottom:10px;text-align:center;background:linear-gradient(160deg,rgba(232,197,138,0.2),var(--card) 60%);border:1px solid var(--border-strong);}
+  .tc-trofeu{width:64px;height:64px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;color:var(--gold-soft);background:radial-gradient(circle,rgba(232,197,138,0.35),rgba(232,197,138,0.05));border:1px solid var(--border-strong);}
+  .tc-tit{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;margin:0;}
+  .tc-sub{font-size:12px;color:var(--text-faint);margin:4px 0 14px;}
+  .tc-nums{display:grid;gap:8px;margin-bottom:12px;}
+  .tc-num{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 4px;}
+  .tc-num b{display:block;font-family:'Playfair Display',serif;font-size:21px;}
+  .tc-num small{font-size:10.5px;color:var(--text-faint);}
+  .tc-cargas{text-align:left;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:8px 12px;}
+  .tc-lbl{font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold);margin:4px 0 4px;font-weight:600;}
+  .tc-linha{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--border);font-size:12.5px;}
+  .tc-linha span{color:var(--text-dim);}
+  .tc-sobe{color:var(--success);} .tc-igual{color:var(--text-faint);font-weight:500;}
+
   /* ===== MODO TREINO (um exercício por vez) ===== */
   .foco-topo{display:flex;justify-content:space-between;align-items:center;margin:0 0 10px;font-size:11px;letter-spacing:1.6px;color:var(--gold);font-weight:600;text-transform:uppercase;}
   .foco-topo .foco-lista{letter-spacing:0;text-transform:none;font-weight:500;font-size:12px;color:var(--text-faint);text-decoration:underline;cursor:pointer;}
@@ -565,7 +581,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-09-O-MODO-TREINO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-09-P-TREINO-CONCLUIDO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1423,7 +1439,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-09-O-MODO-TREINO';
+const VERSAO_APP = '2026-10-09-P-TREINO-CONCLUIDO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -16301,7 +16317,8 @@ const ICONES_PAINEL = {
   calendario: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   sair: '<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5"/><path d="M5 12h11"/>',
   estrela: '<path d="M12 3l2.2 5.3L20 9l-4.4 3.8L17 18.5 12 15.6 7 18.5l1.4-5.7L4 9l5.8-.7z"/>',
-  relogio: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/>'
+  relogio: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/>',
+  trofeu: '<path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M12 13v4M8 21h8M9 17h6M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/>'
 };
 function iconePainel(nome, estiloExtra){
   return '<svg class="pn-ic" viewBox="0 0 24 24"' + (estiloExtra ? ' style="' + estiloExtra + '"' : '') + '>' + (ICONES_PAINEL[nome] || ICONES_PAINEL.lista) + '</svg>';
@@ -18805,6 +18822,63 @@ function confirmarSerieExercicio(idx, nomeExercicio){
   }
 }
 
+
+// ===== TREINO CONCLUÍDO =====
+// Ao registrar o treino, um card de comemoração aparece no topo: tempo, séries feitas, quantos treinos na semana e as
+// cargas que subiram em relação à semana anterior. As perguntas que já existiam (feedback, nutrição, peso) continuam embaixo.
+function formatarKgBR(v){
+  return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+}
+
+function nomesDosExerciciosDoDia(d){
+  const nomes = [];
+  (d.ex || []).forEach(function(linha){
+    if(linha.indexOf('|||') !== -1) linha.split('|||').slice(1).forEach(function(sub){ nomes.push(sub.trim().split(' · ')[0]); });
+    else nomes.push(linha.split(' · ')[0]);
+  });
+  return nomes;
+}
+
+function montarResumoDoTreinoFeito(d, prog, series, segundos, resultadoSemana){
+  let totalSeries = 0;
+  Object.keys(series || {}).forEach(function(k){ (series[k] || []).forEach(function(v){ if(v) totalSeries++; }); });
+  const cargas = [];
+  nomesDosExerciciosDoDia(d).forEach(function(nome){
+    const hist = (prog.historico && prog.historico[nome]) || [];
+    const atual = hist.find(function(r){ return r.semana === prog.semana; });
+    const anteriores = hist.filter(function(r){ return r.semana < prog.semana && r.carga != null && !isNaN(r.carga); });
+    if(!atual || atual.carga == null || isNaN(atual.carga) || anteriores.length === 0) return;
+    const anterior = anteriores[anteriores.length - 1];
+    const dif = Math.round((atual.carga - anterior.carga) * 10) / 10;
+    cargas.push({ nome: nome, dif: dif, texto: dif > 0 ? '+' + formatarKgBR(dif) + ' kg' : (dif === 0 ? 'manteve' : 'ajustou a carga') });
+  });
+  cargas.sort(function(a, b){ return b.dif - a.dif; });
+  return {
+    minutos: segundos > 0 ? Math.max(1, Math.round(segundos / 60)) : null,
+    series: totalSeries,
+    semana: resultadoSemana ? { feitos: resultadoSemana.concluidos, total: resultadoSemana.total, completa: !!resultadoSemana.avancou } : null,
+    cargas: cargas
+  };
+}
+
+function htmlTreinoConcluido(d, r){
+  const primeiroNome = String(NOME_ALUNA_LOGADA || '').split(' ')[0];
+  const numeros = [];
+  if(r.minutos) numeros.push('<div class="tc-num"><b>' + r.minutos + '</b><small>minutos</small></div>');
+  if(r.series > 0) numeros.push('<div class="tc-num"><b>' + r.series + '</b><small>séries</small></div>');
+  if(r.semana) numeros.push('<div class="tc-num"><b>' + r.semana.feitos + ' de ' + r.semana.total + '</b><small>na semana</small></div>');
+  const linhasCarga = r.cargas.slice(0, 5).map(function(c){
+    return '<div class="tc-linha"><span>' + escaparHtmlFicha(c.nome) + '</span><b class="' + (c.dif > 0 ? 'tc-sobe' : 'tc-igual') + '">' + c.texto + '</b></div>';
+  }).join('');
+  return '<div class="tc-card" id="treino-concluido">' +
+    '<div class="tc-trofeu">' + iconePainel('trofeu', 'width:30px;height:30px;') + '</div>' +
+    '<p class="tc-tit">' + (r.semana && r.semana.completa ? 'Semana completa, ' : 'Treino feito, ') + escaparHtmlFicha(primeiroNome) + '</p>' +
+    '<p class="tc-sub">' + escaparHtmlFicha(nomeCompletoDoDia(d.n) + (d.foco ? ' · ' + d.foco : '')) + '</p>' +
+    (numeros.length ? '<div class="tc-nums" style="grid-template-columns:repeat(' + numeros.length + ',1fr);">' + numeros.join('') + '</div>' : '') +
+    (linhasCarga ? '<div class="tc-cargas"><p class="tc-lbl">Comparado com a semana passada</p>' + linhasCarga + '</div>' : '') +
+  '</div>';
+}
+
 function registrarTreinoDia(diaIndex){
   try {
     const d = dias[diaIndex];
@@ -18852,6 +18926,10 @@ function registrarTreinoDia(diaIndex){
     salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
     avisarPersonalTreinoRegistrado(d.n, false);
 
+    // Tela de treino concluído: resumo calculado antes de redesenhar (tempo, séries, semana, cargas que subiram)
+    const resumoFeito = montarResumoDoTreinoFeito(d, prog, seriesConcluidas, cronometroSegundos, resultadoSemana);
+    if(cronometroRodando){ cronometroRodando = false; clearInterval(cronometroInterval); } // treino acabou: o cronômetro para
+    modoFocoTreino = false; // volta pra tela inteira, pra ela ver o resumo e as perguntas
     openDetail('dia', diaIndex);
     const conf = document.getElementById('registro-confirmacao');
 
@@ -18865,8 +18943,9 @@ function registrarTreinoDia(diaIndex){
       msg += ' ' + resultadoSemana.concluidos + ' de ' + resultadoSemana.total + ' treinos concluídos essa semana.';
     }
     if(conf){
-      conf.innerHTML = '<div class="insight"><p>' + msg + '</p></div>';
+      conf.innerHTML = htmlTreinoConcluido(d, resumoFeito) + '<div class="insight"><p>' + msg + '</p></div>';
       conf.innerHTML += renderPerguntaFeedbackTreino(diaIndex);
+      try { if(conf.scrollIntoView) conf.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch(e){}
 
       if(resultadoSemana && resultadoSemana.avancou){
         const semanaFechada = prog.semana - 1;
