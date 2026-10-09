@@ -1,4 +1,4 @@
-[dna_musa_124.html](https://github.com/user-attachments/files/33230697/dna_musa_124.html)
+[dna_musa_125.html](https://github.com/user-attachments/files/33231566/dna_musa_125.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -14,6 +14,8 @@
 <title>MUSA+, Protótipo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Ícones: pacote oficial no jsDelivr (o mesmo servidor que já carrega o Supabase). O endereço antigo do cdnjs ficou como reserva. -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -89,6 +91,71 @@
   .sidebar-personal .side-item.ativo i{ color:var(--gold-soft); }
   .sidebar-personal .side-sair{ margin-top:auto; }
 
+
+  /* ===== PAINEL DO PERSONAL (novo): resumo do dia, números, "precisa de você hoje", controle e ferramentas ===== */
+  .pn-ic{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;display:inline-block;vertical-align:middle;}
+  .pn-topo{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin:6px 0 18px;}
+  .pn-saudacao{font-family:'Playfair Display',serif;font-weight:600;font-size:26px;margin:0;line-height:1.15;}
+  .pn-sub{color:var(--text-faint);font-size:12.5px;margin:6px 0 0;}
+  .pn-acoes{display:flex;gap:10px;align-items:center;flex-wrap:wrap;width:100%;}
+  .pn-busca{flex:1 1 100%;min-width:0;height:42px;border-radius:12px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:0 14px;color:var(--text-faint);}
+  .pn-busca input{flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text);font-size:13px;font-family:inherit;}
+  .pn-btn-gold{flex:1 1 100%;justify-content:center;height:42px;border-radius:12px;padding:0 16px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:linear-gradient(135deg,#F4D9A5,#C9A063);color:#1A1409;font-family:inherit;white-space:nowrap;}
+  .pn-kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+  .pn-kpi{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;cursor:pointer;min-width:0;}
+  .pn-kpi .pn-l{display:flex;align-items:center;gap:8px;color:var(--text-dim);font-size:12px;}
+  .pn-kpi .pn-l .pn-ic{color:var(--gold);width:16px;height:16px;}
+  .pn-kpi .pn-n{font-family:'Playfair Display',serif;font-weight:600;font-size:24px;margin:8px 0 0;line-height:1;white-space:nowrap;}
+  .pn-kpi .pn-d{font-size:11px;color:var(--text-faint);margin:7px 0 0;line-height:1.35;}
+  .pn-kpi.pn-alerta{border-color:rgba(226,163,61,0.35);background:linear-gradient(160deg,rgba(226,163,61,0.08),var(--card) 60%);}
+  .pn-kpi.pn-alerta .pn-l .pn-ic{color:#E2A33D;}
+  .pn-barra{height:6px;border-radius:6px;background:var(--card-2);margin-top:10px;overflow:hidden;}
+  .pn-barra i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#C9A063,#F4D9A5);}
+  .pn-grade{display:grid;grid-template-columns:1fr;gap:14px;}
+  .pn-direita{display:flex;flex-direction:column;gap:14px;min-width:0;}
+  .pn-caixa{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px 18px;min-width:0;}
+  .pn-caixa h2{font-size:14.5px;font-weight:600;display:flex;align-items:center;gap:10px;margin:0;}
+  .pn-cnt{font-size:11px;color:#1A1409;background:var(--gold);border-radius:20px;padding:2px 8px;font-weight:700;}
+  .pn-link{margin-left:auto;font-size:12px;color:var(--gold);font-weight:500;cursor:pointer;white-space:nowrap;}
+  .pn-item{display:grid;grid-template-columns:30px minmax(0,1fr) auto;grid-template-areas:'av txt acao' 'av tag acao';column-gap:12px;row-gap:6px;align-items:center;padding:11px 0;border-top:1px solid var(--border);}
+  .pn-item .pn-av{grid-area:av;align-self:start;margin-top:2px;}
+  .pn-item .pn-txt{grid-area:txt;}
+  .pn-item .pn-tag{grid-area:tag;justify-self:start;}
+  .pn-item .pn-acao{grid-area:acao;}
+  .pn-item:first-child{border-top:none;}
+  .pn-av{width:30px;height:30px;border-radius:50%;background:var(--card-2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--gold-soft);border:1px solid var(--border-strong);flex-shrink:0;}
+  .pn-txt{min-width:0;flex:1;cursor:pointer;}
+  .pn-nm{font-size:13px;font-weight:500;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pn-mt{font-size:11.5px;color:var(--text-faint);margin:3px 0 0;line-height:1.35;}
+  .pn-tag{font-size:10.5px;font-weight:600;border-radius:20px;padding:4px 9px;white-space:nowrap;flex-shrink:0;}
+  .pn-t-alerta{background:rgba(226,163,61,0.13);color:#E2A33D;}
+  .pn-t-ruim{background:rgba(217,120,90,0.14);color:#D9785A;}
+  .pn-t-ouro{background:rgba(232,197,138,0.12);color:var(--gold-soft);}
+  .pn-acao{font-size:12px;color:var(--gold);border:1px solid var(--border-strong);border-radius:9px;padding:6px 11px;cursor:pointer;background:transparent;font-family:inherit;white-space:nowrap;flex-shrink:0;text-decoration:none;}
+  .pn-vazio{font-size:12.5px;color:var(--text-faint);padding:14px 0 4px;}
+  .pn-seg{display:flex;height:12px;border-radius:8px;overflow:hidden;margin-top:14px;gap:3px;background:var(--card-2);}
+  .pn-leg{display:flex;justify-content:space-between;margin-top:12px;gap:8px;}
+  .pn-leg div{font-size:11.5px;color:var(--text-dim);}
+  .pn-leg b{display:block;font-family:'Playfair Display',serif;font-size:22px;color:var(--text);font-weight:600;margin-top:3px;}
+  .pn-leg span{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;}
+  .pn-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+  .pn-tile{background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:9px;cursor:pointer;min-width:0;transition:border-color .2s ease;}
+  .pn-tile:hover{border-color:var(--border-strong);}
+  .pn-tile:last-child:nth-child(odd){grid-column:1 / -1;}
+  .pn-tile .pn-tic{width:32px;height:32px;border-radius:10px;background:rgba(232,197,138,0.1);display:flex;align-items:center;justify-content:center;color:var(--gold);}
+  .pn-tile p{font-size:12.5px;font-weight:600;margin:0;line-height:1.25;}
+  .pn-tile small{font-size:11px;color:var(--text-faint);font-weight:400;display:block;margin-top:3px;}
+  .pn-so-celular{display:block;}
+  /* menu lateral (computador) */
+  .sidebar-personal .side-logo small{display:block;font-family:'Inter',sans-serif;font-weight:500;font-size:9.5px;letter-spacing:2.2px;color:var(--text-faint);margin-top:4px;}
+  .sidebar-personal .side-item .pn-ic{color:var(--text-faint);}
+  .sidebar-personal .side-item.ativo{background:linear-gradient(90deg,rgba(232,197,138,0.14),rgba(232,197,138,0.02));color:var(--gold-soft);box-shadow:inset 2px 0 0 var(--gold);}
+  .sidebar-personal .side-item.ativo .pn-ic{color:var(--gold-soft);}
+  .sidebar-personal .side-badge{margin-left:auto;background:var(--gold);color:#1A1409;font-size:10.5px;font-weight:700;border-radius:20px;padding:1px 7px;}
+  .sidebar-personal .side-equipe{margin-top:auto;border-top:1px solid var(--border);padding:14px 10px 0;display:flex;flex-direction:column;gap:10px;}
+  .sidebar-personal .side-pessoa{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dim);}
+  .sidebar-personal .side-equipe .side-item{padding:8px 0;margin:0;}
+
   .modal-overlay-avisos{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.72); z-index:200; align-items:center; justify-content:center; padding:24px; }
   .modal-overlay-avisos .modal-card{ background:var(--card); border:1px solid var(--border-strong); border-radius:18px; padding:24px 20px; max-width:340px; width:100%; text-align:center; }
   .modal-overlay-avisos .modal-card h3{ font-family:'Playfair Display',serif; font-size:18px; color:var(--gold-soft); margin:0 0 10px; }
@@ -119,6 +186,18 @@
     .phone.modo-personal #label-ferramentas-dashboard,
     .phone.modo-personal #grid-ferramentas-personal{ display:none; }
     .phone.modo-personal #ex-lista{ display:grid !important; grid-template-columns:repeat(2,1fr); gap:8px; }
+    /* painel novo no computador: 4 números lado a lado, lista à esquerda e controle/ferramentas à direita */
+    .phone.modo-personal .pn-acoes{width:auto;}
+    .phone.modo-personal .pn-busca{flex:none;width:250px;}
+    .phone.modo-personal .pn-saudacao{font-size:30px;}
+    .phone.modo-personal .pn-kpis{grid-template-columns:repeat(4,1fr);gap:12px;}
+    .phone.modo-personal .pn-grade{grid-template-columns:1.55fr 1fr;}
+    .phone.modo-personal .pn-so-celular{display:none;}
+    .phone.modo-personal .pn-busca{flex:none;}
+    .phone.modo-personal .pn-btn-gold{flex:none;}
+    .phone.modo-personal .pn-kpi .pn-n{font-size:30px;}
+    .phone.modo-personal .pn-item{grid-template-columns:30px minmax(0,1fr) auto auto;grid-template-areas:'av txt tag acao';}
+    .phone.modo-personal .pn-item .pn-av{align-self:center;margin-top:0;}
   }
 
   /* LAUNCHER */
@@ -406,7 +485,7 @@
     </div>
   </div>
   <div class="screen">
-    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-08-J-ERROS-SEGUROS</p>
+    <p style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-08-K-PAINEL-NOVO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -716,19 +795,42 @@
     <div class="view" data-view="personal">
 
       <div id="personal-dashboard">
-        <h1 class="page-title">Painel do Personal</h1>
-        <p class="page-sub">Visão geral das suas alunas</p>
-
-        <div id="area-presenca-equipe-dash"></div>
-        <div id="metricas-negocio-area"></div>
-        <div id="aviso-aniversarios-area"></div>
+        <!-- Painel novo: o que precisa de você hoje primeiro, depois os números, o Controle e as ferramentas.
+             Tudo aqui é preenchido por renderPainelDoPersonal() com os dados reais das alunas. -->
+        <div class="pn-topo">
+          <div>
+            <h1 class="pn-saudacao" id="pn-saudacao">Painel do Personal</h1>
+            <p class="pn-sub" id="pn-sub">Visão geral das suas alunas</p>
+            <div class="pn-so-celular" id="area-presenca-equipe-dash" style="margin-top:8px;"></div>
+          </div>
+          <div class="pn-acoes">
+            <label class="pn-busca"><svg class="pn-ic" viewBox="0 0 24 24" style="width:16px;height:16px;"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="pn-busca-aluna" placeholder="Buscar aluna" autocomplete="off" onkeydown="if(event.key==='Enter') buscarAlunaDoPainel(this.value)"></label>
+            <button class="pn-btn-gold" onclick="iniciarGeracaoOuProgressaoParaNaoEnviados()"><svg class="pn-ic" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M12 3l2.2 5.3L20 9l-4.4 3.8L17 18.5 12 15.6 7 18.5l1.4-5.7L4 9l5.8-.7z"/></svg>Gerar treinos pendentes</button>
+          </div>
+        </div>
 
         <div id="geracao-massa-area"></div>
 
-        <p class="section-label" style="margin-top:6px;">Ferramentas do painel</p>
-        <div id="atalhos-dashboard-area"></div>
+        <div class="pn-kpis" id="pn-kpis"></div>
 
-        <p class="section-label" id="label-ferramentas-dashboard" style="margin-top:22px;">Ferramentas</p>
+        <div class="pn-grade">
+          <div class="pn-caixa">
+            <h2>Precisa de você hoje <span class="pn-cnt" id="pn-contagem-atencao" style="display:none;"></span><span class="pn-link" id="pn-ver-todas" style="display:none;" onclick="alternarListaAtencaoCompleta()">Ver todas</span></h2>
+            <div id="pn-lista-atencao"><p class="pn-vazio">Carregando...</p></div>
+          </div>
+          <div class="pn-direita">
+            <div class="pn-caixa">
+              <h2>Controle de treinos<span class="pn-link" onclick="showPersonalView('controle')">Abrir controle</span></h2>
+              <div id="pn-controle"></div>
+            </div>
+            <div class="pn-caixa">
+              <h2>Ferramentas</h2>
+              <div class="pn-tiles" id="atalhos-dashboard-area"></div>
+            </div>
+          </div>
+        </div>
+
+        <p class="section-label" id="label-ferramentas-dashboard" style="margin-top:22px;">Todas as telas</p>
         <div class="poster-grid" id="grid-ferramentas-personal"></div>
       </div>
 
@@ -1218,7 +1320,7 @@
 
 <div id="tela-obrigado-notificacao" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:99998;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;">
   <div style="width:56px;height:56px;border-radius:50%;background:var(--card-2);border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
-    <i class="ti ti-handshake" style="font-size:26px;color:var(--gold-soft);"></i>
+    <i class="ti ti-heart-handshake" style="font-size:26px;color:var(--gold-soft);"></i>
   </div>
   <p style="font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--text);margin:0 0 8px;">Combinado! 🤝</p>
   <p style="font-size:13px;color:var(--text-dim);margin:0 0 26px;max-width:290px;">Suas notificações vão te ajudar a nunca perder um ajuste do seu treino, e também vão contribuir com o preenchimento do seu perfil DNA — quanto mais completo, mais preciso fica seu acompanhamento e seu suporte. Obrigado pela confiança!</p>
@@ -1234,7 +1336,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-08-J-ERROS-SEGUROS';
+const VERSAO_APP = '2026-10-08-K-PAINEL-NOVO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -10532,6 +10634,7 @@ function renderControleTreinos(){
     '<p class="txt" style="font-size:12px;color:var(--text-faint);">🟡 ' + amarelos.length + ' geradas · 🟢 ' + verdes.length + ' enviadas · ⚪ ' + incolores.length + ' pendentes de ' + ativas.length + '</p>' +
   '</div>';
 
+  atualizarBadgeControle(amarelos.length + incolores.length); // mesmo número do painel: gerados + pendentes
   html += htmlPrazoDoControle();
   html += htmlAvisosDoControle();
 
@@ -10756,25 +10859,37 @@ function renderSidebarPersonal(){
     { nome: 'Conteúdo pras alunas', views: ['conteudo','treinos','mobilidade','desafios'] }
   ];
 
-  let html = '<div class="side-logo">DNA MUSA</div>';
-  html += '<div id="area-presenca-equipe" style="padding:0 10px 10px;"></div>';
-  html += '<div class="side-item" data-side-view="dashboard" onclick="showPersonalView(\'dashboard\')"><i class="ti ti-layout-dashboard"></i>Dashboard</div>';
-  html += '<div class="side-item" data-side-view="alunas" onclick="showPersonalView(\'alunas\')"><i class="ti ti-users"></i>Alunas</div>';
+  // Ícones desenhados no app (não dependem do pacote de fora) + contador de treinos pra enviar no Controle
+  const iconeDaTela = { sinalizacoes: 'coracao', conversas: 'conversa', controle: 'controle', exercicios: 'video', conteudo: 'livro', treinos: 'lista',
+    mobilidade: 'alongar', desafios: 'bandeira', patologias: 'cruz', desvios: 'postura', corrida: 'correr', alunas: 'alunas' };
+  const item = function(view, icone, titulo, extra){
+    return '<div class="side-item" data-side-view="' + view + '" onclick="showPersonalView(\'' + view + '\')">' + iconePainel(icone) + titulo + (extra || '') + '</div>';
+  };
+
+  let html = '<div class="side-logo">DNA MUSA<small>PAINEL DO PERSONAL</small></div>';
+  html += item('dashboard', 'painel', 'Painel');
+  html += item('alunas', 'alunas', 'Alunas');
+  html += item('controle', 'controle', 'Controle de treinos', '<span class="side-badge" id="side-badge-controle" style="display:none;"></span>');
 
   grupos.forEach(function(grupo, gi){
-    const itensDoGrupo = ferramentasPersonal.filter(function(f){ return grupo.views.indexOf(f.view) !== -1; });
+    const itensDoGrupo = ferramentasPersonal.filter(function(f){ return grupo.views.indexOf(f.view) !== -1 && f.view !== 'controle'; });
     html += '<div class="side-grupo-header" onclick="alternarGrupoSidebar(' + gi + ')" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:10px;margin-top:6px;border-radius:8px;">' +
-      '<span style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-faint);">' + grupo.nome + '</span>' +
-      '<i class="ti ti-chevron-down" id="chevron-sidebar-grupo-' + gi + '" style="font-size:12px;color:var(--text-faint);transition:transform .2s;"></i>' +
+      '<span style="font-size:10.5px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-faint);">' + grupo.nome + '</span>' +
+      '<svg class="pn-ic" id="chevron-sidebar-grupo-' + gi + '" viewBox="0 0 24 24" style="width:13px;height:13px;color:var(--text-faint);transition:transform .2s;"><path d="M6 9l6 6 6-6"/></svg>' +
     '</div>' +
     '<div id="sidebar-grupo-' + gi + '" style="display:none;">' +
       itensDoGrupo.map(function(f){
-        return '<div class="side-item" data-side-view="' + f.view + '" onclick="' + (f.acaoEspecial ? f.acaoEspecial + '()' : "showPersonalView('" + f.view + "')") + '"><i class="ti ' + f.icone + '"></i>' + f.titulo + '</div>';
+        return '<div class="side-item" data-side-view="' + f.view + '" onclick="' + (f.acaoEspecial ? f.acaoEspecial + '()' : "showPersonalView('" + f.view + "')") + '">' + iconePainel(iconeDaTela[f.view]) + f.titulo + '</div>';
       }).join('') +
     '</div>';
   });
 
-  html += '<div class="side-item side-sair" style="margin-top:10px;" onclick="goBack()"><i class="ti ti-logout"></i>Sair</div>';
+  // Equipe no rodapé do menu: quem está logado, a outra pessoa (online ou não) e Sair
+  html += '<div class="side-equipe">' +
+    (NOME_PERSONAL_LOGADO ? '<div class="side-pessoa"><span class="pn-av" style="width:26px;height:26px;font-size:10px;">' + iniciaisDaAluna(NOME_PERSONAL_LOGADO) + '</span>' + NOME_PERSONAL_LOGADO + ' (você)</div>' : '') +
+    '<div id="area-presenca-equipe"></div>' +
+    '<div class="side-item side-sair" onclick="goBack()">' + iconePainel('sair') + 'Sair</div>' +
+  '</div>';
 
   sidebar.innerHTML = html;
 }
@@ -10964,18 +11079,7 @@ function showPersonalView(which){
     });
   }
   if(which === 'dashboard'){
-    renderAtalhosDashboard(); renderMetricasNegocio(); renderInfoCardGerarTreino();
-    const elAviso = document.getElementById('aviso-aniversarios-area');
-    if(elAviso) elAviso.innerHTML = renderAvisoAniversarios();
-    // A sincronização de anamneses novas também precisa rodar aqui, não só na aba Alunas — senão o
-    // Dashboard mostra números desatualizados até a próxima vez que alguém visitar Alunas e voltar.
-    sincronizarListaAlunasDoSupabase().then(function(resultado){
-      if(resultado.novas > 0 || resultado.atualizadas > 0){
-        renderMetricasNegocio();
-        renderInfoCardGerarTreino();
-        if(elAviso) elAviso.innerHTML = renderAvisoAniversarios();
-      }
-    });
+    abrirPainelDoPersonal();
   }
   if(which === 'alunas'){
     renderAlunas();
@@ -13711,7 +13815,8 @@ async function loginPersonal(){
     sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
     perguntarSeQuerLembrarLogin();
 
-    // Diagnóstico único, grande, no topo da tela — impossível de não ver
+    // Diagnóstico do login: só aparece quando deu problema (quando está tudo certo não precisa ocupar o topo da tela)
+    if(statusSessao.indexOf('OK') === 0) return;
     const diag = document.createElement('div');
     diag.id = 'diagnostico-login-completo';
     diag.style.cssText = 'position:fixed;top:0;left:0;right:0;background:' + (statusSessao.indexOf('OK') === 0 ? '#1a3a1a' : '#3a1a1a') + ';color:#fff;padding:14px;font-size:12px;z-index:999999;text-align:center;border-bottom:2px solid ' + (statusSessao.indexOf('OK') === 0 ? '#4a9;' : '#e55;');
@@ -15772,8 +15877,11 @@ function renderAtalhosDashboard(){
       '</div>';
     }).join('');
   }
+  const iconeDoAtalho = { comunicacao: 'conversa', 'ferramentas-treino': 'halter', inteligencia: 'subir', relatorios: 'grafico', faturamento: 'dinheiro' };
   const area = document.getElementById('atalhos-dashboard-area');
-  if(area) area.innerHTML = montarHtml(atalhosBase);
+  if(area) area.innerHTML = atalhosBase.map(function(a){
+    return '<div class="pn-tile" onclick="showPersonalView(\'' + a.view + '\')"><div class="pn-tic">' + iconePainel(iconeDoAtalho[a.view]) + '</div><p>' + a.titulo + '<small>' + a.desc + '</small></p></div>';
+  }).join('');
   // Versão da colaboradora: já pode usar Ferramentas de treino também — só Inteligência de mercado
   // continua de fora (não é uma ferramenta operacional do dia a dia com as alunas)
   const area2 = document.getElementById('atalhos-dashboard-area-2');
@@ -15788,6 +15896,389 @@ function renderAtalhosDashboard(){
       .map(function(f){ return { view: f.view, icone: f.icone, titulo: f.titulo, desc: '' }; });
     areaExtrasBianca.innerHTML = montarHtml(itensExtras);
   }
+}
+
+// ===== PAINEL DO PERSONAL (novo) =====
+// Junta num lugar só o que antes ficava espalhado: quantas alunas ativas, quantos treinos faltam enviar,
+// planos por vencer, faturamento x meta, o Controle resumido e uma lista "Precisa de você hoje" com o
+// que pede ação (treino atrasado, feedback negativo, renovação, erro no app, dúvida, aniversário, quem sumiu).
+// Os ícones daqui são desenhados no próprio app (SVG): aparecem sempre, mesmo se o pacote de ícones de fora falhar.
+const DIAS_SEM_TREINO_ALERTA = 7;   // ativa que não registra treino há 7 dias ou mais entra em "Sumiu"
+const DIAS_FEEDBACK_NEGATIVO = 7;   // desconforto relatado nos últimos 7 dias
+const DIAS_RENOVACAO_ALERTA = 7;    // plano que vence nos próximos 7 dias
+const HORAS_ERROS_NO_PAINEL = 48;   // erros do app das últimas 48 horas
+const ITENS_ATENCAO_VISIVEIS = 6;
+const sinaisProgressoPainel = {};   // nome -> { ultimoTreinoEm, feedbackRuim }  (só leitura, nunca vai pro progresso da aluna)
+let sinaisErrosPainel = [];         // erros recentes lidos da erros_app
+let listaAtencaoCompleta = false;
+let itensAtencaoAtuais = [];
+
+const ICONES_PAINEL = {
+  painel: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+  alunas: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.3c2.6-.4 4.8 1.2 5.5 4.2"/>',
+  aluna: '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5"/>',
+  controle: '<path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/>',
+  conversa: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',
+  coracao: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+  halter: '<path d="M6 4v16M18 4v16M3 9h3M18 9h3M3 15h3M18 15h3M6 12h12"/>',
+  video: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/>',
+  livro: '<path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v15l-8-4-8 4z"/>',
+  lista: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
+  alongar: '<circle cx="12" cy="4.5" r="2"/><path d="M5 9l7 1 7-1M12 10v5l-3 6M12 15l3 6"/>',
+  bandeira: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+  cruz: '<rect x="3" y="6" width="18" height="14" rx="2"/><path d="M9 6V4h6v2M12 10v6M9 13h6"/>',
+  postura: '<circle cx="12" cy="4.5" r="2"/><path d="M12 7v7M8 10l4-2 4 2M9 21l3-7 3 7"/>',
+  correr: '<circle cx="14" cy="4.5" r="2"/><path d="M6 20l3-5 3 1 1-5 4 3h3M9 10l3-3"/>',
+  grafico: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
+  subir: '<path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/>',
+  dinheiro: '<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M7 9.5v5M17 9.5v5"/>',
+  calendario: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  sair: '<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5"/><path d="M5 12h11"/>',
+  estrela: '<path d="M12 3l2.2 5.3L20 9l-4.4 3.8L17 18.5 12 15.6 7 18.5l1.4-5.7L4 9l5.8-.7z"/>'
+};
+function iconePainel(nome, estiloExtra){
+  return '<svg class="pn-ic" viewBox="0 0 24 24"' + (estiloExtra ? ' style="' + estiloExtra + '"' : '') + '>' + (ICONES_PAINEL[nome] || ICONES_PAINEL.lista) + '</svg>';
+}
+
+function iniciaisDaAluna(nome){
+  const partes = String(nome || '').replace(/\(.*?\)/g, '').trim().split(/\s+/).filter(Boolean);
+  if(partes.length === 0) return '?';
+  const primeira = partes[0][0] || '';
+  const ultima = partes.length > 1 ? (partes[partes.length - 1][0] || '') : '';
+  return (primeira + ultima).toUpperCase();
+}
+
+function formatarReaisPainel(valor){
+  return 'R$ ' + Number(valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+function dataCurtaPainel(iso){
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return '';
+  return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+}
+function horaCurtaPainel(iso){
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return '';
+  return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+function linkWhatsAppDaAluna(a){
+  const numero = String((a && a.telefone) || '').replace(/\D/g, '');
+  return numero ? 'https://wa.me/55' + numero : '';
+}
+function diasAteVencerPlano(a, agora){
+  if(!a.dataFechouPlano || !a.duracaoPlanoDias) return null;
+  // "2026-09-13" sozinho o navegador lê como meia-noite de Londres (no Brasil ainda é dia 12): lê como data local
+  const soData = String(a.dataFechouPlano).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const fim = soData ? new Date(+soData[1], +soData[2] - 1, +soData[3]) : new Date(a.dataFechouPlano);
+  if(isNaN(fim.getTime())) return null;
+  fim.setDate(fim.getDate() + parseInt(a.duracaoPlanoDias, 10));
+  return -diasCorridosDesde(fim.toISOString(), agora); // positivo = faltam N dias
+}
+
+// Resume o progresso salvo da aluna só no que o painel precisa (sem guardar o progresso inteiro na memória do Personal)
+function resumirProgressoParaPainel(prog, agora){
+  const r = { ultimoTreinoEm: null, feedbackRuim: null };
+  if(!prog) return r;
+  (prog.horariosTreino || []).forEach(function(h){
+    if(h && h.data && (!r.ultimoTreinoEm || new Date(h.data) > new Date(r.ultimoTreinoEm))) r.ultimoTreinoEm = h.data;
+  });
+  (prog.feedbackTreino || []).forEach(function(f){
+    if(!f || !f.desconforto || !f.data) return;
+    const dias = diasCorridosDesde(f.data, agora);
+    if(dias === null || dias < 0 || dias > DIAS_FEEDBACK_NEGATIVO) return;
+    if(!r.feedbackRuim || new Date(f.data) > new Date(r.feedbackRuim.data)) r.feedbackRuim = f;
+  });
+  return r;
+}
+
+function fichaDoNomeDoErro(quem){
+  const alvo = semAcentoMinusculo(quem).trim();
+  if(!alvo) return null;
+  return alunasPersonal.find(function(a){ return semAcentoMinusculo(a.nomeBase || a.nome).trim() === alvo || semAcentoMinusculo(a.nome).trim() === alvo; }) || null;
+}
+
+// Todos os números e a lista do painel, calculados de uma vez a partir das fichas (sem tocar em nada)
+function calcularPainelDoPersonal(agora){
+  if(agora === undefined) agora = Date.now();
+  const status = function(a){ return statusDoPlano(a); };
+  const ativas = alunasPersonal.filter(function(a){ return status(a) === 'ativas'; });
+  const porVencer = alunasPersonal.filter(function(a){ return status(a) === 'porvencer'; });
+  const efetivo = function(a){ return statusEfetivoDoControle(a, agora); };
+
+  const verdes = ativas.filter(function(a){ return efetivo(a) === 'verde'; });
+  const amarelos = ativas.filter(function(a){ return efetivo(a) === 'amarelo'; });
+  const brancos = ativas.filter(function(a){ return !efetivo(a); });
+  let maisAntigoDias = null;
+  brancos.forEach(function(a){
+    if(!entregaVenceuPorPrazo(a, agora)) return;
+    const d = diasCorridosDesde(a.dataFicouVerde, agora);
+    if(d !== null && (maisAntigoDias === null || d > maisAntigoDias)) maisAntigoDias = d;
+  });
+
+  const m = calcularMetricasNegocio();
+  const meta = metaFaturamentoMensal > 0 ? metaFaturamentoMensal : 0;
+
+  return {
+    clientesAtivos: m.clientesAtivos,
+    totalAtivas: ativas.length,
+    totalPorVencer: porVencer.length,
+    paraEnviar: { total: amarelos.length + brancos.length, paraGerar: brancos.length, gerados: amarelos.length, maisAntigoDias: maisAntigoDias },
+    controle: { verde: verdes.length, amarelo: amarelos.length, branco: brancos.length, total: ativas.length },
+    faturamento: { valor: m.faturamentoMes, meta: meta, pct: meta > 0 ? Math.min(100, Math.round((m.faturamentoMes / meta) * 100)) : null },
+    atencao: montarItensAtencao(agora)
+  };
+}
+
+// A lista "Precisa de você hoje", da mais urgente pra menos urgente
+function montarItensAtencao(agora){
+  const itens = [];
+  const indice = function(a){ return alunasPersonal.indexOf(a); };
+  const abrirFicha = function(a){ return 'openAlunaDetail(' + indice(a) + ')'; };
+  const visiveis = alunasPersonal.filter(function(a){ const s = statusDoPlano(a); return s === 'ativas' || s === 'porvencer'; });
+
+  // 1) Sinal emocional que a Sol levantou e ninguém viu ainda
+  alunasPersonal.forEach(function(a){
+    if(a.sinalRiscoEmocional && !a.sinalRiscoEmocional.visto){
+      itens.push({ prioridade: 1, ordem: 0, ficha: a, nome: a.nome, detalhe: 'A conversa com a Sol pediu atenção', tag: 'Sinal emocional', classe: 'pn-t-ruim', acao: { rotulo: 'Ver', onclick: "showPersonalView('sinalizacoes')" } });
+    }
+  });
+
+  // 2) Erro no app nas últimas horas (agrupado por pessoa)
+  const porPessoa = {};
+  sinaisErrosPainel.forEach(function(e){
+    const chave = e.quem || 'não identificado';
+    if(!porPessoa[chave]) porPessoa[chave] = [];
+    porPessoa[chave].push(e);
+  });
+  Object.keys(porPessoa).forEach(function(quem){
+    const lista = porPessoa[quem].slice().sort(function(x, y){ return new Date(y.data_hora) - new Date(x.data_hora); });
+    const ultimo = lista[0];
+    const ficha = fichaDoNomeDoErro(quem);
+    itens.push({ prioridade: 2, ordem: -new Date(ultimo.data_hora).getTime(), ficha: ficha, nome: ficha ? ficha.nome : quem,
+      detalhe: 'Viu um erro no app às ' + horaCurtaPainel(ultimo.data_hora) + (ultimo.codigo ? ' · código ' + ultimo.codigo : '') + (lista.length > 1 ? ' · ' + lista.length + ' erros' : ''),
+      tag: 'Erro no app', classe: 'pn-t-ruim', acao: { rotulo: 'Ver', onclick: 'abrirErrosDoPainel()' } });
+  });
+
+  visiveis.forEach(function(a){
+    const sinais = sinaisProgressoPainel[a.nome];
+
+    // 3) Feedback pós-treino com desconforto
+    if(sinais && sinais.feedbackRuim){
+      const f = sinais.feedbackRuim;
+      itens.push({ prioridade: 3, ordem: -new Date(f.data).getTime(), ficha: a, nome: a.nome,
+        detalhe: 'Relatou desconforto' + (f.exercicio ? ' no ' + f.exercicio : '') + (f.escalaDesconforto != null ? ' (nível ' + f.escalaDesconforto + ')' : '') + ' em ' + dataCurtaPainel(f.data),
+        tag: 'Feedback negativo', classe: 'pn-t-ruim', acao: { rotulo: 'Abrir', onclick: abrirFicha(a) } });
+    }
+
+    // 4) Treino atrasado: estava entregue e passou do prazo do Controle
+    if(statusDoPlano(a) === 'ativas' && entregaVenceuPorPrazo(a, agora)){
+      const d = diasCorridosDesde(a.dataFicouVerde, agora);
+      itens.push({ prioridade: 4, ordem: -(d || 0), ficha: a, nome: a.nome,
+        detalhe: 'Treino entregue em ' + dataCurtaPainel(a.dataFicouVerde) + ' · passou o prazo de ' + diasParaVoltarAoBranco + ' dias',
+        tag: 'Treino atrasado', classe: 'pn-t-alerta', acao: { rotulo: 'Gerar', onclick: abrirFicha(a) } });
+    }
+
+    // 5) Dúvida que ela mandou e ainda não foi respondida
+    const duvidas = (a.duvidasSinalizadas || []).filter(function(d){ return !d.resolvida; });
+    if(duvidas.length > 0){
+      const texto = String(duvidas[duvidas.length - 1].pergunta || '');
+      itens.push({ prioridade: 5, ordem: -duvidas.length, ficha: a, nome: a.nome,
+        detalhe: (duvidas.length > 1 ? duvidas.length + ' dúvidas sem resposta: ' : 'Dúvida sem resposta: ') + '"' + (texto.length > 60 ? texto.slice(0, 57) + '...' : texto) + '"',
+        tag: 'Dúvida', classe: 'pn-t-ouro', acao: { rotulo: 'Abrir', onclick: abrirFicha(a) } });
+    }
+
+    // 6) Plano vencendo nos próximos dias
+    const faltam = diasAteVencerPlano(a, agora);
+    if(faltam !== null && faltam >= 0 && faltam <= DIAS_RENOVACAO_ALERTA && !a.statusPlanoManual){
+      const wpp = linkWhatsAppDaAluna(a);
+      itens.push({ prioridade: 6, ordem: faltam, ficha: a, nome: a.nome,
+        detalhe: faltam === 0 ? 'Plano vence hoje' : 'Plano vence em ' + faltam + (faltam === 1 ? ' dia' : ' dias'),
+        tag: 'Renovação', classe: 'pn-t-ouro', acao: wpp ? { rotulo: 'WhatsApp', href: wpp } : { rotulo: 'Abrir', onclick: abrirFicha(a) } });
+    }
+
+    // 8) Sumiu: ativa que não registra treino há dias
+    if(statusDoPlano(a) === 'ativas' && sinais && sinais.ultimoTreinoEm){
+      const d = diasCorridosDesde(sinais.ultimoTreinoEm, agora);
+      if(d !== null && d >= DIAS_SEM_TREINO_ALERTA){
+        const wpp = linkWhatsAppDaAluna(a);
+        itens.push({ prioridade: 8, ordem: -d, ficha: a, nome: a.nome, detalhe: d + ' dias sem registrar treino',
+          tag: 'Sumiu', classe: 'pn-t-alerta', acao: wpp ? { rotulo: 'Mensagem', href: wpp } : { rotulo: 'Abrir', onclick: abrirFicha(a) } });
+      }
+    }
+  });
+
+  // 7) Aniversário hoje
+  alunasAniversarioHoje().forEach(function(a){
+    const wpp = linkWhatsAppDaAluna(a);
+    itens.push({ prioridade: 7, ordem: 0, ficha: a, nome: a.nome, detalhe: 'Faz aniversário hoje', tag: 'Aniversário', classe: 'pn-t-ouro',
+      acao: wpp ? { rotulo: 'WhatsApp', href: wpp } : { rotulo: 'Abrir', onclick: abrirFicha(a) } });
+  });
+
+  return itens.sort(function(x, y){ return (x.prioridade - y.prioridade) || (x.ordem - y.ordem); });
+}
+
+function htmlItemAtencao(item){
+  const nomeTela = escaparHtmlFicha(item.nome);
+  const abrir = item.ficha ? 'openAlunaDetail(' + alunasPersonal.indexOf(item.ficha) + ')' : (item.acao && item.acao.onclick ? item.acao.onclick : '');
+  const botao = item.acao.href
+    ? '<a class="pn-acao" href="' + item.acao.href + '" target="_blank" rel="noopener">' + item.acao.rotulo + '</a>'
+    : '<button class="pn-acao" onclick="' + item.acao.onclick + '">' + item.acao.rotulo + '</button>';
+  return '<div class="pn-item">' +
+    '<div class="pn-av">' + escaparHtmlFicha(iniciaisDaAluna(item.nome)) + '</div>' +
+    '<div class="pn-txt"' + (abrir ? ' onclick="' + abrir + '"' : '') + '><p class="pn-nm">' + nomeTela + '</p><p class="pn-mt">' + escaparHtmlFicha(item.detalhe) + '</p></div>' +
+    '<span class="pn-tag ' + item.classe + '">' + item.tag + '</span>' + botao +
+  '</div>';
+}
+
+function htmlKpiPainel(icone, rotulo, numero, detalhe, onclick, extraClasse, extraHtml){
+  return '<div class="pn-kpi' + (extraClasse ? ' ' + extraClasse : '') + '" onclick="' + onclick + '">' +
+    '<div class="pn-l">' + iconePainel(icone) + rotulo + '</div>' +
+    '<p class="pn-n">' + numero + '</p>' + (extraHtml || '') +
+    '<p class="pn-d">' + detalhe + '</p>' +
+  '</div>';
+}
+
+function saudacaoDoPainel(agora){
+  const h = new Date(agora).getHours();
+  return h < 12 ? 'Bom dia' : (h < 18 ? 'Boa tarde' : 'Boa noite');
+}
+
+function renderPainelDoPersonal(agora){
+  if(agora === undefined) agora = Date.now();
+  const d = calcularPainelDoPersonal(agora);
+  itensAtencaoAtuais = d.atencao;
+
+  const elSaud = document.getElementById('pn-saudacao');
+  if(elSaud) elSaud.textContent = saudacaoDoPainel(agora) + (NOME_PERSONAL_LOGADO ? ', ' + NOME_PERSONAL_LOGADO : '');
+  const elSub = document.getElementById('pn-sub');
+  if(elSub){
+    const dataTxt = new Date(agora).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+    const resumo = d.paraEnviar.total > 0 ? d.paraEnviar.total + (d.paraEnviar.total === 1 ? ' treino esperando envio' : ' treinos esperando envio') : 'todos os treinos enviados';
+    elSub.textContent = dataTxt.charAt(0).toUpperCase() + dataTxt.slice(1) + ' · ' + resumo;
+  }
+
+  const elKpis = document.getElementById('pn-kpis');
+  if(elKpis){
+    const f = d.faturamento;
+    const pe = d.paraEnviar;
+    elKpis.innerHTML =
+      htmlKpiPainel('aluna', 'Alunas ativas', d.clientesAtivos, d.totalAtivas + ' ativas e ' + d.totalPorVencer + ' por vencer', "showPersonalView('alunas')") +
+      htmlKpiPainel('halter', 'Treinos pra enviar', pe.total,
+        pe.total === 0 ? 'nenhum pendente no Controle' : pe.paraGerar + ' pra gerar · ' + pe.gerados + ' gerados' + (pe.maisAntigoDias !== null ? ' · o mais antigo há ' + pe.maisAntigoDias + ' dias' : ''),
+        "showPersonalView('controle')", pe.total > 0 ? 'pn-alerta' : '') +
+      htmlKpiPainel('calendario', 'Planos por vencer', d.totalPorVencer, 'na aba Por vencer', "abrirAlunasNaAba('porvencer')") +
+      htmlKpiPainel('subir', 'Faturamento do mês', formatarReaisPainel(f.valor),
+        f.meta > 0 ? f.pct + '% da meta de ' + formatarReaisPainel(f.meta) : 'toque pra definir a meta do mês',
+        "showPersonalView('faturamento')", '', f.meta > 0 ? '<div class="pn-barra"><i style="width:' + f.pct + '%"></i></div>' : '');
+  }
+
+  const elLista = document.getElementById('pn-lista-atencao');
+  const elCnt = document.getElementById('pn-contagem-atencao');
+  const elTodas = document.getElementById('pn-ver-todas');
+  if(elLista){
+    const lista = listaAtencaoCompleta ? d.atencao : d.atencao.slice(0, ITENS_ATENCAO_VISIVEIS);
+    elLista.innerHTML = d.atencao.length === 0
+      ? '<p class="pn-vazio">Nada pendente agora. Tudo em dia por aqui.</p>'
+      : lista.map(htmlItemAtencao).join('');
+  }
+  if(elCnt){ elCnt.textContent = d.atencao.length; elCnt.style.display = d.atencao.length > 0 ? 'inline-block' : 'none'; }
+  if(elTodas){
+    elTodas.style.display = d.atencao.length > ITENS_ATENCAO_VISIVEIS ? 'inline' : 'none';
+    elTodas.textContent = listaAtencaoCompleta ? 'Ver menos' : 'Ver todas (' + d.atencao.length + ')';
+  }
+
+  const elCtrl = document.getElementById('pn-controle');
+  if(elCtrl){
+    const c = d.controle;
+    const seg = function(n, cor){ return n > 0 ? '<i style="flex:' + n + ';background:' + cor + ';"></i>' : ''; };
+    elCtrl.innerHTML = '<div class="pn-seg">' + seg(c.verde, 'var(--success)') + seg(c.amarelo, 'var(--gold)') + seg(c.branco, '#4A4A4A') + '</div>' +
+      '<div class="pn-leg">' +
+        '<div><span style="background:var(--success)"></span>Enviados<b>' + c.verde + '</b></div>' +
+        '<div><span style="background:var(--gold)"></span>Gerados<b>' + c.amarelo + '</b></div>' +
+        '<div><span style="background:#4A4A4A"></span>Pendentes<b>' + c.branco + '</b></div>' +
+      '</div>';
+  }
+  atualizarBadgeControle(d.paraEnviar.total);
+  return d;
+}
+
+function atualizarBadgeControle(total){
+  const badge = document.getElementById('side-badge-controle');
+  if(!badge) return;
+  badge.textContent = total;
+  badge.style.display = total > 0 ? 'inline-block' : 'none';
+}
+
+function alternarListaAtencaoCompleta(){
+  listaAtencaoCompleta = !listaAtencaoCompleta;
+  renderPainelDoPersonal();
+}
+
+function abrirAlunasNaAba(aba){
+  showPersonalView('alunas');
+  alternarFiltroAlunas(aba);
+}
+
+function buscarAlunaDoPainel(texto){
+  showPersonalView('alunas');
+  const campo = document.getElementById('aluna-search');
+  if(campo){ campo.value = String(texto || ''); }
+  renderAlunas();
+}
+
+function abrirErrosDoPainel(){
+  showPersonalView('ferramentas-treino');
+  const area = document.getElementById('erros-recentes-area');
+  if(area) area.innerHTML = '';
+  verErrosRecentes();
+}
+
+// Lê, numa consulta só, o progresso de todas as ativas (último treino e feedback com desconforto)
+// e os erros recentes do app. Nada disso é gravado: serve só pra montar a lista do painel.
+async function carregarSinaisDoPainel(agora){
+  if(typeof supabaseClient === 'undefined' || !supabaseClient) return { ok: false };
+  if(agora === undefined) agora = Date.now();
+  let ok = true;
+  try {
+    const alvo = alunasPersonal.filter(function(a){ const s = statusDoPlano(a); return (s === 'ativas' || s === 'porvencer') && a.email; });
+    const semAuth = alvo.filter(function(a){ return !a.authId; });
+    if(semAuth.length > 0){
+      const r1 = await supabaseClient.from('alunas').select('email, auth_id').in('email', semAuth.map(function(a){ return a.email; }));
+      if(r1 && r1.error) ok = false;
+      ((r1 && r1.data) || []).forEach(function(l){
+        if(!l.email || !l.auth_id) return;
+        semAuth.forEach(function(a){ if(String(a.email).toLowerCase() === String(l.email).toLowerCase()) a.authId = l.auth_id; });
+      });
+    }
+    const comAuth = alvo.filter(function(a){ return a.authId; });
+    if(comAuth.length > 0){
+      const r2 = await supabaseClient.from('progresso_aluna').select('aluna_id, dados').in('aluna_id', comAuth.map(function(a){ return a.authId; }));
+      if(r2 && r2.error) ok = false;
+      ((r2 && r2.data) || []).forEach(function(l){
+        comAuth.forEach(function(a){
+          if(a.authId === l.aluna_id) sinaisProgressoPainel[a.nome] = resumirProgressoParaPainel(l.dados && l.dados.prog, agora);
+        });
+      });
+    }
+  } catch(e){ ok = false; }
+  try {
+    const desde = new Date(agora - HORAS_ERROS_NO_PAINEL * 3600000).toISOString();
+    const r3 = await supabaseClient.from('erros_app').select('quem, codigo, mensagem, data_hora').gte('data_hora', desde).order('data_hora', { ascending: false }).limit(60);
+    if(r3 && !r3.error) sinaisErrosPainel = r3.data || []; else ok = false;
+  } catch(e){ ok = false; }
+  return { ok: ok };
+}
+
+// Abre o painel: mostra na hora com o que já tem, depois atualiza com o servidor
+function abrirPainelDoPersonal(){
+  renderAtalhosDashboard();
+  renderPainelDoPersonal();
+  sincronizarListaAlunasDoSupabase().then(function(){
+    renderPainelDoPersonal();
+    return carregarSinaisDoPainel();
+  }).then(function(){
+    renderPainelDoPersonal();
+  }).catch(function(){});
 }
 
 function renderMetaFinanceiraConteudo(m){
