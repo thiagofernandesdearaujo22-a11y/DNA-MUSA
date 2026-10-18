@@ -774,7 +774,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-18-S-PROGRESSAO-FEEDBACKS</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-18-T-AULA-PRESENCIAL</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1499,7 +1499,7 @@
       <div id="personal-aula-presencial" style="display:none;">
         <div class="local-back" onclick="showPersonalView('aluna')"><i class="ti ti-arrow-left"></i><span>Voltar pra ficha</span></div>
         <h1 class="page-title" style="margin-top:0;" id="ap-titulo">Modo Aula Presencial</h1>
-        <p class="page-sub">Edita a carga e as repetições dela em tempo real, direto na sua tela — igual ela faria pelo celular dela</p>
+        <p class="page-sub">Edite a carga e as repetições dela em tempo real, direto na sua tela, como ela faria pelo celular. Tudo que você confirmar aparece no treino dela.</p>
         <div id="ap-conteudo"></div>
       </div>
 
@@ -1644,7 +1644,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-18-S-PROGRESSAO-FEEDBACKS';
+const VERSAO_APP = '2026-10-18-T-AULA-PRESENCIAL';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -10156,13 +10156,60 @@ async function confirmarAvisoAjusteIndividual(nomeAluna){
   '</p>';
 }
 
-function abrirModoAulaPresencial(nomeAluna){
+// Busca o progresso que está no servidor (o que ela registrou de verdade) antes de mexer. Sem isso, o
+// modo aula presencial gravava a cópia da memória do Personal, que podia estar velha, e apagava registros dela.
+async function garantirProgressoRealDaAluna(a){
+  if(!supabaseClient) return { ok: true, semServidor: true };
+  try {
+    if(!a.authId && a.email){
+      const r1 = await supabaseClient.from('alunas').select('auth_id').eq('email', a.email).maybeSingle();
+      if(r1 && r1.error) return { ok: false, motivo: 'não consegui achar o cadastro dela (' + (r1.error.message || 'erro') + ')' };
+      if(r1 && r1.data && r1.data.auth_id) a.authId = r1.data.auth_id;
+    }
+    if(!a.authId) return { ok: false, motivo: 'ela ainda não tem login no app, então não há onde guardar as cargas' };
+    const r2 = await supabaseClient.from('progresso_aluna').select('dados').eq('aluna_id', a.authId).maybeSingle();
+    if(r2 && r2.error) return { ok: false, motivo: 'não consegui buscar o progresso dela (' + (r2.error.message || 'erro') + ')' };
+    if(r2 && r2.data && r2.data.dados && r2.data.dados.prog) progressoesPorAluna[a.nome] = r2.data.dados.prog;
+    return { ok: true };
+  } catch(e){
+    return { ok: false, motivo: 'sem conexão com o servidor agora' };
+  }
+}
+
+let aulaPresencialPronta = false;   // só deixa confirmar depois que o progresso real dela chegou
+let aulaPresencialMotivo = '';
+
+async function abrirModoAulaPresencial(nomeAluna){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a || !a.treinoAtual){ alert('Essa aluna ainda não tem treino gerado.'); return; }
   alunaModoPresencial = a;
+  aulaPresencialPronta = false;
+  aulaPresencialMotivo = '';
   showPersonalView('aula-presencial');
   document.getElementById('ap-titulo').textContent = 'Aula Presencial · ' + a.nome;
+  const area = document.getElementById('ap-conteudo');
+  if(area) area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Buscando o que ela já registrou...</p>';
+  const r = await garantirProgressoRealDaAluna(a);
+  if(alunaModoPresencial !== a) return; // trocou de aluna enquanto buscava
+  aulaPresencialPronta = r.ok;
+  aulaPresencialMotivo = r.ok ? '' : r.motivo;
   renderModoAulaPresencial();
+}
+
+// A aula presencial conta como treino feito pra ela (constância, "último treino", ranking), igual a
+// quando ela mesma toca em "Registrar treino de hoje". Conta 1 vez por dia de treino, na primeira carga confirmada.
+function contarTreinoDaAulaPresencial(a, d){
+  const prog = getProgressoAluna(a.nome);
+  if(!prog.diasConcluidos[prog.semana]) prog.diasConcluidos[prog.semana] = [];
+  if(prog.diasConcluidos[prog.semana].indexOf(d.n) !== -1) return false; // já contado nesta semana
+  prog.diasConcluidos[prog.semana].push(d.n);
+  if(!prog.horariosTreino) prog.horariosTreino = [];
+  const agora = new Date();
+  prog.horariosTreino.push({ dia: d.n, hora: agora.getHours(), minuto: agora.getMinutes(), data: agora.toISOString(), origem: 'aula_presencial', por: NOME_PERSONAL_LOGADO || '' });
+  // O Painel para de mostrar "Sumiu" na hora, sem esperar a próxima busca no servidor
+  if(sinaisProgressoPainel[a.nome]) sinaisProgressoPainel[a.nome].ultimoTreinoEm = agora.toISOString();
+  else sinaisProgressoPainel[a.nome] = { ultimoTreinoEm: agora.toISOString(), feedbackRuim: null };
+  return true;
 }
 
 function renderModoAulaPresencial(){
@@ -10170,12 +10217,20 @@ function renderModoAulaPresencial(){
   const area = document.getElementById('ap-conteudo');
   if(!a || !area) return;
   const prog = getProgressoAluna(a.nome);
+  const feitosNaSemana = (prog.diasConcluidos || {})[prog.semana] || [];
 
-  area.innerHTML = a.treinoAtual.dias.map(function(d, di){
+  const aviso = aulaPresencialPronta
+    ? '<div class="info-box" style="margin-bottom:12px;"><p class="txt" style="font-size:12px;margin:0;">Cada carga confirmada aqui já aparece salva no treino dela, no celular. A primeira carga confirmada de um dia conta esse treino como feito na semana dela.</p></div>'
+    : '<div class="info-box" style="margin-bottom:12px;border-color:#C9784A;"><p class="txt" style="font-size:12px;margin:0;color:#C9784A;">Não dá pra confirmar cargas agora: ' + escaparHtmlFicha(aulaPresencialMotivo || 'o progresso dela ainda não foi carregado') + '. ' +
+      '<span style="text-decoration:underline;cursor:pointer;" onclick="abrirModoAulaPresencial(\'' + a.nome.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">Tentar de novo</span></p></div>';
+
+  area.innerHTML = aviso + a.treinoAtual.dias.map(function(d, di){
     if(d.descanso) return '';
     const letra = String.fromCharCode(65 + di);
+    const contado = feitosNaSemana.indexOf(d.n) !== -1;
     return '<div class="info-box" style="margin-bottom:12px;">' +
-      '<p class="lbl" style="margin:0 0 8px;">Treino ' + letra + ' · ' + d.n + '</p>' +
+      '<p class="lbl" style="margin:0 0 8px;display:flex;justify-content:space-between;gap:8px;align-items:center;">Treino ' + letra + ' · ' + d.n +
+        '<span id="ap-contado-' + di + '" class="fc ' + (contado ? 'fc-ok' : '') + '" style="text-transform:none;letter-spacing:0;">' + (contado ? 'Treino contado nesta semana' : 'Ainda não contado nesta semana') + '</span></p>' +
       d.ex.map(function(linha, ei){
         const nome = extrairNomeExercicioDeLinha(linha);
         const historico = (prog.historico[nome] || []);
@@ -10217,6 +10272,10 @@ function renderModoAulaPresencial(){
 function confirmarSerieComoPersonal(diaIndex, exIndex, nomeExercicio){
   const a = alunaModoPresencial;
   if(!a) return;
+  if(!aulaPresencialPronta){
+    alert('Ainda não dá pra confirmar: ' + (aulaPresencialMotivo || 'o progresso dela ainda não foi carregado') + '.');
+    return;
+  }
   const cargaEl = document.getElementById('ap-carga-' + diaIndex + '-' + exIndex);
   const repsEl = document.getElementById('ap-reps-' + diaIndex + '-' + exIndex);
   const carga = parseCargaBR(cargaEl.value);
@@ -10231,10 +10290,18 @@ function confirmarSerieComoPersonal(diaIndex, exIndex, nomeExercicio){
   if(idxExistente !== -1) prog.historico[nomeExercicio][idxExistente] = registro;
   else prog.historico[nomeExercicio].push(registro);
 
+  const d = a.treinoAtual.dias[diaIndex];
+  const contouAgora = d ? contarTreinoDaAulaPresencial(a, d) : false;
+
   salvarProgressoNoSupabase(a.nome);
 
   const elResultado = document.getElementById('ap-resultado-' + diaIndex + '-' + exIndex);
-  if(elResultado) elResultado.innerHTML = '<p style="font-size:11px;color:var(--success);margin-top:4px;">✓ Salvo, sugestão pra próxima: ' + sugestao.valor + 'kg</p>';
+  if(elResultado) elResultado.innerHTML = '<p style="font-size:11px;color:var(--success);margin-top:4px;">Salvo no treino dela. Sugestão pra próxima: ' + sugestao.valor + 'kg</p>';
+  if(contouAgora){
+    const selo = document.getElementById('ap-contado-' + diaIndex);
+    if(selo){ selo.className = 'fc fc-ok'; selo.textContent = 'Treino contado nesta semana'; }
+    mostrarConfirmacaoSalvamento(true, 'Treino de ' + d.n + ' contado como feito pra ' + a.nome + '.');
+  }
 }
 
 // Uma linha normal é "Nome · 3x12". Um bi-set é "Bi-set|||Nome1 · 3x12|||Nome2 · 3x12" — sem essa
@@ -11113,7 +11180,7 @@ function openAlunaDetail(i){
   let treinoHtml = '<div class="list-item"><span id="treino-status-inicial">Verificando se já existe um treino salvo pra ela...</span></div>';
   let treinoAcoesHtml = '';
   if(a.treinoAtual){
-    treinoHtml = '<button class="btn-gold" style="background:linear-gradient(135deg,#6FA87C,#4C8058);color:#fff;margin-bottom:8px;" onclick="abrirModoAulaPresencial(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-device-mobile" style="margin-right:6px;"></i>Modo Aula Presencial — editar cargas agora</button>' +
+    treinoHtml = '<button class="btn-gold" style="background:linear-gradient(135deg,#6FA87C,#4C8058);color:#fff;margin-bottom:8px;" onclick="abrirModoAulaPresencial(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-device-mobile" style="margin-right:6px;"></i>Modo Aula Presencial: editar cargas agora</button>' +
       '<button class="btn-secondary" style="margin-bottom:12px;" onclick="mostrarFormularioCopiarTreino(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-copy" style="margin-right:6px;"></i>Copiar esse treino para...</button>' +
       '<div id="copiar-treino-form"></div>' +
       '<div class="badge">' + a.treinoAtual.fase + '</div>' +
