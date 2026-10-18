@@ -1,4 +1,4 @@
-[Uploading dna_musa_128.html…]()
+[dna_musa_129.html](https://github.com/user-attachments/files/33631918/dna_musa_129.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -133,6 +133,40 @@
 
 
 
+
+  /* ===== FICHA DA ALUNA (Personal) ===== */
+  .ficha-cab{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:4px 0 14px;}
+  .ficha-av{width:52px;height:52px;font-size:18px;font-family:'Playfair Display',serif;}
+  .ficha-quem{flex:1;min-width:220px;}
+  .ficha-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .fc{font-size:11px;font-weight:600;border-radius:20px;padding:4px 10px;background:var(--card-2);color:var(--text-dim);white-space:nowrap;}
+  .fc-ok{background:rgba(143,174,125,0.15);color:var(--success);} .fc-ouro{background:rgba(232,197,138,0.12);color:var(--gold-soft);}
+  .fc-alerta{background:rgba(226,163,61,0.13);color:#E2A33D;} .fc-ruim{background:rgba(217,120,90,0.14);color:#D9785A;}
+  .ficha-acoes{display:flex;flex-wrap:wrap;gap:8px;}
+  .fb{height:38px;border-radius:11px;padding:0 13px;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;border:1px solid var(--border-strong);color:var(--gold-soft);background:transparent;cursor:pointer;font-family:inherit;text-decoration:none;}
+  .fb-ouro{background:linear-gradient(135deg,#F4D9A5,#C9A063);color:#1A1409;border:none;}
+  .fb-wpp{border-color:rgba(37,211,102,0.4);color:#7FD99C;}
+  .ficha-abas{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:16px;overflow-x:auto;}
+  .ficha-aba{padding:10px 13px;font-size:13px;color:var(--text-faint);cursor:pointer;white-space:nowrap;}
+  .ficha-aba.on{color:var(--gold-soft);box-shadow:inset 0 -2px 0 var(--gold);}
+  .ficha-box{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px 18px;margin-bottom:14px;}
+  .ficha-h{font-size:14px;font-weight:600;margin:0 0 12px;}
+  .ficha-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .fm{background:var(--card-2);border-radius:14px;padding:11px;}
+  .fm small{display:block;font-size:10.5px;color:var(--text-faint);}
+  .fm b{display:block;font-family:'Playfair Display',serif;font-size:22px;margin:4px 0 2px;}
+  .fm span{font-size:10.5px;color:var(--text-dim);}
+  .ficha-semana{display:flex;gap:5px;margin-top:12px;}
+  .fd{flex:1;text-align:center;font-size:10px;color:var(--text-faint);}
+  .fd i{display:flex;height:28px;border-radius:8px;margin-bottom:4px;background:var(--card-2);align-items:center;justify-content:center;font-style:normal;font-size:11px;}
+  .fd i.ok{background:rgba(143,174,125,0.18);color:var(--success);} .fd i.desc{background:transparent;border:1px dashed var(--border);}
+  .ficha-linha{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);font-size:12.5px;}
+  .ficha-linha:first-of-type{border-top:none;}
+  .ficha-linha .fq{color:var(--text-faint);width:58px;flex-shrink:0;font-size:11.5px;}
+  .ficha-linha .ft{flex:1;min-width:0;}
+  .ficha-alerta{border-radius:14px;padding:12px 14px;margin-bottom:14px;background:linear-gradient(150deg,rgba(226,163,61,0.12),var(--card-2) 70%);border:1px solid rgba(226,163,61,0.3);font-size:12.5px;color:var(--text-dim);line-height:1.45;}
+  .ficha-alerta b{color:var(--text);}
+
   /* ===== TREINO CONCLUÍDO ===== */
   .tc-card{border-radius:20px;padding:20px 16px 14px;margin-bottom:10px;text-align:center;background:linear-gradient(160deg,rgba(232,197,138,0.2),var(--card) 60%);border:1px solid var(--border-strong);}
   .tc-trofeu{width:64px;height:64px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;color:var(--gold-soft);background:radial-gradient(circle,rgba(232,197,138,0.35),rgba(232,197,138,0.05));border:1px solid var(--border-strong);}
@@ -171,6 +205,97 @@
   .evo-breve span{flex:1;min-width:0;}
   .evo-breve small{display:block;font-size:11px;color:var(--text-faint);margin-top:3px;}
   .evo-breve b{font-size:9.5px;letter-spacing:1.5px;color:var(--gold);border:1px solid var(--border-strong);border-radius:6px;padding:3px 6px;white-space:nowrap;}
+  .rv-acao{display:flex;align-items:center;gap:14px;background:linear-gradient(150deg,rgba(232,197,138,0.14),var(--card) 65%);border:1px solid var(--border-strong);border-radius:16px;padding:14px;margin-bottom:14px;cursor:pointer;}
+  .rv-mais{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#F4D9A5,#C9A063);color:#1A1409;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+  .rv-acao p{margin:0;font-size:12px;color:var(--text-faint);} .rv-acao p strong{display:block;font-size:14.5px;color:var(--text);font-weight:600;margin-bottom:2px;}
+  .rv-graf{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:14px;}
+  .rv-leg{text-align:center;font-size:11.5px;color:var(--text-faint);margin:8px 0 0;}
+  .rv-lista{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2px 14px;margin-bottom:14px;}
+  .rv-lin{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--border);font-size:13px;}
+  .rv-lin:first-child{border-top:none;}
+  .rv-lin i{color:var(--gold-soft);font-size:16px;}
+  .rv-lin span{flex:1;min-width:0;}
+  .rv-lin b{font-weight:600;min-width:20px;text-align:right;}
+  .rv-up{color:var(--success);font-size:11px;} .rv-down{color:#D9785A;font-size:11px;}
+  .ck-seq{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 16px;margin:0 0 14px;}
+  .ck-seq b{font-family:'Playfair Display',serif;font-size:28px;color:var(--gold-soft);line-height:1;}
+  .ck-seq span{font-size:13px;color:var(--text-dim);flex:1;}
+  .ck-seq small{font-size:11.5px;color:var(--text-faint);white-space:nowrap;}
+  .ck-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:4px 14px;margin-bottom:14px;}
+  .ck-lin{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--border);}
+  .ck-lin:first-child{border-top:none;}
+  .ck-lin > span{font-size:13.5px;color:var(--text);}
+  .ck-lin > span small{display:block;font-size:10.5px;color:var(--text-faint);margin-top:2px;}
+  .ck-esc{display:flex;gap:6px;}
+  .ck-n{width:34px;height:34px;border-radius:50%;background:var(--card-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text-faint);cursor:pointer;}
+  .ck-n.on{background:var(--gold-deep);border-color:var(--gold);color:var(--gold-soft);font-weight:600;}
+  .ck-sono{width:84px;text-align:center;background:var(--card-2);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:8px 6px;font-size:13px;font-family:inherit;}
+  .ck-hab{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+  .ck-chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-dim);background:var(--card);border:1px solid var(--border);border-radius:20px;padding:8px 12px;cursor:pointer;}
+  .ck-chip.on{background:var(--success-soft);border-color:rgba(143,174,125,0.5);color:var(--success);}
+  .ck-chip b{font-weight:600;color:var(--gold-soft);font-size:11.5px;}
+  .ck-chip.on b{color:var(--success);}
+  .al-cab,.al-lin{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1fr) minmax(0,1.3fr) minmax(0,.9fr) 34px;align-items:center;gap:12px;}
+  .al-cab{font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-faint);padding:0 14px 8px;}
+  .al-lin{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:11px 14px;margin-bottom:8px;position:relative;}
+  .al-quem{display:flex;align-items:center;gap:11px;min-width:0;cursor:pointer;}
+  .al-quem .pn-av{width:34px;height:34px;font-size:11.5px;flex-shrink:0;}
+  .al-quem .aluna-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .al-ult{font-size:12.5px;color:var(--text-dim);}
+  .al-ult.longe{color:#E2A33D;}
+  .al-mais{width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--text-faint);font-size:18px;line-height:1;cursor:pointer;font-family:inherit;}
+  .al-menu{position:absolute;right:12px;top:48px;z-index:20;width:220px;background:#1F1F1F;border:1px solid var(--border-strong);border-radius:12px;padding:6px;box-shadow:0 14px 40px rgba(0,0,0,.6);}
+  .al-menu div{padding:9px 10px;border-radius:8px;font-size:12.5px;color:var(--text-dim);cursor:pointer;}
+  .al-menu div:hover{background:rgba(232,197,138,0.1);color:var(--gold-soft);}
+  .al-menu hr{border:none;border-top:1px solid var(--border);margin:4px 0;}
+  @media (max-width:760px){
+    .al-cab{display:none;}
+    .al-lin{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+    .al-quem{flex:1 1 calc(100% - 50px);order:1;} .al-mais-c{order:2;}
+    .al-c-sit{order:3;margin-left:45px;} .al-c-tre{order:4;}
+    .al-ult{order:5;width:100%;margin-left:45px;font-size:12px;}
+    .al-ult:empty{display:none;}
+  }
+  .ctl-topo{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px;font-size:12.5px;color:var(--text-dim);}
+  .ctl-topo input{width:56px;text-align:center;background:var(--card-2);border:1px solid var(--border-strong);border-radius:8px;color:var(--text);padding:5px 4px;font-size:13px;}
+  .ctl-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;align-items:start;}
+  .ctl-col{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:8px;}
+  .ctl-col h3{margin:0;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;}
+  .ctl-col h3 .ctl-n{margin-left:auto;font-size:12px;color:var(--text-faint);font-weight:500;}
+  .ctl-dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+  .ctl-exp{font-size:11.5px;color:var(--text-faint);margin:-4px 0 2px;}
+  .ctl-it{background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:10px 11px;display:flex;align-items:center;gap:10px;cursor:pointer;}
+  .ctl-it .pn-av{width:32px;height:32px;font-size:11.5px;flex-shrink:0;}
+  .ctl-txt{flex:1;min-width:0;}
+  .ctl-nome{display:block;font-size:13px;font-weight:600;color:var(--text);overflow-wrap:anywhere;}
+  .ctl-sub{display:block;font-size:11.5px;color:var(--text-faint);margin-top:2px;}
+  .ctl-sub.atrasada{color:#E2A33D;}
+  .ctl-bt{flex-shrink:0;height:30px;border-radius:9px;padding:0 11px;font-size:11.5px;font-weight:600;border:1px solid var(--border-strong);background:transparent;color:var(--gold-soft);cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .ctl-bt.ouro{background:linear-gradient(135deg,#F4D9A5,#C9A063);color:#1A1409;border:none;}
+  .ctl-mais{font-size:12px;color:var(--gold);text-align:center;cursor:pointer;padding:6px 0 2px;}
+  .ctl-vazio{font-size:12px;color:var(--text-faint);text-align:center;padding:10px 0;}
+  .rk-pos{display:flex;align-items:center;gap:16px;border-radius:20px;padding:18px;margin:0 0 18px;border:1px solid var(--border-strong);background:linear-gradient(150deg,rgba(232,197,138,0.16),var(--card) 65%);}
+  .rk-num{font-family:'Playfair Display',serif;font-size:44px;font-weight:700;line-height:1;color:var(--gold-soft);flex-shrink:0;min-width:56px;text-align:center;}
+  .rk-num small{display:block;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:1px;color:var(--text-faint);font-weight:600;margin-top:6px;}
+  .rk-pos p{margin:0;font-size:13px;line-height:1.45;color:var(--text-dim);}
+  .rk-pos p strong{display:block;color:var(--text);font-size:15px;margin-bottom:3px;}
+  .rk-podio{display:flex;align-items:flex-end;gap:10px;margin:4px 0 14px;}
+  .rk-pd{flex:1;text-align:center;min-width:0;}
+  .rk-av{width:42px;height:42px;border-radius:50%;margin:0 auto 6px;background:var(--card-2);border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;color:var(--gold-soft);font-weight:600;font-size:14px;}
+  .rk-pd.eu .rk-av{background:var(--gold-deep);border-color:var(--gold);}
+  .rk-pd .rk-nome{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rk-pd .rk-pts{font-size:11px;color:var(--text-faint);margin-bottom:6px;}
+  .rk-degrau{border-radius:12px 12px 0 0;background:var(--card);border:1px solid var(--border);display:flex;align-items:flex-start;justify-content:center;padding-top:8px;font-family:'Playfair Display',serif;font-size:20px;color:var(--gold-soft);}
+  .rk-lista{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:4px 14px;margin-bottom:18px;}
+  .rk-lin{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--border);font-size:14px;}
+  .rk-lin:first-child{border-top:none;}
+  .rk-lin .rk-i{width:22px;color:var(--text-faint);font-size:13px;}
+  .rk-lin .rk-n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rk-lin b{font-weight:600;}
+  .rk-lin.eu{color:var(--gold-soft);}
+  .rk-ganhar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+  .rk-ganhar span{font-size:12.5px;color:var(--text-dim);background:var(--card);border:1px solid var(--border);border-radius:20px;padding:7px 12px;}
+  .rk-ganhar b{color:var(--gold-soft);}
   .sem-dia{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 14px;margin-bottom:10px;cursor:pointer;flex-wrap:wrap;}
   .sem-dia .sem-sig{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;letter-spacing:.5px;background:var(--card-2);color:var(--text-dim);flex-shrink:0;}
   .sem-dia .sem-txt{flex:1;min-width:0;}
@@ -278,7 +403,7 @@
     .phone.modo-personal .screen-conteudo{ padding:28px 44px 60px; max-width:1000px; }
     .phone.modo-personal .backbar{ display:none !important; }
     .phone.modo-personal .top-logo-fixa{ display:none !important; }
-    .phone.modo-personal #alunas-list{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; align-content:start; }
+    .phone.modo-personal #alunas-list{ display:block; } /* agora é uma lista em linhas (tabela), não mais 2 colunas de cards */
     .phone.modo-personal .stat-grid{ grid-template-columns:repeat(4,1fr); }
     .phone.modo-personal #label-ferramentas-dashboard,
     .phone.modo-personal #grid-ferramentas-personal{ display:none; }
@@ -582,7 +707,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-09-P-TREINO-CONCLUIDO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-11-R-TELAS-REVISADAS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -729,7 +854,7 @@
             <span id="badge-avisos" style="display:none;position:absolute;top:-2px;right:-2px;background:var(--gold-soft);color:#1A1409;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;"></span>
           </div>
           <div id="painel-avisos-aluna" style="display:none;position:absolute;top:44px;right:0;width:280px;max-height:320px;overflow-y:auto;background:var(--card);border:1px solid var(--border-strong);border-radius:14px;padding:10px;z-index:50;box-shadow:0 10px 30px rgba(0,0,0,0.5);"></div>
-          <div style="width:36px;height:36px;border-radius:50%;background:var(--card-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;" onclick="openLevel2('launcher')">
+          <div id="botao-conta-home" title="Sua conta" style="width:36px;height:36px;border-radius:50%;background:var(--card-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;" onclick="openLevel2('launcher')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold-soft)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0 -4 -4h-8a4 4 0 0 0 -4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </div>
         </div>
@@ -833,12 +958,10 @@
 
     <!-- RANKING -->
     <div class="view" data-view="ranking">
-      <h1 class="page-title">Ranking da comunidade</h1>
-      <p class="page-sub">Todo mundo junto, evoluindo junto</p>
-      <div id="area-ranking-conteudo"></div>
-      <p class="section-label" style="margin-top:18px;">Top 10 da semana</p>
-      <p class="page-sub" style="margin-top:-6px;">Consistência + evolução de carga + check-ins diários</p>
+      <h1 class="page-title">Ranking</h1>
+      <p class="page-sub">Últimas 4 semanas · treinos, cargas e check-ins</p>
       <div id="area-ranking-publico"></div>
+      <div id="area-ranking-conteudo"></div>
     </div>
 
     <!-- DESAFIO SECA E EMPINA -->
@@ -1137,7 +1260,7 @@
       <div id="personal-controle" style="display:none;">
         <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Dashboard</span></div>
         <h1 class="page-title" style="margin-top:0;">Controle de Treinos</h1>
-        <p class="page-sub" style="margin-top:-6px;">⚪ pendente · 🟡 treino gerado/progredido · 🟢 já enviado. A aluna que fica verde volta pro branco sozinha depois do prazo abaixo, contando da data em que ficou verde. No branco, quem espera há mais tempo fica em primeiro.</p>
+        <p class="page-sub" style="margin-top:-6px;">Quem espera há mais tempo aparece primeiro em Pendentes. A aluna enviada volta pra Pendentes sozinha depois do prazo abaixo.</p>
         <div id="area-controle-treinos"></div>
       </div>
 
@@ -1440,7 +1563,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-09-P-TREINO-CONCLUIDO';
+const VERSAO_APP = '2026-10-11-R-TELAS-REVISADAS';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -4139,6 +4262,54 @@ function moverAlunaDeStatus(nomeAluna, novoStatus){
   renderControleTreinos(); // se essa aluna virou Ativa (ou deixou de ser), a lista de Controle de Treinos já reflete na hora
 }
 
+// ===== LISTA DE ALUNAS: situação, último registro e o menu "⋯" =====
+// Situação do plano numa palavra (a lista antiga mostrava o "Lead antigo · a confirmar" do cadastro, que ficava velho)
+function situacaoDaListaDeAlunas(a, agora){
+  const st = statusDoPlano(a);
+  const d = diasAteVencerPlano(a, agora);
+  if(st === 'vencidas') return { texto: 'Vencida', classe: 'fc-ruim' };
+  if(a.statusPagamento === 'pendente') return { texto: 'Pagamento pendente', classe: 'fc-alerta' };
+  if(d !== null && d >= 0 && (st === 'porvencer' || d <= 10)) return { texto: d === 0 ? 'Vence hoje' : 'Vence em ' + d + (d === 1 ? ' dia' : ' dias'), classe: 'fc-alerta' };
+  if(st === 'porvencer') return { texto: 'Por vencer', classe: 'fc-alerta' };
+  if(a.recemChegadaDaAnamnese) return { texto: 'Nova', classe: 'fc-ouro' };
+  return { texto: 'Ativa', classe: 'fc-ok' };
+}
+
+// Último treino registrado (vem dos sinais que o Painel já buscou; sem eles, fica em branco em vez de chutar)
+function ultimoRegistroDaListaDeAlunas(a, agora){
+  let sinal = null;
+  try { sinal = sinaisProgressoPainel[a.nome]; } catch(e){ sinal = null; } // a lista é desenhada uma vez antes do Painel existir
+  if(!sinal) return { texto: '', longe: false };
+  if(!sinal.ultimoTreinoEm) return { texto: 'nenhum registro', longe: true };
+  const dias = diasCorridosDesde(sinal.ultimoTreinoEm, agora);
+  return { texto: quandoFoiTexto(sinal.ultimoTreinoEm, agora), longe: dias !== null && dias >= 7 };
+}
+
+let menuAlunaAberto = null;
+function alternarMenuDaAluna(i){
+  const a = alunasPersonal[i];
+  if(!a) return;
+  menuAlunaAberto = menuAlunaAberto === a.nome ? null : a.nome;
+  renderAlunas();
+}
+function htmlMenuDaAluna(a, i){
+  const rotulos = { ativas: 'Mover pra Ativas', porvencer: 'Mover pra Por vencer', vencidas: 'Mover pra Vencidas' };
+  const atual = statusDoPlano(a);
+  return '<div class="al-menu" onclick="event.stopPropagation()">' +
+    '<div onclick="fecharMenuDaAluna();openAlunaDetail(' + i + ')">Abrir ficha</div><hr>' +
+    ['ativas', 'porvencer', 'vencidas'].filter(function(s){ return s !== atual; }).map(function(s){
+      return '<div onclick="moverAlunaPeloMenu(' + i + ',\'' + s + '\')">' + rotulos[s] + '</div>';
+    }).join('') +
+    (a.statusPlanoManual ? '<div onclick="moverAlunaPeloMenu(' + i + ',\'auto\')">Voltar ao automático</div>' : '') +
+  '</div>';
+}
+function fecharMenuDaAluna(){ menuAlunaAberto = null; }
+function moverAlunaPeloMenu(i, destino){
+  const a = alunasPersonal[i];
+  menuAlunaAberto = null;
+  if(a) moverAlunaDeStatus(a.nome, destino);
+}
+
 // ===== SELEÇÃO MÚLTIPLA DE ALUNAS (marcar várias e mover todas de uma vez) =====
 let modoSelecaoAlunasAtivo = false;
 let alunasSelecionadas = new Set();
@@ -4187,42 +4358,39 @@ function renderAlunas(){
   }).sort(function(a, b){ return a.nome.localeCompare(b.nome, 'pt-BR'); });
   document.getElementById('alunas-count-label').textContent = filtradas.length + ' de ' + alunasPersonal.length + ' alunas';
   if(!window.alunasQtdVisivel) window.alunasQtdVisivel = 80;
+  if(filtradas.length > 0){
+    const cab = document.createElement('div');
+    cab.className = 'al-cab';
+    cab.innerHTML = '<span>Aluna</span><span>Situação</span><span>Treino</span><span>Último registro</span><span></span>';
+    list.appendChild(cab);
+  }
+  const agora = Date.now();
   filtradas.slice(0, window.alunasQtdVisivel).forEach(function(a){
     const i = alunasPersonal.indexOf(a);
     const el = document.createElement('div');
-    el.className = 'aluna-card';
-    el.style.cssText = 'flex-direction:column;align-items:stretch;gap:6px;';
-    const financeiro = statusFinanceiroAluna(a);
+    el.className = 'al-lin';
     const marcada = alunasSelecionadas.has(a.nome);
+    const sit = situacaoDaListaDeAlunas(a, agora);
+    const tre = situacaoDoControleDaAluna(a, agora);
+    const ult = ultimoRegistroDaListaDeAlunas(a, agora);
+    const meta = [a.nivel, a.freq].filter(Boolean).join(' · ') + (a.valorPlano != null ? ' · R$ ' + a.valorPlano.toFixed(2).replace('.', ',') : '');
     el.innerHTML =
-      '<div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:8px;" data-abrir="1">' +
+      '<div class="al-quem" data-abrir="1">' +
         (modoSelecaoAlunasAtivo ? '<input type="checkbox" class="checkbox-selecao-aluna" ' + (marcada ? 'checked' : '') + ' style="flex-shrink:0;width:18px;height:18px;">' : '') +
-        '<div style="flex:1;"><p class="aluna-name">' + a.nome + (a.recemChegadaDaAnamnese ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">nova</span>' : '') + (a.desafioAtivo ? ' <span class="tag" style="background:#6FA87C;color:#fff;"><i class="ti ti-flag" style="font-size:9px;vertical-align:-1px;"></i> desafio</span>' : '') + '</p><p class="aluna-meta">' + a.nivel + ' · ' + a.freq + (a.statusPlanoManual ? ' · movida manualmente' : '') + (a.valorPlano != null ? ' · R$ ' + a.valorPlano.toFixed(2).replace('.', ',') : '') + '</p></div>' +
-        '<span style="display:flex;align-items:center;gap:6px;">' +
-          '<span class="tag" style="background:' + financeiro.corSuave + ';color:' + financeiro.cor + ';">' + financeiro.label + '</span>' +
-          '<span class="status-dot ' + a.status + '"></span><span class="status-txt ' + a.status + '">' + a.statusLabel + '</span>' +
-        '</span>' +
-      '</div>';
+        '<div class="pn-av">' + escaparHtmlFicha(iniciaisDaAluna(a.nome)) + '</div>' +
+        '<div style="min-width:0;"><p class="aluna-name">' + escaparHtmlFicha(a.nome) + (a.recemChegadaDaAnamnese && sit.texto !== 'Nova' ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">nova</span>' : '') + (a.desafioAtivo ? ' <span class="tag" style="background:#6FA87C;color:#fff;"><i class="ti ti-flag" style="font-size:9px;vertical-align:-1px;"></i> desafio</span>' : '') + '</p>' +
+        '<p class="aluna-meta">' + escaparHtmlFicha(meta) + '</p></div>' +
+      '</div>' +
+      '<div class="al-c-sit"><span class="fc al-sit ' + sit.classe + '">' + sit.texto + '</span></div>' +
+      '<div class="al-c-tre"><span class="fc al-tre ' + tre.classe + '">' + escaparHtmlFicha(tre.texto) + '</span></div>' +
+      '<div class="al-ult' + (ult.longe ? ' longe' : '') + '">' + ult.texto + '</div>' +
+      (modoSelecaoAlunasAtivo ? '<div></div>' : '<div class="al-mais-c"><button class="al-mais" title="Mais opções" onclick="event.stopPropagation();alternarMenuDaAluna(' + i + ')">⋯</button></div>') +
+      (!modoSelecaoAlunasAtivo && menuAlunaAberto === a.nome ? htmlMenuDaAluna(a, i) : '');
     if(modoSelecaoAlunasAtivo){
       el.querySelector('[data-abrir]').onclick = function(){ alternarSelecaoAluna(a.nome); };
     } else {
       el.querySelector('[data-abrir]').onclick = function(){ openAlunaDetail(i); };
     }
-
-    if(!modoSelecaoAlunasAtivo){
-      const seletor = document.createElement('select');
-      seletor.className = 'form-select';
-      seletor.style.cssText = 'font-size:11px;padding:4px 6px;';
-      seletor.innerHTML = '<option value="">Mover pra outra aba...</option>' +
-        ['ativas','porvencer','vencidas'].filter(function(s){ return s !== filtroAlunasAtivo; }).map(function(s){
-          const rotulos = { ativas: 'Ativas', porvencer: 'Por vencer', vencidas: 'Vencidas' };
-          return '<option value="' + s + '">' + rotulos[s] + '</option>';
-        }).join('') +
-        (a.statusPlanoManual ? '<option value="auto">Voltar ao automático</option>' : '');
-      seletor.onchange = function(){ moverAlunaDeStatus(a.nome, seletor.value); };
-      el.appendChild(seletor);
-    }
-
     list.appendChild(el);
   });
   if(filtradas.length > window.alunasQtdVisivel){
@@ -4585,6 +4753,24 @@ function calcularPontosHabitosHoje(nome){
   return CATALOGO_HABITOS_DIARIOS.reduce(function(soma, h){ return soma + (habitosHoje[h.id] ? h.pontos : 0); }, 0);
 }
 
+// Um dia só conta como check-in se ela respondeu alguma coisa (abrir a tela já cria o dia vazio)
+const CAMPOS_DO_CHECKIN = ['humor', 'disposicao', 'ansiedade', 'sonoHoras', 'sonoQualidade'];
+function checkinTemResposta(c){
+  return !!c && CAMPOS_DO_CHECKIN.some(function(k){ return c[k] !== null && c[k] !== undefined && c[k] !== ''; });
+}
+
+// Dias seguidos com check-in, contando até hoje. Se hoje ainda não foi preenchido, conta até ontem
+// (assim a sequência não "zera" de manhã, antes dela responder).
+function diasSeguidosDeCheckin(prog, hojeISO){
+  const mapa = (prog && prog.checkinsEmocionais) || {};
+  const p = String(hojeISO).split('-').map(Number);
+  const d = new Date(p[0], p[1] - 1, p[2]);
+  if(!checkinTemResposta(mapa[dataLocalISO(d)])) d.setDate(d.getDate() - 1);
+  let n = 0;
+  while(checkinTemResposta(mapa[dataLocalISO(d)]) && n < 400){ n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+
 function renderCheckInEHabitos(nome){
   const el = document.getElementById('checkin-habitos-area');
   if(!el) return;
@@ -4592,42 +4778,47 @@ function renderCheckInEHabitos(nome){
   const habitosHoje = getHabitosHojeAluna(nome);
   const pontosHoje = calcularPontosHabitosHoje(nome);
   const totalConcluidos = CATALOGO_HABITOS_DIARIOS.filter(function(h){ return habitosHoje[h.id]; }).length;
+  const nomeJs = nome.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
   function botaoEscala(campo, valorAtual){
-    return [1,2,3,4,5].map(function(n){
-      return '<span class="chip" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;padding:0;' + (valorAtual === n ? 'background:var(--gold-soft);color:#1A1409;border-color:var(--gold-soft);' : '') + '" onclick="salvarCampoCheckInEmocional(\'' + nome.replace(/'/g,"\\'") + '\',\'' + campo + '\',' + n + ')">' + n + '</span>';
-    }).join('');
+    return '<div class="ck-esc">' + [1,2,3,4,5].map(function(n){
+      return '<span class="ck-n' + (valorAtual === n ? ' on' : '') + '" onclick="salvarCampoCheckInEmocional(\'' + nomeJs + '\',\'' + campo + '\',' + n + ')">' + n + '</span>';
+    }).join('') + '</div>';
+  }
+  function linha(rotulo, dica, campo){
+    return '<div class="ck-lin"><span>' + rotulo + (dica ? '<small>' + dica + '</small>' : '') + '</span>' + botaoEscala(campo, checkin[campo]) + '</div>';
   }
 
   const editandoOntem = !!dataEmEdicaoCheckIn;
   const dataFormatadaEmEdicao = new Date(getDataEmEdicaoCheckIn() + 'T00:00:00').toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
+  const respondidos = ['humor', 'disposicao', 'ansiedade', 'sonoQualidade'].filter(function(k){ return checkin[k] != null; }).length;
+  const seguidos = diasSeguidosDeCheckin(getProgressoAluna(nome), getDataHojeISO());
 
-  let html = '<p class="section-label" style="margin-top:0;margin-bottom:10px;">' + (editandoOntem ? 'Preenchendo o dia de ontem (' + dataFormatadaEmEdicao + ')' : 'Meu progresso hoje') + '</p>' +
+  let html = '';
+  if(!editandoOntem){
+    html += '<div class="ck-seq"><b>' + seguidos + '</b><span>' + (seguidos === 1 ? 'dia seguido com check-in' : 'dias seguidos com check-in') + '</span><small>' + respondidos + ' de 4 hoje</small></div>';
+  }
+  html += '<p class="section-label" style="margin-top:0;margin-bottom:10px;">' + (editandoOntem ? 'Preenchendo o dia de ontem (' + dataFormatadaEmEdicao + ')' : 'Como você está hoje') + '</p>' +
+    '<div class="ck-box" id="tour-checkin-box">' +
+      linha('Humor', '', 'humor') +
+      linha('Disposição', '', 'disposicao') +
+      linha('Ansiedade', '1 é pouca, 5 é muita', 'ansiedade') +
+      linha('Qualidade do sono', '', 'sonoQualidade') +
+      '<div class="ck-lin"><span>Horas dormidas</span>' +
+        '<input class="ck-sono" type="text" inputmode="decimal" placeholder="Ex: 7,5" value="' + (checkin.sonoHoras != null ? String(checkin.sonoHoras).replace('.', ',') : '') + '" onchange="salvarCampoCheckInEmocional(\'' + nomeJs + '\',\'sonoHoras\',this.value === \'\' ? null : parseCargaBR(this.value))">' +
+      '</div>' +
+    '</div>' +
+    '<p class="section-label">Hábitos de hoje <span class="tag">' + totalConcluidos + ' de ' + CATALOGO_HABITOS_DIARIOS.length + ' · ' + pontosHoje + ' pts</span></p>' +
+    '<div class="ck-hab">' + CATALOGO_HABITOS_DIARIOS.map(function(h){
+      const marcado = !!habitosHoje[h.id];
+      return '<span class="ck-chip' + (marcado ? ' on' : '') + '" onclick="alternarHabitoDoDia(\'' + nomeJs + '\',\'' + h.id + '\')">' +
+        '<i class="ti ' + (marcado ? 'ti-check' : h.icone) + '"></i>' + h.label + ' <b>' + (marcado ? '' : '+') + h.pontos + '</b></span>';
+    }).join('') + '</div>' +
+    '<button class="btn-gold" style="margin-top:16px;" onclick="salvarProgressoDoDiaAgora(\'' + nomeJs + '\')">' + (editandoOntem ? 'Salvar informações de ontem' : 'Salvar informações de hoje') + '</button>' +
+    '<p id="confirmacao-salvar-progresso-dia" style="text-align:center;font-size:12px;margin-top:6px;height:16px;"></p>' +
     (editandoOntem
-      ? '<span class="chip" style="cursor:pointer;margin-bottom:16px;display:inline-block;" onclick="voltarParaPreenchimentoDeHoje(\'' + nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-arrow-back" style="font-size:11px;vertical-align:-1px;margin-right:4px;"></i>Voltar pra hoje</span>'
-      : '<span class="chip" id="tour-chip-ontem" style="cursor:pointer;margin-bottom:16px;display:inline-block;" onclick="abrirPreenchimentoDeOntem(\'' + nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-calendar-time" style="font-size:11px;vertical-align:-1px;margin-right:4px;"></i>Esqueci de preencher ontem</span>') +
-    '<div class="info-box" id="tour-checkin-box" style="margin-bottom:14px;">' +
-      '<p class="txt" style="font-size:12px;margin-bottom:8px;text-align:center;">Humor</p><div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;">' + botaoEscala('humor', checkin.humor) + '</div>' +
-      '<p class="txt" style="font-size:12px;margin-bottom:8px;text-align:center;">Ansiedade</p><div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;">' + botaoEscala('ansiedade', checkin.ansiedade) + '</div>' +
-      '<p class="txt" style="font-size:12px;margin-bottom:8px;text-align:center;">Disposição</p><div style="display:flex;justify-content:center;gap:10px;">' + botaoEscala('disposicao', checkin.disposicao) + '</div>' +
-    '</div>' +
-    '<div class="info-box" style="margin-bottom:14px;">' +
-      '<p class="txt" style="font-size:12px;margin-bottom:4px;">Quantas horas você dormiu?</p>' +
-      '<input class="form-input" type="text" inputmode="decimal" min="0" max="14" placeholder="Ex: 7.5" value="' + (checkin.sonoHoras != null ? checkin.sonoHoras : '') + '" onchange="salvarCampoCheckInEmocional(\'' + nome.replace(/'/g,"\\'") + '\',\'sonoHoras\',this.value === \'\' ? null : parseCargaBR(this.value))" style="margin-bottom:10px;">' +
-      '<p class="txt" style="font-size:12px;margin-bottom:4px;">Qualidade do sono</p><div class="row" style="gap:6px;">' + botaoEscala('sonoQualidade', checkin.sonoQualidade) + '</div>' +
-    '</div>' +
-    '<p class="section-label">Hábitos do dia <span class="tag">' + totalConcluidos + ' de ' + CATALOGO_HABITOS_DIARIOS.length + ' · ' + pontosHoje + ' pts</span></p>';
-
-  CATALOGO_HABITOS_DIARIOS.forEach(function(h){
-    const marcado = !!habitosHoje[h.id];
-    html += '<div class="list-item" style="margin-bottom:6px;cursor:pointer;' + (marcado ? 'background:var(--success-soft);border-color:var(--success);' : '') + '" onclick="alternarHabitoDoDia(\'' + nome.replace(/'/g,"\\'") + '\',\'' + h.id + '\')">' +
-      '<span><i class="ti ' + h.icone + '" style="margin-right:8px;color:' + (marcado ? 'var(--success)' : 'var(--gold-soft)') + ';"></i>' + h.label + '</span>' +
-      '<span class="tag" style="' + (marcado ? 'background:var(--success-soft);color:var(--success);' : '') + '">' + (marcado ? '✓ ' : '+') + h.pontos + '</span>' +
-    '</div>';
-  });
-
-  html += '<button class="btn-gold" style="margin-top:20px;" onclick="salvarProgressoDoDiaAgora(\'' + nome.replace(/'/g,"\\'") + '\')">' + (editandoOntem ? 'Salvar informações de ontem' : 'Salvar informações de hoje') + '</button>' +
-    '<p id="confirmacao-salvar-progresso-dia" style="text-align:center;font-size:12px;margin-top:6px;height:16px;"></p>';
+      ? '<p style="text-align:center;margin:4px 0 0;"><span class="chip" style="cursor:pointer;display:inline-block;" onclick="voltarParaPreenchimentoDeHoje(\'' + nomeJs + '\')"><i class="ti ti-arrow-back" style="font-size:11px;vertical-align:-1px;margin-right:4px;"></i>Voltar pra hoje</span></p>'
+      : '<p style="text-align:center;margin:4px 0 0;"><span id="tour-chip-ontem" style="cursor:pointer;font-size:12px;color:var(--text-faint);text-decoration:underline;" onclick="abrirPreenchimentoDeOntem(\'' + nomeJs + '\')">Esqueci de preencher ontem</span></p>');
 
   el.innerHTML = html;
 }
@@ -10084,6 +10275,183 @@ function confirmarTransformarEmTabata(nomeAluna){
   mostrarConfirmacaoSalvamento(true, '"' + nomeDia + '" transformado em Tabata de casa.');
 }
 
+
+// ===== FICHA DA ALUNA (Personal): resumo no topo, botões de ação e abas =====
+// Antes a ficha abria direto nos campos de prescrição, e o que importa (situação, treino pendente, último treino)
+// ficava espalhado. Agora: topo com o resumo e os botões, e abas Visão geral, Treino, Prescrição, Histórico e acesso.
+// Nada saiu da ficha: cada parte que já existia só mudou de lugar.
+let abaFichaAtual = 'geral';
+let fichaAbertaNome = null;
+const ABAS_DA_FICHA = [['geral', 'Visão geral'], ['treino', 'Treino'], ['prescricao', 'Prescrição'], ['historico', 'Histórico e acesso']];
+
+function abasDaFicha(){
+  return '<div class="ficha-abas">' + ABAS_DA_FICHA.map(function(x){
+    return '<div class="ficha-aba" data-aba="' + x[0] + '" onclick="abrirAbaDaFicha(\'' + x[0] + '\')">' + x[1] + '</div>';
+  }).join('') + '</div>';
+}
+
+function abrirAbaDaFicha(aba){
+  abaFichaAtual = aba;
+  aplicarAbaDaFicha();
+}
+
+function aplicarAbaDaFicha(){
+  let secs = [], abas = [];
+  try { secs = Array.prototype.slice.call(document.querySelectorAll('#aluna-detail-content .ficha-sec') || []); } catch(e){}
+  try { abas = Array.prototype.slice.call(document.querySelectorAll('#aluna-detail-content .ficha-aba') || []); } catch(e){}
+  secs.forEach(function(sec){ sec.style.display = sec.getAttribute('data-ficha') === abaFichaAtual ? '' : 'none'; });
+  abas.forEach(function(ab){ if(ab.classList) ab.classList.toggle('on', ab.getAttribute('data-aba') === abaFichaAtual); });
+}
+
+function quandoFoiTexto(iso, agora){
+  const d = diasCorridosDesde(iso, agora === undefined ? Date.now() : agora);
+  if(d === null) return '';
+  if(d <= 0) return 'hoje';
+  if(d === 1) return 'ontem';
+  return 'há ' + d + ' dias';
+}
+
+function ultimoTreinoRegistrado(prog){
+  let ultimo = null;
+  ((prog && prog.horariosTreino) || []).forEach(function(h){ if(h && h.data && (!ultimo || new Date(h.data) > new Date(ultimo))) ultimo = h.data; });
+  return ultimo;
+}
+
+// Situação do Controle de Treinos em uma frase (mesma regra da tela do Controle)
+function situacaoDoControleDaAluna(a, agora){
+  if(agora === undefined) agora = Date.now();
+  const ef = statusEfetivoDoControle(a, agora);
+  if(ef === 'verde') return { texto: 'Treino enviado' + (a.dataFicouVerde ? ' em ' + dataCurtaPainel(a.dataFicouVerde) : ''), classe: 'fc-ok' };
+  if(ef === 'amarelo') return { texto: 'Treino gerado, falta enviar', classe: 'fc-ouro' };
+  if(entregaVenceuPorPrazo(a, agora)){
+    const dias = diasCorridosDesde(a.dataFicouVerde, agora);
+    return { texto: 'Treino pendente há ' + dias + ' dias', classe: 'fc-alerta', dias: dias };
+  }
+  return { texto: 'Treino pendente', classe: 'fc-alerta' };
+}
+
+function cabecalhoFichaAluna(a, agora){
+  if(agora === undefined) agora = Date.now();
+  const nomeJs = String(a.nome).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  const prog = getProgressoAluna(a.nome);
+  const sit = statusDoPlano(a);
+  const chips = [];
+  chips.push('<span class="fc ' + (sit === 'ativas' ? 'fc-ok' : (sit === 'porvencer' ? 'fc-ouro' : 'fc-ruim')) + '">' + (sit === 'ativas' ? 'Ativa' : (sit === 'porvencer' ? 'Por vencer' : 'Vencida')) + (a.statusPlanoManual ? ' (definida por você)' : '') + '</span>');
+  const faltam = diasAteVencerPlano(a, agora);
+  if(faltam !== null){
+    const fim = new Date(agora + faltam * 86400000);
+    chips.push('<span class="fc fc-ouro">' + (faltam < 0 ? 'Plano venceu em ' : 'Plano vence em ') + dataCurtaPainel(fim.toISOString()) + '</span>');
+  }
+  if(sit === 'ativas'){ const ctl = situacaoDoControleDaAluna(a, agora); chips.push('<span class="fc ' + ctl.classe + '">' + ctl.texto + '</span>'); }
+  const ultimo = ultimoTreinoRegistrado(prog);
+  if(ultimo) chips.push('<span class="fc">Último treino: ' + quandoFoiTexto(ultimo, agora) + '</span>');
+  chips.push('<span class="fc">' + escaparHtmlFicha([a.nivel, a.freq, a.ambienteTreino || 'Academia'].filter(Boolean).join(' · ')) + '</span>');
+
+  const wpp = linkWhatsAppDaAluna(a);
+  const principal = a.treinoAtual
+    ? '<button class="fb fb-ouro" onclick="abrirAbaDaFicha(\'treino\');mostrarDiagnosticoParaProgredir(\'' + nomeJs + '\')">' + iconePainel('subir', 'width:15px;height:15px;') + 'Progredir treino</button>'
+    : '<button class="fb fb-ouro" onclick="abrirAbaDaFicha(\'treino\');gerarTreinoAutomaticoParaAluna(\'' + nomeJs + '\')">' + iconePainel('halter', 'width:15px;height:15px;') + 'Prescrever treino</button>';
+  return '<div class="ficha-cab">' +
+    '<div class="pn-av ficha-av">' + escaparHtmlFicha(iniciaisDaAluna(a.nome)) + '</div>' +
+    '<div class="ficha-quem"><h1 class="page-title" style="margin:0;">' + escaparHtmlFicha(a.nome) + '</h1><div class="ficha-chips">' + chips.join('') + '</div></div>' +
+    '<div class="ficha-acoes">' +
+      (wpp ? '<a class="fb fb-wpp" href="' + wpp + '" target="_blank" rel="noopener">' + iconePainel('conversa', 'width:15px;height:15px;') + 'WhatsApp</a>' : '') +
+      (a.email ? '<a class="fb" href="mailto:' + escaparHtmlFicha(a.email) + '" title="E-mail">E-mail</a>' : '') +
+      '<button class="fb" onclick="abrirAbaDaFicha(\'geral\');gerarResumoPerformanceAluna(\'' + nomeJs + '\')">' + iconePainel('estrela', 'width:15px;height:15px;') + 'Resumo com IA</button>' +
+      principal +
+    '</div>' +
+  '</div>';
+}
+
+// "Como ela está indo" e "Últimas atividades", a partir do progresso dela
+function resumoDaFicha(a, prog, agora){
+  if(agora === undefined) agora = Date.now();
+  const diasTreino = (a.treinoAtual && a.treinoAtual.dias) ? a.treinoAtual.dias : [];
+  const porSemana = diasTreino.filter(function(d){ return !d.descanso; }).length;
+  let feitos = 0, semanasComDado = 0;
+  for(let w = prog.semana - 3; w <= prog.semana; w++){
+    if(w < 1) continue;
+    semanasComDado++;
+    feitos += ((prog.diasConcluidos && prog.diasConcluidos[w]) || []).length;
+  }
+  const possivel = porSemana * semanasComDado;
+  let cargasSubiram = 0;
+  Object.keys(prog.historico || {}).forEach(function(nome){
+    const h = (prog.historico[nome] || []).filter(function(r){ return r && r.carga != null && !isNaN(r.carga); });
+    if(h.length < 2) return;
+    const ult = h[h.length - 1], ant = h[h.length - 2];
+    if(ult.semana >= prog.semana - 3 && ult.carga > ant.carga) cargasSubiram++;
+  });
+  const atividades = [];
+  (prog.horariosTreino || []).forEach(function(x){ if(x && x.data) atividades.push({ data: x.data, texto: 'Registrou o treino de ' + String(x.dia || '').toLowerCase() }); });
+  (prog.feedbackTreino || []).forEach(function(f){
+    if(!f || !f.data) return;
+    if(f.desconforto) atividades.push({ data: f.data, texto: 'Relatou desconforto' + (f.exercicio ? ' no ' + f.exercicio : '') + (f.escalaDesconforto != null ? ' (nível ' + f.escalaDesconforto + ')' : ''), tag: 'atenção', classe: 'fc-ruim' });
+    else if(f.intensidade != null) atividades.push({ data: f.data, texto: 'Feedback do treino: intensidade ' + f.intensidade + ' de 10' });
+  });
+  ((prog.perguntasPerfilDNA && prog.perguntasPerfilDNA.respondidas) || []).forEach(function(r){ if(r && r.data) atividades.push({ data: r.data, texto: 'Respondeu uma pergunta do Perfil DNA' }); });
+  (a.duvidasSinalizadas || []).forEach(function(d){ if(d && d.data) atividades.push({ data: d.data, texto: 'Mandou uma dúvida: "' + String(d.pergunta || '').slice(0, 60) + '"', tag: d.resolvida ? null : 'sem resposta', classe: 'fc-ouro' }); });
+  atividades.sort(function(x, y){ return new Date(y.data) - new Date(x.data); });
+  let score = null;
+  try { score = calcularProbabilidadeSucesso(a.nome); } catch(e){}
+  return {
+    constancia: possivel > 0 ? Math.min(100, Math.round(feitos / possivel * 100)) : null,
+    feitos: feitos, possivel: possivel, score: score, cargasSubiram: cargasSubiram,
+    semana: diasTreino.length ? montarResumoDaSemanaDaAluna(prog, diasTreino, agora) : null,
+    atividades: atividades.slice(0, 6)
+  };
+}
+
+function painelGeralDaFicha(a, agora){
+  if(agora === undefined) agora = Date.now();
+  return '<div id="ficha-geral-resumo">' + htmlResumoDaFicha(a, agora) + '</div>';
+}
+
+function htmlResumoDaFicha(a, agora){
+  if(agora === undefined) agora = Date.now();
+  const prog = getProgressoAluna(a.nome);
+  const r = resumoDaFicha(a, prog, agora);
+  let html = '';
+  if(statusDoPlano(a) === 'ativas'){
+    const ctl = situacaoDoControleDaAluna(a, agora);
+    if(ctl.dias != null){
+      html += '<div class="ficha-alerta"><b>Treino pendente há ' + ctl.dias + ' dias.</b> O último treino entregue foi em ' + dataCurtaPainel(a.dataFicouVerde) + ' e o prazo do Controle é de ' + diasParaVoltarAoBranco + ' dias.</div>';
+    }
+  }
+  const num = function(rot, val, sub){ return '<div class="fm"><small>' + rot + '</small><b>' + val + '</b><span>' + sub + '</span></div>'; };
+  html += '<div class="ficha-box"><p class="ficha-h">Como ela está indo</p><div class="ficha-mini">' +
+    num('Constância (4 semanas)', r.constancia == null ? '--' : r.constancia + '%', r.possivel > 0 ? r.feitos + ' de ' + r.possivel + ' treinos' : 'sem treino montado') +
+    num('DNA Score', r.score == null ? '--' : r.score, r.score == null ? 'sem dados ainda' : 'calculado pelo app') +
+    num('Cargas que subiram', r.cargasSubiram, 'nas últimas 4 semanas') +
+  '</div>';
+  if(r.semana && r.semana.bolinhas.length){
+    html += '<div class="ficha-semana">' + r.semana.bolinhas.map(function(b){
+      const cls = b.feito ? 'ok' : (b.descanso ? 'desc' : '');
+      return '<div class="fd"><i class="' + cls + '">' + (b.feito ? '✓' : (b.descanso ? '' : escaparHtmlFicha(b.letraTreino))) + '</i>' + escaparHtmlFicha(b.letra) + '</div>';
+    }).join('') + '</div>';
+  }
+  html += '</div>';
+  html += '<div class="ficha-box"><p class="ficha-h">Últimas atividades</p>' +
+    (r.atividades.length === 0 ? '<p class="pn-vazio">Nenhuma atividade registrada ainda.</p>' :
+      r.atividades.map(function(x){
+        return '<div class="ficha-linha"><span class="fq">' + quandoFoiTexto(x.data, agora) + '</span><span class="ft">' + escaparHtmlFicha(x.texto) + '</span>' +
+          (x.tag ? '<span class="fc ' + x.classe + '">' + x.tag + '</span>' : '') + '</div>';
+      }).join('')) +
+  '</div>';
+  return html;
+}
+
+// Busca o progresso mais recente dela e atualiza só o resumo (o resto da ficha não é redesenhado)
+async function carregarProgressoParaFicha(a){
+  try {
+    if(!a || !a.authId || typeof carregarProgressoDoSupabase !== 'function') return;
+    await carregarProgressoDoSupabase(a.authId, a.nome);
+    if(alunaAberta !== a) return;
+    const box = document.getElementById('ficha-geral-resumo');
+    if(box) box.innerHTML = htmlResumoDaFicha(a);
+  } catch(e){}
+}
+
 function openAlunaDetail(i){
   const a = alunasPersonal[i];
   alunaAberta = a;
@@ -10168,14 +10536,8 @@ function openAlunaDetail(i){
   }
 
   el.innerHTML =
-    '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
-      '<h1 class="page-title" style="margin-top:0;margin-bottom:2px;">' + a.nome + '</h1>' +
-      '<div style="display:flex;gap:6px;margin-top:2px;">' +
-        (a.telefone ? '<a href="https://wa.me/55' + a.telefone.replace(/\D/g,'') + '" target="_blank" rel="noopener" style="width:34px;height:34px;border-radius:50%;background:var(--card-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;"><i class="ti ti-brand-whatsapp" style="color:var(--gold-soft);font-size:16px;"></i></a>' : '') +
-        (a.email ? '<a href="mailto:' + a.email + '" style="width:34px;height:34px;border-radius:50%;background:var(--card-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;"><i class="ti ti-mail" style="color:var(--gold-soft);font-size:16px;"></i></a>' : '') +
-      '</div>' +
-    '</div>' +
-    '<p class="page-sub"><span class="status-dot ' + a.status + '"></span><span class="status-txt ' + a.status + '">' + a.statusLabel + '</span></p>' +
+    cabecalhoFichaAluna(a) + abasDaFicha() +
+    '<div class="ficha-sec" data-ficha="prescricao">' +
     '<div class="stat-grid">' +
       '<div class="stat-card"><p class="stat-label">Nível</p>' +
         '<select class="form-select" style="font-size:13px;padding:6px;margin-top:4px;" onchange="editarNivelAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)">' +
@@ -10203,7 +10565,7 @@ function openAlunaDetail(i){
           '<option value="">Automático (revezam Ombro/Peito e Bíceps/Tríceps)</option>' +
           ['Costas','Peito','Ombros','Bíceps','Tríceps'].map(function(g){ return '<option value="' + g + '"' + ((a.enfaseSuperioresManual || '') === g ? ' selected' : '') + '>' + g + ' (ênfase)</option>'; }).join('') +
         '</select>' +
-        '<p style="font-size:10px;color:var(--text-faint);margin-top:4px;">Independente da pirâmide de baixo — pode ter ênfase embaixo E em cima ao mesmo tempo</p>' +
+        '<p style="font-size:10px;color:var(--text-faint);margin-top:4px;">Independente da pirâmide de baixo: pode ter ênfase embaixo E em cima ao mesmo tempo</p>' +
       '</div>' +
       '<div class="stat-card"><p class="stat-label">Situação do plano</p>' +
         '<select class="form-select" style="font-size:13px;padding:6px;margin-top:4px;" onchange="mudarSituacaoDaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)">' +
@@ -10214,9 +10576,11 @@ function openAlunaDetail(i){
         '<p style="font-size:10px;color:var(--text-faint);margin-top:4px;">' + (a.statusPlanoManual ? 'Definida por você. ' : 'Calculada pelo vencimento do plano. ') + 'Excluir tira da lista, mas dá pra restaurar.</p>' +
       '</div>' +
     '</div>' +
-    '<p style="font-size:11px;color:var(--text-faint);margin:-8px 0 12px;">Ajustar aqui atualiza automaticamente toda a estrutura de treino gerada — o gerador nunca mistura exercício de academia com exercício de casa</p>' +
-    '<button class="btn-secondary" style="margin-bottom:18px;" onclick="abrirResumoCompletoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-file-description" style="margin-right:6px;"></i>📋 Resumo completo (diagnóstico, avaliação, plano)</button>' +
-    '<button class="btn-secondary" style="margin-bottom:8px;" onclick="gerarResumoPerformanceAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-sparkles" style="margin-right:6px;"></i>🤖 Resumir performance com IA</button>' +
+    '<p style="font-size:11px;color:var(--text-faint);margin:-8px 0 12px;">Ajustar aqui atualiza automaticamente toda a estrutura de treino gerada. O gerador nunca mistura exercício de academia com exercício de casa</p>' +
+    '<button class="btn-secondary" style="margin-bottom:18px;" onclick="abrirResumoCompletoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-file-description" style="margin-right:6px;"></i>Resumo completo (diagnóstico, avaliação, plano)</button>' +
+    '</div>' +
+    '<div class="ficha-sec" data-ficha="geral">' +
+    painelGeralDaFicha(a) +
     '<div id="resumo-ia-area" style="margin-bottom:18px;"></div>' +
     (objetivoSugereTabata(a) && !a.tabataSugestaoRespondida ? (
       '<div class="info-box" style="margin-bottom:12px;border-color:var(--border-strong);">' +
@@ -10237,11 +10601,15 @@ function openAlunaDetail(i){
     ) : '') +
     renderAuditorPatologia(a) +
     renderMotor8(a.nome) +
-    '<p class="section-label" style="margin-top:24px;">Treino atual</p>' +
+    '</div>' +
+    '<div class="ficha-sec" data-ficha="treino">' +
+    '<p class="section-label" style="margin-top:4px;">Treino atual</p>' +
     '<p style="font-size:12px;color:var(--gold-soft);margin:6px 0 12px;cursor:pointer;" onclick="abrirTreinosArquivados(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-archive" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Ver treinos arquivados (histórico)</p>' +
     '<div id="treinos-arquivados-area"></div>' +
     treinoHtml +
     treinoAcoesHtml +
+    '</div>' +
+    '<div class="ficha-sec" data-ficha="historico">' +
     renderSecaoColapsavel('Acompanhamento e histórico', renderElegibilidadeFase(a) + renderFunilEngajamento(a) + renderLinhaDoTempo(a) + renderPromocaoNivel(a) + renderBlocoPeriodizacao(a) + renderHistoricoPrioridade(a) + renderEditorPesoComposicaoPersonal(a) + renderTecnicaPendente(a) + renderProgressao(a), 'acompanhamento') +
     '<p class="section-label" style="margin-top:22px;">Acesso ao app</p>' +
     (a.authId && a.senhaGerada
@@ -10261,7 +10629,11 @@ function openAlunaDetail(i){
       : '<button class="btn-secondary" style="" onclick="criarLoginParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-key" style="font-size:14px;vertical-align:-2px;margin-right:6px;"></i>Gerar acesso ao app</button>'
     ) +
     '<div id="acesso-gerado-area"></div>' +
-    '<p class="page-sub" style="margin-top:10px;">Anamnese respondida em ' + (a.dataAnamnese || 'data desconhecida') + '</p>';
+    '<p class="page-sub" style="margin-top:10px;">Anamnese respondida em ' + (a.dataAnamnese || 'data desconhecida') + '</p>' +
+    '</div>';
+  if(fichaAbertaNome !== a.nome){ fichaAbertaNome = a.nome; abaFichaAtual = 'geral'; } // outra aluna: começa na Visão geral
+  aplicarAbaDaFicha();
+  carregarProgressoParaFicha(a);
   showPersonalView('aluna');
   aplicarTransicaoSuave('aluna-detail-content');
   renderListaFeedbackGerador(a.nome);
@@ -10783,9 +11155,9 @@ function entregaVenceuPorPrazo(a, agora){
 }
 
 function htmlPrazoDoControle(){
-  return '<div class="info-box" style="margin-bottom:10px;"><p class="txt" style="font-size:12px;margin:0;">Quem fica verde volta pro branco depois de ' +
-    '<input type="number" id="dias-controle" min="1" max="365" value="' + diasParaVoltarAoBranco + '" style="width:60px;text-align:center;" onchange="definirDiasDoControle(this.value)"> ' +
-    'dias, contando da data em que ficou verde.</p></div>';
+  return '<div class="ctl-topo">Enviada volta pra Pendentes depois de ' +
+    '<input type="number" id="dias-controle" min="1" max="365" value="' + diasParaVoltarAoBranco + '" onchange="definirDiasDoControle(this.value)"> ' +
+    'dias, contando da data em que ficou verde.</div>';
 }
 
 function definirDiasDoControle(valor){
@@ -10865,7 +11237,7 @@ function htmlAvisosDoControle(){
   const ativasSemEmail = ativasAgora.filter(function(a){ return !a.email; }).map(function(a){ return a.nome; });
   const ativasRepetidas = ativasAgora.filter(function(a){ return a.email && ehFichaDuplicada(a); }).map(function(a){ return a.nome; });
   if(ativasSemEmail.length > 0 || ativasRepetidas.length > 0){
-    html += '<div class="info-box" style="margin-bottom:10px;"><p class="txt" style="font-size:12px;margin:0;">ℹ Estas fichas ativas não conseguem guardar mudanças no servidor. ' +
+    html += '<div class="info-box" style="margin-bottom:10px;border-color:rgba(226,163,61,0.35);"><p class="txt" style="font-size:12px;margin:0;color:#E2A33D;">Estas fichas ativas não conseguem guardar mudanças no servidor. ' +
       (ativasSemEmail.length > 0 ? '<b>Sem e-mail:</b> ' + escaparHtmlFicha(ativasSemEmail.join(', ')) + ' (preencha o e-mail na ficha, seção Dados). ' : '') +
       (ativasRepetidas.length > 0 ? '<b>Repetidas (mesmo e-mail de outra ficha):</b> ' + escaparHtmlFicha(ativasRepetidas.join(', ')) + ' (mexa na outra ficha da mesma pessoa).' : '') +
       '</p></div>';
@@ -10887,6 +11259,29 @@ async function atualizarControleDoServidor(){
   renderControleTreinos();
   if(resultado.erro) mostrarConfirmacaoSalvamento(false, 'Não consegui buscar do servidor: ' + resultado.erro);
   else mostrarConfirmacaoSalvamento(true, 'Atualizado do servidor: ' + (resultado.atualizadas || 0) + ' ficha(s) mudaram' + (resultado.novas ? ' e ' + resultado.novas + ' nova(s) chegaram' : '') + '.');
+}
+
+// Quantas aparecem por coluna antes do "Ver todas" (a de Pendentes pode ter dezenas)
+const LIMITE_POR_COLUNA_CONTROLE = 8;
+let colunasDoControleAbertas = {};
+function alternarColunaDoControle(col){
+  colunasDoControleAbertas[col] = !colunasDoControleAbertas[col];
+  renderControleTreinos();
+}
+
+// Botão "Gerar" do Controle: abre a ficha e já começa, igual ao botão principal da ficha
+function gerarTreinoPeloControle(i){
+  const a = alunasPersonal[i];
+  if(!a) return;
+  openAlunaDetail(i);
+  abrirAbaDaFicha('treino');
+  if(a.treinoAtual) mostrarDiagnosticoParaProgredir(a.nome);
+  else gerarTreinoAutomaticoParaAluna(a.nome);
+}
+
+function marcarEnviadoPeloControle(i){
+  const a = alunasPersonal[i];
+  if(a) marcarTreinoFeitoManualmente(a.nome);
 }
 
 function renderControleTreinos(){
@@ -10911,45 +11306,63 @@ function renderControleTreinos(){
       return tempoDaEntrega(x) - tempoDaEntrega(y);
     });
 
-  const linhas = verdes.concat(amarelos).concat(incolores);
-
-  const cor = function(a){
-    if(efetivo(a) === 'verde') return 'var(--success)';
-    if(efetivo(a) === 'amarelo') return '#E2C13D';
-    return 'var(--text)';
-  };
   const formatarData = function(iso){ return new Date(iso).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }); };
 
-  let html = '<div class="info-box" style="text-align:center;margin-bottom:12px;">' +
-    '<p class="txt" style="font-size:12px;color:var(--text-faint);">🟡 ' + amarelos.length + ' geradas · 🟢 ' + verdes.length + ' enviadas · ⚪ ' + incolores.length + ' pendentes de ' + ativas.length + '</p>' +
-  '</div>';
-
   atualizarBadgeControle(amarelos.length + incolores.length); // mesmo número do painel: gerados + pendentes
-  html += htmlPrazoDoControle();
+  let html = htmlPrazoDoControle();
   html += htmlAvisosDoControle();
 
-  html += linhas.map(function(a){
+  const item = function(a, sub, classeSub, botao){
     const i = alunasPersonal.indexOf(a);
-    const dias = a.dataFicouVerde ? diasCorridosDesde(a.dataFicouVerde, agora) : null;
-    let etiquetas = '';
-    if(efetivo(a) === 'verde'){
-      if(a.dataFicouVerde && dias !== null){
-        const faltam = diasParaVoltarAoBranco - dias;
-        etiquetas = '<span class="tag" style="font-size:10px;">' + formatarData(a.dataFicouVerde) + '</span>' +
-          '<span class="tag" style="font-size:10px;">volta ao branco em ' + faltam + (faltam === 1 ? ' dia' : ' dias') + '</span>';
-      } else {
-        etiquetas = '<span class="tag" style="font-size:10px;">sem data de entrega</span>';
-      }
-    } else if(entregaVenceuPorPrazo(a, agora)){
-      etiquetas = '<span class="tag" style="font-size:10px;">entregue em ' + formatarData(a.dataFicouVerde).slice(0, 5) + ' · há ' + dias + ' dias</span>';
-    } else if(a.dataFicouVerde){
-      etiquetas = '<span class="tag" style="font-size:10px;">' + formatarData(a.dataFicouVerde) + '</span>';
-    }
-    return '<div class="list-item" style="cursor:pointer;margin-bottom:6px;" onclick="openAlunaDetail(' + i + ')">' +
-      '<span style="color:' + cor(a) + ';font-weight:600;">' + escaparHtmlFicha(a.nome) + '</span>' +
-      (etiquetas ? '<span style="display:flex;gap:6px;">' + etiquetas + '</span>' : '') +
+    return '<div class="ctl-it" onclick="openAlunaDetail(' + i + ')">' +
+      '<div class="pn-av">' + escaparHtmlFicha(iniciaisDaAluna(a.nome)) + '</div>' +
+      '<div class="ctl-txt"><span class="ctl-nome">' + escaparHtmlFicha(a.nome) + '</span><span class="ctl-sub' + (classeSub ? ' ' + classeSub : '') + '">' + sub + '</span></div>' +
+      botao.replace('IDX', i) +
     '</div>';
-  }).join('');
+  };
+
+  const subPendente = function(a){
+    if(entregaVenceuPorPrazo(a, agora)){
+      const dias = diasCorridosDesde(a.dataFicouVerde, agora);
+      return { sub: 'entregue em ' + formatarData(a.dataFicouVerde).slice(0, 5) + ' · há ' + dias + ' dias', classe: 'atrasada' };
+    }
+    if(!a.treinoAtual) return { sub: 'ainda sem treino montado', classe: 'atrasada' };
+    return { sub: a.dataFicouVerde ? 'última entrega ' + formatarData(a.dataFicouVerde) : 'precisa de treino novo', classe: '' };
+  };
+  const subEnviada = function(a){
+    const dias = a.dataFicouVerde ? diasCorridosDesde(a.dataFicouVerde, agora) : null;
+    if(!a.dataFicouVerde || dias === null) return { sub: 'sem data de entrega', classe: '' };
+    const faltam = diasParaVoltarAoBranco - dias;
+    return { sub: formatarData(a.dataFicouVerde) + ' · volta pra Pendentes em ' + faltam + (faltam === 1 ? ' dia' : ' dias'), classe: faltam <= 3 ? 'atrasada' : '' };
+  };
+
+  const coluna = function(col, titulo, cor, explicacao, lista, desenhar){
+    const aberta = !!colunasDoControleAbertas[col];
+    const visiveis = aberta ? lista : lista.slice(0, LIMITE_POR_COLUNA_CONTROLE);
+    const escondidas = lista.length - visiveis.length;
+    return '<div class="ctl-col" data-col="' + col + '" data-qtd="' + lista.length + '">' +
+      '<h3><span class="ctl-dot" style="background:' + cor + ';"></span>' + titulo + '<span class="ctl-n">' + lista.length + '</span></h3>' +
+      '<p class="ctl-exp">' + explicacao + '</p>' +
+      (lista.length === 0 ? '<div class="ctl-vazio">Ninguém aqui agora.</div>' : visiveis.map(desenhar).join('')) +
+      (escondidas > 0 ? '<div class="ctl-mais" onclick="alternarColunaDoControle(\'' + col + '\')">Ver todas (mais ' + escondidas + ')</div>' : '') +
+      (aberta && lista.length > LIMITE_POR_COLUNA_CONTROLE ? '<div class="ctl-mais" onclick="alternarColunaDoControle(\'' + col + '\')">Mostrar menos</div>' : '') +
+    '</div>';
+  };
+
+  html += '<div class="ctl-cols">' +
+    coluna('pendentes', 'Pendentes', 'var(--text-dim)', 'Precisam de treino novo', incolores, function(a){
+      const d = subPendente(a);
+      return item(a, d.sub, d.classe, '<button class="ctl-bt ouro" onclick="event.stopPropagation();gerarTreinoPeloControle(IDX)">' + (a.treinoAtual ? 'Gerar' : 'Prescrever') + '</button>');
+    }) +
+    coluna('gerados', 'Gerados', '#E2C13D', 'Prontos, falta mandar pra aluna', amarelos, function(a){
+      return item(a, 'gerado, falta enviar', '', '<button class="ctl-bt" onclick="event.stopPropagation();marcarEnviadoPeloControle(IDX)">Marcar enviado</button>');
+    }) +
+    coluna('enviados', 'Enviados', 'var(--success)', 'Com a aluna, contando o prazo', verdes, function(a){
+      const d = subEnviada(a);
+      return item(a, d.sub, d.classe, '<button class="ctl-bt" onclick="event.stopPropagation();openAlunaDetail(IDX)">Ver</button>');
+    }) +
+  '</div>' +
+  '<p class="txt" style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:12px;">' + ativas.length + (ativas.length === 1 ? ' aluna ativa' : ' alunas ativas') + ' no controle</p>';
 
   container.innerHTML = html;
 }
@@ -13583,9 +13996,9 @@ function finalizarOnboardingEIr(destino){
 // Versão do tour. Quando o conteúdo mudar de forma relevante, é só trocar esse valor: todas as alunas
 // voltam a ver o tour uma vez, no próximo acesso à tela Início. Quem tinha visto só a versão antiga
 // (marcada como "sim") também vê de novo, de propósito.
-const VERSAO_TOUR = 'v3-telas-novas'; // trocado nas telas novas (Início, menu de 5 itens, Evolução): todas veem o tour de novo
+const VERSAO_TOUR = 'v4-telas-revisadas'; // trocado nas telas revisadas (modo treino, treino concluído, Corpo, check-in, Roda da Vida, Sua conta): todas veem o tour de novo
 const TOTAL_PARTES_TOUR = 4;
-const NOMES_PARTES_TOUR = { 1: 'Tela inicial', 2: 'Treinos da semana', 3: 'Dentro do treino', 4: 'Progresso' };
+const NOMES_PARTES_TOUR = { 1: 'Tela inicial', 2: 'Treinos da semana', 3: 'Dentro do treino', 4: 'Evolução' };
 let indiceTourAtual = 0;
 let tourEmAndamento = false;
 let tourOcupado = false;
@@ -13653,6 +14066,12 @@ async function tourExpandirExercicio(){
 async function tourIrParaProgresso(){
   if(!tourTelaAtiva('progresso')){ openLevel2('progresso'); await tourEsperar(450); }
 }
+async function tourIrParaCorpo(){
+  if(!tourTelaAtiva('dados')){ openLevel2('dados'); await tourEsperar(450); }
+}
+async function tourIrParaRodaDaVida(){
+  if(!tourTelaAtiva('rodadavida')){ openLevel2('rodadavida'); await tourEsperar(450); }
+}
 function tourDentroDoExpandido(css){
   return function(){ const e = tourPrimeiroExpandido(); return e ? e.querySelector(css) : null; };
 }
@@ -13683,14 +14102,14 @@ const PASSOS_TOUR = [
   { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="mentoria"]', rolar: false, titulo: 'Mentoria',
     texto: 'Cursos completos, explicação de métodos de treino, mobilidade e muito mais, organizado por seção.' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="ranking"]', rolar: false, titulo: 'Ranking',
-    texto: 'Veja como você está em relação à comunidade, e o que falta pra bater a próxima meta.' },
+    texto: 'Sua posição no ranking, quanto falta pra passar a próxima colocada e como ganhar pontos. Conta treinos registrados, cargas que subiram e check-ins das últimas 4 semanas.' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '#botao-flutuante-sol', rolar: false, titulo: 'Fale com a Sol',
     texto: 'Sua treinadora digital, sempre disponível pra tirar dúvidas rápidas sobre o treino.' },
 
   // ===== PARTE 2: TREINOS DA SEMANA =====
   { parte: 2, preparar: tourIrParaListaSemana, seletor: '#lista-dias-semana', titulo: 'Seus dias da semana',
-    texto: 'Aqui estão os seus dias, de segunda a domingo. O dia de hoje aparece com a etiqueta "hoje", e os dias que você já registrou ficam verdes. Toque num dia pra abrir o treino completo.',
-    textoCentro: 'Na tela de treinos da semana ficam os seus dias, de segunda a domingo. O dia de hoje aparece com a etiqueta "hoje", e os dias que você já registrou ficam verdes. Toque num dia pra abrir o treino completo.' },
+    texto: 'Aqui estão os seus dias, de segunda a domingo. O treino da vez fica em destaque com a etiqueta HOJE (ou PRÓXIMO) e o botão "Abrir treino". Os dias que você já fez ganham o check verde e mostram quando foram feitos, por exemplo "Feito na segunda, 19:42". Toque em qualquer dia pra abrir o treino completo.',
+    textoCentro: 'Na aba Treino ficam os seus dias, de segunda a domingo. O treino da vez fica em destaque com a etiqueta HOJE (ou PRÓXIMO) e o botão "Abrir treino". Os dias que você já fez ganham o check verde e mostram quando foram feitos, por exemplo "Feito na segunda, 19:42". Toque em qualquer dia pra abrir o treino completo.' },
   { parte: 2, preparar: tourIrParaListaSemana, titulo: 'Esqueceu de registrar?',
     seletor: function(){
       return document.querySelector('#lista-dias-semana [data-feito="nao"][data-descanso="nao"]')
@@ -13704,6 +14123,8 @@ const PASSOS_TOUR = [
   { parte: 3, preparar: tourIrParaTreino, seletor: '#cronometro-btn', titulo: 'Iniciar treino',
     texto: 'Toque aqui quando começar o treino. O cronômetro conta o tempo total, e você pode pausar e retomar quando precisar.',
     textoCentro: 'Dentro de cada treino, o botão "Iniciar treino" no topo liga o cronômetro do treino todo. Você pode pausar e retomar quando precisar.' },
+  { parte: 3, titulo: 'Um exercício por vez',
+    texto: 'Depois de tocar em "Iniciar treino", a tela mostra um exercício por vez, já aberto, com "Exercício 2 de 6" em cima. Embaixo ficam os botões Anterior e Próximo exercício, e no último ele vira "Registrar treino de hoje". Quer ver tudo de uma vez? Toque em "Ver lista completa".' },
   { parte: 3, preparar: tourIrParaTreino, seletor: '[onclick^="alternarExercicioExpandido("]', titulo: 'Seus exercícios',
     texto: 'Cada linha é um exercício, com as séries, as repetições e o tempo de descanso. Toque no nome pra abrir: dentro ficam o vídeo, as séries e os campos de carga.',
     textoCentro: 'Cada linha do treino é um exercício, com as séries, as repetições e o tempo de descanso. Toque no nome pra abrir: dentro ficam o vídeo, as séries e os campos de carga.' },
@@ -13733,22 +14154,33 @@ const PASSOS_TOUR = [
   { parte: 3, preparar: tourIrParaTreino, seletor: '#btn-registrar-treino-dia', titulo: 'Registrar o treino',
     texto: 'Quando terminar, toque em "Registrar treino de hoje". É ele que conta o dia como feito: alimenta a sua constância e o seu DNA Score, e deixa seu personal acompanhar. Você não precisa anotar a carga pra registrar, mas anotar é o que gera a sugestão de progressão. Se você confirmar 3 exercícios, o treino já é registrado sozinho. Se registrar sem querer, no mesmo dia aparece "Registrei sem querer. Desfazer" logo abaixo do botão.',
     textoCentro: 'Quando terminar, toque em "Registrar treino de hoje", no fim do treino. É ele que conta o dia como feito: alimenta a sua constância e o seu DNA Score, e deixa seu personal acompanhar. Você não precisa anotar a carga pra registrar, mas anotar é o que gera a sugestão de progressão. Se você confirmar 3 exercícios, o treino já é registrado sozinho. Se registrar sem querer, no mesmo dia aparece "Registrei sem querer. Desfazer" logo abaixo do botão.' },
+  { parte: 3, titulo: 'Treino concluído',
+    texto: 'Ao registrar, aparece o resumo do treino: quantos minutos durou, quantas séries você fez, quantos treinos da semana já foram e quais cargas subiram em relação à semana anterior.' },
   { parte: 3, titulo: 'Como foi o treino?',
     texto: 'Depois de registrar, aparece o formulário "Como foi o treino de hoje?". Conte se sentiu desconforto em algum exercício e qual foi a intensidade do treino, e deixe um comentário se quiser. Seu personal usa isso pra ajustar o seu treino.' },
 
-  // ===== PARTE 4: PROGRESSO =====
-  { parte: 4, preparar: tourIrParaProgresso, seletor: '#tour-checkin-box', titulo: 'Meu progresso hoje',
-    texto: 'Aqui você registra como está hoje: humor, ansiedade, disposição, sono e os hábitos do dia. Seu personal usa essas informações pra entender como você está além do treino, e cada dia preenchido soma pontos no ranking.',
-    textoCentro: 'Em Evolução > Treino, em "Meu progresso hoje", você registra como está: humor, ansiedade, disposição, sono e os hábitos do dia. Seu personal usa essas informações pra entender como você está além do treino, e cada dia preenchido soma pontos no ranking.' },
+  // ===== PARTE 4: EVOLUÇÃO =====
+  { parte: 4, preparar: tourIrParaCorpo, seletor: '.stat-grid', titulo: 'Corpo',
+    texto: 'Na aba Corpo ficam o seu peso e o seu percentual de gordura. Se ainda não tiver nada, toque em "+ Registrar". Quando a última avaliação física passar de 90 dias, aparece no topo o aviso "Hora de reavaliar", com o botão pra registrar peso e medidas.',
+    textoCentro: 'Em Evolução > Corpo ficam o seu peso e o seu percentual de gordura. Se ainda não tiver nada, toque em "+ Registrar". Quando a última avaliação física passar de 90 dias, aparece no topo o aviso "Hora de reavaliar", com o botão pra registrar peso e medidas.' },
+  { parte: 4, preparar: tourIrParaProgresso, seletor: '#tour-checkin-box', titulo: 'Como você está hoje',
+    texto: 'Na aba Treino você registra como está hoje: humor, disposição, ansiedade e sono, de 1 a 5, e marca os hábitos do dia. Em cima aparece quantos dias seguidos você fez o check-in. Seu personal usa isso pra entender como você está além do treino, e cada dia respondido soma pontos no ranking.',
+    textoCentro: 'Em Evolução > Treino, em "Como você está hoje", você registra humor, disposição, ansiedade e sono, de 1 a 5, e marca os hábitos do dia. Em cima aparece quantos dias seguidos você fez o check-in. Seu personal usa isso pra entender como você está além do treino, e cada dia respondido soma pontos no ranking.' },
   { parte: 4, preparar: tourIrParaProgresso, seletor: '#tour-chip-ontem', titulo: 'Esqueci de preencher ontem',
     texto: 'Esqueceu de preencher ontem? Toque aqui pra preencher o dia de ontem, que fica guardado na data certa. Manter os dias completos deixa o seu acompanhamento muito mais preciso.',
-    textoCentro: 'Esqueceu de preencher ontem? Em Evolução > Treino, o botão "Esqueci de preencher ontem" deixa você preencher o dia de ontem, que fica guardado na data certa. Manter os dias completos deixa o seu acompanhamento muito mais preciso.' },
+    textoCentro: 'Esqueceu de preencher ontem? Em Evolução > Treino, logo abaixo do botão de salvar, o link "Esqueci de preencher ontem" deixa você preencher o dia de ontem, que fica guardado na data certa. Manter os dias completos deixa o seu acompanhamento muito mais preciso.' },
   { parte: 4, preparar: tourIrParaProgresso, seletor: '#hub-corrigir-registros', titulo: 'Corrigir meus registros',
     texto: 'Preencheu algo errado? Aqui no fim da tela você corrige o check-in de nutrição, os feedbacks de treino e as respostas do Perfil DNA. O peso e a composição se corrigem em Evolução > Corpo, em "Minha evolução", e a Roda da Vida tem "Corrigir uma resposta" na própria aba.',
     textoCentro: 'Preencheu algo errado? Em Evolução > Treino, no fim, o bloco "Corrigir meus registros" deixa você corrigir o check-in de nutrição, os feedbacks de treino e as respostas do Perfil DNA. O peso e a composição se corrigem em Evolução > Corpo, em "Minha evolução", e a Roda da Vida tem "Corrigir uma resposta" na própria aba.' },
+  { parte: 4, preparar: tourIrParaRodaDaVida, seletor: '.rv-acao', titulo: 'Sua Roda da Vida',
+    texto: 'Não quer esperar a pergunta aparecer? Toque em "Responder uma área agora". O gráfico mostra como está cada área, e a linha tracejada é a rodada anterior, pra você comparar. Na lista, a seta mostra quanto cada área subiu ou caiu.',
+    textoCentro: 'Na aba Roda da Vida, o botão "Responder uma área agora" deixa você responder sem esperar a pergunta aparecer. O gráfico mostra como está cada área, e a linha tracejada é a rodada anterior, pra você comparar. Na lista, a seta mostra quanto cada área subiu ou caiu.' },
+  { parte: 4, nomeParte: 'Pra terminar', preparar: tourIrParaInicio, seletor: '#botao-conta-home', titulo: 'Sua conta',
+    texto: 'O ícone de pessoa abre Sua conta. Lá fica a caixinha "Lembrar login neste aparelho": marque pra não precisar digitar e-mail e senha toda vez. É lá também que fica o "Sair da conta".',
+    textoCentro: 'O ícone de pessoa, no canto de cima da tela Início, abre Sua conta. Lá fica a caixinha "Lembrar login neste aparelho": marque pra não precisar digitar e-mail e senha toda vez. É lá também que fica o "Sair da conta".' },
   { parte: 4, nomeParte: 'Pra terminar', preparar: tourIrParaInicio, seletor: '#botao-tutorial-home', titulo: 'Tudo pronto',
-    texto: 'Pra rever este tutorial quando quiser, toque nesse botão com o ponto de interrogação. Uma dica final: na tela de entrada do app, marque a caixinha "Lembrar login neste aparelho" pra não precisar digitar e-mail e senha toda vez.',
-    textoCentro: 'Pra rever este tutorial quando quiser, toque no botão com o ponto de interrogação, no canto de cima da tela Início. Uma dica final: na tela de entrada do app, marque a caixinha "Lembrar login neste aparelho" pra não precisar digitar e-mail e senha toda vez.' }
+    texto: 'Pra rever este tutorial quando quiser, toque nesse botão com o ponto de interrogação.',
+    textoCentro: 'Pra rever este tutorial quando quiser, toque no botão com o ponto de interrogação, no canto de cima da tela Início.' }
 ];
 
 function passosAtivosDaParte(parte){
@@ -17234,7 +17666,7 @@ function ajusteRecuperacaoPorIdade(idade){
 // ===== TELA "MEU PROGRESSO" — cruza dados que já calculamos em outros lugares, numa visão única =====
 // ===== RANKING DA COMUNIDADE (pontos coletivos) =====
 let metaComunidadePontos = 50000; // meta padrão, Personal pode mudar
-let metaComunidadeRecompensa = 'Em breve — a Personal vai definir o que desbloqueia quando a comunidade bater a meta';
+let metaComunidadeRecompensa = 'Em breve. O prêmio vai ser anunciado antes da comunidade bater a meta';
 let metaFaturamentoMensal = 0; // 0 = sem meta definida ainda
 
 function calcularPontosAluna(nome){
@@ -17270,7 +17702,7 @@ function calcularPontosRankingPublico(nome){
 
   // Check-ins diários: 3 pontos por dia que ela preencheu humor/ansiedade/disposição
   const checkinsRecentes = Object.values(prog.checkinsEmocionais || {}).filter(function(c){
-    return new Date(c.data + 'T00:00:00') >= new Date(Date.now() - 28 * 24 * 60 * 60 * 1000);
+    return checkinTemResposta(c) && new Date(c.data + 'T00:00:00') >= new Date(Date.now() - 28 * 24 * 60 * 60 * 1000);
   });
   pontos += checkinsRecentes.length * 3;
 
@@ -17298,6 +17730,90 @@ async function buscarRankingPublicoTop10(){
   }
 }
 
+// Junta o Top 10 que vem do servidor com os pontos dela calculados agora (o valor mais atualizado),
+// e descobre a posição dela e quanto falta pra subir. Não inventa ninguém: só usa quem veio do servidor.
+function montarRankingPublicoDaAluna(top10, nomeEla, pontosEla){
+  const pontos = Math.max(0, Math.round(pontosEla || 0));
+  let lista = (top10 || []).filter(function(r){ return r && r.nome && r.nome !== nomeEla; })
+    .map(function(r){ return { nome: r.nome, pontos: Math.round(r.pontos || 0), eu: false }; });
+  if(pontos > 0) lista.push({ nome: nomeEla, pontos: pontos, eu: true });
+  lista.sort(function(a, b){ return b.pontos - a.pontos; });
+  lista = lista.slice(0, 10);
+  const estaNaLista = lista.some(function(r){ return r.eu; });
+  const res = { lista: lista, pontos: pontos, posicao: null, faltam: 0, alvoNome: '', modo: '' };
+  if(pontos === 0){ res.modo = 'zero'; return res; }
+  if(!estaNaLista){
+    // Ficou fora do Top 10: quanto falta pra passar a 10ª
+    res.modo = 'fora';
+    res.faltam = lista[lista.length - 1].pontos - pontos + 1;
+    return res;
+  }
+  // Empate conta como a mesma posição
+  const acima = lista.filter(function(r){ return r.pontos > pontos; });
+  res.posicao = acima.length + 1;
+  if(acima.length === 0){ res.modo = 'primeira'; return res; }
+  const alvo = acima[acima.length - 1]; // a que está logo acima dela
+  res.modo = 'subir';
+  res.faltam = alvo.pontos - pontos + 1;
+  res.alvoNome = primeiroNomeRanking(alvo.nome);
+  return res;
+}
+
+function primeiroNomeRanking(nome){
+  return escaparHtmlFicha(String(nome || '').trim().split(' ')[0]);
+}
+
+function textoFaltamPontos(faltam){
+  return faltam === 1 ? 'Falta 1 ponto' : 'Faltam ' + faltam + ' pontos';
+}
+
+function textoTreinosQueFaltam(faltam){
+  const treinos = Math.ceil(faltam / 10); // cada treino registrado vale 10 pontos
+  return treinos === 1 ? 'Um treino registrado já resolve.' : 'Dá uns ' + treinos + ' treinos registrados.';
+}
+
+function htmlRankingPublico(r){
+  let topo;
+  if(r.modo === 'zero'){
+    topo = '<div class="rk-pos"><div class="rk-num">0<small>PONTOS</small></div><p><strong>Você ainda não entrou no ranking</strong>Registre seu primeiro treino da semana e seus pontos já começam a contar.</p></div>';
+  } else if(r.modo === 'fora'){
+    topo = '<div class="rk-pos"><div class="rk-num">' + r.pontos + '<small>PONTOS</small></div><p><strong>' + textoFaltamPontos(r.faltam) + ' pro Top 10</strong>' + textoTreinosQueFaltam(r.faltam) + '</p></div>';
+  } else if(r.modo === 'primeira'){
+    topo = '<div class="rk-pos"><div class="rk-num">1º<small>' + r.pontos + ' PTS</small></div><p><strong>Você está em 1º lugar</strong>Ninguém tem mais pontos que você nas últimas 4 semanas. Continue registrando pra se manter aí.</p></div>';
+  } else {
+    topo = '<div class="rk-pos"><div class="rk-num">' + r.posicao + 'º<small>' + r.pontos + ' PTS</small></div><p><strong>Você está em ' + r.posicao + 'º lugar</strong>' + textoFaltamPontos(r.faltam) + ' pra passar a ' + r.alvoNome + '. ' + textoTreinosQueFaltam(r.faltam) + '</p></div>';
+  }
+
+  let corpo = '';
+  if(r.lista.length >= 3){
+    const ordem = [1, 0, 2]; // 2º, 1º, 3º
+    const alturas = [86, 64, 50];
+    corpo += '<div class="rk-podio">' + ordem.map(function(i){
+      const x = r.lista[i];
+      const nome = primeiroNomeRanking(x.nome);
+      return '<div class="rk-pd' + (x.eu ? ' eu' : '') + '"><div class="rk-av">' + nome.charAt(0).toUpperCase() + '</div>' +
+        '<div class="rk-nome">' + (x.eu ? 'Você' : nome) + '</div><div class="rk-pts">' + x.pontos + ' pts</div>' +
+        '<div class="rk-degrau" style="height:' + alturas[i] + 'px;">' + (i + 1) + '</div></div>';
+    }).join('') + '</div>';
+  }
+  const resto = r.lista.length >= 3 ? r.lista.slice(3) : r.lista;
+  const inicio = r.lista.length >= 3 ? 3 : 0;
+  if(resto.length > 0){
+    corpo += '<div class="rk-lista">' + resto.map(function(x, j){
+      return '<div class="rk-lin' + (x.eu ? ' eu' : '') + '"><span class="rk-i">' + (inicio + j + 1) + '</span><span class="rk-n">' + (x.eu ? 'Você' : primeiroNomeRanking(x.nome)) + '</span><b>' + x.pontos + '</b></div>';
+    }).join('') + '</div>';
+  }
+  if(r.lista.length === 0){
+    corpo += '<div class="info-box" style="margin-bottom:18px;"><p class="txt" style="color:var(--text-faint);margin:0;">O Top 10 aparece assim que mais alunas registrarem treinos.</p></div>';
+  }
+
+  // Mesmas regras de calcularPontosRankingPublico
+  const ganhar = '<p class="section-label">Como ganhar pontos</p>' +
+    '<div class="rk-ganhar"><span>Treino registrado <b>+10</b></span><span>Exercício com carga que subiu <b>+15</b></span><span>Check-in do dia <b>+3</b></span><span>Conta as últimas <b>4 semanas</b></span></div>';
+
+  return topo + corpo + ganhar;
+}
+
 async function renderRankingPublico(){
   const container = document.getElementById('area-ranking-publico');
   if(!container) return;
@@ -17305,20 +17821,8 @@ async function renderRankingPublico(){
 
   await sincronizarPontosRankingPublico(NOME_ALUNA_LOGADA); // garante que a pontuação dela está atualizada antes de mostrar a lista
   const top10 = await buscarRankingPublicoTop10();
-
-  if(top10.length === 0){
-    container.innerHTML = '<div class="info-box"><p class="txt" style="color:var(--text-faint);">Ainda não tem ranking suficiente pra mostrar — continue treinando!</p></div>';
-    return;
-  }
-
-  const medalhas = ['🥇', '🥈', '🥉'];
-  container.innerHTML = top10.map(function(r, i){
-    const souEu = r.nome === NOME_ALUNA_LOGADA;
-    return '<div class="list-item" style="margin-bottom:6px;' + (souEu ? 'border-color:var(--gold-soft);background:var(--gold-deep);' : '') + '">' +
-      '<span>' + (medalhas[i] || (i + 1) + 'º') + ' ' + r.nome.split(' ')[0] + (souEu ? ' (você)' : '') + '</span>' +
-      '<span class="tag">' + r.pontos + ' pts</span>' +
-    '</div>';
-  }).join('');
+  const r = montarRankingPublicoDaAluna(top10, NOME_ALUNA_LOGADA, calcularPontosRankingPublico(NOME_ALUNA_LOGADA));
+  container.innerHTML = htmlRankingPublico(r);
 }
 
 // Busca de verdade os pontos de TODAS as alunas (não só a que está logada), através de uma função
@@ -17365,36 +17869,25 @@ async function carregarDestaquesSemanaRecentes(){
 async function renderRanking(){
   const container = document.getElementById('area-ranking-conteudo');
   if(!container) return;
-
-  // Mostra na hora com o que já sabe localmente, enquanto busca o resto da comunidade de verdade
-  const pontosDelaAgora = calcularPontosAluna(NOME_ALUNA_LOGADA);
-  container.innerHTML = '<div class="dna-score-card"><div class="dna-score-left">' +
-    '<p class="dna-score-label">SEUS PONTOS</p>' +
-    '<p class="dna-score-numero">' + pontosDelaAgora + '</p>' +
-    '<p class="dna-score-comparativo" style="color:var(--text-faint);">Calculando sua posição na comunidade...</p>' +
-  '</div></div>';
+  container.innerHTML = '';
 
   const [r, destaques] = await Promise.all([calcularRankingComunidade(), carregarDestaquesSemanaRecentes()]);
   const pctMeta = Math.min(100, Math.round((r.totalComunidade / metaComunidadePontos) * 100));
+  const recompensa = escaparHtmlFicha(String(metaComunidadeRecompensa || '').replace(/\s*[—–]\s*/g, '. '));
 
-  let html = '<div class="dna-score-card"><div class="dna-score-left">' +
-    '<p class="dna-score-label">SEUS PONTOS</p>' +
-    '<p class="dna-score-numero">' + r.pontosDela + '</p>' +
-    '<p class="dna-score-comparativo" style="color:var(--gold-soft);">' + (r.percentil != null ? '▲ Top ' + (100 - r.percentil + 1) + '% da consultoria' : 'Ainda calculando sua posição') + '</p>' +
-  '</div></div>';
-
+  let html = '';
   if(destaques.length > 0){
     html += '<p class="section-label" style="margin-top:20px;">Destaques da semana</p>' +
-      destaques.map(function(d){ return '<div class="info-box" style="margin-bottom:8px;"><p class="txt" style="margin-bottom:0;">✨ ' + d + '</p></div>'; }).join('');
+      destaques.map(function(d){ return '<div class="info-box" style="margin-bottom:8px;"><p class="txt" style="margin-bottom:0;">' + escaparHtmlFicha(d) + '</p></div>'; }).join('');
   }
 
   html += '<p class="section-label" style="margin-top:20px;">Meta da comunidade</p>' +
     '<div class="info-box">' +
       '<p class="txt"><b>' + r.totalComunidade.toLocaleString('pt-BR') + '</b> de ' + metaComunidadePontos.toLocaleString('pt-BR') + ' pontos</p>' +
       '<div style="background:var(--card-2);border-radius:8px;height:10px;margin:8px 0;overflow:hidden;"><div style="background:linear-gradient(90deg,#F4D9A5,#E8C58A);height:100%;width:' + pctMeta + '%;"></div></div>' +
-      '<p class="txt" style="font-size:11px;color:var(--text-faint);">' + pctMeta + '% da meta · quando bater 100%: ' + metaComunidadeRecompensa + '</p>' +
+      '<p class="txt" style="font-size:11px;color:var(--text-faint);margin:0;">' + pctMeta + '% da meta · quando bater 100%: ' + recompensa + '</p>' +
     '</div>' +
-    '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:10px;">Seus pontos somam junto com as outras alunas da consultoria — a gente não mostra nome nem posição de ninguém além da sua, mas cada treino registrado ajuda a comunidade toda a chegar mais perto.</p>';
+    '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:10px;">Essa meta soma o DNA Score semanal de todas as alunas da consultoria. Cada semana sua ajuda a comunidade toda a chegar mais perto.</p>';
 
   container.innerHTML = html;
 }
@@ -17550,10 +18043,10 @@ function abrirTelaPerguntaRodaDaVida(){
 
 function pularPerguntaRodaDaVida(){
   const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
-  prog.rodaDaVidaPendente = null; // não marca a área como respondida — pode voltar num próximo ciclo de perguntas
+  prog.rodaDaVidaPendente = null; // não marca a área como respondida, pode voltar num próximo ciclo de perguntas
   salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
   renderBotaoPerguntaRodaDaVida();
-  openLevel2('home');
+  openLevel2(telaDepoisDaPerguntaDaRoda());
 }
 
 function confirmarRespostaRodaDaVida(valor){
@@ -17563,7 +18056,7 @@ function confirmarRespostaRodaDaVida(valor){
   prog.rodaDaVidaPendente = null;
   salvarCampoRodaDaVida(NOME_ALUNA_LOGADA, pendente.areaId, valor); // já salva e checa sozinho se fechou o ciclo
   renderBotaoPerguntaRodaDaVida();
-  openLevel2('home');
+  openLevel2(telaDepoisDaPerguntaDaRoda());
 }
 
 function calcularPontoForteEAreaFraca(areasObj){
@@ -17577,7 +18070,7 @@ function calcularPontoForteEAreaFraca(areasObj){
   return { forte: { label: forte.label, valor: areasObj[forte.id] }, fraca: { label: fraca.label, valor: areasObj[fraca.id] } };
 }
 
-function gerarSvgRadar(areasObj, tamanho){
+function gerarSvgRadar(areasObj, tamanho, anteriorObj){
   tamanho = tamanho || 260;
   const cx = tamanho / 2, cy = tamanho / 2, raioMax = tamanho / 2 - 34;
   const n = AREAS_RODA_DA_VIDA.length;
@@ -17598,16 +18091,82 @@ function gerarSvgRadar(areasObj, tamanho){
     return p.x + ',' + p.y;
   }).join(' ');
 
+  // Ciclo anterior, tracejado, pra comparar (só as áreas que tinham nota)
+  let anterior = '';
+  if(anteriorObj && AREAS_RODA_DA_VIDA.some(function(a){ return anteriorObj[a.id] != null; })){
+    const pontosAnt = AREAS_RODA_DA_VIDA.map(function(a, i){
+      const v = anteriorObj[a.id] != null ? anteriorObj[a.id] : 0;
+      const p = pontoNoAngulo(i, raioMax * (v / 5));
+      return p.x + ',' + p.y;
+    }).join(' ');
+    anterior = '<polygon class="rv-anterior" points="' + pontosAnt + '" fill="none" stroke="var(--text-faint)" stroke-width="1.5" stroke-dasharray="4 4"></polygon>';
+  }
+
   const labels = AREAS_RODA_DA_VIDA.map(function(a, i){
     const p = pontoNoAngulo(i, raioMax + 16);
     return '<circle cx="' + p.x + '" cy="' + p.y + '" r="3" fill="var(--gold-soft)"></circle>';
   }).join('');
 
   return '<svg viewBox="0 0 ' + tamanho + ' ' + tamanho + '" width="100%" style="max-width:280px;display:block;margin:0 auto;">' +
-    grades +
+    grades + anterior +
     '<polygon points="' + pontosValor + '" fill="rgba(232,197,138,0.28)" stroke="var(--gold-soft)" stroke-width="2"></polygon>' +
     labels +
     '</svg>';
+}
+
+// O ciclo fechado logo antes deste mês (pra comparar)
+function rodaDaVidaAnterior(prog, mesISO){
+  const meses = Object.keys((prog && prog.rodaDaVida) || {}).filter(function(m){ return m < mesISO && prog.rodaDaVida[m].finalizado; }).sort();
+  return meses.length ? prog.rodaDaVida[meses[meses.length - 1]] : null;
+}
+
+function nomeDoMesRoda(mesISO){
+  const t = new Date(mesISO + '-01T00:00:00').toLocaleDateString('pt-BR', { month: 'long' });
+  return t.charAt(0).toLowerCase() + t.slice(1);
+}
+
+// Gráfico + legenda + lista das áreas respondidas, com a seta de quanto mudou desde o ciclo anterior
+function htmlGraficoERodaDaVida(registro, anterior){
+  const ant = anterior ? anterior.areas : null;
+  let html = '<div class="rv-graf">' + gerarSvgRadar(registro.areas, 260, ant) +
+    '<p class="rv-leg">' + (ant ? 'Dourado: ' + nomeDoMesRoda(registro.mes) + ' · tracejado: ' + nomeDoMesRoda(anterior.mes) : 'Quanto mais longe do centro, melhor a área está') + '</p></div>';
+  const respondidas = AREAS_RODA_DA_VIDA.filter(function(a){ return registro.areas[a.id] != null; });
+  if(respondidas.length > 0){
+    html += '<div class="rv-lista">' + respondidas.map(function(a){
+      const v = registro.areas[a.id];
+      let seta = '';
+      if(ant && ant[a.id] != null && ant[a.id] !== v){
+        const dif = v - ant[a.id];
+        seta = dif > 0 ? '<span class="rv-up">▲ ' + dif + '</span>' : '<span class="rv-down">▼ ' + Math.abs(dif) + '</span>';
+      }
+      return '<div class="rv-lin"><i class="ti ' + a.icone + '"></i><span>' + a.label + '</span>' + seta + '<b>' + v + '</b></div>';
+    }).join('') + '</div>';
+  }
+  return html;
+}
+
+// "Responder uma área agora": não precisa esperar a pergunta chegar sozinha
+let voltarPraRodaDepoisDeResponder = false;
+function responderAreaDaRodaAgora(){
+  const nome = NOME_ALUNA_LOGADA;
+  if(diasParaProximaRodaDaVida(nome) > 0) return;
+  const prog = getProgressoAluna(nome);
+  if(!prog.rodaDaVidaPendente){
+    const registro = getRodaDaVidaMes(nome, getMesAtualISO());
+    const faltando = AREAS_RODA_DA_VIDA.filter(function(a){ return registro.areas[a.id] == null; });
+    if(faltando.length === 0) return;
+    const escolhida = faltando[Math.floor(Math.random() * faltando.length)];
+    prog.rodaDaVidaPendente = { areaId: escolhida.id, label: escolhida.label, icone: escolhida.icone };
+    prog.rodaDaVidaUltimaPerguntaEm = new Date().toISOString();
+    salvarProgressoNoSupabase(nome);
+  }
+  voltarPraRodaDepoisDeResponder = true;
+  abrirTelaPerguntaRodaDaVida();
+}
+function telaDepoisDaPerguntaDaRoda(){
+  const destino = voltarPraRodaDepoisDeResponder ? 'rodadavida' : 'home';
+  voltarPraRodaDepoisDeResponder = false;
+  return destino;
 }
 
 let mostrandoHistoricoRodaDaVida = false;
@@ -17659,14 +18218,14 @@ function renderRodaDaVidaAlunaBase(){
     const ultima = getUltimaFinalizacaoRodaDaVida(nome);
     const resumo = ultima ? calcularPontoForteEAreaFraca(ultima.areas) : null;
     let html = '<p class="section-label" style="margin-top:0;">Sua última Roda da Vida</p>' +
-      '<div class="info-box" style="margin-bottom:12px;">' + gerarSvgRadar(ultima.areas) + '</div>';
+      htmlGraficoERodaDaVida(ultima, rodaDaVidaAnterior(prog, ultima.mes));
     if(resumo){
       html += '<div class="row" style="gap:8px;margin-bottom:16px;">' +
         '<div class="info-box" style="flex:1;background:var(--success-soft);border-color:var(--success);"><p class="lbl" style="font-size:11px;">Ponto forte</p><p class="txt" style="font-size:12px;">' + resumo.forte.label + ' (' + resumo.forte.valor + '/5)</p></div>' +
         '<div class="info-box" style="flex:1;"><p class="lbl" style="font-size:11px;">Área pra focar</p><p class="txt" style="font-size:12px;">' + resumo.fraca.label + ' (' + resumo.fraca.valor + '/5)</p></div>' +
       '</div>';
     }
-    html += '<div class="info-box" style="text-align:center;margin-bottom:12px;"><p class="txt" style="font-size:12px;color:var(--text-faint);">Um novo preenchimento libera em <b style="color:var(--gold-soft);">' + diasRestantes + ' dia(s)</b></p></div>' +
+    html += '<div class="info-box" style="text-align:center;margin-bottom:12px;"><p class="txt" style="font-size:12px;color:var(--text-faint);">Um novo preenchimento libera em <b style="color:var(--gold-soft);">' + diasRestantes + (diasRestantes === 1 ? ' dia' : ' dias') + '</b></p></div>' +
       '<span class="chip" style="cursor:pointer;" onclick="alternarHistoricoRodaDaVida()">Ver meses anteriores</span>';
     container.innerHTML = html;
     return;
@@ -17683,13 +18242,16 @@ function renderRodaDaVidaAlunaBase(){
   let html = '<p class="section-label" style="margin-top:0;">' + nomeDoMes.charAt(0).toUpperCase() + nomeDoMes.slice(1) + ' <span class="tag">' + totalPreenchido + ' de ' + AREAS_RODA_DA_VIDA.length + '</span></p>';
 
   if(!jaPreencheuAlgumaVez && totalPreenchido === 0){
-    html += '<div class="info-box" style="margin-bottom:16px;background:var(--success-soft);border-color:var(--success);"><p class="txt" style="font-size:12px;">A Roda da Vida avalia como está sua vida além do treino: saúde, trabalho, família, financeiro e mais. Isso ajuda seu personal a te entender melhor como um todo. De vez em quando, uma área aparece pra você responder — leva 5 segundos cada uma.</p></div>';
-  } else if(totalPreenchido < AREAS_RODA_DA_VIDA.length){
-    html += '<div class="info-box" style="margin-bottom:16px;"><p class="txt" style="font-size:12px;color:var(--text-faint);">Faltam ' + (AREAS_RODA_DA_VIDA.length - totalPreenchido) + ' área(s) pra fechar esse ciclo. Elas vão aparecendo aos poucos pra você responder — nenhuma pressa.</p></div>';
+    html += '<div class="info-box" style="margin-bottom:14px;"><p class="txt" style="font-size:12px;margin:0;">A Roda da Vida mostra como está sua vida além do treino: saúde, trabalho, família, financeiro e mais. Isso ajuda seu personal a te entender melhor como um todo. Cada área leva uns 5 segundos pra responder.</p></div>';
+  }
+  if(totalPreenchido < AREAS_RODA_DA_VIDA.length){
+    const faltam = AREAS_RODA_DA_VIDA.length - totalPreenchido;
+    html += '<div class="rv-acao" onclick="responderAreaDaRodaAgora()"><div class="rv-mais">+</div><p><strong>Responder uma área agora</strong>' +
+      totalPreenchido + ' de ' + AREAS_RODA_DA_VIDA.length + ' respondidas neste ciclo · ' + (faltam === 1 ? 'falta 1' : 'faltam ' + faltam) + '</p></div>';
   }
 
   if(totalPreenchido > 0){
-    html += '<div class="info-box" style="margin-bottom:16px;">' + gerarSvgRadar(registro.areas) + '</div>';
+    html += htmlGraficoERodaDaVida(registro, rodaDaVidaAnterior(prog, mesISO));
     const resumo = calcularPontoForteEAreaFraca(registro.areas);
     if(resumo){
       html += '<div class="row" style="gap:8px;margin-bottom:16px;">' +
