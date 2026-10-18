@@ -204,6 +204,74 @@
   .evo-breve span{flex:1;min-width:0;}
   .evo-breve small{display:block;font-size:11px;color:var(--text-faint);margin-top:3px;}
   .evo-breve b{font-size:9.5px;letter-spacing:1.5px;color:var(--gold);border:1px solid var(--border-strong);border-radius:6px;padding:3px 6px;white-space:nowrap;}
+  .fb-filtros{display:flex;gap:8px;margin:0 0 12px;}
+  .fb-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;}
+  .fb-item.novo{border-color:var(--border-strong);background:linear-gradient(150deg,rgba(232,197,138,0.08),var(--card) 60%);}
+  .fb-item .pn-av{width:34px;height:34px;font-size:11.5px;flex-shrink:0;}
+  .fb-corpo{flex:1;min-width:0;}
+  .fb-tit{font-size:13.5px;font-weight:600;margin:0;}
+  .fb-tit span{font-weight:400;color:var(--text-faint);}
+  .fb-txt{font-size:13px;color:var(--text-dim);margin:5px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;}
+  .fb-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;font-size:11.5px;color:var(--text-faint);}
+  .fb-acoes{display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;}
+  .fb-bt{height:30px;border-radius:9px;padding:0 11px;font-size:11.5px;font-weight:600;border:1px solid var(--border-strong);background:transparent;color:var(--gold-soft);cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .fb-bt.ouro{background:linear-gradient(135deg,#F4D9A5,#C9A063);color:#1A1409;border:none;}
+  .fb-vazio{font-size:13px;color:var(--text-faint);text-align:center;padding:26px 0;}
+  @media (max-width:600px){ .fb-item{flex-wrap:wrap;} .fb-acoes{flex-direction:row;width:100%;justify-content:flex-end;} }
+  .pg-box{background:var(--card);border:1px solid var(--border-strong);border-radius:20px;padding:18px;margin-top:10px;display:flex;flex-direction:column;gap:14px;}
+  .pg-top{display:flex;flex-wrap:wrap;align-items:center;gap:10px;}
+  .pg-top h3{margin:0;font-size:15.5px;font-weight:600;}
+  .pg-top .pg-x{margin-left:auto;font-size:11.5px;color:var(--text-faint);}
+  .pg-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
+  .pg-k{background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:11px 13px;}
+  .pg-k small{display:block;font-size:10px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase;}
+  .pg-k b{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;}
+  .pg-k b i{font-style:normal;color:var(--gold-soft);}
+  .pg-k span{display:block;font-size:11px;color:var(--text-faint);margin-top:1px;}
+  .pg-k span.mais{color:var(--success);}
+  .pg-chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .pg-dias{display:flex;gap:2px;border-bottom:1px solid var(--border);overflow-x:auto;}
+  .pg-dia{padding:9px 12px;font-size:12.5px;color:var(--text-faint);display:flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap;}
+  .pg-dia.on{color:var(--gold-soft);box-shadow:inset 0 -2px 0 var(--gold);}
+  .pg-dia em{font-style:normal;font-size:10px;background:var(--card-2);border-radius:10px;padding:2px 7px;}
+  .pg-dia.visto em{color:var(--success);}
+  .pg-foco{font-size:12px;color:var(--text-dim);margin:0;}
+  .pg-foco b{color:var(--text);}
+  .pg-cab,.pg-lin{display:grid;grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr) 200px;gap:8px;align-items:center;}
+  .pg-cab{font-size:10px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase;padding:0 2px;}
+  .pg-lin{position:relative;}
+  .pg-ex{background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:9px 11px;min-height:50px;display:flex;flex-direction:column;justify-content:center;min-width:0;}
+  .pg-ex b{font-size:12.5px;font-weight:600;overflow-wrap:break-word;}
+  .pg-ex small{font-size:11px;color:var(--text-faint);margin-top:2px;}
+  .pg-ex small u{text-decoration:none;color:var(--success);font-weight:600;}
+  .pg-ex.troca,.pg-ex.novo{border-color:rgba(143,174,125,0.45);}
+  .pg-ex.sai{border-color:rgba(217,120,90,0.35);}
+  .pg-ex.vazio{border-style:dashed;background:transparent;color:var(--text-faint);font-size:11.5px;align-items:center;}
+  .pg-seta{display:flex;justify-content:center;font-size:20px;}
+  .pg-seta.verde{color:var(--success);} .pg-seta.cinza{color:#4a4a4a;} .pg-seta.verm{color:#D9785A;}
+  .pg-st{font-size:9.5px;font-weight:700;letter-spacing:.7px;border-radius:5px;padding:1px 5px;margin-right:5px;vertical-align:1px;}
+  .pg-st.troca{background:rgba(143,174,125,0.16);color:var(--success);} .pg-st.mantem{background:var(--card);color:var(--text-faint);}
+  .pg-st.novo{background:rgba(232,197,138,0.14);color:var(--gold-soft);} .pg-st.sai{background:rgba(217,120,90,0.14);color:#D9785A;} .pg-st.seu{background:rgba(232,197,138,0.14);color:var(--gold-soft);}
+  .pg-met{font-size:9.5px;font-weight:600;color:var(--gold-soft);border:1px solid var(--border-strong);border-radius:5px;padding:0 5px;margin-left:5px;}
+  .pg-bts{display:flex;gap:5px;justify-content:flex-end;}
+  .pg-b{height:30px;border-radius:9px;padding:0 9px;font-size:11px;font-weight:600;border:1px solid var(--border-strong);background:transparent;color:var(--gold-soft);cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .pg-b.nao{border-color:rgba(217,120,90,0.4);color:#D9785A;}
+  .pg-recusa{display:flex;align-items:center;gap:10px;font-size:11.5px;color:#D9785A;background:rgba(217,120,90,0.08);border:1px solid rgba(217,120,90,0.25);border-radius:10px;padding:8px 11px;margin-top:-4px;}
+  .pg-recusa span{margin-left:auto;color:var(--gold);text-decoration:underline;cursor:pointer;white-space:nowrap;}
+  .pg-pop{position:absolute;right:0;top:100%;margin-top:4px;width:260px;max-width:90vw;background:#1F1F1F;border:1px solid var(--border-strong);border-radius:12px;padding:8px;box-shadow:0 14px 40px rgba(0,0,0,.6);z-index:30;}
+  .pg-pop p{font-size:10px;color:var(--text-faint);letter-spacing:1px;text-transform:uppercase;margin:2px 6px 6px;}
+  .pg-pop div{padding:8px;border-radius:8px;font-size:12px;color:var(--text-dim);cursor:pointer;}
+  .pg-pop div:hover{background:rgba(232,197,138,0.1);color:var(--gold-soft);}
+  .pg-pop input{width:100%;box-sizing:border-box;background:var(--card-2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 9px;font-size:12px;margin-bottom:4px;font-family:inherit;}
+  .pg-rod{display:flex;flex-wrap:wrap;align-items:center;gap:12px;border-top:1px solid var(--border);padding-top:12px;}
+  .pg-rod .pg-info{font-size:12px;color:var(--text-dim);flex:1;min-width:180px;}
+  .pg-rod .pg-info b{color:var(--text);}
+  .pg-rod .btn-gold{width:auto;margin:0;padding:12px 18px;}
+  @media (max-width:700px){
+    .pg-cab{display:none;}
+    .pg-lin{grid-template-columns:minmax(0,1fr) 26px minmax(0,1fr);}
+    .pg-bts{grid-column:1 / -1;}
+  }
   .rv-acao{display:flex;align-items:center;gap:14px;background:linear-gradient(150deg,rgba(232,197,138,0.14),var(--card) 65%);border:1px solid var(--border-strong);border-radius:16px;padding:14px;margin-bottom:14px;cursor:pointer;}
   .rv-mais{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#F4D9A5,#C9A063);color:#1A1409;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
   .rv-acao p{margin:0;font-size:12px;color:var(--text-faint);} .rv-acao p strong{display:block;font-size:14.5px;color:var(--text);font-weight:600;margin-bottom:2px;}
@@ -706,7 +774,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-11-R-TELAS-REVISADAS</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-18-S-PROGRESSAO-FEEDBACKS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1248,6 +1316,20 @@
         <div id="area-detalhe-sinalizacao"></div>
       </div>
 
+      <div id="personal-feedback-treinos" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
+        <h1 class="page-title" style="margin-top:0;">Feedback dos treinos</h1>
+        <p class="page-sub" style="margin-top:-6px;">O que a equipe anotou sobre os treinos gerados (no campo "Seu feedback sobre esse treino", na ficha). Marque como lido depois de ver.</p>
+        <div id="area-feedback-treinos"></div>
+      </div>
+
+      <div id="personal-feedback-alunas" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
+        <h1 class="page-title" style="margin-top:0;">Feedback das alunas</h1>
+        <p class="page-sub" style="margin-top:-6px;">Só entra aqui o que precisa ser lido: comentário escrito ou desconforto no "Como foi o treino?" (últimos 30 dias) e dúvidas que elas mandaram.</p>
+        <div id="area-feedback-alunas"></div>
+      </div>
+
       <div id="personal-conversas" style="display:none;">
         <div class="local-back" id="conversas-voltar" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Dashboard</span></div>
         <h1 class="page-title" id="conversas-titulo" style="margin-top:0;">Conversas</h1>
@@ -1562,7 +1644,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-11-R-TELAS-REVISADAS';
+const VERSAO_APP = '2026-10-18-S-PROGRESSAO-FEEDBACKS';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -7726,16 +7808,17 @@ async function salvarFeedbackGerador(nomeAluna){
   const textoEl = document.getElementById('feedback-gerador-texto');
   const texto = textoEl.value.trim();
   if(!texto) return;
-  const registro = { data: new Date().toLocaleDateString('pt-BR'), aluna: nomeAluna, texto: texto };
+  const chave = 'feedback_' + Date.now();
+  const registro = { id: chave, data: new Date().toLocaleDateString('pt-BR'), em: new Date().toISOString(), aluna: nomeAluna, texto: texto, autor: NOME_PERSONAL_LOGADO || '', lido: false };
 
   const lista = carregarFeedbackGerador();
   lista.push(registro);
   salvarListaFeedbackGerador(lista);
   textoEl.value = '';
   renderListaFeedbackGerador(nomeAluna);
+  atualizarBadgesFeedback();
 
   // Salva de verdade no banco também, pra não depender só do navegador local
-  const chave = 'feedback_' + Date.now();
   if(supabaseClient){
     try {
       const { error } = await supabaseClient.from('catalogo_personal').upsert({
@@ -7743,11 +7826,196 @@ async function salvarFeedbackGerador(nomeAluna){
       });
       mostrarConfirmacaoSalvamento(!error, error ? 'Feedback salvo só localmente por enquanto: ' + error.message : 'Feedback anotado e salvo de verdade.');
     } catch(erroDeRede){
-      mostrarConfirmacaoSalvamento(false, 'Sem conexão agora — feedback ficou salvo só nesse navegador, tenta de novo com internet.');
+      mostrarConfirmacaoSalvamento(false, 'Sem conexão agora. O feedback ficou salvo só nesse navegador, tente de novo com internet.');
     }
   } else {
-    mostrarConfirmacaoSalvamento(false, 'Sem conexão com o Supabase — feedback ficou salvo só nesse navegador.');
+    mostrarConfirmacaoSalvamento(false, 'Sem conexão com o servidor. O feedback ficou salvo só nesse navegador.');
   }
+}
+
+// =====================================================================================
+// FEEDBACKS COM CONTADOR: "Feedback dos treinos" (o que a equipe anotou) e "Feedback das alunas"
+// (só comentário escrito, desconforto ou dúvida, pra não virar mil avisos)
+// =====================================================================================
+const DIAS_FEEDBACK_ALUNAS = 30;
+const feedbacksAlunasPainel = {};   // nome -> feedbacks do "Como foi o treino?" que importam (lidos do progresso dela)
+const lidosFeedbackAlunas = {};     // "aluna|data" -> { por, em }  (vem do catálogo do Personal)
+let filtroFeedbackTreinos = 'naolidos';
+let filtroFeedbackAlunas = 'naolidos';
+
+function feedbackDaAlunaImporta(f){
+  return !!f && (!!(f.comentario && String(f.comentario).trim()) || f.desconforto === true);
+}
+
+function feedbacksQueImportam(prog, agora){
+  if(agora === undefined) agora = Date.now();
+  const limite = agora - DIAS_FEEDBACK_ALUNAS * 86400000;
+  return ((prog && prog.feedbackTreino) || []).filter(function(f){
+    const t = f && f.data ? new Date(f.data).getTime() : NaN;
+    return feedbackDaAlunaImporta(f) && !isNaN(t) && t >= limite;
+  }).map(function(f){ return { data: f.data, dia: f.dia || '', comentario: f.comentario || '', desconforto: !!f.desconforto, exercicio: f.exercicio || '', escala: f.escalaDesconforto != null ? f.escalaDesconforto : null }; });
+}
+
+function itensFeedbackAlunas(agora){
+  if(agora === undefined) agora = Date.now();
+  const limite = agora - DIAS_FEEDBACK_ALUNAS * 86400000;
+  const itens = [];
+  Object.keys(feedbacksAlunasPainel).forEach(function(nome){
+    if(!alunasPersonal.some(function(a){ return a.nome === nome; })) return;
+    (feedbacksAlunasPainel[nome] || []).forEach(function(f){
+      const chave = nome + '|' + f.data;
+      itens.push({ tipo: 'treino', aluna: nome, data: f.data, chave: chave, lido: !!lidosFeedbackAlunas[chave], lidoPor: lidosFeedbackAlunas[chave] ? lidosFeedbackAlunas[chave].por : '', f: f });
+    });
+  });
+  alunasPersonal.forEach(function(a){
+    (a.duvidasSinalizadas || []).forEach(function(d, idx){
+      if(!d) return;
+      const t = d.data ? new Date(d.data).getTime() : NaN;
+      if(d.resolvida && (isNaN(t) || t < limite)) return; // respondida e antiga: não precisa aparecer
+      itens.push({ tipo: 'duvida', aluna: a.nome, data: d.data || '', chave: a.nome + '|duvida|' + idx, idx: idx, lido: !!d.resolvida, lidoPor: d.resolvidaPor || '', d: d });
+    });
+  });
+  itens.sort(function(x, y){ return (x.lido ? 1 : 0) - (y.lido ? 1 : 0) || new Date(y.data || 0) - new Date(x.data || 0); });
+  return itens;
+}
+
+function itensFeedbackTreinos(){
+  return carregarFeedbackGerador().map(function(f, i){ return Object.assign({ indice: i }, f); })
+    .sort(function(x, y){ return (x.lido ? 1 : 0) - (y.lido ? 1 : 0) || new Date(y.em || 0) - new Date(x.em || 0) || y.indice - x.indice; });
+}
+
+function contarFeedbacksNaoLidos(){
+  let treinos = 0, alunas = 0;
+  try { treinos = carregarFeedbackGerador().filter(function(f){ return !f.lido; }).length; } catch(e){}
+  try { alunas = itensFeedbackAlunas().filter(function(x){ return !x.lido; }).length; } catch(e){}
+  return { treinos: treinos, alunas: alunas };
+}
+
+function atualizarBadgesFeedback(){
+  const n = contarFeedbacksNaoLidos();
+  [['side-badge-fb-treinos', n.treinos], ['side-badge-fb-alunas', n.alunas]].forEach(function(par){
+    const b = document.getElementById(par[0]);
+    if(!b) return;
+    b.textContent = par[1];
+    b.style.display = par[1] > 0 ? 'inline-block' : 'none';
+  });
+}
+
+function dataHoraCurta(iso){
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return '';
+  return d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
+function htmlFiltroFeedback(qual, atual, naoLidos, total){
+  return '<div class="fb-filtros">' +
+    '<div class="chip' + (atual === 'naolidos' ? ' active' : '') + '" onclick="trocarFiltroFeedback(\'' + qual + '\',\'naolidos\')">Não lidos (' + naoLidos + ')</div>' +
+    '<div class="chip' + (atual === 'todos' ? ' active' : '') + '" onclick="trocarFiltroFeedback(\'' + qual + '\',\'todos\')">Todos (' + total + ')</div>' +
+  '</div>';
+}
+
+function trocarFiltroFeedback(qual, filtro){
+  if(qual === 'treinos'){ filtroFeedbackTreinos = filtro; renderFeedbackTreinos(); }
+  else { filtroFeedbackAlunas = filtro; renderFeedbackAlunas(); }
+}
+
+function abrirFichaPeloNome(nome){
+  const i = alunasPersonal.findIndex(function(a){ return a.nome === nome; });
+  if(i !== -1) openAlunaDetail(i);
+}
+
+function renderFeedbackTreinos(){
+  const area = document.getElementById('area-feedback-treinos');
+  if(!area) return;
+  const todos = itensFeedbackTreinos();
+  const naoLidos = todos.filter(function(f){ return !f.lido; });
+  const lista = filtroFeedbackTreinos === 'naolidos' ? naoLidos : todos;
+  let html = htmlFiltroFeedback('treinos', filtroFeedbackTreinos, naoLidos.length, todos.length);
+  if(lista.length === 0){
+    html += '<div class="fb-vazio">' + (todos.length === 0 ? 'Nenhum feedback anotado ainda. Ele é escrito na ficha da aluna, aba Treino, em "Seu feedback sobre esse treino".' : 'Tudo lido por aqui.') + '</div>';
+  } else {
+    html += lista.map(function(f){
+      const nomeJs = String(f.aluna || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      return '<div class="fb-item' + (f.lido ? '' : ' novo') + '">' +
+        '<div class="pn-av">' + escaparHtmlFicha(iniciaisDaAluna(f.aluna || '?')) + '</div>' +
+        '<div class="fb-corpo"><p class="fb-tit">' + escaparHtmlFicha(f.aluna || '') + ' <span>· treino gerado</span></p>' +
+          '<p class="fb-txt">' + escaparHtmlFicha(f.texto || '') + '</p>' +
+          '<div class="fb-meta"><span>' + (f.autor ? 'por ' + escaparHtmlFicha(f.autor) + ' · ' : '') + (f.em ? dataHoraCurta(f.em) : escaparHtmlFicha(f.data || '')) + '</span>' +
+          (f.lido ? '<span class="fc fc-ok">Lido' + (f.lidoPor ? ' por ' + escaparHtmlFicha(f.lidoPor) : '') + '</span>' : '<span class="fc fc-alerta">Novo</span>') + '</div></div>' +
+        '<div class="fb-acoes">' + (f.lido ? '' : '<button class="fb-bt ouro" onclick="marcarFeedbackTreinoLido(' + f.indice + ')">Marcar como lido</button>') +
+          '<button class="fb-bt" onclick="abrirFichaPeloNome(\'' + nomeJs + '\')">Abrir ficha</button></div>' +
+      '</div>';
+    }).join('');
+  }
+  area.innerHTML = html;
+}
+
+function marcarFeedbackTreinoLido(indice){
+  const lista = carregarFeedbackGerador();
+  const f = lista[indice];
+  if(!f || f.lido) return;
+  f.lido = true;
+  f.lidoPor = NOME_PERSONAL_LOGADO || '';
+  f.lidoEm = new Date().toISOString();
+  if(!f.id) f.id = 'feedback_' + Date.now(); // anotação antiga, que só existia neste navegador
+  salvarListaFeedbackGerador(lista);
+  salvarCatalogoPersonalConferindo('feedback_gerador', f.id, f);
+  renderFeedbackTreinos();
+  atualizarBadgesFeedback();
+}
+
+function renderFeedbackAlunas(){
+  const area = document.getElementById('area-feedback-alunas');
+  if(!area) return;
+  const todos = itensFeedbackAlunas();
+  const naoLidos = todos.filter(function(x){ return !x.lido; });
+  const lista = filtroFeedbackAlunas === 'naolidos' ? naoLidos : todos;
+  let html = htmlFiltroFeedback('alunas', filtroFeedbackAlunas, naoLidos.length, todos.length);
+  if(lista.length === 0){
+    html += '<div class="fb-vazio">' + (todos.length === 0 ? 'Nenhum comentário, desconforto ou dúvida das alunas por enquanto.' : 'Tudo lido por aqui.') + '</div>';
+  } else {
+    html += lista.map(function(x){
+      const nomeJs = String(x.aluna).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      const chaveJs = String(x.chave).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      let titulo, texto, extra = '';
+      if(x.tipo === 'treino'){
+        titulo = 'Como foi o treino' + (x.f.dia ? ' de ' + escaparHtmlFicha(x.f.dia) : '');
+        texto = x.f.comentario ? escaparHtmlFicha(x.f.comentario) : '';
+        if(x.f.desconforto) extra = '<span class="fc fc-ruim">Desconforto' + (x.f.exercicio ? ' em ' + escaparHtmlFicha(x.f.exercicio) : '') + (x.f.escala != null ? ' · ' + x.f.escala + '/10' : '') + '</span>';
+      } else {
+        titulo = 'Dúvida';
+        texto = escaparHtmlFicha(x.d.pergunta || '');
+      }
+      return '<div class="fb-item' + (x.lido ? '' : ' novo') + '">' +
+        '<div class="pn-av">' + escaparHtmlFicha(iniciaisDaAluna(x.aluna)) + '</div>' +
+        '<div class="fb-corpo"><p class="fb-tit">' + escaparHtmlFicha(x.aluna) + ' <span>· ' + titulo + '</span></p>' +
+          (texto ? '<p class="fb-txt">' + texto + '</p>' : '') +
+          '<div class="fb-meta">' + extra + '<span>' + dataHoraCurta(x.data) + '</span>' +
+          (x.lido ? '<span class="fc fc-ok">' + (x.tipo === 'duvida' ? 'Respondida' : 'Lido') + (x.lidoPor ? ' por ' + escaparHtmlFicha(x.lidoPor) : '') + '</span>' : '<span class="fc fc-alerta">Novo</span>') + '</div></div>' +
+        '<div class="fb-acoes">' + (x.lido ? '' : '<button class="fb-bt ouro" onclick="marcarFeedbackAlunaLido(\'' + chaveJs + '\')">' + (x.tipo === 'duvida' ? 'Marcar como respondida' : 'Marcar como lido') + '</button>') +
+          '<button class="fb-bt" onclick="abrirFichaPeloNome(\'' + nomeJs + '\')">Abrir ficha</button></div>' +
+      '</div>';
+    }).join('');
+  }
+  area.innerHTML = html;
+}
+
+function marcarFeedbackAlunaLido(chave){
+  const item = itensFeedbackAlunas().find(function(x){ return x.chave === chave; });
+  if(!item || item.lido) return;
+  if(item.tipo === 'duvida'){
+    const a = alunasPersonal.find(function(x){ return x.nome === item.aluna; });
+    if(!a || !a.duvidasSinalizadas[item.idx]) return;
+    a.duvidasSinalizadas[item.idx].resolvida = true;
+    a.duvidasSinalizadas[item.idx].resolvidaPor = NOME_PERSONAL_LOGADO || '';
+    salvarPerfilAlunaNoSupabase(a.nome);
+  } else {
+    const dados = { por: NOME_PERSONAL_LOGADO || '', em: new Date().toISOString() };
+    lidosFeedbackAlunas[chave] = dados;
+    salvarCatalogoPersonalConferindo('feedback_aluna_lido', chave, dados);
+  }
+  renderFeedbackAlunas();
+  atualizarBadgesFeedback();
 }
 
 function renderListaFeedbackGerador(nomeAluna){
@@ -7758,7 +8026,7 @@ function renderListaFeedbackGerador(nomeAluna){
   if(lista.length === 0){ container.innerHTML = ''; return; }
   let html = '<p class="lbl" style="margin-top:14px;">Feedbacks guardados dessa aluna (' + lista.length + ')</p>';
   lista.slice().reverse().forEach(function(f){
-    html += '<div class="info-box" style="margin-bottom:8px;"><p class="txt" style="margin-bottom:2px;">' + f.texto + '</p><p style="font-size:11px;color:var(--text-faint);margin:0;">' + f.aluna + ' · ' + f.data + '</p></div>';
+    html += '<div class="info-box" style="margin-bottom:8px;"><p class="txt" style="margin-bottom:2px;">' + escaparHtmlFicha(f.texto) + '</p><p style="font-size:11px;color:var(--text-faint);margin:0;">' + escaparHtmlFicha(f.aluna) + ' · ' + escaparHtmlFicha(f.autor ? f.autor + ' · ' + f.data : f.data) + (f.lido ? ' · lido' : '') + '</p></div>';
   });
   html += '<div style="display:flex;gap:8px;">' +
     '<button class="btn-secondary" style="font-size:12px;width:auto;flex:1;" onclick="copiarFeedbackGerador(\'' + (nomeAluna || '').replace(/'/g,"\\'") + '\')">Copiar tudo</button>' +
@@ -8878,55 +9146,421 @@ function calcularVolumeTotalDoTreino(diasTreino){
   return { series: series, exercicios: exercicios };
 }
 
+// =====================================================================================
+// PROGRESSÃO POR DIA: antes de confirmar, o Personal vê cada dia lado a lado (hoje x depois de progredir)
+// e pode trocar um exercício só pra essa aluna ou marcar "Não faz sentido", que vale pra todas as alunas.
+// =====================================================================================
+const trocasBloqueadas = {}; // chave "de→para" -> { de, para, por, em, ativa }  (vem do catálogo do Personal)
+const NOMES_DIAS_PROGRESSAO = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+const estadoProgressao = {}; // nome da aluna -> { diaAberto, vistos: {dia: true}, trocaAberta, busca, recusasDaTela: [chaves] }
+
+// "Nome · 3x10" ou "Bi-set|||A · 3x12|||B · 3x12" -> partes usadas na comparação
+function partesDaLinhaDeTreino(linha){
+  const texto = String(linha || '');
+  if(texto.indexOf('|||') !== -1){
+    const pedacos = texto.split('|||');
+    const itens = pedacos.slice(1).map(function(x){ return partesDaLinhaDeTreino(x); });
+    const nomes = itens.map(function(x){ return x.nome; });
+    return { nome: pedacos[0].trim() + ': ' + nomes.join(' + '), nomes: nomes, volume: itens[0] ? itens[0].volume : '', series: itens[0] ? itens[0].series : null, combo: true, chave: semAcentoMinusculo(nomes.join(' + ')).trim() };
+  }
+  const i = texto.lastIndexOf(' · ');
+  const nome = (i === -1 ? texto : texto.slice(0, i)).trim();
+  const volume = i === -1 ? '' : texto.slice(i + 3).trim();
+  const m = volume.match(/^(\d+)\s*x/i);
+  return { nome: nome, nomes: [nome], volume: volume, series: m ? parseInt(m[1], 10) : null, combo: false, chave: semAcentoMinusculo(nome).trim() };
+}
+
+function grupoDaLinhaDeTreino(linha){
+  const ex = buscarExercicioNoBanco(partesDaLinhaDeTreino(linha).nomes[0] || '');
+  return ex ? (ex.grupo || ex.categoria || '') : '';
+}
+
+function chaveDaTroca(de, para){ return semAcentoMinusculo(de).trim() + '→' + semAcentoMinusculo(para).trim(); }
+function trocaEstaBloqueada(de, para){
+  const t = trocasBloqueadas[chaveDaTroca(de, para)];
+  return !!(t && t.ativa !== false);
+}
+
+function nomeDoMetodo(m){ return m ? (typeof m === 'string' ? m : (m.tipo || '')) : ''; }
+
+// Pareia os exercícios de um dia: mesmo exercício = MANTÉM; mesmo grupo muscular = TROCA;
+// o que sobra do novo = NOVO; o que sobra do atual = SAI.
+function parearDiaDaProgressao(exAtual, exNovo){
+  const atual = (exAtual || []).map(function(l, i){ return { linha: l, i: i, p: partesDaLinhaDeTreino(l), usado: false }; });
+  const novo = (exNovo || []).map(function(l, i){ return { linha: l, i: i, p: partesDaLinhaDeTreino(l), par: null, tipo: null }; });
+  novo.forEach(function(n){
+    const igual = atual.find(function(a){ return !a.usado && a.p.chave === n.p.chave; });
+    if(igual){ igual.usado = true; n.par = igual; n.tipo = 'mantem'; }
+  });
+  // Mesmo grupo e mesmo tipo de movimento primeiro (abdutora com abdutora), depois só mesmo grupo
+  novo.forEach(function(n){
+    if(n.tipo) return;
+    const g = grupoDaLinhaDeTreino(n.linha);
+    if(!g) return;
+    const mov = obterPalavraChaveMovimento(n.p.nomes[0] || '');
+    const parecido = atual.find(function(a){ return !a.usado && grupoDaLinhaDeTreino(a.linha) === g && obterPalavraChaveMovimento(a.p.nomes[0] || '') === mov; });
+    if(parecido){ parecido.usado = true; n.par = parecido; n.tipo = 'troca'; }
+  });
+  novo.forEach(function(n){
+    if(n.tipo) return;
+    const g = grupoDaLinhaDeTreino(n.linha);
+    if(!g) return;
+    const mesmo = atual.find(function(a){ return !a.usado && grupoDaLinhaDeTreino(a.linha) === g; });
+    if(mesmo){ mesmo.usado = true; n.par = mesmo; n.tipo = 'troca'; }
+  });
+  const linhas = novo.map(function(n){ return { tipo: n.tipo || 'novo', atual: n.par ? { linha: n.par.linha, i: n.par.i, p: n.par.p } : null, novo: { linha: n.linha, i: n.i, p: n.p } }; });
+  atual.filter(function(a){ return !a.usado; }).forEach(function(a){ linhas.push({ tipo: 'sai', atual: { linha: a.linha, i: a.i, p: a.p }, novo: null }); });
+  return linhas;
+}
+
+function diaPorNome(dias, nome){ return (dias || []).find(function(d){ return d && d.n === nome; }) || null; }
+
+// Aplica no treino novo (já com nome nos dias): as trocas que alguém marcou como "Não faz sentido"
+// voltam pro exercício atual, e os ajustes que você fez só pra essa aluna entram no lugar.
+function aplicarAjustesNaProgressao(diasAnteriores, diasNovos, ajustes){
+  const revertidas = [];
+  (diasNovos || []).forEach(function(dn){
+    if(!dn || dn.descanso || !dn.ex) return;
+    const da = diaPorNome(diasAnteriores, dn.n);
+    if(da && !da.descanso && da.ex){
+      parearDiaDaProgressao(da.ex, dn.ex).forEach(function(par){
+        if(par.tipo === 'troca' && trocaEstaBloqueada(par.atual.p.nome, par.novo.p.nome)){
+          dn.ex[par.novo.i] = par.atual.linha;
+          if(da.metodos && da.metodos[par.atual.i]){ dn.metodos = dn.metodos || {}; dn.metodos[par.novo.i] = da.metodos[par.atual.i]; }
+          else if(dn.metodos){ delete dn.metodos[par.novo.i]; }
+          revertidas.push({ dia: dn.n, de: par.atual.p.nome, para: par.novo.p.nome });
+        }
+      });
+    }
+    if(!ajustes) return;
+    const trocas = ajustes.trocas || {};
+    Object.keys(trocas).forEach(function(k){
+      const partes = k.split('|');
+      if(partes[0] !== dn.n) return;
+      const idx = parseInt(partes[1], 10);
+      if(isNaN(idx) || !dn.ex[idx] || dn.ex[idx].indexOf('|||') !== -1) return;
+      dn.ex[idx] = trocas[k] + (partesDaLinhaDeTreino(dn.ex[idx]).volume ? ' · ' + partesDaLinhaDeTreino(dn.ex[idx]).volume : '');
+    });
+    const mantidos = (ajustes.mantidos || {})[dn.n] || [];
+    mantidos.forEach(function(linha){ if(dn.ex.indexOf(linha) === -1) dn.ex.push(linha); });
+  });
+  return revertidas;
+}
+
+// Tira os exercícios novos que você marcou como "Tirar". Fica separado (e por último) porque muda as
+// posições: a tela mostra a lista antes disso, com a linha marcada como tirada e o botão de desfazer.
+function aplicarRemocoesDaProgressao(diasNovos, ajustes){
+  if(!ajustes) return;
+  (diasNovos || []).forEach(function(dn){
+    if(!dn || !dn.ex) return;
+    const tirar = ((ajustes.removidos || {})[dn.n] || []).slice().sort(function(x, y){ return y - x; });
+    tirar.forEach(function(idx){
+      if(!dn.ex[idx]) return;
+      dn.ex.splice(idx, 1);
+      if(dn.metodos){
+        const novos = {};
+        Object.keys(dn.metodos).forEach(function(k){ const n = parseInt(k, 10); if(n < idx) novos[n] = dn.metodos[k]; else if(n > idx) novos[n - 1] = dn.metodos[k]; });
+        dn.metodos = novos;
+      }
+    });
+  });
+}
+
+// O treino como ficaria depois de progredir (mesma conta do botão Confirmar), já com os ajustes
+function simularTreinoProgredido(a){
+  const alvo = (a.progressaoManualForcada || 0) + 1;
+  const perfilNovo = construirPerfilAluna(Object.assign({}, a, { progressaoManualForcada: alvo }));
+  const semana = gerarTreinoSemanal(perfilNovo);
+  const dias = NOMES_DIAS_PROGRESSAO.map(function(nome, i){
+    if(i < semana.length) return Object.assign({ n: nome }, semana[i]);
+    return { n: nome, foco: 'Descanso', descanso: true, ex: [] };
+  });
+  const ajustes = a.ajustesProgressao && a.ajustesProgressao.alvo === alvo ? a.ajustesProgressao : null;
+  const revertidas = aplicarAjustesNaProgressao(a.treinoAtual ? a.treinoAtual.dias : null, dias, ajustes);
+  const final = JSON.parse(JSON.stringify(dias));
+  aplicarRemocoesDaProgressao(final, ajustes);
+  return { dias: dias, final: final, revertidas: revertidas, alvo: alvo, ajustes: ajustes };
+}
+
+function ajustesDaProgressao(a){
+  const alvo = (a.progressaoManualForcada || 0) + 1;
+  if(!a.ajustesProgressao || a.ajustesProgressao.alvo !== alvo) a.ajustesProgressao = { alvo: alvo, trocas: {}, mantidos: {}, removidos: {} };
+  return a.ajustesProgressao;
+}
+
+function contarAjustesDaAluna(aj){
+  if(!aj) return 0;
+  let n = Object.keys(aj.trocas || {}).length;
+  Object.keys(aj.mantidos || {}).forEach(function(d){ n += aj.mantidos[d].length; });
+  Object.keys(aj.removidos || {}).forEach(function(d){ n += aj.removidos[d].length; });
+  return n;
+}
+
+function textoDoVolume(p, anterior){
+  if(!p.volume) return '';
+  const m = p.volume.match(/^(\d+)\s*x\s*(.+)$/i);
+  if(!m) return escaparHtmlFicha(p.volume);
+  const series = parseInt(m[1], 10);
+  const mudou = anterior && anterior.series !== null && anterior.series !== series;
+  const txtSeries = series + (series === 1 ? ' série' : ' séries');
+  const repsAntes = anterior && anterior.volume ? (anterior.volume.match(/^\d+\s*x\s*(.+)$/i) || [])[1] : null;
+  const repsMudou = repsAntes != null && String(repsAntes).trim() !== String(m[2]).trim();
+  return (mudou ? '<u>' + txtSeries + '</u>' : txtSeries) + ' x ' + (repsMudou ? '<u>' + escaparHtmlFicha(m[2]) + '</u>' : escaparHtmlFicha(m[2])) +
+    (mudou ? ' · ' + (series > anterior.series ? '+' : '') + (series - anterior.series) + (Math.abs(series - anterior.series) === 1 ? ' série' : ' séries') : '');
+}
+
 function mostrarDiagnosticoParaProgredir(nomeAluna){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
   const container = document.getElementById('diagnostico-progressao-area');
   if(!container) return;
   if(container.innerHTML){ container.innerHTML = ''; return; } // clique de novo fecha
+  estadoProgressao[nomeAluna] = { diaAberto: null, vistos: {}, trocaAberta: null, busca: '', recusasDaTela: [] };
+  renderProgressaoPendente(nomeAluna);
+}
+
+function renderProgressaoPendente(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  const container = document.getElementById('diagnostico-progressao-area');
+  if(!a || !container) return;
+  const est = estadoProgressao[nomeAluna] || (estadoProgressao[nomeAluna] = { diaAberto: null, vistos: {}, trocaAberta: null, busca: '', recusasDaTela: [] });
+  const nomeJs = nomeAluna.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
   const diagnostico = gerarDiagnosticoInterno(a);
   const prog = getProgressoAluna(a.nome);
   const stats = calcularEstatisticasAluna(a.nome);
+  const diasAtuais = a.treinoAtual ? a.treinoAtual.dias : [];
+  const sim = simularTreinoProgredido(a);
+  const volumeAtual = calcularVolumeTotalDoTreino(diasAtuais);
+  const volumeNovo = calcularVolumeTotalDoTreino(sim.final);
 
-  const volumeAtual = calcularVolumeTotalDoTreino(a.treinoAtual ? a.treinoAtual.dias : null);
+  const diasDeTreino = sim.dias.filter(function(d){ return !d.descanso && d.ex && d.ex.length; });
+  if(!est.diaAberto || !diasDeTreino.some(function(d){ return d.n === est.diaAberto; })) est.diaAberto = diasDeTreino.length ? diasDeTreino[0].n : null;
+  if(est.diaAberto) est.vistos[est.diaAberto] = true;
 
-  // Simula o treino novo (sem salvar/aplicar ainda) só pra comparar volume, exatamente como ficaria progredindo
-  const progressaoSimulada = (a.progressaoManualForcada || 0) + 1;
-  const aluna_simulada = Object.assign({}, a, { progressaoManualForcada: progressaoSimulada });
-  const perfilNovo = construirPerfilAluna(aluna_simulada);
-  const treinoNovoSimulado = gerarTreinoSemanal(perfilNovo);
-  const volumeNovo = calcularVolumeTotalDoTreino(treinoNovoSimulado);
-
+  const paresPorDia = {};
+  let totalTrocas = 0, totalMantidos = 0, totalNovos = 0, totalSai = 0;
+  diasDeTreino.forEach(function(d){
+    const da = diaPorNome(diasAtuais, d.n);
+    const pares = parearDiaDaProgressao(da && !da.descanso ? da.ex : [], d.ex);
+    paresPorDia[d.n] = pares;
+    pares.forEach(function(par){ if(par.tipo === 'troca') totalTrocas++; else if(par.tipo === 'mantem') totalMantidos++; else if(par.tipo === 'novo') totalNovos++; else totalSai++; });
+  });
+  const mudancasDoDia = function(n){ return (paresPorDia[n] || []).filter(function(par){ return par.tipo !== 'mantem' || (par.atual && par.atual.p.series !== par.novo.p.series); }).length; };
+  const aj = a.ajustesProgressao && a.ajustesProgressao.alvo === sim.alvo ? a.ajustesProgressao : null;
+  const nAjustes = contarAjustesDaAluna(aj);
   const diffSeries = volumeNovo.series - volumeAtual.series;
-  const progressoesRegistradas = stats.temDados ? stats.progressoes : 0;
-  const totalExerciciosComHistorico = Object.keys(prog.historico || {}).length;
+  const diffEx = volumeNovo.exercicios - volumeAtual.exercicios;
+  const sinal = function(n){ return (n > 0 ? '+' : '') + n; };
 
-  container.innerHTML = '<div class="info-box" style="margin-top:10px;">' +
-    '<p class="lbl">Comparativo — treino atual vs. treino progredido</p>' +
-    '<div style="display:flex;gap:10px;margin:8px 0;">' +
-      '<div style="flex:1;background:var(--card-2);border-radius:10px;padding:10px;text-align:center;">' +
-        '<p style="font-size:10px;color:var(--text-faint);margin:0 0 4px;">ATUAL</p>' +
-        '<p style="font-size:20px;font-weight:700;margin:0;">' + volumeAtual.series + '</p>' +
-        '<p style="font-size:10px;color:var(--text-faint);margin:2px 0 0;">séries · ' + volumeAtual.exercicios + ' exercícios</p>' +
-      '</div>' +
-      '<div style="flex:1;background:var(--card-2);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--border-strong);">' +
-        '<p style="font-size:10px;color:var(--gold-soft);margin:0 0 4px;">PROGREDIDO</p>' +
-        '<p style="font-size:20px;font-weight:700;color:var(--gold-soft);margin:0;">' + volumeNovo.series + '</p>' +
-        '<p style="font-size:10px;color:var(--text-faint);margin:2px 0 0;">séries · ' + volumeNovo.exercicios + ' exercícios</p>' +
-      '</div>' +
+  let html = '<div class="pg-box">' +
+    '<div class="pg-top"><h3>Progressão do treino</h3><span class="fc fc-alerta">Esperando sua confirmação</span><span class="pg-x">Nada muda pra aluna até você confirmar</span></div>' +
+    '<div class="pg-kpis">' +
+      '<div class="pg-k"><small>Séries na semana</small><b>' + volumeAtual.series + ' → <i>' + volumeNovo.series + '</i></b><span class="' + (diffSeries > 0 ? 'mais' : '') + '">' + (diffSeries === 0 ? 'mesmo volume' : sinal(diffSeries) + (Math.abs(diffSeries) === 1 ? ' série' : ' séries')) + '</span></div>' +
+      '<div class="pg-k"><small>Exercícios</small><b>' + volumeAtual.exercicios + ' → <i>' + volumeNovo.exercicios + '</i></b><span class="' + (diffEx > 0 ? 'mais' : '') + '">' + (diffEx === 0 ? 'mesma quantidade' : sinal(diffEx) + (Math.abs(diffEx) === 1 ? ' exercício' : ' exercícios')) + '</span></div>' +
+      '<div class="pg-k"><small>O que muda</small><b><i>' + totalTrocas + '</i> ' + (totalTrocas === 1 ? 'troca' : 'trocas') + '</b><span>' + totalMantidos + ' mantidos · ' + totalNovos + ' novos · ' + totalSai + ' saem</span></div>' +
+      '<div class="pg-k"><small>Seus ajustes</small><b><i>' + (nAjustes + sim.revertidas.length) + '</i></b><span>' + nAjustes + ' só dessa aluna · ' + sim.revertidas.length + ' recusadas pela regra</span></div>' +
     '</div>' +
-    '<p class="txt" style="text-align:center;font-size:11px;color:' + (diffSeries > 0 ? 'var(--success)' : 'var(--text-faint)') + ';">' + (diffSeries > 0 ? '▲ +' + diffSeries + ' séries' : (diffSeries < 0 ? diffSeries + ' séries' : 'mesmo volume, foco em variedade')) + ' em relação ao atual</p>' +
-    '<p class="section-label" style="margin-top:12px;font-size:11px;">Scout dela até agora</p>' +
-    '<p class="txt"><b>Semana atual (DNA):</b> ' + prog.semana + ' · <b>Frequência real:</b> ' + (stats.temDados ? Math.round((stats.totalConcluidos/stats.totalPlanejado)*100) + '% de constância' : 'ainda sem dados suficientes') + '</p>' +
-    '<p class="txt"><b>Progressões de carga registradas:</b> ' + progressoesRegistradas + ' · <b>Exercícios com histórico:</b> ' + totalExerciciosComHistorico + '</p>' +
-    '<p class="txt" style="margin-top:4px;"><b>Estratégia agora:</b> ' + diagnostico.estrategiaAtual + '</p>' +
-    '<p class="txt" style="font-size:11px;color:var(--text-faint);">' + diagnostico.justificativaEstrategia + '</p>' +
-    '<p class="txt" style="margin-top:4px;"><b>Fase:</b> ' + diagnostico.faseAtual + '</p>' +
-    (diagnostico.pontosFortes.length ? '<p class="txt" style="font-size:11px;color:var(--success);margin-top:4px;">✓ ' + diagnostico.pontosFortes.join(' · ') + '</p>' : '') +
-    (diagnostico.gargalos.length ? '<p class="txt" style="font-size:11px;color:var(--gold-soft);margin-top:4px;">⚠ ' + diagnostico.gargalos.join(' · ') + '</p>' : '') +
-    '</div>' +
-    '<button class="btn-gold" style="margin-top:8px;" onclick="confirmarProgressaoManual(\'' + a.nome.replace(/'/g,"\\'") + '\')">Confirmar e progredir o treino</button>';
+    '<div class="pg-chips">' +
+      '<span class="fc">Semana ' + prog.semana + '</span>' +
+      '<span class="fc ' + (stats.temDados ? 'fc-ok' : '') + '">' + (stats.temDados ? 'Constância ' + Math.round((stats.totalConcluidos / stats.totalPlanejado) * 100) + '%' : 'Constância sem dados ainda') + '</span>' +
+      '<span class="fc">' + (stats.temDados ? stats.progressoes : 0) + ' progressões de carga</span>' +
+      '<span class="fc">' + Object.keys(prog.historico || {}).length + ' exercícios com histórico</span>' +
+      '<span class="fc fc-ouro">' + escaparHtmlFicha(diagnostico.estrategiaAtual + ' · ' + diagnostico.faseAtual) + '</span>' +
+      diagnostico.gargalos.map(function(g){ return '<span class="fc fc-alerta">' + escaparHtmlFicha(g) + '</span>'; }).join('') +
+    '</div>';
+
+  if(diasDeTreino.length === 0){
+    html += '<p class="txt" style="color:var(--text-faint);margin:0;">O treino progredido não tem dias de treino pra comparar.</p>';
+  } else {
+    html += '<div class="pg-dias">' + diasDeTreino.map(function(d){
+      return '<div class="pg-dia' + (d.n === est.diaAberto ? ' on' : '') + (est.vistos[d.n] ? ' visto' : '') + '" onclick="abrirDiaDaProgressao(\'' + nomeJs + '\',\'' + d.n + '\')">' + d.n + '<em>' + mudancasDoDia(d.n) + (mudancasDoDia(d.n) === 1 ? ' mudança' : ' mudanças') + '</em></div>';
+    }).join('') + '</div>';
+
+    const diaNovo = diaPorNome(sim.dias, est.diaAberto);
+    const diaAtual = diaPorNome(diasAtuais, est.diaAberto);
+    html += '<p class="pg-foco"><b>' + escaparHtmlFicha(diaNovo.foco || '') + '</b>' + (diaAtual && diaAtual.foco && diaAtual.foco !== diaNovo.foco ? ' · hoje: ' + escaparHtmlFicha(diaAtual.foco) : '') + '</p>' +
+      '<div class="pg-cab"><span>Hoje</span><span></span><span>Depois de progredir</span><span></span></div>';
+
+    const ajDia = aj || { trocas: {}, mantidos: {}, removidos: {} };
+    html += (paresPorDia[est.diaAberto] || []).map(function(par){
+      const metAtual = par.atual && diaAtual && diaAtual.metodos ? nomeDoMetodo(diaAtual.metodos[par.atual.i]) : '';
+      const metNovo = par.novo && diaNovo.metodos ? nomeDoMetodo(diaNovo.metodos[par.novo.i]) : '';
+      const caixa = function(lado, p, cls, etiqueta, met, anterior){
+        if(!p) return '<div class="pg-ex vazio">' + (lado === 'esq' ? 'não tinha' : 'sai do treino') + '</div>';
+        return '<div class="pg-ex ' + cls + '"><b>' + (etiqueta || '') + escaparHtmlFicha(p.nome) + (met ? '<span class="pg-met">' + escaparHtmlFicha(met) + '</span>' : '') + '</b><small>' + textoDoVolume(p, anterior) + '</small></div>';
+      };
+      const chaveTroca = est.diaAberto + '|' + (par.novo ? par.novo.i : '');
+      const ehSua = par.novo && ajDia.trocas[chaveTroca];
+      let etiqueta = '', cls = '', seta = 'cinza', bts = '';
+      const btTrocar = par.novo && !par.novo.p.combo ? '<button class="pg-b" onclick="event.stopPropagation();abrirTrocaDaProgressao(\'' + nomeJs + '\',' + par.novo.i + ')">Trocar</button>' : '';
+      if(par.tipo === 'mantem'){
+        etiqueta = ehSua ? '<span class="pg-st seu">SUA TROCA</span>' : '<span class="pg-st mantem">MANTÉM</span>'; cls = ehSua ? 'troca' : ''; seta = ehSua ? 'verde' : 'cinza';
+        bts = btTrocar;
+      } else if(par.tipo === 'troca'){
+        etiqueta = ehSua ? '<span class="pg-st seu">SUA TROCA</span>' : '<span class="pg-st troca">TROCA</span>'; cls = 'troca'; seta = 'verde';
+        bts = btTrocar + (ehSua ? '' : '<button class="pg-b nao" onclick="event.stopPropagation();marcarTrocaSemSentido(\'' + nomeJs + '\',' + par.novo.i + ')">Não faz sentido</button>');
+      } else if(par.tipo === 'novo' && (ajDia.removidos[est.diaAberto] || []).indexOf(par.novo.i) !== -1){
+        etiqueta = '<span class="pg-st sai">TIRADO POR VOCÊ</span>'; cls = 'sai'; seta = 'cinza';
+        bts = '<button class="pg-b" onclick="event.stopPropagation();desfazerTirarNaProgressao(\'' + nomeJs + '\',' + par.novo.i + ')">Desfazer</button>';
+      } else if(par.tipo === 'novo'){
+        etiqueta = ehSua ? '<span class="pg-st seu">SUA TROCA</span>' : '<span class="pg-st novo">NOVO</span>'; cls = 'novo'; seta = 'verde';
+        bts = btTrocar + '<button class="pg-b nao" onclick="event.stopPropagation();tirarNovoDaProgressao(\'' + nomeJs + '\',' + par.novo.i + ')">Tirar</button>';
+      } else {
+        cls = 'sai'; seta = 'verm';
+        bts = '<button class="pg-b" onclick="event.stopPropagation();manterSaiNaProgressao(\'' + nomeJs + '\',' + par.atual.i + ')">Manter</button>';
+      }
+      let linha = '<div class="pg-lin">' +
+        caixa('esq', par.atual ? par.atual.p : null, '', '', metAtual, null) +
+        '<div class="pg-seta ' + seta + '">→</div>' +
+        (par.tipo === 'sai' ? caixa('dir', null) : caixa('dir', par.novo.p, cls, etiqueta, metNovo, par.atual ? par.atual.p : null)) +
+        '<div class="pg-bts" style="position:relative;">' + bts + (est.trocaAberta === (par.novo ? par.novo.i : -1) ? htmlOpcoesDeTroca(a, nomeJs, par) : '') + '</div>' +
+      '</div>';
+      // Avisa quando essa linha voltou pro exercício atual por causa de um "Não faz sentido"
+      const recusa = par.tipo === 'mantem' && sim.revertidas.find(function(r){ return r.dia === est.diaAberto && semAcentoMinusculo(r.de).trim() === par.atual.p.chave; });
+      if(recusa){
+        linha += '<div class="pg-recusa">Não faz sentido: era "' + escaparHtmlFicha(recusa.para) + '". O motor não vai mais sugerir essa troca pra nenhuma aluna.' +
+          '<span onclick="desfazerTrocaSemSentido(\'' + nomeJs + '\',\'' + chaveDaTroca(recusa.de, recusa.para).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">Desfazer</span></div>';
+      }
+      return linha;
+    }).join('');
+
+    const faltam = diasDeTreino.filter(function(d){ return !est.vistos[d.n]; }).map(function(d){ return d.n; });
+    html += '<div class="pg-rod"><div class="pg-info">' + (faltam.length === 0 ? '<b>Todos os dias revisados.</b>' : '<b>' + escaparHtmlFicha(est.diaAberto) + ' revisada.</b> Faltam ' + faltam.join(', ').replace(/, ([^,]*)$/, ' e $1') + '.') + '</div>' +
+      '<span style="font-size:12px;color:var(--gold);text-decoration:underline;cursor:pointer;" onclick="irParaFeedbackDoTreino()">Anotar feedback sobre esse treino</span>' +
+      '<button class="btn-gold" onclick="confirmarProgressaoManual(\'' + nomeJs + '\')">Confirmar e progredir o treino</button></div>';
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function abrirDiaDaProgressao(nomeAluna, dia){
+  const est = estadoProgressao[nomeAluna];
+  if(!est) return;
+  est.diaAberto = dia; est.trocaAberta = null; est.busca = '';
+  renderProgressaoPendente(nomeAluna);
+}
+
+// Opções pra trocar: mesmo grupo muscular, que servem pro ambiente dela, e sem as trocas já recusadas
+function opcoesDeTrocaParaProgressao(a, par, busca){
+  const ref = par.novo ? par.novo.p.nome : '';
+  const grupo = grupoDaLinhaDeTreino(par.novo.linha);
+  const casa = a.ambienteTreino === 'Casa';
+  const serve = function(e){ return casa ? exercicioServeParaCasa(e) : ((e.ambiente || 'Academia') === 'Academia' && !ehExercicioElastico(e)); };
+  const termo = semAcentoMinusculo(busca || '').trim();
+  const de = par.atual ? par.atual.p.nome : null;
+  return exerciciosBanco.filter(function(e){
+    if(!e || !e.nome || !serve(e)) return false;
+    if(semAcentoMinusculo(e.nome).trim() === semAcentoMinusculo(ref).trim()) return false;
+    if(de && trocaEstaBloqueada(de, capitalizarNomeExercicio(e.nome))) return false;
+    return termo ? semAcentoMinusculo(e.nome).indexOf(termo) !== -1 : (grupo && (e.grupo || e.categoria) === grupo);
+  }).slice(0, 6).map(function(e){ return capitalizarNomeExercicio(e.nome); });
+}
+
+function htmlOpcoesDeTroca(a, nomeJs, par){
+  const est = estadoProgressao[a.nome];
+  const opcoes = opcoesDeTrocaParaProgressao(a, par, est.busca);
+  return '<div class="pg-pop" onclick="event.stopPropagation()"><p>Trocar só pra essa aluna</p>' +
+    '<input placeholder="Buscar outro exercício" value="' + escaparHtmlFicha(est.busca) + '" oninput="buscarTrocaDaProgressao(\'' + nomeJs + '\',this.value)">' +
+    (opcoes.length ? opcoes.map(function(o){
+      return '<div onclick="escolherTrocaDaProgressao(\'' + nomeJs + '\',' + par.novo.i + ',\'' + o.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">' + escaparHtmlFicha(o) + '</div>';
+    }).join('') : '<p style="text-transform:none;letter-spacing:0;">Nenhuma opção encontrada.</p>') +
+  '</div>';
+}
+
+function abrirTrocaDaProgressao(nomeAluna, idxNovo){
+  const est = estadoProgressao[nomeAluna];
+  if(!est) return;
+  est.trocaAberta = est.trocaAberta === idxNovo ? null : idxNovo;
+  est.busca = '';
+  renderProgressaoPendente(nomeAluna);
+}
+
+let timerBuscaProgressao = null;
+function buscarTrocaDaProgressao(nomeAluna, texto){
+  const est = estadoProgressao[nomeAluna];
+  if(!est) return;
+  est.busca = texto;
+  clearTimeout(timerBuscaProgressao);
+  timerBuscaProgressao = setTimeout(function(){
+    renderProgressaoPendente(nomeAluna);
+    const campo = document.querySelector('.pg-pop input');
+    if(campo && campo.focus){ campo.focus(); try { campo.setSelectionRange(texto.length, texto.length); } catch(e){} }
+  }, 250);
+}
+
+function escolherTrocaDaProgressao(nomeAluna, idxNovo, nomeExercicio){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  const est = estadoProgressao[nomeAluna];
+  if(!a || !est) return;
+  ajustesDaProgressao(a).trocas[est.diaAberto + '|' + idxNovo] = nomeExercicio;
+  est.trocaAberta = null; est.busca = '';
+  renderProgressaoPendente(nomeAluna);
+}
+
+function tirarNovoDaProgressao(nomeAluna, idxNovo){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  const est = estadoProgressao[nomeAluna];
+  if(!a || !est) return;
+  const aj = ajustesDaProgressao(a);
+  aj.removidos[est.diaAberto] = aj.removidos[est.diaAberto] || [];
+  if(aj.removidos[est.diaAberto].indexOf(idxNovo) === -1) aj.removidos[est.diaAberto].push(idxNovo);
+  renderProgressaoPendente(nomeAluna);
+}
+
+function desfazerTirarNaProgressao(nomeAluna, idxNovo){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  const est = estadoProgressao[nomeAluna];
+  if(!a || !est) return;
+  const lista = ajustesDaProgressao(a).removidos[est.diaAberto] || [];
+  const k = lista.indexOf(idxNovo);
+  if(k !== -1) lista.splice(k, 1);
+  renderProgressaoPendente(nomeAluna);
+}
+
+function manterSaiNaProgressao(nomeAluna, idxAtual){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  const est = estadoProgressao[nomeAluna];
+  if(!a || !est || !a.treinoAtual) return;
+  const da = diaPorNome(a.treinoAtual.dias, est.diaAberto);
+  if(!da || !da.ex[idxAtual]) return;
+  const aj = ajustesDaProgressao(a);
+  aj.mantidos[est.diaAberto] = aj.mantidos[est.diaAberto] || [];
+  if(aj.mantidos[est.diaAberto].indexOf(da.ex[idxAtual]) === -1) aj.mantidos[est.diaAberto].push(da.ex[idxAtual]);
+  renderProgressaoPendente(nomeAluna);
+}
+
+// "Não faz sentido": guarda a troca (de → para) pra nunca mais ser sugerida, pra nenhuma aluna
+function marcarTrocaSemSentido(nomeAluna, idxNovo){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  const est = estadoProgressao[nomeAluna];
+  if(!a || !est || !a.treinoAtual) return;
+  const sim = simularTreinoProgredido(a);
+  const dn = diaPorNome(sim.dias, est.diaAberto);
+  const da = diaPorNome(a.treinoAtual.dias, est.diaAberto);
+  if(!dn || !da) return;
+  const par = parearDiaDaProgressao(da.ex, dn.ex).find(function(x){ return x.novo && x.novo.i === idxNovo && x.tipo === 'troca'; });
+  if(!par) return;
+  const chave = chaveDaTroca(par.atual.p.nome, par.novo.p.nome);
+  const dados = { de: par.atual.p.nome, para: par.novo.p.nome, por: NOME_PERSONAL_LOGADO || '', aluna: nomeAluna, em: new Date().toISOString(), ativa: true };
+  trocasBloqueadas[chave] = dados;
+  salvarCatalogoPersonalConferindo('troca_bloqueada', chave, dados);
+  mostrarConfirmacaoSalvamento(true, 'Anotado: o motor não vai mais trocar ' + dados.de + ' por ' + dados.para + ', pra nenhuma aluna.');
+  renderProgressaoPendente(nomeAluna);
+}
+
+function desfazerTrocaSemSentido(nomeAluna, chave){
+  const t = trocasBloqueadas[chave];
+  if(!t) return;
+  t.ativa = false;
+  t.desfeitaEm = new Date().toISOString();
+  salvarCatalogoPersonalConferindo('troca_bloqueada', chave, t);
+  renderProgressaoPendente(nomeAluna);
+}
+
+function irParaFeedbackDoTreino(){
+  const campo = document.getElementById('feedback-gerador-texto');
+  if(campo){ if(campo.scrollIntoView) campo.scrollIntoView({ behavior: 'smooth', block: 'center' }); if(campo.focus) campo.focus(); }
 }
 
 // Núcleo reaproveitável: calcula e atribui o treino, sem nenhum efeito de navegação/tela —
@@ -8950,6 +9584,13 @@ async function construirEAtribuirTreino(nomeAluna){
     if(i < semana.length) return Object.assign({ n: nome }, semana[i]);
     return { n: nome, foco: 'Descanso', descanso: true, ex: [] };
   });
+  // Trocas marcadas como "Não faz sentido" voltam pro exercício de antes (vale pra todas as alunas),
+  // e os ajustes feitos na tela de progressão dessa aluna entram aqui (só na progressão que estava na tela)
+  const ajustesDaTela = a.ajustesProgressao && a.ajustesProgressao.alvo === (a.progressaoManualForcada || 0) ? a.ajustesProgressao : null;
+  aplicarAjustesNaProgressao(a.treinoAtual ? a.treinoAtual.dias : null, semanaComNome, ajustesDaTela);
+  aplicarRemocoesDaProgressao(semanaComNome, ajustesDaTela);
+  if(ajustesDaTela) a.ajustesProgressao = null;
+  if(estadoProgressao[a.nome]) delete estadoProgressao[a.nome];
 
   a.treinoAtual = { fase: rotuloFaseParaAluna(a), volume: 'Gerado automaticamente, revise antes de confirmar', dias: semanaComNome };
   const saidaSalvamento = await sincronizarTreinoComSupabase(a);
@@ -11523,6 +12164,8 @@ const ferramentasPersonal = [
   { titulo: 'Sinalizações', icone: 'ti-heart-handshake', view: 'sinalizacoes' },
   { titulo: 'Conversas', icone: 'ti-brand-whatsapp', view: 'conversas' },
   { titulo: 'Controle de Treinos', icone: 'ti-list-check', view: 'controle' },
+  { titulo: 'Feedback dos treinos', icone: 'ti-notes', view: 'feedback-treinos' },
+  { titulo: 'Feedback das alunas', icone: 'ti-message-dots', view: 'feedback-alunas' },
   { titulo: 'Banco de exercícios', icone: 'ti-video', view: 'exercicios' },
   { titulo: 'Biblioteca de conteúdo', icone: 'ti-library', view: 'conteudo' },
   { titulo: 'Biblioteca de treinos', icone: 'ti-clipboard-list', view: 'treinos' },
@@ -11572,9 +12215,11 @@ function renderSidebarPersonal(){
   html += item('dashboard', 'painel', 'Painel');
   html += item('alunas', 'alunas', 'Alunas');
   html += item('controle', 'controle', 'Controle de treinos', '<span class="side-badge" id="side-badge-controle" style="display:none;"></span>');
+  html += item('feedback-treinos', 'lista', 'Feedback dos treinos', '<span class="side-badge" id="side-badge-fb-treinos" style="display:none;"></span>');
+  html += item('feedback-alunas', 'conversa', 'Feedback das alunas', '<span class="side-badge" id="side-badge-fb-alunas" style="display:none;"></span>');
 
   grupos.forEach(function(grupo, gi){
-    const itensDoGrupo = ferramentasPersonal.filter(function(f){ return grupo.views.indexOf(f.view) !== -1 && f.view !== 'controle'; });
+    const itensDoGrupo = ferramentasPersonal.filter(function(f){ return grupo.views.indexOf(f.view) !== -1 && f.view !== 'controle'; }); // os feedbacks ficam fora dos grupos, com número, como o Controle
     html += '<div class="side-grupo-header" onclick="alternarGrupoSidebar(' + gi + ')" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:10px;margin-top:6px;border-radius:8px;">' +
       '<span style="font-size:10.5px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-faint);">' + grupo.nome + '</span>' +
       '<svg class="pn-ic" id="chevron-sidebar-grupo-' + gi + '" viewBox="0 0 24 24" style="width:13px;height:13px;color:var(--text-faint);transition:transform .2s;"><path d="M6 9l6 6 6-6"/></svg>' +
@@ -11594,6 +12239,7 @@ function renderSidebarPersonal(){
   '</div>';
 
   sidebar.innerHTML = html;
+  atualizarBadgesFeedback();
 }
 
 function alternarGrupoSidebar(indice){
@@ -11750,11 +12396,17 @@ function showPersonalView(which){
   if(which === 'dashboard' && NOME_PERSONAL_LOGADO === 'Bianca') which = 'dashboard-suporte';
   renderFerramentasPersonal();
   atualizarSidebarAtiva(which);
-  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes','comunicacao','ferramentas-treino','inteligencia','relatorios','faturamento','dashboard-suporte','conversas','aula-presencial'].forEach(function(v){
+  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes','comunicacao','ferramentas-treino','inteligencia','relatorios','faturamento','dashboard-suporte','conversas','aula-presencial','feedback-treinos','feedback-alunas'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
   });
   if(which === 'sinalizacoes'){ renderSinalizacoes(); }
   if(which === 'conversas'){ renderListaConversas(); }
+  if(which === 'feedback-treinos'){ renderFeedbackTreinos(); }
+  if(which === 'feedback-alunas'){
+    renderFeedbackAlunas();
+    // Os comentários delas vêm do progresso de cada uma: busca de novo pra mostrar o que chegou agora
+    carregarSinaisDoPainel().then(function(){ renderFeedbackAlunas(); }).catch(function(){});
+  }
   if(which === 'controle'){
     renderControleTreinos();
     // Mesma lógica do Dashboard: sincroniza com o que há de mais recente (inclusive quem acabou de
@@ -12740,6 +13392,7 @@ async function carregarCatalogoPersonal(){
     // Exercícios adicionados pelo app precisam entrar ANTES das edições/movimentos deles — a ordem que o
     // banco devolve as linhas não é garantida, e uma edição processada antes do exercício existir se perdia
     linhas.sort(function(a, b){ return (b.tipo === 'exercicio_customizado' ? 1 : 0) - (a.tipo === 'exercicio_customizado' ? 1 : 0); });
+    setTimeout(function(){ try { atualizarBadgesFeedback(); } catch(e){} }, 0);
     linhas.forEach(function(row){
       if(row.tipo === 'exercicio_customizado'){
         const jaExiste = exerciciosBanco.find(function(e){ return e.nome === row.dados.nome; });
@@ -12760,10 +13413,20 @@ async function carregarCatalogoPersonal(){
       } else if(row.tipo === 'curso'){
         const jaExisteCurso = cursosPersonal.find(function(c){ return c.id === row.dados.id; });
         if(!jaExisteCurso) cursosPersonal.push(row.dados);
+      } else if(row.tipo === 'troca_bloqueada'){
+        if(row.chave && row.dados) trocasBloqueadas[row.chave] = row.dados;
       } else if(row.tipo === 'feedback_gerador'){
         const listaLocal = carregarFeedbackGerador();
-        const jaTem = listaLocal.some(function(f){ return f.data === row.dados.data && f.aluna === row.dados.aluna && f.texto === row.dados.texto; });
-        if(!jaTem){ listaLocal.push(row.dados); salvarListaFeedbackGerador(listaLocal); }
+        const jaTem = listaLocal.find(function(f){ return (f.id && f.id === row.chave) || (f.data === row.dados.data && f.aluna === row.dados.aluna && f.texto === row.dados.texto); });
+        if(!jaTem){ listaLocal.push(Object.assign({}, row.dados, { id: row.chave })); }
+        else {
+          const lidoAqui = !!jaTem.lido;
+          Object.assign(jaTem, row.dados, { id: row.chave });
+          if(lidoAqui && !jaTem.lido) jaTem.lido = true; // lido aqui e ainda não salvo lá: continua lido
+        }
+        salvarListaFeedbackGerador(listaLocal);
+      } else if(row.tipo === 'feedback_aluna_lido'){
+        if(row.chave && row.dados) lidosFeedbackAlunas[row.chave] = row.dados;
       } else if(row.tipo === 'config_ranking'){
         if(row.dados.meta) metaComunidadePontos = row.dados.meta;
         if(row.dados.recompensa) metaComunidadeRecompensa = row.dados.recompensa;
@@ -17072,7 +17735,10 @@ async function carregarSinaisDoPainel(agora){
       if(r2 && r2.error) ok = false;
       ((r2 && r2.data) || []).forEach(function(l){
         comAuth.forEach(function(a){
-          if(a.authId === l.aluna_id) sinaisProgressoPainel[a.nome] = resumirProgressoParaPainel(l.dados && l.dados.prog, agora);
+          if(a.authId === l.aluna_id){
+            sinaisProgressoPainel[a.nome] = resumirProgressoParaPainel(l.dados && l.dados.prog, agora);
+            feedbacksAlunasPainel[a.nome] = feedbacksQueImportam(l.dados && l.dados.prog, agora);
+          }
         });
       });
     }
@@ -17082,6 +17748,7 @@ async function carregarSinaisDoPainel(agora){
     const r3 = await supabaseClient.from('erros_app').select('quem, codigo, mensagem, data_hora').gte('data_hora', desde).order('data_hora', { ascending: false }).limit(60);
     if(r3 && !r3.error) sinaisErrosPainel = r3.data || []; else ok = false;
   } catch(e){ ok = false; }
+  atualizarBadgesFeedback();
   return { ok: ok };
 }
 
