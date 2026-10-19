@@ -1,4 +1,4 @@
-[dna_musa_137.html](https://github.com/user-attachments/files/33665852/dna_musa_137.html)
+[Uploading dna_musa_138.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -953,7 +953,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-19-AA-SO-DESAFIO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-19-AD-PLANO-DESAFIO-FICHA</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1857,7 +1857,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-19-AA-SO-DESAFIO';
+const VERSAO_APP = '2026-10-19-AD-PLANO-DESAFIO-FICHA';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -6732,9 +6732,27 @@ function confirmarInscricaoSeca21(){
   mostrarConfirmacaoSalvamento(true, n + (n === 1 ? ' aluna inscrita' : ' alunas inscritas') + ' no SECA 21.');
 }
 
+// Quem está no SECA 21 e ainda não tem o treino, mas a estrutura dela já foi salva: entrega agora e salva a ficha.
+// Cobre a aluna inscrita antes de o modelo carregar do servidor, ou que teve nível/frequência trocados depois.
+function entregarTreinosSeca21QueFaltam(){
+  let n = 0;
+  alunasPersonal.forEach(function(a){
+    if(!estaNoSeca21(a) || treinoSeca21DaAluna(a)) return;
+    const st = situacaoDoSeca21(a);
+    if(st && st.terminou) return;
+    const modelo = modelosSeca21[chaveSeca21DaAluna(a)];
+    if(!modelo) return;
+    a.desafioTreinos = { seca21: copiaProfunda(modelo) };
+    salvarPerfilAlunaNoSupabase(a.nome);
+    n++;
+  });
+  return n;
+}
+
 function renderListaSeca21(){
   const area = document.getElementById('lista-seca21');
   if(!area) return;
+  entregarTreinosSeca21QueFaltam();
   const agora = Date.now();
   const inscritas = alunasPersonal.filter(function(a){ return estaNoSeca21(a); }).sort(function(x, y){ return x.nome.localeCompare(y.nome, 'pt-BR'); });
   if(inscritas.length === 0){
@@ -7998,6 +8016,144 @@ function desfazerDiaSeca21(indiceDia){
   abrirTelaDesafioSeca21();
 }
 
+// ===== PLANO E DESAFIO NA FICHA DA ALUNA =====
+// Uma caixa só, na Prescrição: "Só consultoria", e pra cada desafio do app "Consultoria + desafio" e "Só desafio".
+// Escolher já inscreve (ou tira) na hora e define o que aparece no celular dela: só a consultoria, só o desafio,
+// ou os dois. As opções saem de DESAFIOS_DO_APP: desafio novo cadastrado ali aparece aqui sozinho.
+function opcoesPlanoEDesafio(){
+  const lista = [{ valor: 'consultoria', texto: 'Só consultoria (sem desafio)' }];
+  Object.keys(DESAFIOS_DO_APP).forEach(function(id){
+    const d = DESAFIOS_DO_APP[id];
+    lista.push({ valor: 'consultoria-desafio|' + id, texto: 'Consultoria + ' + d.nome });
+    lista.push({ valor: 'so-desafio|' + id, texto: 'Só ' + d.nome + ' (só o desafio)' });
+  });
+  return lista;
+}
+
+function valorPlanoEDesafioDaAluna(a){
+  if(!a || !a.desafioAtivo) return 'consultoria';
+  const plano = planoDaAluna(a).plano === 'so-desafio' ? 'so-desafio' : 'consultoria-desafio';
+  return plano + '|' + idDoDesafio(a);
+}
+
+function tirarAlunaDoDesafioAtual(a){
+  if(!a || !a.desafioAtivo) return;
+  const id = idDoDesafio(a), d = DESAFIOS_DO_APP[id];
+  a.desafioAtivo = null;
+  a.desafioTreinos = null;
+  if(d && d.curso) a.cursosLiberados = (a.cursosLiberados || []).filter(function(c){ return c !== d.curso; });
+}
+
+function inscreverAlunaNoDesafio(a, id){
+  const d = DESAFIOS_DO_APP[id];
+  if(!a || !d) return false;
+  const freq = parseInt(String(a.freq || ''), 10) >= 5 ? 5 : 3;
+  const hoje = dataLocalISO(new Date());
+  if(id === 'seca21'){
+    const fim = dataISOMaisDias(hoje, (d.duracaoDias || 21) - 1);
+    return inscreverNoSeca21([a.nome], { plano: a.plano || 'consultoria-desafio', nivel: 'cada', frequencia: freq, inicio: hoje, fim: fim, curso: true }) === 1;
+  }
+  if(id === 'seca-empina'){
+    a.desafioAtivo = { id: 'seca-empina', nome: d.nome, dataInicio: new Date().toISOString(), dataUltimaVirada: new Date().toISOString(), frequencia: freq, estruturaAtual: 1 };
+    a.desafioTreinos = {};
+    garantirEstruturasDoDesafio(a);
+    return true;
+  }
+  // Desafio novo (cadastrado em DESAFIOS_DO_APP): inscrição básica, com data de fim se ele tiver duração
+  a.desafioAtivo = { id: id, nome: d.nome, dataInicio: hoje, dataFim: d.duracaoDias ? dataISOMaisDias(hoje, d.duracaoDias - 1) : null, frequencia: freq, inscritaEm: new Date().toISOString() };
+  if(d.curso){ a.cursosLiberados = (a.cursosLiberados || []).slice(); if(a.cursosLiberados.indexOf(d.curso) === -1) a.cursosLiberados.push(d.curso); }
+  return true;
+}
+
+// Aplica a escolha. semConfirmar = true só nos testes.
+function definirPlanoEDesafio(nomeAluna, valor, semConfirmar){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !valor) return false;
+  const partes = String(valor).split('|');
+  const plano = partes[0], idNovo = partes[1] || null;
+  if(['consultoria', 'consultoria-desafio', 'so-desafio'].indexOf(plano) === -1) return false;
+  if(idNovo && !DESAFIOS_DO_APP[idNovo]) return false;
+  const idAtual = a.desafioAtivo ? idDoDesafio(a) : null;
+  const voltar = function(){ try { openAlunaDetail(alunasPersonal.indexOf(a)); } catch(e){} return false; };
+  if(idAtual && idAtual !== idNovo && !semConfirmar){
+    const nomeAtual = (DESAFIOS_DO_APP[idAtual] || {}).nome || 'desafio atual';
+    if(!confirm('Tirar ' + nomeAluna + ' do ' + nomeAtual + '?' + (idNovo ? ' Ela entra no ' + DESAFIOS_DO_APP[idNovo].nome + ' começando hoje.' : ' O treino e as aulas do desafio saem do celular dela.'))) return voltar();
+  }
+  if(idAtual && idAtual !== idNovo) tirarAlunaDoDesafioAtual(a);
+  a.plano = plano;
+  if(idNovo && idNovo !== idAtual && !inscreverAlunaNoDesafio(a, idNovo)) return voltar();
+  salvarPerfilAlunaNoSupabase(a.nome);
+  const textoFinal = plano === 'consultoria' ? 'Só consultoria' : (plano === 'so-desafio' ? 'Só ' : 'Consultoria + ') + DESAFIOS_DO_APP[idNovo].nome;
+  try { mostrarConfirmacaoSalvamento(true, nomeAluna.split(' ')[0] + ': ' + textoFinal + '.'); } catch(e){}
+  try { openAlunaDetail(alunasPersonal.indexOf(a)); } catch(e){}
+  return true;
+}
+
+// Início do desafio pela ficha: no dia da inscrição (padrão) ou 2 dias depois. O fim acompanha a duração do desafio.
+function ajustarInicioDoDesafioNaFicha(nomeAluna, quando){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !a.desafioAtivo) return false;
+  const d = DESAFIOS_DO_APP[idDoDesafio(a)];
+  if(!d || !d.duracaoDias) return false; // desafio sem duração fixa (Seca e Empina) não tem data de fim
+  const base = dataLocalISO(new Date(a.desafioAtivo.inscritaEm || Date.now()));
+  const inicio = quando === '2dias' ? dataISOMaisDias(base, 2) : base;
+  a.desafioAtivo.dataInicio = inicio;
+  a.desafioAtivo.dataFim = dataISOMaisDias(inicio, d.duracaoDias - 1);
+  salvarPerfilAlunaNoSupabase(a.nome);
+  try { openAlunaDetail(alunasPersonal.indexOf(a)); } catch(e){}
+  return true;
+}
+
+// SECA 21: nível e frequência da estrutura, direto da ficha (o treino salvo da nova estrutura entra na hora)
+function ajustarEstruturaSeca21NaFicha(nomeAluna, campo, valor){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !estaNoSeca21(a)) return false;
+  if(campo === 'nivel') a.desafioAtivo.nivel = valor === 'Avançado' ? 'Avançado' : 'Iniciante';
+  else if(campo === 'frequencia') a.desafioAtivo.frequencia = parseInt(valor, 10) === 5 ? 5 : 3;
+  else return false;
+  const modelo = modelosSeca21[chaveSeca21DaAluna(a)];
+  a.desafioTreinos = modelo ? { seca21: copiaProfunda(modelo) } : null;
+  salvarPerfilAlunaNoSupabase(a.nome);
+  try { openAlunaDetail(alunasPersonal.indexOf(a)); } catch(e){}
+  return true;
+}
+
+function htmlInicioDoDesafioNaFicha(a, nomeJs){
+  const base = dataLocalISO(new Date(a.desafioAtivo.inscritaEm || Date.now()));
+  const atual = a.desafioAtivo.dataInicio === dataISOMaisDias(base, 2) ? '2dias' : (a.desafioAtivo.dataInicio === base ? 'hoje' : '');
+  return '<select class="form-select" style="font-size:12px;padding:5px;margin-top:6px;" onchange="ajustarInicioDoDesafioNaFicha(\'' + nomeJs + '\',this.value)">' +
+    (atual ? '' : '<option value="" selected>Começa ' + dataCurtaBR(a.desafioAtivo.dataInicio) + ' (definido no Controle)</option>') +
+    '<option value="hoje"' + (atual === 'hoje' ? ' selected' : '') + '>Começa no dia da inscrição (' + dataCurtaBR(base) + ')</option>' +
+    '<option value="2dias"' + (atual === '2dias' ? ' selected' : '') + '>Começa 2 dias depois (' + dataCurtaBR(dataISOMaisDias(base, 2)) + ')</option></select>';
+}
+
+function htmlCaixaPlanoEDesafio(a){
+  const nomeJs = escaparNomeParaClique(a.nome);
+  const valor = valorPlanoEDesafioDaAluna(a);
+  let detalhe = '<p style="font-size:10px;color:var(--text-faint);margin-top:4px;">Só consultoria: ela vê só o treino da consultoria.</p>';
+  if(estaNoSeca21(a)){
+    const d = a.desafioAtivo, st = situacaoDoSeca21(a), tem = !!treinoSeca21DaAluna(a);
+    detalhe = '<div style="display:flex;gap:6px;margin-top:6px;">' +
+        '<select class="form-select" style="font-size:12px;padding:5px;" onchange="ajustarEstruturaSeca21NaFicha(\'' + nomeJs + '\',\'nivel\',this.value)">' + ['Iniciante', 'Avançado'].map(function(n){ return '<option' + (nivelSeca21PeloNivel(d.nivel) === n ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select>' +
+        '<select class="form-select" style="font-size:12px;padding:5px;" onchange="ajustarEstruturaSeca21NaFicha(\'' + nomeJs + '\',\'frequencia\',this.value)">' + [3, 5].map(function(f){ return '<option value="' + f + '"' + (d.frequencia === f ? ' selected' : '') + '>' + f + 'x</option>'; }).join('') + '</select></div>' +
+      htmlInicioDoDesafioNaFicha(a, nomeJs) +
+      '<p style="font-size:10px;margin-top:5px;color:' + (tem ? 'var(--success)' : '#E2A33D') + ';">' + (st.terminou ? 'Terminou em ' + dataCurtaBR(d.dataFim) : (st.comecou ? 'Dia ' + st.dia + ' de ' + st.total : 'Começa ' + dataCurtaBR(d.dataInicio)) + ' · até ' + dataCurtaBR(d.dataFim)) +
+        ' · ' + (tem ? 'treino liberado' : 'falta liberar o treino ' + nomeEstruturaSeca21(chaveSeca21DaAluna(a))) + '</p>' +
+      '<p style="font-size:10px;color:var(--gold-soft);cursor:pointer;margin-top:3px;" onclick="abaControleDesafio=\'seca21\';telaControleDesafio={tipo:\'lista\'};showPersonalView(\'desafios\')">Abrir o Controle de desafios ›</p>';
+  } else if(estaNoSecaEmpina(a)){
+    detalhe = '<p style="font-size:10px;color:var(--text-faint);margin-top:5px;">Estrutura ' + a.desafioAtivo.estruturaAtual + '/10 · ' + a.desafioAtivo.frequencia + 'x por semana</p>' +
+      '<p style="font-size:10px;color:var(--gold-soft);cursor:pointer;margin-top:3px;" onclick="abaControleDesafio=\'seca-empina\';telaControleDesafio={tipo:\'lista\'};showPersonalView(\'desafios\')">Abrir o Controle de desafios ›</p>';
+  } else if(a.desafioAtivo){
+    const dd = DESAFIOS_DO_APP[idDoDesafio(a)] || {};
+    detalhe = (dd.duracaoDias ? htmlInicioDoDesafioNaFicha(a, nomeJs) : '') +
+      '<p style="font-size:10px;color:var(--text-faint);margin-top:5px;">' + (a.desafioAtivo.dataFim ? dataCurtaBR(a.desafioAtivo.dataInicio) + ' até ' + dataCurtaBR(a.desafioAtivo.dataFim) : 'Inscrita') + '</p>';
+  }
+  return '<div class="stat-card"><p class="stat-label">Plano e desafio</p>' +
+    '<select class="form-select" style="font-size:13px;padding:6px;margin-top:4px;" onchange="definirPlanoEDesafio(\'' + nomeJs + '\',this.value)">' +
+      opcoesPlanoEDesafio().map(function(o){ return '<option value="' + o.valor + '"' + (o.valor === valor ? ' selected' : '') + '>' + o.texto + '</option>'; }).join('') +
+    '</select>' + detalhe + '</div>';
+}
+
 // ===== SECA 21 NO CELULAR DA ALUNA: modo "só desafio" e consultoria + desafio =====
 // Só desafio (plano "so-desafio"): o app vira o app do desafio. Topo "SECA 21 · Desafio", cartão "Dia X de 21",
 // o treino do dia no MESMO modo treino da consultoria (um exercício por vez, vídeo, séries, carga e cronômetro),
@@ -8037,19 +8193,23 @@ function diasDoSeca21ParaModoTreino(semana){
 
 function diasSaoDoDesafio(lista){ return !!(lista && lista.length && lista.every(function(d){ return d && d.desafio === 'seca21'; })); }
 
-// Só desafio, no período do desafio e com o treino liberado: o treino dela é o do SECA 21. Fora disso, se o que está
-// carregado é do desafio, sai (o desafio acabou ou ela mudou de plano). Nunca mexe num treino da consultoria.
+// Só desafio: a aluna vê SÓ o material do desafio. Mesmo que ela tenha um treino de consultoria guardado (de antes,
+// ou criado por engano), ele não aparece: durante o desafio o treino é o do SECA 21; sem treino do desafio liberado,
+// ou antes de começar, ou depois do fim, não aparece treino nenhum. O treino da consultoria continua guardado na
+// ficha dela (a.treinoAtual) e volta sozinho se você mudar o plano dela pra Consultoria ou Consultoria + desafio.
 function ligarTreinoDoDesafioNoModoSoDesafio(){
   let a = null;
   try { a = obterAlunaLogadaOuCriar(); } catch(e){ return false; }
   const m = modoDoDesafioDaAluna(a);
   const semana = treinoSeca21DaAluna(a);
-  const temConsultoria = dias.length > 0 && !diasSaoDoDesafio(dias);
-  if(m && m.soDesafio && m.ativo && semana && !temConsultoria){
-    dias = diasDoSeca21ParaModoTreino(semana);
-    return true;
+  if(m && m.soDesafio){
+    dias = m.ativo && semana ? diasDoSeca21ParaModoTreino(semana) : [];
+    return dias.length > 0;
   }
-  if(diasSaoDoDesafio(dias)) dias = [];
+  // Não é (mais) só desafio: se o que está na tela é o treino do desafio, volta o da consultoria (se tiver)
+  if(diasSaoDoDesafio(dias) || (dias.length === 0 && a && a.treinoAtual && a.treinoAtual.dias && a.treinoAtual.dias.length && m)){
+    dias = (a && a.treinoAtual && a.treinoAtual.dias) ? a.treinoAtual.dias : [];
+  }
   return false;
 }
 
@@ -8169,7 +8329,10 @@ function renderBotaoDesafio(){
       return;
     }
     const texto = st.comecou ? 'Dia ' + st.dia + ' de ' + st.total + ' · os treinos do desafio aparecem aqui assim que forem liberados' : 'Começa em ' + dataCurtaBR(a.desafioAtivo.dataInicio);
-    area.innerHTML = htmlTarefaHome('ti-flag', 'Desafio SECA 21', texto, 'irParaAbaFixa(\'mentoria\')');
+    area.innerHTML = '<div class="home-hero s21-verde"><p class="hh-lbl">Desafio SECA 21 <span class="s21-tag">por tempo determinado</span></p>' +
+      '<p class="hh-tit">' + (st.comecou ? 'Dia ' + st.dia + ' de ' + st.total : 'Começa em ' + dataCurtaBR(a.desafioAtivo.dataInicio)) + '</p>' + htmlBolinhasDoDesafio(st) +
+      '<p class="hh-info">' + texto + '. Enquanto isso, as aulas do desafio já estão liberadas.</p>' +
+      '<button class="hh-btn" onclick="irParaAbaFixa(\'mentoria\')">Ver as aulas do desafio</button></div>';
     return;
   }
   area.innerHTML = htmlTarefaHome('ti-flag', 'Desafio Seca e Empina', 'Estrutura ' + a.desafioAtivo.estruturaAtual + '/10 liberada', 'abrirTelaDesafioSecaEmpina()');
@@ -12748,6 +12911,7 @@ function openAlunaDetail(i){
         '</select>' +
         '<p style="font-size:10px;color:var(--text-faint);margin-top:4px;">' + (a.statusPlanoManual ? 'Definida por você. ' : 'Calculada pelo vencimento do plano. ') + 'Excluir tira da lista, mas dá pra restaurar.</p>' +
       '</div>' +
+      htmlCaixaPlanoEDesafio(a) +
     '</div>' +
     '<p style="font-size:11px;color:var(--text-faint);margin:-8px 0 12px;">Ajustar aqui atualiza automaticamente toda a estrutura de treino gerada. O gerador nunca mistura exercício de academia com exercício de casa</p>' +
     '<button class="btn-secondary" style="margin-bottom:18px;" onclick="abrirResumoCompletoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-file-description" style="margin-right:6px;"></i>Resumo completo (diagnóstico, avaliação, plano)</button>' +
@@ -14989,6 +15153,7 @@ async function carregarCatalogoPersonal(){
       }
     });
 
+    try { if(sessaoTipo === 'personal') entregarTreinosSeca21QueFaltam(); } catch(e){} // modelo do SECA 21 chegou: entrega pra quem ainda não tinha
     // Processa exclusões por último, pra garantir que remove mesmo que algo tenha tentado re-adicionar antes
     linhas.forEach(function(row){
       if(row.tipo === 'exercicio_excluido'){
@@ -16039,6 +16204,7 @@ function aplicarTreinoRecebidoDoSupabase(treinoRow){
   }
   a.treinoAtual = { fase: treinoRow.fase, volume: treinoRow.volume, dias: treinoRow.dias };
   dias = treinoRow.dias;
+  try { ligarTreinoDoDesafioNoModoSoDesafio(); } catch(e){} // aluna só do desafio: o treino da consultoria não aparece
   const viewAtiva = document.querySelector('.view.active');
   if(viewAtiva && viewAtiva.getAttribute('data-view') === 'home' && typeof renderHome === 'function'){
     renderHome();
