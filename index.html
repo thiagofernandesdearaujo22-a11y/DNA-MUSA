@@ -487,6 +487,27 @@
 
   /* ===== PAINEL DO PERSONAL (novo): resumo do dia, números, "precisa de você hoje", controle e ferramentas ===== */
   .pn-ic{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;display:inline-block;vertical-align:middle;}
+  /* ===== Envios em massa (histórico) ===== */
+  .cd-c-ruim{background:rgba(217,120,90,.14);color:#D9785A;}
+  .env-grade{display:grid;grid-template-columns:1fr;gap:14px;align-items:start;}
+  .env-card{background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:11px 12px;margin-bottom:8px;cursor:pointer;}
+  .env-card.on{border-color:var(--gold);}
+  .env-l1{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text-faint);flex-wrap:wrap;} .env-l1 .cd-chip{margin-left:auto;}
+  .env-txt{font-size:12.5px;margin:6px 0 8px;color:var(--text);line-height:1.4;white-space:pre-wrap;overflow-wrap:anywhere;max-height:54px;overflow:hidden;}
+  .env-msg{background:var(--card-2);border-radius:12px;padding:11px 12px;font-size:12.5px;color:var(--text-dim);line-height:1.5;border-left:3px solid var(--gold);white-space:pre-wrap;overflow-wrap:anywhere;}
+  .env-resumo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0;}
+  .env-resumo > div{background:var(--card-2);border-radius:10px;padding:8px 10px;} .env-resumo small{font-size:10.5px;color:var(--text-faint);} .env-resumo b{display:block;font-size:20px;font-family:'Playfair Display',serif;color:var(--text);}
+  .env-filtros{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+  .env-filtros span{font-size:11.5px;padding:5px 10px;border-radius:16px;background:var(--card-2);color:var(--text-dim);cursor:pointer;}
+  .env-filtros span.on{background:rgba(232,197,138,.14);color:var(--gold-soft);}
+  .env-lista{max-height:420px;overflow-y:auto;}
+  .env-al{display:grid;grid-template-columns:22px minmax(0,1.4fr) auto minmax(0,1.2fr);align-items:center;gap:8px;padding:7px 2px;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text);cursor:pointer;}
+  .env-al b{font-weight:600;overflow-wrap:anywhere;} .env-al small{font-size:11px;color:var(--text-faint);}
+  .env-al input{width:16px;height:16px;accent-color:#E8C58A;} .env-al .cd-chip{justify-self:start;} .env-ck-vazio{width:16px;}
+  .env-atalhos{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .env-at{background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-size:12px;color:var(--text-dim);cursor:pointer;}
+  .env-at:hover{border-color:var(--gold);} .env-at b{display:block;font-size:13px;color:var(--text);margin-bottom:3px;}
+  .env-busca{height:32px;padding:4px 10px;font-size:12px;width:190px;max-width:100%;}
   /* ===== Painel de suporte (Bianca) ===== */
   .sp-hero{background:linear-gradient(135deg,rgba(232,197,138,.16),rgba(232,197,138,.04));border:1px solid rgba(232,197,138,.32);border-radius:18px;padding:16px 18px;display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px;}
   .sp-hero h2{font-family:'Playfair Display',serif;font-size:21px;font-weight:600;margin:0;color:var(--text);}
@@ -613,6 +634,8 @@
     .phone.modo-personal .sp-funcs{grid-template-columns:repeat(4,minmax(0,1fr));}
     .phone.modo-personal .sp-baixo{grid-template-columns:1.25fr 1fr;}
     .phone.modo-personal .sp-outras{grid-template-columns:repeat(3,minmax(0,1fr));}
+    .phone.modo-personal .env-grade{grid-template-columns:minmax(0,1fr) minmax(0,1.45fr);}
+    .phone.modo-personal .env-grade.env-grade-novo{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);}
     .phone.modo-personal .pn-so-celular{display:none;}
     .phone.modo-personal .pn-busca{flex:none;}
     .phone.modo-personal .pn-btn-gold{flex:none;}
@@ -906,7 +929,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-19-Y-PAINEL-SUPORTE</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-19-Z-HISTORICO-ENVIOS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1271,7 +1294,8 @@
         <p class="section-label" style="margin-top:18px;">Enviar mensagem em massa</p>
         <p class="page-sub" style="margin-top:-6px;">Cada botão abaixo já deixa claro por onde a mensagem sai</p>
 
-        <button class="btn-gold" style="background:#25D366;color:#fff;border:none;margin-bottom:8px;" onclick="mostrarPainelEnvio('whatsapp')"><i class="ti ti-brand-whatsapp" style="margin-right:6px;"></i>Mandar via WhatsApp</button>
+        <button class="btn-gold" style="background:#25D366;color:#fff;border:none;margin-bottom:8px;" onclick="abrirEnvios('novo')"><i class="ti ti-brand-whatsapp" style="margin-right:6px;"></i>Mandar via WhatsApp</button>
+        <button class="btn-secondary" style="margin-bottom:8px;" onclick="abrirEnvios('historico')"><i class="ti ti-history" style="margin-right:6px;"></i>Histórico de envios <span id="comunicacao-envios-parados"></span></button>
         <div id="painel-envio-whatsapp"></div>
 
         <button class="btn-secondary" style="margin-bottom:14px;margin-top:8px;" onclick="mostrarPainelEnvio('app')"><i class="ti ti-device-mobile" style="margin-right:6px;"></i>Mandar via Aplicativo</button>
@@ -1280,6 +1304,13 @@
         <p class="section-label" style="margin-top:18px;">Ferramenta específica</p>
         <button class="btn-secondary" style="margin-bottom:14px;" onclick="mostrarFormularioAvisarTreinoAjustado()"><i class="ti ti-barbell" style="margin-right:6px;"></i>Avisar treino ajustado (WhatsApp + Aplicativo juntos)</button>
         <div id="avisar-treino-ajustado-area"></div>
+      </div>
+
+      <div id="personal-envios" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('comunicacao')"><i class="ti ti-arrow-left"></i><span>Comunicação com as alunas</span></div>
+        <h1 class="page-title" style="margin-top:0;">Envios em massa pelo WhatsApp</h1>
+        <p class="page-sub">Cada envio fica guardado, com quem recebeu e quem faltou. Dá pra continuar de onde parou, sem mandar repetido.</p>
+        <div id="envios-conteudo"></div>
       </div>
 
       <div id="personal-ferramentas-treino" style="display:none;">
@@ -1799,7 +1830,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-19-Y-PAINEL-SUPORTE';
+const VERSAO_APP = '2026-10-19-Z-HISTORICO-ENVIOS';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -4251,12 +4282,14 @@ async function enviarMensagemFunilEmMassa(estagio, indice){
   if(!confirm('Mandar "' + template.titulo + '" pro WhatsApp de ' + alunasNoEstagio.length + ' aluna(s), já com o nome de cada uma. Continuar?' + textoTempoEnvioWhatsApp(alunasNoEstagio.length))) return;
 
   const area = document.getElementById('resultado-funil-massa-' + estagio + '-' + indice);
+  const registro = novoRegistroDeEnvio({ origem: 'Funil: ' + template.titulo, texto: template.texto, destinatarias: alunasNoEstagio.map(function(a){ return { nome: a.nome, msg: personalizarMensagemFunil(a.nome, template.texto) }; }) });
   let enviadas = 0, erros = [];
   for(let i = 0; i < alunasNoEstagio.length; i++){
     const a = alunasNoEstagio[i];
     if(area) area.innerHTML = '<p class="txt" style="font-size:11px;color:var(--text-faint);">Enviando ' + (i+1) + ' de ' + alunasNoEstagio.length + '... (de propósito, com pausa entre cada uma, pra proteger seu WhatsApp de bloqueio)</p>';
     const mensagem = personalizarMensagemFunil(a.nome, template.texto);
     const saida = await enviarWhatsApp(a.telefone, mensagem);
+    marcarResultadoNoRegistro(registro, a.nome, saida);
     if(saida.sucesso) enviadas++; else erros.push({ nome: a.nome, motivo: saida.motivo });
     await pausaEntreEnviosWhatsApp();
   }
@@ -5406,12 +5439,14 @@ async function confirmarEnvioMassa(canal){
 
   if(canal === 'whatsapp'){
     const comTelefone = destinatarias.filter(function(a){ return a.telefone; });
+    const registro = novoRegistroDeEnvio({ origem: 'Envio em massa', texto: texto, destinatarias: comTelefone.map(function(a){ return { nome: a.nome, msg: personalizarTextoEnvio(texto, a.nome) }; }) });
     let enviadas = 0, erros = [];
     for(let i = 0; i < comTelefone.length; i++){
       const a = comTelefone[i];
       areaResultado.innerHTML = '<p class="txt" style="color:var(--text-faint);">Enviando ' + (i+1) + ' de ' + comTelefone.length + '... (com pausa entre cada uma, pra proteger seu WhatsApp de bloqueio)</p>';
       const mensagemPersonalizada = texto.replace(/\{nome\}/g, a.nome.split(' ')[0]);
       const saida = await enviarWhatsApp(a.telefone, mensagemPersonalizada);
+      marcarResultadoNoRegistro(registro, a.nome, saida);
       if(saida.sucesso) enviadas++; else erros.push({ nome: a.nome, motivo: saida.motivo });
       await pausaEntreEnviosWhatsApp();
     }
@@ -5484,17 +5519,21 @@ async function confirmarAvisarTreinoAjustado(){
 
   const area = document.getElementById('resultado-treino-ajustado');
   let enviadosWhats = 0, errosWhats = [], enviadosApp = 0;
+  const registro = novoRegistroDeEnvio({ origem: 'Treino ajustado', texto: texto, destinatarias: nomesMarcados.map(function(n){ return { nome: n, msg: personalizarTextoEnvio(texto, n) }; }) });
 
   for(let i = 0; i < nomesMarcados.length; i++){
     const nome = nomesMarcados[i];
     const a = alunasPersonal.find(function(x){ return x.nome === nome; });
     if(!a) continue;
     area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Enviando ' + (i+1) + ' de ' + nomesMarcados.length + '... (de propósito, com pausa entre cada uma, pra proteger seu WhatsApp de bloqueio)</p>';
-    if(enviarAvisoInApp(a.nome, texto, 'ajuste_treino')) enviadosApp++;
+    const textoDela = personalizarTextoEnvio(texto, a.nome);
+    if(enviarAvisoInApp(a.nome, textoDela, 'ajuste_treino')) enviadosApp++;
     if(a.telefone){
-      const saida = await enviarWhatsApp(a.telefone, texto);
+      const saida = await enviarWhatsApp(a.telefone, textoDela);
+      marcarResultadoNoRegistro(registro, a.nome, saida);
       if(saida.sucesso) enviadosWhats++; else errosWhats.push({ nome: a.nome, motivo: saida.motivo });
     } else {
+      marcarResultadoNoRegistro(registro, a.nome, { sucesso: false, motivo: 'sem telefone cadastrado' });
       errosWhats.push({ nome: a.nome, motivo: 'sem telefone cadastrado' });
     }
     await pausaEntreEnviosWhatsApp();
@@ -13707,7 +13746,7 @@ function showPersonalView(which){
   if(which === 'dashboard' && NOME_PERSONAL_LOGADO === 'Bianca') which = 'dashboard-suporte';
   renderFerramentasPersonal();
   atualizarSidebarAtiva(which);
-  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes','comunicacao','ferramentas-treino','inteligencia','relatorios','faturamento','dashboard-suporte','conversas','aula-presencial','feedback-treinos','feedback-alunas'].forEach(function(v){
+  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes','comunicacao','ferramentas-treino','inteligencia','relatorios','faturamento','dashboard-suporte','conversas','aula-presencial','feedback-treinos','feedback-alunas','envios'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
   });
   if(which === 'sinalizacoes'){ renderSinalizacoes(); }
@@ -13726,7 +13765,12 @@ function showPersonalView(which){
       renderControleTreinos();
     });
   }
-  if(which === 'comunicacao'){ renderCentralDeAvisos(); }
+  if(which === 'comunicacao'){
+    renderCentralDeAvisos();
+    const parados = enviosParadosNoMeio().length, el = document.getElementById('comunicacao-envios-parados');
+    if(el) el.innerHTML = parados ? '<b style="color:#E2A33D;">· ' + parados + (parados === 1 ? ' parou no meio' : ' pararam no meio') + '</b>' : '';
+  }
+  if(which === 'envios'){ renderEnvios(); }
   if(which === 'ferramentas-treino'){ renderInfoCardGerarTreino(); }
   if(which === 'inteligencia'){ renderRelatoriosTendencias(); }
   if(which === 'faturamento'){ renderFaturamentoMetas(); }
@@ -14745,6 +14789,9 @@ async function carregarCatalogoPersonal(){
         registrarFichaDoCatalogo(row);
       } else if(row.tipo === 'modelo_mestre_desafio'){
         modelosMestreSecaEmpina[row.chave] = row.dados;
+      } else if(row.tipo === 'envio_massa'){
+        const atual = enviosEmMassa[row.chave];
+        if(row.chave && row.dados && row.dados.ordem && !enviosRodandoAgora[row.chave] && (!atual || String(row.dados.atualizadoEm || '') >= String(atual.atualizadoEm || ''))) enviosEmMassa[row.chave] = row.dados;
       } else if(row.tipo === 'modelo_seca21'){
         if(row.chave && row.dados && row.dados.dias) modelosSeca21[row.chave] = row.dados;
       } else if(row.tipo === 'relatorio_tendencias'){
@@ -19423,10 +19470,12 @@ async function avisarDataEspecial(tipo){
   const elegiveis = alunasPersonal.filter(function(a){ return a.telefone; });
   if(!confirm('Vai avisar ' + elegiveis.length + ' aluna(s) sobre essa data. Continuar?' + textoTempoEnvioWhatsApp(elegiveis.length))) return;
   const area = document.getElementById('resultado-avisos-lote');
+  const registro = novoRegistroDeEnvio({ origem: 'Data especial', texto: templatesAvisos[tipo]({ nome: '{nome}' }), destinatarias: elegiveis.map(function(a){ return { nome: a.nome, msg: templatesAvisos[tipo](a) }; }) });
   let enviadas = 0, erros = [];
   for(let i = 0; i < elegiveis.length; i++){
     area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Enviando ' + (i+1) + ' de ' + elegiveis.length + '... (de propósito, com pausa entre cada uma, pra proteger seu WhatsApp de bloqueio)</p>';
-    const saida = await enviarWhatsApp(elegiveis[i].telefone, templatesAvisos[tipo](elegiveis[i]));
+    const saida = await enviarWhatsApp(elegiveis[i].telefone, registro.alunas[elegiveis[i].nome] ? registro.alunas[elegiveis[i].nome].msg : templatesAvisos[tipo](elegiveis[i]));
+    marcarResultadoNoRegistro(registro, elegiveis[i].nome, saida);
     if(saida.sucesso) enviadas++; else erros.push({ nome: elegiveis[i].nome, motivo: saida.motivo });
     await pausaEntreEnviosWhatsApp();
   }
@@ -19438,11 +19487,13 @@ async function avisarMetaComunidadeBatida(){
   await sincronizarListaAlunasDoSupabase(); // sempre busca a lista mais nova antes de decidir quem recebe, nunca manda com dado velho
   const elegiveis = alunasPersonal.filter(function(a){ return a.telefone; });
   if(!confirm('Vai avisar ' + elegiveis.length + ' aluna(s) que a meta foi batida. Continuar?' + textoTempoEnvioWhatsApp(elegiveis.length))) return;
+  const registroMeta = novoRegistroDeEnvio({ origem: 'Meta da comunidade', texto: templatesAvisos.metaComunidade(metaComunidadePontos), destinatarias: elegiveis.map(function(a){ return { nome: a.nome, msg: templatesAvisos.metaComunidade(metaComunidadePontos) }; }) });
   const area = document.getElementById('resultado-avisos-lote');
   let enviadas = 0;
   for(let i = 0; i < elegiveis.length; i++){
     area.innerHTML = '<p class="txt" style="color:var(--text-faint);">Enviando ' + (i+1) + ' de ' + elegiveis.length + '... (de propósito, com pausa entre cada uma, pra proteger seu WhatsApp de bloqueio)</p>';
     const saida = await enviarWhatsApp(elegiveis[i].telefone, templatesAvisos.metaComunidade(metaComunidadePontos));
+    marcarResultadoNoRegistro(registroMeta, elegiveis[i].nome, saida);
     if(saida.sucesso) enviadas++;
     await pausaEntreEnviosWhatsApp();
   }
@@ -19458,17 +19509,373 @@ async function enviarAvisosEmLote(tipo){
   if(!confirm('Vai mandar mensagem no WhatsApp de ' + lista.length + ' aluna(s) agora. Continuar?' + textoTempoEnvioWhatsApp(lista.length))) return;
 
   const resultadoArea = document.getElementById('resultado-avisos-lote');
+  const NOMES_AVISOS = { riscoAbandono: 'Risco de abandono', avaliacaoAtrasada: 'Avaliação atrasada', planoVencendo: 'Plano vencendo', planoVencido: 'Plano vencido', aniversario: 'Aniversário' };
+  const registro = novoRegistroDeEnvio({ origem: 'Aviso: ' + (NOMES_AVISOS[tipo] || tipo), texto: templatesAvisos[tipo]({ nome: '{nome}' }), destinatarias: lista.map(function(a){ return { nome: a.nome, msg: templatesAvisos[tipo](a) }; }) });
   let enviadas = 0, erros = [];
   for(let i = 0; i < lista.length; i++){
     const a = lista[i];
     resultadoArea.innerHTML = '<p class="txt" style="color:var(--text-faint);">Enviando ' + (i+1) + ' de ' + lista.length + '... (de propósito, com pausa entre cada uma, pra proteger seu WhatsApp de bloqueio)</p>';
     const mensagem = templatesAvisos[tipo](a);
     const saida = await enviarWhatsApp(a.telefone, mensagem);
+    marcarResultadoNoRegistro(registro, a.nome, saida);
     if(saida.sucesso) enviadas++; else erros.push({ nome: a.nome, motivo: saida.motivo });
     await pausaEntreEnviosWhatsApp();
   }
   const listaErros = erros.length ? '<ul style="margin:8px 0 0;padding-left:18px;font-size:11px;color:var(--text-faint);">' + erros.map(function(e){ return '<li>' + e.nome + ': ' + (e.motivo || 'motivo não informado') + '</li>'; }).join('') + '</ul>' : '';
   resultadoArea.innerHTML = '<div class="info-box" style="border-color:' + (erros.length ? '#C9784A' : 'var(--success)') + ';margin-top:8px;"><p class="txt">' + (erros.length ? '' : '✓ ') + enviadas + ' enviada(s)' + (erros.length ? ' · ' + erros.length + ' com erro' : '') + '</p>' + listaErros + '</div>';
+}
+
+// ===== HISTÓRICO DE ENVIOS EM MASSA (WhatsApp) =====
+// Todo envio em massa vira um registro guardado no servidor (catálogo, tipo "envio_massa"), com a situação de cada
+// aluna salva logo depois de cada mensagem: enviada (com a hora), com erro (com o motivo) ou faltou enviar.
+// Se a tela fechar no meio, o registro mostra até onde foi e dá pra continuar só com as que faltaram.
+// A mensagem de cada aluna fica guardada enquanto ela não recebeu (pra continuar igualzinho) e sai do registro
+// assim que é enviada, pra o histórico não crescer à toa.
+let enviosEmMassa = {};          // id -> registro
+let enviosRodandoAgora = {};     // id -> true enquanto ESTA tela está enviando
+let abaEnvios = 'novo';          // 'novo' | 'historico'
+let envioAbertoNoHistorico = null;
+let filtroDoHistorico = 'faltou';
+let marcadasNoHistorico = {};
+let novoEnvio = { texto: '', comparar: null, marcadas: {}, filtro: 'todas', busca: '' };
+const MS_ENVIO_EM_OUTRO_APARELHO = 180000; // registro com pendência mexido há menos de 3 min: provavelmente ainda enviando em outro aparelho
+
+function agoraISOEnvio(){ return new Date().toISOString(); }
+function primeiroNomeEnvio(nome){ return String(nome || '').trim().split(' ')[0]; }
+function personalizarTextoEnvio(texto, nome){ return String(texto || '').replace(/\{nome\}/g, primeiroNomeEnvio(nome)); }
+function textoComparavelEnvio(texto){ return String(texto || '').replace(/\s+/g, ' ').trim().toLowerCase(); }
+
+function salvarRegistroDeEnvio(r){
+  r.atualizadoEm = agoraISOEnvio();
+  try { salvarCatalogoPersonal('envio_massa', r.id, r); } catch(e){}
+}
+
+// destinatarias: [{ nome, msg }]. Devolve o registro já salvo, com todas "faltou enviar".
+function novoRegistroDeEnvio(opcoes){
+  const id = 'env_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const r = { id: id, criadoEm: agoraISOEnvio(), por: NOME_PERSONAL_LOGADO || '', canal: 'whatsapp', origem: opcoes.origem || 'Envio em massa',
+    texto: opcoes.texto || '', ordem: [], alunas: {} };
+  (opcoes.destinatarias || []).forEach(function(d){
+    if(!d || !d.nome || r.alunas[d.nome]) return;
+    r.ordem.push(d.nome);
+    r.alunas[d.nome] = { st: 'pendente', msg: d.msg };
+  });
+  enviosEmMassa[id] = r;
+  salvarRegistroDeEnvio(r);
+  return r;
+}
+
+function marcarResultadoNoRegistro(r, nome, saida){
+  if(!r || !r.alunas[nome]) return;
+  const x = r.alunas[nome];
+  x.em = agoraISOEnvio();
+  if(saida && saida.sucesso){ x.st = 'enviada'; delete x.msg; delete x.motivo; }
+  else { x.st = 'erro'; x.motivo = (saida && saida.motivo) || 'motivo não informado'; }
+  salvarRegistroDeEnvio(r);
+}
+
+function contagemDoRegistro(r){
+  const c = { total: r.ordem.length, enviadas: 0, erros: 0, faltam: 0 };
+  r.ordem.forEach(function(n){ const st = r.alunas[n].st; if(st === 'enviada') c.enviadas++; else if(st === 'erro') c.erros++; else c.faltam++; });
+  return c;
+}
+
+function situacaoDoRegistro(r, agora){
+  const c = contagemDoRegistro(r);
+  if(c.faltam > 0){
+    if(enviosRodandoAgora[r.id]) return { texto: 'Enviando agora', classe: 'cd-c-verde' };
+    const mexido = new Date(r.atualizadoEm || r.criadoEm).getTime();
+    if((agora === undefined ? Date.now() : agora) - mexido < MS_ENVIO_EM_OUTRO_APARELHO) return { texto: 'Enviando em outro aparelho', classe: 'cd-c-verde' };
+    return { texto: 'Parou no meio', classe: 'cd-c-alerta' };
+  }
+  return c.erros > 0 ? { texto: 'Concluído com erros', classe: 'cd-c-alerta' } : { texto: 'Concluído', classe: 'cd-c-ok' };
+}
+
+function registrosDeEnvioOrdenados(){
+  return Object.keys(enviosEmMassa).map(function(k){ return enviosEmMassa[k]; }).filter(function(r){ return r && r.ordem && r.alunas; })
+    .sort(function(a, b){ return String(b.criadoEm).localeCompare(String(a.criadoEm)); });
+}
+
+function enviosParadosNoMeio(){ return registrosDeEnvioOrdenados().filter(function(r){ return situacaoDoRegistro(r).texto === 'Parou no meio'; }); }
+
+// Manda pra uma lista de nomes de um registro, respeitando o espaçamento combinado. Pula quem já recebeu.
+async function executarRegistroDeEnvio(r, nomes, aoAvancar){
+  enviosRodandoAgora[r.id] = true;
+  let enviadas = 0;
+  const erros = [];
+  try {
+    for(let i = 0; i < nomes.length; i++){
+      const nome = nomes[i], x = r.alunas[nome];
+      if(!x || x.st === 'enviada') continue;
+      if(aoAvancar) aoAvancar(i + 1, nomes.length, nome);
+      const a = alunasPersonal.find(function(y){ return y.nome === nome; });
+      const msg = x.msg || personalizarTextoEnvio(r.texto, nome);
+      const saida = !a ? { sucesso: false, motivo: 'aluna não encontrada' } : (!a.telefone ? { sucesso: false, motivo: 'sem telefone cadastrado' } : await enviarWhatsApp(a.telefone, msg));
+      if(!saida.sucesso && !x.msg) x.msg = msg; // guarda pra poder tentar de novo igual
+      marcarResultadoNoRegistro(r, nome, saida);
+      if(saida.sucesso) enviadas++; else erros.push({ nome: nome, motivo: saida.motivo });
+      if(a && a.telefone) await pausaEntreEnviosWhatsApp();
+    }
+  } finally {
+    delete enviosRodandoAgora[r.id];
+  }
+  return { enviadas: enviadas, erros: erros };
+}
+
+// Aviso do navegador se tentar fechar a página no meio de um envio (navegar entre as telas do app não interrompe)
+if(typeof window !== 'undefined' && window.addEventListener){
+  window.addEventListener('beforeunload', function(ev){
+    if(Object.keys(enviosRodandoAgora).length){ ev.preventDefault(); ev.returnValue = 'Tem um envio em massa em andamento.'; return ev.returnValue; }
+  });
+}
+
+// ----- Situação de cada aluna em relação a um envio -----
+function situacaoDaAlunaNoEnvio(r, nome){
+  if(!r || !r.alunas[nome]) return 'fora';
+  return r.alunas[nome].st; // 'enviada' | 'erro' | 'pendente'
+}
+function alunaRecebeuEssaMensagem(nome, texto){
+  const alvo = textoComparavelEnvio(texto);
+  if(!alvo) return false;
+  return registrosDeEnvioOrdenados().some(function(r){ return textoComparavelEnvio(r.texto) === alvo && r.alunas[nome] && r.alunas[nome].st === 'enviada'; });
+}
+
+// ----- Tela -----
+function abrirEnvios(aba){
+  abaEnvios = aba === 'historico' ? 'historico' : 'novo';
+  if(abaEnvios === 'novo' && novoEnvio.comparar === null){
+    const ultimo = registrosDeEnvioOrdenados()[0];
+    novoEnvio.comparar = ultimo ? ultimo.id : '';
+  }
+  showPersonalView('envios');
+}
+
+function renderEnvios(){
+  const area = document.getElementById('envios-conteudo');
+  if(!area) return;
+  const parados = enviosParadosNoMeio().length;
+  area.innerHTML = '<div class="cd-abas">' +
+      '<div class="cd-aba' + (abaEnvios === 'novo' ? ' on' : '') + '" onclick="abaEnvios=\'novo\';renderEnvios()">Novo envio</div>' +
+      '<div class="cd-aba' + (abaEnvios === 'historico' ? ' on' : '') + '" onclick="abaEnvios=\'historico\';renderEnvios()">Histórico de envios' + (parados ? ' <b style="color:#E2A33D;">' + parados + (parados === 1 ? ' parou no meio' : ' pararam no meio') + '</b>' : '') + '</div>' +
+    '</div>' + (abaEnvios === 'historico' ? htmlHistoricoEnvios() : htmlNovoEnvio());
+}
+
+function htmlCardRegistro(r){
+  const c = contagemDoRegistro(r), st = situacaoDoRegistro(r);
+  const data = new Date(r.criadoEm).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  const pct = c.total ? Math.round(c.enviadas / c.total * 100) : 0;
+  return '<div class="env-card' + (envioAbertoNoHistorico === r.id ? ' on' : '') + '" onclick="abrirRegistroNoHistorico(\'' + r.id + '\')">' +
+    '<div class="env-l1">' + data + ' · ' + escaparHtmlFicha(r.por || 'equipe') + ' · ' + escaparHtmlFicha(r.origem) + '<span class="cd-chip ' + st.classe + '">' + st.texto + '</span></div>' +
+    '<p class="env-txt">' + escaparHtmlFicha(r.texto) + '</p>' +
+    '<span class="cd-barra"><i style="width:' + pct + '%;' + (c.faltam === 0 && c.erros === 0 ? 'background:#8FAE7D;' : '') + '"></i></span>' +
+    '<small class="cd-faint">' + c.enviadas + ' de ' + c.total + ' enviadas' + (c.erros ? ' · ' + c.erros + ' com erro' : '') + (c.faltam ? ' · faltam ' + c.faltam : '') + '</small></div>';
+}
+
+function htmlHistoricoEnvios(){
+  const lista = registrosDeEnvioOrdenados().slice(0, 30);
+  if(!lista.length) return '<div class="info-box"><p class="txt" style="color:var(--text-faint);margin:0;">Nenhum envio em massa registrado ainda. Os próximos envios pelo WhatsApp aparecem aqui, com quem recebeu e quem faltou.</p></div>';
+  if(!envioAbertoNoHistorico || !enviosEmMassa[envioAbertoNoHistorico]) envioAbertoNoHistorico = lista[0].id;
+  return '<div class="env-grade"><div class="cd-box"><div class="cd-box-cab"><h2>Últimos envios</h2></div>' + lista.map(htmlCardRegistro).join('') + '</div>' +
+    '<div class="cd-box" id="env-detalhe">' + htmlDetalheRegistro(enviosEmMassa[envioAbertoNoHistorico]) + '</div></div>';
+}
+
+function abrirRegistroNoHistorico(id){
+  if(!enviosEmMassa[id]) return;
+  envioAbertoNoHistorico = id;
+  abaEnvios = 'historico';
+  marcadasNoHistorico = {};
+  const r = enviosEmMassa[id];
+  r.ordem.forEach(function(n){ if(r.alunas[n].st === 'pendente') marcadasNoHistorico[n] = true; }); // as que faltaram já vêm marcadas
+  filtroDoHistorico = contagemDoRegistro(r).faltam ? 'faltou' : 'todas';
+  renderEnvios();
+}
+
+const ROTULO_SITUACAO_ENVIO = { enviada: ['enviada', 'cd-c-ok'], erro: ['erro', 'cd-c-ruim'], pendente: ['faltou enviar', 'cd-c-alerta'] };
+
+function htmlDetalheRegistro(r){
+  if(!r) return '';
+  const c = contagemDoRegistro(r), st = situacaoDoRegistro(r);
+  const data = new Date(r.criadoEm).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  const filtros = [['todas', 'Todas', c.total], ['enviada', 'Enviadas', c.enviadas], ['erro', 'Com erro', c.erros], ['faltou', 'Faltou enviar', c.faltam]];
+  const visiveis = r.ordem.filter(function(n){
+    const s = r.alunas[n].st;
+    return filtroDoHistorico === 'todas' || (filtroDoHistorico === 'faltou' ? s === 'pendente' : s === filtroDoHistorico);
+  });
+  const marcadas = r.ordem.filter(function(n){ return marcadasNoHistorico[n] && r.alunas[n].st === 'pendente'; });
+  const rodando = !!enviosRodandoAgora[r.id];
+  return '<div class="cd-box-cab"><h2>Envio de ' + data + '</h2><div class="cd-r"><span class="cd-chip ' + st.classe + '">' + st.texto + '</span></div></div>' +
+    '<div class="env-msg">' + escaparHtmlFicha(r.texto) + '</div>' +
+    '<div class="env-resumo"><div><small>Pra quem</small><b>' + c.total + '</b></div><div><small>Enviadas</small><b style="color:#8FAE7D;">' + c.enviadas + '</b></div>' +
+      '<div><small>Com erro</small><b style="color:#D9785A;">' + c.erros + '</b></div><div><small>Faltou enviar</small><b style="color:#E2A33D;">' + c.faltam + '</b></div></div>' +
+    '<div class="env-filtros">' + filtros.map(function(f){ return '<span class="' + (filtroDoHistorico === f[0] ? 'on' : '') + '" onclick="filtroDoHistorico=\'' + f[0] + '\';renderEnvios()">' + f[1] + ' (' + f[2] + ')</span>'; }).join('') + '</div>' +
+    '<div class="env-lista">' + (visiveis.length ? visiveis.map(function(n){
+      const x = r.alunas[n], rot = ROTULO_SITUACAO_ENVIO[x.st] || ['', ''];
+      const quando = x.em ? new Date(x.em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : (x.st === 'pendente' ? 'ainda não saiu' : '');
+      const marcavel = x.st === 'pendente';
+      return '<label class="env-al">' + (marcavel ? '<input type="checkbox"' + (marcadasNoHistorico[n] ? ' checked' : '') + ' onchange="marcarNoHistorico(\'' + escaparNomeParaClique(n) + '\', this.checked)">' : '<span class="env-ck-vazio"></span>') +
+        '<b>' + escaparHtmlFicha(n) + '</b><span class="cd-chip ' + rot[1] + '">' + rot[0] + (x.st === 'erro' && x.motivo ? ': ' + escaparHtmlFicha(x.motivo) : '') + '</span><small>' + quando + '</small></label>';
+    }).join('') : '<p class="cd-nota">Ninguém nesse filtro.</p>') + '</div>' +
+    '<div id="env-progresso-historico"></div>' +
+    '<div class="cd-rodape"><span class="cd-nota">' + (rodando ? 'Enviando agora. Pode navegar pelo app, só não feche a página.' : marcadas.length + (marcadas.length === 1 ? ' marcada' : ' marcadas') + (marcadas.length ? ' · ' + textoTempoEnvioWhatsApp(marcadas.length).split('Tempo estimado: ')[1].split('.')[0] : '')) + '</span>' +
+      '<div class="cd-r">' + (c.erros && !rodando ? '<button class="cd-btn" onclick="tentarDeNovoAsComErro(\'' + r.id + '\')">Tentar de novo as com erro (' + c.erros + ')</button>' : '') +
+      (c.faltam && !rodando ? '<button class="cd-btn cd-btn-ouro" onclick="continuarDeOndeParou(\'' + r.id + '\')">Continuar de onde parou (' + marcadas.length + ')</button>' : '') + '</div></div>';
+}
+
+function marcarNoHistorico(nome, marcar){ if(marcar) marcadasNoHistorico[nome] = true; else delete marcadasNoHistorico[nome]; renderEnvios(); }
+
+async function rodarDoHistorico(r, nomes, textoConfirmacao){
+  if(!nomes.length){ alert('Nenhuma aluna marcada pra enviar.'); return null; }
+  if(!confirm(textoConfirmacao + textoTempoEnvioWhatsApp(nomes.length))) return null;
+  renderEnvios();
+  const res = await executarRegistroDeEnvio(r, nomes, function(i, n, nome){
+    const el = document.getElementById('env-progresso-historico');
+    if(el) el.innerHTML = '<p class="cd-nota" style="color:var(--gold-soft);">Enviando ' + i + ' de ' + n + ' (' + escaparHtmlFicha(nome) + ')... com pausa entre cada uma, pra proteger o número.</p>';
+  });
+  marcadasNoHistorico = {};
+  renderEnvios();
+  mostrarConfirmacaoSalvamento(res.erros.length === 0, res.enviadas + (res.enviadas === 1 ? ' enviada' : ' enviadas') + (res.erros.length ? ' · ' + res.erros.length + ' com erro' : '.'));
+  return res;
+}
+
+function continuarDeOndeParou(id){
+  const r = enviosEmMassa[id];
+  if(!r || enviosRodandoAgora[id]) return null;
+  const nomes = r.ordem.filter(function(n){ return marcadasNoHistorico[n] && r.alunas[n].st === 'pendente'; });
+  return rodarDoHistorico(r, nomes, 'Continuar esse envio pra ' + nomes.length + (nomes.length === 1 ? ' aluna' : ' alunas') + ' que faltaram?');
+}
+
+function tentarDeNovoAsComErro(id){
+  const r = enviosEmMassa[id];
+  if(!r || enviosRodandoAgora[id]) return null;
+  const nomes = r.ordem.filter(function(n){ return r.alunas[n].st === 'erro'; });
+  return rodarDoHistorico(r, nomes, 'Tentar de novo pras ' + nomes.length + ' que deram erro?');
+}
+
+// ----- Novo envio -----
+const ATALHOS_NOVO_ENVIO = [
+  { id: 'ativas', titulo: 'Ativas que não receberam', filtro: function(a){ return statusDoPlano(a) === 'ativas'; } },
+  { id: 'vencidas', titulo: 'Vencidas que não receberam', filtro: function(a){ return statusDoPlano(a) === 'vencidas'; } },
+  { id: 'porvencer', titulo: 'Por vencer que não receberam', filtro: function(a){ return statusDoPlano(a) === 'porvencer'; } },
+  { id: 'todas', titulo: 'Todas que não receberam', filtro: function(){ return true; } }
+];
+const ROTULO_STATUS_PLANO = { ativas: ['Ativa', 'cd-c-ok'], porvencer: ['Por vencer', 'cd-c-ouro'], vencidas: ['Vencida', 'cd-c-ruim'] };
+
+function alunasDoAtalho(at, r){
+  return alunasPersonal.filter(function(a){ return a.telefone && at.filtro(a) && situacaoDaAlunaNoEnvio(r, a.nome) !== 'enviada'; });
+}
+
+function htmlNovoEnvio(){
+  const regs = registrosDeEnvioOrdenados();
+  const r = novoEnvio.comparar ? enviosEmMassa[novoEnvio.comparar] : null;
+  const opcoes = '<option value="">Não comparar</option>' + regs.slice(0, 20).map(function(x, i){
+    const data = new Date(x.criadoEm).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    return '<option value="' + x.id + '"' + (x.id === novoEnvio.comparar ? ' selected' : '') + '>' + (i === 0 ? 'Último envio: ' : '') + data + ' · ' + escaparHtmlFicha(String(x.texto).slice(0, 40)) + '</option>';
+  }).join('');
+  const atalhos = ATALHOS_NOVO_ENVIO.map(function(at){
+    const n = alunasDoAtalho(at, r).length;
+    return '<div class="env-at" onclick="aplicarAtalhoNovoEnvio(\'' + at.id + '\')"><b>' + at.titulo + '</b>' + n + (n === 1 ? ' aluna' : ' alunas') + '</div>';
+  }).join('') +
+    (r ? '<div class="env-at" onclick="aplicarAtalhoNovoEnvio(\'erro\')"><b>Só as que deram erro</b>' + r.ordem.filter(function(n){ return r.alunas[n].st === 'erro'; }).length + ' no envio comparado</div>' : '') +
+    '<div class="env-at" onclick="aplicarAtalhoNovoEnvio(\'limpar\')"><b>Limpar seleção</b>&nbsp;</div>';
+  return '<div class="env-grade env-grade-novo"><div class="cd-box"><div class="cd-box-cab"><h2>Mensagem</h2></div>' +
+      '<textarea class="form-input" id="env-texto" rows="4" placeholder="Escreve aqui..." oninput="novoEnvio.texto=this.value">' + escaparHtmlFicha(novoEnvio.texto) + '</textarea>' +
+      '<p class="cd-nota" style="margin-top:6px;">Use {nome} pra chamar cada aluna pelo primeiro nome.</p>' +
+      '<div class="cd-box-cab" style="margin-top:14px;"><h2>Comparar com</h2></div><select class="form-select" onchange="novoEnvio.comparar=this.value;renderEnvios()">' + opcoes + '</select>' +
+      '<div class="cd-box-cab" style="margin-top:14px;"><h2>Seleção rápida</h2></div><div class="env-atalhos">' + atalhos + '</div></div>' +
+    '<div class="cd-box"><div class="cd-box-cab"><h2>Alunas</h2><div class="cd-r"><input class="form-input env-busca" placeholder="Buscar aluna" value="' + escaparHtmlFicha(novoEnvio.busca) + '" oninput="novoEnvio.busca=this.value;renderListaNovoEnvio()"></div></div>' +
+      '<div class="env-filtros">' + [['todas', 'Todas'], ['ativas', 'Ativas'], ['porvencer', 'Por vencer'], ['vencidas', 'Vencidas'], ['naorecebeu', 'Não receberam']].map(function(f){
+        return '<span class="' + (novoEnvio.filtro === f[0] ? 'on' : '') + '" onclick="novoEnvio.filtro=\'' + f[0] + '\';renderEnvios()">' + f[1] + '</span>';
+      }).join('') + '</div>' +
+      '<div id="env-lista-novo">' + htmlListaNovoEnvio() + '</div>' +
+      '<div id="env-progresso-novo"></div>' +
+      '<div class="cd-rodape" id="env-rodape-novo">' + htmlRodapeNovoEnvio() + '</div></div></div>';
+}
+
+function alunasVisiveisNoNovoEnvio(){
+  const r = novoEnvio.comparar ? enviosEmMassa[novoEnvio.comparar] : null;
+  const busca = textoComparavelEnvio(novoEnvio.busca);
+  return alunasPersonal.filter(function(a){
+    if(busca && textoComparavelEnvio(a.nome).indexOf(busca) === -1) return false;
+    if(novoEnvio.filtro === 'naorecebeu') return situacaoDaAlunaNoEnvio(r, a.nome) !== 'enviada';
+    if(novoEnvio.filtro !== 'todas') return statusDoPlano(a) === novoEnvio.filtro;
+    return true;
+  }).sort(function(x, y){ return x.nome.localeCompare(y.nome, 'pt-BR'); });
+}
+
+function htmlListaNovoEnvio(){
+  const r = novoEnvio.comparar ? enviosEmMassa[novoEnvio.comparar] : null;
+  const lista = alunasVisiveisNoNovoEnvio();
+  if(!lista.length) return '<p class="cd-nota">Nenhuma aluna nesse filtro.</p>';
+  return '<div class="env-lista">' + lista.map(function(a){
+    const st = ROTULO_STATUS_PLANO[statusDoPlano(a)] || ['', ''];
+    const s = situacaoDaAlunaNoEnvio(r, a.nome);
+    const quando = r && r.alunas[a.nome] && r.alunas[a.nome].em ? new Date(r.alunas[a.nome].em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '';
+    const rot = !r ? ['', ''] : (s === 'enviada' ? ['recebeu ' + quando, 'cd-c-ok'] : (s === 'erro' ? ['erro no envio', 'cd-c-ruim'] : ['não recebeu', 'cd-c-alerta']));
+    return '<label class="env-al">' + (a.telefone ? '<input type="checkbox"' + (novoEnvio.marcadas[a.nome] ? ' checked' : '') + ' onchange="marcarNoNovoEnvio(\'' + escaparNomeParaClique(a.nome) + '\', this.checked)">' : '<span class="env-ck-vazio"></span>') +
+      '<b>' + escaparHtmlFicha(a.nome) + '</b>' + (st[0] ? '<span class="cd-chip ' + st[1] + '">' + st[0] + '</span>' : '<span></span>') +
+      (a.telefone ? (rot[0] ? '<span class="cd-chip ' + rot[1] + '">' + rot[0] + '</span>' : '<span></span>') : '<span class="cd-chip">sem telefone</span>') + '</label>';
+  }).join('') + '</div>';
+}
+
+function nomesMarcadosNoNovoEnvio(){
+  return alunasPersonal.filter(function(a){ return novoEnvio.marcadas[a.nome] && a.telefone; }).map(function(a){ return a.nome; });
+}
+
+function htmlRodapeNovoEnvio(){
+  const nomes = nomesMarcadosNoNovoEnvio();
+  const jaReceberam = nomes.filter(function(n){ return alunaRecebeuEssaMensagem(n, novoEnvio.texto); }).length;
+  const vaoReceber = nomes.length - jaReceberam;
+  return '<span class="cd-nota">' + nomes.length + (nomes.length === 1 ? ' marcada' : ' marcadas') +
+      (jaReceberam ? ' · ' + jaReceberam + ' já ' + (jaReceberam === 1 ? 'recebeu' : 'receberam') + ' essa mesma mensagem e ' + (jaReceberam === 1 ? 'fica' : 'ficam') + ' de fora' : '') + '</span>' +
+    '<div class="cd-r"><button class="cd-btn cd-btn-ouro" onclick="enviarNovoEnvio()"' + (enviosRodandoAgora.__novo ? ' disabled' : '') + '>Enviar pra ' + vaoReceber + (vaoReceber === 1 ? ' aluna' : ' alunas') + '</button></div>';
+}
+
+function renderListaNovoEnvio(){
+  const l = document.getElementById('env-lista-novo'), rod = document.getElementById('env-rodape-novo');
+  if(l) l.innerHTML = htmlListaNovoEnvio();
+  if(rod) rod.innerHTML = htmlRodapeNovoEnvio();
+}
+
+function marcarNoNovoEnvio(nome, marcar){ if(marcar) novoEnvio.marcadas[nome] = true; else delete novoEnvio.marcadas[nome]; renderListaNovoEnvio(); }
+
+function aplicarAtalhoNovoEnvio(id){
+  const r = novoEnvio.comparar ? enviosEmMassa[novoEnvio.comparar] : null;
+  novoEnvio.marcadas = {};
+  if(id === 'erro' && r){
+    r.ordem.forEach(function(n){ const a = alunasPersonal.find(function(x){ return x.nome === n; }); if(r.alunas[n].st === 'erro' && a && a.telefone) novoEnvio.marcadas[n] = true; });
+  } else {
+    const at = ATALHOS_NOVO_ENVIO.find(function(x){ return x.id === id; });
+    if(at) alunasDoAtalho(at, r).forEach(function(a){ novoEnvio.marcadas[a.nome] = true; });
+  }
+  renderEnvios();
+}
+
+async function enviarNovoEnvio(){
+  const campo = document.getElementById('env-texto');
+  if(campo) novoEnvio.texto = campo.value;
+  const texto = String(novoEnvio.texto || '').trim();
+  if(!texto){ alert('Escreve a mensagem antes de enviar.'); return null; }
+  const marcadas = nomesMarcadosNoNovoEnvio();
+  const nomes = marcadas.filter(function(n){ return !alunaRecebeuEssaMensagem(n, texto); }); // nunca manda a mesma mensagem 2 vezes pra mesma aluna
+  const puladas = marcadas.length - nomes.length;
+  if(!nomes.length){ alert(marcadas.length ? 'Todas as marcadas já receberam essa mesma mensagem.' : 'Marque pelo menos uma aluna.'); return null; }
+  if(!confirm('Mandar essa mensagem pelo WhatsApp pra ' + nomes.length + (nomes.length === 1 ? ' aluna' : ' alunas') + '?' +
+    (puladas ? ' ' + puladas + (puladas === 1 ? ' já recebeu e fica' : ' já receberam e ficam') + ' de fora.' : '') + textoTempoEnvioWhatsApp(nomes.length))) return null;
+  const r = novoRegistroDeEnvio({ origem: 'Envio em massa', texto: texto, destinatarias: nomes.map(function(n){ return { nome: n, msg: personalizarTextoEnvio(texto, n) }; }) });
+  enviosRodandoAgora.__novo = true;
+  renderListaNovoEnvio();
+  let res;
+  try {
+    res = await executarRegistroDeEnvio(r, nomes, function(i, n, nome){
+      const el = document.getElementById('env-progresso-novo');
+      if(el) el.innerHTML = '<p class="cd-nota" style="color:var(--gold-soft);">Enviando ' + i + ' de ' + n + ' (' + escaparHtmlFicha(nome) + ')... Pode navegar pelo app, só não feche a página.</p>';
+    });
+  } finally { delete enviosRodandoAgora.__novo; }
+  novoEnvio = { texto: '', comparar: r.id, marcadas: {}, filtro: 'todas', busca: '' };
+  envioAbertoNoHistorico = r.id; abaEnvios = 'historico'; filtroDoHistorico = 'todas';
+  renderEnvios();
+  mostrarConfirmacaoSalvamento(res.erros.length === 0, res.enviadas + (res.enviadas === 1 ? ' enviada' : ' enviadas') + (res.erros.length ? ' · ' + res.erros.length + ' com erro' : '.'));
+  return res;
 }
 
 // ===== ENVIO DE WHATSAPP (via porteiro seguro no Supabase) =====
