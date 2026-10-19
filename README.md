@@ -1,4 +1,4 @@
-[dna_musa_139.html](https://github.com/user-attachments/files/33668639/dna_musa_139.html)
+[Uploading dna_musa_140.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -953,7 +953,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-19-AE-GRUPO-DESAFIO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-19-AF-GRUPO-LINK</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1857,7 +1857,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-19-AE-GRUPO-DESAFIO';
+const VERSAO_APP = '2026-10-19-AF-GRUPO-LINK';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -8192,8 +8192,11 @@ function avisarGrupoDoDesafio(nomeTreino){
 }
 
 // ----- Personal: número do grupo e liga/desliga, e as últimas mensagens da fila -----
+// Aceita o LINK de convite do grupo (o servidor descobre o código na Z-API na primeira mensagem) ou o código direto
 function normalizarIdDoGrupo(texto){
   const s = String(texto || '').trim().replace(/\s+/g, '');
+  const link = s.match(/^(?:https?:\/\/)?chat\.whatsapp\.com\/(?:invite\/)?([A-Za-z0-9]{10,})/);
+  if(link) return 'https://chat.whatsapp.com/' + link[1];
   return /^[0-9]{10,}(-group|@g\.us)$/.test(s) ? s : null;
 }
 
@@ -8201,8 +8204,11 @@ function salvarGrupoDoDesafio(idDesafio){
   const campo = document.getElementById('grupo-desafio-' + idDesafio), liga = document.getElementById('grupo-desafio-ativo-' + idDesafio);
   const bruto = campo ? campo.value : '';
   const grupo = bruto.trim() ? normalizarIdDoGrupo(bruto) : '';
-  if(grupo === null){ alert('Esse código de grupo não parece certo. Ele fica no painel da Z-API, em Grupos, e tem esse formato: 120363019502650977-group'); return false; }
+  if(grupo === null){ alert('Esse link não parece certo. Cole o link de convite do grupo, assim: https://chat.whatsapp.com/AbCdEf123456 (no WhatsApp: dados do grupo > Convidar via link > Copiar link).'); return false; }
+  const antes = gruposDosDesafios[idDesafio] || {};
   gruposDosDesafios[idDesafio] = { grupo: grupo, ativo: !!(liga && liga.checked) && !!grupo, em: new Date().toISOString() };
+  // o código que o servidor já descobriu pra esse mesmo link continua valendo
+  if(antes.grupoId && antes.linkResolvido === grupo){ gruposDosDesafios[idDesafio].grupoId = antes.grupoId; gruposDosDesafios[idDesafio].linkResolvido = antes.linkResolvido; }
   salvarCatalogoPersonalConferindo('grupo_desafio', idDesafio, gruposDosDesafios[idDesafio]);
   mostrarConfirmacaoSalvamento(true, gruposDosDesafios[idDesafio].ativo ? 'Pronto: quando ela registrar o treino, a mensagem entra no grupo.' : 'Salvo. As mensagens no grupo estão desligadas.');
   renderControleDesafios();
@@ -8215,11 +8221,12 @@ function htmlGrupoDoDesafio(idDesafio){
   const cfg = gruposDosDesafios[idDesafio] || {};
   return '<div class="cd-box"><div class="cd-box-cab"><h2>Grupo do WhatsApp do ' + escaparHtmlFicha((DESAFIOS_DO_APP[idDesafio] || {}).nome || idDesafio) + '</h2>' +
       '<div class="cd-r"><span class="cd-chip ' + (cfg.ativo ? 'cd-c-ok">ligado' : 'cd-c-alerta">desligado') + '</span></div></div>' +
-    '<p class="cd-nota" style="margin:0 0 8px;">Quando a aluna registra o treino do desafio, entra no grupo: "🔥 Ana acabou de concluir o Treino B do SECA 21! Dia 5 de 21." Sai pelo número de suporte, uma mensagem por vez, com 5 a 30 segundos entre uma e outra, e no máximo uma por aluna por dia.</p>' +
+    '<p class="cd-nota" style="margin:0 0 8px;">Quando a aluna registra o treino do desafio, entra no grupo: "🔥 Ana acabou de concluir o Treino B do SECA 21! Dia 5 de 21." Sai pelo número do Thiago (o mesmo dos avisos automáticos), uma mensagem por vez, com 5 a 30 segundos entre uma e outra, e no máximo uma por aluna por dia.</p>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
-      '<input class="form-input" id="grupo-desafio-' + idDesafio + '" style="flex:1;min-width:220px;font-size:12.5px;" placeholder="Código do grupo na Z-API (ex: 120363019502650977-group)" value="' + escaparHtmlFicha(cfg.grupo || '') + '">' +
+      '<input class="form-input" id="grupo-desafio-' + idDesafio + '" style="flex:1;min-width:220px;font-size:12.5px;" placeholder="Link de convite do grupo (https://chat.whatsapp.com/...)" value="' + escaparHtmlFicha(cfg.grupo || '') + '">' +
       '<label style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--text-dim);"><input type="checkbox" id="grupo-desafio-ativo-' + idDesafio + '"' + (cfg.ativo || !cfg.grupo ? ' checked' : '') + '> Avisar no grupo</label>' +
       '<button class="cd-btn cd-btn-verde" onclick="salvarGrupoDoDesafio(\'' + idDesafio + '\')">Salvar</button></div>' +
+    '<p class="cd-nota" style="margin:6px 0 0;">' + (cfg.grupoId && cfg.linkResolvido === cfg.grupo ? 'Grupo encontrado na Z-API: ' + escaparHtmlFicha(cfg.grupoId) : (cfg.grupo ? 'O grupo é encontrado na primeira mensagem. O número do Thiago (o dos avisos automáticos) precisa estar no grupo.' : 'No WhatsApp: dados do grupo > Convidar via link > Copiar link. O número do Thiago (o dos avisos automáticos) precisa estar no grupo.')) + '</p>' +
     '<div id="cd-fila-grupo-' + idDesafio + '" style="margin-top:10px;"></div></div>';
 }
 
