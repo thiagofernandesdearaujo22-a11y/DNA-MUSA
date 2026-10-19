@@ -1,4 +1,4 @@
-[dna_musa_136.html](https://github.com/user-attachments/files/33665186/dna_musa_136.html)
+[dna_musa_137.html](https://github.com/user-attachments/files/33665852/dna_musa_137.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -113,6 +113,29 @@
   .home-hero .hh-info{font-size:12.5px;color:var(--text-dim);margin:7px 0 0;display:flex;gap:14px;flex-wrap:wrap;}
   .home-hero .hh-info span{display:inline-flex;align-items:center;gap:5px;}
   .home-hero .hh-btn{height:48px;border-radius:14px;background:linear-gradient(135deg,#F4D9A5,#C9A063);color:#1A1409;font-weight:700;font-size:14.5px;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;cursor:pointer;border:none;width:100%;font-family:inherit;}
+  /* ===== SECA 21 na Início (só desafio / consultoria + desafio) ===== */
+  [data-view="home"].modo-so-desafio .dna-score-card,
+  [data-view="home"].modo-so-desafio #botao-desafio-area,
+  [data-view="home"].modo-so-desafio #botoes-cursos-area,
+  [data-view="home"].modo-so-desafio #botao-pergunta-perfil-area,
+  [data-view="home"].modo-so-desafio #botao-pergunta-roda-vida-area,
+  [data-view="home"].modo-so-desafio #home-label-indicadores,
+  [data-view="home"].modo-so-desafio #home-indicadores-grid,
+  [data-view="home"].modo-so-desafio #home-meu-progresso,
+  [data-view="home"].modo-so-desafio #botao-tutorial-home{display:none !important;}
+  .s21-hero .s21-grande{font-size:34px;-webkit-line-clamp:1;}
+  .s21-dots{display:flex;gap:3px;margin-top:12px;}
+  .s21-dots i{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,0.10);}
+  .s21-dots i.feito{background:#8FAE7D;} .s21-dots i.hoje{background:var(--gold);}
+  .home-hero.s21-verde{background:linear-gradient(150deg,rgba(169,221,180,0.16),rgba(169,221,180,0.03) 55%,var(--card));border-color:rgba(169,221,180,0.35);}
+  .home-hero.s21-verde .hh-lbl{color:#A9DDB4;}
+  .home-hero.s21-verde .hh-btn{background:linear-gradient(135deg,#A9DDB4,#6FA87C);color:#0d1a10;}
+  .s21-tag{display:inline-block;font-size:9px;letter-spacing:1px;background:rgba(169,221,180,0.16);color:#A9DDB4;border-radius:10px;padding:2px 7px;margin-left:6px;vertical-align:1px;}
+  .s21-convite{display:block;border:1px dashed var(--border-strong);border-radius:14px;padding:12px 14px;margin:12px 0;font-size:12.5px;color:var(--text-dim);text-decoration:none;line-height:1.5;}
+  .s21-convite b{color:var(--gold-soft);}
+  .s21-troca{display:flex;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:3px;margin:4px 0 12px;}
+  .s21-troca span{flex:1;text-align:center;padding:9px 8px;font-size:12.5px;border-radius:9px;color:var(--text-dim);cursor:pointer;}
+  .s21-troca span.on{background:rgba(169,221,180,0.14);color:#A9DDB4;font-weight:600;}
   .home-semana{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px 16px;margin-bottom:14px;cursor:pointer;}
   .home-semana-topo{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--text-dim);}
   .home-semana-topo b{color:var(--text);font-weight:600;}
@@ -930,7 +953,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-19-Z-HISTORICO-ENVIOS</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-19-AA-SO-DESAFIO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1065,8 +1088,8 @@
     <div class="view" data-view="home">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
         <div>
-          <p style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold);margin:0;letter-spacing:0.5px;">DNA MUSA</p>
-          <p style="font-size:9.5px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin:2px 0 0;">Team Fernandes</p>
+          <p id="home-marca" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold);margin:0;letter-spacing:0.5px;">DNA MUSA</p>
+          <p id="home-marca-sub" style="font-size:9.5px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin:2px 0 0;">Team Fernandes</p>
         </div>
         <div style="display:flex;gap:8px;align-items:center;position:relative;">
           <div id="botao-tutorial-home" role="button" aria-label="Ver tutorial do aplicativo" title="Ver tutorial" style="width:36px;height:36px;border-radius:50%;background:var(--card-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;" onclick="reverTour()">
@@ -1086,10 +1109,12 @@
       <p class="page-sub" id="home-data">Sua Central de Inteligência</p>
 
       <!-- Início nova: o que ela veio fazer (o treino) primeiro. Preenchido por renderInicioDaAluna(). -->
+      <div id="home-desafio-topo"></div>
       <div class="home-hero" id="home-treino-hoje"></div>
+      <div id="botao-desafio-area"></div>
 
       <div class="home-semana" id="link-ver-treinos-semana" onclick="abrirListaDeTreinosDaSemana()">
-        <div class="home-semana-topo"><span>Sua semana</span><b id="resumo-dias-semana"></b></div>
+        <div class="home-semana-topo"><span id="home-semana-titulo">Sua semana</span><b id="resumo-dias-semana"></b></div>
         <div class="home-bolinhas" id="home-bolinhas"></div>
       </div>
 
@@ -1117,15 +1142,15 @@
         </div>
       </div>
 
-      <div id="botao-desafio-area"></div>
       <div id="botoes-cursos-area"></div>
       <div id="botao-pergunta-perfil-area"></div>
       <div id="botao-pergunta-roda-vida-area"></div>
+      <div id="home-desafio-rodape"></div>
 
-      <p class="section-label" style="margin-top:22px;">Seus indicadores</p>
+      <p class="section-label" id="home-label-indicadores" style="margin-top:22px;">Seus indicadores</p>
       <div class="indicadores-grid" id="home-indicadores-grid"></div>
 
-      <div class="list-item" style="cursor:pointer;margin-top:10px;" onclick="openLevel2('progresso')">
+      <div class="list-item" id="home-meu-progresso" style="cursor:pointer;margin-top:10px;" onclick="openLevel2('progresso')">
         <span><i class="ti ti-trending-up" style="margin-right:8px;color:var(--gold-soft);"></i>Meu progresso</span>
         <i class="ti ti-chevron-right" style="color:var(--text-faint);"></i>
       </div>
@@ -1741,7 +1766,8 @@
     <!-- LISTA DE TREINOS DA SEMANA -->
 
     <div class="view" data-view="semana-treinos">
-      <h1 class="page-title">Sua semana</h1>
+      <h1 class="page-title" id="semana-titulo">Sua semana</h1>
+      <div id="semana-troca-desafio"></div>
       <p class="page-sub" id="semana-sub">Toque num dia pra abrir o treino completo</p>
       <div class="pn-barra" style="margin:10px 0 16px;"><i id="semana-barra" style="width:0%"></i></div>
       <div id="lista-dias-semana"></div>
@@ -1831,7 +1857,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-19-Z-HISTORICO-ENVIOS';
+const VERSAO_APP = '2026-10-19-AA-SO-DESAFIO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -2311,6 +2337,7 @@ function poster(container, title, sub, onClick, opts){
 }
 
 function abrirListaDeTreinosDaSemana(){
+  try { ligarTreinoDoDesafioNoModoSoDesafio(); atualizarTrocaDaAbaTreino(); } catch(e){}
   const lista = document.getElementById('lista-dias-semana');
   const abreviacoes = { 'Segunda':'SEG', 'Terça':'TER', 'Quarta':'QUA', 'Quinta':'QUI', 'Sexta':'SEX', 'Sábado':'SÁB', 'Domingo':'DOM' };
   const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
@@ -2337,7 +2364,7 @@ function abrirListaDeTreinosDaSemana(){
   };
 
   lista.innerHTML = dias.map(function(d, i){
-    const abrev = abreviacoes[d.n] || String(d.n || '').slice(0,3).toUpperCase();
+    const abrev = abreviacoes[d.n] || (d.desafio ? String(d.n || '').replace(/^Treino\s+/, '') : String(d.n || '').slice(0,3).toUpperCase());
     const foiRegistrado = diasRegistradosEssaSemana.indexOf(d.n) !== -1;
     const ehAlvo = i === indiceAlvo;
     const classe = 'sem-dia' + (foiRegistrado ? ' feito' : '') + (d.descanso && !foiRegistrado ? ' descanso' : '') + (ehAlvo ? ' alvo' : '');
@@ -2759,7 +2786,7 @@ function montarResumoDaSemanaDaAluna(prog, listaDias, agora){
     alvo: alvo,
     semanaCompleta: treinos.length > 0 && totalFeitos === treinos.length,
     bolinhas: lista.map(function(d, i){
-      return { letra: String(d.n || '').charAt(0).toUpperCase(), feito: ehTreino(d) && feito(d), hoje: i === idxHoje, descanso: !!(d && d.descanso), letraTreino: letraDoTreino(d) };
+      return { letra: d && d.desafio ? '' : String(d.n || '').charAt(0).toUpperCase(), feito: ehTreino(d) && feito(d), hoje: i === idxHoje, descanso: !!(d && d.descanso), letraTreino: letraDoTreino(d) };
     })
   };
 }
@@ -2843,7 +2870,9 @@ function htmlTarefaHome(iconeTi, titulo, subtitulo, onclick, extraDireita){
 }
 
 function renderHome(){
+  try { ligarTreinoDoDesafioNoModoSoDesafio(); } catch(e){}
   renderInicioDaAluna();
+  try { aplicarModoDesafioNaInicio(); } catch(e){}
   const stats = calcularEstatisticasAluna(NOME_ALUNA_LOGADA);
   const nutriStats = calcularNutricaoStats(NOME_ALUNA_LOGADA);
   const elNumero = document.getElementById('home-score-numero');
@@ -7899,7 +7928,9 @@ function abrirTelaDesafioSeca21(){
   }
   const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
   const feitos = ((prog.desafioDiasConcluidos || {})[chaveRegistroSeca21(sn)]) || [];
-  lista.innerHTML = '<p class="txt" style="font-size:12px;color:var(--text-faint);margin:0 0 10px;">' + feitos.length + ' de ' + semana.dias.length + ' treinos feitos nesta semana. Toque no nome do exercício pra ver o vídeo.</p>' +
+  const mDesafio = modoDoDesafioDaAluna(a);
+  lista.innerHTML = (mDesafio && !mDesafio.soDesafio ? htmlTrocaConsultoriaDesafio('desafio') : '') +
+    '<p class="txt" style="font-size:12px;color:var(--text-faint);margin:0 0 10px;">' + feitos.length + ' de ' + semana.dias.length + ' treinos feitos nesta semana. Toque no nome do exercício pra ver o vídeo.</p>' +
     htmlLegendaMetodosSeca21(semana) +
     semana.dias.map(function(d, i){
       const feito = feitos.indexOf(d.n) !== -1;
@@ -7967,6 +7998,155 @@ function desfazerDiaSeca21(indiceDia){
   abrirTelaDesafioSeca21();
 }
 
+// ===== SECA 21 NO CELULAR DA ALUNA: modo "só desafio" e consultoria + desafio =====
+// Só desafio (plano "so-desafio"): o app vira o app do desafio. Topo "SECA 21 · Desafio", cartão "Dia X de 21",
+// o treino do dia no MESMO modo treino da consultoria (um exercício por vez, vídeo, séries, carga e cronômetro),
+// aulas do SECA 21 e o convite pra consultoria. Some tudo que é da consultoria (DNA Score, Roda da Vida, perguntas,
+// indicadores). O menu vira Início, Treinos, Aulas, Evolução e Ranking. Os treinos feitos contam na constância.
+// Consultoria + desafio: a Início continua a da consultoria, com um cartão verde do desafio "por tempo determinado",
+// e a aba Treino ganha a troca entre "Consultoria" e "Desafio SECA 21". Tudo do desafio some quando ele termina.
+function modoDoDesafioDaAluna(a){
+  if(!a || !estaNoSeca21(a)) return null;
+  const st = situacaoDoSeca21(a);
+  if(!st) return null;
+  return { soDesafio: planoDaAluna(a).plano === 'so-desafio', st: st, ativo: st.comecou && !st.terminou };
+}
+
+function alunaLogadaNoModoSoDesafio(){
+  let a = null;
+  try { a = obterAlunaLogadaOuCriar(); } catch(e){ return false; }
+  const m = modoDoDesafioDaAluna(a);
+  return !!(m && m.soDesafio);
+}
+
+// Converte a semana do SECA 21 pro formato do modo treino da consultoria: o método sai do texto da linha e vai pra
+// "metodos" (Dropset / Restpause), que é onde o modo treino lê; o bi-set já está no formato que ele entende.
+function diasDoSeca21ParaModoTreino(semana){
+  return (semana && semana.dias || []).map(function(d){
+    const metodos = {};
+    const ex = d.ex.map(function(l, i){
+      if(l.indexOf('|||') !== -1) return l;
+      const p = partesLinhaSeca21(l);
+      if(p.metodo === 'Drop set') metodos[i] = 'Dropset';
+      else if(p.metodo === 'Rest pause') metodos[i] = 'Restpause';
+      return p.nomes[0] + ' · ' + p.series + 'x' + p.reps;
+    });
+    return { n: d.n, foco: d.n + ' · ' + d.foco, ex: ex, metodos: metodos, videos: Object.assign({}, d.videos || {}), descanso: false, desafio: 'seca21' };
+  });
+}
+
+function diasSaoDoDesafio(lista){ return !!(lista && lista.length && lista.every(function(d){ return d && d.desafio === 'seca21'; })); }
+
+// Só desafio, no período do desafio e com o treino liberado: o treino dela é o do SECA 21. Fora disso, se o que está
+// carregado é do desafio, sai (o desafio acabou ou ela mudou de plano). Nunca mexe num treino da consultoria.
+function ligarTreinoDoDesafioNoModoSoDesafio(){
+  let a = null;
+  try { a = obterAlunaLogadaOuCriar(); } catch(e){ return false; }
+  const m = modoDoDesafioDaAluna(a);
+  const semana = treinoSeca21DaAluna(a);
+  const temConsultoria = dias.length > 0 && !diasSaoDoDesafio(dias);
+  if(m && m.soDesafio && m.ativo && semana && !temConsultoria){
+    dias = diasDoSeca21ParaModoTreino(semana);
+    return true;
+  }
+  if(diasSaoDoDesafio(dias)) dias = [];
+  return false;
+}
+
+function htmlBolinhasDoDesafio(st){
+  let html = '<div class="s21-dots">';
+  for(let i = 1; i <= st.total; i++){
+    const classe = st.terminou || i < st.dia ? ' feito' : (i === st.dia && st.comecou ? ' hoje' : '');
+    html += '<i class="' + classe.trim() + '"></i>';
+  }
+  return html + '</div>';
+}
+
+// Próximo treino do desafio que ela ainda não fez nesta semana (pro cartão de consultoria + desafio)
+function proximoTreinoDoSeca21(a, st){
+  const semana = treinoSeca21DaAluna(a);
+  if(!semana) return null;
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const feitos = ((prog.desafioDiasConcluidos || {})[chaveRegistroSeca21(semanaAtualDoSeca21(st))]) || [];
+  return semana.dias.find(function(d){ return feitos.indexOf(d.n) === -1; }) || null;
+}
+
+function htmlTopoSoDesafio(a, m){
+  const st = m.st, d = a.desafioAtivo;
+  if(st.terminou){
+    return '<div class="home-hero s21-hero"><p class="hh-lbl">Seu desafio</p><p class="hh-tit">O SECA 21 terminou</p>' + htmlBolinhasDoDesafio(st) +
+      '<p class="hh-info">Terminou em ' + dataCurtaBR(d.dataFim) + '. Os treinos do desafio saíram do app, mas a sua evolução continua salva.</p></div>';
+  }
+  if(!st.comecou){
+    return '<div class="home-hero s21-hero"><p class="hh-lbl">Seu desafio</p><p class="hh-tit">Começa em ' + dataCurtaBR(d.dataInicio) + '</p>' + htmlBolinhasDoDesafio(st) +
+      '<p class="hh-info">São ' + st.total + ' dias. O treino aparece aqui no primeiro dia.</p></div>';
+  }
+  return '<div class="home-hero s21-hero"><p class="hh-lbl">Seu desafio</p><p class="hh-tit s21-grande">Dia ' + st.dia + ' de ' + st.total + '</p>' + htmlBolinhasDoDesafio(st) +
+    '<p class="hh-info">' + (st.faltam === 0 ? 'Último dia! ' : 'Faltam ' + st.faltam + (st.faltam === 1 ? ' dia' : ' dias') + '. ') + 'Termina em ' + dataCurtaBR(d.dataFim) + '.</p></div>';
+}
+
+function linkConsultoriaDoDesafio(){
+  return 'https://wa.me/' + TELEFONE_PERSONAL + '?text=' + encodeURIComponent('Oi, Thiago! Estou no desafio SECA 21 e quero conhecer a consultoria DNA Musa.');
+}
+
+function htmlRodapeSoDesafio(a){
+  const curso = cursoDoAppPorId('seca21');
+  const temAulas = curso && alunaTemCursoLiberado(a, 'seca21');
+  return (temAulas ? htmlTarefaHome('ti-player-play', 'Aulas do SECA 21', curso.aulas.length + ' aulas · toque pra assistir', 'abrirCursoDoApp(\'seca21\')') : '') +
+    '<a class="s21-convite" href="' + linkConsultoriaDoDesafio() + '" target="_blank" rel="noopener">Quer um treino montado só pra você? <b>Conheça a consultoria DNA Musa</b></a>';
+}
+
+function atualizarMenuDoDesafio(soDesafio){
+  const t = document.querySelector('[data-nav="treino"] span'), m = document.querySelector('[data-nav="mentoria"] span');
+  if(t) t.textContent = soDesafio ? 'Treinos' : 'Treino';
+  if(m) m.textContent = soDesafio ? 'Aulas' : 'Mentoria';
+}
+
+// Chamado no fim da Início: liga ou desliga o modo só desafio
+function aplicarModoDesafioNaInicio(){
+  let a = null;
+  try { a = obterAlunaLogadaOuCriar(); } catch(e){ return; }
+  const m = modoDoDesafioDaAluna(a);
+  const so = !!(m && m.soDesafio);
+  const view = document.querySelector('[data-view="home"]');
+  if(view && view.classList) view.classList.toggle('modo-so-desafio', so);
+  const el = function(id){ return document.getElementById(id); };
+  if(el('home-marca')) el('home-marca').textContent = so ? 'SECA 21' : 'DNA MUSA';
+  if(el('home-marca-sub')) el('home-marca-sub').textContent = so ? 'Desafio' : 'Team Fernandes';
+  if(el('home-desafio-topo')) el('home-desafio-topo').innerHTML = so ? htmlTopoSoDesafio(a, m) : '';
+  if(el('home-desafio-rodape')) el('home-desafio-rodape').innerHTML = so ? htmlRodapeSoDesafio(a) : '';
+  if(el('home-semana-titulo')) el('home-semana-titulo').textContent = so ? 'Sua semana no desafio' : 'Sua semana';
+  atualizarMenuDoDesafio(so);
+  if(!so) return;
+  if(el('home-data')) el('home-data').textContent = nivelSeca21PeloNivel(a.desafioAtivo.nivel) + ' · ' + a.desafioAtivo.frequencia + 'x por semana';
+  const hero = el('home-treino-hoje');
+  if(hero && (!m.ativo || !treinoSeca21DaAluna(a))){
+    hero.innerHTML = m.st.terminou
+      ? '<p class="hh-lbl">E agora?</p><p class="hh-tit">Continue com um treino montado só pra você</p><a class="hh-btn" href="' + linkConsultoriaDoDesafio() + '" target="_blank" rel="noopener">Conhecer a consultoria</a>'
+      : (!m.st.comecou
+        ? '<p class="hh-lbl">Treino de hoje</p><p class="hh-tit">Seu primeiro treino aparece no dia ' + dataCurtaBR(a.desafioAtivo.dataInicio) + '</p>'
+        : '<p class="hh-lbl">Treino de hoje</p><p class="hh-tit">Seu treino do SECA 21 está sendo preparado</p><p class="hh-info">Assim que estiver pronto, ele aparece aqui. Enquanto isso, as aulas já estão liberadas.</p>');
+  }
+}
+
+// Aba Treino de quem tem consultoria + desafio: troca entre os dois treinos
+function htmlTrocaConsultoriaDesafio(ativa){
+  return '<div class="s21-troca"><span class="' + (ativa === 'consultoria' ? 'on' : '') + '" onclick="irParaAbaFixa(\'treino\')">Consultoria</span>' +
+    '<span class="' + (ativa === 'desafio' ? 'on' : '') + '" onclick="abrirTelaDesafioSeca21()">Desafio SECA 21</span></div>';
+}
+
+function atualizarTrocaDaAbaTreino(){
+  const area = document.getElementById('semana-troca-desafio');
+  const titulo = document.getElementById('semana-titulo');
+  let a = null;
+  try { a = obterAlunaLogadaOuCriar(); } catch(e){}
+  const m = modoDoDesafioDaAluna(a);
+  if(titulo) titulo.textContent = m && m.soDesafio ? 'Treinos do SECA 21' : 'Sua semana';
+  atualizarMenuDoDesafio(!!(m && m.soDesafio));
+  if(!area) return;
+  area.innerHTML = m && !m.soDesafio && m.ativo && treinoSeca21DaAluna(a) ? htmlTrocaConsultoriaDesafio('consultoria') : '';
+}
+
 // ===== ALUNA: botão condicional na home, tela do desafio, marcar dia como feito =====
 // Usa obterAlunaLogadaOuCriar() (não alunasPersonal.find direto) — sessão da aluna não tem a lista
 // completa carregada, e essa é a forma segura já estabelecida no resto do app pra esse caso.
@@ -7980,8 +8160,16 @@ function renderBotaoDesafio(){
     const st = situacaoDoSeca21(a);
     if(!st || st.terminou){ area.innerHTML = ''; return; }
     const temTreino = !!treinoSeca21DaAluna(a);
-    const texto = st.comecou ? 'Dia ' + st.dia + ' de ' + st.total + (temTreino ? ' · toque pra ver o treino de hoje' : ' · os treinos do desafio aparecem aqui assim que forem liberados') : 'Começa em ' + dataCurtaBR(a.desafioAtivo.dataInicio);
-    area.innerHTML = htmlTarefaHome('ti-flag', 'Desafio SECA 21', texto, temTreino ? 'abrirTelaDesafioSeca21()' : 'irParaAbaFixa(\'mentoria\')');
+    if(st.comecou && temTreino){
+      const prox = proximoTreinoDoSeca21(a, st);
+      area.innerHTML = '<div class="home-hero s21-verde"><p class="hh-lbl">Desafio SECA 21 <span class="s21-tag">por tempo determinado</span></p>' +
+        '<p class="hh-tit">Dia ' + st.dia + ' de ' + st.total + (prox ? ' · ' + escaparHtmlFicha(prox.n) : ' · semana completa') + '</p>' + htmlBolinhasDoDesafio(st) +
+        '<p class="hh-info">Termina em ' + dataCurtaBR(a.desafioAtivo.dataFim) + '. Depois disso some daqui e fica só a consultoria.</p>' +
+        '<button class="hh-btn" onclick="abrirTelaDesafioSeca21()">Abrir treino do desafio</button></div>';
+      return;
+    }
+    const texto = st.comecou ? 'Dia ' + st.dia + ' de ' + st.total + ' · os treinos do desafio aparecem aqui assim que forem liberados' : 'Começa em ' + dataCurtaBR(a.desafioAtivo.dataInicio);
+    area.innerHTML = htmlTarefaHome('ti-flag', 'Desafio SECA 21', texto, 'irParaAbaFixa(\'mentoria\')');
     return;
   }
   area.innerHTML = htmlTarefaHome('ti-flag', 'Desafio Seca e Empina', 'Estrutura ' + a.desafioAtivo.estruturaAtual + '/10 liberada', 'abrirTelaDesafioSecaEmpina()');
@@ -16349,6 +16537,7 @@ async function finalizarTour(){
 function verificarEIniciarTourPrimeiraVez(){
   if(tourEmAndamento) return; // o tour navega pelas telas, e uma delas é a Início: não pode reiniciar a si mesmo
   if(sessaoTipo && sessaoTipo !== 'aluna') return; // o tour é só das alunas
+  if(alunaLogadaNoModoSoDesafio()) return; // o tour da consultoria apontaria pra telas que ela não tem
   if(tourJaVisto()) return;
   setTimeout(function(){ // pequena espera pra tela de home terminar de renderizar
     if(tourEmAndamento || tourJaVisto()) return;
@@ -16687,6 +16876,11 @@ function atualizarNavAtiva(which){
 
 function irParaAbaFixa(which){
   if(which === 'treino'){ openLevel2('semana-treinos'); return; }
+  // Só desafio: "Aulas" abre direto as aulas do SECA 21
+  if(which === 'mentoria' && alunaLogadaNoModoSoDesafio()){
+    let a = null; try { a = obterAlunaLogadaOuCriar(); } catch(e){}
+    if(a && alunaTemCursoLiberado(a, 'seca21') && cursoDoAppPorId('seca21')){ abrirCursoDoApp('seca21'); return; }
+  }
   if(which === 'evolucao'){ openLevel2('dados'); return; } // Evolução abre em "Corpo"
   openLevel2(which);
 }
