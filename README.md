@@ -1,4 +1,4 @@
-[dna_musa_132.html](https://github.com/user-attachments/files/33643858/dna_musa_132.html)
+[dna_musa_133.html](https://github.com/user-attachments/files/33646379/dna_musa_133.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -327,6 +327,106 @@
     .al-ult{order:7;width:100%;margin-left:45px;font-size:12px;}
     .al-niv small{display:inline;margin-left:4px;}
     .al-ult:empty{display:none;}
+  }
+  /* ===== Controle de desafios ===== */
+  .cd-abas{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 14px;}
+  .cd-aba{padding:9px 16px;font-size:13px;color:var(--text-dim);border-radius:11px;background:var(--card);border:1px solid var(--border);cursor:pointer;display:flex;gap:8px;align-items:center;}
+  .cd-aba b{font-size:11px;color:var(--text-faint);font-weight:600;}
+  .cd-aba.on{background:rgba(232,197,138,.12);border-color:rgba(232,197,138,.35);color:var(--gold-soft);}
+  .cd-aba.cd-verde.on{background:rgba(169,221,180,.10);border-color:rgba(169,221,180,.38);color:#A9DDB4;}
+  .cd-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:14px;min-width:0;}
+  .cd-box-cab{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+  .cd-box-cab h2{font-size:14px;font-weight:600;margin:0;color:var(--text);}
+  .cd-r{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+  .cd-btn{height:32px;border-radius:9px;padding:0 12px;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;border:1px solid rgba(232,197,138,.3);color:var(--gold-soft);background:transparent;cursor:pointer;white-space:nowrap;font-family:inherit;}
+  .cd-btn-ouro{background:linear-gradient(135deg,#F4D9A5,#C9A063);color:#1A1409;border:none;}
+  .cd-btn-verde{background:linear-gradient(135deg,#A9DDB4,#6FA87C);color:#0d1a10;border:none;}
+  .cd-btn-perigo{border-color:rgba(217,120,90,.4);color:#E59A80;}
+  .cd-btn-peq{height:26px;font-size:11px;padding:0 9px;}
+  .cd-chip{font-size:10.5px;font-weight:600;border-radius:20px;padding:3px 9px;background:var(--card-2);color:var(--text-dim);white-space:nowrap;display:inline-block;}
+  .cd-c-ok{background:rgba(143,174,125,.15);color:#8FAE7D;} .cd-c-alerta{background:rgba(226,163,61,.13);color:#E2A33D;}
+  .cd-c-ouro{background:rgba(232,197,138,.12);color:var(--gold-soft);} .cd-c-verde{background:rgba(169,221,180,.12);color:#A9DDB4;}
+  .cd-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px;}
+  .cd-k{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:11px 14px;}
+  .cd-k small{font-size:11px;color:var(--text-faint);} .cd-k b{display:block;font-family:'Playfair Display',serif;font-size:24px;margin-top:2px;color:var(--text);} .cd-k span{font-size:11px;color:var(--text-dim);}
+  .cd-tab{display:flex;flex-direction:column;}
+  .cd-lin{display:grid;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text);}
+  .cd-lin > span{min-width:0;}
+  .cd-lin-cab{font-size:10.5px;color:var(--text-faint);letter-spacing:.6px;text-transform:uppercase;padding-top:0;}
+  .cd-lin-se{grid-template-columns:minmax(0,1.7fr) minmax(0,.8fr) minmax(0,1.4fr) minmax(0,.9fr) minmax(0,1.2fr) auto;}
+  .cd-lin-s21{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr) minmax(0,1.6fr) minmax(0,.8fr) auto;}
+  .cd-nm{display:flex;gap:9px;align-items:center;} .cd-nm b{display:block;font-size:13px;overflow-wrap:anywhere;} .cd-nm small{display:block;font-size:10.5px;color:var(--text-faint);margin-top:1px;}
+  .cd-av{width:30px;height:30px;border-radius:50%;background:var(--card-2);border:1px solid rgba(232,197,138,.3);display:flex;align-items:center;justify-content:center;font-size:10.5px;color:var(--gold-soft);flex-shrink:0;}
+  .cd-barra{display:block;height:6px;border-radius:4px;background:var(--card-2);overflow:hidden;width:100%;margin-bottom:3px;} .cd-barra i{display:block;height:100%;background:var(--gold);}
+  .cd-faint{font-size:10.5px;color:var(--text-faint);} .cd-dim{color:var(--text-dim);} .cd-ouro{color:var(--gold-soft);}
+  .cd-acoes-lin{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;}
+  .cd-seg{display:flex;flex-wrap:wrap;background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:3px;}
+  .cd-seg span{padding:6px 12px;font-size:12px;border-radius:8px;color:var(--text-dim);cursor:pointer;}
+  .cd-seg span.on{background:rgba(232,197,138,.15);color:var(--gold-soft);} .cd-seg-verde span.on{background:rgba(169,221,180,.14);color:#A9DDB4;}
+  .cd-ests{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;}
+  .cd-est{background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:10px 11px;cursor:pointer;}
+  .cd-est:hover{border-color:var(--gold);}
+  .cd-est-t{display:flex;align-items:center;justify-content:space-between;} .cd-est-t b{font-family:'Playfair Display',serif;font-size:20px;color:var(--gold-soft);}
+  .cd-est-v{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;margin-top:6px;font-size:11px;color:var(--text-faint);} .cd-est-v b{color:var(--text);}
+  .cd-est small{font-size:9.5px;color:var(--text-faint);display:block;margin-top:5px;}
+  .cd-nota{font-size:11.5px;color:var(--text-faint);line-height:1.5;margin:10px 0 0;}
+  .cd-grade2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px;}
+  .cd-e4{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  .cd-e4i{background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;display:flex;flex-direction:column;gap:6px;}
+  .cd-e4i.on{border-color:rgba(169,221,180,.5);} .cd-e4i:hover{border-color:#A9DDB4;}
+  .cd-e4t{display:flex;justify-content:space-between;align-items:center;gap:6px;} .cd-e4t b{font-size:14px;color:var(--text);}
+  .cd-e4i small{font-size:11px;color:var(--text-faint);} .cd-e4r{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-faint);margin-top:auto;}
+  .cd-regras{display:flex;flex-direction:column;gap:7px;font-size:12px;color:var(--text-dim);}
+  .cd-regras > div{display:flex;gap:8px;align-items:flex-start;} .cd-regras .ok{color:#A9DDB4;font-weight:700;} .cd-regras .no{color:#E59A80;font-weight:700;}
+  .cd-erro{display:block;color:#E59A80;font-size:11px;margin-top:2px;}
+  .cd-metodos{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+  .cd-metodos > div{background:var(--card-2);border-radius:10px;padding:9px 10px;font-size:11.5px;color:var(--text-dim);line-height:1.55;} .cd-metodos b{display:block;color:var(--text);font-size:12px;margin-bottom:3px;}
+  .cd-volta{font-size:12.5px;color:var(--gold);cursor:pointer;margin-bottom:6px;} .cd-verde-t{color:#A9DDB4;}
+  .cd-topo{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+  .cd-titulo{font-family:'Playfair Display',serif;font-weight:600;font-size:26px;margin:0;color:var(--text);}
+  .cd-topo-r{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .cd-nav{display:flex;gap:5px;} .cd-nav span{width:30px;height:30px;border-radius:9px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-dim);cursor:pointer;}
+  .cd-nav span.on{border-color:var(--gold);color:var(--gold-soft);} .cd-nav span.off{opacity:.3;pointer-events:none;}
+  .cd-vols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) minmax(0,1.4fr);gap:10px;margin-bottom:12px;}
+  .cd-vol{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px;} .cd-vol small{font-size:11px;color:var(--text-faint);}
+  .cd-vol b{display:block;font-size:20px;margin:2px 0 6px;color:var(--text);} .cd-vol b span{font-size:12px;color:var(--text-faint);}
+  .cd-vol-nota{display:flex;flex-direction:column;justify-content:center;gap:4px;} .cd-vol-nota span{font-size:12px;color:var(--text-dim);}
+  .cd-dias{display:grid;gap:9px;align-items:start;}
+  .cd-dia{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:11px;display:flex;flex-direction:column;gap:6px;min-width:0;}
+  .cd-dia-cab b{font-size:13.5px;color:var(--text);} .cd-dia-cab small{display:block;font-size:11px;color:var(--text-faint);margin-top:1px;}
+  .cd-ex{background:var(--card-2);border-radius:10px;padding:8px 9px;display:flex;flex-direction:column;gap:6px;}
+  .cd-ex-l1{display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap;font-size:12px;font-weight:600;color:var(--text);}
+  .cd-ex-nome{cursor:pointer;flex:1;min-width:0;overflow-wrap:anywhere;} .cd-ex-nome i{font-style:normal;color:var(--text-faint);font-size:10px;font-weight:400;}
+  .cd-mais{color:var(--text-faint);font-weight:400;margin:0 5px;}
+  .cd-ex-l2{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .cd-num{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--gold-soft);} .cd-num b{min-width:16px;text-align:center;} .cd-num small{font-size:10px;color:var(--text-faint);}
+  .cd-mini{width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,.06);color:var(--text-dim);font-size:11px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;}
+  .cd-mini.off{opacity:.25;pointer-events:none;} .cd-mini-x{color:#E59A80;} .cd-mini-troca{color:var(--gold-soft);}
+  .cd-acoes{display:inline-flex;gap:4px;margin-left:auto;}
+  .cd-sel{background:var(--card);border:1px solid var(--border);border-radius:7px;color:var(--text-dim);font-size:11px;padding:3px 4px;font-family:inherit;}
+  .cd-mt{font-size:9.5px;font-weight:700;border-radius:10px;padding:2px 7px;white-space:nowrap;}
+  .cd-mt-bs{background:rgba(232,197,138,.14);color:var(--gold-soft);} .cd-mt-ds{background:rgba(217,120,90,.15);color:#E59A80;} .cd-mt-rp{background:rgba(120,160,220,.15);color:#9DBBE8;}
+  .cd-add-l{display:flex;gap:6px;margin-top:2px;} .cd-add-l span{flex:1;font-size:11px;color:#A9DDB4;text-align:center;padding:7px 4px;border:1px dashed rgba(169,221,180,.35);border-radius:9px;cursor:pointer;}
+  .cd-troca{display:flex;gap:6px;align-items:center;margin-top:2px;} .cd-sel-troca{font-size:12px;padding:6px;flex:1;min-width:0;}
+  .cd-wrap{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:12px;align-items:start;}
+  .cd-conf{margin:0 0 12px;} .cd-regras-grade{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px 14px;}
+  .cd-rodape{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;} .cd-rodape .cd-nota{margin:0;}
+  .cd-al-ex{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12.5px;}
+  .cd-al-ex small{display:block;font-size:11px;color:var(--text-faint);margin-top:2px;}
+  .cd-al-nome{cursor:pointer;text-decoration:underline;text-decoration-color:var(--gold-soft);text-underline-offset:2px;}
+  @media(max-width:900px){
+    .cd-lin-cab{display:none;}
+    .cd-lin{display:flex;flex-wrap:wrap;gap:6px 10px;}
+    .cd-lin > .cd-nm{width:100%;}
+    .cd-lin > span:nth-child(3){flex:1;min-width:140px;}
+    .cd-acoes-lin{width:100%;justify-content:flex-start;}
+    .cd-ests{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .cd-grade2,.cd-wrap{grid-template-columns:1fr;}
+    .cd-e4,.cd-metodos,.cd-regras-grade{grid-template-columns:1fr;}
+    .cd-vols{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .cd-dias{grid-template-columns:1fr !important;}
+    .cd-titulo{font-size:22px;}
+    .cd-topo-r{margin-left:0;}
   }
   .ctl-topo{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px;font-size:12.5px;color:var(--text-dim);}
   .ctl-topo input{width:56px;text-align:center;background:var(--card-2);border:1px solid var(--border-strong);border-radius:8px;color:var(--text);padding:5px 4px;font-size:13px;}
@@ -779,7 +879,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-18-V-NIVEL-ANAMNESE</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-18-W-CONTROLE-DESAFIOS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1038,7 +1138,7 @@
 
     <!-- DESAFIO SECA E EMPINA -->
     <div class="view" data-view="desafio-seca-empina">
-      <p style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold);margin:0 0 4px;letter-spacing:0.5px;">Desafio Seca e Empina</p>
+      <p id="se-titulo-desafio" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold);margin:0 0 4px;letter-spacing:0.5px;">Desafio Seca e Empina</p>
       <p class="page-sub" id="se-subtitulo-estrutura"></p>
       <div id="se-lista-dias"></div>
     </div>
@@ -1519,20 +1619,11 @@
 
       <div id="personal-desafios" style="display:none;">
         <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
-        <h1 class="page-title" style="margin-top:0;">Desafio</h1>
+        <h1 class="page-title" style="margin-top:0;">Controle de desafios</h1>
+        <p class="page-sub">Quem está em cada desafio, em que ponto está e o treino de cada estrutura</p>
+        <div id="cd-raiz"></div>
 
-        <p class="section-label" style="margin-top:0;">SECA 21 · em andamento</p>
-        <div id="lista-seca21"></div>
-        <button class="btn-gold" onclick="mostrarFormularioInscricaoSeca21()" style="margin-bottom:10px;background:linear-gradient(135deg,#A9DDB4,#6FA87C);color:#0d1a10;">Inscrever aluna no SECA 21</button>
-        <div id="form-inscricao-seca21"></div>
-
-        <p class="section-label" style="margin-top:22px;">Seca e Empina · em andamento</p>
-        <div id="lista-seca-empina"></div>
-        <button class="btn-gold" onclick="mostrarFormularioInscricaoSecaEmpina()" style="margin-bottom:22px;">Inscrever aluna no Seca e Empina</button>
-        <div id="form-inscricao-seca-empina"></div>
-        <button class="btn-secondary" style="margin-top:10px;" onclick="alternarPreviewSecaEmpina()"><i class="ti ti-eye" style="margin-right:6px;"></i>Ver as 10 estruturas do Seca e Empina</button>
-        <div id="preview-seca-empina"></div>
-
+        <details class="info-box" id="cd-outros" style="margin-top:22px;"><summary style="cursor:pointer;font-weight:600;font-size:13px;">Outros desafios por link</summary>
         <p class="page-sub" style="margin-top:22px;">Crie um treino e gere um link de inscrição, quem entra participa só do desafio, sem acesso ao restante do app</p>
 
         <div id="desafios-list"></div>
@@ -1544,6 +1635,7 @@
         </div>
         <div class="form-group"><label class="form-label">Duração (dias)</label><input class="form-input" id="df-duracao" placeholder="Ex: 7" type="number"></div>
         <button class="btn-gold" onclick="criarDesafio()">Criar desafio e gerar link</button>
+        </details>
       </div>
 
       <div id="personal-patologias" style="display:none;">
@@ -1663,7 +1755,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-18-V-NIVEL-ANAMNESE';
+const VERSAO_APP = '2026-10-18-W-CONTROLE-DESAFIOS';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -6498,6 +6590,8 @@ function inscreverNoSeca21(nomes, opcoes){
     if(!a || a.desafioAtivo) return;
     const nivel = opcoes.nivel === 'cada' ? nivelSeca21PeloNivel(nivelDaAluna(a).nivel) : nivelSeca21PeloNivel(opcoes.nivel);
     a.desafioAtivo = { id: 'seca21', nome: 'SECA 21', dataInicio: ini, dataFim: fim, nivel: nivel, frequencia: opcoes.frequencia === 5 ? 5 : 3, inscritaEm: new Date().toISOString() };
+    const modeloS21 = modelosSeca21[chaveSeca21DaAluna(a)];
+    a.desafioTreinos = modeloS21 ? { seca21: copiaProfunda(modeloS21) } : null; // estrutura já salva: entra com o treino pronto
     a.plano = opcoes.plano === 'auto' ? planoDaAluna(Object.assign({}, a, { plano: null })).plano : opcoes.plano;
     if(opcoes.curso){
       a.cursosLiberados = (a.cursosLiberados || []).slice();
@@ -6534,15 +6628,24 @@ function renderListaSeca21(){
     area.innerHTML = '<div class="info-box"><p class="txt" style="color:var(--text-faint);margin:0;">Nenhuma aluna no SECA 21 ainda.</p></div>';
     return;
   }
-  area.innerHTML = inscritas.map(function(a){
-    const d = a.desafioAtivo, st = situacaoDoSeca21(a, agora), pl = planoDaAluna(a);
-    const quando = st.terminou ? 'terminou em ' + dataCurtaBR(d.dataFim) : (!st.comecou ? 'começa em ' + dataCurtaBR(d.dataInicio) : 'dia ' + st.dia + ' de ' + st.total + ' · termina ' + dataCurtaBR(d.dataFim));
-    return '<div class="list-item" style="margin-bottom:6px;flex-wrap:wrap;gap:6px;">' +
-      '<span>' + escaparHtmlFicha(a.nome) + ' <span class="tag">' + d.nivel + ' · ' + d.frequencia + 'x · ' + quando + '</span> <span class="tag">' + NOMES_PLANO[pl.plano] + '</span>' +
-        ((a.cursosLiberados || []).indexOf('seca21') !== -1 ? ' <span class="tag">curso liberado</span>' : '') + '</span>' +
-      '<span class="acao-pill" style="background:var(--danger);" onclick="removerAlunaDoSeca21(\'' + a.nome.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">Remover</span>' +
-    '</div>';
-  }).join('');
+  area.innerHTML = '<div class="cd-tab"><div class="cd-lin cd-lin-cab cd-lin-s21"><span>Aluna</span><span>Estrutura</span><span>Andamento</span><span>Treino</span><span></span></div>' +
+    inscritas.map(function(a){
+      const d = a.desafioAtivo, st = situacaoDoSeca21(a, agora), pl = planoDaAluna(a);
+      const quando = st.terminou ? 'terminou em ' + dataCurtaBR(d.dataFim) : (!st.comecou ? 'começa em ' + dataCurtaBR(d.dataInicio) : 'dia ' + st.dia + ' de ' + st.total + ' · termina ' + dataCurtaBR(d.dataFim));
+      const pct = st.terminou ? 100 : (!st.comecou ? 0 : Math.round(st.dia / st.total * 100));
+      const temTreino = !!treinoSeca21DaAluna(a);
+      return '<div class="cd-lin cd-lin-s21">' +
+        '<span class="cd-nm"><span class="cd-av">' + iniciaisDaAluna(a.nome) + '</span><span><b>' + escaparHtmlFicha(a.nome) + '</b><small>' + NOMES_PLANO[pl.plano] +
+          ((a.cursosLiberados || []).indexOf('seca21') !== -1 ? ' · curso liberado' : '') + '</small></span></span>' +
+        '<span><span class="cd-chip cd-c-verde">' + d.nivel + ' · ' + d.frequencia + 'x</span></span>' +
+        '<span><span class="cd-barra"><i style="width:' + pct + '%;background:#A9DDB4;"></i></span><small class="cd-faint">' + quando + '</small></span>' +
+        '<span><span class="cd-chip ' + (temTreino ? 'cd-c-ok">liberado' : 'cd-c-alerta">falta liberar') + '</span></span>' +
+        '<span class="cd-acoes-lin"><span class="cd-btn cd-btn-peq cd-btn-perigo" onclick="removerAlunaDoSeca21(\'' + a.nome.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">Remover</span></span>' +
+      '</div>';
+    }).join('') + '</div>';
+  const cards = document.getElementById('cd-estruturas-s21');
+  if(cards) cards.innerHTML = htmlCardsEstruturasSeca21();
+  atualizarBadgeDesafios();
 }
 
 function removerAlunaDoSeca21(nomeAluna){
@@ -6821,28 +6924,30 @@ function htmlBlocoPreviewEstrutura(n, freq){
 
 function htmlDiasEditaveisDesafio(n, freq){
   const semana = obterOuCriarSemanaEditavel(n, freq);
-  return semana.dias.filter(function(d){ return !d.descanso; }).map(function(d, di){
-    const tipoDoDia = d.tipo === 'superior' ? ' · Superiores' : (d.tipo === 'inferior' ? ' · Inferiores' : '');
-    return '<p class="lbl" style="margin:10px 0 4px;">' + d.n + tipoDoDia + ' · ' + d.ex.length + ' exercícios · ' + seriesDaLinhaDesafioTotal(d.ex) + ' séries</p>' +
+  const diasAtivos = semana.dias.filter(function(d){ return !d.descanso; });
+  return '<div class="cd-dias" style="grid-template-columns:repeat(' + Math.min(diasAtivos.length, 5) + ',minmax(0,1fr));">' + diasAtivos.map(function(d, di){
+    const tipoDoDia = d.tipo === 'superior' ? 'Superiores' : (d.tipo === 'inferior' ? 'Inferiores' : '');
+    return '<div class="cd-dia"><div class="cd-dia-cab"><b>' + d.n + '</b><small>' + (tipoDoDia ? tipoDoDia + ' · ' : '') + d.ex.length + ' exercícios · ' + seriesDaLinhaDesafioTotal(d.ex) + ' séries</small></div>' +
       d.ex.map(function(linha, ei){
         const nome = extrairNomeExercicioDeLinha(linha);
         const url = (d.videos && d.videos[nome]) || '';
         const series = seriesDaLinhaDesafio(linha);
-        return '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:4px 0;border-bottom:1px solid var(--border);">' +
-          '<span style="cursor:pointer;text-decoration:underline;text-decoration-color:var(--gold-soft);text-underline-offset:2px;font-size:12px;flex:1;" onclick="abrirVideoApenasExercicio(\'' + nome.replace(/'/g,"\\'") + '\', event, \'' + url.replace(/'/g,"\\'") + '\')">' + nome + '</span>' +
-          '<span style="display:flex;align-items:center;gap:4px;flex-shrink:0;">' +
-            // Subir/descer o exercício dentro do dia. Na ponta (primeiro não sobe, último não desce) o botão fica apagado.
-            '<span title="Subir" style="cursor:pointer;color:var(--gold-soft);padding:2px 5px;font-size:11px;' + (ei === 0 ? 'opacity:.25;pointer-events:none;' : '') + '" onclick="moverExercicioPreviewDesafio(' + n + ',' + freq + ',' + di + ',' + ei + ',-1)">▲</span>' +
-            '<span title="Descer" style="cursor:pointer;color:var(--gold-soft);padding:2px 5px;font-size:11px;margin-right:4px;' + (ei === d.ex.length - 1 ? 'opacity:.25;pointer-events:none;' : '') + '" onclick="moverExercicioPreviewDesafio(' + n + ',' + freq + ',' + di + ',' + ei + ',1)">▼</span>' +
-            '<span style="cursor:pointer;color:var(--gold-soft);padding:2px 6px;" onclick="ajustarSeriePreviewDesafio(' + n + ',' + freq + ',' + di + ',' + ei + ',-1)">−</span>' +
-            '<span style="font-size:11.5px;min-width:16px;text-align:center;">' + series + '</span>' +
-            '<span style="cursor:pointer;color:var(--gold-soft);padding:2px 6px;" onclick="ajustarSeriePreviewDesafio(' + n + ',' + freq + ',' + di + ',' + ei + ',1)">+</span>' +
-            '<span class="acao-pill" style="margin-left:6px;padding:3px 8px;font-size:11px;" onclick="abrirTrocaExercicioPreviewDesafio(' + n + ',' + freq + ',' + di + ',' + ei + ')">⇄</span>' +
-          '</span>' +
+        return '<div class="cd-ex">' +
+          '<div class="cd-ex-l1"><span class="cd-ex-nome" onclick="abrirVideoApenasExercicio(\'' + nome.replace(/'/g,"\\'") + '\', event, \'' + url.replace(/'/g,"\\'") + '\')">' + nome + '</span></div>' +
+          '<div class="cd-ex-l2">' +
+            '<span class="cd-num"><span class="cd-mini" onclick="ajustarSeriePreviewDesafio(' + n + ',' + freq + ',' + di + ',' + ei + ',-1)">−</span><b>' + series + '</b>' +
+              '<span class="cd-mini" onclick="ajustarSeriePreviewDesafio(' + n + ',' + freq + ',' + di + ',' + ei + ',1)">+</span><small>séries</small></span>' +
+            '<span class="cd-acoes">' +
+              // Subir/descer o exercício dentro do dia. Na ponta (primeiro não sobe, último não desce) o botão fica apagado.
+              '<span class="cd-mini' + (ei === 0 ? ' off' : '') + '" title="Subir" onclick="moverExercicioPreviewDesafio(' + n + ',' + freq + ',' + di + ',' + ei + ',-1)">▲</span>' +
+              '<span class="cd-mini' + (ei === d.ex.length - 1 ? ' off' : '') + '" title="Descer" onclick="moverExercicioPreviewDesafio(' + n + ',' + freq + ',' + di + ',' + ei + ',1)">▼</span>' +
+              '<span class="cd-mini cd-mini-troca" title="Trocar exercício" onclick="abrirTrocaExercicioPreviewDesafio(' + n + ',' + freq + ',' + di + ',' + ei + ')">⇄</span>' +
+            '</span>' +
+          '</div>' +
         '</div>';
       }).join('') +
-      '<div id="preview-troca-' + n + '-' + di + '"></div>';
-  }).join('');
+      '<div id="preview-troca-' + n + '-' + di + '"></div></div>';
+  }).join('') + '</div>';
 }
 
 function seriesDaLinhaDesafioTotal(listaEx){
@@ -6855,6 +6960,8 @@ function reRenderizarBlocoEstrutura(n, freq){
   if(bloco) bloco.innerHTML = htmlDiasEditaveisDesafio(n, freq);
   if(volumeEl) volumeEl.textContent = htmlVolumeDesafio(obterOuCriarSemanaEditavel(n, freq)).replace(/<[^>]+>/g, '');
   if(volumeEl) volumeEl.innerHTML = htmlVolumeDesafio(obterOuCriarSemanaEditavel(n, freq));
+  const cardsVolume = telaControleDesafio.tipo === 'estrutura-se' ? document.getElementById('cd-volume-' + n) : null;
+  if(cardsVolume) cardsVolume.innerHTML = htmlCardsVolumeSecaEmpina(obterOuCriarSemanaEditavel(n, freq));
 }
 
 function ajustarSeriePreviewDesafio(n, freq, diaIndex, exIndex, delta){
@@ -6932,6 +7039,7 @@ function regenerarPreviewEstrutura(n){
   sementesPreviewSecaEmpina[n] = Math.floor(Math.random() * 100000);
   delete semanasEditandoPreviewDesafio[chave]; // força gerar do zero, ignorando o modelo mestre dessa vez
   semanasEditandoPreviewDesafio[chave] = gerarSemanaDesafio(n, freq, sementesPreviewSecaEmpina[n]);
+  if(telaControleDesafio.tipo === 'estrutura-se'){ renderControleDesafios(); return; }
   const bloco = document.getElementById('preview-estrutura-' + n);
   if(!bloco) return;
   const estavaAberto = bloco.open;
@@ -6967,6 +7075,7 @@ function aplicarEstruturaParaTodasDoDesafio(n){
   if(bloco){ const estavaAberto = bloco.open; bloco.outerHTML = htmlBlocoPreviewEstrutura(n, freq); const novo = document.getElementById('preview-estrutura-' + n); if(novo && estavaAberto) novo.open = true; }
 
   alert('Modelo da Estrutura ' + n + ' (' + freq + 'x) salvo, e aplicado pra ' + afetadas.length + ' aluna(s).');
+  if(telaControleDesafio.tipo === 'estrutura-se') renderControleDesafios();
 }
 
 function verTreinoDesafioDaAluna(nomeAluna){
@@ -6989,22 +7098,789 @@ function verTreinoDesafioDaAluna(nomeAluna){
 
 function renderListaSecaEmpina(){
   const area = document.getElementById('lista-seca-empina');
+  const kpis = document.getElementById('cd-kpis-se');
+  if(kpis) kpis.innerHTML = htmlKpisSecaEmpina();
   if(!area) return;
-  const ativas = alunasPersonal.filter(function(a){ return estaNoSecaEmpina(a); });
+  const agora = Date.now();
+  const ativas = alunasPersonal.filter(function(a){ return estaNoSecaEmpina(a); }).sort(function(x, y){ return x.nome.localeCompare(y.nome, 'pt-BR'); });
   if(ativas.length === 0){
     area.innerHTML = '<div class="info-box"><p class="txt" style="color:var(--text-faint);">Nenhuma aluna no Seca e Empina agora.</p></div>';
     return;
   }
-  area.innerHTML = ativas.map(function(a){
-    const diasNoDesafio = Math.floor((Date.now() - new Date(a.desafioAtivo.dataInicio).getTime()) / (1000*60*60*24));
-    return '<div class="list-item" style="margin-bottom:6px;">' +
-      '<span>' + a.nome + ' <span class="tag">Estrutura ' + a.desafioAtivo.estruturaAtual + '/10 · ' + a.desafioAtivo.frequencia + 'x · dia ' + diasNoDesafio + '</span></span>' +
-      '<span style="display:flex;gap:6px;"><span class="acao-pill" onclick="verTreinoDesafioDaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')">Ver treino</span>' +
-      '<span class="acao-pill" style="background:var(--card-2);color:var(--gold-soft);border:1px solid var(--border);" onclick="abrirEdicaoInscricaoDesafio(\'' + a.nome.replace(/'/g,"\\'") + '\')">Editar</span>' +
-      '<span class="acao-pill" style="background:var(--danger);" onclick="removerAlunaDoSecaEmpina(\'' + a.nome.replace(/'/g,"\\'") + '\')">Remover</span></span>' +
-    '</div>' + htmlFormEdicaoInscricaoDesafio(a) + '<div id="ver-desafio-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '"></div>';
-  }).join('') +
-  '<button class="btn-secondary" style="margin-top:8px;" onclick="avancarTodasEstruturaSecaEmpina()">Avançar todas pra próxima estrutura agora</button>';
+  const trocar = ativas.filter(function(a){ return a.desafioAtivo.estruturaAtual < 10; }).length;
+  area.innerHTML = '<div class="cd-tab"><div class="cd-lin cd-lin-cab cd-lin-se"><span>Aluna</span><span>Estrutura</span><span>Tempo na estrutura</span><span>Próxima troca</span><span>Situação</span><span></span></div>' +
+    ativas.map(function(a){
+      const d = a.desafioAtivo, st = situacaoSecaEmpina(a, agora), nomeJs = a.nome.replace(/'/g, "\\'");
+      const nv = nivelDaAluna(a).nivel;
+      const proxima = d.estruturaAtual >= 10 ? 'última' : (st.trocar ? 'no próximo acesso' : 'em ' + (30 - st.dias) + (30 - st.dias === 1 ? ' dia' : ' dias'));
+      return '<div class="cd-lin cd-lin-se">' +
+        '<span class="cd-nm"><span class="cd-av">' + iniciaisDaAluna(a.nome) + '</span><span><b>' + escaparHtmlFicha(a.nome) + '</b><small>' + (nv || 'Nível a confirmar') + ' · ' + d.frequencia + 'x por semana</small></span></span>' +
+        '<span>Estrutura <b class="cd-ouro">' + d.estruturaAtual + '</b>/10</span>' +
+        '<span><span class="cd-barra"><i style="width:' + Math.min(100, Math.round(st.dias / 30 * 100)) + '%;"></i></span><small class="cd-faint">dia ' + Math.min(st.dias, 30) + ' de 30 nessa estrutura</small></span>' +
+        '<span class="cd-dim">' + proxima + '</span>' +
+        '<span><span class="cd-chip ' + st.classe + '">' + st.texto + '</span></span>' +
+        '<span class="cd-acoes-lin"><span class="cd-btn cd-btn-peq" onclick="verTreinoDesafioDaAluna(\'' + nomeJs + '\')">Ver treino</span>' +
+        '<span class="cd-btn cd-btn-peq" onclick="abrirEdicaoInscricaoDesafio(\'' + nomeJs + '\')">Editar</span>' +
+        '<span class="cd-btn cd-btn-peq cd-btn-perigo" onclick="removerAlunaDoSecaEmpina(\'' + nomeJs + '\')">Remover</span></span>' +
+      '</div>' + htmlFormEdicaoInscricaoDesafio(a) + '<div id="ver-desafio-' + a.nome.replace(/[^a-zA-Z0-9]/g,'') + '"></div>';
+    }).join('') + '</div>' +
+  (trocar ? '<button class="btn-secondary" style="margin-top:10px;" onclick="avancarTodasEstruturaSecaEmpina()">Avançar todas pra próxima estrutura agora</button>' : '');
+  atualizarBadgeDesafios();
+}
+
+// ===== CONTROLE DE DESAFIOS (Personal) =====
+// Tela própria no menu, logo abaixo do Controle de treinos (antes ficava em "Conteúdo pras alunas").
+// Duas abas independentes: Seca e Empina (10 estruturas fixas) e SECA 21 (4 estruturas, motor próprio).
+// Dentro de cada aba: quem está inscrita, em que ponto está, e as estruturas pra ver e ajustar.
+let abaControleDesafio = 'seca21';
+let telaControleDesafio = { tipo: 'lista' }; // { tipo: 'lista' } | { tipo: 'estrutura-se', n, freq } | { tipo: 'estrutura-s21', chave }
+let freqEstruturasSecaEmpina = 5;
+
+function escaparNomeParaClique(nome){ return String(nome).replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
+
+function diasNaEstruturaSecaEmpina(a, agora){
+  const base = new Date(a.desafioAtivo.dataUltimaVirada || a.desafioAtivo.dataInicio).getTime();
+  return Math.max(0, Math.floor(((agora === undefined ? Date.now() : agora) - base) / 86400000));
+}
+
+// Situação de cada inscrita no Seca e Empina, numa palavra (a troca de estrutura acontece sozinha quando ela abre o app)
+function situacaoSecaEmpina(a, agora){
+  const d = a.desafioAtivo, dias = diasNaEstruturaSecaEmpina(a, agora);
+  if(d.estruturaAtual >= 10) return { texto: 'Na última estrutura', classe: 'cd-c-ouro', trocar: false, dias: dias };
+  if(dias >= 30) return { texto: 'Troca no próximo acesso dela', classe: 'cd-c-alerta', trocar: true, dias: dias };
+  return { texto: 'Em dia', classe: 'cd-c-ok', trocar: false, dias: dias };
+}
+
+// Número do menu: inscritas do Seca e Empina que já completaram 30 dias + inscritas do SECA 21 ainda sem treino liberado
+function pendenciasControleDesafios(){
+  let n = 0;
+  alunasPersonal.forEach(function(a){
+    if(estaNoSecaEmpina(a) && situacaoSecaEmpina(a).trocar) n++;
+    else if(estaNoSeca21(a)){ const st = situacaoDoSeca21(a); if(st && !st.terminou && !treinoSeca21DaAluna(a)) n++; }
+  });
+  return n;
+}
+
+function atualizarBadgeDesafios(){
+  const el = document.getElementById('side-badge-desafios');
+  if(!el) return;
+  const n = pendenciasControleDesafios();
+  el.textContent = n;
+  el.style.display = n > 0 ? '' : 'none';
+}
+
+function renderControleDesafios(){
+  const raiz = document.getElementById('cd-raiz');
+  if(!raiz) return;
+  const outros = document.getElementById('cd-outros');
+  if(telaControleDesafio.tipo === 'estrutura-se'){
+    if(outros) outros.style.display = 'none';
+    raiz.innerHTML = htmlEditorEstruturaSecaEmpina(telaControleDesafio.n, telaControleDesafio.freq);
+    return;
+  }
+  if(telaControleDesafio.tipo === 'estrutura-s21'){
+    if(outros) outros.style.display = 'none';
+    raiz.innerHTML = htmlEditorEstruturaSeca21(telaControleDesafio.chave);
+    return;
+  }
+  if(outros) outros.style.display = '';
+  const nSE = alunasPersonal.filter(function(a){ return estaNoSecaEmpina(a); }).length;
+  const nS21 = alunasPersonal.filter(function(a){ return estaNoSeca21(a); }).length;
+  const aba = function(id, nome, qtd, classe){
+    return '<div class="cd-aba ' + classe + (abaControleDesafio === id ? ' on' : '') + '" onclick="trocarAbaControleDesafio(\'' + id + '\')">' + nome + ' <b>' + qtd + (qtd === 1 ? ' aluna' : ' alunas') + '</b></div>';
+  };
+  let html = '<div class="cd-abas">' + aba('seca21', 'SECA 21', nS21, 'cd-verde') + aba('seca-empina', 'Seca e Empina', nSE, '') + '</div>';
+  if(abaControleDesafio === 'seca21'){
+    html += '<div class="cd-box"><div class="cd-box-cab"><h2>Alunas no SECA 21</h2><div class="cd-r"><button class="cd-btn cd-btn-verde" onclick="mostrarFormularioInscricaoSeca21()">+ Inscrever aluna</button></div></div>' +
+      '<div id="form-inscricao-seca21"></div><div id="lista-seca21"></div></div>' +
+      '<div class="cd-grade2"><div class="cd-box"><div class="cd-box-cab"><h2>As 4 estruturas do SECA 21</h2></div><div id="cd-estruturas-s21">' + htmlCardsEstruturasSeca21() + '</div>' +
+        '<p class="cd-nota">Cada aluna recebe sozinha a estrutura do nível e da frequência dela. Intermediária recebe a de Iniciante. Quem você inscrever depois de salvar já entra com o treino.</p></div>' +
+      '<div class="cd-box">' + htmlRegrasSeca21() + '</div></div>';
+  } else {
+    html += '<div id="cd-kpis-se"></div>' +
+      '<div class="cd-box"><div class="cd-box-cab"><h2>Alunas no Seca e Empina</h2><div class="cd-r"><button class="cd-btn cd-btn-ouro" onclick="mostrarFormularioInscricaoSecaEmpina()">+ Inscrever aluna</button></div></div>' +
+      '<div id="form-inscricao-seca-empina"></div><div id="lista-seca-empina"></div></div>' +
+      '<div class="cd-box"><div class="cd-box-cab"><h2>As 10 estruturas</h2><div class="cd-r"><div class="cd-seg">' +
+        '<span class="' + (freqEstruturasSecaEmpina === 3 ? 'on' : '') + '" onclick="trocarFreqEstruturasSecaEmpina(3)">3x por semana</span>' +
+        '<span class="' + (freqEstruturasSecaEmpina === 5 ? 'on' : '') + '" onclick="trocarFreqEstruturasSecaEmpina(5)">5x por semana</span></div></div></div>' +
+        '<div class="cd-ests">' + htmlCardsEstruturasSecaEmpina() + '</div>' +
+        '<p class="cd-nota">Toque numa estrutura pra ver e ajustar os treinos (trocar exercício, séries e ordem).</p></div>';
+  }
+  raiz.innerHTML = html;
+  if(abaControleDesafio === 'seca21') renderListaSeca21(); else renderListaSecaEmpina();
+  atualizarBadgeDesafios();
+}
+
+function trocarAbaControleDesafio(id){ abaControleDesafio = id === 'seca-empina' ? 'seca-empina' : 'seca21'; telaControleDesafio = { tipo: 'lista' }; renderControleDesafios(); }
+function voltarControleDesafios(){ telaControleDesafio = { tipo: 'lista' }; renderControleDesafios(); }
+function trocarFreqEstruturasSecaEmpina(f){ freqEstruturasSecaEmpina = f === 3 ? 3 : 5; renderControleDesafios(); }
+
+// ----- Seca e Empina: números do topo e cartões das 10 estruturas -----
+function htmlKpisSecaEmpina(){
+  const ativas = alunasPersonal.filter(function(a){ return estaNoSecaEmpina(a); });
+  const em3 = ativas.filter(function(a){ return a.desafioAtivo.frequencia !== 5; }).length;
+  const trocar = ativas.filter(function(a){ return situacaoSecaEmpina(a).trocar; }).length;
+  const naUltima = ativas.filter(function(a){ return a.desafioAtivo.estruturaAtual >= 10; }).length;
+  const k = function(rot, n, sub, cor){ return '<div class="cd-k"><small>' + rot + '</small><b' + (cor ? ' style="color:' + cor + ';"' : '') + '>' + n + '</b><span>' + sub + '</span></div>'; };
+  return '<div class="cd-kpis">' +
+    k('No desafio agora', ativas.length, '3x: ' + em3 + ' · 5x: ' + (ativas.length - em3)) +
+    k('Completaram 30 dias', trocar, trocar ? 'trocam de estrutura quando abrirem o app' : 'ninguém pra trocar agora', trocar ? 'var(--warning, #E2A33D)' : '') +
+    k('Na estrutura 10', naUltima, 'última estrutura do desafio') +
+  '</div>';
+}
+
+function htmlCardsEstruturasSecaEmpina(){
+  const freq = freqEstruturasSecaEmpina;
+  let html = '';
+  for(let n = 1; n <= 10; n++){
+    const m = obterMetaVolumeDesafio(n, freq) || {};
+    const qtd = alunasPersonal.filter(function(a){ return estaNoSecaEmpina(a) && a.desafioAtivo.estruturaAtual === n; }).length;
+    const salvo = !!modelosMestreSecaEmpina[chaveModeloMestre(n, freq)];
+    html += '<div class="cd-est" onclick="abrirEstruturaSecaEmpinaNoControle(' + n + ')">' +
+      '<div class="cd-est-t"><b>' + n + '</b><span class="cd-chip' + (qtd ? ' cd-c-ouro' : '') + '">' + qtd + (qtd === 1 ? ' aluna' : ' alunas') + '</span></div>' +
+      '<div class="cd-est-v"><span>Quad <b>' + m.quadriceps + '</b></span><span>Post <b>' + m.posterior + '</b></span><span>G.méd <b>' + m.gluteoMedio + '</b></span><span>G.máx <b>' + m.gluteoMaximo + '</b></span></div>' +
+      '<small>' + (salvo ? 'modelo salvo' : 'sugestão automática') + ' · séries/semana no ' + freq + 'x</small>' +
+    '</div>';
+  }
+  return html;
+}
+
+function abrirEstruturaSecaEmpinaNoControle(n, freq){
+  telaControleDesafio = { tipo: 'estrutura-se', n: Math.max(1, Math.min(10, n)), freq: freq === 3 || freq === 5 ? freq : freqEstruturasSecaEmpina };
+  renderControleDesafios();
+  window.scrollTo && window.scrollTo(0, 0);
+}
+
+function htmlCardsVolumeSecaEmpina(semana){
+  const v = contarVolumeDaSemanaDesafio(semana), m = semana.metaVolume || {};
+  const grupos = [['Quadríceps', 'quadriceps'], ['Posterior', 'posterior'], ['Glúteo médio', 'gluteoMedio'], ['Glúteo máximo', 'gluteoMaximo']];
+  const avisos = [];
+  const cards = grupos.map(function(g){
+    const feito = v[g[1]], meta = m[g[1]] || 0;
+    if(meta && feito !== meta) avisos.push(g[0] + ' ' + (feito < meta ? (meta - feito) + ' abaixo' : (feito - meta) + ' acima'));
+    const pct = meta ? Math.min(100, Math.round(feito / meta * 100)) : 0;
+    return '<div class="cd-vol"><small>' + g[0] + '</small><b>' + feito + '<span>/' + meta + '</span></b><div class="cd-barra"><i style="width:' + pct + '%;background:' + (feito >= meta ? 'var(--success)' : '#E2A33D') + ';"></i></div></div>';
+  }).join('');
+  return cards + '<div class="cd-vol cd-vol-nota"><small>Séries por semana: feito / meta</small><span>' + (avisos.length ? avisos.join(' · ') : 'Tudo na meta') + ' · ' + v.total + ' séries no total</span></div>';
+}
+
+function htmlEditorEstruturaSecaEmpina(n, freq){
+  const semana = obterOuCriarSemanaEditavel(n, freq);
+  const qtd = alunasPersonal.filter(function(a){ return estaNoSecaEmpina(a) && a.desafioAtivo.estruturaAtual === n; }).length;
+  const afetadas = alunasPersonal.filter(function(a){ return estaNoSecaEmpina(a) && a.desafioTreinos && a.desafioTreinos[n] && a.desafioAtivo.frequencia === freq; }).length;
+  const salvo = !!modelosMestreSecaEmpina[chaveModeloMestre(n, freq)];
+  return '<div id="cd-editor-se">' +
+    '<div class="cd-volta" onclick="voltarControleDesafios()">‹ Controle de desafios · Seca e Empina</div>' +
+    '<div class="cd-topo"><div><h2 class="cd-titulo">Estrutura ' + n + ' de 10</h2><p class="page-sub" style="margin:2px 0 0;">' + qtd + (qtd === 1 ? ' aluna está' : ' alunas estão') + ' nela agora · ' + (salvo ? 'modelo salvo' : 'sugestão automática, ainda não salva') + '</p></div>' +
+      '<div class="cd-topo-r"><div class="cd-nav">' +
+        '<span class="' + (n <= 1 ? 'off' : '') + '" onclick="abrirEstruturaSecaEmpinaNoControle(' + (n - 1) + ',' + freq + ')">‹</span>' +
+        [n - 1, n, n + 1].filter(function(k){ return k >= 1 && k <= 10; }).map(function(k){ return '<span class="' + (k === n ? 'on' : '') + '" onclick="abrirEstruturaSecaEmpinaNoControle(' + k + ',' + freq + ')">' + k + '</span>'; }).join('') +
+        '<span class="' + (n >= 10 ? 'off' : '') + '" onclick="abrirEstruturaSecaEmpinaNoControle(' + (n + 1) + ',' + freq + ')">›</span></div>' +
+        '<div class="cd-seg"><span class="' + (freq === 3 ? 'on' : '') + '" onclick="abrirEstruturaSecaEmpinaNoControle(' + n + ',3)">3x por semana</span><span class="' + (freq === 5 ? 'on' : '') + '" onclick="abrirEstruturaSecaEmpinaNoControle(' + n + ',5)">5x por semana</span></div>' +
+        '<select id="se-preview-freq" style="display:none;"><option value="' + freq + '" selected>' + freq + '</option></select>' +
+      '</div></div>' +
+    '<div class="cd-vols" id="cd-volume-' + n + '">' + htmlCardsVolumeSecaEmpina(semana) + '</div>' +
+    '<div id="preview-dias-' + n + '">' + htmlDiasEditaveisDesafio(n, freq) + '</div>' +
+    '<div class="cd-rodape"><span class="cd-nota">▲▼ muda a ordem · − + muda as séries · ⇄ troca o exercício · os números de cima recalculam na hora</span>' +
+      '<div class="cd-r"><button class="cd-btn" onclick="regenerarPreviewEstrutura(' + n + ')">Gerar de novo</button>' +
+      '<button class="cd-btn" onclick="descartarEdicaoSecaEmpina(' + n + ',' + freq + ')">Desfazer mudanças</button>' +
+      '<button class="cd-btn cd-btn-ouro" onclick="aplicarEstruturaParaTodasDoDesafio(' + n + ')">Salvar e aplicar' + (afetadas ? ' pras ' + afetadas + (afetadas === 1 ? ' aluna' : ' alunas') : '') + '</button></div></div>' +
+  '</div>';
+}
+
+function descartarEdicaoSecaEmpina(n, freq){
+  delete semanasEditandoPreviewDesafio[chaveModeloMestre(n, freq)];
+  renderControleDesafios();
+}
+
+// ===== SECA 21: motor próprio =====
+// Regras (combinadas com o Thiago): multiarticulares em primeiro lugar e bilaterais; isolado só bíceps e tríceps,
+// sempre em bi-set; nada unilateral; nada de glúteo na polia ou no cabo. Métodos: bi-set em todos os níveis,
+// drop set no último exercício do dia, rest pause só no Avançado (1º multiarticular de máquina do dia).
+// Divisão: 3x = Inferior A, Superior, Inferior B. 5x = Inferior A, Superior A, Inferior B, Superior B, Inferior completo.
+const ESTRUTURAS_SECA21 = [
+  { chave: 'Iniciante_3', nivel: 'Iniciante', frequencia: 3 },
+  { chave: 'Iniciante_5', nivel: 'Iniciante', frequencia: 5 },
+  { chave: 'Avançado_3', nivel: 'Avançado', frequencia: 3 },
+  { chave: 'Avançado_5', nivel: 'Avançado', frequencia: 5 }
+];
+const DIAS_SECA21 = {
+  3: [ { n: 'Treino A', foco: 'Inferior · quadríceps e glúteo', tipo: 'infA' }, { n: 'Treino B', foco: 'Superior e braços', tipo: 'sup' }, { n: 'Treino C', foco: 'Inferior · posterior e glúteo', tipo: 'infB' } ],
+  5: [ { n: 'Treino A', foco: 'Inferior · quadríceps e glúteo', tipo: 'infA' }, { n: 'Treino B', foco: 'Superior e braços', tipo: 'sup' }, { n: 'Treino C', foco: 'Inferior · posterior e glúteo', tipo: 'infB' },
+       { n: 'Treino D', foco: 'Superior e braços', tipo: 'sup' }, { n: 'Treino E', foco: 'Inferior completo', tipo: 'infC' } ]
+};
+// O que entra em cada tipo de dia, na ordem (o bi-set de braço fecha o dia de superior)
+const RECEITA_SECA21 = {
+  Iniciante: { infA: ['gluteo', 'quad', 'quad', 'posterior'], infB: ['gluteo', 'posterior', 'quad', 'posterior'], infC: ['gluteo', 'quad', 'posterior', 'quad'], sup: ['costas', 'costas', 'peito', 'ombro', 'biset'] },
+  'Avançado': { infA: ['gluteo', 'quad', 'quad', 'posterior', 'quad'], infB: ['gluteo', 'posterior', 'quad', 'posterior', 'posterior'], infC: ['gluteo', 'quad', 'posterior', 'quad', 'posterior'], sup: ['costas', 'costas', 'peito', 'ombro', 'costas', 'biset'] }
+};
+const VOLUME_SECA21 = { Iniciante: { series: 3, reps: 12, seriesPrincipais: 3 }, 'Avançado': { series: 3, reps: 10, seriesPrincipais: 4 } }; // principais = os 2 primeiros do dia
+const BISET_SECA21 = { series: 3, reps: 12 };
+const METODOS_SECA21 = { Iniciante: ['Drop set'], 'Avançado': ['Rest pause', 'Drop set'] };
+const PADROES_SECA21 = {
+  gluteo: /^ELEVAÇÃO PÉLVICA/,
+  quad: /AGACHAMENTO|LEG PRESS|LEG HORIZONTAL|HACK/,
+  posterior: /STIFF|TERRA|BOM DIA/,
+  costas: /PUXADA|REMADA/,
+  peito: /SUPINO/,
+  ombro: /DESENVOLVIMENTO/,
+  biceps: /^ROSCA/,
+  triceps: /^TR[IÍ]CEPS/
+};
+// Fica de fora do SECA 21 mesmo batendo no padrão: polia/cabo (glúteo na polia), unilaterais e alternados,
+// pliometria, variações em casa ou com acessório improvisado, e nomes duplicados que vieram com " - YOUTUBE"
+const FORA_DO_SECA21 = /POLIA|CABO|CROSS|UNI\b|UNIL|UNILATERAL|ALTERNAD|CONCENTRADA|COICE|PLIOM|JACK|BÚLGARO|BULGARO|ELÁSTIC|ELASTIC|LENÇOL|TRX|MOCHILA|YOUTUBE|ISOMETRIA|\b21\b|ISOLADO|\s(Y|P|PC|H)$/;
+const MAQUINA_SECA21 = /LEG PRESS|LEG HORIZONTAL|HACK|MÁQUINA|MAQUINA|GUIAD|SMITH|ARTICULAD|ARTICULAR|PENDULAR|SQUAT/;
+const ORDEM_NIVEL_SECA21 = { '': 0, 'A definir': 0, 'Iniciante': 0, 'Intermediário': 1, 'Avançado': 2 };
+
+// Iniciante usa até o que o banco marca como Intermediário (sem isso, quase não sobra stiff e terra pra ela);
+// o que o banco marca como Avançado fica só pro Avançado. Guarda o resultado pra não varrer o banco a cada clique.
+let cachePoolSeca21 = {};
+function poolSeca21(slot, nivel){
+  const chaveCache = slot + '|' + nivel + '|' + exerciciosBanco.length;
+  if(!cachePoolSeca21[chaveCache]) cachePoolSeca21[chaveCache] = calcularPoolSeca21(slot, nivel);
+  return cachePoolSeca21[chaveCache].slice();
+}
+function calcularPoolSeca21(slot, nivel){
+  const padrao = PADROES_SECA21[slot];
+  if(!padrao) return [];
+  const teto = nivel === 'Avançado' ? 2 : 1;
+  const porNome = {};
+  exerciciosBanco.forEach(function(e){
+    const nome = String(e.nome || '').trim();
+    const u = nome.toUpperCase();
+    if((e.ambiente || 'Academia') !== 'Academia') return;
+    if(!padrao.test(u) || FORA_DO_SECA21.test(u)) return;
+    if(slot === 'costas' && /PULLDOWN|PULLOVER/.test(u)) return;
+    if(ehExercicioUnilateral(nome)) return;
+    if(ehExercicioElastico(e)) return;
+    if((ORDEM_NIVEL_SECA21[e.nivelMinimo || ''] || 0) > teto) return;
+    const atual = porNome[u];
+    if(!atual || (!atual.video && e.video)) porNome[u] = e;
+  });
+  return Object.keys(porNome).map(function(k){ return porNome[k].nome; }).sort(function(x, y){ return x.localeCompare(y, 'pt-BR'); });
+}
+
+function slotDoExercicioSeca21(nome, nivel){
+  const slots = ['gluteo', 'quad', 'posterior', 'costas', 'peito', 'ombro', 'biceps', 'triceps'];
+  const u = String(nome).toUpperCase();
+  for(let i = 0; i < slots.length; i++){
+    if(poolSeca21(slots[i], nivel || 'Avançado').some(function(p){ return p.toUpperCase() === u; })) return slots[i];
+  }
+  return null;
+}
+
+function linhaSeca21(nome, series, reps, metodo){ return nome + ' · ' + series + 'x' + reps + (metodo ? ' · ' + metodo : ''); }
+
+// Partes de uma linha do SECA 21: normal "Nome · 3x12 · Drop set" ou bi-set "Bi-set|||A · 3x12|||B · 3x12"
+function partesLinhaSeca21(linha){
+  const s = String(linha);
+  if(s.indexOf('|||') !== -1){
+    const p = s.split('|||');
+    const a = (p[1] || '').split(' · '), b = (p[2] || '').split(' · ');
+    const v = (a[1] || '').match(/^(\d+)x(\d+)/) || [];
+    return { biset: true, nomes: [a[0] || '', b[0] || ''], series: parseInt(v[1], 10) || 0, reps: parseInt(v[2], 10) || 0, metodo: 'Bi-set' };
+  }
+  const p = s.split(' · ');
+  const v = (p[1] || '').match(/^(\d+)x(\d+)/) || [];
+  return { biset: false, nomes: [p[0] || ''], series: parseInt(v[1], 10) || 0, reps: parseInt(v[2], 10) || 0, metodo: p[2] || '' };
+}
+
+function montarLinhaSeca21(partes){
+  if(partes.biset) return 'Bi-set|||' + partes.nomes[0] + ' · ' + partes.series + 'x' + partes.reps + '|||' + partes.nomes[1] + ' · ' + partes.series + 'x' + partes.reps;
+  return linhaSeca21(partes.nomes[0], partes.series, partes.reps, partes.metodo);
+}
+
+function videosDaLinhaSeca21(linha, videos){
+  partesLinhaSeca21(linha).nomes.forEach(function(nome){
+    const ex = buscarExercicioNoBanco(nome);
+    if(ex && ex.video) videos[nome] = ex.video;
+  });
+}
+
+function gerarSemanaSeca21(chave, semente){
+  const est = ESTRUTURAS_SECA21.find(function(e){ return e.chave === chave; });
+  if(!est) return null;
+  const nivel = est.nivel, receita = RECEITA_SECA21[nivel], vol = VOLUME_SECA21[nivel];
+  const seed = typeof semente === 'number' ? semente : hashString('seca21' + chave);
+  const pools = {};
+  ['gluteo', 'quad', 'posterior', 'costas', 'peito', 'ombro', 'biceps', 'triceps'].forEach(function(s){ pools[s] = poolSeca21(s, nivel); });
+  const usadosNaSemana = {};
+  const dias = DIAS_SECA21[est.frequencia].map(function(modelo, d){
+    const usadosNoDia = {};
+    let legPress = 0;
+    const escolher = function(slot, offset){
+      const pool = pools[slot] || [];
+      for(let passada = 0; passada < 2; passada++){
+        for(let t = 0; t < pool.length; t++){
+          const nome = pool[(seed + offset + d * 7 + t) % pool.length];
+          const u = nome.toUpperCase();
+          if(usadosNoDia[u]) continue;
+          if(passada === 0 && usadosNaSemana[u]) continue;
+          if(u.indexOf('LEG PRESS') !== -1 && legPress >= 1) continue;
+          usadosNoDia[u] = true; usadosNaSemana[u] = true;
+          if(u.indexOf('LEG PRESS') !== -1) legPress++;
+          return nome;
+        }
+      }
+      return null;
+    };
+    const ex = [];
+    receita[modelo.tipo].forEach(function(slot, i){
+      if(slot === 'biset'){
+        const b = escolher('biceps', 11 + i), t = escolher('triceps', 13 + i);
+        if(b && t) ex.push('Bi-set|||' + b + ' · ' + BISET_SECA21.series + 'x' + BISET_SECA21.reps + '|||' + t + ' · ' + BISET_SECA21.series + 'x' + BISET_SECA21.reps);
+        return;
+      }
+      const nome = escolher(slot, i * 3);
+      if(nome) ex.push(linhaSeca21(nome, ex.length < 2 ? vol.seriesPrincipais : vol.series, vol.reps, ''));
+    });
+    aplicarMetodosSeca21(ex, nivel);
+    const videos = {};
+    ex.forEach(function(l){ videosDaLinhaSeca21(l, videos); });
+    return { n: modelo.n, foco: modelo.foco, tipo: modelo.tipo, ex: ex, videos: videos, descanso: false };
+  });
+  return { desafio: 'seca21', chave: chave, nivel: nivel, frequencia: est.frequencia, dias: dias, geradoEm: new Date().toISOString() };
+}
+
+// Drop set no último exercício do dia (fora o bi-set). Se o último for de peso livre (barra fixa, stiff com barra),
+// o drop set vai pro último de máquina, que desce pro fim do dia: na máquina dá pra baixar a carga na hora.
+// Rest pause (só Avançado) no 1º multiarticular de máquina do dia.
+function aplicarMetodosSeca21(ex, nivel){
+  let ultimo = -1, ultimoMaquina = -1;
+  ex.forEach(function(l, i){
+    if(l.indexOf('|||') !== -1) return;
+    ultimo = i;
+    const nome = partesLinhaSeca21(l).nomes[0].toUpperCase();
+    if(MAQUINA_SECA21.test(nome) && !PADROES_SECA21.gluteo.test(nome) && i >= 2) ultimoMaquina = i;
+  });
+  if(ultimoMaquina !== -1 && ultimoMaquina !== ultimo){
+    const linha = ex.splice(ultimoMaquina, 1)[0];
+    ex.splice(ultimo, 0, linha); // vai pro lugar do último (o antigo último sobe uma posição)
+  }
+  if(ultimo >= 0){ const p = partesLinhaSeca21(ex[ultimo]); p.metodo = 'Drop set'; ex[ultimo] = montarLinhaSeca21(p); }
+  if(nivel === 'Avançado'){
+    for(let i = 0; i < ex.length; i++){
+      if(i === ultimo || ex[i].indexOf('|||') !== -1) continue;
+      const p = partesLinhaSeca21(ex[i]);
+      if(PADROES_SECA21.gluteo.test(p.nomes[0].toUpperCase())) continue; // elevação pélvica não é multiarticular
+      if(MAQUINA_SECA21.test(p.nomes[0].toUpperCase())){ p.metodo = 'Rest pause'; ex[i] = montarLinhaSeca21(p); break; }
+    }
+  }
+}
+
+// Confere a semana contra as regras do SECA 21 (vale também depois das suas trocas)
+function conferirRegrasSeca21(semana){
+  const nivel = semana.nivel;
+  const naoMulti = [], unilaterais = [], polia = [], bisetErrado = [], repetidos = [], metodoFora = [];
+  semana.dias.forEach(function(d){
+    const vistos = {};
+    d.ex.forEach(function(l){
+      const p = partesLinhaSeca21(l);
+      p.nomes.forEach(function(nome){
+        const u = nome.toUpperCase();
+        if(vistos[u]) repetidos.push(nome + ' (' + d.n + ')'); vistos[u] = true;
+        if(ehExercicioUnilateral(nome)) unilaterais.push(nome);
+      });
+      if(p.biset){
+        const s1 = slotDoExercicioSeca21(p.nomes[0]), s2 = slotDoExercicioSeca21(p.nomes[1]);
+        const okPar = (s1 === 'biceps' && s2 === 'triceps') || (s1 === 'triceps' && s2 === 'biceps');
+        if(!okPar) bisetErrado.push(p.nomes.join(' + '));
+      } else {
+        const slot = slotDoExercicioSeca21(p.nomes[0]);
+        if(!slot || slot === 'biceps' || slot === 'triceps') naoMulti.push(p.nomes[0]);
+        if(/POLIA|CABO|CROSS/.test(p.nomes[0].toUpperCase())) polia.push(p.nomes[0]);
+        if(p.metodo && METODOS_SECA21[nivel].indexOf(p.metodo) === -1) metodoFora.push(p.metodo + ' em ' + p.nomes[0]);
+      }
+    });
+  });
+  const item = function(ok, texto, problemas){ return { ok: ok, texto: texto, detalhe: problemas.slice(0, 3).join(', ') }; };
+  return [
+    item(naoMulti.length === 0, 'Todos multiarticulares, menos o bi-set de braço', naoMulti),
+    item(bisetErrado.length === 0, 'Isolado só bíceps e tríceps, em bi-set', bisetErrado),
+    item(unilaterais.length === 0, 'Nenhum unilateral', unilaterais),
+    item(polia.length === 0, 'Nenhum glúteo na polia ou no cabo', polia),
+    item(metodoFora.length === 0, 'Métodos do ' + nivel + ': ' + (nivel === 'Avançado' ? 'bi-set, rest pause e drop set' : 'bi-set e drop set'), metodoFora),
+    item(repetidos.length === 0, 'Nenhum exercício repetido no mesmo treino', repetidos)
+  ];
+}
+
+// ----- Modelos salvos (catálogo) e a semana em edição na tela -----
+let modelosSeca21 = {};          // chave -> semana salva (é essa que vai pras alunas)
+let semanasEditandoSeca21 = {};  // chave -> semana na tela (com suas mudanças ainda não salvas)
+
+function copiaProfunda(o){ return JSON.parse(JSON.stringify(o)); }
+function chaveSeca21DaAluna(a){ return nivelSeca21PeloNivel(a.desafioAtivo.nivel) + '_' + (a.desafioAtivo.frequencia === 5 ? 5 : 3); }
+function treinoSeca21DaAluna(a){ return (a && a.desafioTreinos && a.desafioTreinos.seca21) || null; }
+
+function obterSemanaEditandoSeca21(chave){
+  if(!semanasEditandoSeca21[chave]){
+    semanasEditandoSeca21[chave] = modelosSeca21[chave] ? copiaProfunda(modelosSeca21[chave]) : gerarSemanaSeca21(chave);
+  }
+  return semanasEditandoSeca21[chave];
+}
+
+function situacaoEstruturaSeca21(chave){
+  const salvo = modelosSeca21[chave], editando = semanasEditandoSeca21[chave];
+  if(salvo && editando && JSON.stringify(salvo.dias) !== JSON.stringify(editando.dias)) return { texto: 'Mudanças não salvas', classe: 'cd-c-alerta' };
+  if(salvo) return { texto: 'Liberada', classe: 'cd-c-ok' };
+  if(editando) return { texto: 'Gerada, falta salvar', classe: 'cd-c-alerta' };
+  return { texto: 'Ainda não gerada', classe: '' };
+}
+
+function nomeEstruturaSeca21(chave){ const e = ESTRUTURAS_SECA21.find(function(x){ return x.chave === chave; }); return e ? e.nivel + ' ' + e.frequencia + 'x' : chave; }
+
+function htmlCardsEstruturasSeca21(){
+  return '<div class="cd-e4">' + ESTRUTURAS_SECA21.map(function(e){
+    const st = situacaoEstruturaSeca21(e.chave);
+    const qtd = alunasPersonal.filter(function(a){ return estaNoSeca21(a) && chaveSeca21DaAluna(a) === e.chave; }).length;
+    const dias = DIAS_SECA21[e.frequencia].map(function(d){ return d.foco.split(' · ')[0]; }).join(' · ');
+    return '<div class="cd-e4i' + (st.texto === 'Liberada' ? ' on' : '') + '" onclick="abrirEstruturaSeca21NoControle(\'' + e.chave + '\')">' +
+      '<div class="cd-e4t"><b>' + e.nivel + ' ' + e.frequencia + 'x</b><span class="cd-chip ' + st.classe + '">' + st.texto + '</span></div>' +
+      '<small>' + e.frequencia + ' treinos: ' + dias + '</small>' +
+      '<div class="cd-e4r"><span>' + qtd + (qtd === 1 ? ' aluna' : ' alunas') + '</span><span class="cd-btn cd-btn-peq">' + (st.texto === 'Ainda não gerada' ? 'Gerar' : 'Abrir') + '</span></div>' +
+    '</div>';
+  }).join('') + '</div>';
+}
+
+function htmlRegrasSeca21(){
+  return '<div class="cd-box-cab"><h2>Regras do motor SECA 21</h2></div><div class="cd-regras">' +
+    '<div><span class="ok">✓</span>Multiarticulares em primeiro lugar, bilaterais</div>' +
+    '<div><span class="ok">✓</span>Isolado só bíceps e tríceps, sempre em bi-set</div>' +
+    '<div><span class="no">✕</span>Nada unilateral, nada de glúteo na polia ou no cabo</div>' +
+    '<div><span class="no">✕</span>Nenhuma cadeira ou exercício isolado de perna</div></div>' +
+    '<div class="cd-metodos"><div><b>Iniciante</b>Bi-set bíceps + tríceps<br>Drop set no último exercício do dia</div>' +
+    '<div><b>Avançado</b>Bi-set bíceps + tríceps<br>Rest pause no 1º multiarticular de máquina<br>Drop set no último exercício do dia</div></div>';
+}
+
+function abrirEstruturaSeca21NoControle(chave){
+  if(!ESTRUTURAS_SECA21.some(function(e){ return e.chave === chave; })) return;
+  obterSemanaEditandoSeca21(chave);
+  telaControleDesafio = { tipo: 'estrutura-s21', chave: chave };
+  renderControleDesafios();
+  window.scrollTo && window.scrollTo(0, 0);
+}
+
+function htmlEditorEstruturaSeca21(chave){
+  const semana = obterSemanaEditandoSeca21(chave);
+  const st = situacaoEstruturaSeca21(chave);
+  const qtd = alunasPersonal.filter(function(a){ return estaNoSeca21(a) && chaveSeca21DaAluna(a) === chave; }).length;
+  const regras = conferirRegrasSeca21(semana);
+  const quebradas = regras.filter(function(r){ return !r.ok; }).length;
+  return '<div id="cd-editor-s21">' +
+    '<div class="cd-volta cd-verde-t" onclick="voltarControleDesafios()">‹ Controle de desafios · SECA 21</div>' +
+    '<div class="cd-topo"><div><h2 class="cd-titulo">SECA 21 · ' + nomeEstruturaSeca21(chave) + '</h2><p class="page-sub" style="margin:2px 0 0;">' + qtd + (qtd === 1 ? ' aluna recebe' : ' alunas recebem') + ' essa estrutura · <span class="cd-chip ' + st.classe + '">' + st.texto + '</span></p></div>' +
+      '<div class="cd-topo-r"><div class="cd-seg cd-seg-verde">' + ESTRUTURAS_SECA21.map(function(e){
+        return '<span class="' + (e.chave === chave ? 'on' : '') + '" onclick="abrirEstruturaSeca21NoControle(\'' + e.chave + '\')">' + e.nivel + ' ' + e.frequencia + 'x</span>';
+      }).join('') + '</div></div></div>' +
+    '<div class="cd-box cd-conf"><div class="cd-box-cab"><h2>Conferência das regras</h2><span class="cd-r cd-nota" style="margin:0;">' + (quebradas ? 'Tem ' + quebradas + (quebradas === 1 ? ' regra quebrada' : ' regras quebradas') + '. Dá pra salvar mesmo assim, se for de propósito.' : 'Tudo dentro das regras do SECA 21.') + '</span></div><div class="cd-regras cd-regras-grade">' +
+        regras.map(function(r){ return '<div><span class="' + (r.ok ? 'ok' : 'no') + '">' + (r.ok ? '✓' : '✕') + '</span><span>' + r.texto + (r.ok ? '' : '<small class="cd-erro">' + escaparHtmlFicha(r.detalhe) + '</small>') + '</span></div>'; }).join('') +
+      '</div></div>' +
+    '<div class="cd-dias" style="grid-template-columns:repeat(' + Math.min(semana.dias.length, 3) + ',minmax(0,1fr));">' +
+      semana.dias.map(function(d, di){ return htmlDiaEditorSeca21(chave, d, di); }).join('') + '</div>' +
+    '<div class="cd-rodape"><span class="cd-nota">⇄ troca o exercício · − + muda séries e repetições · a aluna faz no celular, com vídeo de cada exercício</span>' +
+      '<div class="cd-r"><button class="cd-btn" onclick="gerarDeNovoSeca21(\'' + chave + '\')">Gerar de novo</button>' +
+      (modelosSeca21[chave] ? '<button class="cd-btn" onclick="descartarEdicaoSeca21(\'' + chave + '\')">Desfazer mudanças</button>' : '') +
+      '<button class="cd-btn cd-btn-verde" onclick="salvarEstruturaSeca21(\'' + chave + '\')">Salvar e liberar' + (qtd ? ' pra ' + qtd + (qtd === 1 ? ' aluna' : ' alunas') : '') + '</button></div></div>' +
+  '</div>';
+}
+
+function htmlDiaEditorSeca21(chave, d, di){
+  return '<div class="cd-dia"><div class="cd-dia-cab"><b>' + d.n + '</b><small>' + d.foco + '</small></div>' +
+    d.ex.map(function(l, ei){
+      const p = partesLinhaSeca21(l);
+      const tag = p.biset ? '<span class="cd-mt cd-mt-bs">Bi-set</span>' : (p.metodo === 'Drop set' ? '<span class="cd-mt cd-mt-ds">Drop set</span>' : (p.metodo === 'Rest pause' ? '<span class="cd-mt cd-mt-rp">Rest pause</span>' : ''));
+      const nomes = p.biset
+        ? p.nomes.map(function(nm, k){ return '<span class="cd-ex-nome" onclick="abrirTrocaSeca21(\'' + chave + '\',' + di + ',' + ei + ',' + k + ')">' + escaparHtmlFicha(nm) + ' <i>⇄</i></span>'; }).join('<span class="cd-mais">+</span>')
+        : '<span class="cd-ex-nome" onclick="abrirTrocaSeca21(\'' + chave + '\',' + di + ',' + ei + ',0)">' + escaparHtmlFicha(p.nomes[0]) + ' <i>⇄</i></span>';
+      const cl = function(campo, delta, txt){ return '<span class="cd-mini" onclick="ajustarLinhaSeca21(\'' + chave + '\',' + di + ',' + ei + ',\'' + campo + '\',' + delta + ')">' + txt + '</span>'; };
+      return '<div class="cd-ex">' +
+        '<div class="cd-ex-l1">' + nomes + tag + '</div>' +
+        '<div class="cd-ex-l2"><span class="cd-num">' + cl('series', -1, '−') + '<b>' + p.series + '</b>' + cl('series', 1, '+') + '<small>séries</small></span>' +
+          '<span class="cd-num">' + cl('reps', -1, '−') + '<b>' + p.reps + '</b>' + cl('reps', 1, '+') + '<small>reps</small></span>' +
+          (p.biset ? '' : '<select class="cd-sel" onchange="definirMetodoSeca21(\'' + chave + '\',' + di + ',' + ei + ',this.value)">' +
+            ['', 'Drop set', 'Rest pause'].map(function(m){ return '<option value="' + m + '"' + (p.metodo === m ? ' selected' : '') + '>' + (m || 'Sem método') + '</option>'; }).join('') + '</select>') +
+          '<span class="cd-acoes">' +
+            '<span class="cd-mini' + (ei === 0 ? ' off' : '') + '" onclick="moverLinhaSeca21(\'' + chave + '\',' + di + ',' + ei + ',-1)">▲</span>' +
+            '<span class="cd-mini' + (ei === d.ex.length - 1 ? ' off' : '') + '" onclick="moverLinhaSeca21(\'' + chave + '\',' + di + ',' + ei + ',1)">▼</span>' +
+            '<span class="cd-mini cd-mini-x" onclick="tirarLinhaSeca21(\'' + chave + '\',' + di + ',' + ei + ')">✕</span></span>' +
+        '</div>' +
+        '<div id="cd-troca-' + di + '-' + ei + '"></div>' +
+      '</div>';
+    }).join('') +
+    '<div class="cd-add-l"><span onclick="abrirAdicionarSeca21(\'' + chave + '\',' + di + ')">+ exercício</span><span onclick="adicionarBisetSeca21(\'' + chave + '\',' + di + ')">+ bi-set de braço</span></div>' +
+    '<div id="cd-add-' + di + '"></div>' +
+  '</div>';
+}
+
+function redesenharEditorSeca21(){ if(telaControleDesafio.tipo === 'estrutura-s21') renderControleDesafios(); }
+
+function linhaEmEdicaoSeca21(chave, di, ei){
+  const semana = obterSemanaEditandoSeca21(chave);
+  const dia = semana.dias[di];
+  return dia && dia.ex[ei] !== undefined ? { semana: semana, dia: dia } : null;
+}
+
+function ajustarLinhaSeca21(chave, di, ei, campo, delta){
+  const r = linhaEmEdicaoSeca21(chave, di, ei);
+  if(!r) return;
+  const p = partesLinhaSeca21(r.dia.ex[ei]);
+  if(campo === 'series') p.series = Math.max(1, Math.min(8, p.series + delta));
+  else p.reps = Math.max(4, Math.min(30, p.reps + delta));
+  r.dia.ex[ei] = montarLinhaSeca21(p);
+  redesenharEditorSeca21();
+}
+
+function definirMetodoSeca21(chave, di, ei, metodo){
+  const r = linhaEmEdicaoSeca21(chave, di, ei);
+  if(!r) return;
+  const p = partesLinhaSeca21(r.dia.ex[ei]);
+  if(p.biset) return;
+  p.metodo = ['Drop set', 'Rest pause'].indexOf(metodo) !== -1 ? metodo : '';
+  r.dia.ex[ei] = montarLinhaSeca21(p);
+  redesenharEditorSeca21();
+}
+
+function moverLinhaSeca21(chave, di, ei, direcao){
+  const r = linhaEmEdicaoSeca21(chave, di, ei);
+  if(!r) return;
+  const destino = ei + direcao;
+  if(destino < 0 || destino >= r.dia.ex.length) return;
+  const g = r.dia.ex[ei]; r.dia.ex[ei] = r.dia.ex[destino]; r.dia.ex[destino] = g;
+  redesenharEditorSeca21();
+}
+
+function tirarLinhaSeca21(chave, di, ei){
+  const r = linhaEmEdicaoSeca21(chave, di, ei);
+  if(!r) return;
+  r.dia.ex.splice(ei, 1);
+  redesenharEditorSeca21();
+}
+
+// Opções de troca: primeiro as do mesmo grupo, depois o resto do que é permitido no SECA 21 pro nível
+function opcoesTrocaSeca21(nivel, nomeAtual, ehBraco, jaNoDia){
+  const fora = {};
+  (jaNoDia || []).forEach(function(n){ fora[String(n).toUpperCase()] = true; }); // o que já está no treino não aparece de novo
+  const slotAtual = slotDoExercicioSeca21(nomeAtual, nivel) || slotDoExercicioSeca21(nomeAtual);
+  const grupos = ehBraco ? ['biceps', 'triceps'] : ['gluteo', 'quad', 'posterior', 'costas', 'peito', 'ombro'];
+  const rotulos = { gluteo: 'Glúteo', quad: 'Quadríceps', posterior: 'Posterior', costas: 'Costas', peito: 'Peito', ombro: 'Ombro', biceps: 'Bíceps', triceps: 'Tríceps' };
+  const ordem = slotAtual && grupos.indexOf(slotAtual) !== -1 ? [slotAtual].concat(grupos.filter(function(g){ return g !== slotAtual; })) : grupos;
+  return ordem.map(function(g){
+    return { grupo: rotulos[g], nomes: poolSeca21(g, nivel).filter(function(n){ return n.toUpperCase() !== String(nomeAtual).toUpperCase() && !fora[n.toUpperCase()]; }) };
+  }).filter(function(g){ return g.nomes.length; });
+}
+
+function htmlSelectOpcoesSeca21(id, grupos){
+  return '<select class="form-select cd-sel-troca" id="' + id + '">' + grupos.map(function(g){
+    return '<optgroup label="' + g.grupo + '">' + g.nomes.map(function(n){ return '<option value="' + n.replace(/"/g, '&quot;') + '">' + escaparHtmlFicha(n) + '</option>'; }).join('') + '</optgroup>';
+  }).join('') + '</select>';
+}
+
+function nomesDoDiaSeca21(dia){ return [].concat.apply([], dia.ex.map(function(l){ return partesLinhaSeca21(l).nomes; })); }
+
+function abrirTrocaSeca21(chave, di, ei, parte){
+  const area = document.getElementById('cd-troca-' + di + '-' + ei);
+  const r = linhaEmEdicaoSeca21(chave, di, ei);
+  if(!area || !r) return;
+  if(area.innerHTML && area.getAttribute('data-parte') === String(parte)){ area.innerHTML = ''; return; }
+  const p = partesLinhaSeca21(r.dia.ex[ei]);
+  area.setAttribute('data-parte', String(parte));
+  area.innerHTML = '<div class="cd-troca">' + htmlSelectOpcoesSeca21('cd-sel-' + di + '-' + ei, opcoesTrocaSeca21(r.semana.nivel, p.nomes[parte], p.biset, nomesDoDiaSeca21(r.dia))) +
+    '<span class="cd-btn cd-btn-peq cd-btn-verde" onclick="confirmarTrocaSeca21(\'' + chave + '\',' + di + ',' + ei + ',' + parte + ')">Trocar</span></div>';
+}
+
+function trocarExercicioSeca21(chave, di, ei, parte, novoNome){
+  const r = linhaEmEdicaoSeca21(chave, di, ei);
+  if(!r || !novoNome) return false;
+  const p = partesLinhaSeca21(r.dia.ex[ei]);
+  p.nomes[parte] = novoNome;
+  r.dia.ex[ei] = montarLinhaSeca21(p);
+  if(!r.dia.videos) r.dia.videos = {};
+  videosDaLinhaSeca21(r.dia.ex[ei], r.dia.videos);
+  return true;
+}
+
+function confirmarTrocaSeca21(chave, di, ei, parte){
+  const sel = document.getElementById('cd-sel-' + di + '-' + ei);
+  if(sel && trocarExercicioSeca21(chave, di, ei, parte, sel.value)) redesenharEditorSeca21();
+}
+
+function abrirAdicionarSeca21(chave, di){
+  const area = document.getElementById('cd-add-' + di);
+  const semana = obterSemanaEditandoSeca21(chave);
+  if(!area || !semana.dias[di]) return;
+  if(area.innerHTML){ area.innerHTML = ''; return; }
+  area.innerHTML = '<div class="cd-troca">' + htmlSelectOpcoesSeca21('cd-sel-add-' + di, opcoesTrocaSeca21(semana.nivel, '', false, nomesDoDiaSeca21(semana.dias[di]))) +
+    '<span class="cd-btn cd-btn-peq cd-btn-verde" onclick="confirmarAdicionarSeca21(\'' + chave + '\',' + di + ')">Adicionar</span></div>';
+}
+
+function adicionarExercicioSeca21(chave, di, nome){
+  const semana = obterSemanaEditandoSeca21(chave);
+  const dia = semana.dias[di];
+  if(!dia || !nome) return false;
+  const vol = VOLUME_SECA21[semana.nivel];
+  const linha = linhaSeca21(nome, vol.series, vol.reps, '');
+  const posBiset = dia.ex.findIndex(function(l){ return l.indexOf('|||') !== -1; });
+  if(posBiset === -1) dia.ex.push(linha); else dia.ex.splice(posBiset, 0, linha); // o bi-set de braço continua fechando o dia
+  if(!dia.videos) dia.videos = {};
+  videosDaLinhaSeca21(linha, dia.videos);
+  return true;
+}
+
+function confirmarAdicionarSeca21(chave, di){
+  const sel = document.getElementById('cd-sel-add-' + di);
+  if(sel && adicionarExercicioSeca21(chave, di, sel.value)) redesenharEditorSeca21();
+}
+
+function adicionarBisetSeca21(chave, di){
+  const semana = obterSemanaEditandoSeca21(chave);
+  const dia = semana.dias[di];
+  if(!dia) return;
+  const b = poolSeca21('biceps', semana.nivel), t = poolSeca21('triceps', semana.nivel);
+  if(!b.length || !t.length) return;
+  const k = dia.ex.length;
+  const linha = 'Bi-set|||' + b[k % b.length] + ' · ' + BISET_SECA21.series + 'x' + BISET_SECA21.reps + '|||' + t[k % t.length] + ' · ' + BISET_SECA21.series + 'x' + BISET_SECA21.reps;
+  dia.ex.push(linha);
+  if(!dia.videos) dia.videos = {};
+  videosDaLinhaSeca21(linha, dia.videos);
+  redesenharEditorSeca21();
+}
+
+function gerarDeNovoSeca21(chave){
+  semanasEditandoSeca21[chave] = gerarSemanaSeca21(chave, Math.floor(Math.random() * 100000));
+  redesenharEditorSeca21();
+}
+
+function descartarEdicaoSeca21(chave){
+  delete semanasEditandoSeca21[chave];
+  redesenharEditorSeca21();
+}
+
+// Salva a versão da tela como a oficial da estrutura e entrega uma cópia pra cada inscrita dessa estrutura
+function salvarEstruturaSeca21(chave, semConfirmar){
+  const semana = obterSemanaEditandoSeca21(chave);
+  const vazio = semana.dias.filter(function(d){ return !d.ex.length; }).map(function(d){ return d.n; });
+  if(vazio.length){ alert('Tem treino sem nenhum exercício: ' + vazio.join(', ') + '. Coloque pelo menos um antes de salvar.'); return 0; }
+  const afetadas = alunasPersonal.filter(function(a){ return estaNoSeca21(a) && chaveSeca21DaAluna(a) === chave; });
+  if(!semConfirmar && !confirm('Salvar o SECA 21 ' + nomeEstruturaSeca21(chave) + ' e liberar pra ' + afetadas.length + (afetadas.length === 1 ? ' aluna' : ' alunas') + '? Quem você inscrever depois nessa estrutura também recebe esse treino.')) return 0;
+  semana.salvoEm = new Date().toISOString();
+  modelosSeca21[chave] = copiaProfunda(semana);
+  salvarCatalogoPersonalConferindo('modelo_seca21', chave, modelosSeca21[chave]);
+  afetadas.forEach(function(a){
+    a.desafioTreinos = { seca21: copiaProfunda(modelosSeca21[chave]) };
+    salvarPerfilAlunaNoSupabase(a.nome);
+  });
+  mostrarConfirmacaoSalvamento(true, 'SECA 21 ' + nomeEstruturaSeca21(chave) + ' salvo e liberado pra ' + afetadas.length + (afetadas.length === 1 ? ' aluna.' : ' alunas.'));
+  redesenharEditorSeca21();
+  atualizarBadgeDesafios();
+  return afetadas.length;
+}
+
+// ===== SECA 21 no celular da aluna =====
+function semanaAtualDoSeca21(st){ return Math.max(1, Math.min(Math.ceil(st.total / 7), Math.ceil(st.dia / 7))); }
+function chaveRegistroSeca21(semanaNum){ return 'seca21-semana' + semanaNum; }
+
+function htmlLinhaSeca21ParaAluna(linha, dia){
+  const p = partesLinhaSeca21(linha);
+  const nomeClicavel = function(nome){
+    const url = (dia.videos && dia.videos[nome]) || '';
+    return '<span class="cd-al-nome" onclick="abrirVideoApenasExercicio(\'' + escaparNomeParaClique(nome) + '\', event, \'' + escaparNomeParaClique(url) + '\')">' + escaparHtmlFicha(nome) + '</span>';
+  };
+  const tag = p.biset ? '<span class="cd-mt cd-mt-bs">Bi-set</span>' : (p.metodo ? '<span class="cd-mt ' + (p.metodo === 'Drop set' ? 'cd-mt-ds' : 'cd-mt-rp') + '">' + p.metodo + '</span>' : '');
+  return '<div class="cd-al-ex"><div>' + p.nomes.map(nomeClicavel).join('<span class="cd-mais">+</span>') + '<small>' + p.series + ' séries de ' + p.reps + (p.biset ? ', um seguido do outro' : '') + '</small></div>' + tag + '</div>';
+}
+
+function abrirTelaDesafioSeca21(){
+  const a = obterAlunaLogadaOuCriar();
+  if(!estaNoSeca21(a)) return;
+  const st = situacaoDoSeca21(a);
+  if(!st || st.terminou) return;
+  openLevel2('desafio-seca-empina');
+  const titulo = document.getElementById('se-titulo-desafio');
+  if(titulo) titulo.textContent = 'Desafio SECA 21';
+  const sub = document.getElementById('se-subtitulo-estrutura');
+  const lista = document.getElementById('se-lista-dias');
+  const semana = treinoSeca21DaAluna(a);
+  if(!st.comecou){
+    sub.textContent = 'Começa em ' + dataCurtaBR(a.desafioAtivo.dataInicio) + '. Por tempo determinado: ' + st.total + ' dias.';
+    lista.innerHTML = semana ? '<div class="info-box"><p class="txt" style="margin:0;">Seu treino já está pronto e aparece aqui no primeiro dia do desafio.</p></div>' : '';
+    return;
+  }
+  const sn = semanaAtualDoSeca21(st), totalSemanas = Math.ceil(st.total / 7);
+  sub.textContent = 'Dia ' + st.dia + ' de ' + st.total + ' · semana ' + sn + ' de ' + totalSemanas + ' · ' + nivelSeca21PeloNivel(a.desafioAtivo.nivel) + ' ' + a.desafioAtivo.frequencia + 'x por semana';
+  if(!semana){
+    lista.innerHTML = '<div class="info-box"><p class="txt" style="margin:0 0 10px;">Seu treino do SECA 21 está sendo preparado e aparece aqui assim que for liberado. Enquanto isso, as aulas do desafio já estão na Mentoria.</p>' +
+      '<button class="btn-gold" onclick="irParaAbaFixa(\'mentoria\')">Ver as aulas</button></div>';
+    return;
+  }
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const feitos = ((prog.desafioDiasConcluidos || {})[chaveRegistroSeca21(sn)]) || [];
+  lista.innerHTML = '<p class="txt" style="font-size:12px;color:var(--text-faint);margin:0 0 10px;">' + feitos.length + ' de ' + semana.dias.length + ' treinos feitos nesta semana. Toque no nome do exercício pra ver o vídeo.</p>' +
+    htmlLegendaMetodosSeca21(semana) +
+    semana.dias.map(function(d, i){
+      const feito = feitos.indexOf(d.n) !== -1;
+      const podeDesfazer = feito && seca21PodeDesfazer(prog, sn, d.n);
+      return '<div class="info-box" style="margin-bottom:10px;' + (feito ? 'border-color:var(--success);' : '') + '">' +
+        '<p class="lbl" style="margin:0 0 2px;">' + d.n + (feito ? ' <span class="tag" style="background:var(--success-soft);color:var(--success);">feito</span>' : '') + '</p>' +
+        '<p class="txt" style="font-size:11.5px;color:var(--text-faint);margin:0 0 8px;">' + d.foco + '</p>' +
+        d.ex.map(function(l){ return htmlLinhaSeca21ParaAluna(l, d); }).join('') +
+        '<button class="btn-gold" style="margin-top:10px;' + (feito ? 'background:var(--success);color:#fff;' : '') + '" onclick="marcarDiaSeca21Feito(' + i + ')">' + (feito ? '✓ Treino registrado' : 'Registrar treino de hoje') + '</button>' +
+        (podeDesfazer ? '<p class="txt" style="font-size:11.5px;text-align:center;color:var(--text-faint);margin:8px 0 0;cursor:pointer;text-decoration:underline;" onclick="desfazerDiaSeca21(' + i + ')">Registrei sem querer. Desfazer</p>' : '') +
+      '</div>';
+    }).join('');
+}
+
+// Explica só os métodos que aparecem no treino dela
+const EXPLICACAO_METODOS_SECA21 = {
+  'Bi-set': 'dois exercícios seguidos, sem descanso entre eles. Descansa só depois do segundo.',
+  'Drop set': 'na última série, quando não conseguir mais repetições, baixe a carga e continue até não conseguir de novo.',
+  'Rest pause': 'na última série, quando não conseguir mais repetições, descanse de 10 a 15 segundos e faça mais algumas com a mesma carga.'
+};
+function htmlLegendaMetodosSeca21(semana){
+  const usados = {};
+  semana.dias.forEach(function(d){ d.ex.forEach(function(l){ const m = partesLinhaSeca21(l).metodo; if(m) usados[m] = true; }); });
+  const itens = ['Bi-set', 'Drop set', 'Rest pause'].filter(function(m){ return usados[m]; });
+  if(!itens.length) return '';
+  return '<div class="info-box" style="margin-bottom:10px;">' + itens.map(function(m){
+    return '<p class="txt" style="font-size:12px;margin:2px 0;"><b>' + m + ':</b> ' + EXPLICACAO_METODOS_SECA21[m] + '</p>';
+  }).join('') + '</div>';
+}
+
+function seca21PodeDesfazer(prog, sn, nomeDia){
+  if(REGRA_DESFAZER_DIA_ALUNA === 'nunca') return false;
+  if(REGRA_DESFAZER_DIA_ALUNA === 'sempre') return true;
+  const quando = (prog.desafioRegistroEm || {})[chaveRegistroSeca21(sn) + '|' + nomeDia];
+  return !!quando && mesmaDataLocal(quando);
+}
+
+function marcarDiaSeca21Feito(indiceDia){
+  const a = obterAlunaLogadaOuCriar();
+  const semana = treinoSeca21DaAluna(a), st = situacaoDoSeca21(a);
+  if(!semana || !st || !st.comecou || st.terminou || !semana.dias[indiceDia]) return;
+  const d = semana.dias[indiceDia], chave = chaveRegistroSeca21(semanaAtualDoSeca21(st));
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  if(!prog.desafioDiasConcluidos) prog.desafioDiasConcluidos = {};
+  if(!prog.desafioDiasConcluidos[chave]) prog.desafioDiasConcluidos[chave] = [];
+  if(prog.desafioDiasConcluidos[chave].indexOf(d.n) === -1) prog.desafioDiasConcluidos[chave].push(d.n);
+  if(!prog.desafioRegistroEm) prog.desafioRegistroEm = {};
+  prog.desafioRegistroEm[chave + '|' + d.n] = new Date().toISOString();
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  abrirTelaDesafioSeca21();
+}
+
+function desfazerDiaSeca21(indiceDia){
+  const a = obterAlunaLogadaOuCriar();
+  const semana = treinoSeca21DaAluna(a), st = situacaoDoSeca21(a);
+  if(!semana || !st || !semana.dias[indiceDia]) return;
+  const d = semana.dias[indiceDia], sn = semanaAtualDoSeca21(st), chave = chaveRegistroSeca21(sn);
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  if(!seca21PodeDesfazer(prog, sn, d.n)){ alert('Esse registro só pode ser desfeito pelo seu personal.'); return; }
+  if(!confirm('Desfazer o registro de "' + d.n + '"? O treino volta a ficar como não feito.')) return;
+  const lista = prog.desafioDiasConcluidos[chave];
+  lista.splice(lista.indexOf(d.n), 1);
+  if(prog.desafioRegistroEm) delete prog.desafioRegistroEm[chave + '|' + d.n];
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  abrirTelaDesafioSeca21();
 }
 
 // ===== ALUNA: botão condicional na home, tela do desafio, marcar dia como feito =====
@@ -7016,10 +7892,12 @@ function renderBotaoDesafio(){
   const a = obterAlunaLogadaOuCriar();
   if(!a.desafioAtivo){ area.innerHTML = ''; return; }
   if(estaNoSeca21(a)){
-    // Enquanto os treinos das 4 estruturas do SECA 21 não estão no app, mostra só o dia do desafio (as aulas já ficam na Mentoria)
+    // Com o treino liberado, abre a tela do desafio; sem treino ainda, mostra o dia e leva pras aulas na Mentoria
     const st = situacaoDoSeca21(a);
     if(!st || st.terminou){ area.innerHTML = ''; return; }
-    area.innerHTML = htmlTarefaHome('ti-flag', 'Desafio SECA 21', st.comecou ? 'Dia ' + st.dia + ' de ' + st.total + ' · os treinos do desafio aparecem aqui assim que forem liberados' : 'Começa em ' + dataCurtaBR(a.desafioAtivo.dataInicio), 'irParaAbaFixa(\'mentoria\')');
+    const temTreino = !!treinoSeca21DaAluna(a);
+    const texto = st.comecou ? 'Dia ' + st.dia + ' de ' + st.total + (temTreino ? ' · toque pra ver o treino de hoje' : ' · os treinos do desafio aparecem aqui assim que forem liberados') : 'Começa em ' + dataCurtaBR(a.desafioAtivo.dataInicio);
+    area.innerHTML = htmlTarefaHome('ti-flag', 'Desafio SECA 21', texto, temTreino ? 'abrirTelaDesafioSeca21()' : 'irParaAbaFixa(\'mentoria\')');
     return;
   }
   area.innerHTML = htmlTarefaHome('ti-flag', 'Desafio Seca e Empina', 'Estrutura ' + a.desafioAtivo.estruturaAtual + '/10 liberada', 'abrirTelaDesafioSecaEmpina()');
@@ -7029,6 +7907,8 @@ function abrirTelaDesafioSecaEmpina(){
   const a = obterAlunaLogadaOuCriar();
   if(!estaNoSecaEmpina(a)) return;
   openLevel2('desafio-seca-empina');
+  const tituloDesafio = document.getElementById('se-titulo-desafio');
+  if(tituloDesafio) tituloDesafio.textContent = 'Desafio Seca e Empina';
   // Rede de segurança pra quem já estava inscrita antes dessa correção: completa as que faltavam
   if(garantirEstruturasDoDesafio(a)) salvarPerfilAlunaNoSupabase(NOME_ALUNA_LOGADA);
   document.getElementById('se-subtitulo-estrutura').textContent = 'Estruturas liberadas: 1 a ' + a.desafioAtivo.estruturaAtual + '. Você pode treinar qualquer uma delas.';
@@ -12545,13 +13425,13 @@ const ferramentasPersonal = [
   { titulo: 'Sinalizações', icone: 'ti-heart-handshake', view: 'sinalizacoes' },
   { titulo: 'Conversas', icone: 'ti-brand-whatsapp', view: 'conversas' },
   { titulo: 'Controle de Treinos', icone: 'ti-list-check', view: 'controle' },
+  { titulo: 'Controle de desafios', icone: 'ti-flag', view: 'desafios' },
   { titulo: 'Feedback dos treinos', icone: 'ti-notes', view: 'feedback-treinos' },
   { titulo: 'Feedback das alunas', icone: 'ti-message-dots', view: 'feedback-alunas' },
   { titulo: 'Banco de exercícios', icone: 'ti-video', view: 'exercicios' },
   { titulo: 'Biblioteca de conteúdo', icone: 'ti-library', view: 'conteudo' },
   { titulo: 'Biblioteca de treinos', icone: 'ti-clipboard-list', view: 'treinos' },
   { titulo: 'Biblioteca de mobilidade', icone: 'ti-stretching', view: 'mobilidade' },
-  { titulo: 'Grupo de desafio', icone: 'ti-flag', view: 'desafios' },
   { titulo: 'Banco de patologias', icone: 'ti-first-aid-kit', view: 'patologias' },
   { titulo: 'Banco de desvios posturais', icone: 'ti-yoga', view: 'desvios' },
   { titulo: 'Banco de testes de corrida', icone: 'ti-run', view: 'corrida' }
@@ -12582,7 +13462,7 @@ function renderSidebarPersonal(){
   const grupos = [
     { nome: 'Atendimento & Suporte', views: ['dashboard-suporte','sinalizacoes','conversas','controle'] },
     { nome: 'Bancos de referência', views: ['exercicios','patologias','desvios','corrida'] },
-    { nome: 'Conteúdo pras alunas', views: ['conteudo','treinos','mobilidade','desafios'] }
+    { nome: 'Conteúdo pras alunas', views: ['conteudo','treinos','mobilidade'] }
   ];
 
   // Ícones desenhados no app (não dependem do pacote de fora) + contador de treinos pra enviar no Controle
@@ -12596,6 +13476,7 @@ function renderSidebarPersonal(){
   html += item('dashboard', 'painel', 'Painel');
   html += item('alunas', 'alunas', 'Alunas');
   html += item('controle', 'controle', 'Controle de treinos', '<span class="side-badge" id="side-badge-controle" style="display:none;"></span>');
+  html += item('desafios', 'bandeira', 'Controle de desafios', '<span class="side-badge" id="side-badge-desafios" style="display:none;"></span>');
   html += item('feedback-treinos', 'lista', 'Feedback dos treinos', '<span class="side-badge" id="side-badge-fb-treinos" style="display:none;"></span>');
   html += item('feedback-alunas', 'conversa', 'Feedback das alunas', '<span class="side-badge" id="side-badge-fb-alunas" style="display:none;"></span>');
 
@@ -12621,6 +13502,7 @@ function renderSidebarPersonal(){
 
   sidebar.innerHTML = html;
   atualizarBadgesFeedback();
+  atualizarBadgeDesafios();
 }
 
 function alternarGrupoSidebar(indice){
@@ -12847,7 +13729,7 @@ function showPersonalView(which){
     });
   }
   if(which === 'treinos'){ renderTemplates(); populateExercicioSelect(); }
-  if(which === 'desafios'){ renderDesafios(); populateTreinoSelect(); renderListaSeca21(); renderListaSecaEmpina(); }
+  if(which === 'desafios'){ renderDesafios(); populateTreinoSelect(); renderControleDesafios(); }
   if(which === 'mobilidade'){ renderArticulacaoChips(); renderAquecimentoBanco(); document.getElementById('mob-articulacoes-view').style.display = 'block'; document.getElementById('mob-lista-view').style.display = 'none'; }
   if(which === 'patologias'){ renderPatologiaChips(); renderPatologiaList(); }
   if(which === 'desvios'){ renderDesviosBanco(); }
@@ -13822,6 +14704,8 @@ async function carregarCatalogoPersonal(){
         registrarFichaDoCatalogo(row);
       } else if(row.tipo === 'modelo_mestre_desafio'){
         modelosMestreSecaEmpina[row.chave] = row.dados;
+      } else if(row.tipo === 'modelo_seca21'){
+        if(row.chave && row.dados && row.dados.dias) modelosSeca21[row.chave] = row.dados;
       } else if(row.tipo === 'relatorio_tendencias'){
         const jaExisteRelatorio = relatoriosTendencias.find(function(r){ return r.data === row.dados.data; });
         if(!jaExisteRelatorio) relatoriosTendencias.push(row.dados);
@@ -18065,6 +18949,7 @@ function renderPainelDoPersonal(agora){
 }
 
 function atualizarBadgeControle(total){
+  try { atualizarBadgeDesafios(); } catch(e){}
   const badge = document.getElementById('side-badge-controle');
   if(!badge) return;
   badge.textContent = total;
