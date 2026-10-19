@@ -1,4 +1,4 @@
-[dna_musa_134.html](https://github.com/user-attachments/files/33663238/dna_musa_134.html)
+[dna_musa_135.html](https://github.com/user-attachments/files/33664298/dna_musa_135.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -488,6 +488,30 @@
 
   /* ===== PAINEL DO PERSONAL (novo): resumo do dia, números, "precisa de você hoje", controle e ferramentas ===== */
   .pn-ic{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;display:inline-block;vertical-align:middle;}
+  /* ===== Painel de suporte (Bianca) ===== */
+  .sp-hero{background:linear-gradient(135deg,rgba(232,197,138,.16),rgba(232,197,138,.04));border:1px solid rgba(232,197,138,.32);border-radius:18px;padding:16px 18px;display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px;}
+  .sp-hero h2{font-family:'Playfair Display',serif;font-size:21px;font-weight:600;margin:0;color:var(--text);}
+  .sp-hero .sp-exp{font-size:12.5px;color:var(--text-dim);margin:5px 0 0;line-height:1.5;}
+  .sp-prog{margin-top:12px;} .sp-prog .pn-barra{height:8px;margin-top:0;} .sp-prog small{display:block;font-size:11px;color:var(--text-faint);margin-top:6px;}
+  .sp-hero .pn-btn-gold{flex:none;width:auto;display:inline-flex;margin-top:12px;}
+  .sp-pend{display:flex;flex-direction:column;gap:6px;}
+  .sp-pi{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.25);border-radius:10px;padding:9px 11px;font-size:12.5px;color:var(--text);cursor:pointer;flex-wrap:wrap;}
+  .sp-pi .sp-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;} .sp-pi small{color:var(--text-faint);font-size:11px;margin-left:auto;}
+  .sp-pi.sp-mais{justify-content:center;color:var(--gold);font-size:12px;}
+  .sp-sec{font-size:10.5px;letter-spacing:1.4px;color:var(--text-faint);text-transform:uppercase;margin:4px 0 10px;}
+  .sp-funcs{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:16px;}
+  .sp-f{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 15px;display:flex;flex-direction:column;gap:6px;position:relative;min-width:0;}
+  .sp-f .sp-n{position:absolute;top:12px;right:12px;font-size:11px;font-weight:700;background:var(--gold);color:#1a1409;border-radius:10px;padding:2px 8px;}
+  .sp-f .sp-num{font-family:'Playfair Display',serif;font-size:13px;color:var(--gold);letter-spacing:1px;}
+  .sp-f b{font-size:15px;color:var(--text);} .sp-f .sp-d{font-size:11.5px;color:var(--text-faint);line-height:1.45;}
+  .sp-f .sp-pend-txt{font-size:11.5px;color:#E2A33D;}
+  .sp-f .sp-ac{margin-top:auto;display:flex;gap:6px;flex-wrap:wrap;padding-top:6px;}
+  .sp-bt{height:30px;border-radius:9px;padding:0 11px;display:inline-flex;align-items:center;font-size:12px;font-weight:600;border:1px solid var(--border-strong);color:var(--gold-soft);background:transparent;cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .sp-bt.ouro{background:linear-gradient(135deg,#F4D9A5,#C9A063);color:#1A1409;border:none;}
+  .sp-baixo{display:grid;grid-template-columns:1fr;gap:14px;}
+  .sp-outras{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px;}
+  .sp-outras div{background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:9px 11px;font-size:12px;color:var(--text-dim);cursor:pointer;}
+  .sp-outras div:hover{border-color:var(--border-strong);color:var(--text);}
   .pn-topo{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin:6px 0 18px;}
   .pn-saudacao{font-family:'Playfair Display',serif;font-weight:600;font-size:26px;margin:0;line-height:1.15;}
   .pn-sub{color:var(--text-faint);font-size:12.5px;margin:6px 0 0;}
@@ -586,6 +610,10 @@
     .phone.modo-personal .pn-saudacao{font-size:30px;}
     .phone.modo-personal .pn-kpis{grid-template-columns:repeat(4,1fr);gap:12px;}
     .phone.modo-personal .pn-grade{grid-template-columns:1.55fr 1fr;}
+    .phone.modo-personal .sp-hero{grid-template-columns:1fr 1.5fr;}
+    .phone.modo-personal .sp-funcs{grid-template-columns:repeat(4,minmax(0,1fr));}
+    .phone.modo-personal .sp-baixo{grid-template-columns:1.25fr 1fr;}
+    .phone.modo-personal .sp-outras{grid-template-columns:repeat(3,minmax(0,1fr));}
     .phone.modo-personal .pn-so-celular{display:none;}
     .phone.modo-personal .pn-busca{flex:none;}
     .phone.modo-personal .pn-btn-gold{flex:none;}
@@ -879,7 +907,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-19-X-ENVIO-WHATSAPP</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-19-Y-PAINEL-SUPORTE</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1347,21 +1375,38 @@
       </div>
 
       <div id="personal-dashboard-suporte" style="display:none;">
-        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
-        <h1 class="page-title" style="margin-top:0;">Painel do Personal</h1>
-        <p class="page-sub">Visão geral das suas alunas</p>
+        <!-- Painel de suporte (login da Bianca): as funções dela em destaque, com as mesmas informações do painel do Thiago.
+             Preenchido por renderPainelSuporte() com os dados reais das alunas. -->
+        <div class="pn-topo">
+          <div>
+            <h1 class="pn-saudacao" id="sp-saudacao">Painel de suporte</h1>
+            <p class="pn-sub" id="sp-sub">Seu painel de suporte</p>
+            <div id="area-presenca-equipe-dash-2" style="margin-top:8px;"></div>
+          </div>
+          <div class="pn-acoes">
+            <label class="pn-busca"><svg class="pn-ic" viewBox="0 0 24 24" style="width:16px;height:16px;"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="sp-busca-aluna" placeholder="Buscar aluna" autocomplete="off" onkeydown="if(event.key==='Enter') buscarAlunaDoPainel(this.value)"></label>
+          </div>
+        </div>
 
-        <div id="area-presenca-equipe-dash-2"></div>
-        <div id="metricas-negocio-area-2"></div>
-        <div id="aviso-aniversarios-area-2"></div>
+        <div id="sp-hero"></div>
 
-        <p class="section-label" style="margin-top:6px;">Ferramentas do painel</p>
-        <div id="atalhos-dashboard-area-2"></div>
+        <p class="sp-sec">Suas funções principais</p>
+        <div class="sp-funcs" id="sp-funcoes"></div>
 
-        <p class="section-label" style="margin-top:22px;">Outras ferramentas</p>
-        <div id="atalhos-extras-bianca-area"></div>
+        <div class="pn-kpis sp-kpis" id="sp-kpis"></div>
 
-        <p class="section-label" style="margin-top:22px;">Central de Suporte</p>
+        <div class="sp-baixo">
+          <div class="pn-caixa">
+            <h2>Precisa de você hoje <span class="pn-cnt" id="sp-contagem-atencao" style="display:none;"></span><span class="pn-link" id="sp-ver-todas" style="display:none;" onclick="alternarListaAtencaoSuporte()"></span></h2>
+            <div id="sp-lista-atencao"><p class="pn-vazio">Carregando...</p></div>
+          </div>
+          <div class="pn-caixa">
+            <h2>Todas as outras telas</h2>
+            <div class="sp-outras" id="sp-outras"></div>
+          </div>
+        </div>
+
+        <p class="section-label" id="sp-central" style="margin-top:24px;">Central de Suporte · todas as prioridades</p>
         <p class="page-sub" style="margin-top:-6px;">Prioridades de hoje, com sugestão pronta pra cada uma. Ciclo reinicia toda Segunda, Quarta e Sexta.</p>
         <div id="area-controle-suporte"></div>
       </div>
@@ -1755,7 +1800,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-19-X-ENVIO-WHATSAPP';
+const VERSAO_APP = '2026-10-19-Y-PAINEL-SUPORTE';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -13472,16 +13517,18 @@ function renderSidebarPersonal(){
     return '<div class="side-item" data-side-view="' + view + '" onclick="showPersonalView(\'' + view + '\')">' + iconePainel(icone) + titulo + (extra || '') + '</div>';
   };
 
-  let html = '<div class="side-logo">DNA MUSA<small>PAINEL DO PERSONAL</small></div>';
-  html += item('dashboard', 'painel', 'Painel');
+  const ehSuporte = NOME_PERSONAL_LOGADO === 'Bianca'; // login de suporte: painel próprio e Conversas perto do topo
+  let html = '<div class="side-logo">DNA MUSA<small>' + (ehSuporte ? 'PAINEL DE SUPORTE' : 'PAINEL DO PERSONAL') + '</small></div>';
+  html += ehSuporte ? item('dashboard-suporte', 'painel', 'Painel de suporte') : item('dashboard', 'painel', 'Painel');
   html += item('alunas', 'alunas', 'Alunas');
+  if(ehSuporte) html += item('conversas', 'conversa', 'Conversas');
   html += item('controle', 'controle', 'Controle de treinos', '<span class="side-badge" id="side-badge-controle" style="display:none;"></span>');
   html += item('desafios', 'bandeira', 'Controle de desafios', '<span class="side-badge" id="side-badge-desafios" style="display:none;"></span>');
   html += item('feedback-treinos', 'lista', 'Feedback dos treinos', '<span class="side-badge" id="side-badge-fb-treinos" style="display:none;"></span>');
   html += item('feedback-alunas', 'conversa', 'Feedback das alunas', '<span class="side-badge" id="side-badge-fb-alunas" style="display:none;"></span>');
 
   grupos.forEach(function(grupo, gi){
-    const itensDoGrupo = ferramentasPersonal.filter(function(f){ return grupo.views.indexOf(f.view) !== -1 && f.view !== 'controle'; }); // os feedbacks ficam fora dos grupos, com número, como o Controle
+    const itensDoGrupo = ferramentasPersonal.filter(function(f){ return grupo.views.indexOf(f.view) !== -1 && f.view !== 'controle' && !(ehSuporte && f.view === 'conversas'); }); // os feedbacks ficam fora dos grupos, com número, como o Controle
     html += '<div class="side-grupo-header" onclick="alternarGrupoSidebar(' + gi + ')" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:10px;margin-top:6px;border-radius:8px;">' +
       '<span style="font-size:10.5px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-faint);">' + grupo.nome + '</span>' +
       '<svg class="pn-ic" id="chevron-sidebar-grupo-' + gi + '" viewBox="0 0 24 24" style="width:13px;height:13px;color:var(--text-faint);transition:transform .2s;"><path d="M6 9l6 6 6-6"/></svg>' +
@@ -13495,7 +13542,7 @@ function renderSidebarPersonal(){
 
   // Equipe no rodapé do menu: quem está logado, a outra pessoa (online ou não) e Sair
   html += '<div class="side-equipe">' +
-    (NOME_PERSONAL_LOGADO ? '<div class="side-pessoa"><span class="pn-av" style="width:26px;height:26px;font-size:10px;">' + iniciaisDaAluna(NOME_PERSONAL_LOGADO) + '</span>' + NOME_PERSONAL_LOGADO + ' (você)</div>' : '') +
+    (NOME_PERSONAL_LOGADO ? '<div class="side-pessoa"><span class="pn-av" style="width:26px;height:26px;font-size:10px;">' + iniciaisDaAluna(NOME_PERSONAL_LOGADO) + '</span>' + NOME_PERSONAL_LOGADO + ' (você)' + (ehSuporte ? ' · suporte' : '') + '</div>' : '') +
     '<div id="area-presenca-equipe"></div>' +
     '<div class="side-item side-sair" onclick="goBack()">' + iconePainel('sair') + 'Sair</div>' +
   '</div>';
@@ -13685,17 +13732,12 @@ function showPersonalView(which){
   if(which === 'inteligencia'){ renderRelatoriosTendencias(); }
   if(which === 'faturamento'){ renderFaturamentoMetas(); }
   if(which === 'dashboard-suporte'){
-    renderAtalhosDashboard(); renderMetricasNegocio(); renderInfoCardGerarTreino(); renderControleSuporte();
-    const elAviso2 = document.getElementById('aviso-aniversarios-area-2');
-    if(elAviso2) elAviso2.innerHTML = renderAvisoAniversarios();
-    // Mesma sincronização que a Dashboard do Thiago já fazia — faltava aqui, por isso os números
-    // da Bianca só vinham corretos depois de alguém visitar outra aba que sincronizasse por acaso.
-    sincronizarListaAlunasDoSupabase().then(function(resultado){
-      renderMetricasNegocio();
-      renderInfoCardGerarTreino();
-      renderControleSuporte(); // sinais novos (aniversário, risco, etc.) também dependem do dado fresco
-      if(elAviso2) elAviso2.innerHTML = renderAvisoAniversarios();
-    });
+    renderPainelSuporte();
+    // Mesma sincronização do painel do Thiago: lista nova de alunas e depois os sinais do progresso delas
+    sincronizarListaAlunasDoSupabase().then(function(){
+      renderPainelSuporte();
+      return carregarSinaisDoPainel();
+    }).then(function(){ renderPainelSuporte(); }).catch(function(){});
   }
   if(which === 'dashboard'){
     abrirPainelDoPersonal();
@@ -18626,20 +18668,6 @@ function renderAtalhosDashboard(){
   if(area) area.innerHTML = atalhosBase.map(function(a){
     return '<div class="pn-tile" onclick="showPersonalView(\'' + a.view + '\')"><div class="pn-tic">' + iconePainel(iconeDoAtalho[a.view]) + '</div><p>' + a.titulo + '<small>' + a.desc + '</small></p></div>';
   }).join('');
-  // Versão da colaboradora: já pode usar Ferramentas de treino também — só Inteligência de mercado
-  // continua de fora (não é uma ferramenta operacional do dia a dia com as alunas)
-  const area2 = document.getElementById('atalhos-dashboard-area-2');
-  if(area2) area2.innerHTML = montarHtml(atalhosBase.filter(function(a){ return a.view !== 'inteligencia'; }));
-
-  // Liberado especificamente pra ela: as mesmas fontes de conteúdo/controle que o Thiago usa, puxando
-  // direto de ferramentasPersonal (mesma lista de sempre) pra nunca ficar desalinhado se algo mudar lá.
-  const areaExtrasBianca = document.getElementById('atalhos-extras-bianca-area');
-  if(areaExtrasBianca){
-    const viewsLiberadasPraBianca = ['controle', 'exercicios', 'treinos', 'mobilidade', 'desafios', 'sinalizacoes'];
-    const itensExtras = ferramentasPersonal.filter(function(f){ return viewsLiberadasPraBianca.indexOf(f.view) !== -1; })
-      .map(function(f){ return { view: f.view, icone: f.icone, titulo: f.titulo, desc: '' }; });
-    areaExtrasBianca.innerHTML = montarHtml(itensExtras);
-  }
 }
 
 // ===== PAINEL DO PERSONAL (novo) =====
@@ -19177,6 +19205,106 @@ function registrarContatoSuporte(nomeAluna){
   a.suporteHistorico.push({ data: new Date().toISOString(), resumo: resumo });
   salvarPerfilAlunaNoSupabase(a.nome);
   renderControleSuporte();
+}
+
+// ===== PAINEL DE SUPORTE (login da Bianca) =====
+// As mesmas informações do painel do Thiago (números, "Precisa de você hoje", todas as telas), mas com as
+// funções do suporte em destaque: Central de Suporte no topo e 4 funções principais numeradas.
+let listaAtencaoSuporteCompleta = false;
+
+function htmlHeroSuporte(){
+  const pend = calcularPendenciasSuporteHoje(), feitas = calcularFeitasNesseCiclo();
+  const total = pend.length + feitas.length;
+  const pct = total ? Math.round(feitas.length / total * 100) : 100;
+  const itens = pend.slice(0, 3).map(function(p){
+    return '<div class="sp-pi" onclick="irParaCentralDeSuporte()"><span class="sp-dot" style="background:' + p.cor + ';"></span><b>' + escaparHtmlFicha(p.nome) + '</b> · ' +
+      escaparHtmlFicha(p.tipo.replace(/^\S+\s/, '')) + '<small>' + escaparHtmlFicha(p.sugestao) + '</small></div>';
+  }).join('');
+  return '<div class="sp-hero"><div><h2>Central de Suporte</h2><p class="sp-exp">As prioridades de hoje, cada uma com a sugestão do que falar. O ciclo recomeça toda segunda, quarta e sexta.</p>' +
+    '<div class="sp-prog"><div class="pn-barra"><i style="width:' + pct + '%"></i></div><small>' + feitas.length + ' de ' + total + ' feitas nesse ciclo</small></div>' +
+    '<button class="pn-btn-gold" onclick="irParaCentralDeSuporte()">' + (pend.length ? 'Começar pelas prioridades' : 'Ver a Central de Suporte') + '</button></div>' +
+    '<div class="sp-pend">' + (itens || '<div class="sp-pi" style="cursor:default;color:var(--text-faint);">Nenhuma prioridade agora. Tudo em dia por aqui.</div>') +
+      (pend.length > 3 ? '<div class="sp-pi sp-mais" onclick="irParaCentralDeSuporte()">ver as ' + pend.length + ' prioridades ›</div>' : '') + '</div></div>';
+}
+
+function irParaCentralDeSuporte(){
+  const alvo = document.getElementById('sp-central');
+  if(alvo && alvo.scrollIntoView) alvo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function htmlFuncoesSuporte(d){
+  const duvidas = alunasPersonal.filter(function(a){ return (a.duvidasSinalizadas || []).some(function(x){ return !x.resolvida; }); }).length;
+  const fb = contarFeedbacksNaoLidos();
+  const nFb = (fb.alunas || 0) + (fb.treinos || 0);
+  let nDesafios = 0;
+  try { nDesafios = pendenciasControleDesafios(); } catch(e){}
+  const card = function(num, titulo, desc, n, textoN, botoes){
+    return '<div class="sp-f">' + (n > 0 ? '<span class="sp-n">' + n + '</span>' : '') + '<span class="sp-num">' + num + '</span><b>' + titulo + '</b><span class="sp-d">' + desc + '</span>' +
+      (n > 0 ? '<span class="sp-pend-txt">' + textoN + '</span>' : '') +
+      '<div class="sp-ac">' + botoes.map(function(b){ return '<button class="sp-bt' + (b[2] ? ' ouro' : '') + '" onclick="' + b[1] + '">' + b[0] + '</button>'; }).join('') + '</div></div>';
+  };
+  const pe = d.paraEnviar.total;
+  return card('01', 'Falar com as alunas', 'Responder conversas, mandar avisos e mensagens em massa pelo WhatsApp e pelo app', duvidas,
+      duvidas + (duvidas === 1 ? ' aluna com dúvida sem resposta' : ' alunas com dúvida sem resposta'),
+      [['Conversas', "showPersonalView('conversas')", duvidas > 0], ['Comunicação', "showPersonalView('comunicacao')"]]) +
+    card('02', 'Treinos', 'Gerar e enviar os treinos pendentes, progredir, réplicas e auditoria', pe,
+      pe + (pe === 1 ? ' treino esperando envio' : ' treinos esperando envio'),
+      [['Controle de treinos', "showPersonalView('controle')", pe > 0], ['Ferramentas', "showPersonalView('ferramentas-treino')"]]) +
+    card('03', 'Desafios', 'Quem está no SECA 21 e no Seca e Empina, estruturas e inscrições', nDesafios,
+      nDesafios + (nDesafios === 1 ? ' pendência no desafio' : ' pendências nos desafios'),
+      [['Controle de desafios', "showPersonalView('desafios')", nDesafios > 0]]) +
+    card('04', 'Feedbacks', 'Desconforto, dúvida ou comentário das alunas, e o que a equipe anotou nos treinos', nFb,
+      nFb + (nFb === 1 ? ' feedback pra ler' : ' feedbacks pra ler'),
+      [['Das alunas', "showPersonalView('feedback-alunas')", (fb.alunas || 0) > 0], ['Dos treinos', "showPersonalView('feedback-treinos')", (fb.treinos || 0) > 0]]);
+}
+
+// Tudo o que não está nas 4 funções: as mesmas telas que o Thiago tem
+const TELAS_JA_NAS_FUNCOES_SUPORTE = ['conversas', 'comunicacao', 'controle', 'ferramentas-treino', 'desafios', 'feedback-alunas', 'feedback-treinos', 'alunas'];
+function htmlOutrasTelasSuporte(){
+  const extras = [
+    { titulo: 'Relatórios da semana', view: 'relatorios' },
+    { titulo: 'Faturamento e metas', view: 'faturamento' },
+    { titulo: 'Inteligência de mercado', view: 'inteligencia' }
+  ];
+  const telas = extras.concat(ferramentasPersonal.filter(function(f){ return TELAS_JA_NAS_FUNCOES_SUPORTE.indexOf(f.view) === -1; }));
+  return telas.map(function(f){ return '<div onclick="' + (f.acaoEspecial ? f.acaoEspecial + '()' : "showPersonalView('" + f.view + "')") + '">' + f.titulo + '</div>'; }).join('');
+}
+
+function alternarListaAtencaoSuporte(){ listaAtencaoSuporteCompleta = !listaAtencaoSuporteCompleta; renderPainelSuporte(); }
+
+function renderPainelSuporte(agora){
+  if(agora === undefined) agora = Date.now();
+  const d = calcularPainelDoPersonal(agora);
+  const el = function(id){ return document.getElementById(id); };
+  if(el('sp-saudacao')) el('sp-saudacao').textContent = saudacaoDoPainel(agora) + (NOME_PERSONAL_LOGADO ? ', ' + NOME_PERSONAL_LOGADO : '');
+  if(el('sp-sub')){
+    const dataTxt = new Date(agora).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+    el('sp-sub').textContent = 'Seu painel de suporte · ' + dataTxt;
+  }
+  if(el('sp-hero')) el('sp-hero').innerHTML = htmlHeroSuporte();
+  if(el('sp-funcoes')) el('sp-funcoes').innerHTML = htmlFuncoesSuporte(d);
+  if(el('sp-kpis')){
+    const f = d.faturamento, pe = d.paraEnviar;
+    el('sp-kpis').innerHTML =
+      htmlKpiPainel('aluna', 'Alunas ativas', d.clientesAtivos, d.totalAtivas + ' ativas e ' + d.totalPorVencer + ' por vencer', "showPersonalView('alunas')") +
+      htmlKpiPainel('halter', 'Treinos pra enviar', pe.total, pe.total === 0 ? 'nenhum pendente no Controle' : pe.paraGerar + ' pra gerar · ' + pe.gerados + ' gerados', "showPersonalView('controle')", pe.total > 0 ? 'pn-alerta' : '') +
+      htmlKpiPainel('calendario', 'Planos por vencer', d.totalPorVencer, 'na aba Por vencer', "abrirAlunasNaAba('porvencer')") +
+      htmlKpiPainel('subir', 'Faturamento do mês', formatarReaisPainel(f.valor), f.meta > 0 ? f.pct + '% da meta de ' + formatarReaisPainel(f.meta) : 'meta do mês ainda não definida',
+        "showPersonalView('faturamento')", '', f.meta > 0 ? '<div class="pn-barra"><i style="width:' + f.pct + '%"></i></div>' : '');
+  }
+  if(el('sp-lista-atencao')){
+    const lista = listaAtencaoSuporteCompleta ? d.atencao : d.atencao.slice(0, ITENS_ATENCAO_VISIVEIS);
+    el('sp-lista-atencao').innerHTML = d.atencao.length === 0 ? '<p class="pn-vazio">Nada pendente agora. Tudo em dia por aqui.</p>' : lista.map(htmlItemAtencao).join('');
+  }
+  if(el('sp-contagem-atencao')){ el('sp-contagem-atencao').textContent = d.atencao.length; el('sp-contagem-atencao').style.display = d.atencao.length > 0 ? 'inline-block' : 'none'; }
+  if(el('sp-ver-todas')){
+    el('sp-ver-todas').style.display = d.atencao.length > ITENS_ATENCAO_VISIVEIS ? 'inline' : 'none';
+    el('sp-ver-todas').textContent = listaAtencaoSuporteCompleta ? 'Ver menos' : 'Ver todas (' + d.atencao.length + ')';
+  }
+  if(el('sp-outras')) el('sp-outras').innerHTML = htmlOutrasTelasSuporte();
+  renderControleSuporte();
+  atualizarBadgeControle(d.paraEnviar.total);
+  return d;
 }
 
 function renderControleSuporte(){
