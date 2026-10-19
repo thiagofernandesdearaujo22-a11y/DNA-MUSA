@@ -878,7 +878,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-18-W-CONTROLE-DESAFIOS</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-19-X-ENVIO-WHATSAPP</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1754,7 +1754,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-18-W-CONTROLE-DESAFIOS';
+const VERSAO_APP = '2026-10-19-X-ENVIO-WHATSAPP';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -4203,7 +4203,7 @@ async function enviarMensagemFunilEmMassa(estagio, indice){
   if(!template) return;
   const alunasNoEstagio = alunasPersonal.filter(function(a){ return alunaNoEstagioFunil(a, estagio) && a.telefone; });
   if(alunasNoEstagio.length === 0){ alert('Nenhuma aluna com telefone cadastrado nesse estágio agora.'); return; }
-  if(!confirm('Mandar "' + template.titulo + '" pro WhatsApp de ' + alunasNoEstagio.length + ' aluna(s), já com o nome de cada uma. Continuar?')) return;
+  if(!confirm('Mandar "' + template.titulo + '" pro WhatsApp de ' + alunasNoEstagio.length + ' aluna(s), já com o nome de cada uma. Continuar?' + textoTempoEnvioWhatsApp(alunasNoEstagio.length))) return;
 
   const area = document.getElementById('resultado-funil-massa-' + estagio + '-' + indice);
   let enviadas = 0, erros = [];
@@ -5355,7 +5355,7 @@ async function confirmarEnvioMassa(canal){
   }
 
   const nomeCanal = canal === 'whatsapp' ? 'pelo WhatsApp' : 'pelo Aplicativo';
-  if(!confirm('Vai mandar essa mensagem ' + nomeCanal + ' pra ' + destinatarias.length + ' aluna(s). Continuar?')) return;
+  if(!confirm('Vai mandar essa mensagem ' + nomeCanal + ' pra ' + destinatarias.length + ' aluna(s). Continuar?' + (canal === 'whatsapp' ? textoTempoEnvioWhatsApp(destinatarias.filter(function(a){ return a.telefone; }).length) : ''))) return;
 
   const areaResultado = document.getElementById('resultado-envio-' + canal);
 
@@ -5435,7 +5435,7 @@ async function confirmarAvisarTreinoAjustado(){
   if(!texto){ alert('Escreve a mensagem antes de enviar.'); return; }
   const nomesMarcados = Array.from(document.querySelectorAll('.checkbox-treino-ajustado:checked')).map(function(el){ return el.value; });
   if(nomesMarcados.length === 0){ alert('Marca pelo menos uma aluna.'); return; }
-  if(!confirm('Vai mandar essa mensagem por WhatsApp e pelo app pra ' + nomesMarcados.length + ' aluna(s). Continuar?')) return;
+  if(!confirm('Vai mandar essa mensagem por WhatsApp e pelo app pra ' + nomesMarcados.length + ' aluna(s). Continuar?' + textoTempoEnvioWhatsApp(nomesMarcados.length))) return;
 
   const area = document.getElementById('resultado-treino-ajustado');
   let enviadosWhats = 0, errosWhats = [], enviadosApp = 0;
@@ -19293,7 +19293,7 @@ async function renderCentralDeAvisos(){
 async function avisarDataEspecial(tipo){
   await sincronizarListaAlunasDoSupabase(); // sempre busca a lista mais nova antes de decidir quem recebe, nunca manda com dado velho
   const elegiveis = alunasPersonal.filter(function(a){ return a.telefone; });
-  if(!confirm('Vai avisar ' + elegiveis.length + ' aluna(s) sobre essa data. Continuar?')) return;
+  if(!confirm('Vai avisar ' + elegiveis.length + ' aluna(s) sobre essa data. Continuar?' + textoTempoEnvioWhatsApp(elegiveis.length))) return;
   const area = document.getElementById('resultado-avisos-lote');
   let enviadas = 0, erros = [];
   for(let i = 0; i < elegiveis.length; i++){
@@ -19309,7 +19309,7 @@ async function avisarDataEspecial(tipo){
 async function avisarMetaComunidadeBatida(){
   await sincronizarListaAlunasDoSupabase(); // sempre busca a lista mais nova antes de decidir quem recebe, nunca manda com dado velho
   const elegiveis = alunasPersonal.filter(function(a){ return a.telefone; });
-  if(!confirm('Vai avisar ' + elegiveis.length + ' aluna(s) que a meta foi batida. Continuar?')) return;
+  if(!confirm('Vai avisar ' + elegiveis.length + ' aluna(s) que a meta foi batida. Continuar?' + textoTempoEnvioWhatsApp(elegiveis.length))) return;
   const area = document.getElementById('resultado-avisos-lote');
   let enviadas = 0;
   for(let i = 0; i < elegiveis.length; i++){
@@ -19327,7 +19327,7 @@ async function enviarAvisosEmLote(tipo){
   const mapaLista = { riscoAbandono: dados.risco, avaliacaoAtrasada: dados.avaliacaoAtrasada, planoVencendo: dados.planoVencendo, planoVencido: dados.planoVencido, aniversario: dados.aniversario };
   const lista = mapaLista[tipo];
   if(!lista || lista.length === 0) return;
-  if(!confirm('Vai mandar mensagem no WhatsApp de ' + lista.length + ' aluna(s) agora. Continuar?')) return;
+  if(!confirm('Vai mandar mensagem no WhatsApp de ' + lista.length + ' aluna(s) agora. Continuar?' + textoTempoEnvioWhatsApp(lista.length))) return;
 
   const resultadoArea = document.getElementById('resultado-avisos-lote');
   let enviadas = 0, erros = [];
@@ -19344,7 +19344,7 @@ async function enviarAvisosEmLote(tipo){
 }
 
 // ===== ENVIO DE WHATSAPP (via porteiro seguro no Supabase) =====
-// Pausa segura entre mensagens em lote pro WhatsApp: intervalo aleatório entre 4 e 8 segundos,
+// Pausa segura entre mensagens em lote pro WhatsApp: intervalo aleatório (ver pausaEntreEnviosWhatsApp),
 // nunca fixo, pra não criar um padrão robótico que os sistemas antispam do WhatsApp costumam pegar.
 // IMPORTANTE: nunca diminua esse intervalo pra deixar o envio "mais rápido" — o risco é o número
 // do Thiago ser banido ou restringido pelo WhatsApp, o que para TODO o envio automático do app.
@@ -19365,11 +19365,40 @@ async function aguardarIntervaloMinimoDeEnvio(remetente){
   ultimoEnvioPorInstancia[chave] = Date.now();
 }
 
-// Pausa MAIOR, usada explicitamente nos loops de envio em massa (além da trava mínima acima, que já
-// é automática) — mantém o espaçamento generoso quando são várias mensagens seguidas de propósito.
-function pausaEntreEnviosWhatsApp(){
-  const msAleatorio = 5000 + Math.floor(Math.random() * 5000); // entre 5000 e 10000ms — aumentado por segurança
-  return new Promise(function(r){ setTimeout(r, msAleatorio); });
+// Pausa dos envios em massa (combinada com o Thiago, igual ao WA Leads): tempo aleatório entre 5 e 20
+// segundos depois de cada mensagem e, a cada 10 mensagens, 1 minuto parado. A contagem dos 10 continua
+// de um envio em massa pro outro se o segundo começar logo depois (menos de 3 minutos), pra não virar
+// 2 rajadas seguidas. Nunca diminua esses números: o risco é bloquear de novo os números de suporte.
+const PAUSA_MIN_ENTRE_ENVIOS_MS = 5000;
+const PAUSA_MAX_ENTRE_ENVIOS_MS = 20000;
+const ENVIOS_POR_BLOCO_WHATSAPP = 10;
+const PAUSA_DO_BLOCO_WHATSAPP_MS = 60000;
+const MS_PRA_RECOMECAR_CONTAGEM = 180000;
+let enviosNoBlocoWhatsApp = 0;
+let fimDaUltimaPausaWhatsApp = 0;
+
+function msDaPausaEntreEnviosWhatsApp(sorteio){
+  return PAUSA_MIN_ENTRE_ENVIOS_MS + Math.floor(sorteio * (PAUSA_MAX_ENTRE_ENVIOS_MS - PAUSA_MIN_ENTRE_ENVIOS_MS + 1));
+}
+
+async function pausaEntreEnviosWhatsApp(){
+  if(Date.now() - fimDaUltimaPausaWhatsApp > MS_PRA_RECOMECAR_CONTAGEM) enviosNoBlocoWhatsApp = 0; // envio novo, depois de um tempo parado
+  enviosNoBlocoWhatsApp++;
+  let ms = msDaPausaEntreEnviosWhatsApp(Math.random());
+  if(enviosNoBlocoWhatsApp % ENVIOS_POR_BLOCO_WHATSAPP === 0){
+    ms = PAUSA_DO_BLOCO_WHATSAPP_MS;
+    try { mostrarConfirmacaoSalvamento(true, 'Pausa de 1 minuto a cada ' + ENVIOS_POR_BLOCO_WHATSAPP + ' mensagens, pra proteger o número. O envio continua sozinho, deixe o app aberto.'); } catch(e){}
+  }
+  await new Promise(function(r){ setTimeout(r, ms); });
+  fimDaUltimaPausaWhatsApp = Date.now();
+}
+
+// Tempo estimado de um envio em massa (média de 12,5s por mensagem + 1 minuto a cada 10), pra aparecer na confirmação
+function textoTempoEnvioWhatsApp(quantidade){
+  const segundos = quantidade * (PAUSA_MIN_ENTRE_ENVIOS_MS + PAUSA_MAX_ENTRE_ENVIOS_MS) / 2000 + Math.floor(quantidade / ENVIOS_POR_BLOCO_WHATSAPP) * PAUSA_DO_BLOCO_WHATSAPP_MS / 1000;
+  const minutos = Math.max(1, Math.round(segundos / 60));
+  return '\n\nPra proteger o número, sai uma mensagem a cada 5 a 20 segundos, com 1 minuto de pausa a cada ' + ENVIOS_POR_BLOCO_WHATSAPP +
+    '. Tempo estimado: cerca de ' + minutos + (minutos === 1 ? ' minuto' : ' minutos') + '. Deixe o app aberto nessa tela até terminar.';
 }
 
 async function enviarWhatsApp(telefone, mensagem, jaTentouDeNovo){
@@ -19383,15 +19412,9 @@ async function enviarWhatsApp(telefone, mensagem, jaTentouDeNovo){
     });
     const dados = await resposta.json();
     if(!resposta.ok || dados.error){
-      const motivo = dados.error || ('HTTP ' + resposta.status);
-      // Antes só tentava de novo se caísse a conexão. Mas o WhatsApp também pode recusar por excesso
-      // de velocidade (limite de taxa) e isso não é exceção de rede, é uma resposta "normal" com erro
-      // — então também merece uma segunda chance, com uma pausa maior, antes de desistir de vez.
-      if(!jaTentouDeNovo){
-        await new Promise(function(r){ setTimeout(r, 6000); });
-        return enviarWhatsApp(telefone, mensagem, true);
-      }
-      return { sucesso: false, motivo: motivo };
+      // Recusa do servidor ou do WhatsApp (inclusive por excesso de velocidade): NÃO tenta de novo.
+      // Mandar outra vez logo em seguida é justamente o que aumenta o risco de bloqueio do número.
+      return { sucesso: false, motivo: dados.error || ('HTTP ' + resposta.status) };
     }
     return { sucesso: true };
   } catch(erro){
