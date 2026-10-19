@@ -1,4 +1,4 @@
-[Uploading dna_musa_140.html…]()
+[dna_musa_141.html](https://github.com/user-attachments/files/33669849/dna_musa_141.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -953,7 +953,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-19-AF-GRUPO-LINK</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-19-AG-GRUPO-TESTE</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1857,7 +1857,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-19-AF-GRUPO-LINK';
+const VERSAO_APP = '2026-10-19-AG-GRUPO-TESTE';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -8215,6 +8215,22 @@ function salvarGrupoDoDesafio(idDesafio){
   return true;
 }
 
+// Botão de teste do Personal: põe uma mensagem "Teste" na fila, sem precisar entrar como aluna
+async function mandarTesteNoGrupo(idDesafio){
+  if(typeof supabaseClient === 'undefined' || !supabaseClient){ mostrarConfirmacaoSalvamento(false, 'Sem conexão com o servidor.'); return false; }
+  const nome = (DESAFIOS_DO_APP[idDesafio] || {}).nome || idDesafio;
+  try {
+    const r = await supabaseClient.from('fila_grupo_desafio').upsert({ chave: 'teste|' + Date.now() + '|' + idDesafio, desafio_id: idDesafio, desafio_nome: nome,
+      aluna_primeiro_nome: 'Teste', treino: 'Treino A', dia_desafio: 1, total_dias: (DESAFIOS_DO_APP[idDesafio] || {}).duracaoDias || 21 }, { onConflict: 'chave', ignoreDuplicates: true });
+    if(r && r.error){ mostrarConfirmacaoSalvamento(false, 'O servidor não aceitou a mensagem de teste: ' + (r.error.message || 'erro')); return false; }
+  } catch(e){ mostrarConfirmacaoSalvamento(false, 'Sem conexão com o servidor.'); return false; }
+  mostrarConfirmacaoSalvamento(true, 'Mensagem de teste na fila. Ela sai em até 1 minuto e meio; a lista abaixo atualiza sozinha.');
+  carregarFilaDoGrupo(idDesafio);
+  setTimeout(function(){ carregarFilaDoGrupo(idDesafio); }, 45000);
+  setTimeout(function(){ carregarFilaDoGrupo(idDesafio); }, 95000);
+  return true;
+}
+
 const ROTULO_FILA_GRUPO = { pendente: ['na fila', 'cd-c-ouro'], enviando: ['enviando', 'cd-c-verde'], enviada: ['enviada', 'cd-c-ok'], erro: ['erro', 'cd-c-ruim'], sem_grupo: ['sem grupo', 'cd-c-alerta'], vencida: ['não saiu (passou de 12h)', 'cd-c-alerta'] };
 
 function htmlGrupoDoDesafio(idDesafio){
@@ -8225,7 +8241,8 @@ function htmlGrupoDoDesafio(idDesafio){
     '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
       '<input class="form-input" id="grupo-desafio-' + idDesafio + '" style="flex:1;min-width:220px;font-size:12.5px;" placeholder="Link de convite do grupo (https://chat.whatsapp.com/...)" value="' + escaparHtmlFicha(cfg.grupo || '') + '">' +
       '<label style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--text-dim);"><input type="checkbox" id="grupo-desafio-ativo-' + idDesafio + '"' + (cfg.ativo || !cfg.grupo ? ' checked' : '') + '> Avisar no grupo</label>' +
-      '<button class="cd-btn cd-btn-verde" onclick="salvarGrupoDoDesafio(\'' + idDesafio + '\')">Salvar</button></div>' +
+      '<button class="cd-btn cd-btn-verde" onclick="salvarGrupoDoDesafio(\'' + idDesafio + '\')">Salvar</button>' +
+      (cfg.ativo ? '<button class="cd-btn" onclick="mandarTesteNoGrupo(\'' + idDesafio + '\')">Mandar teste</button>' : '') + '</div>' +
     '<p class="cd-nota" style="margin:6px 0 0;">' + (cfg.grupoId && cfg.linkResolvido === cfg.grupo ? 'Grupo encontrado na Z-API: ' + escaparHtmlFicha(cfg.grupoId) : (cfg.grupo ? 'O grupo é encontrado na primeira mensagem. O número do Thiago (o dos avisos automáticos) precisa estar no grupo.' : 'No WhatsApp: dados do grupo > Convidar via link > Copiar link. O número do Thiago (o dos avisos automáticos) precisa estar no grupo.')) + '</p>' +
     '<div id="cd-fila-grupo-' + idDesafio + '" style="margin-top:10px;"></div></div>';
 }
@@ -15238,7 +15255,8 @@ async function carregarCatalogoPersonal(){
         const atual = enviosEmMassa[row.chave];
         if(row.chave && row.dados && row.dados.ordem && !enviosRodandoAgora[row.chave] && (!atual || String(row.dados.atualizadoEm || '') >= String(atual.atualizadoEm || ''))) enviosEmMassa[row.chave] = row.dados;
       } else if(row.tipo === 'grupo_desafio'){
-        if(row.chave && row.dados) gruposDosDesafios[row.chave] = row.dados;
+        // pode haver mais de uma linha do mesmo grupo: vale a salva por último
+        if(row.chave && row.dados && String(row.dados.em || '') >= String((gruposDosDesafios[row.chave] || {}).em || '')) gruposDosDesafios[row.chave] = row.dados;
       } else if(row.tipo === 'modelo_seca21'){
         if(row.chave && row.dados && row.dados.dias) modelosSeca21[row.chave] = row.dados;
       } else if(row.tipo === 'relatorio_tendencias'){
