@@ -1,4 +1,4 @@
-[Uploading dna_musa_138.html…]()
+[dna_musa_139.html](https://github.com/user-attachments/files/33668639/dna_musa_139.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -953,7 +953,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-19-AD-PLANO-DESAFIO-FICHA</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-19-AE-GRUPO-DESAFIO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1857,7 +1857,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-19-AD-PLANO-DESAFIO-FICHA';
+const VERSAO_APP = '2026-10-19-AE-GRUPO-DESAFIO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -2522,6 +2522,7 @@ function registrarDiaRapido(indice){
   // de dias anteriores "sumirem" da lista (ficavam presos debaixo do número de semana antigo).
   salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
   avisarPersonalTreinoRegistrado(d.n, true);
+  if(d.desafio) avisarGrupoDoDesafio(d.n); // treino do desafio: mensagem no grupo
   ultimoRegistroRapidoEm = Date.now(); // reforça a trava, cobrindo o tempo que o innerHTML novo leva pra entrar
   abrirListaDeTreinosDaSemana(); // recarrega a lista já mostrando esse dia verde
 }
@@ -7326,7 +7327,7 @@ function renderControleDesafios(){
       '<div id="form-inscricao-seca21"></div><div id="lista-seca21"></div></div>' +
       '<div class="cd-grade2"><div class="cd-box"><div class="cd-box-cab"><h2>As 4 estruturas do SECA 21</h2></div><div id="cd-estruturas-s21">' + htmlCardsEstruturasSeca21() + '</div>' +
         '<p class="cd-nota">Cada aluna recebe sozinha a estrutura do nível e da frequência dela. Intermediária recebe a de Iniciante. Quem você inscrever depois de salvar já entra com o treino.</p></div>' +
-      '<div class="cd-box">' + htmlRegrasSeca21() + '</div></div>';
+      '<div class="cd-box">' + htmlRegrasSeca21() + '</div></div>' + htmlGrupoDoDesafio('seca21');
   } else {
     html += '<div id="cd-kpis-se"></div>' +
       '<div class="cd-box"><div class="cd-box-cab"><h2>Alunas no Seca e Empina</h2><div class="cd-r"><button class="cd-btn cd-btn-ouro" onclick="mostrarFormularioInscricaoSecaEmpina()">+ Inscrever aluna</button></div></div>' +
@@ -7338,7 +7339,7 @@ function renderControleDesafios(){
         '<p class="cd-nota">Toque numa estrutura pra ver e ajustar os treinos (trocar exercício, séries e ordem).</p></div>';
   }
   raiz.innerHTML = html;
-  if(abaControleDesafio === 'seca21') renderListaSeca21(); else renderListaSecaEmpina();
+  if(abaControleDesafio === 'seca21'){ renderListaSeca21(); carregarFilaDoGrupo('seca21'); } else renderListaSecaEmpina();
   atualizarBadgeDesafios();
 }
 
@@ -7998,6 +7999,7 @@ function marcarDiaSeca21Feito(indiceDia){
   if(!prog.desafioRegistroEm) prog.desafioRegistroEm = {};
   prog.desafioRegistroEm[chave + '|' + d.n] = new Date().toISOString();
   salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  avisarGrupoDoDesafio(d.n); // mensagem no grupo do desafio
   abrirTelaDesafioSeca21();
 }
 
@@ -8152,6 +8154,89 @@ function htmlCaixaPlanoEDesafio(a){
     '<select class="form-select" style="font-size:13px;padding:6px;margin-top:4px;" onchange="definirPlanoEDesafio(\'' + nomeJs + '\',this.value)">' +
       opcoesPlanoEDesafio().map(function(o){ return '<option value="' + o.valor + '"' + (o.valor === valor ? ' selected' : '') + '>' + o.texto + '</option>'; }).join('') +
     '</select>' + detalhe + '</div>';
+}
+
+// ===== MENSAGEM NO GRUPO DO DESAFIO (WhatsApp) =====
+// Quando a aluna registra o treino do desafio, o app só anota na fila do servidor ("fila_grupo_desafio"). Quem manda
+// pro grupo é a função "fila-grupo-desafio" do Supabase: uma mensagem por vez, com 5 a 30 segundos entre uma e outra,
+// mesmo que várias alunas terminem juntas. Uma mensagem por aluna por dia (a "chave"), e fechar o app logo depois de
+// registrar não perde nada. O número do grupo e o liga/desliga ficam no Controle de desafios.
+let gruposDosDesafios = {}; // id do desafio -> { grupo, ativo }
+
+function chaveDoDiaNoGrupo(a, idDesafio, agora){
+  return String(a.email || a.nome || '').trim().toLowerCase() + '|' + dataLocalISO(new Date(agora)) + '|' + idDesafio;
+}
+
+function linhaDaFilaDoGrupo(a, nomeTreino, agora){
+  const m = modoDoDesafioDaAluna(a);
+  if(!m || !m.ativo) return null;
+  const id = idDoDesafio(a);
+  return { chave: chaveDoDiaNoGrupo(a, id, agora), desafio_id: id, desafio_nome: (DESAFIOS_DO_APP[id] || {}).nome || a.desafioAtivo.nome || 'desafio',
+    aluna_primeiro_nome: primeiroNomeEnvio(a.nome), treino: nomeTreino || null, dia_desafio: m.st.dia, total_dias: m.st.total };
+}
+
+function inserirNaFilaDoGrupo(linha){
+  if(typeof supabaseClient === 'undefined' || !supabaseClient) return;
+  try { supabaseClient.from('fila_grupo_desafio').upsert(linha, { onConflict: 'chave', ignoreDuplicates: true }).then(function(){}, function(){}); } catch(e){}
+}
+
+// Nunca trava a aluna: se não der pra anotar (sem internet, tabela ainda não criada), ela nem percebe
+function avisarGrupoDoDesafio(nomeTreino){
+  if(sessaoTipo !== 'aluna') return false;
+  let a = null;
+  try { a = obterAlunaLogadaOuCriar(); } catch(e){ return false; }
+  const linha = a ? linhaDaFilaDoGrupo(a, nomeTreino, Date.now()) : null;
+  if(!linha) return false;
+  inserirNaFilaDoGrupo(linha);
+  return true;
+}
+
+// ----- Personal: número do grupo e liga/desliga, e as últimas mensagens da fila -----
+function normalizarIdDoGrupo(texto){
+  const s = String(texto || '').trim().replace(/\s+/g, '');
+  return /^[0-9]{10,}(-group|@g\.us)$/.test(s) ? s : null;
+}
+
+function salvarGrupoDoDesafio(idDesafio){
+  const campo = document.getElementById('grupo-desafio-' + idDesafio), liga = document.getElementById('grupo-desafio-ativo-' + idDesafio);
+  const bruto = campo ? campo.value : '';
+  const grupo = bruto.trim() ? normalizarIdDoGrupo(bruto) : '';
+  if(grupo === null){ alert('Esse código de grupo não parece certo. Ele fica no painel da Z-API, em Grupos, e tem esse formato: 120363019502650977-group'); return false; }
+  gruposDosDesafios[idDesafio] = { grupo: grupo, ativo: !!(liga && liga.checked) && !!grupo, em: new Date().toISOString() };
+  salvarCatalogoPersonalConferindo('grupo_desafio', idDesafio, gruposDosDesafios[idDesafio]);
+  mostrarConfirmacaoSalvamento(true, gruposDosDesafios[idDesafio].ativo ? 'Pronto: quando ela registrar o treino, a mensagem entra no grupo.' : 'Salvo. As mensagens no grupo estão desligadas.');
+  renderControleDesafios();
+  return true;
+}
+
+const ROTULO_FILA_GRUPO = { pendente: ['na fila', 'cd-c-ouro'], enviando: ['enviando', 'cd-c-verde'], enviada: ['enviada', 'cd-c-ok'], erro: ['erro', 'cd-c-ruim'], sem_grupo: ['sem grupo', 'cd-c-alerta'], vencida: ['não saiu (passou de 12h)', 'cd-c-alerta'] };
+
+function htmlGrupoDoDesafio(idDesafio){
+  const cfg = gruposDosDesafios[idDesafio] || {};
+  return '<div class="cd-box"><div class="cd-box-cab"><h2>Grupo do WhatsApp do ' + escaparHtmlFicha((DESAFIOS_DO_APP[idDesafio] || {}).nome || idDesafio) + '</h2>' +
+      '<div class="cd-r"><span class="cd-chip ' + (cfg.ativo ? 'cd-c-ok">ligado' : 'cd-c-alerta">desligado') + '</span></div></div>' +
+    '<p class="cd-nota" style="margin:0 0 8px;">Quando a aluna registra o treino do desafio, entra no grupo: "🔥 Ana acabou de concluir o Treino B do SECA 21! Dia 5 de 21." Sai pelo número de suporte, uma mensagem por vez, com 5 a 30 segundos entre uma e outra, e no máximo uma por aluna por dia.</p>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
+      '<input class="form-input" id="grupo-desafio-' + idDesafio + '" style="flex:1;min-width:220px;font-size:12.5px;" placeholder="Código do grupo na Z-API (ex: 120363019502650977-group)" value="' + escaparHtmlFicha(cfg.grupo || '') + '">' +
+      '<label style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--text-dim);"><input type="checkbox" id="grupo-desafio-ativo-' + idDesafio + '"' + (cfg.ativo || !cfg.grupo ? ' checked' : '') + '> Avisar no grupo</label>' +
+      '<button class="cd-btn cd-btn-verde" onclick="salvarGrupoDoDesafio(\'' + idDesafio + '\')">Salvar</button></div>' +
+    '<div id="cd-fila-grupo-' + idDesafio + '" style="margin-top:10px;"></div></div>';
+}
+
+async function carregarFilaDoGrupo(idDesafio){
+  const area = document.getElementById('cd-fila-grupo-' + idDesafio);
+  if(!area || typeof supabaseClient === 'undefined' || !supabaseClient) return;
+  try {
+    const r = await supabaseClient.from('fila_grupo_desafio').select('aluna_primeiro_nome, treino, status, criado_em, enviado_em, erro').eq('desafio_id', idDesafio).order('id', { ascending: false }).limit(12);
+    if(r.error){ area.innerHTML = '<p class="cd-nota">A fila do grupo ainda não foi criada no servidor (passo 1 do passo a passo).</p>'; return; }
+    const linhas = r.data || [];
+    area.innerHTML = linhas.length ? '<p class="cd-nota" style="margin:0 0 4px;">Últimas mensagens do grupo</p>' + linhas.map(function(l){
+      const rot = ROTULO_FILA_GRUPO[l.status] || [l.status, ''];
+      const quando = new Date(l.enviado_em || l.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      return '<div class="env-al" style="grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto auto;cursor:default;"><b>' + escaparHtmlFicha(l.aluna_primeiro_nome) + '</b><span class="cd-faint">' + escaparHtmlFicha(l.treino || '') + '</span>' +
+        '<span class="cd-chip ' + rot[1] + '">' + rot[0] + (l.status === 'erro' && l.erro ? ': ' + escaparHtmlFicha(l.erro) : '') + '</span><small>' + quando + '</small></div>';
+    }).join('') : '<p class="cd-nota">Nenhuma mensagem ainda.</p>';
+  } catch(e){}
 }
 
 // ===== SECA 21 NO CELULAR DA ALUNA: modo "só desafio" e consultoria + desafio =====
@@ -15145,6 +15230,8 @@ async function carregarCatalogoPersonal(){
       } else if(row.tipo === 'envio_massa'){
         const atual = enviosEmMassa[row.chave];
         if(row.chave && row.dados && row.dados.ordem && !enviosRodandoAgora[row.chave] && (!atual || String(row.dados.atualizadoEm || '') >= String(atual.atualizadoEm || ''))) enviosEmMassa[row.chave] = row.dados;
+      } else if(row.tipo === 'grupo_desafio'){
+        if(row.chave && row.dados) gruposDosDesafios[row.chave] = row.dados;
       } else if(row.tipo === 'modelo_seca21'){
         if(row.chave && row.dados && row.dados.dias) modelosSeca21[row.chave] = row.dados;
       } else if(row.tipo === 'relatorio_tendencias'){
@@ -22340,6 +22427,7 @@ function registrarTreinoDia(diaIndex){
 
     salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
     avisarPersonalTreinoRegistrado(d.n, false);
+    if(d.desafio) avisarGrupoDoDesafio(d.n); // treino do desafio: mensagem no grupo
 
     // Tela de treino concluído: resumo calculado antes de redesenhar (tempo, séries, semana, cargas que subiram)
     const resumoFeito = montarResumoDoTreinoFeito(d, prog, seriesConcluidas, cronometroSegundos, resultadoSemana);
