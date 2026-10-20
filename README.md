@@ -1,4 +1,4 @@
-[Uploading dna_musa_143.html…]()
+[Uploading dna_musa_144.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -956,7 +956,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-20-AJ-GRUPO-DIAGNOSTICO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-20-AK-GRUPO-ALUNA</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1860,7 +1860,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-20-AJ-GRUPO-DIAGNOSTICO';
+const VERSAO_APP = '2026-10-20-AK-GRUPO-ALUNA';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -8181,8 +8181,10 @@ function linhaDaFilaDoGrupo(a, nomeTreino, agora){
 function inserirNaFilaDoGrupo(linha){
   if(typeof supabaseClient === 'undefined' || !supabaseClient) return;
   try {
-    supabaseClient.from('fila_grupo_desafio').upsert(linha, { onConflict: 'chave', ignoreDuplicates: true }).then(function(r){
-      if(r && r.error) registrarErroNoBanco(new Error('[Grupo] o servidor não aceitou na fila: ' + (r.error.message || 'erro')), 'grupo_fila_recusada');
+    // insert simples (sem "upsert"): a aluna só tem permissão de COLOCAR na fila, não de ler. Repetida no mesmo dia
+    // (mesma chave) o servidor recusa com o código 23505, e isso é o esperado: uma mensagem por aluna por dia.
+    supabaseClient.from('fila_grupo_desafio').insert(linha).then(function(r){
+      if(r && r.error && String(r.error.code) !== '23505') registrarErroNoBanco(new Error('[Grupo] o servidor não aceitou na fila: ' + (r.error.message || 'erro')), 'grupo_fila_recusada');
     }, function(e){ registrarErroNoBanco(new Error('[Grupo] sem conexão pra pôr na fila: ' + (e && e.message || e)), 'grupo_fila_sem_conexao'); });
   } catch(e){ registrarErroNoBanco(new Error('[Grupo] falha ao pôr na fila: ' + (e && e.message || e)), 'grupo_fila_falha'); }
 }
