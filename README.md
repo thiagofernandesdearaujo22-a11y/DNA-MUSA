@@ -1,4 +1,4 @@
-[dna_musa_142.html](https://github.com/user-attachments/files/33670701/dna_musa_142.html)
+[Uploading dna_musa_143.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -381,6 +381,9 @@
   .cd-nm{display:flex;gap:9px;align-items:center;} .cd-nm b{display:block;font-size:13px;overflow-wrap:anywhere;} .cd-nm small{display:block;font-size:10.5px;color:var(--text-faint);margin-top:1px;}
   .cd-av{width:30px;height:30px;border-radius:50%;background:var(--card-2);border:1px solid rgba(232,197,138,.3);display:flex;align-items:center;justify-content:center;font-size:10.5px;color:var(--gold-soft);flex-shrink:0;}
   .cd-barra{display:block;height:6px;border-radius:4px;background:var(--card-2);overflow:hidden;width:100%;margin-bottom:3px;} .cd-barra i{display:block;height:100%;background:var(--gold);}
+  .gf-linha{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:4px 10px;align-items:center;padding:8px 2px;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text);}
+  .gf-linha b{font-weight:600;overflow-wrap:anywhere;} .gf-linha b span{font-weight:400;color:var(--text-faint);font-size:11.5px;} .gf-linha small{font-size:11px;color:var(--text-faint);white-space:nowrap;}
+  .gf-motivo{grid-column:1 / -1;font-size:11.5px;line-height:1.4;color:#E8A08A;overflow-wrap:anywhere;}
   .cd-faint{font-size:10.5px;color:var(--text-faint);} .cd-dim{color:var(--text-dim);} .cd-ouro{color:var(--gold-soft);}
   .cd-acoes-lin{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;}
   .cd-seg{display:flex;flex-wrap:wrap;background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:3px;}
@@ -953,7 +956,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-19-AH-GRUPO-NUMERO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-20-AJ-GRUPO-DIAGNOSTICO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1857,7 +1860,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-19-AH-GRUPO-NUMERO';
+const VERSAO_APP = '2026-10-20-AJ-GRUPO-DIAGNOSTICO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -8177,16 +8180,32 @@ function linhaDaFilaDoGrupo(a, nomeTreino, agora){
 
 function inserirNaFilaDoGrupo(linha){
   if(typeof supabaseClient === 'undefined' || !supabaseClient) return;
-  try { supabaseClient.from('fila_grupo_desafio').upsert(linha, { onConflict: 'chave', ignoreDuplicates: true }).then(function(){}, function(){}); } catch(e){}
+  try {
+    supabaseClient.from('fila_grupo_desafio').upsert(linha, { onConflict: 'chave', ignoreDuplicates: true }).then(function(r){
+      if(r && r.error) registrarErroNoBanco(new Error('[Grupo] o servidor não aceitou na fila: ' + (r.error.message || 'erro')), 'grupo_fila_recusada');
+    }, function(e){ registrarErroNoBanco(new Error('[Grupo] sem conexão pra pôr na fila: ' + (e && e.message || e)), 'grupo_fila_sem_conexao'); });
+  } catch(e){ registrarErroNoBanco(new Error('[Grupo] falha ao pôr na fila: ' + (e && e.message || e)), 'grupo_fila_falha'); }
 }
 
 // Nunca trava a aluna: se não der pra anotar (sem internet, tabela ainda não criada), ela nem percebe
+// Por que um treino do desafio NÃO foi pro grupo (vai pro registro de erros, pra dar pra descobrir sem adivinhar)
+function motivoDeNaoIrProGrupo(a){
+  if(!a) return 'não achei a ficha da aluna logada';
+  if(!a.desafioAtivo) return 'a ficha dela não tem desafio';
+  if(!estaNoSeca21(a)) return 'o desafio dela não é o SECA 21 (' + (a.desafioAtivo.id || a.desafioAtivo.nome || '?') + ')';
+  const st = situacaoDoSeca21(a);
+  if(!st) return 'não consegui ler as datas do desafio';
+  if(!st.comecou) return 'o desafio dela só começa em ' + a.desafioAtivo.dataInicio;
+  if(st.terminou) return 'o desafio dela terminou em ' + a.desafioAtivo.dataFim;
+  return 'motivo desconhecido';
+}
+
 function avisarGrupoDoDesafio(nomeTreino){
-  if(sessaoTipo !== 'aluna') return false;
+  if(sessaoTipo !== 'aluna'){ registrarErroNoBanco(new Error('[Grupo] treino do desafio registrado fora do login de aluna (' + sessaoTipo + '): não vai pro grupo'), 'grupo_nao_aluna'); return false; }
   let a = null;
   try { a = obterAlunaLogadaOuCriar(); } catch(e){ return false; }
   const linha = a ? linhaDaFilaDoGrupo(a, nomeTreino, Date.now()) : null;
-  if(!linha) return false;
+  if(!linha){ registrarErroNoBanco(new Error('[Grupo] treino do desafio não foi pro grupo: ' + motivoDeNaoIrProGrupo(a)), 'grupo_fora_do_desafio'); return false; }
   inserirNaFilaDoGrupo(linha);
   return true;
 }
@@ -8232,6 +8251,19 @@ async function mandarTesteNoGrupo(idDesafio){
   return true;
 }
 
+// Erro da fila em português simples (o texto completo da Z-API fica ao passar o mouse)
+function motivoCurtoDoErroDoGrupo(erro){
+  const e = String(erro || '');
+  const quem = (e.match(/número do\(a\) (Thiago|Bianca)/) || [])[1];
+  const no = quem ? ' (número do(a) ' + quem + ')' : '';
+  if(/subscribe to this instance/i.test(e)) return 'A instância da Z-API está vencida' + no + '. Renove a assinatura na Z-API ou escolha o outro número.';
+  if(/client-token/i.test(e)) return 'A Z-API recusou o token de segurança' + no + '.';
+  if(/not.*member|não.*participa/i.test(e)) return 'O número não está no grupo' + no + '.';
+  if(/não achei o grupo pelo link/i.test(e)) return 'Não encontrou o grupo pelo link' + no + '. Confira se o número está no grupo e se o link ainda vale.';
+  if(/grupo não configurado/i.test(e)) return 'Grupo não configurado ou desligado.';
+  return e.length > 140 ? e.slice(0, 140) + '...' : (e || 'Erro no envio.');
+}
+
 const ROTULO_FILA_GRUPO = { pendente: ['na fila', 'cd-c-ouro'], enviando: ['enviando', 'cd-c-verde'], enviada: ['enviada', 'cd-c-ok'], erro: ['erro', 'cd-c-ruim'], sem_grupo: ['sem grupo', 'cd-c-alerta'], vencida: ['não saiu (passou de 12h)', 'cd-c-alerta'] };
 
 function htmlGrupoDoDesafio(idDesafio){
@@ -8250,6 +8282,17 @@ function htmlGrupoDoDesafio(idDesafio){
     '<div id="cd-fila-grupo-' + idDesafio + '" style="margin-top:10px;"></div></div>';
 }
 
+function htmlListaDaFilaDoGrupo(linhas){
+  return linhas.length ? '<p class="cd-nota" style="margin:0 0 4px;">Últimas mensagens do grupo</p>' + linhas.map(function(l){
+      const rot = ROTULO_FILA_GRUPO[l.status] || [l.status, ''];
+      const quando = new Date(l.enviado_em || l.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      const motivo = l.status === 'erro' ? motivoCurtoDoErroDoGrupo(l.erro) : '';
+      return '<div class="gf-linha"><b>' + escaparHtmlFicha(l.aluna_primeiro_nome) + (l.treino ? ' <span>· ' + escaparHtmlFicha(l.treino) + '</span>' : '') + '</b>' +
+        '<span class="cd-chip ' + rot[1] + '">' + rot[0] + '</span><small>' + quando + '</small>' +
+        (motivo ? '<div class="gf-motivo" title="' + escaparHtmlFicha(l.erro || '') + '">' + escaparHtmlFicha(motivo) + '</div>' : '') + '</div>';
+    }).join('') : '<p class="cd-nota">Nenhuma mensagem ainda.</p>';
+}
+
 async function carregarFilaDoGrupo(idDesafio){
   const area = document.getElementById('cd-fila-grupo-' + idDesafio);
   if(!area || typeof supabaseClient === 'undefined' || !supabaseClient) return;
@@ -8257,12 +8300,7 @@ async function carregarFilaDoGrupo(idDesafio){
     const r = await supabaseClient.from('fila_grupo_desafio').select('aluna_primeiro_nome, treino, status, criado_em, enviado_em, erro').eq('desafio_id', idDesafio).order('id', { ascending: false }).limit(12);
     if(r.error){ area.innerHTML = '<p class="cd-nota">A fila do grupo ainda não foi criada no servidor (passo 1 do passo a passo).</p>'; return; }
     const linhas = r.data || [];
-    area.innerHTML = linhas.length ? '<p class="cd-nota" style="margin:0 0 4px;">Últimas mensagens do grupo</p>' + linhas.map(function(l){
-      const rot = ROTULO_FILA_GRUPO[l.status] || [l.status, ''];
-      const quando = new Date(l.enviado_em || l.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-      return '<div class="env-al" style="grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto auto;cursor:default;"><b>' + escaparHtmlFicha(l.aluna_primeiro_nome) + '</b><span class="cd-faint">' + escaparHtmlFicha(l.treino || '') + '</span>' +
-        '<span class="cd-chip ' + rot[1] + '">' + rot[0] + (l.status === 'erro' && l.erro ? ': ' + escaparHtmlFicha(l.erro) : '') + '</span><small>' + quando + '</small></div>';
-    }).join('') : '<p class="cd-nota">Nenhuma mensagem ainda.</p>';
+    area.innerHTML = htmlListaDaFilaDoGrupo(linhas);
   } catch(e){}
 }
 
