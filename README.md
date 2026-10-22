@@ -1,4 +1,4 @@
-[Uploading dna_musa_144.html…]()
+[dna_musa_145.html](https://github.com/user-attachments/files/33825856/dna_musa_145.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -526,6 +526,9 @@
   .env-resumo > div{background:var(--card-2);border-radius:10px;padding:8px 10px;} .env-resumo small{font-size:10.5px;color:var(--text-faint);} .env-resumo b{display:block;font-size:20px;font-family:'Playfair Display',serif;color:var(--text);}
   .env-filtros{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
   .env-filtros span{font-size:11.5px;padding:5px 10px;border-radius:16px;background:var(--card-2);color:var(--text-dim);cursor:pointer;}
+  .env-marcar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;margin:0 0 8px;border:1px solid var(--border);border-radius:12px;background:var(--card-2);}
+  .env-marcar span{font-size:12px;padding:6px 12px;border-radius:16px;cursor:pointer;color:var(--text-dim);background:var(--card);} .env-marcar span.ouro{color:var(--gold-soft);background:rgba(232,197,138,.16);font-weight:600;}
+  .env-marcar small{font-size:11px;color:var(--text-faint);margin-left:auto;}
   .env-filtros span.on{background:rgba(232,197,138,.14);color:var(--gold-soft);}
   .env-lista{max-height:420px;overflow-y:auto;}
   .env-al{display:grid;grid-template-columns:22px minmax(0,1.4fr) auto minmax(0,1.2fr);align-items:center;gap:8px;padding:7px 2px;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text);cursor:pointer;}
@@ -956,7 +959,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-20-AK-GRUPO-ALUNA</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-22-AM-MARCAR-FILTRO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1860,7 +1863,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-20-AK-GRUPO-ALUNA';
+const VERSAO_APP = '2026-10-22-AM-MARCAR-FILTRO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -8483,8 +8486,10 @@ function renderBotaoDesafio(){
     const texto = st.comecou ? 'Dia ' + st.dia + ' de ' + st.total + ' · os treinos do desafio aparecem aqui assim que forem liberados' : 'Começa em ' + dataCurtaBR(a.desafioAtivo.dataInicio);
     area.innerHTML = '<div class="home-hero s21-verde"><p class="hh-lbl">Desafio SECA 21 <span class="s21-tag">por tempo determinado</span></p>' +
       '<p class="hh-tit">' + (st.comecou ? 'Dia ' + st.dia + ' de ' + st.total : 'Começa em ' + dataCurtaBR(a.desafioAtivo.dataInicio)) + '</p>' + htmlBolinhasDoDesafio(st) +
-      '<p class="hh-info">' + texto + '. Enquanto isso, as aulas do desafio já estão liberadas.</p>' +
-      '<button class="hh-btn" onclick="irParaAbaFixa(\'mentoria\')">Ver as aulas do desafio</button></div>';
+      // o botão abre direto as aulas do SECA 21 (antes caía na Mentoria geral); sem aulas liberadas, não aparece
+      (alunaTemCursoLiberado(a, 'seca21') && cursoDoAppPorId('seca21')
+        ? '<p class="hh-info">' + texto + '. Enquanto isso, as aulas do desafio já estão liberadas.</p><button class="hh-btn" onclick="abrirCursoDoApp(\'seca21\')">Ver as aulas do desafio</button>'
+        : '<p class="hh-info">' + texto + '.</p>') + '</div>';
     return;
   }
   area.innerHTML = htmlTarefaHome('ti-flag', 'Desafio Seca e Empina', 'Estrutura ' + a.desafioAtivo.estruturaAtual + '/10 liberada', 'abrirTelaDesafioSecaEmpina()');
@@ -20318,11 +20323,32 @@ function alunasVisiveisNoNovoEnvio(){
   }).sort(function(x, y){ return x.nome.localeCompare(y.nome, 'pt-BR'); });
 }
 
+// Marcar/desmarcar de uma vez todas as que estão na tela (filtro + busca). Soma com o que já estava marcado.
+const NOME_DO_FILTRO_ENVIO = { ativas: ['ativa', 'ativas'], porvencer: ['por vencer', 'por vencer'], vencidas: ['vencida', 'vencidas'], naorecebeu: ['que não recebeu', 'que não receberam'], todas: ['', ''] };
+function alunasDaListaParaMarcar(){ return alunasVisiveisNoNovoEnvio().filter(function(a){ return a.telefone; }); }
+
+function htmlBarraMarcarFiltro(){
+  const lista = alunasDaListaParaMarcar();
+  const n = lista.length;
+  if(!n) return '';
+  const nomeF = NOME_DO_FILTRO_ENVIO[novoEnvio.filtro] || ['', ''];
+  const marcadas = lista.filter(function(a){ return novoEnvio.marcadas[a.nome]; }).length;
+  const quais = (n === 1 ? 'a 1' : 'as ' + n) + ((n === 1 ? nomeF[0] : nomeF[1]) ? ' ' + (n === 1 ? nomeF[0] : nomeF[1]) : '');
+  return '<div class="env-marcar"><span class="ouro" onclick="marcarListaDoFiltroEnvio(true)">☑ Marcar ' + quais + '</span>' +
+    '<span onclick="marcarListaDoFiltroEnvio(false)">Desmarcar ' + (n === 1 ? 'a 1' : 'as ' + n) + '</span>' +
+    '<small>' + marcadas + ' de ' + n + ' desta lista ' + (marcadas === 1 ? 'marcada' : 'marcadas') + '</small></div>';
+}
+
+function marcarListaDoFiltroEnvio(marcar){
+  alunasDaListaParaMarcar().forEach(function(a){ if(marcar) novoEnvio.marcadas[a.nome] = true; else delete novoEnvio.marcadas[a.nome]; });
+  renderListaNovoEnvio();
+}
+
 function htmlListaNovoEnvio(){
   const r = novoEnvio.comparar ? enviosEmMassa[novoEnvio.comparar] : null;
   const lista = alunasVisiveisNoNovoEnvio();
   if(!lista.length) return '<p class="cd-nota">Nenhuma aluna nesse filtro.</p>';
-  return '<div class="env-lista">' + lista.map(function(a){
+  return htmlBarraMarcarFiltro() + '<div class="env-lista">' + lista.map(function(a){
     const st = ROTULO_STATUS_PLANO[statusDoPlano(a)] || ['', ''];
     const s = situacaoDaAlunaNoEnvio(r, a.nome);
     const quando = r && r.alunas[a.nome] && r.alunas[a.nome].em ? new Date(r.alunas[a.nome].em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '';
