@@ -1,4 +1,4 @@
-[dna_musa_145.html](https://github.com/user-attachments/files/33825856/dna_musa_145.html)
+[dna_musa_148.html](https://github.com/user-attachments/files/33964055/dna_musa_148.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -959,7 +959,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-22-AM-MARCAR-FILTRO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-24-AQ-ABA-PRESCRICAO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1863,7 +1863,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-22-AM-MARCAR-FILTRO';
+const VERSAO_APP = '2026-10-24-AQ-ABA-PRESCRICAO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -3682,26 +3682,29 @@ const CURSOS_DO_APP = [
     nome: 'SECA 21',
     cat: 'Cursos completos',
     descricao: 'Sequência completa de aulas do desafio SECA 21.',
+    // Ordem certa (Thiago, 24/10). Falta a Aula 01 (apresentação, ele vai gravar). A 08 repete a 20 (abdômen), de propósito.
+    // Sem Aula 21 por enquanto (ele vai criar outra).
+    // A antiga "Aula 19" (youtu.be/_AC-W4KgM6Q) era repetição da Aula 20 e saiu da lista.
     aulas: [
-    { titulo: '', video: 'https://youtu.be/ICo3PN906oQ' },
-    { titulo: '', video: 'https://youtu.be/PdaKs5k0bIg' },
-    { titulo: '', video: 'https://youtu.be/2JXIG1RyFl4' },
-    { titulo: '', video: 'https://youtu.be/69LcB0U4d8I' },
-    { titulo: '', video: 'https://youtu.be/6iSIgs6yLG0' },
-    { titulo: '', video: 'https://youtu.be/8SptyN6pn3c' },
-    { titulo: '', video: 'https://youtu.be/QmibbQ35G3k' },
-    { titulo: '', video: 'https://youtu.be/Sk0WB0fwZV4' },
-    { titulo: '', video: 'https://youtu.be/Zfsub2Bp_zY' },
-    { titulo: '', video: 'https://youtu.be/fzhKDrTnnWw' },
-    { titulo: '', video: 'https://youtu.be/kA4xW9dS74k' },
-    { titulo: '', video: 'https://youtu.be/kU02vDZQhio' },
-    { titulo: '', video: 'https://youtu.be/q8eOM9lxOws' },
-    { titulo: '', video: 'https://youtu.be/sBGsIucgkjQ' },
-    { titulo: '', video: 'https://youtu.be/uF5a0v1ydRo' },
-    { titulo: '', video: 'https://youtu.be/umhBmppjYXc' },
-    { titulo: '', video: 'https://youtu.be/Nc9ab-ZYzIo' },
-    { titulo: '', video: 'https://youtu.be/XYEMyNvN1Gg' },
-    { titulo: '', video: 'https://youtu.be/_AC-W4KgM6Q' }
+    { titulo: 'Aula 02', video: 'https://youtu.be/PdaKs5k0bIg' },
+    { titulo: 'Aula 03', video: 'https://youtu.be/Zfsub2Bp_zY' },
+    { titulo: 'Aula 04', video: 'https://youtu.be/Sk0WB0fwZV4' },
+    { titulo: 'Aula 05', video: 'https://youtu.be/6iSIgs6yLG0' },
+    { titulo: 'Aula 06', video: 'https://youtu.be/QmibbQ35G3k' },
+    { titulo: 'Aula 07', video: 'https://youtu.be/8SptyN6pn3c' },
+    { titulo: 'Aula 08', video: 'https://youtu.be/Nc9ab-ZYzIo' }, // mesmo vídeo da Aula 20 (treino de abdômen), de propósito
+    { titulo: 'Aula 09', video: 'https://youtu.be/sBGsIucgkjQ' },
+    { titulo: 'Aula 10', video: 'https://youtu.be/69LcB0U4d8I' },
+    { titulo: 'Aula 11', video: 'https://youtu.be/fzhKDrTnnWw' },
+    { titulo: 'Aula 12', video: 'https://youtu.be/ICo3PN906oQ' },
+    { titulo: 'Aula 13', video: 'https://youtu.be/kA4xW9dS74k' },
+    { titulo: 'Aula 14', video: 'https://youtu.be/uF5a0v1ydRo' },
+    { titulo: 'Aula 15', video: 'https://youtu.be/2JXIG1RyFl4' },
+    { titulo: 'Aula 16', video: 'https://youtu.be/q8eOM9lxOws' },
+    { titulo: 'Aula 17', video: 'https://youtu.be/umhBmppjYXc' },
+    { titulo: 'Aula 18', video: 'https://youtu.be/kU02vDZQhio' },
+    { titulo: 'Aula 19', video: 'https://youtu.be/XYEMyNvN1Gg' },
+    { titulo: 'Aula 20', video: 'https://youtu.be/Nc9ab-ZYzIo' }
     ]
   }
 ];
@@ -6189,9 +6192,11 @@ function garantirMinimoDeExerciciosPorDia(dia, perfil){
   if(!grupoDominante) return; // sem grupo pra buscar mais candidatos, não força nada arriscado
 
   const repsPadrao = dia.ex[0] ? (dia.ex[0].match(/x(\d+)/) || [,'12'])[1] : '12';
+  let jaTemElevacao = Object.keys(nomesJaNoDia).some(ehElevacaoPelvica);
   let tentativasSemSucesso = 0;
   while(dia.ex.length < MINIMO_EXERCICIOS_NO_DIA && tentativasSemSucesso < 10){
-    const candidatos = selecionarExerciciosVariados(grupoDominante, (perfil.nomeAluna || '') + '_minimo' + dia.ex.length, 6, (perfil.indiceCiclo || 0) + dia.ex.length, {}, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel) || [];
+    const candidatos = (selecionarExerciciosVariados(grupoDominante, (perfil.nomeAluna || '') + '_minimo' + dia.ex.length, 6, (perfil.indiceCiclo || 0) + dia.ex.length, {}, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel) || [])
+      .filter(function(n){ return !ehExercicioDeAula(n) && !(jaTemElevacao && ehElevacaoPelvica(n)); }); // regras fixas
     // Prioriza um candidato NORMAL (bilateral) que ainda não esteja no dia; só aceita unilateral se
     // realmente não sobrar outra opção bilateral nos candidatos retornados.
     const candidatoBilateral = candidatos.find(function(n){ return !nomesJaNoDia[n.toUpperCase()] && !ehExercicioUnilateral(n); });
@@ -6200,6 +6205,7 @@ function garantirMinimoDeExerciciosPorDia(dia, perfil){
     if(!escolhido){ tentativasSemSucesso++; continue; }
     dia.ex.push(escolhido + ' · 3x' + repsPadrao);
     nomesJaNoDia[escolhido.toUpperCase()] = true;
+    if(ehElevacaoPelvica(escolhido)) jaTemElevacao = true;
     tentativasSemSucesso++; // mesmo em caso de sucesso, limita o total de voltas do while por segurança
   }
 }
@@ -6212,6 +6218,38 @@ function removerVariacoesDuplicadasDeAfundo(dia){
     jaTemAfundo = true;
     return true;
   });
+}
+
+// ===== REGRAS FIXAS DE PRESCRIÇÃO (valem em todos os motores: consultoria, Seca e Empina e SECA 21) =====
+// 1) Nunca 2 elevações pélvicas no mesmo treino (qualquer variação: livre, com barra, na máquina, unilateral).
+// 2) Exercício com a palavra "aula" no nome nunca entra em treino nenhum (é vídeo de aula, não exercício).
+const REGEX_ELEVACAO_PELVICA = /ELEVA[ÇC][ÃA]O\s+P[ÉE]LVICA|HIP\s*THRUST/i;
+function ehElevacaoPelvica(nome){ return REGEX_ELEVACAO_PELVICA.test(String(nome || '')); }
+function ehExercicioDeAula(nome){ return /(^|[^A-Za-zÀ-ÿ])AULAS?([^A-Za-zÀ-ÿ]|$)/i.test(String(nome || '')); }
+function exercicioPodeSerPrescrito(e){ return !!e && !ehExercicioDeAula(e.nome); }
+
+function nomesDaLinhaDeTreino(linha){
+  try { return extrairTodosNomesDeLinha(linha); } catch(e){ return [extrairNomeExercicioDeLinha(linha)]; }
+}
+
+// Fica a primeira elevação pélvica do dia; as outras saem
+function removerElevacoesPelvicasExcedentesNoDia(dia){
+  let jaTem = false;
+  dia.ex = dia.ex.filter(function(linha){
+    if(!nomesDaLinhaDeTreino(linha).some(ehElevacaoPelvica)) return true;
+    if(jaTem) return false;
+    jaTem = true;
+    return true;
+  });
+}
+
+function removerExerciciosDeAulaDoDia(dia){
+  dia.ex = dia.ex.filter(function(linha){ return !nomesDaLinhaDeTreino(linha).some(ehExercicioDeAula); });
+}
+
+function aplicarRegrasFixasNoDia(dia){
+  removerExerciciosDeAulaDoDia(dia);
+  removerElevacoesPelvicasExcedentesNoDia(dia);
 }
 
 // Nunca 2 Leg Press no mesmo treino — a não ser que um dos dois seja unilateral, aí os dois podem
@@ -6249,6 +6287,7 @@ function obterPoolRealDoGrupo(grupoInterno, ambiente, evitarPliometrico, nivelAl
   // mas pra Casa, também libera exercício de barra/halteres/elástico, mesmo catalogado como Academia
   const baseAmbiente = exerciciosBanco.filter(function(e){
     if(e.grupo !== grupoReal) return false;
+    if(!exercicioPodeSerPrescrito(e)) return false;
     if(evitarPliometrico && ehExercicioPliometrico(e)) return false;
     if(!nivelPermiteExercicio(nivelAluna, e)) return false;
     return ambiente === 'Casa' ? exercicioServeParaCasa(e) : ((e.ambiente || 'Academia') === 'Academia' && !ehExercicioElastico(e));
@@ -6272,6 +6311,7 @@ function capitalizarNomeExercicio(nome){
 
 function obterPalavraChaveMovimento(nomeExercicio){
   const upper = nomeExercicio.toUpperCase();
+  if(ehElevacaoPelvica(upper)) return 'ELEVAÇÃO'; // hip thrust é elevação pélvica: mesmo padrão
   const padroesConhecidos = ['STIFF', 'CADEIRA', 'ELEVAÇÃO', 'EXTENSÃO', 'AFUNDO', 'AGACHAMENTO', 'FLEXÃO', 'ABDUÇÃO', 'ADUÇÃO', 'LEG PRESS', 'HACK', 'TERRA', 'BOM DIA', 'COICE', 'GLÚTEO', 'PONTE'];
   for(let i = 0; i < padroesConhecidos.length; i++){
     if(upper.indexOf(padroesConhecidos[i]) !== -1) return padroesConhecidos[i];
@@ -6371,11 +6411,12 @@ function obterMetaVolumeDesafio(numeroEstrutura, frequencia){
 // pra economizar tempo de sessão). Antes, essas variações vazavam pelo pool de Glúteo Máximo.
 function poolDesafio(grupoBanco, restringirGluteoMedio){
   if(restringirGluteoMedio){
-    return exerciciosBanco.filter(function(e){ return GLUTEO_MEDIO_DESAFIO.indexOf(e.nome.toUpperCase()) !== -1; }).map(function(e){ return e.nome; });
+    return exerciciosBanco.filter(function(e){ return GLUTEO_MEDIO_DESAFIO.indexOf(e.nome.toUpperCase()) !== -1 && exercicioPodeSerPrescrito(e); }).map(function(e){ return e.nome; });
   }
   return exerciciosBanco.filter(function(e){
     if((e.ambiente || 'Academia') !== 'Academia') return false;
     if(e.grupo !== grupoBanco) return false;
+    if(!exercicioPodeSerPrescrito(e)) return false;
     if(ehExercicioElastico(e)) return false;
     if(BANIDOS_DESAFIO.indexOf(e.nome.toUpperCase()) !== -1) return false;
     if(e.nome.toUpperCase().indexOf('ABDU') !== -1) return false;
@@ -6518,7 +6559,7 @@ function gerarSemanaDesafio(numeroEstrutura, frequencia, seedVariacao){
   let indiceInf = 0, indiceSup = 0;
   for(let d = 0; d < numDias; d++){
     const ehSuperior = posicoesSup.indexOf(d) !== -1;
-    const estado = { usadosNoDia: {}, padroesNoDia: {}, temUnilateralNoDia: false, legPressNoDia: 0, temAfundoNoDia: false, exDoDia: [] };
+    const estado = { usadosNoDia: {}, padroesNoDia: {}, temUnilateralNoDia: false, legPressNoDia: 0, temAfundoNoDia: false, temElevacaoNoDia: false, exDoDia: [] };
 
     const preencher = function(g, n){
       const tamanho = g.pool.length;
@@ -6540,6 +6581,9 @@ function gerarSemanaDesafio(numeroEstrutura, frequencia, seedVariacao){
           // antes o filtro removia DEPOIS de escolhido e a meta de volume ficava alguns pontos abaixo
           if(ehLeg && !ehUni && estado.legPressNoDia >= 1) continue;
           if(ehAfundo && estado.temAfundoNoDia) continue;
+          const ehElevacao = ehElevacaoPelvica(nome);
+          if(ehElevacao && estado.temElevacaoNoDia) continue; // nunca 2 elevações pélvicas no mesmo treino
+          if(ehExercicioDeAula(nome)) continue;
           // Nos grupos de superiores, evita 2 exercícios do mesmo padrão de movimento no dia (ex: duas
           // puxadas frontais); se não tiver outra opção, a 2ª passada relaxa isso
           const padrao = g.evitarPadrao ? obterPalavraChaveMovimento(nomeUpper) : null;
@@ -6550,6 +6594,7 @@ function gerarSemanaDesafio(numeroEstrutura, frequencia, seedVariacao){
           if(ehUni) estado.temUnilateralNoDia = true;
           if(ehLeg) estado.legPressNoDia++;
           if(ehAfundo) estado.temAfundoNoDia = true;
+          if(ehElevacao) estado.temElevacaoNoDia = true;
           estado.exDoDia.push(nome + ' · ' + SERIES_POR_EXERCICIO_DESAFIO + 'x12');
           escolhidos++;
         }
@@ -6584,6 +6629,7 @@ function gerarSemanaDesafio(numeroEstrutura, frequencia, seedVariacao){
       tipo: ehSuperior ? 'superior' : 'inferior'
     };
     removerLegsExcedentesNoDia(dia);
+    aplicarRegrasFixasNoDia(dia);
     removerVariacoesDuplicadasDeAfundo(dia);
     dias.push(dia);
   }
@@ -7143,7 +7189,7 @@ function abrirTrocaExercicioPreviewDesafio(n, freq, diaIndex, exIndex){
   const opcoes = exerciciosBanco.filter(function(e){
     const grupoDoEx = e.grupo || e.categoria;
     const mesmoAmbiente = (e.ambiente || 'Academia') === 'Academia'; // desafio é sempre academia
-    return (!grupo || grupoDoEx === grupo) && mesmoAmbiente && e.nome.toUpperCase() !== nomeAtual.toUpperCase();
+    return exercicioPodeSerPrescrito(e) && (!grupo || grupoDoEx === grupo) && mesmoAmbiente && e.nome.toUpperCase() !== nomeAtual.toUpperCase();
   }).sort(function(x, y){ return x.nome.localeCompare(y.nome, 'pt-BR'); });
 
   area.innerHTML = '<div style="margin:6px 0;"><select class="form-select" style="font-size:12px;padding:6px;" id="select-troca-' + n + '-' + diaIndex + '-' + exIndex + '">' +
@@ -7488,7 +7534,7 @@ function calcularPoolSeca21(slot, nivel){
     const nome = String(e.nome || '').trim();
     const u = nome.toUpperCase();
     if((e.ambiente || 'Academia') !== 'Academia') return;
-    if(!padrao.test(u) || FORA_DO_SECA21.test(u)) return;
+    if(!padrao.test(u) || FORA_DO_SECA21.test(u) || ehExercicioDeAula(nome)) return;
     if(slot === 'costas' && /PULLDOWN|PULLOVER/.test(u)) return;
     if(ehExercicioUnilateral(nome)) return;
     if(ehExercicioElastico(e)) return;
@@ -7546,7 +7592,7 @@ function gerarSemanaSeca21(chave, semente){
   const usadosNaSemana = {};
   const dias = DIAS_SECA21[est.frequencia].map(function(modelo, d){
     const usadosNoDia = {};
-    let legPress = 0;
+    let legPress = 0, elevacao = 0;
     const escolher = function(slot, offset){
       const pool = pools[slot] || [];
       for(let passada = 0; passada < 2; passada++){
@@ -7556,8 +7602,11 @@ function gerarSemanaSeca21(chave, semente){
           if(usadosNoDia[u]) continue;
           if(passada === 0 && usadosNaSemana[u]) continue;
           if(u.indexOf('LEG PRESS') !== -1 && legPress >= 1) continue;
+          if(ehElevacaoPelvica(u) && elevacao >= 1) continue; // nunca 2 elevações pélvicas no mesmo treino
+          if(ehExercicioDeAula(u)) continue;
           usadosNoDia[u] = true; usadosNaSemana[u] = true;
           if(u.indexOf('LEG PRESS') !== -1) legPress++;
+          if(ehElevacaoPelvica(u)) elevacao++;
           return nome;
         }
       }
@@ -7610,15 +7659,18 @@ function aplicarMetodosSeca21(ex, nivel){
 // Confere a semana contra as regras do SECA 21 (vale também depois das suas trocas)
 function conferirRegrasSeca21(semana){
   const nivel = semana.nivel;
-  const naoMulti = [], unilaterais = [], polia = [], bisetErrado = [], repetidos = [], metodoFora = [];
+  const naoMulti = [], unilaterais = [], polia = [], bisetErrado = [], repetidos = [], metodoFora = [], elevacoes = [], deAula = [];
   semana.dias.forEach(function(d){
     const vistos = {};
+    let nElev = 0;
     d.ex.forEach(function(l){
       const p = partesLinhaSeca21(l);
       p.nomes.forEach(function(nome){
         const u = nome.toUpperCase();
         if(vistos[u]) repetidos.push(nome + ' (' + d.n + ')'); vistos[u] = true;
         if(ehExercicioUnilateral(nome)) unilaterais.push(nome);
+        if(ehElevacaoPelvica(nome) && ++nElev === 2) elevacoes.push(d.n);
+        if(ehExercicioDeAula(nome)) deAula.push(nome);
       });
       if(p.biset){
         const s1 = slotDoExercicioSeca21(p.nomes[0]), s2 = slotDoExercicioSeca21(p.nomes[1]);
@@ -7639,7 +7691,9 @@ function conferirRegrasSeca21(semana){
     item(unilaterais.length === 0, 'Nenhum unilateral', unilaterais),
     item(polia.length === 0, 'Nenhum glúteo na polia ou no cabo', polia),
     item(metodoFora.length === 0, 'Métodos do ' + nivel + ': ' + (nivel === 'Avançado' ? 'bi-set, rest pause e drop set' : 'bi-set e drop set'), metodoFora),
-    item(repetidos.length === 0, 'Nenhum exercício repetido no mesmo treino', repetidos)
+    item(repetidos.length === 0, 'Nenhum exercício repetido no mesmo treino', repetidos),
+    item(elevacoes.length === 0, 'Nunca 2 elevações pélvicas no mesmo treino', elevacoes),
+    item(deAula.length === 0, 'Nenhum exercício com "aula" no nome', deAula)
   ];
 }
 
@@ -8761,6 +8815,7 @@ function gerarDiasFullBody(perfil, numDias){
 
     const dia = { n: nomesDias[d], foco: 'Full Body ' + String.fromCharCode(65 + d) + ' · corpo inteiro, volume baixo por grupo', ex: ex, descanso: false };
     removerLegsExcedentesNoDia(dia);
+    aplicarRegrasFixasNoDia(dia);
     removerVariacoesDuplicadasDeAfundo(dia);
     removerUnilateraisExcedentesNoDia(dia);
     dias.push(dia);
@@ -8794,6 +8849,7 @@ function gerarDiasInferiores(perfil, numDias, seriesTotais, diasCicloAnterior){
     return nomes.filter(function(nome){
       const exBanco = exerciciosBanco.find(function(e){ return e.nome.toUpperCase() === nome.toUpperCase(); });
       if(!exBanco) return false; // não existe cadastrado no banco ainda
+      if(!exercicioPodeSerPrescrito(exBanco)) return false;
       if(!exBanco.grupo) return false; // sem grupo classificado, não confiável pra entrar sozinho numa prescrição automática
       return perfil.ambienteTreino === 'Casa' ? exercicioServeParaCasa(exBanco) : ((exBanco.ambiente || 'Academia') === 'Academia' && !ehExercicioElastico(exBanco));
     });
@@ -9194,6 +9250,7 @@ function gerarTreinoSemanal(perfil){
             // A amostra embaralhada não tinha opção válida — antes de desistir, busca direto no banco inteiro (não só na amostra)
             const todoOBanco = exerciciosBanco.filter(function(e){
               if((e.grupo || e.categoria) !== grupoDoDia) return false;
+              if(!exercicioPodeSerPrescrito(e)) return false;
               if(perfil.evitarPliometrico && ehExercicioPliometrico(e)) return false;
               if(!nivelPermiteExercicio(perfil.nivel, e)) return false;
               return perfil.ambienteTreino === 'Casa' ? exercicioServeParaCasa(e) : ((e.ambiente || 'Academia') === 'Academia' && !ehExercicioElastico(e));
@@ -9229,6 +9286,7 @@ function gerarTreinoSemanal(perfil){
     }
     removerVariacoesDuplicadasDeAfundo(dia);
     removerLegsExcedentesNoDia(dia);
+    aplicarRegrasFixasNoDia(dia);
     removerExerciciosExatamenteRepetidosNoDia(dia);
     removerUnilateraisExcedentesNoDia(dia);
     const duracaoFinal = calcularDuracaoDia(dia);
@@ -9286,6 +9344,9 @@ function gerarTreinoSemanal(perfil){
   // recorrentes por decisão de metodologia, não por falta de variedade.
   limitarRepeticaoEntreDias(semana, perfil);
 
+  // Regras fixas por último de verdade (2 elevações pélvicas, "aula"); se tirar algo, completa o mínimo de novo
+  semana.forEach(function(dia){ if(dia.descanso) return; aplicarRegrasFixasNoDia(dia); garantirMinimoDeExerciciosPorDia(dia, perfil); });
+
   return semana;
 }
 
@@ -9313,7 +9374,9 @@ function limitarRepeticaoEntreDias(semana, perfil){
         if(!exBanco) return;
         const jaUsados = nomesI.concat(nomesJ).map(function(n){ return n.toUpperCase(); });
         const candidatos = selecionarExerciciosVariados(exBanco.grupo, (perfil.nomeAluna || '') + '_div' + i + j, 6, (perfil.indiceCiclo || 0) + i + j, {}, perfil.ambienteTreino, perfil.evitarPliometrico, perfil.nivel) || [];
-        const substituto = candidatos.find(function(c){ return jaUsados.indexOf(c.toUpperCase()) === -1; });
+        const outrasDoDiaJ = nomesJ.filter(function(n){ return n !== nomeRepetido; });
+        const diaJTemElevacao = outrasDoDiaJ.some(ehElevacaoPelvica);
+        const substituto = candidatos.find(function(c){ return jaUsados.indexOf(c.toUpperCase()) === -1 && !ehExercicioDeAula(c) && !(diaJTemElevacao && ehElevacaoPelvica(c)); });
         if(!substituto) return; // não achou opção nova, deixa como está — repetir é melhor que ficar sem exercício
         const idx = diaJ.ex.findIndex(function(linha){ return extrairNomeExercicioDeLinha(linha) === nomeRepetido; });
         if(idx === -1) return;
@@ -9450,6 +9513,10 @@ function validarPrescricao(perfil, semana){
   });
   checklist.push({ item: 'Nunca 2 exercícios unilaterais no mesmo dia', ok: diasComProblemaUnilateral.length === 0, detalhe: diasComProblemaUnilateral.length ? diasComProblemaUnilateral.join(', ') : 'ok' });
   checklist.push({ item: 'Nunca 2 Leg Press sem um ser unilateral', ok: diasComDoisLegs.length === 0, detalhe: diasComDoisLegs.length ? diasComDoisLegs.join(', ') : 'ok' });
+  const diasComDuasElevacoes = diasDeTreino.filter(function(d){ return d.ex.filter(function(linha){ return nomesDaLinhaDeTreino(linha).some(ehElevacaoPelvica); }).length > 1; }).map(function(d){ return d.n; });
+  checklist.push({ item: 'Nunca 2 elevações pélvicas no mesmo treino', ok: diasComDuasElevacoes.length === 0, detalhe: diasComDuasElevacoes.length ? diasComDuasElevacoes.join(', ') : 'ok' });
+  const diasComAula = diasDeTreino.filter(function(d){ return d.ex.some(function(linha){ return nomesDaLinhaDeTreino(linha).some(ehExercicioDeAula); }); }).map(function(d){ return d.n; });
+  checklist.push({ item: 'Nenhum exercício com "aula" no nome', ok: diasComAula.length === 0, detalhe: diasComAula.length ? diasComAula.join(', ') : 'ok' });
 
   // 16. Nenhuma variação de Afundo duplicada no mesmo dia — já evitado na hora de gerar, reconferido
   // aqui pra pegar qualquer edição manual feita depois que reintroduza a duplicidade
@@ -11213,7 +11280,6 @@ function renderProgressaoPendente(nomeAluna){
 
     const faltam = diasDeTreino.filter(function(d){ return !est.vistos[d.n]; }).map(function(d){ return d.n; });
     html += '<div class="pg-rod"><div class="pg-info">' + (faltam.length === 0 ? '<b>Todos os dias revisados.</b>' : '<b>' + escaparHtmlFicha(est.diaAberto) + ' revisada.</b> Faltam ' + faltam.join(', ').replace(/, ([^,]*)$/, ' e $1') + '.') + '</div>' +
-      '<span style="font-size:12px;color:var(--gold);text-decoration:underline;cursor:pointer;" onclick="irParaFeedbackDoTreino()">Anotar feedback sobre esse treino</span>' +
       '<button class="btn-gold" onclick="confirmarProgressaoManual(\'' + nomeJs + '\')">Confirmar e progredir o treino</button></div>';
   }
   html += '</div>';
@@ -11236,7 +11302,7 @@ function opcoesDeTrocaParaProgressao(a, par, busca){
   const termo = semAcentoMinusculo(busca || '').trim();
   const de = par.atual ? par.atual.p.nome : null;
   return exerciciosBanco.filter(function(e){
-    if(!e || !e.nome || !serve(e)) return false;
+    if(!e || !e.nome || !serve(e) || !exercicioPodeSerPrescrito(e)) return false;
     if(semAcentoMinusculo(e.nome).trim() === semAcentoMinusculo(ref).trim()) return false;
     if(de && trocaEstaBloqueada(de, capitalizarNomeExercicio(e.nome))) return false;
     return termo ? semAcentoMinusculo(e.nome).indexOf(termo) !== -1 : (grupo && (e.grupo || e.categoria) === grupo);
@@ -11815,6 +11881,7 @@ function abrirSelecaoExercicioParaAdicionar(diaIndex, grupo){
   const ehTreinoDeCasa = alunaAberta && alunaAberta.ambienteTreino === 'Casa';
   const mostrarTodosDeCasa = grupo === '__CASA_TODOS__';
   let opcoes = exerciciosBanco.filter(function(e){
+    if(!exercicioPodeSerPrescrito(e)) return false;
     if(mostrarTodosDeCasa) return e.ambiente === 'Casa';
     const pertenceAoGrupo = e.grupo === grupo || e.categoria === grupo;
     if(!pertenceAoGrupo) return false;
@@ -12152,7 +12219,7 @@ function mostrarOpcoesDeTrocaMesmoAssim(diaIndex, exIndex){
   let opcoes = exerciciosBanco.filter(function(e){
     const grupoDoEx = e.grupo || e.categoria;
     const mesmoAmbiente = exAtualBanco ? ((e.ambiente || 'Academia') === (exAtualBanco.ambiente || 'Academia')) : true;
-    return (!grupo || grupoDoEx === grupo) && mesmoAmbiente && e.nome.toUpperCase() !== nomeAtual.toUpperCase();
+    return exercicioPodeSerPrescrito(e) && (!grupo || grupoDoEx === grupo) && mesmoAmbiente && e.nome.toUpperCase() !== nomeAtual.toUpperCase();
   });
 
   // Motor 5: prioriza mesma família biomecânica primeiro (troca com justificativa funcional, não aleatória);
@@ -12576,7 +12643,7 @@ function htmlCaixasParceirosCombo(nomePrincipal, quantosParceiros, parceirosAtua
   const grupo = exPrincipalBanco ? (exPrincipalBanco.grupo || exPrincipalBanco.categoria) : null;
   const opcoes = exerciciosBanco.filter(function(e){
     const grupoDoEx = e.grupo || e.categoria;
-    return (!restringirMesmoGrupo || !grupo || grupoDoEx === grupo) && e.nome.toUpperCase() !== nomePrincipal.toUpperCase();
+    return exercicioPodeSerPrescrito(e) && (!restringirMesmoGrupo || !grupo || grupoDoEx === grupo) && e.nome.toUpperCase() !== nomePrincipal.toUpperCase();
   }).sort(function(x, y){ return x.nome.localeCompare(y.nome, 'pt-BR'); });
 
   // Achado real de auditoria: a prescrição mostra o exercício principal com nome sublinhado e
@@ -12775,7 +12842,9 @@ function confirmarTransformarEmTabata(nomeAluna){
 // Nada saiu da ficha: cada parte que já existia só mudou de lugar.
 let abaFichaAtual = 'geral';
 let fichaAbertaNome = null;
-const ABAS_DA_FICHA = [['geral', 'Visão geral'], ['treino', 'Treino'], ['prescricao', 'Prescrição'], ['historico', 'Histórico e acesso']];
+// Prescrição de treino junta o que eram 3 abas (Prescrição, Treino e o acesso): ajusta nível/frequência, gera,
+// ajusta a semana logo abaixo e manda pelo WhatsApp no fim. Histórico fica só com o acompanhamento.
+const ABAS_DA_FICHA = [['geral', 'Visão geral'], ['treino', 'Prescrição de treino'], ['historico', 'Histórico']];
 
 function abasDaFicha(){
   return '<div class="ficha-abas">' + ABAS_DA_FICHA.map(function(x){
@@ -13000,12 +13069,6 @@ function openAlunaDetail(i){
       '</div>';
     treinoAcoesHtml += '<button class="btn-secondary" style="margin-top:10px;" onclick="gerarTreinoAutomaticoParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-wand" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>Prescrever treino automaticamente</button>';
   }
-  treinoAcoesHtml += '<div id="validacao-treino-area"></div>';
-  treinoAcoesHtml += '<p class="section-label" style="margin-top:18px;">Seu feedback sobre esse treino</p>' +
-    '<p class="page-sub" style="margin-top:-4px;">Anote aqui o que achou estranho ou errado, isso fica guardado organizado pra você trazer numa próxima conversa e a gente transformar em regra permanente.</p>' +
-    '<div class="form-group"><textarea class="form-input" id="feedback-gerador-texto" rows="3" placeholder="Ex: achei o volume de posterior baixo demais pra essa aluna..."></textarea></div>' +
-    '<button class="btn-secondary" style="" onclick="salvarFeedbackGerador(\'' + a.nome.replace(/'/g,"\\'") + '\')">Salvar feedback</button>' +
-    '<div id="lista-feedback-gerador"></div>';
 
   let queixaHtml = '';
   if(a.queixaDor && !a.patologiaConfirmada){
@@ -13030,7 +13093,31 @@ function openAlunaDetail(i){
 
   el.innerHTML =
     cabecalhoFichaAluna(a) + abasDaFicha() +
-    '<div class="ficha-sec" data-ficha="prescricao">' +
+    '<div class="ficha-sec" data-ficha="geral">' +
+    painelGeralDaFicha(a) +
+    '<div id="resumo-ia-area" style="margin-bottom:18px;"></div>' +
+    (objetivoSugereTabata(a) && !a.tabataSugestaoRespondida ? (
+      '<div class="info-box" style="margin-bottom:12px;border-color:var(--border-strong);">' +
+        '<p class="lbl">💡 Sugestão baseada no objetivo dela</p>' +
+        '<p class="txt">O objetivo relatado por ela menciona emagrecimento/definição. Um protocolo Tabata (circuito intervalado, ' + (a.nivel || 'Iniciante') + ') pode complementar bem o treino resistido nesse caso. Quer que eu já deixe pronto pra você aplicar num dos dias?</p>' +
+        '<div style="display:flex;gap:8px;margin-top:8px;">' +
+          '<span class="chip" style="cursor:pointer;background:var(--success-soft);color:var(--success);" onclick="responderSugestaoTabata(\'' + a.nome.replace(/'/g,"\\'") + '\',true)">Sim, quero ver</span>' +
+          '<span class="chip" style="cursor:pointer;" onclick="responderSugestaoTabata(\'' + a.nome.replace(/'/g,"\\'") + '\',false)">Não, obrigado</span>' +
+        '</div>' +
+      '</div>'
+    ) : '') +
+    (detectarRiscoAbandonoPorConstancia(a.nome) ? (
+      '<div class="info-box" style="margin-top:14px;border-color:#E2A33D;">' +
+        '<p class="lbl" style="color:#E2A33D;">⚠ Risco de abandono</p>' +
+        '<p class="txt">3 semanas seguidas com constância abaixo de 40%. O volume do próximo treino já foi reduzido automaticamente pra facilitar ela voltar. Vale puxar ela de volta com uma mensagem agora.</p>' +
+        (a.telefone ? '<a href="https://wa.me/55' + a.telefone.replace(/\D/g,'') + '" target="_blank" rel="noopener" class="btn-gold" style="display:inline-block;text-decoration:none;text-align:center;margin-top:8px;padding:10px 16px;width:auto;"><i class="ti ti-brand-whatsapp" style="margin-right:6px;"></i>Chamar no WhatsApp</a>' : '') +
+      '</div>'
+    ) : '') +
+    renderAuditorPatologia(a) +
+    renderMotor8(a.nome) +
+    '</div>' +
+    '<div class="ficha-sec" data-ficha="treino">' +
+    '<p class="section-label" style="margin-top:4px;">1 · Prescrição</p>' +
     '<div class="stat-grid">' +
       '<div class="stat-card"><p class="stat-label">Nível</p>' +
         '<select class="form-select" style="font-size:13px;padding:6px;margin-top:4px;" onchange="editarNivelAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)">' +
@@ -13072,40 +13159,14 @@ function openAlunaDetail(i){
     '</div>' +
     '<p style="font-size:11px;color:var(--text-faint);margin:-8px 0 12px;">Ajustar aqui atualiza automaticamente toda a estrutura de treino gerada. O gerador nunca mistura exercício de academia com exercício de casa</p>' +
     '<button class="btn-secondary" style="margin-bottom:18px;" onclick="abrirResumoCompletoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-file-description" style="margin-right:6px;"></i>Resumo completo (diagnóstico, avaliação, plano)</button>' +
-    '</div>' +
-    '<div class="ficha-sec" data-ficha="geral">' +
-    painelGeralDaFicha(a) +
-    '<div id="resumo-ia-area" style="margin-bottom:18px;"></div>' +
-    (objetivoSugereTabata(a) && !a.tabataSugestaoRespondida ? (
-      '<div class="info-box" style="margin-bottom:12px;border-color:var(--border-strong);">' +
-        '<p class="lbl">💡 Sugestão baseada no objetivo dela</p>' +
-        '<p class="txt">O objetivo relatado por ela menciona emagrecimento/definição. Um protocolo Tabata (circuito intervalado, ' + (a.nivel || 'Iniciante') + ') pode complementar bem o treino resistido nesse caso. Quer que eu já deixe pronto pra você aplicar num dos dias?</p>' +
-        '<div style="display:flex;gap:8px;margin-top:8px;">' +
-          '<span class="chip" style="cursor:pointer;background:var(--success-soft);color:var(--success);" onclick="responderSugestaoTabata(\'' + a.nome.replace(/'/g,"\\'") + '\',true)">Sim, quero ver</span>' +
-          '<span class="chip" style="cursor:pointer;" onclick="responderSugestaoTabata(\'' + a.nome.replace(/'/g,"\\'") + '\',false)">Não, obrigado</span>' +
-        '</div>' +
-      '</div>'
-    ) : '') +
-    (detectarRiscoAbandonoPorConstancia(a.nome) ? (
-      '<div class="info-box" style="margin-top:14px;border-color:#E2A33D;">' +
-        '<p class="lbl" style="color:#E2A33D;">⚠ Risco de abandono</p>' +
-        '<p class="txt">3 semanas seguidas com constância abaixo de 40%. O volume do próximo treino já foi reduzido automaticamente pra facilitar ela voltar. Vale puxar ela de volta com uma mensagem agora.</p>' +
-        (a.telefone ? '<a href="https://wa.me/55' + a.telefone.replace(/\D/g,'') + '" target="_blank" rel="noopener" class="btn-gold" style="display:inline-block;text-decoration:none;text-align:center;margin-top:8px;padding:10px 16px;width:auto;"><i class="ti ti-brand-whatsapp" style="margin-right:6px;"></i>Chamar no WhatsApp</a>' : '') +
-      '</div>'
-    ) : '') +
-    renderAuditorPatologia(a) +
-    renderMotor8(a.nome) +
-    '</div>' +
-    '<div class="ficha-sec" data-ficha="treino">' +
-    '<p class="section-label" style="margin-top:4px;">Treino atual</p>' +
+    '<p class="section-label" style="margin-top:4px;">2 · Gerar o treino</p>' +
+    treinoAcoesHtml +
+    '<p class="section-label" style="margin-top:18px;">3 · Treino atual (toque no dia pra ajustar)</p>' +
     '<p style="font-size:12px;color:var(--gold-soft);margin:6px 0 12px;cursor:pointer;" onclick="abrirTreinosArquivados(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-archive" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Ver treinos arquivados (histórico)</p>' +
     '<div id="treinos-arquivados-area"></div>' +
     treinoHtml +
-    treinoAcoesHtml +
-    '</div>' +
-    '<div class="ficha-sec" data-ficha="historico">' +
-    renderSecaoColapsavel('Acompanhamento e histórico', renderElegibilidadeFase(a) + renderFunilEngajamento(a) + renderLinhaDoTempo(a) + renderPromocaoNivel(a) + renderBlocoPeriodizacao(a) + renderHistoricoPrioridade(a) + renderEditorPesoComposicaoPersonal(a) + renderTecnicaPendente(a) + renderProgressao(a), 'acompanhamento') +
-    '<p class="section-label" style="margin-top:22px;">Acesso ao app</p>' +
+    '<div id="validacao-treino-area"></div>' + // a conferência das regras fica logo depois da semana, sem empurrar o treino pra baixo
+    '<p class="section-label" style="margin-top:22px;">4 · Enviar e acesso ao app</p>' +
     (a.authId && a.senhaGerada
       ? '<div class="info-box"><p class="lbl" style="color:var(--success);">Acesso gerado pelo app (se ela não conseguir entrar, use "Alterar senha")</p>' +
         '<p class="txt">E-mail: ' + a.email + '<br>Senha: <b>' + a.senhaGerada + '</b><br>Link do app: ' + (LINK_DO_APP) + '</p>' +
@@ -13123,6 +13184,9 @@ function openAlunaDetail(i){
       : '<button class="btn-secondary" style="" onclick="criarLoginParaAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-key" style="font-size:14px;vertical-align:-2px;margin-right:6px;"></i>Gerar acesso ao app</button>'
     ) +
     '<div id="acesso-gerado-area"></div>' +
+    '</div>' +
+    '<div class="ficha-sec" data-ficha="historico">' +
+    renderSecaoColapsavel('Acompanhamento e histórico', renderElegibilidadeFase(a) + renderFunilEngajamento(a) + renderLinhaDoTempo(a) + renderPromocaoNivel(a) + renderBlocoPeriodizacao(a) + renderHistoricoPrioridade(a) + renderEditorPesoComposicaoPersonal(a) + renderTecnicaPendente(a) + renderProgressao(a), 'acompanhamento') +
     '<p class="page-sub" style="margin-top:10px;">Anamnese respondida em ' + (a.dataAnamnese || 'data desconhecida') + '</p>' +
     '</div>';
   if(fichaAbertaNome !== a.nome){ fichaAbertaNome = a.nome; abaFichaAtual = 'geral'; } // outra aluna: começa na Visão geral
@@ -13130,7 +13194,6 @@ function openAlunaDetail(i){
   carregarProgressoParaFicha(a);
   showPersonalView('aluna');
   aplicarTransicaoSuave('aluna-detail-content');
-  renderListaFeedbackGerador(a.nome);
 }
 
 function renderPromocaoNivel(a){
@@ -15027,6 +15090,7 @@ function gerarTreinoTabata(nivel, restricoesTexto){
 
   // Filtra exercícios que batem com alguma restrição relatada na anamnese, pra não prescrever o que não deveria
   const exerciciosSeguros = bancoTabataExercicios.filter(function(ex){
+    if(ehExercicioDeAula(ex.nome)) return false;
     if(!ex.restricao) return true;
     return restricoesLower.indexOf(ex.restricao) === -1;
   });
@@ -15771,7 +15835,7 @@ function verAulasDoCursoDoApp(idCurso){
   if(!curso || !area) return;
   if(area.innerHTML){ area.innerHTML = ''; return; }
   area.innerHTML = '<div style="margin-top:8px;">' + curso.aulas.map(function(a, i){
-    return '<p class="txt" style="font-size:12px;margin:0 0 4px;">' + String(i + 1).padStart(2, '0') + ' · ' + escaparHtmlFicha(tituloDaAula(a, i)) + (a.titulo ? '' : ' <span style="color:var(--text-faint);">(sem título)</span>') +
+    return '<p class="txt" style="font-size:12px;margin:0 0 4px;">' + (tituloJaTemNumero(a) ? '' : String(i + 1).padStart(2, '0') + ' · ') + escaparHtmlFicha(tituloDaAula(a, i)) + (a.titulo ? '' : ' <span style="color:var(--text-faint);">(sem título)</span>') +
       ' <a href="' + a.video + '" target="_blank" rel="noopener" style="color:var(--gold-soft);">abrir</a></p>';
   }).join('') + '</div>';
 }
@@ -17998,7 +18062,7 @@ function alternarSubstituicoesInline(idx, nomeEx){
   if(container.style.display === 'none' || !container.innerHTML){
     const exAtual = buscarExercicioNoBanco(nomeEx);
     const grupo = exAtual ? (exAtual.grupo || exAtual.categoria) : null;
-    const opcoes = grupo ? exerciciosBanco.filter(function(e){ return (e.grupo === grupo || e.categoria === grupo) && e.nome.toUpperCase() !== nomeEx.toUpperCase(); }).slice(0, 3) : [];
+    const opcoes = grupo ? exerciciosBanco.filter(function(e){ return exercicioPodeSerPrescrito(e) && (e.grupo === grupo || e.categoria === grupo) && e.nome.toUpperCase() !== nomeEx.toUpperCase(); }).slice(0, 3) : [];
     container.innerHTML = opcoes.length === 0
       ? '<p class="txt" style="font-size:11px;color:var(--text-faint);margin:0 0 6px;">Sem opções parecidas cadastradas ainda.</p>'
       : '<div class="info-box" style="margin:0 0 8px;padding:10px 12px;">' +
@@ -18396,8 +18460,10 @@ function abrirCurso(c){
 }
 
 // Na lista: aula com título leva o número na frente; aula sem título já é "Aula 01" (não repete o número)
+// Título que já é "Aula 12" (numeração real do curso, que pode ter aulas faltando) não ganha outro número na frente
+function tituloJaTemNumero(a){ return /^aula\s*\d+/i.test(String((a && a.titulo) || '').trim()); }
 function rotuloDaAulaNaLista(a, i){
-  return (a.titulo && a.titulo.trim()) ? (i + 1) + '. ' + a.titulo : tituloDaAula(a, i);
+  return (a.titulo && a.titulo.trim() && !tituloJaTemNumero(a)) ? (i + 1) + '. ' + a.titulo : tituloDaAula(a, i);
 }
 
 function renderPlaylist(){
@@ -18427,7 +18493,7 @@ function playAula(i){
       // O link do YouTube fica logo abaixo: se o player não carregar (vídeo com incorporação desligada, por exemplo), ela ainda assiste
       ? '<div class="video-block"><iframe src="' + embed + '" title="' + titulo + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>' + ytFallback(a.video)
       : '<div class="video-block"><i class="ti ti-player-play"></i></div>') +
-    '<p class="page-sub" style="margin:10px 0 0;">Aula ' + (i + 1) + ' de ' + c.aulas.length + '</p>' +
+    '<p class="page-sub" style="margin:10px 0 0;">' + (tituloJaTemNumero(a) ? 'Vídeo ' : 'Aula ') + (i + 1) + ' de ' + c.aulas.length + '</p>' +
     '<h1 class="page-title" style="margin-top:0;">' + titulo + '</h1>' +
     (i < c.aulas.length - 1 ? '<button class="btn-gold" style="margin-top:12px;" onclick="playAula(' + (i + 1) + ')">Próxima aula: ' + tituloDaAula(c.aulas[i + 1], i + 1) + '</button>' : '');
 }
