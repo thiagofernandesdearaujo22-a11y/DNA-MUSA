@@ -958,7 +958,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-24-AQ-ABA-PRESCRICAO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-26-AR-MANTER-NA-PROGRESSAO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1862,7 +1862,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-24-AQ-ABA-PRESCRICAO';
+const VERSAO_APP = '2026-10-26-AR-MANTER-NA-PROGRESSAO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -11246,12 +11246,19 @@ function renderProgressaoPendente(nomeAluna){
       const ehSua = par.novo && ajDia.trocas[chaveTroca];
       let etiqueta = '', cls = '', seta = 'cinza', bts = '';
       const btTrocar = par.novo && !par.novo.p.combo ? '<button class="pg-b" onclick="event.stopPropagation();abrirTrocaDaProgressao(\'' + nomeJs + '\',' + par.novo.i + ')">Trocar</button>' : '';
-      if(par.tipo === 'mantem'){
+      const mantidoPorVoce = par.novo && (ajDia.mantidosDaTroca || {})[chaveTroca];
+      if(par.tipo === 'mantem' && mantidoPorVoce){
+        // "Manter": o exercício de hoje ficou no lugar da troca sugerida, só pra essa aluna
+        etiqueta = '<span class="pg-st seu">MANTIDO POR VOCÊ</span>'; cls = ''; seta = 'cinza';
+        bts = '<button class="pg-b" onclick="event.stopPropagation();desfazerManterNaProgressao(\'' + nomeJs + '\',' + par.novo.i + ')">Desfazer</button>';
+      } else if(par.tipo === 'mantem'){
         etiqueta = ehSua ? '<span class="pg-st seu">SUA TROCA</span>' : '<span class="pg-st mantem">MANTÉM</span>'; cls = ehSua ? 'troca' : ''; seta = ehSua ? 'verde' : 'cinza';
         bts = btTrocar;
       } else if(par.tipo === 'troca'){
         etiqueta = ehSua ? '<span class="pg-st seu">SUA TROCA</span>' : '<span class="pg-st troca">TROCA</span>'; cls = 'troca'; seta = 'verde';
-        bts = btTrocar + (ehSua ? '' : '<button class="pg-b nao" onclick="event.stopPropagation();marcarTrocaSemSentido(\'' + nomeJs + '\',' + par.novo.i + ')">Não faz sentido</button>');
+        const podeManter = !ehSua && par.atual && !par.atual.p.combo && !par.novo.p.combo;
+        bts = btTrocar + (podeManter ? '<button class="pg-b" onclick="event.stopPropagation();manterNaTrocaDaProgressao(\'' + nomeJs + '\',' + par.novo.i + ')">Manter</button>' : '') +
+          (ehSua ? '' : '<button class="pg-b nao" onclick="event.stopPropagation();marcarTrocaSemSentido(\'' + nomeJs + '\',' + par.novo.i + ')">Não faz sentido</button>');
       } else if(par.tipo === 'novo' && (ajDia.removidos[est.diaAberto] || []).indexOf(par.novo.i) !== -1){
         etiqueta = '<span class="pg-st sai">TIRADO POR VOCÊ</span>'; cls = 'sai'; seta = 'cinza';
         bts = '<button class="pg-b" onclick="event.stopPropagation();desfazerTirarNaProgressao(\'' + nomeJs + '\',' + par.novo.i + ')">Desfazer</button>';
@@ -11378,6 +11385,39 @@ function manterSaiNaProgressao(nomeAluna, idxAtual){
   const aj = ajustesDaProgressao(a);
   aj.mantidos[est.diaAberto] = aj.mantidos[est.diaAberto] || [];
   if(aj.mantidos[est.diaAberto].indexOf(da.ex[idxAtual]) === -1) aj.mantidos[est.diaAberto].push(da.ex[idxAtual]);
+  renderProgressaoPendente(nomeAluna);
+}
+
+// "Manter": numa linha de TROCA, o exercício de hoje continua (só pra essa aluna; o motor segue podendo sugerir
+// essa troca pras outras). As séries e repetições seguem as da progressão, igual ao "Trocar".
+function manterNaTrocaDaProgressao(nomeAluna, idxNovo){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  const est = estadoProgressao[nomeAluna];
+  if(!a || !est || !a.treinoAtual) return false;
+  const sim = simularTreinoProgredido(a);
+  const dn = diaPorNome(sim.dias, est.diaAberto);
+  const da = diaPorNome(a.treinoAtual.dias, est.diaAberto);
+  if(!dn || !da) return false;
+  const par = parearDiaDaProgressao(da.ex, dn.ex).find(function(x){ return x.novo && x.novo.i === idxNovo && x.tipo === 'troca'; });
+  if(!par || par.atual.p.combo || par.novo.p.combo) return false;
+  const aj = ajustesDaProgressao(a);
+  const k = est.diaAberto + '|' + idxNovo;
+  aj.trocas[k] = par.atual.p.nome;
+  aj.mantidosDaTroca = aj.mantidosDaTroca || {};
+  aj.mantidosDaTroca[k] = true;
+  est.trocaAberta = null;
+  renderProgressaoPendente(nomeAluna);
+  return true;
+}
+
+function desfazerManterNaProgressao(nomeAluna, idxNovo){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  const est = estadoProgressao[nomeAluna];
+  if(!a || !est) return;
+  const aj = ajustesDaProgressao(a);
+  const k = est.diaAberto + '|' + idxNovo;
+  delete aj.trocas[k];
+  if(aj.mantidosDaTroca) delete aj.mantidosDaTroca[k];
   renderProgressaoPendente(nomeAluna);
 }
 
