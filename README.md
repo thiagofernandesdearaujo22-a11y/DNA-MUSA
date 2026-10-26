@@ -1,4 +1,4 @@
-[dna_musa_149.html](https://github.com/user-attachments/files/33966720/dna_musa_149.html)
+[dna_musa_150.html](https://github.com/user-attachments/files/33967657/dna_musa_150.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -381,6 +381,11 @@
   .cd-nm{display:flex;gap:9px;align-items:center;} .cd-nm b{display:block;font-size:13px;overflow-wrap:anywhere;} .cd-nm small{display:block;font-size:10.5px;color:var(--text-faint);margin-top:1px;}
   .cd-av{width:30px;height:30px;border-radius:50%;background:var(--card-2);border:1px solid rgba(232,197,138,.3);display:flex;align-items:center;justify-content:center;font-size:10.5px;color:var(--gold-soft);flex-shrink:0;}
   .cd-barra{display:block;height:6px;border-radius:4px;background:var(--card-2);overflow:hidden;width:100%;margin-bottom:3px;} .cd-barra i{display:block;height:100%;background:var(--gold);}
+  #bottom-nav-fixa.nav-desafio .bottom-nav-item span{font-size:10px;white-space:nowrap;letter-spacing:-.1px;}
+  .aula-ex{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;margin-bottom:8px;background:var(--card);}
+  .aula-ex.pronta{cursor:pointer;} .aula-ex-play{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--card-2);color:var(--text-faint);font-size:14px;}
+  .aula-ex.pronta .aula-ex-play{background:linear-gradient(135deg,#F4D9A5,#E8C58A);color:#1a1712;}
+  .aula-ex-txt{display:flex;flex-direction:column;min-width:0;} .aula-ex-txt b{font-size:13.5px;font-weight:600;} .aula-ex-txt small{font-size:11.5px;color:var(--text-faint);margin-top:2px;} .aula-ex.pronta .aula-ex-txt small{color:var(--success);}
   .gf-linha{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:4px 10px;align-items:center;padding:8px 2px;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text);}
   .gf-linha b{font-weight:600;overflow-wrap:anywhere;} .gf-linha b span{font-weight:400;color:var(--text-faint);font-size:11.5px;} .gf-linha small{font-size:11px;color:var(--text-faint);white-space:nowrap;}
   .gf-motivo{grid-column:1 / -1;font-size:11.5px;line-height:1.4;color:#E8A08A;overflow-wrap:anywhere;}
@@ -959,7 +964,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-26-AR-MANTER-NA-PROGRESSAO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-26-AS-AULAS-DESAFIO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1254,6 +1259,9 @@
       <p class="page-sub">Avalie 10 áreas da sua vida, uma vez por mês</p>
       <div id="area-rodadavida-conteudo"></div>
     </div>
+
+    <!-- AULAS DOS EXERCÍCIOS (SECA 21, só desafio) -->
+    <div class="view" data-view="aulas-ex"><div id="aulas-ex-conteudo"></div></div>
 
     <!-- MENTORIA -->
     <div class="view" data-view="mentoria">
@@ -1815,6 +1823,10 @@
       <div class="bottom-nav-item" data-nav="evolucao" onclick="irParaAbaFixa('evolucao')">
         <svg class="nav-icon-svg nav-traco" width="22" height="22" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg><span>Evolução</span>
       </div>
+      <!-- Só no modo "só desafio" (SECA 21): aulas de cada exercício do treino. Fica escondido no resto. -->
+      <div class="bottom-nav-item" data-nav="aulas-ex" onclick="irParaAbaFixa('aulas-ex')" style="display:none;">
+        <svg class="nav-icon-svg nav-traco" width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/></svg><span>Aulas</span>
+      </div>
       <div class="bottom-nav-item" data-nav="mentoria" onclick="irParaAbaFixa('mentoria')">
         <svg class="nav-icon-svg nav-traco" width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/></svg><span>Mentoria</span>
       </div>
@@ -1863,7 +1875,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-26-AR-MANTER-NA-PROGRESSAO';
+const VERSAO_APP = '2026-10-26-AS-AULAS-DESAFIO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -8461,14 +8473,87 @@ function linkConsultoriaDoDesafio(){
 function htmlRodapeSoDesafio(a){
   const curso = cursoDoAppPorId('seca21');
   const temAulas = curso && alunaTemCursoLiberado(a, 'seca21');
-  return (temAulas ? htmlTarefaHome('ti-player-play', 'Aulas do SECA 21', curso.aulas.length + ' aulas · toque pra assistir', 'abrirCursoDoApp(\'seca21\')') : '') +
+  return (temAulas ? htmlTarefaHome('ti-home', 'Treinos em casa', curso.aulas.length + ' treinos · toque pra assistir', 'abrirCursoDoApp(\'seca21\')') : '') +
     '<a class="s21-convite" href="' + linkConsultoriaDoDesafio() + '" target="_blank" rel="noopener">Quer um treino montado só pra você? <b>Conheça a consultoria DNA Musa</b></a>';
 }
 
 function atualizarMenuDoDesafio(soDesafio){
   const t = document.querySelector('[data-nav="treino"] span'), m = document.querySelector('[data-nav="mentoria"] span');
   if(t) t.textContent = soDesafio ? 'Treinos' : 'Treino';
-  if(m) m.textContent = soDesafio ? 'Aulas' : 'Mentoria';
+  if(m) m.textContent = soDesafio ? 'Treinos em casa' : 'Mentoria';
+  // Só desafio: sai a Evolução, entra "Aulas" (aulas dos exercícios); "Mentoria" vira "Treinos em casa" (ícone de casa)
+  const ev = document.querySelector('[data-nav="evolucao"]'), au = document.querySelector('[data-nav="aulas-ex"]');
+  if(ev && ev.style) ev.style.display = soDesafio ? 'none' : '';
+  if(au && au.style) au.style.display = soDesafio ? '' : 'none';
+  const barraMenu = document.getElementById('bottom-nav-fixa');
+  if(barraMenu && barraMenu.classList) barraMenu.classList.toggle('nav-desafio', !!soDesafio); // "Treinos em casa" numa linha só
+  const icone = document.querySelector('[data-nav="mentoria"] svg');
+  if(icone){
+    if(!icone.getAttribute('data-original')) icone.setAttribute('data-original', icone.innerHTML);
+    icone.innerHTML = soDesafio ? '<path d="M4 11l8-7 8 7v9H4z"/><path d="M9 20v-6h6v6"/>' : icone.getAttribute('data-original');
+  }
+}
+
+// ===== AULAS DOS EXERCÍCIOS DO SECA 21 (aba "Aulas" de quem é só desafio) =====
+// PARA ADICIONAR UMA AULA: coloque o nome do exercício (como aparece no treino) e o link do vídeo, assim:
+//   'ELEVAÇÃO PÉLVICA': 'https://youtu.be/XXXXXXXX',
+// Vale pra toda aluna que tiver esse exercício no treino. Sem link, o exercício aparece como "Aula em breve".
+const AULAS_DOS_EXERCICIOS_SECA21 = {
+};
+
+function linkDaAulaDoExercicio(nome){
+  const alvo = semAcentoMinusculo(String(nome || '')).trim();
+  const k = Object.keys(AULAS_DOS_EXERCICIOS_SECA21).find(function(x){ return semAcentoMinusculo(x).trim() === alvo; });
+  return k ? AULAS_DOS_EXERCICIOS_SECA21[k] : '';
+}
+
+// Os exercícios do treino dela, por treino (A, B, C...), sem repetir o mesmo exercício
+function exerciciosDasAulasDaAluna(a){
+  const semana = treinoSeca21DaAluna(a);
+  if(!semana) return [];
+  const vistos = {};
+  return semana.dias.map(function(d){
+    const nomes = [];
+    d.ex.forEach(function(l){
+      partesLinhaSeca21(l).nomes.forEach(function(nome){
+        const k = semAcentoMinusculo(nome).trim();
+        if(vistos[k]) return;
+        vistos[k] = true;
+        nomes.push(nome);
+      });
+    });
+    return { treino: d.n, foco: d.foco, nomes: nomes };
+  }).filter(function(g){ return g.nomes.length; });
+}
+
+function abrirAulaDoExercicio(nome){
+  const link = linkDaAulaDoExercicio(nome);
+  if(!link) return false;
+  abrirVideoApenasExercicio('Aula · ' + nome, null, link); // nome com "Aula ·" não acha no banco, então usa o link da aula
+  return true;
+}
+
+function renderAulasDosExercicios(){
+  const area = document.getElementById('aulas-ex-conteudo');
+  if(!area) return;
+  let a = null;
+  try { a = obterAlunaLogadaOuCriar(); } catch(e){}
+  const grupos = a ? exerciciosDasAulasDaAluna(a) : [];
+  let html = '<p class="section-label" style="margin:0 0 2px;">SECA 21</p><h1 class="page-title" style="margin-top:0;">Aulas</h1>' +
+    '<p class="page-sub">A aula de cada exercício do seu treino: como fazer, onde sentir e os erros mais comuns.</p>';
+  if(!grupos.length){
+    area.innerHTML = html + '<div class="info-box"><p class="txt" style="margin:0;">As aulas aparecem aqui assim que o seu treino do desafio for liberado.</p></div>';
+    return;
+  }
+  grupos.forEach(function(g){
+    html += '<p class="section-label" style="margin-top:18px;">' + escaparHtmlFicha(g.treino + ' · ' + g.foco) + '</p>';
+    g.nomes.forEach(function(nome){
+      const tem = !!linkDaAulaDoExercicio(nome);
+      html += '<div class="aula-ex' + (tem ? ' pronta' : '') + '"' + (tem ? ' onclick="abrirAulaDoExercicio(\'' + nome.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')"' : '') + '>' +
+        '<span class="aula-ex-play">▶</span><span class="aula-ex-txt"><b>' + escaparHtmlFicha(capitalizarNomeExercicio(nome)) + '</b><small>' + (tem ? 'Assistir aula' : 'Aula em breve') + '</small></span></div>';
+    });
+  });
+  area.innerHTML = html;
 }
 
 // Chamado no fim da Início: liga ou desliga o modo só desafio
@@ -8494,7 +8579,7 @@ function aplicarModoDesafioNaInicio(){
       ? '<p class="hh-lbl">E agora?</p><p class="hh-tit">Continue com um treino montado só pra você</p><a class="hh-btn" href="' + linkConsultoriaDoDesafio() + '" target="_blank" rel="noopener">Conhecer a consultoria</a>'
       : (!m.st.comecou
         ? '<p class="hh-lbl">Treino de hoje</p><p class="hh-tit">Seu primeiro treino aparece no dia ' + dataCurtaBR(a.desafioAtivo.dataInicio) + '</p>'
-        : '<p class="hh-lbl">Treino de hoje</p><p class="hh-tit">Seu treino do SECA 21 está sendo preparado</p><p class="hh-info">Assim que estiver pronto, ele aparece aqui. Enquanto isso, as aulas já estão liberadas.</p>');
+        : '<p class="hh-lbl">Treino de hoje</p><p class="hh-tit">Seu treino do SECA 21 está sendo preparado</p><p class="hh-info">Assim que estiver pronto, ele aparece aqui. Enquanto isso, os treinos em casa já estão liberados.</p>');
   }
 }
 
@@ -17269,9 +17354,9 @@ function setActive(name){
   if(name === 'launcher') atualizarVisualCheckboxLembrarLogin(); // sempre reflete o estado real, não importa por onde chegou aqui
 }
 
-const abasFixasAluna = ['home', 'semana-treinos', 'dados', 'mentoria', 'progresso', 'ranking', 'rodadavida'];
+const abasFixasAluna = ['home', 'semana-treinos', 'dados', 'mentoria', 'progresso', 'ranking', 'rodadavida', 'aulas-ex'];
 // Qual item do menu de baixo fica aceso em cada tela (Corpo, Treino e Roda da Vida ficam dentro de "Evolução")
-const ITEM_DO_MENU_POR_TELA = { home: 'home', 'semana-treinos': 'treino', dados: 'evolucao', progresso: 'evolucao', rodadavida: 'evolucao', mentoria: 'mentoria', ranking: 'ranking' };
+const ITEM_DO_MENU_POR_TELA = { home: 'home', 'semana-treinos': 'treino', dados: 'evolucao', progresso: 'evolucao', rodadavida: 'evolucao', mentoria: 'mentoria', ranking: 'ranking', 'aulas-ex': 'aulas-ex' };
 
 function openLevel2(which){
   level2 = which;
@@ -17295,6 +17380,7 @@ function openLevel2(which){
   if(which === 'ranking' && typeof renderRanking === 'function'){ renderRanking(); renderRankingPublico(); }
   if(which === 'rodadavida'){ renderRodaDaVidaAluna(); }
   if(which === 'semana-treinos'){ abrirListaDeTreinosDaSemana(); }
+  if(which === 'aulas-ex'){ renderAulasDosExercicios(); }
 }
 
 function atualizarNavAtiva(which){
@@ -18515,7 +18601,8 @@ function renderPlaylist(){
   });
   el.innerHTML =
     '<p class="page-sub" style="margin-top:14px;">' + c.cat + (c.cursoDoAppId ? ' · Liberado pra você' : ' · Grátis') + '</p>' +
-    '<h1 class="page-title" style="margin-top:0;">' + c.n + '</h1>' +
+    // Pra aluna, o curso do SECA 21 aparece como "Treinos em casa" (a aba "Aulas" agora é das aulas dos exercícios)
+    '<h1 class="page-title" style="margin-top:0;">' + (c.cursoDoAppId === 'seca21' && sessaoTipo === 'aluna' ? 'Treinos em casa' : c.n) + '</h1>' +
     '<div class="info-box"><p class="txt">' + c.desc + '</p></div>' +
     '<p class="section-label">Aulas (' + c.aulas.length + ')</p>' +
     itens;
