@@ -1,4 +1,4 @@
-[dna_musa_153.html](https://github.com/user-attachments/files/34054109/dna_musa_153.html)
+[Uploading dna_musa_154.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -377,6 +377,9 @@
   .cd-lin > span{min-width:0;}
   .cd-lin-cab{font-size:10.5px;color:var(--text-faint);letter-spacing:.6px;text-transform:uppercase;padding-top:0;}
   .cd-lin-se{grid-template-columns:minmax(0,1.7fr) minmax(0,.8fr) minmax(0,1.4fr) minmax(0,.9fr) minmax(0,1.2fr) auto;}
+  .cd-marcando .cd-lin-s21{grid-template-columns:26px minmax(0,1.7fr) minmax(0,1fr) minmax(0,1.6fr) minmax(0,.8fr) auto;}
+  .cd-marcar-s21{border-color:rgba(232,197,138,.6) !important;color:var(--gold-soft) !important;margin-right:8px;} .cd-marcar-s21.on{color:var(--text-dim) !important;border-color:var(--border) !important;}
+  .cd-btn-ficha{border-color:rgba(232,197,138,.55) !important;color:var(--gold-soft) !important;margin-right:6px;}
   .cd-lin-s21{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr) minmax(0,1.6fr) minmax(0,.8fr) auto;}
   .cd-nm{display:flex;gap:9px;align-items:center;} .cd-nm b{display:block;font-size:13px;overflow-wrap:anywhere;} .cd-nm small{display:block;font-size:10.5px;color:var(--text-faint);margin-top:1px;}
   .cd-av{width:30px;height:30px;border-radius:50%;background:var(--card-2);border:1px solid rgba(232,197,138,.3);display:flex;align-items:center;justify-content:center;font-size:10.5px;color:var(--gold-soft);flex-shrink:0;}
@@ -996,7 +999,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-27-AV-SECA21-NIVEIS-MARCAR</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-28-AW-SECA21-REINICIAR</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1914,7 +1917,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-27-AV-SECA21-NIVEIS-MARCAR';
+const VERSAO_APP = '2026-10-28-AW-SECA21-REINICIAR';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -6865,24 +6868,99 @@ function renderListaSeca21(){
     area.innerHTML = '<div class="info-box"><p class="txt" style="color:var(--text-faint);margin:0;">Nenhuma aluna no SECA 21 ainda.</p></div>';
     return;
   }
-  area.innerHTML = '<div class="cd-tab"><div class="cd-lin cd-lin-cab cd-lin-s21"><span>Aluna</span><span>Estrutura</span><span>Andamento</span><span>Treino</span><span></span></div>' +
+  inscritasSeca21NaTela = inscritas.map(function(a){ return a.nome; });
+  const barra = document.getElementById('barra-marcar-s21');
+  if(barra) barra.innerHTML = marcandoSeca21 ? htmlBarraMarcarSeca21(inscritas, agora) : '';
+  area.innerHTML = '<div class="cd-tab' + (marcandoSeca21 ? ' cd-marcando' : '') + '"><div class="cd-lin cd-lin-cab cd-lin-s21">' + (marcandoSeca21 ? '<span></span>' : '') + '<span>Aluna</span><span>Estrutura</span><span>Andamento</span><span>Treino</span><span></span></div>' +
     inscritas.map(function(a){
       const d = a.desafioAtivo, st = situacaoDoSeca21(a, agora), pl = planoDaAluna(a);
       const quando = st.terminou ? 'terminou em ' + dataCurtaBR(d.dataFim) : (!st.comecou ? 'começa em ' + dataCurtaBR(d.dataInicio) : 'dia ' + st.dia + ' de ' + st.total + ' · termina ' + dataCurtaBR(d.dataFim));
       const pct = st.terminou ? 100 : (!st.comecou ? 0 : Math.round(st.dia / st.total * 100));
       const temTreino = !!treinoSeca21DaAluna(a);
-      return '<div class="cd-lin cd-lin-s21">' +
-        '<span class="cd-nm"><span class="cd-av">' + iniciaisDaAluna(a.nome) + '</span><span><b>' + escaparHtmlFicha(a.nome) + '</b><small>' + NOMES_PLANO[pl.plano] +
+      const nj = a.nome.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      return '<div class="cd-lin cd-lin-s21">' + (marcandoSeca21 ? '<span><input type="checkbox" class="an-ck"' + (marcadasSeca21[a.nome] ? ' checked' : '') + ' onchange="marcarAlunaSeca21(\'' + nj + '\', this.checked)"></span>' : '') +
+        '<span class="cd-nm" style="cursor:pointer;" onclick="abrirFichaDaAlunaPeloDesafio(\'' + nj + '\')"><span class="cd-av">' + iniciaisDaAluna(a.nome) + '</span><span><b>' + escaparHtmlFicha(a.nome) + '</b><small>' + NOMES_PLANO[pl.plano] +
           ((a.cursosLiberados || []).indexOf('seca21') !== -1 ? ' · curso liberado' : '') + '</small></span></span>' +
         '<span><span class="cd-chip cd-c-verde">' + nivelSeca21PeloNivel(d.nivel) + ' · ' + d.frequencia + 'x</span></span>' +
         '<span><span class="cd-barra"><i style="width:' + pct + '%;background:#A9DDB4;"></i></span><small class="cd-faint">' + quando + '</small></span>' +
         '<span><span class="cd-chip ' + (temTreino ? 'cd-c-ok">liberado' : 'cd-c-alerta">falta liberar') + '</span></span>' +
-        '<span class="cd-acoes-lin"><span class="cd-btn cd-btn-peq cd-btn-perigo" onclick="removerAlunaDoSeca21(\'' + a.nome.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">Remover</span></span>' +
+        '<span class="cd-acoes-lin"><span class="cd-btn cd-btn-peq cd-btn-ficha" onclick="abrirFichaDaAlunaPeloDesafio(\'' + nj + '\')">Abrir ficha</span><span class="cd-btn cd-btn-peq cd-btn-perigo" onclick="removerAlunaDoSeca21(\'' + nj + '\')">Remover</span></span>' +
       '</div>';
     }).join('') + '</div>';
   const cards = document.getElementById('cd-estruturas-s21');
   if(cards) cards.innerHTML = htmlCardsEstruturasSeca21();
   atualizarBadgeDesafios();
+}
+
+// ----- SECA 21: marcar alunas e reiniciar a contagem (Dia 1 hoje, amanhã ou numa data) -----
+let marcandoSeca21 = false;
+let marcadasSeca21 = {};
+let inscritasSeca21NaTela = [];
+let reinicioSeca21 = null; // { quando } quando o painel está aberto
+
+function alternarMarcarSeca21(){
+  marcandoSeca21 = !marcandoSeca21;
+  if(!marcandoSeca21){ marcadasSeca21 = {}; reinicioSeca21 = null; }
+  renderControleDesafios();
+}
+function marcarAlunaSeca21(nome, marcar){ if(marcar) marcadasSeca21[nome] = true; else delete marcadasSeca21[nome]; renderListaSeca21(); }
+function marcarTodasSeca21(marcar){
+  inscritasSeca21NaTela.forEach(function(n){ if(marcar) marcadasSeca21[n] = true; else delete marcadasSeca21[n]; });
+  renderListaSeca21();
+}
+function nomesMarcadosSeca21(){ return Object.keys(marcadasSeca21).filter(function(n){ return alunasPersonal.some(function(a){ return a.nome === n && estaNoSeca21(a); }); }); }
+
+function htmlBarraMarcarSeca21(inscritas, agora){
+  const nomes = nomesMarcadosSeca21(), n = nomes.length;
+  let html = '<div class="an-barra"><b>' + n + (n === 1 ? ' marcada' : ' marcadas') + '</b>' +
+    '<span class="an-link" onclick="marcarTodasSeca21(true)">Marcar ' + (inscritas.length === 1 ? 'a 1' : 'as ' + inscritas.length) + '</span>' +
+    '<span class="an-link fraco" onclick="marcarTodasSeca21(false)">Desmarcar</span>' +
+    '<span class="an-acoes"><button class="cd-btn cd-btn-ouro"' + (n ? '' : ' disabled') + ' onclick="abrirReinicioSeca21()">Reiniciar a contagem</button></span></div>';
+  if(reinicioSeca21 && n){
+    const c = reinicioSeca21;
+    const chip = function(valor, rotulo){ return '<span class="rg-chip' + (c.quando === valor ? ' on' : '') + '" onclick="reinicioSeca21.quando=\'' + valor + '\';renderListaSeca21()">' + rotulo + '</span>'; };
+    const onde = nomes.map(function(nm){
+      const a = alunasPersonal.find(function(x){ return x.nome === nm; }), st = situacaoDoSeca21(a, agora);
+      return nm.split(' ')[0] + ' (' + (st.terminou ? 'já terminou' : (st.comecou ? 'hoje no dia ' + st.dia + ' de ' + st.total : 'ainda não começou')) + ')';
+    });
+    const inicio = dataDeInicioEscolhida(c.quando, agora);
+    html += '<div class="an-inscrever" style="border-color:rgba(232,197,138,.45);"><p class="an-ins-tit">Reiniciar a contagem de ' + (n === 1 ? '1 aluna' : n + ' alunas') + '</p>' +
+      '<p class="an-ins-sub">' + escaparHtmlFicha(onde.join(', ')) + '</p>' +
+      '<p class="rg-lbl">O Dia 1 passa a ser</p>' + chip('hoje', 'Hoje') + chip('amanha', 'Amanhã') +
+      '<input type="date" class="form-input" style="font-size:12px;padding:5px 8px;width:auto;display:inline-block;" title="Ou escolha a data" value="' + (/^\d{4}-/.test(c.quando) ? c.quando : '') + '" onchange="reinicioSeca21.quando=this.value||\'hoje\';renderListaSeca21()">' +
+      '<p class="an-ins-sub" style="margin-top:8px;">Dia 1 em ' + dataCurtaBR(inicio) + ', termina em ' + dataCurtaBR(dataISOMaisDias(inicio, (DESAFIOS_DO_APP.seca21.duracaoDias || 21) - 1)) + '. Os treinos que ' + (n === 1 ? 'ela já marcou' : 'elas já marcaram') + ' no desafio ficam guardados, mas a contagem e a semana recomeçam do Dia 1. Nível, frequência e treino continuam os mesmos.</p>' +
+      '<button class="btn-gold" style="margin-top:12px;" onclick="confirmarReinicioSeca21()">Reiniciar ' + (n === 1 ? 'a 1' : 'as ' + n) + '</button></div>';
+  }
+  return html;
+}
+
+function abrirReinicioSeca21(){ reinicioSeca21 = reinicioSeca21 ? null : { quando: 'hoje' }; renderListaSeca21(); }
+
+function confirmarReinicioSeca21(){
+  if(!reinicioSeca21) return 0;
+  const inicio = dataDeInicioEscolhida(reinicioSeca21.quando);
+  let n = 0;
+  nomesMarcadosSeca21().forEach(function(nome){
+    const a = alunasPersonal.find(function(x){ return x.nome === nome; });
+    if(!a || !definirInicioDoDesafio(a, inicio)) return;
+    a.desafioAtivo.turma = 't' + Date.now().toString(36) + n; // registros novos separados dos antigos
+    a.desafioAtivo.reiniciadoEm = new Date().toISOString();
+    salvarPerfilAlunaNoSupabase(a.nome);
+    n++;
+  });
+  mostrarConfirmacaoSalvamento(true, (n === 1 ? '1 aluna recomeça' : n + ' alunas recomeçam') + ' o SECA 21 no Dia 1 em ' + dataCurtaBR(inicio) + '.');
+  reinicioSeca21 = null; marcadasSeca21 = {}; marcandoSeca21 = false;
+  renderControleDesafios();
+  return n;
+}
+
+// "Abrir ficha": vai direto pra ficha dela, na aba Prescrição de treino (a mesma das alunas da consultoria)
+function abrirFichaDaAlunaPeloDesafio(nome){
+  const i = alunasPersonal.findIndex(function(x){ return x.nome === nome; });
+  if(i === -1) return false;
+  openAlunaDetail(i);
+  abrirAbaDaFicha('treino');
+  return true;
 }
 
 function removerAlunaDoSeca21(nomeAluna){
@@ -7428,8 +7506,8 @@ function renderControleDesafios(){
   };
   let html = '<div class="cd-abas">' + aba('seca21', 'SECA 21', nS21, 'cd-verde') + aba('seca-empina', 'Seca e Empina', nSE, '') + '</div>';
   if(abaControleDesafio === 'seca21'){
-    html += '<div class="cd-box"><div class="cd-box-cab"><h2>Alunas no SECA 21</h2><div class="cd-r"><button class="cd-btn cd-btn-verde" onclick="mostrarFormularioInscricaoSeca21()">+ Inscrever aluna</button></div></div>' +
-      '<div id="form-inscricao-seca21"></div><div id="lista-seca21"></div></div>' +
+    html += '<div class="cd-box"><div class="cd-box-cab"><h2>Alunas no SECA 21</h2><div class="cd-r"><button class="cd-btn cd-marcar-s21' + (marcandoSeca21 ? ' on' : '') + '" onclick="alternarMarcarSeca21()">' + (marcandoSeca21 ? '✕ Parar de marcar' : '☑ Marcar') + '</button><button class="cd-btn cd-btn-verde" onclick="mostrarFormularioInscricaoSeca21()">+ Inscrever aluna</button></div></div>' +
+      '<div id="form-inscricao-seca21"></div><div id="barra-marcar-s21"></div><div id="lista-seca21"></div></div>' +
       '<div class="cd-grade2"><div class="cd-box"><div class="cd-box-cab"><h2>As 4 estruturas do SECA 21</h2></div><div id="cd-estruturas-s21">' + htmlCardsEstruturasSeca21() + '</div>' +
         '<p class="cd-nota">Cada aluna recebe sozinha a estrutura do nível e da frequência dela. Quem é Iniciante na ficha entra no Intermediário. Quem você inscrever depois de salvar já entra com o treino.</p></div>' +
       '<div class="cd-box">' + htmlRegrasSeca21() + '</div></div>' + htmlGrupoDoDesafio('seca21');
@@ -8034,7 +8112,13 @@ function salvarEstruturaSeca21(chave, semConfirmar){
 
 // ===== SECA 21 no celular da aluna =====
 function semanaAtualDoSeca21(st){ return Math.max(1, Math.min(Math.ceil(st.total / 7), Math.ceil(st.dia / 7))); }
-function chaveRegistroSeca21(semanaNum){ return 'seca21-semana' + semanaNum; }
+// Registro dos treinos do desafio por semana. Depois de "Reiniciar a contagem", a aluna ganha uma "turma" nova e os
+// registros novos ficam separados dos antigos (que continuam guardados), então a semana recomeça sem nada marcado.
+function chaveRegistroSeca21(semanaNum, a){
+  if(a === undefined){ try { a = obterAlunaLogadaOuCriar(); } catch(e){ a = null; } }
+  const turma = a && a.desafioAtivo && a.desafioAtivo.turma;
+  return 'seca21-' + (turma ? turma + '-' : '') + 'semana' + semanaNum;
+}
 
 function htmlLinhaSeca21ParaAluna(linha, dia){
   const p = partesLinhaSeca21(linha);
@@ -8215,16 +8299,27 @@ function definirPlanoEDesafio(nomeAluna, valor, semConfirmar){
   return true;
 }
 
-// Início do desafio pela ficha: no dia da inscrição (padrão) ou 2 dias depois. O fim acompanha a duração do desafio.
-function ajustarInicioDoDesafioNaFicha(nomeAluna, quando){
-  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
-  if(!a || !a.desafioAtivo) return false;
-  const d = DESAFIOS_DO_APP[idDoDesafio(a)];
+// Quando começa o desafio: "hoje" (libera na hora), "amanha" (no dia seguinte) ou uma data específica (aaaa-mm-dd).
+// (A opção de 2 dias depois saiu, a pedido do Thiago.)
+function dataDeInicioEscolhida(quando, agora){
+  const hoje = dataLocalISO(new Date(agora === undefined ? Date.now() : agora));
+  if(quando === 'amanha') return dataISOMaisDias(hoje, 1);
+  if(/^\d{4}-\d{2}-\d{2}$/.test(String(quando || ''))) return quando;
+  return hoje;
+}
+function definirInicioDoDesafio(a, inicio){
+  const d = a && a.desafioAtivo ? DESAFIOS_DO_APP[idDoDesafio(a)] : null;
   if(!d || !d.duracaoDias) return false; // desafio sem duração fixa (Seca e Empina) não tem data de fim
-  const base = dataLocalISO(new Date(a.desafioAtivo.inscritaEm || Date.now()));
-  const inicio = quando === '2dias' ? dataISOMaisDias(base, 2) : base;
   a.desafioAtivo.dataInicio = inicio;
   a.desafioAtivo.dataFim = dataISOMaisDias(inicio, d.duracaoDias - 1);
+  return true;
+}
+
+// Início do desafio pela ficha: hoje, amanhã ou uma data. O fim acompanha a duração do desafio.
+function ajustarInicioDoDesafioNaFicha(nomeAluna, quando){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !a.desafioAtivo || !quando) return false;
+  if(!definirInicioDoDesafio(a, dataDeInicioEscolhida(quando))) return false;
   salvarPerfilAlunaNoSupabase(a.nome);
   try { openAlunaDetail(alunasPersonal.indexOf(a)); } catch(e){}
   return true;
@@ -8245,12 +8340,13 @@ function ajustarEstruturaSeca21NaFicha(nomeAluna, campo, valor){
 }
 
 function htmlInicioDoDesafioNaFicha(a, nomeJs){
-  const base = dataLocalISO(new Date(a.desafioAtivo.inscritaEm || Date.now()));
-  const atual = a.desafioAtivo.dataInicio === dataISOMaisDias(base, 2) ? '2dias' : (a.desafioAtivo.dataInicio === base ? 'hoje' : '');
-  return '<select class="form-select" style="font-size:12px;padding:5px;margin-top:6px;" onchange="ajustarInicioDoDesafioNaFicha(\'' + nomeJs + '\',this.value)">' +
-    (atual ? '' : '<option value="" selected>Começa ' + dataCurtaBR(a.desafioAtivo.dataInicio) + ' (definido no Controle)</option>') +
-    '<option value="hoje"' + (atual === 'hoje' ? ' selected' : '') + '>Começa no dia da inscrição (' + dataCurtaBR(base) + ')</option>' +
-    '<option value="2dias"' + (atual === '2dias' ? ' selected' : '') + '>Começa 2 dias depois (' + dataCurtaBR(dataISOMaisDias(base, 2)) + ')</option></select>';
+  const hoje = dataLocalISO(new Date()), amanha = dataISOMaisDias(hoje, 1);
+  const atual = a.desafioAtivo.dataInicio === hoje ? 'hoje' : (a.desafioAtivo.dataInicio === amanha ? 'amanha' : '');
+  return '<div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap;"><select class="form-select" style="font-size:12px;padding:5px;flex:1;min-width:150px;" onchange="ajustarInicioDoDesafioNaFicha(\'' + nomeJs + '\',this.value)">' +
+    (atual ? '' : '<option value="" selected>Começa ' + dataCurtaBR(a.desafioAtivo.dataInicio) + '</option>') +
+    '<option value="hoje"' + (atual === 'hoje' ? ' selected' : '') + '>Começa hoje (' + dataCurtaBR(hoje) + ')</option>' +
+    '<option value="amanha"' + (atual === 'amanha' ? ' selected' : '') + '>Começa amanhã (' + dataCurtaBR(amanha) + ')</option></select>' +
+    '<input type="date" class="form-input" style="font-size:12px;padding:4px 6px;width:auto;" title="Ou escolha a data" value="' + escaparHtmlFicha(a.desafioAtivo.dataInicio || '') + '" onchange="ajustarInicioDoDesafioNaFicha(\'' + nomeJs + '\',this.value)"></div>';
 }
 
 function htmlCaixaPlanoEDesafio(a){
@@ -10034,7 +10130,8 @@ function htmlInscricaoPelasAnamneses(){
     '<p class="an-ins-sub">' + escaparHtmlFicha(nomes.map(function(n){ return n.split(' ')[0]; }).join(', ')) + '</p>' +
     '<p class="rg-lbl">Desafio</p>' + chip('desafio', 'seca21', 'SECA 21') + chip('desafio', 'seca-empina', 'Seca e Empina') +
     '<p class="rg-lbl">Plano</p>' + chip('plano', 'so-desafio', 'Só desafio') + chip('plano', 'consultoria-desafio', 'Consultoria + desafio') +
-    (s21 ? '<p class="rg-lbl">Começa</p>' + chip('inicio', 'hoje', 'Hoje') + chip('inicio', '2dias', 'Daqui a 2 dias') +
+    (s21 ? '<p class="rg-lbl">Começa</p>' + chip('inicio', 'hoje', 'Hoje') + chip('inicio', 'amanha', 'Amanhã') +
+      '<input type="date" class="form-input" style="font-size:12px;padding:5px 8px;width:auto;display:inline-block;" title="Ou escolha a data" value="' + (/^\d{4}-/.test(c.inicio) ? c.inicio : '') + '" onchange="escolherInscricaoAnamneses(\'inicio\', this.value || \'hoje\')">' +
       '<p class="an-ins-sub" style="margin-top:8px;">Cada uma entra na estrutura do nível e da frequência dela (Intermediário ou Avançado, 3x ou 5x), já com o treino se a estrutura estiver salva.</p>' +
       '<label class="an-ins-ck"><input type="checkbox"' + (c.curso ? ' checked' : '') + ' onchange="inscricaoPelasAnamneses.curso=this.checked"> Liberar os treinos em casa (curso do SECA 21)</label>' : '') +
     (jaEmDesafio.length ? '<p class="rg-aviso">' + jaEmDesafio.length + (jaEmDesafio.length === 1 ? ' já está' : ' já estão') + ' em um desafio e ' + (jaEmDesafio.length === 1 ? 'fica' : 'ficam') + ' de fora: ' + escaparHtmlFicha(jaEmDesafio.join(', ')) + '</p>' : '') +
@@ -10044,7 +10141,6 @@ function htmlInscricaoPelasAnamneses(){
 function confirmarInscricaoPelasAnamneses(){
   const c = inscricaoPelasAnamneses;
   if(!c) return 0;
-  const hoje = dataLocalISO(new Date());
   let n = 0;
   nomesMarcadosNasAnamneses().forEach(function(nome){
     const a = alunasPersonal.find(function(x){ return x.nome === nome; });
@@ -10052,10 +10148,7 @@ function confirmarInscricaoPelasAnamneses(){
     a.plano = c.plano;
     if(!inscreverAlunaNoDesafio(a, c.desafio)) return;
     if(c.desafio === 'seca21'){
-      if(c.inicio === '2dias'){
-        a.desafioAtivo.dataInicio = dataISOMaisDias(hoje, 2);
-        a.desafioAtivo.dataFim = dataISOMaisDias(a.desafioAtivo.dataInicio, (DESAFIOS_DO_APP.seca21.duracaoDias || 21) - 1);
-      }
+      if(c.inicio && c.inicio !== 'hoje') definirInicioDoDesafio(a, dataDeInicioEscolhida(c.inicio));
       if(!c.curso) a.cursosLiberados = (a.cursosLiberados || []).filter(function(x){ return x !== 'seca21'; });
     }
     salvarPerfilAlunaNoSupabase(a.nome);
