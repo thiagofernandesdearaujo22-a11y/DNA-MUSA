@@ -381,6 +381,18 @@
   .cd-av{width:30px;height:30px;border-radius:50%;background:var(--card-2);border:1px solid rgba(232,197,138,.3);display:flex;align-items:center;justify-content:center;font-size:10.5px;color:var(--gold-soft);flex-shrink:0;}
   .cd-barra{display:block;height:6px;border-radius:4px;background:var(--card-2);overflow:hidden;width:100%;margin-bottom:3px;} .cd-barra i{display:block;height:100%;background:var(--gold);}
   #bottom-nav-fixa.nav-desafio .bottom-nav-item span{font-size:10px;white-space:nowrap;letter-spacing:-.1px;}
+  .an-topo{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px;} .an-busca{margin-left:auto;width:220px;font-size:12.5px;}
+  .an-tab{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--card);}
+  .an-lin{display:grid;grid-template-columns:minmax(0,1.6fr) 100px minmax(0,1.6fr) minmax(0,1.3fr) 96px 56px;gap:10px;padding:12px 14px;align-items:center;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text);}
+  .an-lin b{font-weight:600;display:block;overflow-wrap:anywhere;} .an-lin small{display:block;font-size:11px;color:var(--text-faint);}
+  .an-cab{font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-faint);padding:10px 14px;}
+  .an-selo{display:inline-block;font-size:10px;font-weight:700;border-radius:20px;padding:2px 8px;margin-top:3px;} .an-selo.nova{background:#E8C58A;color:#1a1712;} .an-selo.denovo{background:rgba(232,197,138,.14);color:#E8C58A;}
+  .an-dim{color:var(--text-dim);} .an-faint{color:var(--text-faint);} .an-alerta{color:#E2A33D;}
+  .an-abrir{color:var(--gold-soft);font-size:12px;text-decoration:underline;cursor:pointer;}
+  .an-detalhe{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;padding:12px 14px 16px;border-bottom:1px solid var(--border);background:var(--card-2);} .an-detalhe > div{flex:1;min-width:240px;}
+  .an-sub{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold-soft);margin:0 0 6px;} .an-r{font-size:12.5px;margin:0 0 5px;color:var(--text-dim);} .an-r b{display:block;font-size:11px;color:var(--text-faint);font-weight:600;}
+  .an-antes{border-left:1px solid var(--border);padding-left:14px;}
+  @media (max-width: 760px){ .an-lin{grid-template-columns:minmax(0,1fr) auto;} .an-lin > span:nth-child(3), .an-lin > span:nth-child(4), .an-lin > span:nth-child(5){display:none;} .an-cab{display:none;} .an-busca{margin-left:0;width:100%;} }
   .rg-botoes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
   .rg-bt{border-color:rgba(226,163,61,.55) !important;color:#E2A33D !important;}
   .rg-box{margin-top:12px;border:1px solid rgba(226,163,61,.45);border-radius:16px;padding:16px;background:var(--card);}
@@ -976,7 +988,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-27-AT-REGREDIR-TREINO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-27-AU-ANAMNESES</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1564,6 +1576,13 @@
         <div id="area-feedback-treinos"></div>
       </div>
 
+      <div id="personal-anamneses" style="display:none;">
+        <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
+        <h1 class="page-title" style="margin-top:0;">Anamneses</h1>
+        <p class="page-sub" style="margin-top:-6px;">A mais recente de cada aluna, das últimas pra trás. Se uma aluna antiga responde de novo, ela sobe pro topo.</p>
+        <div id="area-anamneses"></div>
+      </div>
+
       <div id="personal-feedback-alunas" style="display:none;">
         <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
         <h1 class="page-title" style="margin-top:0;">Feedback das alunas</h1>
@@ -1887,7 +1906,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-27-AT-REGREDIR-TREINO';
+const VERSAO_APP = '2026-10-27-AU-ANAMNESES';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -9838,7 +9857,118 @@ function contarFeedbacksNaoLidos(){
   return { treinos: treinos, alunas: alunas };
 }
 
+// ===== ANAMNESES: lista com a mais recente de cada aluna =====
+// Quando ela responde de novo, o servidor troca as respostas (mesmo e-mail) e a data. Aqui o app percebe a data
+// nova, guarda as respostas de antes em "anamnesesAnteriores" e marca "respondeu de novo".
+function fotoDaAnamnese(a){
+  return { data: a.dataAnamnese || null, objetivo: a.objetivo || '', piramide: a.piramide || '', restricoes: a.restricoes || '', academia: a.academia || '', freq: a.freq || '', anamneseTreino: a.anamneseTreino || null };
+}
+
+function registrarAnamneseNova(a, row){
+  const nova = row && row.data_anamnese ? String(row.data_anamnese).slice(0, 10) : '';
+  if(!nova || !a) return false;
+  const antes = a.dataAnamnese ? String(a.dataAnamnese).slice(0, 10) : '';
+  if(antes && nova <= antes) return false;
+  const tinhaRespostas = !!(antes && (String(a.objetivo || '').trim() || String(a.piramide || '').trim()));
+  if(tinhaRespostas){
+    a.anamnesesAnteriores = (a.anamnesesAnteriores || []).concat([fotoDaAnamnese(a)]).slice(-5);
+    a.respondeuDeNovoEm = nova;
+  }
+  a.dataAnamnese = nova;
+  if(row.piramide != null && row.piramide !== '') a.piramide = row.piramide; // a pirâmide não vem junto das outras colunas
+  if(tinhaRespostas && typeof salvarPerfilAlunaNoSupabase === 'function') salvarPerfilAlunaNoSupabase(a.nome);
+  return true;
+}
+
+// Uma linha por aluna (mesmo e-mail = a mesma aluna; fica a ficha com a anamnese mais nova)
+function listaDeAnamneses(){
+  const porChave = {};
+  alunasPersonal.forEach(function(a){
+    if(!a || !a.dataAnamnese) return;
+    const chave = a.email ? String(a.email).trim().toLowerCase() : 'nome:' + semAcentoMinusculo(a.nomeBase || a.nome);
+    const atual = porChave[chave];
+    if(!atual || String(a.dataAnamnese) > String(atual.dataAnamnese)) porChave[chave] = a;
+  });
+  return Object.keys(porChave).map(function(k){ return porChave[k]; }).sort(function(x, y){
+    return String(y.dataAnamnese).localeCompare(String(x.dataAnamnese)) || x.nome.localeCompare(y.nome, 'pt-BR');
+  });
+}
+
+function diasDesdeAnamnese(a, agora){
+  const d = diasCorridosDesde(String(a.dataAnamnese).slice(0, 10) + 'T12:00:00', agora === undefined ? Date.now() : agora);
+  return d === null ? 9999 : Math.max(0, d);
+}
+
+function contarAnamnesesRecentes(dias, agora){
+  return listaDeAnamneses().filter(function(a){ return diasDesdeAnamnese(a, agora) < dias; }).length;
+}
+
+function respondeuDeNovo(a){ return !!(a.respondeuDeNovoEm && a.respondeuDeNovoEm === String(a.dataAnamnese).slice(0, 10) && (a.anamnesesAnteriores || []).length); }
+function temRestricaoDeVerdade(texto){ const t = semAcentoMinusculo(String(texto || '')).trim(); return !!t && !/^(nenhuma|nao|n|nada|sem)\b/.test(t); }
+
+let filtroAnamneses = '30';
+let buscaAnamneses = '';
+let anamneseAberta = null;
+
+function htmlRespostasDaAnamnese(f){
+  const linha = function(rotulo, valor){ return valor ? '<p class="an-r"><b>' + rotulo + '</b>' + escaparHtmlFicha(String(valor)) + '</p>' : ''; };
+  const t = f.anamneseTreino || {};
+  return linha('Objetivo', f.objetivo) + linha('Pirâmide (prioridades)', f.piramide) + linha('Restrições', f.restricoes) + linha('Academia', f.academia) + linha('Frequência', f.freq) +
+    linha('Já treinou?', t.jaTreinou) + linha('Por quanto tempo treinou', t.tempoTreinou) + linha('Treina atualmente?', t.treinaAtualmente) + linha('Pausa', t.pausa);
+}
+
+function renderAnamneses(agora){
+  const area = document.getElementById('area-anamneses');
+  if(!area) return;
+  const todas = listaDeAnamneses();
+  const n7 = todas.filter(function(a){ return diasDesdeAnamnese(a, agora) < 7; }).length;
+  const n30 = todas.filter(function(a){ return diasDesdeAnamnese(a, agora) < 30; }).length;
+  const nDeNovo = todas.filter(respondeuDeNovo).length;
+  const termo = semAcentoMinusculo(buscaAnamneses).trim();
+  const lista = todas.filter(function(a){
+    if(termo && semAcentoMinusculo(a.nome).indexOf(termo) === -1) return false;
+    if(filtroAnamneses === '7') return diasDesdeAnamnese(a, agora) < 7;
+    if(filtroAnamneses === '30') return diasDesdeAnamnese(a, agora) < 30;
+    if(filtroAnamneses === 'denovo') return respondeuDeNovo(a);
+    return true;
+  });
+  const filtros = [['7', 'Últimos 7 dias (' + n7 + ')'], ['30', 'Últimos 30 dias (' + n30 + ')'], ['todas', 'Todas (' + todas.length + ')'], ['denovo', 'Só quem respondeu de novo (' + nDeNovo + ')']];
+  let html = '<div class="an-topo"><div class="env-filtros" style="margin:0;">' + filtros.map(function(f){
+      return '<span class="' + (filtroAnamneses === f[0] ? 'on' : '') + '" onclick="filtroAnamneses=\'' + f[0] + '\';renderAnamneses()">' + f[1] + '</span>';
+    }).join('') + '</div><input class="form-input an-busca" placeholder="Buscar aluna" value="' + escaparHtmlFicha(buscaAnamneses) + '" oninput="buscaAnamneses=this.value;renderAnamneses();var c=document.querySelector(\'.an-busca\');if(c&&c.focus){c.focus();try{c.setSelectionRange(this.value.length,this.value.length)}catch(e){}}"></div>';
+  if(!lista.length){
+    area.innerHTML = html + '<p class="cd-nota">Nenhuma anamnese nesse filtro.</p>';
+    return;
+  }
+  const rotSit = ROTULO_STATUS_PLANO;
+  html += '<div class="an-tab"><div class="an-lin an-cab"><span>Aluna</span><span>Respondeu</span><span>Objetivo</span><span>Restrições</span><span>Situação</span><span></span></div>' +
+    lista.map(function(a){
+      const i = alunasPersonal.indexOf(a);
+      const d = diasDesdeAnamnese(a, agora);
+      const quando = d === 0 ? 'hoje' : (d === 1 ? 'ontem' : 'há ' + d + ' dias');
+      const selo = respondeuDeNovo(a) ? '<span class="an-selo denovo">RESPONDEU DE NOVO</span>' : (d < 7 ? '<span class="an-selo nova">NOVA</span>' : '<small>' + escaparHtmlFicha((a.academia ? a.academia + ' · ' : '') + (a.freq || '')) + '</small>');
+      const sit = rotSit[statusDoPlano(a)] || ['', ''];
+      const aberta = anamneseAberta === i;
+      let linha = '<div class="an-lin"><span><b>' + escaparHtmlFicha(a.nome) + '</b>' + selo + '</span>' +
+        '<span>' + dataCurtaBR(String(a.dataAnamnese).slice(0, 10)) + '<small>' + quando + '</small></span>' +
+        '<span class="an-dim">' + escaparHtmlFicha(a.objetivo || '') + '</span>' +
+        '<span class="' + (temRestricaoDeVerdade(a.restricoes) ? 'an-alerta' : 'an-faint') + '">' + escaparHtmlFicha(a.restricoes || 'Nenhuma relatada') + '</span>' +
+        '<span>' + (sit[0] ? '<span class="cd-chip ' + sit[1] + '">' + sit[0] + '</span>' : '') + '</span>' +
+        '<span class="an-abrir" onclick="anamneseAberta=' + (aberta ? 'null' : i) + ';renderAnamneses()">' + (aberta ? 'Fechar' : 'Abrir') + '</span></div>';
+      if(aberta){
+        const ant = (a.anamnesesAnteriores || []).slice(-1)[0];
+        linha += '<div class="an-detalhe"><div><p class="an-sub">Respostas de ' + dataCurtaBR(String(a.dataAnamnese).slice(0, 10)) + '</p>' + htmlRespostasDaAnamnese(fotoDaAnamnese(a)) + '</div>' +
+          (ant ? '<div class="an-antes"><p class="an-sub">Da vez anterior (' + (ant.data ? dataCurtaBR(String(ant.data).slice(0, 10)) : 'sem data') + ')</p>' + htmlRespostasDaAnamnese(ant) + '</div>' : '') +
+          '<button class="cd-btn cd-btn-ouro" onclick="openAlunaDetail(' + i + ')">Abrir a ficha</button></div>';
+      }
+      return linha;
+    }).join('') + '</div>';
+  area.innerHTML = html;
+}
+
 function atualizarBadgesFeedback(){
+  const bA = document.getElementById('side-badge-anamneses');
+  if(bA){ const nA = contarAnamnesesRecentes(7); bA.textContent = nA; bA.style.display = nA > 0 ? 'inline-block' : 'none'; }
   const n = contarFeedbacksNaoLidos();
   [['side-badge-fb-treinos', n.treinos], ['side-badge-fb-alunas', n.alunas]].forEach(function(par){
     const b = document.getElementById(par[0]);
@@ -10490,7 +10620,9 @@ function montarDadosExtrasDaAluna(a){
     desafioTreinos: a.desafioTreinos || null,
     plano: a.plano || null,                     // 'consultoria' | 'so-desafio' | 'consultoria-desafio' (escolhido por você)
     nivelDefinidoPor: a.nivelDefinidoPor || null, // 'personal' quando você escolhe o nível na lista
-    anamneseTreino: a.anamneseTreino || null,   // respostas 14 a 17 da anamnese (experiência de treino)
+    anamneseTreino: a.anamneseTreino || null,
+    anamnesesAnteriores: a.anamnesesAnteriores || [], // respostas de antes, quando ela responde a anamnese de novo
+    respondeuDeNovoEm: a.respondeuDeNovoEm || null,   // respostas 14 a 17 da anamnese (experiência de treino)
     cursosLiberados: a.cursosLiberados || [] // cursos do app liberados pra ela (ex: 'seca21'). Ela lê a própria ficha no login
   };
 }
@@ -14458,6 +14590,7 @@ function renderSidebarPersonal(){
   let html = '<div class="side-logo">DNA MUSA<small>' + (ehSuporte ? 'PAINEL DE SUPORTE' : 'PAINEL DO PERSONAL') + '</small></div>';
   html += ehSuporte ? item('dashboard-suporte', 'painel', 'Painel de suporte') : item('dashboard', 'painel', 'Painel');
   html += item('alunas', 'alunas', 'Alunas');
+  html += item('anamneses', 'lista', 'Anamneses', '<span class="side-badge" id="side-badge-anamneses" style="display:none;"></span>');
   if(ehSuporte) html += item('conversas', 'conversa', 'Conversas');
   html += item('controle', 'controle', 'Controle de treinos', '<span class="side-badge" id="side-badge-controle" style="display:none;"></span>');
   html += item('desafios', 'bandeira', 'Controle de desafios', '<span class="side-badge" id="side-badge-desafios" style="display:none;"></span>');
@@ -14557,6 +14690,7 @@ async function sincronizarListaAlunasDoSupabase(){
       if(jaExiste){
         // Já existe localmente: traz de volta os campos que podem ter sido editados e salvos em outro dispositivo/sessão
         let mudou = false;
+        if(registrarAnamneseNova(jaExiste, row)) mudou = true; // respondeu a anamnese de novo: guarda a de antes
         if(row.data_fechou_plano && jaExiste.dataFechouPlano !== row.data_fechou_plano){
           jaExiste.dataFechouPlano = row.data_fechou_plano;
           mudou = true;
@@ -14645,12 +14779,13 @@ function showPersonalView(which){
   if(which === 'dashboard' && NOME_PERSONAL_LOGADO === 'Bianca') which = 'dashboard-suporte';
   renderFerramentasPersonal();
   atualizarSidebarAtiva(which);
-  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes','comunicacao','ferramentas-treino','inteligencia','relatorios','faturamento','dashboard-suporte','conversas','aula-presencial','feedback-treinos','feedback-alunas','envios'].forEach(function(v){
+  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes','comunicacao','ferramentas-treino','inteligencia','relatorios','faturamento','dashboard-suporte','conversas','aula-presencial','feedback-treinos','feedback-alunas','envios','anamneses'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
   });
   if(which === 'sinalizacoes'){ renderSinalizacoes(); }
   if(which === 'conversas'){ renderListaConversas(); }
   if(which === 'feedback-treinos'){ renderFeedbackTreinos(); }
+  if(which === 'anamneses'){ renderAnamneses(); }
   if(which === 'feedback-alunas'){
     renderFeedbackAlunas();
     // Os comentários delas vêm do progresso de cada uma: busca de novo pra mostrar o que chegou agora
