@@ -998,7 +998,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-28-AW-SECA21-REINICIAR</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-28-AX-SO-DESAFIO-FORA-PENDENCIAS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1916,7 +1916,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-28-AW-SECA21-REINICIAR';
+const VERSAO_APP = '2026-10-28-AX-SO-DESAFIO-FORA-PENDENCIAS';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -12295,7 +12295,7 @@ function alunasAtivasElegiveis(){
 }
 
 async function iniciarGeracaoParaSemTreino(){
-  const todasAtivasSemTreino = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas' && !a.treinoAtual; });
+  const todasAtivasSemTreino = alunasPersonal.filter(function(a){ return entraNoControleDeTreinos(a) && !a.treinoAtual; });
   const elegiveis = todasAtivasSemTreino.filter(function(a){ return a.email; });
   const semEmail = todasAtivasSemTreino.length - elegiveis.length;
   if(elegiveis.length === 0){
@@ -12309,7 +12309,7 @@ async function iniciarGeracaoParaSemTreino(){
 }
 
 async function iniciarProgressaoParaComTreino(){
-  const todasAtivasComTreino = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas' && !!a.treinoAtual; });
+  const todasAtivasComTreino = alunasPersonal.filter(function(a){ return entraNoControleDeTreinos(a) && !!a.treinoAtual; });
   const elegiveis = todasAtivasComTreino.filter(function(a){ return a.email; });
   const semEmail = todasAtivasComTreino.length - elegiveis.length;
   if(elegiveis.length === 0){
@@ -12327,7 +12327,7 @@ async function iniciarProgressaoParaComTreino(){
 // adicionada no motor: roda isso uma vez e pega todo mundo que ainda está pendente de receber a
 // atualização, sem precisar separar manualmente quem já tinha treino de quem não tinha.
 async function iniciarGeracaoOuProgressaoParaNaoEnviados(){
-  const naoEnviadas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas' && statusEfetivoDoControle(a) !== 'verde'; });
+  const naoEnviadas = alunasPersonal.filter(function(a){ return entraNoControleDeTreinos(a) && statusEfetivoDoControle(a) !== 'verde'; });
   const elegiveis = naoEnviadas.filter(function(a){ return a.email; });
   const semEmail = naoEnviadas.length - elegiveis.length;
   if(elegiveis.length === 0){
@@ -13542,6 +13542,7 @@ function ultimoTreinoRegistrado(prog){
 // Situação do Controle de Treinos em uma frase (mesma regra da tela do Controle)
 function situacaoDoControleDaAluna(a, agora){
   if(agora === undefined) agora = Date.now();
+  if(soDesafioComDesafioVigente(a, agora)) return { texto: 'Treino do desafio', classe: 'fc-ok' };
   const ef = statusEfetivoDoControle(a, agora);
   if(ef === 'verde') return { texto: 'Treino enviado' + (a.dataFicouVerde ? ' em ' + dataCurtaPainel(a.dataFicouVerde) : ''), classe: 'fc-ok' };
   if(ef === 'amarelo') return { texto: 'Treino gerado, falta enviar', classe: 'fc-ouro' };
@@ -14373,6 +14374,18 @@ function entregaVenceuPorPrazo(a, agora){
   return a.statusControleCiclo === 'verde' && !!a.dataFicouVerde && statusEfetivoDoControle(a, agora) === null;
 }
 
+// Regra do Thiago: aluna "Só desafio" com o desafio vigente não tem treino da consultoria pendente (o treino dela é
+// o do desafio). Vigente: inscrita e o desafio ainda não terminou (o SECA 21 termina na data de fim; o Seca e Empina
+// não tem fim). Terminou: volta pro Controle de treinos. "Consultoria + desafio" segue a regra normal do Controle.
+function soDesafioComDesafioVigente(a, agora){
+  if(!a || !a.desafioAtivo || planoDaAluna(a).plano !== 'so-desafio') return false;
+  if(estaNoSeca21(a)){ const st = situacaoDoSeca21(a, agora); return !!st && !st.terminou; }
+  return true;
+}
+function entraNoControleDeTreinos(a, agora){
+  return statusDoPlano(a) === 'ativas' && !soDesafioComDesafioVigente(a, agora);
+}
+
 function htmlPrazoDoControle(){
   return '<div class="ctl-topo">Enviada volta pra Pendentes depois de ' +
     '<input type="number" id="dias-controle" min="1" max="365" value="' + diasParaVoltarAoBranco + '" onchange="definirDiasDoControle(this.value)"> ' +
@@ -14507,7 +14520,8 @@ function renderControleTreinos(){
   const container = document.getElementById('area-controle-treinos');
   if(!container) return;
   const agora = Date.now();
-  const ativas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  const ativas = alunasPersonal.filter(function(a){ return entraNoControleDeTreinos(a, agora); });
+  const soDesafio = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas' && soDesafioComDesafioVigente(a, agora); });
   const efetivo = function(a){ return statusEfetivoDoControle(a, agora); };
   const tempoDaEntrega = function(a){ const t = new Date(a.dataFicouVerde).getTime(); return isNaN(t) ? 0 : t; };
 
@@ -14530,6 +14544,10 @@ function renderControleTreinos(){
   atualizarBadgeControle(amarelos.length + incolores.length); // mesmo número do painel: gerados + pendentes
   let html = htmlPrazoDoControle();
   html += htmlAvisosDoControle();
+  if(soDesafio.length > 0){
+    html += '<p class="ctl-fora-desafio" style="font-size:11px;color:var(--text-faint);margin:0 0 10px;">' + (soDesafio.length === 1 ? '1 aluna só no desafio fica' : soDesafio.length + ' alunas só no desafio ficam') +
+      ' fora do Controle enquanto o desafio estiver valendo (o treino delas é o do desafio): ' + escaparHtmlFicha(soDesafio.map(function(a){ return a.nome.split(' ')[0]; }).join(', ')) + '.</p>';
+  }
 
   const item = function(a, sub, classeSub, botao){
     const i = alunasPersonal.indexOf(a);
@@ -19888,7 +19906,7 @@ async function renderInfoCardGerarTreino(){
   // Usa a MESMA base do Controle de Treinos (todas as Ativas, sem exigir e-mail aqui), pra os números
   // baterem entre as duas telas. O e-mail só é exigido de verdade na hora de processar (mais abaixo),
   // porque sem ele não tem como salvar o treino no banco — mas isso agora aparece avisado, não escondido.
-  const todasAtivas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  const todasAtivas = alunasPersonal.filter(function(a){ return entraNoControleDeTreinos(a); }); // só desafio com desafio valendo fica de fora
   const semTreino = todasAtivas.filter(function(a){ return !a.treinoAtual; });
   const comTreino = todasAtivas.filter(function(a){ return !!a.treinoAtual; });
   const semTreinoSemEmail = semTreino.filter(function(a){ return !a.email; }).length;
@@ -20076,7 +20094,7 @@ function fichaDoNomeDoErro(quem){
 function calcularPainelDoPersonal(agora){
   if(agora === undefined) agora = Date.now();
   const status = function(a){ return statusDoPlano(a); };
-  const ativas = alunasPersonal.filter(function(a){ return status(a) === 'ativas'; });
+  const ativas = alunasPersonal.filter(function(a){ return entraNoControleDeTreinos(a, agora); });
   const porVencer = alunasPersonal.filter(function(a){ return status(a) === 'porvencer'; });
   const efetivo = function(a){ return statusEfetivoDoControle(a, agora); };
 
@@ -20146,7 +20164,7 @@ function montarItensAtencao(agora){
     }
 
     // 4) Treino atrasado: estava entregue e passou do prazo do Controle
-    if(statusDoPlano(a) === 'ativas' && entregaVenceuPorPrazo(a, agora)){
+    if(entraNoControleDeTreinos(a, agora) && entregaVenceuPorPrazo(a, agora)){
       const d = diasCorridosDesde(a.dataFicouVerde, agora);
       itens.push({ prioridade: 4, ordem: -(d || 0), ficha: a, nome: a.nome,
         detalhe: 'Treino entregue em ' + dataCurtaPainel(a.dataFicouVerde) + ' · passou o prazo de ' + diasParaVoltarAoBranco + ' dias',
