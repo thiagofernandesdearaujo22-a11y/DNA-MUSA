@@ -381,6 +381,19 @@
   .cd-av{width:30px;height:30px;border-radius:50%;background:var(--card-2);border:1px solid rgba(232,197,138,.3);display:flex;align-items:center;justify-content:center;font-size:10.5px;color:var(--gold-soft);flex-shrink:0;}
   .cd-barra{display:block;height:6px;border-radius:4px;background:var(--card-2);overflow:hidden;width:100%;margin-bottom:3px;} .cd-barra i{display:block;height:100%;background:var(--gold);}
   #bottom-nav-fixa.nav-desafio .bottom-nav-item span{font-size:10px;white-space:nowrap;letter-spacing:-.1px;}
+  .rg-botoes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+  .rg-bt{border-color:rgba(226,163,61,.55) !important;color:#E2A33D !important;}
+  .rg-box{margin-top:12px;border:1px solid rgba(226,163,61,.45);border-radius:16px;padding:16px;background:var(--card);}
+  .rg-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;} .rg-top h3{margin:0;font-size:16px;} .rg-top span{font-size:11px;color:var(--text-faint);}
+  .rg-lbl{font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold-soft);margin:14px 0 8px;}
+  .rg-chip{display:inline-block;font-size:12px;padding:7px 12px;border-radius:16px;margin:0 6px 6px 0;cursor:pointer;background:var(--card-2);color:var(--text-dim);border:1px solid var(--border);}
+  .rg-chip.on{background:rgba(226,163,61,.18);color:#E2A33D;border-color:rgba(226,163,61,.6);}
+  .rg-niveis{display:flex;gap:8px;flex-wrap:wrap;} .rg-nivel{flex:1;min-width:150px;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:var(--card-2);cursor:pointer;}
+  .rg-nivel b{font-size:12.5px;display:block;} .rg-nivel small{font-size:11px;color:var(--text-faint);} .rg-nivel.on{border-color:rgba(226,163,61,.7);background:rgba(226,163,61,.08);} .rg-nivel.on b{color:#E2A33D;}
+  .rg-resumo{margin-top:14px;padding:12px;border-radius:12px;background:var(--card-2);border:1px solid var(--border);} .rg-resumo p{margin:0 0 4px;font-size:12px;color:var(--text-dim);} .rg-resumo p:first-child{font-size:12.5px;color:var(--text);margin-bottom:8px;} .rg-resumo b{color:var(--text);}
+  .rg-aviso{font-size:11px;color:#E2A33D;margin:10px 0 0;}
+  .rg-faixa{margin-top:10px;padding:10px 12px;border-radius:12px;border:1px solid rgba(226,163,61,.45);background:rgba(226,163,61,.08);font-size:12px;color:var(--text-dim);} .rg-faixa b{color:#E2A33D;}
+  .rg-faixa span{color:var(--gold-soft);text-decoration:underline;cursor:pointer;margin-left:6px;} .rg-faixa.fim{border-color:rgba(232,197,138,.6);}
   .aula-ex{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;margin-bottom:8px;background:var(--card);}
   .aula-ex.pronta{cursor:pointer;} .aula-ex-play{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--card-2);color:var(--text-faint);font-size:14px;}
   .aula-ex.pronta .aula-ex-play{background:linear-gradient(135deg,#F4D9A5,#E8C58A);color:#1a1712;}
@@ -963,7 +976,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-26-AS-AULAS-DESAFIO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-27-AT-REGREDIR-TREINO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1874,7 +1887,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-26-AS-AULAS-DESAFIO';
+const VERSAO_APP = '2026-10-27-AT-REGREDIR-TREINO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -10457,6 +10470,9 @@ function montarDadosExtrasDaAluna(a){
     contadorAberturas: a.contadorAberturas || 0,
     sinalRiscoEmocional: a.sinalRiscoEmocional || null,
     progressaoManualForcada: a.progressaoManualForcada || 0,
+    regressao: a.regressao || null, // regressão ativa (motivo, região, nível, até quando)
+    treinoAntesDaRegressao: a.treinoAntesDaRegressao || null, // pra desfazer a regressão
+    historicoRegressoes: a.historicoRegressoes || [],
     composicaoHistorico: a.composicaoHistorico || [],
     pesoHistorico: a.pesoHistorico || [],
     // Peso e altura iniciais (e o IMC calculado deles) nunca eram salvos: ao carregar alunas do banco o app
@@ -11064,10 +11080,194 @@ function confirmarProgressaoManual(nomeAluna){
   // dado suficiente registrado ainda. Cada clique aqui força uma variação real de exercício e
   // um degrau a mais de volume, independente da semana/histórico dela.
   a.progressaoManualForcada = (a.progressaoManualForcada || 0) + 1;
+  a.regressao = null; a.treinoAntesDaRegressao = null; // progrediu: a regressão acabou
   salvarPerfilAlunaNoSupabase(nomeAluna);
   gerarTreinoAutomaticoParaAluna(nomeAluna);
   if(a.telefone) enviarWhatsApp(a.telefone, templatesAvisos.treinoProgredido(a));
   enviarAvisoInApp(nomeAluna, 'Seu treino acabou de ser atualizado, com evolução de carga/variedade. Já pode conferir! 💪', 'ajuste_treino');
+}
+
+// =====================================================================================
+// REGREDIR TREINO: motivo (dor, lesão, cansaço...), região (pra dor/lesão), quanto e por quanto tempo.
+// Parte do treino ATUAL dela (não gera outro): tira séries, tira métodos e troca o que pesa na região.
+// =====================================================================================
+const MOTIVOS_REGRESSAO = ['Dor', 'Lesão', 'Cansaço / fadiga', 'Sono ou estresse', 'Voltando de pausa', 'Rotina apertada / viagem', 'Outro'];
+// Exercícios que pedem mais da região (lista de partida, ajuste como quiser). "Outro lugar" não troca nada.
+const REGIOES_REGRESSAO = {
+  'Ombro': /DESENVOLVIMENTO|ELEVA[ÇC][ÃA]O LATERAL|ELEVA[ÇC][ÃA]O FRONTAL|SUPINO|MERGULHO|PARALELA|CRUCIFIXO|ARNOLD|REMADA ALTA|PULLOVER/i,
+  'Joelho': /AGACHAMENTO|AFUNDO|AVAN[ÇC]O|PASSADA|LUNGE|B[ÚU]LGARO|LEG PRESS|LEG HORIZONTAL|HACK|EXTENSORA|STEP|SUBIDA|SALTO|PLIOM|PENDULAR|SISSY|PISTOL|SENTA E LEVANTA|SENTAR/i,
+  'Lombar': /TERRA|STIFF|BOM DIA|GOOD MORNING|AGACHAMENTO LIVRE|REMADA CURVADA|LEVANTAMENTO/i,
+  'Quadril': /AFUNDO|AVAN[ÇC]O|LUNGE|B[ÚU]LGARO|PASSADA|SUM[ÔO]|ADU[ÇC][ÃA]O/i,
+  'Punho / cotovelo': /ROSCA|TR[ÍI]CEPS|FLEX[ÃA]O DE BRA[ÇC]O|SUPINO|MERGULHO|PARALELA/i,
+  'Outro lugar': null
+};
+const NIVEIS_REGRESSAO = {
+  leve: { titulo: 'Leve', desc: '1 série a menos nos 2 primeiros exercícios de cada dia' },
+  moderada: { titulo: 'Moderada', desc: 'Cerca de 30% menos séries, sem drop set e rest pause' },
+  recomeco: { titulo: 'Recomeço', desc: '2 séries em cada exercício, sem métodos' }
+};
+const DURACOES_REGRESSAO = [[7, '1 semana'], [14, '2 semanas'], [0, 'Até eu progredir de novo']];
+const estadoRegressao = {}; // nome -> { motivo, regiao, detalhe, nivel, dias }
+
+function mudarSeriesDaLinha(linha, fn){
+  const t = String(linha || '');
+  if(t.indexOf('|||') !== -1){
+    const p = t.split('|||');
+    return p[0] + '|||' + p.slice(1).map(function(x){ return mudarSeriesDaLinha(x, fn); }).join('|||');
+  }
+  const i = t.indexOf(' · ');
+  if(i === -1) return t;
+  const nome = t.slice(0, i), resto = t.slice(i + 3);
+  const m = resto.match(/^(\d+)(\s*x.*)$/i);
+  if(!m) return t;
+  return nome + ' · ' + fn(parseInt(m[1], 10)) + m[2];
+}
+
+function semMetodoNaLinha(linha){ return String(linha).replace(/ · (drop ?set|rest ?pause|cluster[^·]*)$/i, ''); }
+
+// Calcula a semana regredida (sem salvar nada) a partir do treino atual dela
+function calcularRegressao(a, cfg){
+  const dias = JSON.parse(JSON.stringify((a.treinoAtual && a.treinoAtual.dias) || []));
+  const trocas = [], removidos = [];
+  const regra = cfg.regiao && (cfg.motivo === 'Dor' || cfg.motivo === 'Lesão') ? REGIOES_REGRESSAO[cfg.regiao] : null;
+  const casa = a.ambienteTreino === 'Casa';
+  const serve = function(e){ return casa ? exercicioServeParaCasa(e) : ((e.ambiente || 'Academia') === 'Academia' && !ehExercicioElastico(e)); };
+  dias.forEach(function(d){
+    if(!d || d.descanso || !d.ex) return;
+    d.ex = d.ex.map(function(linha, i){
+      if(cfg.nivel === 'leve') return i < 2 ? mudarSeriesDaLinha(linha, function(n){ return Math.max(2, n - 1); }) : linha;
+      const sem = semMetodoNaLinha(linha);
+      if(cfg.nivel === 'recomeco') return mudarSeriesDaLinha(sem, function(n){ return Math.min(n, 2); });
+      return mudarSeriesDaLinha(sem, function(n){ return Math.max(2, Math.round(n * 0.7)); });
+    });
+    if(cfg.nivel !== 'leve') d.metodos = {};
+    if(!regra) return;
+    const nomesNoDia = d.ex.map(function(l){ return partesDaLinhaDeTreino(l).nomes.join('|').toUpperCase(); }).join('|');
+    const novas = [];
+    d.ex.forEach(function(linha){
+      const p = partesDaLinhaDeTreino(linha);
+      if(!p.nomes.some(function(n){ return regra.test(n); })){ novas.push(linha); return; }
+      const exBanco = p.combo ? null : buscarExercicioNoBanco(p.nome);
+      const grupo = exBanco ? (exBanco.grupo || exBanco.categoria) : null;
+      const opcoes = grupo ? exerciciosBanco.filter(function(e){
+        return (e.grupo || e.categoria) === grupo && serve(e) && exercicioPodeSerPrescrito(e) && !regra.test(e.nome) &&
+          nomesNoDia.indexOf(e.nome.toUpperCase()) === -1 && novas.join('|').toUpperCase().indexOf(e.nome.toUpperCase()) === -1;
+      }).sort(function(x, y){ return (y.video ? 1 : 0) - (x.video ? 1 : 0) || x.nome.localeCompare(y.nome, 'pt-BR'); }) : [];
+      if(opcoes.length){
+        const para = capitalizarNomeExercicio(opcoes[0].nome);
+        novas.push(para + (p.volume ? ' · ' + p.volume : ''));
+        trocas.push({ dia: d.n, de: p.nome, para: para });
+      } else {
+        removidos.push({ dia: d.n, nome: p.nome });
+      }
+    });
+    d.ex = novas;
+  });
+  return { dias: dias, trocas: trocas, removidos: removidos };
+}
+
+function alternarRegressao(nomeAluna){
+  const area = document.getElementById('regressao-area');
+  if(!area) return;
+  if(area.innerHTML){ area.innerHTML = ''; return; }
+  estadoRegressao[nomeAluna] = { motivo: null, regiao: null, detalhe: '', nivel: 'moderada', dias: 14 };
+  renderRegressao(nomeAluna);
+}
+
+function escolherNaRegressao(nomeAluna, campo, valor){
+  const est = estadoRegressao[nomeAluna];
+  if(!est) return;
+  est[campo] = valor;
+  if(campo === 'motivo' && valor !== 'Dor' && valor !== 'Lesão') est.regiao = null;
+  renderRegressao(nomeAluna);
+}
+
+function renderRegressao(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  const est = estadoRegressao[nomeAluna];
+  const area = document.getElementById('regressao-area');
+  if(!a || !est || !area || !a.treinoAtual) return;
+  const nj = nomeAluna.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  const chip = function(campo, valor, rotulo){
+    const on = est[campo] === valor;
+    return '<span class="rg-chip' + (on ? ' on' : '') + '" onclick="escolherNaRegressao(\'' + nj + '\',\'' + campo + '\',' + (typeof valor === 'number' ? valor : '\'' + String(valor).replace(/'/g, "\\'") + '\'') + ')">' + escaparHtmlFicha(rotulo || valor) + '</span>';
+  };
+  const comRegiao = est.motivo === 'Dor' || est.motivo === 'Lesão';
+  let html = '<div class="rg-box"><div class="rg-top"><h3>Regredir o treino</h3><span>Nada muda pra aluna até você confirmar</span></div>' +
+    '<p class="rg-lbl">1 · Motivo</p>' + MOTIVOS_REGRESSAO.map(function(m){ return chip('motivo', m); }).join('');
+  if(comRegiao){
+    html += '<p class="rg-lbl">2 · Onde dói</p>' + Object.keys(REGIOES_REGRESSAO).map(function(r){ return chip('regiao', r); }).join('') +
+      '<input class="form-input" style="font-size:12.5px;margin-top:4px;" placeholder="Detalhe (opcional): ex. dor no joelho direito ao agachar fundo" value="' + escaparHtmlFicha(est.detalhe) + '" oninput="estadoRegressao[\'' + nj + '\'].detalhe=this.value">';
+  } else if(est.motivo){
+    html += '<input class="form-input" style="font-size:12.5px;margin-top:8px;" placeholder="Detalhe (opcional)" value="' + escaparHtmlFicha(est.detalhe) + '" oninput="estadoRegressao[\'' + nj + '\'].detalhe=this.value">';
+  }
+  html += '<p class="rg-lbl">' + (comRegiao ? '3' : '2') + ' · Quanto regredir</p><div class="rg-niveis">' + Object.keys(NIVEIS_REGRESSAO).map(function(k){
+      const n = NIVEIS_REGRESSAO[k];
+      return '<div class="rg-nivel' + (est.nivel === k ? ' on' : '') + '" onclick="escolherNaRegressao(\'' + nj + '\',\'nivel\',\'' + k + '\')"><b>' + n.titulo + '</b><small>' + n.desc + '</small></div>';
+    }).join('') + '</div>' +
+    '<p class="rg-lbl">' + (comRegiao ? '4' : '3') + ' · Por quanto tempo</p>' + DURACOES_REGRESSAO.map(function(d){ return chip('dias', d[0], d[1]); }).join('');
+  if(est.motivo){
+    const r = calcularRegressao(a, est);
+    const antes = calcularVolumeTotalDoTreino(a.treinoAtual.dias), depois = calcularVolumeTotalDoTreino(r.dias);
+    const quando = est.dias ? (est.dias === 7 ? '1 semana' : '2 semanas') : 'até você progredir de novo';
+    html += '<div class="rg-resumo"><p><b>O que muda (' + escaparHtmlFicha(est.motivo + (est.regiao ? ' · ' + est.regiao : '') + ' · ' + NIVEIS_REGRESSAO[est.nivel].titulo.toLowerCase() + ' · ' + quando) + ')</b></p>' +
+      '<p>Séries na semana: <b>' + antes.series + ' → ' + depois.series + '</b>' + (est.nivel !== 'leve' ? ' · drop set e rest pause saem' : '') + '</p>' +
+      (r.trocas.length ? '<p>' + r.trocas.length + (r.trocas.length === 1 ? ' exercício troca' : ' exercícios trocam') + ' por causa da região: ' + r.trocas.map(function(t){ return '<b>' + escaparHtmlFicha(t.de) + ' → ' + escaparHtmlFicha(t.para) + '</b> (' + escaparHtmlFicha(t.dia) + ')'; }).join(', ') + '</p>' : (comRegiao && est.regiao && REGIOES_REGRESSAO[est.regiao] ? '<p>Nenhum exercício do treino dela está na lista dessa região.</p>' : '')) +
+      (r.removidos.length ? '<p>Saem (sem troca parecida no banco): ' + r.removidos.map(function(t){ return '<b>' + escaparHtmlFicha(t.nome) + '</b> (' + escaparHtmlFicha(t.dia) + ')'; }).join(', ') + '</p>' : '') +
+      (est.dias ? '<p>No fim do prazo, a ficha te lembra de reavaliar e progredir de novo.</p>' : '') + '</div>';
+  }
+  if(comRegiao) html += '<p class="rg-aviso">Dor que não melhora, piora ou veio de trauma: vale encaminhar pra avaliação de um profissional de saúde.</p>';
+  html += '<button class="btn-gold" style="margin-top:12px;"' + (est.motivo ? '' : ' disabled') + ' onclick="confirmarRegressao(\'' + nj + '\')">' + (est.motivo ? 'Confirmar e regredir o treino' : 'Escolha o motivo pra continuar') + '</button></div>';
+  area.innerHTML = html;
+}
+
+async function confirmarRegressao(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  const est = estadoRegressao[nomeAluna];
+  if(!a || !est || !est.motivo || !a.treinoAtual) return false;
+  const r = calcularRegressao(a, est);
+  const hoje = dataLocalISO(new Date());
+  a.treinoAntesDaRegressao = JSON.parse(JSON.stringify(a.treinoAtual));
+  a.treinoAtual = Object.assign({}, a.treinoAtual, { dias: r.dias, volume: 'Regredido (' + est.motivo + (est.regiao ? ', ' + est.regiao : '') + ')' });
+  a.regressao = { motivo: est.motivo, regiao: est.regiao || null, detalhe: String(est.detalhe || '').trim(), nivel: est.nivel, em: hoje, ate: est.dias ? dataISOMaisDias(hoje, est.dias) : null, por: NOME_PERSONAL_LOGADO || '' };
+  a.historicoRegressoes = (a.historicoRegressoes || []).concat([a.regressao]);
+  delete estadoRegressao[nomeAluna];
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+  try { await sincronizarTreinoComSupabase(a); } catch(e){}
+  try { enviarAvisoInApp(nomeAluna, 'Seu treino foi ajustado pra essa fase. Já pode conferir!', 'ajuste_treino'); } catch(e){}
+  mostrarConfirmacaoSalvamento(true, 'Treino regredido. Ela já vê o treino novo.');
+  const i = alunasPersonal.indexOf(a);
+  if(i !== -1) openAlunaDetail(i);
+  return true;
+}
+
+async function desfazerRegressao(nomeAluna){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !a.treinoAntesDaRegressao) return false;
+  if(!confirm('Voltar pro treino de antes da regressão?')) return false;
+  a.treinoAtual = a.treinoAntesDaRegressao;
+  a.treinoAntesDaRegressao = null;
+  a.regressao = null;
+  salvarPerfilAlunaNoSupabase(nomeAluna);
+  try { await sincronizarTreinoComSupabase(a); } catch(e){}
+  const i = alunasPersonal.indexOf(a);
+  if(i !== -1) openAlunaDetail(i);
+  return true;
+}
+
+// Faixa na ficha: regressão em andamento (com Desfazer) ou já no fim do prazo (hora de reavaliar)
+function htmlFaixaRegressao(a, agora){
+  const r = a && a.regressao;
+  if(!r) return '';
+  const hoje = dataLocalISO(new Date(agora === undefined ? Date.now() : agora));
+  const nj = a.nome.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  const porque = escaparHtmlFicha(r.motivo + (r.regiao ? ' (' + r.regiao + ')' : ''));
+  if(r.ate && hoje > r.ate){
+    return '<div class="rg-faixa fim"><b>A regressão por ' + porque + ' terminou em ' + dataCurtaBR(r.ate) + '.</b> Hora de reavaliar e progredir o treino de novo.</div>';
+  }
+  return '<div class="rg-faixa"><b>Treino regredido em ' + dataCurtaBR(r.em) + ' por ' + porque + '</b>' + (r.ate ? ', até ' + dataCurtaBR(r.ate) : '') + '.' +
+    (r.detalhe ? ' <i>"' + escaparHtmlFicha(r.detalhe) + '"</i>' : '') +
+    (a.treinoAntesDaRegressao ? ' <span onclick="desfazerRegressao(\'' + nj + '\')">Desfazer</span>' : '') + '</div>';
 }
 
 function calcularVolumeTotalDoTreino(diasTreino){
@@ -13182,8 +13382,10 @@ function openAlunaDetail(i){
   const diagnostico = gerarDiagnosticoInterno(a);
   const prog = getProgressoAluna(a.nome);
   if(a.treinoAtual){
-    treinoAcoesHtml = '<button class="btn-secondary" style="margin-top:10px;" onclick="mostrarDiagnosticoParaProgredir(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-trending-up" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>Progredir treino</button>';
-    treinoAcoesHtml += '<div id="diagnostico-progressao-area"></div>';
+    treinoAcoesHtml = htmlFaixaRegressao(a) + '<div class="rg-botoes">' +
+      '<button class="btn-secondary" style="margin-top:0;" onclick="mostrarDiagnosticoParaProgredir(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-trending-up" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>Progredir treino</button>' +
+      '<button class="btn-secondary rg-bt" style="margin-top:0;" onclick="alternarRegressao(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-trending-down" style="font-size:13px;vertical-align:-2px;margin-right:6px;"></i>Regredir treino</button></div>';
+    treinoAcoesHtml += '<div id="regressao-area"></div><div id="diagnostico-progressao-area"></div>';
   } else {
     treinoAcoesHtml = '<div class="info-box" style="margin-top:10px;">' +
       '<p class="lbl">Diagnóstico antes de gerar</p>' +
