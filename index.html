@@ -381,6 +381,13 @@
   .cd-av{width:30px;height:30px;border-radius:50%;background:var(--card-2);border:1px solid rgba(232,197,138,.3);display:flex;align-items:center;justify-content:center;font-size:10.5px;color:var(--gold-soft);flex-shrink:0;}
   .cd-barra{display:block;height:6px;border-radius:4px;background:var(--card-2);overflow:hidden;width:100%;margin-bottom:3px;} .cd-barra i{display:block;height:100%;background:var(--gold);}
   #bottom-nav-fixa.nav-desafio .bottom-nav-item span{font-size:10px;white-space:nowrap;letter-spacing:-.1px;}
+  .an-marcar{background:rgba(232,197,138,.14) !important;color:var(--gold-soft) !important;border:1px solid rgba(232,197,138,.5);font-weight:600;} .an-marcar.on{background:var(--card-2) !important;color:var(--text-dim) !important;border-color:var(--border);}
+  .an-tab.marcando .an-lin{grid-template-columns:26px minmax(0,1.6fr) 100px minmax(0,1.6fr) minmax(0,1.3fr) 96px 56px;} .an-ck{width:16px;height:16px;accent-color:#E8C58A;}
+  .an-barra{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:10px 12px;margin-bottom:10px;border:1px solid rgba(232,197,138,.5);border-radius:12px;background:rgba(232,197,138,.07);font-size:12.5px;}
+  .an-link{color:var(--gold-soft);text-decoration:underline;cursor:pointer;font-size:12px;} .an-link.fraco{color:var(--text-faint);} .an-acoes{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;}
+  .an-inscrever{padding:14px 16px;margin-bottom:12px;border:1px solid rgba(143,191,143,.45);border-radius:14px;background:var(--card);max-width:520px;}
+  .an-ins-tit{margin:0;font-size:15px;font-weight:600;} .an-ins-sub{margin:2px 0 0;font-size:11.5px;color:var(--text-faint);} .an-ins-ck{display:flex;gap:8px;align-items:center;font-size:12px;margin-top:10px;color:var(--text-dim);}
+  @media (max-width: 760px){ .an-tab.marcando .an-lin{grid-template-columns:26px minmax(0,1fr) auto;} .an-tab.marcando .an-lin > span:nth-child(3), .an-tab.marcando .an-lin > span:nth-child(6){display:none !important;} .an-tab.marcando .an-lin > span:nth-child(4), .an-tab.marcando .an-lin > span:nth-child(5){display:none !important;} .an-acoes{margin-left:0;} }
   .an-topo{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px;} .an-busca{margin-left:auto;width:220px;font-size:12.5px;}
   .an-tab{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--card);}
   .an-lin{display:grid;grid-template-columns:minmax(0,1.6fr) 100px minmax(0,1.6fr) minmax(0,1.3fr) 96px 56px;gap:10px;padding:12px 14px;align-items:center;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text);}
@@ -988,7 +995,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-27-AU-ANAMNESES</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-27-AV-SECA21-NIVEIS-MARCAR</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1906,7 +1913,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-27-AU-ANAMNESES';
+const VERSAO_APP = '2026-10-27-AV-SECA21-NIVEIS-MARCAR';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -4752,8 +4759,10 @@ function definirPlanoPelaLista(i, plano){
   renderAlunas();
 }
 
-// SECA 21: estrutura pelo nível (o SECA 21 só tem Iniciante e Avançado; Intermediário recebe Iniciante)
-function nivelSeca21PeloNivel(nivel){ return nivel === 'Avançado' ? 'Avançado' : 'Iniciante'; }
+// SECA 21: estrutura pelo nível. O SECA 21 só tem Intermediário e Avançado: quem é Iniciante na ficha (e quem foi
+// inscrita quando a estrutura ainda se chamava "Iniciante") entra no Intermediário.
+function nivelSeca21PeloNivel(nivel){ return nivel === 'Avançado' ? 'Avançado' : 'Intermediário'; }
+function chaveSeca21Normalizada(chave){ return String(chave || '').replace(/^Iniciante_/, 'Intermediário_'); }
 function dataISOMaisDias(iso, dias){
   const p = String(iso).split('-').map(Number);
   const d = new Date(p[0], p[1] - 1, p[2] + dias);
@@ -6754,7 +6763,7 @@ function mostrarFormularioInscricaoSeca21(){
   const elegiveis = alunasPersonal.filter(function(a){ return !a.desafioAtivo; }).sort(function(x, y){ return x.nome.localeCompare(y.nome, 'pt-BR'); });
   area.innerHTML = '<div class="info-box">' +
     '<div class="form-group"><label class="form-label">Plano dessas alunas</label><select class="form-select" id="s21-plano"><option value="auto">Pelo cadastro de cada uma (sugestão do app)</option><option value="so-desafio">Só desafio</option><option value="consultoria-desafio">Consultoria + desafio</option></select></div>' +
-    '<div class="form-group"><label class="form-label">Nível da estrutura</label><select class="form-select" id="s21-nivel"><option value="cada">O nível de cada uma (Intermediário recebe Iniciante)</option><option value="Iniciante">Iniciante pra todas</option><option value="Avançado">Avançado pra todas</option></select></div>' +
+    '<div class="form-group"><label class="form-label">Nível da estrutura</label><select class="form-select" id="s21-nivel"><option value="cada">O nível de cada uma (Iniciante entra no Intermediário)</option><option value="Intermediário">Intermediário pra todas</option><option value="Avançado">Avançado pra todas</option></select></div>' +
     '<div class="form-group"><label class="form-label">Frequência</label><select class="form-select" id="s21-freq"><option value="3">3x por semana</option><option value="5">5x por semana</option></select></div>' +
     '<div class="row" style="gap:8px;"><div class="form-group" style="flex:1;"><label class="form-label">Começa em</label><input class="form-input" type="date" id="s21-inicio" value="' + hoje + '" onchange="atualizarFimSeca21()"></div>' +
       '<div class="form-group" style="flex:1;"><label class="form-label">Termina em</label><input class="form-input" type="date" id="s21-fim" value="' + dataISOMaisDias(hoje, DESAFIOS_DO_APP.seca21.duracaoDias - 1) + '"></div></div>' +
@@ -6864,7 +6873,7 @@ function renderListaSeca21(){
       return '<div class="cd-lin cd-lin-s21">' +
         '<span class="cd-nm"><span class="cd-av">' + iniciaisDaAluna(a.nome) + '</span><span><b>' + escaparHtmlFicha(a.nome) + '</b><small>' + NOMES_PLANO[pl.plano] +
           ((a.cursosLiberados || []).indexOf('seca21') !== -1 ? ' · curso liberado' : '') + '</small></span></span>' +
-        '<span><span class="cd-chip cd-c-verde">' + d.nivel + ' · ' + d.frequencia + 'x</span></span>' +
+        '<span><span class="cd-chip cd-c-verde">' + nivelSeca21PeloNivel(d.nivel) + ' · ' + d.frequencia + 'x</span></span>' +
         '<span><span class="cd-barra"><i style="width:' + pct + '%;background:#A9DDB4;"></i></span><small class="cd-faint">' + quando + '</small></span>' +
         '<span><span class="cd-chip ' + (temTreino ? 'cd-c-ok">liberado' : 'cd-c-alerta">falta liberar') + '</span></span>' +
         '<span class="cd-acoes-lin"><span class="cd-btn cd-btn-peq cd-btn-perigo" onclick="removerAlunaDoSeca21(\'' + a.nome.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">Remover</span></span>' +
@@ -7421,7 +7430,7 @@ function renderControleDesafios(){
     html += '<div class="cd-box"><div class="cd-box-cab"><h2>Alunas no SECA 21</h2><div class="cd-r"><button class="cd-btn cd-btn-verde" onclick="mostrarFormularioInscricaoSeca21()">+ Inscrever aluna</button></div></div>' +
       '<div id="form-inscricao-seca21"></div><div id="lista-seca21"></div></div>' +
       '<div class="cd-grade2"><div class="cd-box"><div class="cd-box-cab"><h2>As 4 estruturas do SECA 21</h2></div><div id="cd-estruturas-s21">' + htmlCardsEstruturasSeca21() + '</div>' +
-        '<p class="cd-nota">Cada aluna recebe sozinha a estrutura do nível e da frequência dela. Intermediária recebe a de Iniciante. Quem você inscrever depois de salvar já entra com o treino.</p></div>' +
+        '<p class="cd-nota">Cada aluna recebe sozinha a estrutura do nível e da frequência dela. Quem é Iniciante na ficha entra no Intermediário. Quem você inscrever depois de salvar já entra com o treino.</p></div>' +
       '<div class="cd-box">' + htmlRegrasSeca21() + '</div></div>' + htmlGrupoDoDesafio('seca21');
   } else {
     html += '<div id="cd-kpis-se"></div>' +
@@ -7526,8 +7535,8 @@ function descartarEdicaoSecaEmpina(n, freq){
 // drop set no último exercício do dia, rest pause só no Avançado (1º multiarticular de máquina do dia).
 // Divisão: 3x = Inferior A, Superior, Inferior B. 5x = Inferior A, Superior A, Inferior B, Superior B, Inferior completo.
 const ESTRUTURAS_SECA21 = [
-  { chave: 'Iniciante_3', nivel: 'Iniciante', frequencia: 3 },
-  { chave: 'Iniciante_5', nivel: 'Iniciante', frequencia: 5 },
+  { chave: 'Intermediário_3', nivel: 'Intermediário', frequencia: 3 },
+  { chave: 'Intermediário_5', nivel: 'Intermediário', frequencia: 5 },
   { chave: 'Avançado_3', nivel: 'Avançado', frequencia: 3 },
   { chave: 'Avançado_5', nivel: 'Avançado', frequencia: 5 }
 ];
@@ -7538,12 +7547,13 @@ const DIAS_SECA21 = {
 };
 // O que entra em cada tipo de dia, na ordem (o bi-set de braço fecha o dia de superior)
 const RECEITA_SECA21 = {
-  Iniciante: { infA: ['gluteo', 'quad', 'quad', 'posterior'], infB: ['gluteo', 'posterior', 'quad', 'posterior'], infC: ['gluteo', 'quad', 'posterior', 'quad'], sup: ['costas', 'costas', 'peito', 'ombro', 'biset'] },
+  'Intermediário': { infA: ['gluteo', 'quad', 'quad', 'posterior'], infB: ['gluteo', 'posterior', 'quad', 'posterior'], infC: ['gluteo', 'quad', 'posterior', 'quad'], sup: ['costas', 'costas', 'peito', 'ombro', 'biset'] },
   'Avançado': { infA: ['gluteo', 'quad', 'quad', 'posterior', 'quad'], infB: ['gluteo', 'posterior', 'quad', 'posterior', 'posterior'], infC: ['gluteo', 'quad', 'posterior', 'quad', 'posterior'], sup: ['costas', 'costas', 'peito', 'ombro', 'costas', 'biset'] }
 };
-const VOLUME_SECA21 = { Iniciante: { series: 3, reps: 12, seriesPrincipais: 3 }, 'Avançado': { series: 3, reps: 10, seriesPrincipais: 4 } }; // principais = os 2 primeiros do dia
+// principais = os 2 primeiros do dia; primeiro = o 1º exercício do dia (Intermediário: 1 série a mais, pra intensificar)
+const VOLUME_SECA21 = { 'Intermediário': { series: 3, reps: 12, seriesPrincipais: 3, seriesPrimeiro: 4 }, 'Avançado': { series: 3, reps: 10, seriesPrincipais: 4, seriesPrimeiro: 4 } };
 const BISET_SECA21 = { series: 3, reps: 12 };
-const METODOS_SECA21 = { Iniciante: ['Drop set'], 'Avançado': ['Rest pause', 'Drop set'] };
+const METODOS_SECA21 = { 'Intermediário': ['Rest pause', 'Drop set'], 'Avançado': ['Rest pause', 'Drop set'] };
 const PADROES_SECA21 = {
   gluteo: /^ELEVAÇÃO PÉLVICA/,
   quad: /AGACHAMENTO|LEG PRESS|LEG HORIZONTAL|HACK/,
@@ -7560,7 +7570,7 @@ const FORA_DO_SECA21 = /POLIA|CABO|CROSS|UNI\b|UNIL|UNILATERAL|ALTERNAD|CONCENTR
 const MAQUINA_SECA21 = /LEG PRESS|LEG HORIZONTAL|HACK|MÁQUINA|MAQUINA|GUIAD|SMITH|ARTICULAD|ARTICULAR|PENDULAR|SQUAT/;
 const ORDEM_NIVEL_SECA21 = { '': 0, 'A definir': 0, 'Iniciante': 0, 'Intermediário': 1, 'Avançado': 2 };
 
-// Iniciante usa até o que o banco marca como Intermediário (sem isso, quase não sobra stiff e terra pra ela);
+// Intermediário usa até o que o banco marca como Intermediário (sem isso, quase não sobra stiff e terra pra ela);
 // o que o banco marca como Avançado fica só pro Avançado. Guarda o resultado pra não varrer o banco a cada clique.
 let cachePoolSeca21 = {};
 function poolSeca21(slot, nivel){
@@ -7626,6 +7636,7 @@ function videosDaLinhaSeca21(linha, videos){
 }
 
 function gerarSemanaSeca21(chave, semente){
+  chave = chaveSeca21Normalizada(chave);
   const est = ESTRUTURAS_SECA21.find(function(e){ return e.chave === chave; });
   if(!est) return null;
   const nivel = est.nivel, receita = RECEITA_SECA21[nivel], vol = VOLUME_SECA21[nivel];
@@ -7663,7 +7674,7 @@ function gerarSemanaSeca21(chave, semente){
         return;
       }
       const nome = escolher(slot, i * 3);
-      if(nome) ex.push(linhaSeca21(nome, ex.length < 2 ? vol.seriesPrincipais : vol.series, vol.reps, ''));
+      if(nome) ex.push(linhaSeca21(nome, ex.length === 0 ? vol.seriesPrimeiro : (ex.length < 2 ? vol.seriesPrincipais : vol.series), vol.reps, ''));
     });
     aplicarMetodosSeca21(ex, nivel);
     const videos = {};
@@ -7675,7 +7686,7 @@ function gerarSemanaSeca21(chave, semente){
 
 // Drop set no último exercício do dia (fora o bi-set). Se o último for de peso livre (barra fixa, stiff com barra),
 // o drop set vai pro último de máquina, que desce pro fim do dia: na máquina dá pra baixar a carga na hora.
-// Rest pause (só Avançado) no 1º multiarticular de máquina do dia.
+// Rest pause: Avançado no 1º multiarticular de máquina do dia; Intermediário no último (antes do drop set).
 function aplicarMetodosSeca21(ex, nivel){
   let ultimo = -1, ultimoMaquina = -1;
   ex.forEach(function(l, i){
@@ -7689,6 +7700,15 @@ function aplicarMetodosSeca21(ex, nivel){
     ex.splice(ultimo, 0, linha); // vai pro lugar do último (o antigo último sobe uma posição)
   }
   if(ultimo >= 0){ const p = partesLinhaSeca21(ex[ultimo]); p.metodo = 'Drop set'; ex[ultimo] = montarLinhaSeca21(p); }
+  // Intermediário: rest pause no ÚLTIMO multiarticular de máquina antes do drop set (Avançado: no 1º)
+  if(nivel === 'Intermediário'){
+    for(let i = ex.length - 1; i >= 0; i--){
+      if(i === ultimo || ex[i].indexOf('|||') !== -1) continue;
+      const p = partesLinhaSeca21(ex[i]);
+      if(PADROES_SECA21.gluteo.test(p.nomes[0].toUpperCase())) continue;
+      if(MAQUINA_SECA21.test(p.nomes[0].toUpperCase())){ p.metodo = 'Rest pause'; ex[i] = montarLinhaSeca21(p); break; }
+    }
+  }
   if(nivel === 'Avançado'){
     for(let i = 0; i < ex.length; i++){
       if(i === ultimo || ex[i].indexOf('|||') !== -1) continue;
@@ -7723,7 +7743,7 @@ function conferirRegrasSeca21(semana){
         const slot = slotDoExercicioSeca21(p.nomes[0]);
         if(!slot || slot === 'biceps' || slot === 'triceps') naoMulti.push(p.nomes[0]);
         if(/POLIA|CABO|CROSS/.test(p.nomes[0].toUpperCase())) polia.push(p.nomes[0]);
-        if(p.metodo && METODOS_SECA21[nivel].indexOf(p.metodo) === -1) metodoFora.push(p.metodo + ' em ' + p.nomes[0]);
+        if(p.metodo && METODOS_SECA21[nivelSeca21PeloNivel(nivel)].indexOf(p.metodo) === -1) metodoFora.push(p.metodo + ' em ' + p.nomes[0]);
       }
     });
   });
@@ -7733,7 +7753,7 @@ function conferirRegrasSeca21(semana){
     item(bisetErrado.length === 0, 'Isolado só bíceps e tríceps, em bi-set', bisetErrado),
     item(unilaterais.length === 0, 'Nenhum unilateral', unilaterais),
     item(polia.length === 0, 'Nenhum glúteo na polia ou no cabo', polia),
-    item(metodoFora.length === 0, 'Métodos do ' + nivel + ': ' + (nivel === 'Avançado' ? 'bi-set, rest pause e drop set' : 'bi-set e drop set'), metodoFora),
+    item(metodoFora.length === 0, 'Métodos do ' + nivelSeca21PeloNivel(nivel) + ': bi-set, rest pause e drop set', metodoFora),
     item(repetidos.length === 0, 'Nenhum exercício repetido no mesmo treino', repetidos),
     item(elevacoes.length === 0, 'Nunca 2 elevações pélvicas no mesmo treino', elevacoes),
     item(deAula.length === 0, 'Nenhum exercício com "aula" no nome', deAula)
@@ -7745,7 +7765,7 @@ let modelosSeca21 = {};          // chave -> semana salva (é essa que vai pras 
 let semanasEditandoSeca21 = {};  // chave -> semana na tela (com suas mudanças ainda não salvas)
 
 function copiaProfunda(o){ return JSON.parse(JSON.stringify(o)); }
-function chaveSeca21DaAluna(a){ return nivelSeca21PeloNivel(a.desafioAtivo.nivel) + '_' + (a.desafioAtivo.frequencia === 5 ? 5 : 3); }
+function chaveSeca21DaAluna(a){ return nivelSeca21PeloNivel(a.desafioAtivo.nivel) + '_' + (a.desafioAtivo.frequencia === 5 ? 5 : 3); } // sempre Intermediário ou Avançado
 function treinoSeca21DaAluna(a){ return (a && a.desafioTreinos && a.desafioTreinos.seca21) || null; }
 
 function obterSemanaEditandoSeca21(chave){
@@ -7784,7 +7804,7 @@ function htmlRegrasSeca21(){
     '<div><span class="ok">✓</span>Isolado só bíceps e tríceps, sempre em bi-set</div>' +
     '<div><span class="no">✕</span>Nada unilateral, nada de glúteo na polia ou no cabo</div>' +
     '<div><span class="no">✕</span>Nenhuma cadeira ou exercício isolado de perna</div></div>' +
-    '<div class="cd-metodos"><div><b>Iniciante</b>Bi-set bíceps + tríceps<br>Drop set no último exercício do dia</div>' +
+    '<div class="cd-metodos"><div><b>Intermediário</b>Bi-set bíceps + tríceps<br>1 série a mais no 1º exercício<br>Rest pause no último multiarticular de máquina<br>Drop set no último exercício do dia</div>' +
     '<div><b>Avançado</b>Bi-set bíceps + tríceps<br>Rest pause no 1º multiarticular de máquina<br>Drop set no último exercício do dia</div></div>';
 }
 
@@ -8213,7 +8233,7 @@ function ajustarInicioDoDesafioNaFicha(nomeAluna, quando){
 function ajustarEstruturaSeca21NaFicha(nomeAluna, campo, valor){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a || !estaNoSeca21(a)) return false;
-  if(campo === 'nivel') a.desafioAtivo.nivel = valor === 'Avançado' ? 'Avançado' : 'Iniciante';
+  if(campo === 'nivel') a.desafioAtivo.nivel = valor === 'Avançado' ? 'Avançado' : 'Intermediário';
   else if(campo === 'frequencia') a.desafioAtivo.frequencia = parseInt(valor, 10) === 5 ? 5 : 3;
   else return false;
   const modelo = modelosSeca21[chaveSeca21DaAluna(a)];
@@ -8239,7 +8259,7 @@ function htmlCaixaPlanoEDesafio(a){
   if(estaNoSeca21(a)){
     const d = a.desafioAtivo, st = situacaoDoSeca21(a), tem = !!treinoSeca21DaAluna(a);
     detalhe = '<div style="display:flex;gap:6px;margin-top:6px;">' +
-        '<select class="form-select" style="font-size:12px;padding:5px;" onchange="ajustarEstruturaSeca21NaFicha(\'' + nomeJs + '\',\'nivel\',this.value)">' + ['Iniciante', 'Avançado'].map(function(n){ return '<option' + (nivelSeca21PeloNivel(d.nivel) === n ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select>' +
+        '<select class="form-select" style="font-size:12px;padding:5px;" onchange="ajustarEstruturaSeca21NaFicha(\'' + nomeJs + '\',\'nivel\',this.value)">' + ['Intermediário', 'Avançado'].map(function(n){ return '<option' + (nivelSeca21PeloNivel(d.nivel) === n ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select>' +
         '<select class="form-select" style="font-size:12px;padding:5px;" onchange="ajustarEstruturaSeca21NaFicha(\'' + nomeJs + '\',\'frequencia\',this.value)">' + [3, 5].map(function(f){ return '<option value="' + f + '"' + (d.frequencia === f ? ' selected' : '') + '>' + f + 'x</option>'; }).join('') + '</select></div>' +
       htmlInicioDoDesafioNaFicha(a, nomeJs) +
       '<p style="font-size:10px;margin-top:5px;color:' + (tem ? 'var(--success)' : '#E2A33D') + ';">' + (st.terminou ? 'Terminou em ' + dataCurtaBR(d.dataFim) : (st.comecou ? 'Dia ' + st.dia + ' de ' + st.total : 'Começa ' + dataCurtaBR(d.dataInicio)) + ' · até ' + dataCurtaBR(d.dataFim)) +
@@ -9935,13 +9955,15 @@ function renderAnamneses(agora){
   const filtros = [['7', 'Últimos 7 dias (' + n7 + ')'], ['30', 'Últimos 30 dias (' + n30 + ')'], ['todas', 'Todas (' + todas.length + ')'], ['denovo', 'Só quem respondeu de novo (' + nDeNovo + ')']];
   let html = '<div class="an-topo"><div class="env-filtros" style="margin:0;">' + filtros.map(function(f){
       return '<span class="' + (filtroAnamneses === f[0] ? 'on' : '') + '" onclick="filtroAnamneses=\'' + f[0] + '\';renderAnamneses()">' + f[1] + '</span>';
-    }).join('') + '</div><input class="form-input an-busca" placeholder="Buscar aluna" value="' + escaparHtmlFicha(buscaAnamneses) + '" oninput="buscaAnamneses=this.value;renderAnamneses();var c=document.querySelector(\'.an-busca\');if(c&&c.focus){c.focus();try{c.setSelectionRange(this.value.length,this.value.length)}catch(e){}}"></div>';
+    }).join('') + '<span class="an-marcar' + (marcandoAnamneses ? ' on' : '') + '" onclick="alternarMarcarAnamneses()">' + (marcandoAnamneses ? '✕ Parar de marcar' : '☑ Marcar') + '</span></div><input class="form-input an-busca" placeholder="Buscar aluna" value="' + escaparHtmlFicha(buscaAnamneses) + '" oninput="buscaAnamneses=this.value;renderAnamneses();var c=document.querySelector(\'.an-busca\');if(c&&c.focus){c.focus();try{c.setSelectionRange(this.value.length,this.value.length)}catch(e){}}"></div>';
   if(!lista.length){
     area.innerHTML = html + '<p class="cd-nota">Nenhuma anamnese nesse filtro.</p>';
     return;
   }
   const rotSit = ROTULO_STATUS_PLANO;
-  html += '<div class="an-tab"><div class="an-lin an-cab"><span>Aluna</span><span>Respondeu</span><span>Objetivo</span><span>Restrições</span><span>Situação</span><span></span></div>' +
+  anamnesesNaTela = lista.map(function(a){ return a.nome; });
+  if(marcandoAnamneses) html += htmlBarraMarcadasAnamneses(lista);
+  html += '<div class="an-tab' + (marcandoAnamneses ? ' marcando' : '') + '"><div class="an-lin an-cab">' + (marcandoAnamneses ? '<span></span>' : '') + '<span>Aluna</span><span>Respondeu</span><span>Objetivo</span><span>Restrições</span><span>Situação</span><span></span></div>' +
     lista.map(function(a){
       const i = alunasPersonal.indexOf(a);
       const d = diasDesdeAnamnese(a, agora);
@@ -9949,7 +9971,7 @@ function renderAnamneses(agora){
       const selo = respondeuDeNovo(a) ? '<span class="an-selo denovo">RESPONDEU DE NOVO</span>' : (d < 7 ? '<span class="an-selo nova">NOVA</span>' : '<small>' + escaparHtmlFicha((a.academia ? a.academia + ' · ' : '') + (a.freq || '')) + '</small>');
       const sit = rotSit[statusDoPlano(a)] || ['', ''];
       const aberta = anamneseAberta === i;
-      let linha = '<div class="an-lin"><span><b>' + escaparHtmlFicha(a.nome) + '</b>' + selo + '</span>' +
+      let linha = '<div class="an-lin">' + (marcandoAnamneses ? '<span><input type="checkbox" class="an-ck"' + (anamnesesMarcadas[a.nome] ? ' checked' : '') + ' onchange="marcarAnamnese(\'' + escaparNomeParaClique(a.nome) + '\', this.checked)"></span>' : '') + '<span><b>' + escaparHtmlFicha(a.nome) + '</b>' + selo + '</span>' +
         '<span>' + dataCurtaBR(String(a.dataAnamnese).slice(0, 10)) + '<small>' + quando + '</small></span>' +
         '<span class="an-dim">' + escaparHtmlFicha(a.objetivo || '') + '</span>' +
         '<span class="' + (temRestricaoDeVerdade(a.restricoes) ? 'an-alerta' : 'an-faint') + '">' + escaparHtmlFicha(a.restricoes || 'Nenhuma relatada') + '</span>' +
@@ -9964,6 +9986,95 @@ function renderAnamneses(agora){
       return linha;
     }).join('') + '</div>';
   area.innerHTML = html;
+}
+
+// ----- Marcar alunas na lista de anamneses: inscrever num desafio ou mandar mensagem -----
+// (criar treino pra várias de uma vez fica de fora: o treino da consultoria é individual e passa pela sua revisão)
+let marcandoAnamneses = false;
+let anamnesesMarcadas = {};
+let anamnesesNaTela = [];
+let inscricaoPelasAnamneses = null; // { desafio, plano, inicio, curso } quando o painel de inscrever está aberto
+
+function alternarMarcarAnamneses(){
+  marcandoAnamneses = !marcandoAnamneses;
+  if(!marcandoAnamneses){ anamnesesMarcadas = {}; inscricaoPelasAnamneses = null; }
+  renderAnamneses();
+}
+function marcarAnamnese(nome, marcar){ if(marcar) anamnesesMarcadas[nome] = true; else delete anamnesesMarcadas[nome]; renderAnamneses(); }
+function marcarTodasAnamnesesDaTela(marcar){
+  anamnesesNaTela.forEach(function(n){ if(marcar) anamnesesMarcadas[n] = true; else delete anamnesesMarcadas[n]; });
+  renderAnamneses();
+}
+function nomesMarcadosNasAnamneses(){ return Object.keys(anamnesesMarcadas).filter(function(n){ return alunasPersonal.some(function(a){ return a.nome === n; }); }); }
+
+function htmlBarraMarcadasAnamneses(lista){
+  const n = nomesMarcadosNasAnamneses().length;
+  let html = '<div class="an-barra"><b>' + n + (n === 1 ? ' marcada' : ' marcadas') + '</b>' +
+    '<span class="an-link" onclick="marcarTodasAnamnesesDaTela(true)">Marcar ' + (lista.length === 1 ? 'a 1' : 'as ' + lista.length) + ' desta lista</span>' +
+    '<span class="an-link fraco" onclick="marcarTodasAnamnesesDaTela(false)">Desmarcar</span>' +
+    '<span class="an-acoes"><button class="cd-btn"' + (n ? '' : ' disabled') + ' onclick="mandarMensagemPelasAnamneses()">Mandar mensagem</button>' +
+    '<button class="cd-btn cd-btn-verde"' + (n ? '' : ' disabled') + ' onclick="abrirInscricaoPelasAnamneses()">Inscrever no desafio</button></span></div>';
+  if(inscricaoPelasAnamneses && n) html += htmlInscricaoPelasAnamneses();
+  return html;
+}
+
+function abrirInscricaoPelasAnamneses(){
+  inscricaoPelasAnamneses = inscricaoPelasAnamneses ? null : { desafio: 'seca21', plano: 'so-desafio', inicio: 'hoje', curso: true };
+  renderAnamneses();
+}
+function escolherInscricaoAnamneses(campo, valor){ if(!inscricaoPelasAnamneses) return; inscricaoPelasAnamneses[campo] = valor; renderAnamneses(); }
+
+function htmlInscricaoPelasAnamneses(){
+  const c = inscricaoPelasAnamneses, nomes = nomesMarcadosNasAnamneses();
+  const chip = function(campo, valor, rotulo){ return '<span class="rg-chip' + (c[campo] === valor ? ' on' : '') + '" onclick="escolherInscricaoAnamneses(\'' + campo + '\',\'' + valor + '\')">' + rotulo + '</span>'; };
+  const jaEmDesafio = nomes.filter(function(n){ const a = alunasPersonal.find(function(x){ return x.nome === n; }); return a && a.desafioAtivo; });
+  const s21 = c.desafio === 'seca21';
+  return '<div class="an-inscrever"><p class="an-ins-tit">Inscrever ' + (nomes.length === 1 ? '1 aluna' : nomes.length + ' alunas') + '</p>' +
+    '<p class="an-ins-sub">' + escaparHtmlFicha(nomes.map(function(n){ return n.split(' ')[0]; }).join(', ')) + '</p>' +
+    '<p class="rg-lbl">Desafio</p>' + chip('desafio', 'seca21', 'SECA 21') + chip('desafio', 'seca-empina', 'Seca e Empina') +
+    '<p class="rg-lbl">Plano</p>' + chip('plano', 'so-desafio', 'Só desafio') + chip('plano', 'consultoria-desafio', 'Consultoria + desafio') +
+    (s21 ? '<p class="rg-lbl">Começa</p>' + chip('inicio', 'hoje', 'Hoje') + chip('inicio', '2dias', 'Daqui a 2 dias') +
+      '<p class="an-ins-sub" style="margin-top:8px;">Cada uma entra na estrutura do nível e da frequência dela (Intermediário ou Avançado, 3x ou 5x), já com o treino se a estrutura estiver salva.</p>' +
+      '<label class="an-ins-ck"><input type="checkbox"' + (c.curso ? ' checked' : '') + ' onchange="inscricaoPelasAnamneses.curso=this.checked"> Liberar os treinos em casa (curso do SECA 21)</label>' : '') +
+    (jaEmDesafio.length ? '<p class="rg-aviso">' + jaEmDesafio.length + (jaEmDesafio.length === 1 ? ' já está' : ' já estão') + ' em um desafio e ' + (jaEmDesafio.length === 1 ? 'fica' : 'ficam') + ' de fora: ' + escaparHtmlFicha(jaEmDesafio.join(', ')) + '</p>' : '') +
+    '<button class="btn-gold" style="margin-top:12px;" onclick="confirmarInscricaoPelasAnamneses()">Inscrever ' + (nomes.length - jaEmDesafio.length === 1 ? 'a 1' : 'as ' + (nomes.length - jaEmDesafio.length)) + '</button></div>';
+}
+
+function confirmarInscricaoPelasAnamneses(){
+  const c = inscricaoPelasAnamneses;
+  if(!c) return 0;
+  const hoje = dataLocalISO(new Date());
+  let n = 0;
+  nomesMarcadosNasAnamneses().forEach(function(nome){
+    const a = alunasPersonal.find(function(x){ return x.nome === nome; });
+    if(!a || a.desafioAtivo) return;
+    a.plano = c.plano;
+    if(!inscreverAlunaNoDesafio(a, c.desafio)) return;
+    if(c.desafio === 'seca21'){
+      if(c.inicio === '2dias'){
+        a.desafioAtivo.dataInicio = dataISOMaisDias(hoje, 2);
+        a.desafioAtivo.dataFim = dataISOMaisDias(a.desafioAtivo.dataInicio, (DESAFIOS_DO_APP.seca21.duracaoDias || 21) - 1);
+      }
+      if(!c.curso) a.cursosLiberados = (a.cursosLiberados || []).filter(function(x){ return x !== 'seca21'; });
+    }
+    salvarPerfilAlunaNoSupabase(a.nome);
+    n++;
+  });
+  mostrarConfirmacaoSalvamento(true, n === 0 ? 'Ninguém foi inscrita (todas já estavam em um desafio).' : (n === 1 ? '1 aluna inscrita.' : n + ' alunas inscritas.') + ' Elas aparecem no Controle de desafios.');
+  inscricaoPelasAnamneses = null; anamnesesMarcadas = {}; marcandoAnamneses = false;
+  renderAnamneses();
+  return n;
+}
+
+// Leva as marcadas pro envio em massa (WhatsApp), já marcadas lá
+function mandarMensagemPelasAnamneses(){
+  const nomes = nomesMarcadosNasAnamneses();
+  if(!nomes.length) return false;
+  novoEnvio.marcadas = {};
+  nomes.forEach(function(n){ novoEnvio.marcadas[n] = true; });
+  novoEnvio.filtro = 'todas'; novoEnvio.busca = '';
+  abrirEnvios('novo');
+  return true;
 }
 
 function atualizarBadgesFeedback(){
@@ -15831,7 +15942,8 @@ async function carregarCatalogoPersonal(){
         // pode haver mais de uma linha do mesmo grupo: vale a salva por último
         if(row.chave && row.dados && String(row.dados.em || '') >= String((gruposDosDesafios[row.chave] || {}).em || '')) gruposDosDesafios[row.chave] = row.dados;
       } else if(row.tipo === 'modelo_seca21'){
-        if(row.chave && row.dados && row.dados.dias) modelosSeca21[row.chave] = row.dados;
+        // estrutura salva quando ainda se chamava "Iniciante" vale como a do Intermediário (a de nome novo, se já existir, ganha)
+        if(row.chave && row.dados && row.dados.dias){ const ch = chaveSeca21Normalizada(row.chave); if(ch === row.chave || !modelosSeca21[ch]) modelosSeca21[ch] = Object.assign({}, row.dados, { chave: ch, nivel: nivelSeca21PeloNivel(row.dados.nivel) }); }
       } else if(row.tipo === 'relatorio_tendencias'){
         const jaExisteRelatorio = relatoriosTendencias.find(function(r){ return r.data === row.dados.data; });
         if(!jaExisteRelatorio) relatoriosTendencias.push(row.dados);
