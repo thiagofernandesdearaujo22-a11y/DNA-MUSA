@@ -1,4 +1,4 @@
-[dna_musa_156.html](https://github.com/user-attachments/files/34056308/dna_musa_156.html)
+[Uploading dna_musa_158.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -999,7 +999,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-28-AX-SO-DESAFIO-FORA-PENDENCIAS</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-28-BA-GRUPO-FASES-DOBRADINHA</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1917,7 +1917,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-28-AX-SO-DESAFIO-FORA-PENDENCIAS';
+const VERSAO_APP = '2026-10-28-BA-GRUPO-FASES-DOBRADINHA';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -8222,6 +8222,12 @@ function desfazerDiaSeca21(indiceDia){
   const lista = prog.desafioDiasConcluidos[chave];
   lista.splice(lista.indexOf(d.n), 1);
   if(prog.desafioRegistroEm) delete prog.desafioRegistroEm[chave + '|' + d.n];
+  // e sai da contagem de treinos do desafio (o de hoje, desse treino)
+  if(prog.registrosDoDesafio){
+    const hoje = dataLocalISO(new Date());
+    const i = prog.registrosDoDesafio.map(function(r){ return r.tipo === 'academia' && r.treino === d.n && r.dia === hoje; }).lastIndexOf(true);
+    if(i !== -1) prog.registrosDoDesafio.splice(i, 1);
+  }
   salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
   abrirTelaDesafioSeca21();
 }
@@ -8395,14 +8401,31 @@ function linhaDaFilaDoGrupo(a, nomeTreino, agora){
     aluna_primeiro_nome: primeiroNomeEnvio(a.nome), treino: nomeTreino || null, dia_desafio: m.st.dia, total_dias: m.st.total };
 }
 
+// Colunas que entraram depois (número de treinos, dobradinha, de onde veio o treino). Se o SQL novo ainda não rodou
+// no Supabase, o servidor recusa a linha por causa delas: aí manda de novo sem elas, pra mensagem não se perder.
+const COLUNAS_NOVAS_DA_FILA = ['treinos_no_desafio', 'treinos_hoje'];
+function erroDeColunaQueNaoExiste(e){
+  return !!e && (String(e.code) === 'PGRST204' || String(e.code) === '42703' || /column/i.test(String(e.message || '')));
+}
 function inserirNaFilaDoGrupo(linha){
   if(typeof supabaseClient === 'undefined' || !supabaseClient) return;
+  const recusou = function(r){ registrarErroNoBanco(new Error('[Grupo] o servidor não aceitou na fila: ' + (r.error.message || 'erro')), 'grupo_fila_recusada'); };
+  const semConexao = function(e){ registrarErroNoBanco(new Error('[Grupo] sem conexão pra pôr na fila: ' + (e && e.message || e)), 'grupo_fila_sem_conexao'); };
   try {
     // insert simples (sem "upsert"): a aluna só tem permissão de COLOCAR na fila, não de ler. Repetida no mesmo dia
-    // (mesma chave) o servidor recusa com o código 23505, e isso é o esperado: uma mensagem por aluna por dia.
+    // (mesma chave) o servidor recusa com o código 23505, e isso é o esperado: uma mensagem por treino do dia.
     supabaseClient.from('fila_grupo_desafio').insert(linha).then(function(r){
-      if(r && r.error && String(r.error.code) !== '23505') registrarErroNoBanco(new Error('[Grupo] o servidor não aceitou na fila: ' + (r.error.message || 'erro')), 'grupo_fila_recusada');
-    }, function(e){ registrarErroNoBanco(new Error('[Grupo] sem conexão pra pôr na fila: ' + (e && e.message || e)), 'grupo_fila_sem_conexao'); });
+      if(!r || !r.error || String(r.error.code) === '23505') return;
+      if(erroDeColunaQueNaoExiste(r.error) && COLUNAS_NOVAS_DA_FILA.some(function(c){ return c in linha; })){
+        const simples = Object.assign({}, linha);
+        COLUNAS_NOVAS_DA_FILA.forEach(function(c){ delete simples[c]; });
+        supabaseClient.from('fila_grupo_desafio').insert(simples).then(function(r2){
+          if(r2 && r2.error && String(r2.error.code) !== '23505') recusou(r2);
+        }, semConexao);
+        return;
+      }
+      recusou(r);
+    }, semConexao);
   } catch(e){ registrarErroNoBanco(new Error('[Grupo] falha ao pôr na fila: ' + (e && e.message || e)), 'grupo_fila_falha'); }
 }
 
@@ -8419,12 +8442,42 @@ function motivoDeNaoIrProGrupo(a){
   return 'motivo desconhecido';
 }
 
-function avisarGrupoDoDesafio(nomeTreino){
+// Cada treino do desafio que ela registra (academia ou em casa) fica anotado em "registrosDoDesafio": é daí que sai
+// o número de treinos dela no desafio ("a Ana já fechou 8 treinos") e a DOBRADINHA (2º treino no mesmo dia, que vira
+// uma 2ª mensagem no grupo comemorando). Do 3º treino do dia em diante conta, mas não manda mais mensagem.
+function registrosDoDesafioDaAluna(prog, a){
+  const id = idDoDesafio(a), turma = (a.desafioAtivo && a.desafioAtivo.turma) || null, d = a.desafioAtivo || {};
+  return (prog.registrosDoDesafio || []).filter(function(r){
+    return r.desafio === id && (r.turma || null) === turma && (!d.dataInicio || r.dia >= d.dataInicio) && (!d.dataFim || r.dia <= d.dataFim);
+  });
+}
+function treinosNoDesafioDaAluna(a){
+  try { return registrosDoDesafioDaAluna(getProgressoAluna(a.nome), a).length; } catch(e){ return 0; }
+}
+
+function avisarGrupoDoDesafio(nomeTreino, tipo){
   if(sessaoTipo !== 'aluna'){ registrarErroNoBanco(new Error('[Grupo] treino do desafio registrado fora do login de aluna (' + sessaoTipo + '): não vai pro grupo'), 'grupo_nao_aluna'); return false; }
   let a = null;
   try { a = obterAlunaLogadaOuCriar(); } catch(e){ return false; }
-  const linha = a ? linhaDaFilaDoGrupo(a, nomeTreino, Date.now()) : null;
+  const agora = Date.now();
+  const linha = a ? linhaDaFilaDoGrupo(a, nomeTreino, agora) : null;
   if(!linha){ registrarErroNoBanco(new Error('[Grupo] treino do desafio não foi pro grupo: ' + motivoDeNaoIrProGrupo(a)), 'grupo_fora_do_desafio'); return false; }
+  const origem = tipo === 'casa' ? 'casa' : 'academia';
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const hoje = dataLocalISO(new Date(agora));
+  const doDesafio = registrosDoDesafioDaAluna(prog, a);
+  const doDia = doDesafio.filter(function(r){ return r.dia === hoje; });
+  // o mesmo treino registrado de novo no mesmo dia não conta de novo (nem manda de novo)
+  if(doDia.some(function(r){ return r.tipo === origem && r.treino === nomeTreino; })) return true;
+  if(!prog.registrosDoDesafio) prog.registrosDoDesafio = [];
+  prog.registrosDoDesafio.push({ em: new Date(agora).toISOString(), dia: hoje, tipo: origem, treino: nomeTreino, desafio: linha.desafio_id, turma: (a.desafioAtivo && a.desafioAtivo.turma) || null });
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  const noDia = doDia.length + 1;
+  if(noDia > 2) return true; // 3º treino do dia: conta, mas o grupo já comemorou a dobradinha
+  if(noDia === 2) linha.chave += '|2';
+  if(origem === 'casa') linha.treino = 'treino em casa'; // no grupo: "a Ana concluiu o treino em casa"
+  linha.treinos_no_desafio = doDesafio.length + 1;
+  linha.treinos_hoje = noDia;
   inserirNaFilaDoGrupo(linha);
   return true;
 }
@@ -8489,7 +8542,7 @@ function htmlGrupoDoDesafio(idDesafio){
   const cfg = gruposDosDesafios[idDesafio] || {};
   return '<div class="cd-box"><div class="cd-box-cab"><h2>Grupo do WhatsApp do ' + escaparHtmlFicha((DESAFIOS_DO_APP[idDesafio] || {}).nome || idDesafio) + '</h2>' +
       '<div class="cd-r"><span class="cd-chip ' + (cfg.ativo ? 'cd-c-ok">ligado' : 'cd-c-alerta">desligado') + '</span></div></div>' +
-    '<p class="cd-nota" style="margin:0 0 8px;">Quando a aluna registra o treino do desafio, entra no grupo: "🔥 Ana acabou de concluir o Treino B do SECA 21! Dia 5 de 21." Sai pelo número escolhido abaixo (Thiago ou Bianca, os mesmos da Z-API do app), uma mensagem por vez, com 5 a 30 segundos entre uma e outra, e no máximo uma por aluna por dia.</p>' +
+    '<p class="cd-nota" style="margin:0 0 8px;">Quando a aluna registra o treino do desafio (na academia ou o treino em casa), entra no grupo uma frase da fase do desafio: começo (dias 1 a 3), constância (4 a 10), número de treinos dela (do 11 em diante), reta final e último dia. O 2º treino no mesmo dia vira a DOBRADINHA. A cada 3 ou 4 mensagens sai um lembrete (água, alimentação, metas do dia) e, às 20h, o resumo do dia (quantas treinaram, de quantas inscritas, sem citar quem não treinou). Sai pelo número escolhido abaixo (Thiago ou Bianca), uma mensagem por vez, com 5 a 30 segundos entre uma e outra.</p>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
       '<input class="form-input" id="grupo-desafio-' + idDesafio + '" style="flex:1;min-width:220px;font-size:12.5px;" placeholder="Link de convite do grupo (https://chat.whatsapp.com/...)" value="' + escaparHtmlFicha(cfg.grupo || '') + '">' +
       '<label style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--text-dim);">Sai pelo número de <select class="form-input" id="grupo-desafio-remetente-' + idDesafio + '" style="width:auto;padding:4px 8px;font-size:12px;">' +
@@ -14759,6 +14812,7 @@ function renderElegibilidadeFase(a){
 
 const ferramentasPersonal = [
   { titulo: 'Alunas', icone: 'ti-users', view: 'alunas' },
+  { titulo: 'Anamneses', icone: 'ti-clipboard-text', view: 'anamneses' }, // no celular não tem o menu do lado: a aba entra na grade
   { titulo: 'Sinalizações', icone: 'ti-heart-handshake', view: 'sinalizacoes' },
   { titulo: 'Conversas', icone: 'ti-brand-whatsapp', view: 'conversas' },
   { titulo: 'Controle de Treinos', icone: 'ti-list-check', view: 'controle' },
@@ -17955,7 +18009,10 @@ function irParaAbaFixa(which){
   // Só desafio: "Aulas" abre direto as aulas do SECA 21
   if(which === 'mentoria' && alunaLogadaNoModoSoDesafio()){
     let a = null; try { a = obterAlunaLogadaOuCriar(); } catch(e){}
-    if(a && alunaTemCursoLiberado(a, 'seca21') && cursoDoAppPorId('seca21')){ abrirCursoDoApp('seca21'); return; }
+    if(a && alunaTemCursoLiberado(a, 'seca21') && cursoDoAppPorId('seca21')){
+      abrirCursoDoApp('seca21');
+      return;
+    }
   }
   if(which === 'evolucao'){ openLevel2('dados'); return; } // Evolução abre em "Corpo"
   openLevel2(which);
@@ -19182,7 +19239,42 @@ function playAula(i){
       : '<div class="video-block"><i class="ti ti-player-play"></i></div>') +
     '<p class="page-sub" style="margin:10px 0 0;">' + (tituloJaTemNumero(a) ? 'Vídeo ' : 'Aula ') + (i + 1) + ' de ' + c.aulas.length + '</p>' +
     '<h1 class="page-title" style="margin-top:0;">' + titulo + '</h1>' +
+    '<div id="registrar-aula-area">' + htmlBotaoRegistrarAula(c, i) + '</div>' +
     (i < c.aulas.length - 1 ? '<button class="btn-gold" style="margin-top:12px;" onclick="playAula(' + (i + 1) + ')">Próxima aula: ' + tituloDaAula(c.aulas[i + 1], i + 1) + '</button>' : '');
+}
+
+// ===== "REGISTRAR TREINO" NO PLAYER DOS TREINOS EM CASA (SECA 21) =====
+// Vale pra aluna com o SECA 21 valendo: registra o treino em casa e manda pro grupo do desafio, igual ao treino da
+// academia. Se ela já treinou na academia hoje (ou o contrário), vira a DOBRADINHA no grupo.
+function podeRegistrarAulaEmCasa(c){
+  if(!c || c.cursoDoAppId !== 'seca21' || sessaoTipo !== 'aluna') return false;
+  let a = null;
+  try { a = obterAlunaLogadaOuCriar(); } catch(e){ return false; }
+  const m = modoDoDesafioDaAluna(a);
+  return !!(m && m.ativo);
+}
+function nomeDoTreinoEmCasa(c, i){ return 'Treino em casa · ' + tituloDaAula(c.aulas[i], i); }
+function aulaJaRegistradaHoje(c, i){
+  try {
+    const prog = getProgressoAluna(NOME_ALUNA_LOGADA), hoje = dataLocalISO(new Date()), nome = nomeDoTreinoEmCasa(c, i);
+    return (prog.registrosDoDesafio || []).some(function(r){ return r.tipo === 'casa' && r.treino === nome && r.dia === hoje; });
+  } catch(e){ return false; }
+}
+function htmlBotaoRegistrarAula(c, i){
+  if(!podeRegistrarAulaEmCasa(c)) return '';
+  if(aulaJaRegistradaHoje(c, i)) return '<div class="btn-gold" style="margin-top:14px;background:var(--card-2);color:var(--success);border:1px solid var(--success);text-align:center;">✓ Treino registrado hoje</div>';
+  return '<button class="btn-gold" style="margin-top:14px;background:var(--success);color:#0E1A12;" onclick="registrarAulaEmCasa(' + i + ')">✓ Registrar treino</button>';
+}
+function registrarAulaEmCasa(i){
+  const c = currentCursoMeta;
+  if(!podeRegistrarAulaEmCasa(c) || !c.aulas[i]) return false;
+  if(aulaJaRegistradaHoje(c, i)) return false;
+  // o grupo mostra "concluiu o treino em casa"; o registro guarda qual aula foi
+  avisarGrupoDoDesafio(nomeDoTreinoEmCasa(c, i), 'casa');
+  const area = document.getElementById('registrar-aula-area');
+  if(area) area.innerHTML = htmlBotaoRegistrarAula(c, i);
+  try { mostrarConfirmacaoSalvamento(true, 'Treino em casa registrado! 💪'); } catch(e){}
+  return true;
 }
 
 // Aviso na Início: aparece uma vez por curso liberado, e some quando ela abre
@@ -19215,6 +19307,13 @@ function abrirCursoDoApp(idCurso){
   const curso = cursoDoAppPorId(idCurso);
   if(!curso) return;
   openDetail('conteudo', cursoDoAppComoConteudo(curso));
+  // Só desafio: o curso do SECA 21 É a aba "Treinos em casa". Ele abre na tela de detalhe (não passa pelo
+  // openLevel2), então o menu de baixo é acendido aqui, venha do botão de baixo ou do cartão da tela Início.
+  if(idCurso === 'seca21' && sessaoTipo === 'aluna' && alunaLogadaNoModoSoDesafio()){
+    const nav = document.getElementById('bottom-nav-fixa');
+    if(nav) nav.style.display = 'flex';
+    atualizarNavAtiva('mentoria');
+  }
 }
 
 function calcularEfeitoCardio(minutosSemana){
