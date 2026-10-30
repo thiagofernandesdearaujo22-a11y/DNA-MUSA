@@ -1,4 +1,4 @@
-[Uploading dna_musa_158.html…]()
+[dna_musa_159.html](https://github.com/user-attachments/files/34162339/dna_musa_159.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -229,6 +229,40 @@
   .evo-breve small{display:block;font-size:11px;color:var(--text-faint);margin-top:3px;}
   .evo-breve b{font-size:9.5px;letter-spacing:1.5px;color:var(--gold);border:1px solid var(--border-strong);border-radius:6px;padding:3px 6px;white-space:nowrap;}
   .fb-filtros{display:flex;gap:8px;margin:0 0 12px;}
+  .hh-dia{display:flex;align-items:center;gap:12px;margin:10px 0 2px;} .hh-dia b{display:block;font-size:17px;font-weight:600;line-height:1.25;} .hh-dia small{display:block;font-size:12px;color:var(--text-dim);margin-top:2px;}
+  .hh-letra{width:46px;height:46px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--gold-soft);background:var(--card-2);border:1px solid var(--border);}
+  .s21-anel{display:flex;align-items:center;gap:16px;} .s21-anel-svg{flex-shrink:0;} .s21-anel-txt{flex:1;min-width:0;} .s21-anel .hh-tit{font-size:20px;margin:0;}
+  .s21-ult{display:flex;align-items:center;gap:5px;margin-top:9px;} .s21-ult i{width:18px;height:18px;border-radius:50%;border:1.6px solid var(--text-faint);font-style:normal;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#0E1A12;}
+  .s21-ult i.feito{background:var(--success);border-color:var(--success);} .s21-ult i.hoje{border-color:var(--gold-soft);} .s21-ult span{font-size:10.5px;color:var(--text-faint);margin-left:4px;}
+  .metas-dia{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:12px 16px 6px;margin:0 0 14px;}
+  .metas-topo{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--text-faint);margin-bottom:4px;} .metas-topo b{letter-spacing:0;text-transform:none;color:var(--gold-soft);font-size:12px;}
+  .meta-lin{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--border);font-size:13.5px;cursor:pointer;} .meta-lin:first-of-type{border-top:none;} .meta-lin.auto{cursor:default;}
+  .meta-lin small{display:block;font-size:10.5px;color:var(--text-faint);margin-top:1px;} .meta-lin.feita>span:last-child{color:var(--text-dim);}
+  .meta-ck{width:22px;height:22px;border-radius:50%;border:1.8px solid var(--text-faint);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#0E1A12;}
+  .feita .meta-ck,.meta-lin.feita .meta-ck{background:var(--success);border-color:var(--success);}
+  .s21-atalhos{display:flex;gap:10px;margin:0 0 12px;} .s21-atalho{flex:1;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 14px;cursor:pointer;}
+  .s21-atalho small{display:block;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-faint);} .s21-atalho b{display:block;font-size:15px;margin-top:5px;} .s21-sub{display:block;font-size:11px;color:var(--text-faint);margin-top:3px;}
+  .s21-mini{display:block;height:5px;border-radius:5px;background:rgba(232,197,138,0.14);overflow:hidden;margin-top:8px;} .s21-mini i{display:block;height:100%;background:var(--gold-soft);border-radius:5px;}
+  .sem-dia .sem-nome.inteiro{white-space:normal;overflow:visible;} .sem-dica{font-size:11.5px;color:var(--text-faint);text-align:center;margin:4px 0 16px;}
+  details.como-funciona summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;} details.como-funciona summary:after{content:'›';color:var(--text-faint);font-size:16px;transition:transform .2s;} details.como-funciona[open] summary:after{transform:rotate(90deg);}
+  .ex-nome-desafio{display:flex;align-items:center;gap:10px;} .ex-num{width:24px;height:24px;border-radius:50%;flex-shrink:0;background:var(--card-2);border:1px solid var(--border);font-size:11px;color:var(--text-dim);display:flex;align-items:center;justify-content:center;}
+  .tag-metodo-suave{font-size:10.5px;padding:2px 7px;border-radius:10px;border:1px solid rgba(232,197,138,0.45);color:var(--gold-soft);cursor:pointer;white-space:nowrap;}
+  .tc-prog{display:flex;align-items:center;gap:10px;margin:4px 0 16px;} .tc-prog .s21-mini{flex:1;margin:0;} .tc-prog b{font-size:12px;color:var(--text-dim);font-weight:500;white-space:nowrap;}
+  .tc-continuar{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;cursor:pointer;}
+  .tc-thumb{height:130px;background:radial-gradient(circle at 50% 50%,#2a241b,#151310);display:flex;align-items:center;justify-content:center;} .tc-thumb span{width:52px;height:52px;border-radius:50%;background:rgba(232,197,138,0.92);color:#1b140a;display:flex;align-items:center;justify-content:center;font-size:18px;}
+  .tc-cont-txt{padding:12px 16px 14px;} .tc-cont-txt small{display:block;font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--text-faint);} .tc-cont-txt b{display:block;font-size:17px;margin-top:3px;} .tc-cont-txt span{display:block;font-size:12px;color:var(--text-dim);margin-top:2px;}
+  .tc-lista{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:2px 16px;}
+  .tc-lin{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--border);cursor:pointer;} .tc-lin:first-child{border-top:none;} .tc-lin.prox .tc-nome{color:var(--gold-soft);} .tc-lin.prox .meta-ck{border-color:var(--gold-soft);}
+  .tc-nome{flex:1;font-size:14px;} .tc-lin:not(.feita):not(.prox) .tc-nome{color:var(--text-dim);} .tc-chip{font-size:11px;padding:3px 9px;} .tc-chip.ok{color:var(--success);border-color:var(--success);}
+  .tc-play{width:28px;height:28px;border-radius:50%;background:rgba(232,197,138,0.12);color:var(--gold-soft);display:flex;align-items:center;justify-content:center;font-size:10px;}
+  .ldt{position:relative;padding-left:18px;margin:4px 0 8px;} .ldt:before{content:'';position:absolute;left:5px;top:6px;bottom:6px;width:2px;background:var(--border);}
+  .ldt-item{position:relative;margin-bottom:10px;} .ldt-ponto{position:absolute;left:-17px;top:14px;width:10px;height:10px;border-radius:50%;background:var(--gold-soft);box-shadow:0 0 0 3px var(--bg);}
+  .ldt-item.nos .ldt-ponto{background:var(--text-faint);}
+  .ldt-corpo{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px;} .ldt-item.nos .ldt-corpo{background:transparent;border-style:dashed;}
+  .ldt-tit{font-size:12.5px;font-weight:600;margin:0;display:flex;justify-content:space-between;gap:8px;} .ldt-tit span{font-weight:400;color:var(--text-faint);font-size:11px;white-space:nowrap;}
+  .ldt-txt{font-size:13px;margin:5px 0 0;color:var(--text-dim);white-space:pre-line;} .ldt-resp{font-size:12px;margin:6px 0 0;color:var(--text-faint);}
+  .ldt-cab{display:flex;gap:12px;align-items:center;margin:10px 0 14px;} .ldt-lin{cursor:pointer;align-items:center;}
+  .ldt-mais{font-size:12px;color:var(--gold-soft);cursor:pointer;margin:4px 0 0;}
   .fb-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;}
   .fb-item.novo{border-color:var(--border-strong);background:linear-gradient(150deg,rgba(232,197,138,0.08),var(--card) 60%);}
   .fb-item .pn-av{width:34px;height:34px;font-size:11.5px;flex-shrink:0;}
@@ -999,7 +1033,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-28-BA-GRUPO-FASES-DOBRADINHA</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-29-BC-LINHA-DO-TEMPO-E-TELAS-DESAFIO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1157,6 +1191,7 @@
       <!-- Início nova: o que ela veio fazer (o treino) primeiro. Preenchido por renderInicioDaAluna(). -->
       <div id="home-desafio-topo"></div>
       <div class="home-hero" id="home-treino-hoje"></div>
+      <div id="home-metas-dia"></div>
       <div id="botao-desafio-area"></div>
 
       <div class="home-semana" id="link-ver-treinos-semana" onclick="abrirListaDeTreinosDaSemana()">
@@ -1597,7 +1632,7 @@
       <div id="personal-feedback-alunas" style="display:none;">
         <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
         <h1 class="page-title" style="margin-top:0;">Feedback das alunas</h1>
-        <p class="page-sub" style="margin-top:-6px;">Só entra aqui o que precisa ser lido: comentário escrito ou desconforto no "Como foi o treino?" (últimos 30 dias) e dúvidas que elas mandaram.</p>
+        <p class="page-sub" style="margin-top:-6px;">Em "Novos" fica só o que ainda não foi lido (comentário ou desconforto no "Como foi o treino?" e dúvidas). Lido, vai pra linha do tempo da aluna, junto com o que disparamos em massa pra ela.</p>
         <div id="area-feedback-alunas"></div>
       </div>
 
@@ -1827,10 +1862,11 @@
       <p class="page-sub" id="semana-sub">Toque num dia pra abrir o treino completo</p>
       <div class="pn-barra" style="margin:10px 0 16px;"><i id="semana-barra" style="width:0%"></i></div>
       <div id="lista-dias-semana"></div>
-      <div class="info-box" style="margin:6px 0 14px;">
-        <p class="lbl" style="margin-bottom:6px;">Como funciona esse treino</p>
-        <p class="txt" style="margin-bottom:0;">Faça as séries de cada exercício na ordem. Registre a carga e as repetições da <b>1ª série</b>, é isso que ajusta sua carga sugerida pra próxima vez. O descanso entre séries já está calculado pra cada exercício, é só seguir o cronômetro.</p>
-      </div>
+      <details class="info-box como-funciona" style="margin:6px 0 14px;">
+        <summary class="lbl" style="margin-bottom:0;">Como funciona esse treino</summary>
+        <p class="txt" style="margin:8px 0 0;">Faça as séries de cada exercício na ordem. Registre a carga e as repetições da <b>1ª série</b>, é isso que ajusta sua carga sugerida pra próxima vez. O descanso entre séries já está calculado pra cada exercício, é só seguir o cronômetro.</p>
+      </details>
+      <p class="sem-dica" id="semana-dica" style="display:none;">Dica: segure um treino pra marcar como feito sem abrir.</p>
     </div>
 
     <!-- DETAIL -->
@@ -1917,7 +1953,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-28-BA-GRUPO-FASES-DOBRADINHA';
+const VERSAO_APP = '2026-10-29-BC-LINHA-DO-TEMPO-E-TELAS-DESAFIO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -2434,14 +2470,16 @@ function abrirListaDeTreinosDaSemana(){
       titulo = '<span class="sem-nome">' + escaparHtmlFicha(d.n) + ' · Descanso</span>';
       sub = foiRegistrado ? textoFeito(d.n) + (alunaPodeDesfazerDia(prog, d.n) ? ' · segure pra desfazer' : '') : 'segure pra marcar como feito';
     } else {
-      titulo = '<span class="sem-nome">' + escaparHtmlFicha(d.foco || d.n) + '</span>' + (ehAlvo ? '<span class="sem-tag">' + (resumo.alvo.modo === 'hoje' ? 'HOJE' : 'PRÓXIMO') + '</span>' : '');
+      const fd = d.desafio ? partesDoFocoDoDesafio(d) : null;
+      titulo = '<span class="sem-nome' + (fd ? ' inteiro' : '') + '">' + escaparHtmlFicha(fd ? fd.titulo : (d.foco || d.n)) + '</span>' + (ehAlvo ? '<span class="sem-tag">' + (resumo.alvo.modo === 'hoje' ? 'HOJE' : 'PRÓXIMO') + '</span>' : '');
       if(foiRegistrado){
         sub = textoFeito(d.n) + (alunaPodeDesfazerDia(prog, d.n) ? ' · segure pra desfazer' : '');
       } else {
         const partes = [];
+        if(fd && fd.detalhe) partes.push(fd.detalhe);
         if(qtd > 0) partes.push(qtd + (qtd === 1 ? ' exercício' : ' exercícios'));
         if(d.duracaoEstimadaMin) partes.push('cerca de ' + Math.round(d.duracaoEstimadaMin) + ' min');
-        partes.push('segure pra marcar como feito');
+        if(!fd) partes.push('segure pra marcar como feito'); // no desafio a dica aparece uma vez só, embaixo da lista
         sub = partes.join(' · ');
       }
     }
@@ -2456,6 +2494,8 @@ function abrirListaDeTreinosDaSemana(){
     '</div>';
   }).join('');
 
+  const elDica = document.getElementById('semana-dica');
+  if(elDica && elDica.style) elDica.style.display = diasSaoDoDesafio(dias) ? '' : 'none';
   const elSub = document.getElementById('semana-sub');
   if(elSub) elSub.textContent = resumo.totalTreinos > 0 ? 'Semana ' + prog.semana + ' · ' + resumo.totalFeitos + ' de ' + resumo.totalTreinos + ' treinos feitos' : 'Toque num dia pra abrir o treino completo';
   const elBarra = document.getElementById('semana-barra');
@@ -2889,10 +2929,17 @@ function renderInicioDaAluna(agora){
       const info = [];
       if(qtd > 0) info.push('<span>' + iconePainel('halter', 'width:14px;height:14px;') + qtd + (qtd === 1 ? ' exercício' : ' exercícios') + '</span>');
       if(d.duracaoEstimadaMin) info.push('<span>' + iconePainel('relogio', 'width:14px;height:14px;') + 'cerca de ' + Math.round(d.duracaoEstimadaMin) + ' min</span>');
-      elHero.innerHTML = '<p class="hh-lbl">' + escaparHtmlFicha(rotuloDoAlvoDoInicio(r, d)) + '</p>' +
-        '<p class="hh-tit">' + escaparHtmlFicha(d.foco || d.n) + '</p>' +
-        (info.length ? '<p class="hh-info">' + info.join('') + '</p>' : '') +
-        '<button class="hh-btn" onclick="abrirTreinoDaHome(' + r.alvo.indice + ')">Abrir treino</button>';
+      const fd = d.desafio ? partesDoFocoDoDesafio(d) : null;
+      elHero.innerHTML = fd
+        // Treino do desafio: a letra num quadradinho e o nome inteiro, sem repetir "Treino A"
+        ? '<p class="hh-lbl">' + escaparHtmlFicha(r.alvo.modo === 'hoje' ? 'Treino de hoje' : 'Próximo treino') + '</p>' +
+          '<div class="hh-dia"><span class="hh-letra">' + escaparHtmlFicha(fd.letra) + '</span><span><b>' + escaparHtmlFicha(fd.titulo) + '</b>' +
+          (fd.detalhe || qtd ? '<small>' + escaparHtmlFicha([fd.detalhe, qtd ? qtd + (qtd === 1 ? ' exercício' : ' exercícios') : ''].filter(Boolean).join(' · ')) + '</small>' : '') + '</span></div>' +
+          '<button class="hh-btn" onclick="abrirTreinoDaHome(' + r.alvo.indice + ')">Começar treino</button>'
+        : '<p class="hh-lbl">' + escaparHtmlFicha(rotuloDoAlvoDoInicio(r, d)) + '</p>' +
+          '<p class="hh-tit">' + escaparHtmlFicha(d.foco || d.n) + '</p>' +
+          (info.length ? '<p class="hh-info">' + info.join('') + '</p>' : '') +
+          '<button class="hh-btn" onclick="abrirTreinoDaHome(' + r.alvo.indice + ')">Abrir treino</button>';
     }
   }
 
@@ -8663,8 +8710,93 @@ function htmlTopoSoDesafio(a, m){
     return '<div class="home-hero s21-hero"><p class="hh-lbl">Seu desafio</p><p class="hh-tit">Começa em ' + dataCurtaBR(d.dataInicio) + '</p>' + htmlBolinhasDoDesafio(st) +
       '<p class="hh-info">São ' + st.total + ' dias. O treino aparece aqui no primeiro dia.</p></div>';
   }
-  return '<div class="home-hero s21-hero"><p class="hh-lbl">Seu desafio</p><p class="hh-tit s21-grande">Dia ' + st.dia + ' de ' + st.total + '</p>' + htmlBolinhasDoDesafio(st) +
-    '<p class="hh-info">' + (st.faltam === 0 ? 'Último dia! ' : 'Faltam ' + st.faltam + (st.faltam === 1 ? ' dia' : ' dias') + '. ') + 'Termina em ' + dataCurtaBR(d.dataFim) + '.</p></div>';
+  return '<div class="home-hero s21-hero s21-anel">' + htmlAnelDoDesafio(st) +
+    '<div class="s21-anel-txt"><p class="hh-tit">Dia ' + st.dia + ' de ' + st.total + '</p>' +
+    '<p class="hh-info">' + (st.faltam === 0 ? 'Último dia! ' : 'Faltam ' + st.faltam + (st.faltam === 1 ? ' dia' : ' dias') + ' · ') + 'termina em ' + dataCurtaBR(d.dataFim) + '</p>' +
+    htmlUltimosDiasDoDesafio(a, st) + '</div></div>';
+}
+
+// "Treino A · Inferior · quadríceps e glúteo" -> letra A, título "Inferior", detalhe "Quadríceps e glúteo"
+function partesDoFocoDoDesafio(d){
+  const n = String(d.n || ''), letra = (n.match(/^Treino\s+(\S+)/i) || [])[1] || n.slice(0, 1).toUpperCase();
+  let resto = String(d.foco || '').replace(/^Treino\s+\S+\s*·\s*/i, '');
+  const pedacos = resto.split(' · ');
+  const cap = function(t){ t = String(t || '').trim(); return t ? t.charAt(0).toUpperCase() + t.slice(1) : ''; };
+  return { letra: letra, titulo: cap(pedacos[0]) || n, detalhe: cap(pedacos.slice(1).join(' · ')) };
+}
+
+// Anel do dia do desafio (5 de 21)
+function htmlAnelDoDesafio(st){
+  const c = 226, feito = Math.max(0, Math.min(1, st.dia / st.total));
+  return '<svg class="s21-anel-svg" width="84" height="84" viewBox="0 0 84 84" aria-label="Dia ' + st.dia + ' de ' + st.total + '">' +
+    '<circle cx="42" cy="42" r="36" fill="none" stroke="rgba(232,197,138,0.16)" stroke-width="7"/>' +
+    '<circle cx="42" cy="42" r="36" fill="none" stroke="#E8C58A" stroke-width="7" stroke-linecap="round" stroke-dasharray="' + c + '" stroke-dashoffset="' + Math.round(c * (1 - feito)) + '" transform="rotate(-90 42 42)"/>' +
+    '<text x="42" y="41" text-anchor="middle" fill="#F2EDE4" font-family="Playfair Display, serif" font-size="22" font-weight="600">' + st.dia + '</text>' +
+    '<text x="42" y="57" text-anchor="middle" fill="#A39A8C" font-family="Inter, sans-serif" font-size="10">de ' + st.total + '</text></svg>';
+}
+
+// Os últimos 5 dias do desafio: verde em quem treinou naquele dia (academia ou em casa)
+function htmlUltimosDiasDoDesafio(a, st){
+  let regs = [];
+  try { regs = registrosDoDesafioDaAluna(getProgressoAluna(NOME_ALUNA_LOGADA), a); } catch(e){}
+  const dias = {};
+  regs.forEach(function(r){ dias[r.dia] = true; });
+  const hoje = dataLocalISO(new Date());
+  let html = '<div class="s21-ult">';
+  for(let k = Math.min(4, st.dia - 1); k >= 0; k--){
+    const dia = dataISOMaisDias(hoje, -k);
+    html += '<i class="' + (dias[dia] ? 'feito' : (k === 0 ? 'hoje' : '')) + '">' + (dias[dia] ? '✓' : '') + '</i>';
+  }
+  return html + '<span>' + (st.dia >= 5 ? 'últimos 5 dias' : (st.dia === 1 ? 'hoje' : 'dias do desafio')) + '</span></div>';
+}
+
+// ----- Metas de hoje (as tarefas do dia do desafio, as mesmas da mensagem fixada no grupo) -----
+// Dia do desafio -> tarefas. "treino: true" marca sozinha quando ela registra um treino do desafio no dia.
+// Dias que ainda não estão aqui não mostram o cartão (os dias 8 a 21 entram quando as mensagens forem aprovadas).
+const METAS_DO_DIA_SECA21 = {
+  1: [{ t: '3 litros de água' }, { t: 'Treino do dia', treino: true }],
+  2: [{ t: '3 litros de água' }, { t: 'Zero açúcar e zero lactose' }, { t: 'Treino do dia', treino: true }],
+  3: [{ t: '3 litros de água' }, { t: 'Zero açúcar e zero lactose' }, { t: 'Só 4 refeições no dia' }, { t: 'Treino do dia', treino: true }],
+  4: [{ t: '3 litros de água' }, { t: 'Zero açúcar e zero lactose' }, { t: '4 refeições, 5 horas entre elas' }, { t: '1g de ômega 3' }, { t: 'Treino do dia', treino: true }, { t: 'Escrever no grupo por que entrou no desafio' }],
+  5: [{ t: '3 litros de água' }, { t: 'Zero açúcar, lactose e álcool' }, { t: '4 refeições, 5 horas entre elas' }, { t: '1g de ômega 3' }, { t: 'Treino do dia', treino: true }],
+  6: [{ t: '3 litros de água' }, { t: '1g de ômega 3' }, { t: 'Caminhada forte de 40 minutos' }, { t: 'Treino do dia', treino: true }, { t: 'Zero álcool' }, { t: '3 refeições (a 3ª é livre)' }],
+  7: [{ t: '3 litros de água' }, { t: 'Zero açúcar, lactose e álcool' }, { t: '4 refeições, 5 horas entre elas' }, { t: '1g de ômega 3' }, { t: 'Treino do dia', treino: true }, { t: '150g de verdura e/ou fruta em 3 refeições' }]
+};
+function chaveDasMetasDoDia(a, dia){ return ((a.desafioAtivo && a.desafioAtivo.turma) || 'turma') + '|' + idDoDesafio(a) + '|dia' + dia; }
+function metasDeHojeDaAluna(a, m){
+  if(!m || !m.ativo || !METAS_DO_DIA_SECA21[m.st.dia]) return null;
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const marcadas = ((prog.metasDoDesafio || {})[chaveDasMetasDoDia(a, m.st.dia)]) || [];
+  const hoje = dataLocalISO(new Date());
+  const treinou = registrosDoDesafioDaAluna(prog, a).some(function(r){ return r.dia === hoje; });
+  return METAS_DO_DIA_SECA21[m.st.dia].map(function(x, i){ return { t: x.t, auto: !!x.treino, feita: x.treino ? treinou : marcadas.indexOf(i) !== -1 }; });
+}
+function htmlMetasDeHoje(a, m){
+  const metas = metasDeHojeDaAluna(a, m);
+  if(!metas) return '';
+  const feitas = metas.filter(function(x){ return x.feita; }).length;
+  return '<div class="metas-dia"><div class="metas-topo"><span>Metas de hoje</span><b>' + feitas + ' de ' + metas.length + '</b></div>' +
+    metas.map(function(x, i){
+      return '<div class="meta-lin' + (x.feita ? ' feita' : '') + (x.auto ? ' auto' : '') + '"' + (x.auto ? '' : ' onclick="alternarMetaDoDia(' + i + ')"') + '>' +
+        '<span class="meta-ck">' + (x.feita ? '✓' : '') + '</span><span>' + escaparHtmlFicha(x.t) + (x.auto && !x.feita ? '<small>marca sozinho quando você registrar o treino</small>' : '') + '</span></div>';
+    }).join('') + '</div>';
+}
+function alternarMetaDoDia(i){
+  let a = null;
+  try { a = obterAlunaLogadaOuCriar(); } catch(e){ return false; }
+  const m = modoDoDesafioDaAluna(a);
+  const lista = m && m.ativo && METAS_DO_DIA_SECA21[m.st.dia];
+  if(!lista || !lista[i] || lista[i].treino) return false;
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  if(!prog.metasDoDesafio) prog.metasDoDesafio = {};
+  const k = chaveDasMetasDoDia(a, m.st.dia);
+  const marcadas = prog.metasDoDesafio[k] || (prog.metasDoDesafio[k] = []);
+  const pos = marcadas.indexOf(i);
+  if(pos === -1) marcadas.push(i); else marcadas.splice(pos, 1);
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  const area = document.getElementById('home-metas-dia');
+  if(area) area.innerHTML = htmlMetasDeHoje(a, m);
+  return true;
 }
 
 function linkConsultoriaDoDesafio(){
@@ -8674,14 +8806,19 @@ function linkConsultoriaDoDesafio(){
 function htmlRodapeSoDesafio(a){
   const curso = cursoDoAppPorId('seca21');
   const temAulas = curso && alunaTemCursoLiberado(a, 'seca21');
-  return (temAulas ? htmlTarefaHome('ti-home', 'Treinos em casa', curso.aulas.length + ' treinos · toque pra assistir', 'abrirCursoDoApp(\'seca21\')') : '') +
+  const feitasCasa = temAulas ? aulasEmCasaFeitas(a).length : 0;
+  const noDesafio = treinosNoDesafioDaAluna(a);
+  return '<div class="s21-atalhos">' +
+      (temAulas ? '<div class="s21-atalho" onclick="abrirCursoDoApp(\'seca21\')"><small>Treinos em casa</small><b>' + feitasCasa + ' de ' + curso.aulas.length + '</b><span class="s21-mini"><i style="width:' + Math.round(feitasCasa / curso.aulas.length * 100) + '%"></i></span></div>' : '') +
+      '<div class="s21-atalho" onclick="abrirListaDeTreinosDaSemana()"><small>Treinos no desafio</small><b>' + noDesafio + (noDesafio === 1 ? ' treino' : ' treinos') + '</b><span class="s21-sub">academia e em casa</span></div>' +
+    '</div>' +
     '<a class="s21-convite" href="' + linkConsultoriaDoDesafio() + '" target="_blank" rel="noopener">Quer um treino montado só pra você? <b>Conheça a consultoria DNA Musa</b></a>';
 }
 
 function atualizarMenuDoDesafio(soDesafio){
   const t = document.querySelector('[data-nav="treino"] span'), m = document.querySelector('[data-nav="mentoria"] span');
   if(t) t.textContent = soDesafio ? 'Treinos' : 'Treino';
-  if(m) m.textContent = soDesafio ? 'Treinos em casa' : 'Mentoria';
+  if(m) m.textContent = soDesafio ? 'Em casa' : 'Mentoria';
   // Só desafio: sai a Evolução, entra "Aulas" (aulas dos exercícios); "Mentoria" vira "Treinos em casa" (ícone de casa)
   const ev = document.querySelector('[data-nav="evolucao"]'), au = document.querySelector('[data-nav="aulas-ex"]');
   if(ev && ev.style) ev.style.display = soDesafio ? 'none' : '';
@@ -8770,6 +8907,7 @@ function aplicarModoDesafioNaInicio(){
   if(el('home-marca-sub')) el('home-marca-sub').textContent = so ? 'Desafio' : 'Team Fernandes';
   if(el('home-desafio-topo')) el('home-desafio-topo').innerHTML = so ? htmlTopoSoDesafio(a, m) : '';
   if(el('home-desafio-rodape')) el('home-desafio-rodape').innerHTML = so ? htmlRodapeSoDesafio(a) : '';
+  if(el('home-metas-dia')) el('home-metas-dia').innerHTML = so ? htmlMetasDeHoje(a, m) : '';
   if(el('home-semana-titulo')) el('home-semana-titulo').textContent = so ? 'Sua semana no desafio' : 'Sua semana';
   atualizarMenuDoDesafio(so);
   if(!so) return;
@@ -10299,17 +10437,137 @@ function marcarFeedbackTreinoLido(indice){
   atualizarBadgesFeedback();
 }
 
+// ===== FEEDBACK DAS ALUNAS: caixa de entrada + linha do tempo de cada aluna =====
+// "Novos" mostra só o que ainda não foi lido. Marcou como lido (ou respondida), sai daqui e fica na LINHA DO TEMPO
+// da aluna, que junta tudo o que ela mandou (comentário e desconforto do "Como foi o treino?", dúvidas, com a
+// resposta da Sol) e o que a gente disparou em massa pra ela (WhatsApp em massa e avisos em massa no app).
+// O que é conversado no WhatsApp individual NÃO entra (regra do Thiago).
+let abaFeedbackAlunas = 'novos';      // 'novos' | 'linhas'
+let linhaDoTempoAberta = null;        // nome da aluna com a linha do tempo aberta
+const mensagensLinhaDoTempo = {};     // nome -> { feedbacks: [...todos, sem limite de dias], avisosMassa: [...] }
+
+function feedbacksDaLinhaDoTempo(prog){
+  return ((prog && prog.feedbackTreino) || []).filter(function(f){ return feedbackDaAlunaImporta(f) && f.data && !isNaN(new Date(f.data).getTime()); })
+    .map(function(f){ return { data: f.data, dia: f.dia || '', comentario: f.comentario || '', desconforto: !!f.desconforto, exercicio: f.exercicio || '', escala: f.escalaDesconforto != null ? f.escalaDesconforto : null }; });
+}
+function guardarMensagensDaLinhaDoTempo(nome, prog){
+  mensagensLinhaDoTempo[nome] = {
+    feedbacks: feedbacksDaLinhaDoTempo(prog),
+    avisosMassa: ((prog && prog.avisosInApp) || []).filter(function(av){ return av && av.tipo === 'massa' && av.texto; }).map(function(av){ return { data: av.data, texto: av.texto }; })
+  };
+}
+
+// Tudo da aluna, do mais novo pro mais antigo
+function itensDaLinhaDoTempo(nome){
+  const a = alunasPersonal.find(function(x){ return x.nome === nome; });
+  if(!a) return [];
+  const guardado = mensagensLinhaDoTempo[nome] || {};
+  const itens = [];
+  (guardado.feedbacks || feedbacksAlunasPainel[nome] || []).forEach(function(f){
+    const chave = nome + '|' + f.data, lido = lidosFeedbackAlunas[chave];
+    // mais antigo que a caixa de entrada (30 dias) e nunca lido: fica na linha do tempo sem a etiqueta "Novo"
+    const antigo = new Date(f.data).getTime() < Date.now() - DIAS_FEEDBACK_ALUNAS * 86400000;
+    itens.push({ de: 'aluna', tipo: f.desconforto ? 'desconforto' : 'treino', data: f.data, chave: chave, lido: !!lido, antigo: antigo, lidoPor: lido ? lido.por : '', lidoEm: lido ? lido.em : '', f: f });
+  });
+  (a.duvidasSinalizadas || []).forEach(function(d, idx){
+    if(!d) return;
+    itens.push({ de: 'aluna', tipo: 'duvida', data: d.data || '', chave: nome + '|duvida|' + idx, lido: !!d.resolvida, lidoPor: d.resolvidaPor || '', lidoEm: d.resolvidaEm || '', d: d });
+  });
+  registrosDeEnvioOrdenados().forEach(function(r){
+    const x = r.alunas[nome];
+    if(!x || x.st !== 'enviada') return;
+    itens.push({ de: 'nos', tipo: 'massa', data: x.em || r.criadoEm, origem: r.origem || 'Envio em massa', canal: 'WhatsApp', por: r.por || '', texto: personalizarTextoEnvio(r.texto, nome) });
+  });
+  (guardado.avisosMassa || []).forEach(function(av){
+    itens.push({ de: 'nos', tipo: 'massa', data: av.data, origem: 'Aviso em massa', canal: 'app', por: '', texto: av.texto });
+  });
+  itens.sort(function(x, y){ return new Date(y.data || 0) - new Date(x.data || 0); });
+  return itens;
+}
+
+// Alunas que já mandaram alguma coisa (cada uma tem a sua linha do tempo), da conversa mais recente pra mais antiga
+function alunasComLinhaDoTempo(){
+  return alunasPersonal.map(function(a){
+    const itens = itensDaLinhaDoTempo(a.nome), dela = itens.filter(function(x){ return x.de === 'aluna'; });
+    if(dela.length === 0) return null;
+    return { nome: a.nome, ultimo: itens[0], total: itens.length, deLa: dela.length, novos: dela.filter(function(x){ return !x.lido; }).length };
+  }).filter(Boolean).sort(function(x, y){ return new Date(y.ultimo.data || 0) - new Date(x.ultimo.data || 0); });
+}
+
+function textoDoItemDaLinha(x){
+  if(x.tipo === 'massa') return x.texto || '';
+  if(x.tipo === 'duvida') return x.d.pergunta || '';
+  return x.f.comentario || '';
+}
+function htmlItemDaLinhaDoTempo(x){
+  let tit, cls, extra = '';
+  if(x.tipo === 'massa'){ tit = 'Enviamos · ' + escaparHtmlFicha(x.origem) + ' (' + x.canal + ')'; cls = 'nos'; }
+  else if(x.tipo === 'duvida'){ tit = 'Dúvida'; cls = 'ela';
+    if(x.d.respostaSol) extra += '<p class="ldt-resp"><b>Sol:</b> ' + escaparHtmlFicha(x.d.respostaSol) + '</p>'; }
+  else { tit = 'Como foi ' + (/^treino\b/i.test(x.f.dia || '') ? 'o ' + escaparHtmlFicha(x.f.dia) : 'o treino' + (x.f.dia ? ' de ' + escaparHtmlFicha(x.f.dia) : '')); cls = 'ela';
+    if(x.f.desconforto) extra += '<span class="fc fc-ruim">Desconforto' + (x.f.exercicio ? ' em ' + escaparHtmlFicha(x.f.exercicio) : '') + (x.f.escala != null ? ' · ' + x.f.escala + '/10' : '') + '</span>'; }
+  const situacao = x.de === 'nos' ? (x.por ? '<span>por ' + escaparHtmlFicha(x.por) + '</span>' : '')
+    : (!x.lido && x.antigo ? '' : x.lido ? '<span class="fc fc-ok">' + (x.tipo === 'duvida' ? 'Respondida' : 'Lido') + (x.lidoPor ? ' por ' + escaparHtmlFicha(x.lidoPor) : '') + (x.lidoEm ? ' em ' + dataHoraCurta(x.lidoEm) : '') + '</span>' : '<span class="fc fc-alerta">Novo</span>');
+  const texto = textoDoItemDaLinha(x);
+  return '<div class="ldt-item ' + cls + '"><span class="ldt-ponto"></span><div class="ldt-corpo">' +
+    '<p class="ldt-tit">' + tit + '<span>' + dataHoraCurta(x.data) + '</span></p>' +
+    (texto ? '<p class="ldt-txt">' + escaparHtmlFicha(texto) + '</p>' : '') + extra +
+    '<div class="fb-meta">' + situacao + '</div></div></div>';
+}
+function htmlLinhaDoTempoDaAluna(nome, limite){
+  const itens = itensDaLinhaDoTempo(nome);
+  if(itens.length === 0) return '<div class="fb-vazio">Nada por aqui ainda. Quando ela mandar um feedback ou uma dúvida, aparece aqui.</div>';
+  const mostrar = limite ? itens.slice(0, limite) : itens;
+  return '<div class="ldt">' + mostrar.map(htmlItemDaLinhaDoTempo).join('') + '</div>' +
+    (limite && itens.length > limite ? '<p class="ldt-mais" onclick="abrirLinhaDoTempoDaAluna(\'' + String(nome).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">Ver a linha do tempo inteira (' + itens.length + ')</p>' : '');
+}
+
+function abrirLinhaDoTempoDaAluna(nome){
+  abaFeedbackAlunas = 'linhas'; linhaDoTempoAberta = nome;
+  showPersonalView('feedback-alunas');
+}
+function trocarAbaFeedbackAlunas(aba){ abaFeedbackAlunas = aba === 'linhas' ? 'linhas' : 'novos'; linhaDoTempoAberta = null; renderFeedbackAlunas(); }
+
 function renderFeedbackAlunas(){
   const area = document.getElementById('area-feedback-alunas');
   if(!area) return;
-  const todos = itensFeedbackAlunas();
-  const naoLidos = todos.filter(function(x){ return !x.lido; });
-  const lista = filtroFeedbackAlunas === 'naolidos' ? naoLidos : todos;
-  let html = htmlFiltroFeedback('alunas', filtroFeedbackAlunas, naoLidos.length, todos.length);
-  if(lista.length === 0){
-    html += '<div class="fb-vazio">' + (todos.length === 0 ? 'Nenhum comentário, desconforto ou dúvida das alunas por enquanto.' : 'Tudo lido por aqui.') + '</div>';
+  const naoLidos = itensFeedbackAlunas().filter(function(x){ return !x.lido; });
+  const linhas = alunasComLinhaDoTempo();
+  let html = '<div class="fb-filtros">' +
+    '<div class="chip' + (abaFeedbackAlunas === 'novos' ? ' active' : '') + '" onclick="trocarAbaFeedbackAlunas(\'novos\')">Novos (' + naoLidos.length + ')</div>' +
+    '<div class="chip' + (abaFeedbackAlunas === 'linhas' ? ' active' : '') + '" onclick="trocarAbaFeedbackAlunas(\'linhas\')">Linhas do tempo (' + linhas.length + ')</div>' +
+  '</div>';
+
+  if(abaFeedbackAlunas === 'linhas' && linhaDoTempoAberta){
+    const nome = linhaDoTempoAberta, nomeJs = String(nome).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    html += '<div class="local-back" onclick="linhaDoTempoAberta=null;renderFeedbackAlunas()"><i class="ti ti-arrow-left"></i><span>Todas as linhas do tempo</span></div>' +
+      '<div class="ldt-cab"><div class="pn-av">' + escaparHtmlFicha(iniciaisDaAluna(nome)) + '</div><div style="flex:1;"><p class="fb-tit">' + escaparHtmlFicha(nome) + '</p><p class="fb-txt" style="margin:0;">Linha do tempo das mensagens</p></div>' +
+      '<button class="fb-bt" onclick="abrirFichaPeloNome(\'' + nomeJs + '\')">Abrir ficha</button></div>' +
+      htmlLinhaDoTempoDaAluna(nome);
+    area.innerHTML = html;
+    return;
+  }
+
+  if(abaFeedbackAlunas === 'linhas'){
+    html += linhas.length === 0 ? '<div class="fb-vazio">Nenhuma aluna mandou mensagem ainda.</div>' :
+      linhas.map(function(l){
+        const nomeJs = String(l.nome).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        const prev = textoDoItemDaLinha(l.ultimo);
+        return '<div class="fb-item ldt-lin" onclick="abrirLinhaDoTempoDaAluna(\'' + nomeJs + '\')">' +
+          '<div class="pn-av">' + escaparHtmlFicha(iniciaisDaAluna(l.nome)) + '</div>' +
+          '<div class="fb-corpo"><p class="fb-tit">' + escaparHtmlFicha(l.nome) + ' <span>· ' + dataHoraCurta(l.ultimo.data) + '</span></p>' +
+            (prev ? '<p class="fb-txt">' + (l.ultimo.de === 'nos' ? 'Enviamos: ' : '') + escaparHtmlFicha(prev.length > 90 ? prev.slice(0, 87) + '...' : prev) + '</p>' : '') +
+            '<div class="fb-meta"><span>' + l.total + (l.total === 1 ? ' mensagem' : ' mensagens') + '</span>' + (l.novos ? '<span class="fc fc-alerta">' + l.novos + (l.novos === 1 ? ' nova' : ' novas') + '</span>' : '') + '</div></div>' +
+          '<span style="color:var(--text-faint);font-size:18px;">›</span></div>';
+      }).join('');
+    area.innerHTML = html;
+    return;
+  }
+
+  if(naoLidos.length === 0){
+    html += '<div class="fb-vazio">Tudo lido por aqui. O que já foi lido está na linha do tempo de cada aluna.</div>';
   } else {
-    html += lista.map(function(x){
+    html += naoLidos.map(function(x){
       const nomeJs = String(x.aluna).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
       const chaveJs = String(x.chave).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
       let titulo, texto, extra = '';
@@ -10321,13 +10579,13 @@ function renderFeedbackAlunas(){
         titulo = 'Dúvida';
         texto = escaparHtmlFicha(x.d.pergunta || '');
       }
-      return '<div class="fb-item' + (x.lido ? '' : ' novo') + '">' +
+      return '<div class="fb-item novo">' +
         '<div class="pn-av">' + escaparHtmlFicha(iniciaisDaAluna(x.aluna)) + '</div>' +
         '<div class="fb-corpo"><p class="fb-tit">' + escaparHtmlFicha(x.aluna) + ' <span>· ' + titulo + '</span></p>' +
           (texto ? '<p class="fb-txt">' + texto + '</p>' : '') +
-          '<div class="fb-meta">' + extra + '<span>' + dataHoraCurta(x.data) + '</span>' +
-          (x.lido ? '<span class="fc fc-ok">' + (x.tipo === 'duvida' ? 'Respondida' : 'Lido') + (x.lidoPor ? ' por ' + escaparHtmlFicha(x.lidoPor) : '') + '</span>' : '<span class="fc fc-alerta">Novo</span>') + '</div></div>' +
-        '<div class="fb-acoes">' + (x.lido ? '' : '<button class="fb-bt ouro" onclick="marcarFeedbackAlunaLido(\'' + chaveJs + '\')">' + (x.tipo === 'duvida' ? 'Marcar como respondida' : 'Marcar como lido') + '</button>') +
+          '<div class="fb-meta">' + extra + '<span>' + dataHoraCurta(x.data) + '</span><span class="fc fc-alerta">Novo</span></div></div>' +
+        '<div class="fb-acoes"><button class="fb-bt ouro" onclick="marcarFeedbackAlunaLido(\'' + chaveJs + '\')">' + (x.tipo === 'duvida' ? 'Marcar como respondida' : 'Marcar como lido') + '</button>' +
+          '<button class="fb-bt" onclick="abrirLinhaDoTempoDaAluna(\'' + nomeJs + '\')">Linha do tempo</button>' +
           '<button class="fb-bt" onclick="abrirFichaPeloNome(\'' + nomeJs + '\')">Abrir ficha</button></div>' +
       '</div>';
     }).join('');
@@ -10343,6 +10601,7 @@ function marcarFeedbackAlunaLido(chave){
     if(!a || !a.duvidasSinalizadas[item.idx]) return;
     a.duvidasSinalizadas[item.idx].resolvida = true;
     a.duvidasSinalizadas[item.idx].resolvidaPor = NOME_PERSONAL_LOGADO || '';
+    a.duvidasSinalizadas[item.idx].resolvidaEm = new Date().toISOString();
     salvarPerfilAlunaNoSupabase(a.nome);
   } else {
     const dados = { por: NOME_PERSONAL_LOGADO || '', em: new Date().toISOString() };
@@ -10351,6 +10610,7 @@ function marcarFeedbackAlunaLido(chave){
   }
   renderFeedbackAlunas();
   atualizarBadgesFeedback();
+  try { mostrarConfirmacaoSalvamento(true, 'Lido. Foi pra linha do tempo da ' + primeiroNomeEnvio(item.aluna) + '.'); } catch(e){}
 }
 
 function renderListaFeedbackGerador(nomeAluna){
@@ -13903,6 +14163,7 @@ function openAlunaDetail(i){
     '<div id="acesso-gerado-area"></div>' +
     '</div>' +
     '<div class="ficha-sec" data-ficha="historico">' +
+    '<p class="section-label" style="margin-top:18px;">Linha do tempo das mensagens</p>' + htmlLinhaDoTempoDaAluna(a.nome, 5) +
     renderSecaoColapsavel('Acompanhamento e histórico', renderElegibilidadeFase(a) + renderFunilEngajamento(a) + renderLinhaDoTempo(a) + renderPromocaoNivel(a) + renderBlocoPeriodizacao(a) + renderHistoricoPrioridade(a) + renderEditorPesoComposicaoPersonal(a) + renderTecnicaPendente(a) + renderProgressao(a), 'acompanhamento') +
     '<p class="page-sub" style="margin-top:10px;">Anamnese respondida em ' + (a.dataAnamnese || 'data desconhecida') + '</p>' +
     '</div>';
@@ -19212,6 +19473,7 @@ function rotuloDaAulaNaLista(a, i){
 function renderPlaylist(){
   const el = document.getElementById('detail-content');
   const c = currentCursoMeta;
+  if(c.cursoDoAppId === 'seca21' && sessaoTipo === 'aluna'){ el.innerHTML = htmlTreinosEmCasaDaAluna(c); return; }
   let itens = '';
   c.aulas.forEach(function(a, i){
     itens += '<div class="list-item" style="cursor:pointer;" onclick="playAula(' + i + ')"><span>' + rotuloDaAulaNaLista(a, i) + '</span><i class="ti ti-player-play" style="font-size:13px;color:var(--gold-soft);"></i></div>';
@@ -19241,6 +19503,43 @@ function playAula(i){
     '<h1 class="page-title" style="margin-top:0;">' + titulo + '</h1>' +
     '<div id="registrar-aula-area">' + htmlBotaoRegistrarAula(c, i) + '</div>' +
     (i < c.aulas.length - 1 ? '<button class="btn-gold" style="margin-top:12px;" onclick="playAula(' + (i + 1) + ')">Próxima aula: ' + tituloDaAula(c.aulas[i + 1], i + 1) + '</button>' : '');
+}
+
+// ===== TREINOS EM CASA (aluna): quanto ela já fez, "Continuar" na próxima aula e ✓ nas registradas =====
+function aulasEmCasaFeitas(a){
+  let regs = [];
+  try { regs = registrosDoDesafioDaAluna(getProgressoAluna(NOME_ALUNA_LOGADA), a); } catch(e){}
+  const vistas = [];
+  regs.forEach(function(r){ if(r.tipo === 'casa' && vistas.indexOf(r.treino) === -1) vistas.push(r.treino); });
+  return vistas;
+}
+function htmlTreinosEmCasaDaAluna(c){
+  let a = null;
+  try { a = obterAlunaLogadaOuCriar(); } catch(e){}
+  const feitas = a ? aulasEmCasaFeitas(a) : [];
+  const hoje = dataLocalISO(new Date());
+  let deHoje = [];
+  try { deHoje = registrosDoDesafioDaAluna(getProgressoAluna(NOME_ALUNA_LOGADA), a).filter(function(r){ return r.tipo === 'casa' && r.dia === hoje; }).map(function(r){ return r.treino; }); } catch(e){}
+  const feita = function(i){ return feitas.indexOf(nomeDoTreinoEmCasa(c, i)) !== -1; };
+  const nFeitas = c.aulas.filter(function(_, i){ return feita(i); }).length;
+  let prox = c.aulas.findIndex(function(_, i){ return !feita(i); });
+  const total = c.aulas.length;
+  let html = '<p class="section-label" style="margin:14px 0 2px;">SECA 21</p><h1 class="page-title" style="margin-top:0;">Treinos em casa</h1>' +
+    '<div class="tc-prog"><span class="s21-mini"><i style="width:' + Math.round(nFeitas / Math.max(1, total) * 100) + '%"></i></span><b>' + nFeitas + ' de ' + total + (nFeitas === 1 ? ' feito' : ' feitos') + '</b></div>';
+  if(prox !== -1){
+    html += '<div class="tc-continuar" onclick="playAula(' + prox + ')"><div class="tc-thumb"><span>▶</span></div>' +
+      '<div class="tc-cont-txt"><small>' + (nFeitas ? 'Continuar' : 'Comece por aqui') + '</small><b>' + escaparHtmlFicha(tituloDaAula(c.aulas[prox], prox)) + '</b><span>Depois do treino, é só tocar em "Registrar treino"</span></div></div>';
+  } else {
+    html += '<div class="info-box"><p class="txt" style="margin:0;">Você fez todos os treinos em casa do desafio! 🏆 Pode repetir qualquer um quando quiser.</p></div>';
+  }
+  html += '<p class="section-label" style="margin-top:20px;">Todas as aulas</p><div class="tc-lista">' +
+    c.aulas.map(function(au, i){
+      const f = feita(i), ehHoje = deHoje.indexOf(nomeDoTreinoEmCasa(c, i)) !== -1;
+      return '<div class="tc-lin' + (f ? ' feita' : '') + (i === prox ? ' prox' : '') + '" onclick="playAula(' + i + ')">' +
+        '<span class="meta-ck">' + (f ? '✓' : '') + '</span><span class="tc-nome">' + escaparHtmlFicha(rotuloDaAulaNaLista(au, i)) + '</span>' +
+        (ehHoje ? '<span class="chip tc-chip ok">hoje</span>' : (f ? '<span class="chip tc-chip">feito</span>' : '<span class="tc-play">▶</span>')) + '</div>';
+    }).join('') + '</div>';
+  return html;
 }
 
 // ===== "REGISTRAR TREINO" NO PLAYER DOS TREINOS EM CASA (SECA 21) =====
@@ -20453,6 +20752,7 @@ async function carregarSinaisDoPainel(agora){
           if(a.authId === l.aluna_id){
             sinaisProgressoPainel[a.nome] = resumirProgressoParaPainel(l.dados && l.dados.prog, agora);
             feedbacksAlunasPainel[a.nome] = feedbacksQueImportam(l.dados && l.dados.prog, agora);
+            guardarMensagensDaLinhaDoTempo(a.nome, l.dados && l.dados.prog);
           }
         });
       });
@@ -22675,7 +22975,10 @@ if(type === 'central'){
         corpoTreino += '<div class="ex-card" data-ex-idx="' + j + '">' + '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;">' +
           '<div style="display:flex;">' +
             '<div style="flex:1;display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:14px 12px;" onclick="alternarExercicioExpandido(' + j + ')">' +
-              '<span>' + nomeEx + (nomeMetodoExibicao ? ' <span class="tag tag-metodo" style="background:var(--gold-soft);color:#1A1409;cursor:pointer;" onclick="mostrarInfoMetodo(\'' + nomeMetodoExibicao.replace(/'/g,"\\'") + '\', event)">' + nomeMetodoExibicao + ' <i class="ti ti-info-circle" style="font-size:11px;vertical-align:-1px;"></i></span>' : '') + '</span>' +
+              (d.desafio
+                // Desafio: número, nome sem CAIXA ALTA e o método numa etiqueta discreta
+                ? '<span class="ex-nome-desafio"><span class="ex-num">' + (j + 1) + '</span><span>' + escaparHtmlFicha(capitalizarNomeExercicio(nomeEx)) + (nomeMetodoExibicao ? ' <span class="tag-metodo-suave" onclick="mostrarInfoMetodo(\'' + nomeMetodoExibicao.replace(/'/g,"\\'") + '\', event)">' + nomeMetodoExibicao + ' ⓘ</span>' : '') + '</span></span>'
+                : '<span>' + nomeEx + (nomeMetodoExibicao ? ' <span class="tag tag-metodo" style="background:var(--gold-soft);color:#1A1409;cursor:pointer;" onclick="mostrarInfoMetodo(\'' + nomeMetodoExibicao.replace(/'/g,"\\'") + '\', event)">' + nomeMetodoExibicao + ' <i class="ti ti-info-circle" style="font-size:11px;vertical-align:-1px;"></i></span>' : '') + '</span>') +
               '<span class="tag">' + (partes[1] || '') + (descanso ? ' · ⏱ ' + descanso : '') + '</span>' +
             '</div>' +
             '<div style="width:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--card-2);" title="Ver opções parecidas" onclick="event.stopPropagation();alternarSubstituicoesInline(' + j + ',\'' + nomeEx.replace(/'/g,"\\'") + '\')">' +
@@ -22698,9 +23001,10 @@ if(type === 'central'){
     // Antes juntava "-feira" em qualquer dia ("Sábado-feira", "Domingo-feira")
     const qtdEx = (d.ex || []).length;
     const infoDia = (!d.descanso && !d.tabata && qtdEx) ? qtdEx + (qtdEx === 1 ? ' exercício' : ' exercícios') + (d.duracaoEstimadaMin ? ' · cerca de ' + Math.round(d.duracaoEstimadaMin) + ' min' : '') : '';
+    const fdDia = d.desafio ? partesDoFocoDoDesafio(d) : null;
     el.innerHTML =
-      '<p class="page-sub" style="margin-top:14px;margin-bottom:2px;">' + nomeCompletoDoDia(d.n) + (d.hoje ? ' · hoje' : '') + '</p>' +
-      (!d.descanso && d.foco ? '<h1 class="page-title" style="margin:0 0 4px;font-size:24px;">' + escaparHtmlFicha(d.foco) + '</h1>' : '') +
+      '<p class="page-sub" style="margin-top:14px;margin-bottom:2px;">' + (fdDia ? 'Treino ' + escaparHtmlFicha(fdDia.letra) : nomeCompletoDoDia(d.n)) + (d.hoje ? ' · hoje' : '') + '</p>' +
+      (!d.descanso && d.foco ? '<h1 class="page-title" style="margin:0 0 4px;font-size:24px;">' + escaparHtmlFicha(fdDia ? fdDia.titulo + (fdDia.detalhe ? ' · ' + fdDia.detalhe : '') : d.foco) + '</h1>' : '') +
       (infoDia ? '<p style="font-size:12px;color:var(--text-faint);margin:0 0 12px;">' + infoDia + '</p>' : '') +
       corpoTreino;
     if(!d.descanso) atualizarBarraProgressoDia(d);
