@@ -228,6 +228,8 @@
   .evo-breve small{display:block;font-size:11px;color:var(--text-faint);margin-top:3px;}
   .evo-breve b{font-size:9.5px;letter-spacing:1.5px;color:var(--gold);border:1px solid var(--border-strong);border-radius:6px;padding:3px 6px;white-space:nowrap;}
   .fb-filtros{display:flex;gap:8px;margin:0 0 12px;}
+  .carga-personal{position:fixed;top:10px;right:12px;z-index:9000;font-size:11px;padding:6px 12px;border-radius:14px;background:var(--card-2);border:1px solid var(--border-strong);color:var(--gold-soft);opacity:0;pointer-events:none;transition:opacity .25s;}
+  .carga-personal.on{opacity:1;} .carga-personal.erro{color:#E2A33D;}
   .hh-dia{display:flex;align-items:center;gap:12px;margin:10px 0 2px;} .hh-dia b{display:block;font-size:17px;font-weight:600;line-height:1.25;} .hh-dia small{display:block;font-size:12px;color:var(--text-dim);margin-top:2px;}
   .hh-letra{width:46px;height:46px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--gold-soft);background:var(--card-2);border:1px solid var(--border);}
   .s21-anel{display:flex;align-items:center;gap:16px;} .s21-anel-svg{flex-shrink:0;} .s21-anel-txt{flex:1;min-width:0;} .s21-anel .hh-tit{font-size:20px;margin:0;}
@@ -1032,7 +1034,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-01-BG-ALUNA-PELO-EMAIL</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-01-BH-CARGA-COMPLETA-PERSONAL</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1952,7 +1954,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-01-BG-ALUNA-PELO-EMAIL';
+const VERSAO_APP = '2026-11-01-BH-CARGA-COMPLETA-PERSONAL';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -15337,6 +15339,7 @@ function showPersonalView(which){
   if(which === 'dashboard' && NOME_PERSONAL_LOGADO === 'Bianca') which = 'dashboard-suporte';
   renderFerramentasPersonal();
   atualizarSidebarAtiva(which);
+  telaPersonalAtual = which;
   ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes','comunicacao','ferramentas-treino','inteligencia','relatorios','faturamento','dashboard-suporte','conversas','aula-presencial','feedback-treinos','feedback-alunas','envios','anamneses'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
   });
@@ -15346,16 +15349,11 @@ function showPersonalView(which){
   if(which === 'anamneses'){ renderAnamneses(); }
   if(which === 'feedback-alunas'){
     renderFeedbackAlunas();
-    // Os comentários delas vêm do progresso de cada uma: busca de novo pra mostrar o que chegou agora
-    carregarSinaisDoPainel().then(function(){ renderFeedbackAlunas(); }).catch(function(){});
+    garantirDadosDoPersonal(); // dado com mais de 1 minuto: busca tudo de novo e redesenha a tela aberta
   }
   if(which === 'controle'){
     renderControleTreinos();
-    // Mesma lógica do Dashboard: sincroniza com o que há de mais recente (inclusive quem acabou de
-    // virar Ativa) antes de mostrar a lista, pra nunca ficar com dado desatualizado nessa tela.
-    sincronizarListaAlunasDoSupabase().then(function(){
-      renderControleTreinos();
-    });
+    garantirDadosDoPersonal();
   }
   if(which === 'comunicacao'){
     renderCentralDeAvisos();
@@ -15368,11 +15366,7 @@ function showPersonalView(which){
   if(which === 'faturamento'){ renderFaturamentoMetas(); }
   if(which === 'dashboard-suporte'){
     renderPainelSuporte();
-    // Mesma sincronização do painel do Thiago: lista nova de alunas e depois os sinais do progresso delas
-    sincronizarListaAlunasDoSupabase().then(function(){
-      renderPainelSuporte();
-      return carregarSinaisDoPainel();
-    }).then(function(){ renderPainelSuporte(); }).catch(function(){});
+    garantirDadosDoPersonal();
   }
   if(which === 'dashboard'){
     abrirPainelDoPersonal();
@@ -15385,7 +15379,8 @@ function showPersonalView(which){
     areaDiagnostico.textContent = 'Verificando anamneses novas...';
     document.getElementById('alunas-count-label').insertAdjacentElement('afterend', areaDiagnostico);
 
-    sincronizarListaAlunasDoSupabase().then(function(resultado){
+    garantirDadosDoPersonal(true).then(function(carga){
+      const resultado = (carga && carga.alunas) || { novas: 0, atualizadas: 0, erro: null };
       const el = document.getElementById('diagnostico-sync-alunas');
       if(!el) return;
       if(resultado.erro){
@@ -16325,8 +16320,8 @@ function normalizarAmbientesDoBanco(){
 }
 
 let catalogoPersonalJaCarregado = false;
-async function carregarCatalogoPersonal(){
-  if(!supabaseClient || catalogoPersonalJaCarregado) return;
+async function carregarCatalogoPersonal(forcar){
+  if(!supabaseClient || (catalogoPersonalJaCarregado && !forcar)) return;
   try {
     const { data: linhas } = await supabaseClient.from('catalogo_personal').select('*');
     if(!linhas) return;
@@ -18147,7 +18142,6 @@ async function loginPersonal(){
     mostrarBannerInstalarApp();
     openLevel2('personal');
     if(NOME_PERSONAL_LOGADO === 'Bianca') showPersonalView('dashboard-suporte'); // ela vai direto pra 2ª Dashboard, não pra padrão do Thiago
-    sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
     perguntarSeQuerLembrarLogin();
 
     // Diagnóstico do login: só aparece quando deu problema (quando está tudo certo não precisa ocupar o topo da tela)
@@ -18176,7 +18170,6 @@ async function loginPersonal(){
     mostrarBannerInstalarApp();
     openLevel2('personal');
     if(NOME_PERSONAL_LOGADO === 'Bianca') showPersonalView('dashboard-suporte'); // ela vai direto pra 2ª Dashboard, não pra padrão do Thiago
-    sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
     perguntarSeQuerLembrarLogin();
     return;
   }
@@ -18213,7 +18206,6 @@ async function loginPersonal(){
     mostrarBannerInstalarApp();
     openLevel2('personal');
     if(NOME_PERSONAL_LOGADO === 'Bianca') showPersonalView('dashboard-suporte'); // ela vai direto pra 2ª Dashboard, não pra padrão do Thiago
-    sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
     perguntarSeQuerLembrarLogin();
   } catch(erroDeRede){
     // Falha de rede de verdade — se as credenciais batem com as suas, entra local pra você continuar testando
@@ -18228,7 +18220,6 @@ async function loginPersonal(){
     mostrarBannerInstalarApp();
       openLevel2('personal');
       if(NOME_PERSONAL_LOGADO === 'Bianca') showPersonalView('dashboard-suporte'); // ela vai direto pra 2ª Dashboard, não pra padrão do Thiago
-      sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
       perguntarSeQuerLembrarLogin();
     } else {
       erroEl.textContent = 'E-mail ou senha incorretos.';
@@ -18275,7 +18266,7 @@ function openLevel2(which){
   document.getElementById('backlabel').textContent = (which === 'personal') ? 'Sair' : 'Voltar para o início';
   const phoneEl = document.getElementById('phone-container');
   if(phoneEl) phoneEl.classList.toggle('modo-personal', which === 'personal');
-  if(which === 'personal'){ showPersonalView('dashboard'); carregarCatalogoPersonal(); iniciarPresencaEquipe(); iniciarRealtimeConversas(); }
+  if(which === 'personal'){ showPersonalView('dashboard'); carregarTudoDoPersonal('entrada'); iniciarPresencaEquipe(); iniciarRealtimeConversas(); iniciarAtualizacaoAutomaticaDoPersonal(); }
   if(which === 'chatia'){ inicializarChatIA(); }
   if(which === 'mentoria'){ atualizarMentoriaAoAbrir(); }
   if(which === 'home' && typeof renderHome === 'function'){ renderHome(); verificarAvancoEstruturaDesafio(); renderBotaoDesafio(); renderBotoesCursosLiberados(); verificarPerguntaPerfilPendente(); renderBotaoPerguntaPerfil(); verificarPerguntaRodaDaVidaPendente(); renderBotaoPerguntaRodaDaVida(); verificarEIniciarTourPrimeiraVez(); }
@@ -18412,7 +18403,6 @@ async function restaurarSessaoAtiva(){
     mostrarBannerInstalarApp();
       openLevel2('personal');
       if(NOME_PERSONAL_LOGADO === 'Bianca') showPersonalView('dashboard-suporte'); // ela vai direto pra 2ª Dashboard, não pra padrão do Thiago
-      sincronizarListaAlunasDoSupabase(); // carrega tudo de todas as alunas automaticamente, assim que o Personal entra
       perguntarSeQuerLembrarLogin();
     } else if(perfilRow.tipo === 'aluna'){
       NOME_ALUNA_LOGADA = perfilRow.nome;
@@ -20819,13 +20809,118 @@ async function carregarSinaisDoPainel(agora){
 function abrirPainelDoPersonal(){
   renderAtalhosDashboard();
   renderPainelDoPersonal();
-  sincronizarListaAlunasDoSupabase().then(function(){
-    renderPainelDoPersonal();
-    return carregarSinaisDoPainel();
-  }).then(function(){
-    renderPainelDoPersonal();
-  }).catch(function(){});
+  garantirDadosDoPersonal();
 }
+
+// ===== CARGA COMPLETA DO PERSONAL (Thiago e Bianca) =====
+// Antes cada tela buscava do servidor só o pedaço dela, na hora em que era aberta, e o catálogo (status manual das
+// fichas, prazo do Controle, lidos dos feedbacks, grupos e estruturas dos desafios, envios) chegava depois, sem
+// redesenhar as telas. Por isso o Painel do Thiago e o da Bianca mostravam números diferentes, e às vezes era
+// preciso entrar em outra tela pra aparecer o certo. Agora, ao entrar, tudo é buscado junto, na ordem certa, e no fim
+// TODAS as contagens do menu e a tela aberta são redesenhadas. Depois disso, a cada 2 minutos (e quando o app volta a
+// ficar visível) a carga roda de novo, pra o que um fez aparecer pro outro sem precisar sair e entrar.
+let telaPersonalAtual = '';
+let cargaDoPersonalEmAndamento = null;
+let ultimaCargaDoPersonalEm = 0;
+let ultimaCargaDoPersonal = null;
+const INTERVALO_CARGA_PERSONAL_MS = 120000;
+const IDADE_MAXIMA_DADOS_PERSONAL_MS = 60000;
+
+function carregarTudoDoPersonal(motivo){
+  if(sessaoTipo !== 'personal' && motivo !== 'entrada') return Promise.resolve(ultimaCargaDoPersonal);
+  if(cargaDoPersonalEmAndamento) return cargaDoPersonalEmAndamento; // já está carregando: espera a mesma carga
+  indicadorDeCargaDoPersonal('carregando');
+  const carga = (async function(){
+    // 1) alunas e catálogo juntos (um depende do outro pra contar ativas, status manual e desafios)
+    const res = await Promise.all([
+      sincronizarListaAlunasDoSupabase().catch(function(e){ return { erro: String(e && e.message || e) }; }),
+      carregarCatalogoPersonal(true).catch(function(){ return null; })
+    ]);
+    try { aplicarRegistrosDeFichasDoCatalogo(); } catch(e){}
+    try { entregarTreinosSeca21QueFaltam(); } catch(e){} // o modelo e as inscritas já estão aqui
+    // 2) o que depende da lista de alunas: progresso (painel, feedbacks, último treino) e treinos das ativas
+    await Promise.all([
+      carregarSinaisDoPainel().catch(function(){ return null; }),
+      carregarTreinosDeTodasAtivas().catch(function(){ return null; })
+    ]);
+    ultimaCargaDoPersonalEm = Date.now();
+    ultimaCargaDoPersonal = { alunas: res[0] || {}, em: new Date().toISOString() };
+    atualizarTelasDoPersonal();
+    return ultimaCargaDoPersonal;
+  })();
+  cargaDoPersonalEmAndamento = carga.then(function(r){
+    cargaDoPersonalEmAndamento = null;
+    indicadorDeCargaDoPersonal('pronto');
+    return r;
+  }, function(e){
+    cargaDoPersonalEmAndamento = null;
+    indicadorDeCargaDoPersonal('erro');
+    try { registrarErroNoBanco(e, 'carga_personal'); } catch(x){}
+    return ultimaCargaDoPersonal;
+  });
+  return cargaDoPersonalEmAndamento;
+}
+
+// Tela aberta: usa o que já tem e, se o dado tiver mais de 1 minuto (ou se pedir), busca de novo
+function garantirDadosDoPersonal(forcar){
+  if(cargaDoPersonalEmAndamento) return cargaDoPersonalEmAndamento;
+  if(forcar || Date.now() - ultimaCargaDoPersonalEm > IDADE_MAXIMA_DADOS_PERSONAL_MS) return carregarTudoDoPersonal('tela');
+  return Promise.resolve(ultimaCargaDoPersonal);
+}
+
+// Recalcula todas as contagens do menu e redesenha a tela que está aberta (a ficha aberta não, pra não perder o que
+// está sendo editado nela)
+function atualizarTelasDoPersonal(){
+  if(sessaoTipo !== 'personal') return;
+  const passo = function(f){ try { f(); } catch(e){ console.warn('[carga do personal]', e); } };
+  passo(function(){ renderControleTreinos(); });       // também atualiza o número do Controle de treinos
+  passo(function(){ atualizarBadgeDesafios(); });
+  passo(function(){ atualizarBadgesFeedback(); });     // feedbacks e anamneses
+  const telas = {
+    'dashboard': function(){ renderAtalhosDashboard(); renderPainelDoPersonal(); },
+    'dashboard-suporte': function(){ renderPainelSuporte(); },
+    'alunas': function(){ renderAlunas(); },
+    'desafios': function(){ renderControleDesafios(); },
+    'feedback-alunas': function(){ renderFeedbackAlunas(); },
+    'feedback-treinos': function(){ renderFeedbackTreinos(); },
+    'anamneses': function(){ renderAnamneses(); },
+    'envios': function(){ renderEnvios(); },
+    'comunicacao': function(){ renderCentralDeAvisos(); },
+    'sinalizacoes': function(){ renderSinalizacoes(); },
+    'conversas': function(){ renderListaConversas(); }
+  };
+  if(telas[telaPersonalAtual]) passo(telas[telaPersonalAtual]);
+}
+
+// Aviso discreto no canto: "Atualizando os dados..." enquanto busca, some quando termina
+function indicadorDeCargaDoPersonal(estado){
+  let el = document.getElementById('indicador-carga-personal');
+  if(!el || !el.parentNode){
+    try {
+      el = document.createElement('div');
+      el.id = 'indicador-carga-personal';
+      document.body.appendChild(el);
+    } catch(e){ return; }
+  }
+  if(estado === 'carregando'){ el.textContent = 'Atualizando os dados...'; el.className = 'carga-personal on'; }
+  else if(estado === 'erro'){ el.textContent = 'Não consegui atualizar agora. Tento de novo em instantes.'; el.className = 'carga-personal on erro'; setTimeout(function(){ el.className = 'carga-personal'; }, 5000); }
+  else { el.className = 'carga-personal'; }
+}
+
+let atualizacaoAutomaticaLigada = false;
+function iniciarAtualizacaoAutomaticaDoPersonal(){
+  if(atualizacaoAutomaticaLigada) return;
+  atualizacaoAutomaticaLigada = true;
+  try {
+    setInterval(function(){
+      if(sessaoTipo === 'personal' && document.visibilityState !== 'hidden') carregarTudoDoPersonal('automatica');
+    }, INTERVALO_CARGA_PERSONAL_MS);
+    document.addEventListener('visibilitychange', function(){
+      if(document.visibilityState === 'visible' && sessaoTipo === 'personal') garantirDadosDoPersonal();
+    });
+  } catch(e){}
+}
+
 
 function renderMetaFinanceiraConteudo(m){
   if(!metaFaturamentoMensal || metaFaturamentoMensal <= 0){
