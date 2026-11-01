@@ -1032,7 +1032,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-01-BF-TOUR-ESPERA-LOGIN</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-01-BG-ALUNA-PELO-EMAIL</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1952,7 +1952,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-01-BF-TOUR-ESPERA-LOGIN';
+const VERSAO_APP = '2026-11-01-BG-ALUNA-PELO-EMAIL';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -17328,7 +17328,7 @@ async function loginAluna(){
 
     // Se ela ainda não existe na lista local dessa sessão (primeiro login no aparelho dela), cria o registro completo agora,
     // com os dados reais dela — sem isso, os cálculos de DNA/progresso ficariam usando dados de outra aluna que sobraram por padrão
-    let alunaLocal = alunasPersonal.find(function(x){ return x.nome === NOME_ALUNA_LOGADA; });
+    let alunaLocal = fichaLocalDaAlunaQueEntrou(alunaRow);
     if(!alunaLocal && alunaRow){
       alunaLocal = {
         nome: alunaRow.nome,
@@ -18325,6 +18325,25 @@ let NOME_ALUNA_LOGADA = 'Andriele Caroline Rubert'; // padrão pra testes locais
 // Garante que a aluna logada sempre tenha um registro em alunasPersonal, mesmo se por qualquer motivo
 // o login não tiver criado ele ainda — evita que funções que salvam carga, peso, ciclo, etc. falhem
 // silenciosamente (era exatamente essa a causa do erro relatado ao confirmar carga/registrar treino).
+// A ficha da aluna que acabou de entrar, achada pelo E-MAIL (não pelo nome). Antes era pelo nome: a lista que vem no
+// app tem fichas antigas, e duas alunas com o mesmo nome ("Rafaela") faziam o app pegar a ficha da OUTRA. Aí tudo o
+// que ela salvava ia pra ficha errada e o servidor recusava ("não consegui salvar"). Fichas de outras alunas com o
+// mesmo nome saem da lista do aparelho dela, pra nada achar a errada depois.
+function fichaLocalDaAlunaQueEntrou(alunaRow){
+  const minus = function(t){ return String(t || '').trim().toLowerCase(); };
+  const email = minus(alunaRow && alunaRow.email);
+  let a = email ? alunasPersonal.find(function(x){ return minus(x.email) === email; }) : null;
+  if(!a) a = alunasPersonal.find(function(x){ return x.nome === NOME_ALUNA_LOGADA && (!x.email || !email || minus(x.email) === email); }) || null;
+  if(a) NOME_ALUNA_LOGADA = a.nome; // o nome da ficha local é o que o resto do app usa pra achar ela
+  if(email){
+    for(let i = alunasPersonal.length - 1; i >= 0; i--){
+      const x = alunasPersonal[i];
+      if(x !== a && x.nome === NOME_ALUNA_LOGADA && minus(x.email) !== email) alunasPersonal.splice(i, 1);
+    }
+  }
+  return a;
+}
+
 function obterAlunaLogadaOuCriar(){
   let a = alunasPersonal.find(function(x){ return x.nome === NOME_ALUNA_LOGADA; });
   if(!a){
@@ -18398,7 +18417,7 @@ async function restaurarSessaoAtiva(){
     } else if(perfilRow.tipo === 'aluna'){
       NOME_ALUNA_LOGADA = perfilRow.nome;
       const { data: alunaRow } = await supabaseClient.from('alunas').select('*').eq('auth_id', sessao.user.id).maybeSingle();
-      let alunaLocal = alunasPersonal.find(function(x){ return x.nome === NOME_ALUNA_LOGADA; });
+      let alunaLocal = alunaRow ? fichaLocalDaAlunaQueEntrou(alunaRow) : alunasPersonal.find(function(x){ return x.nome === NOME_ALUNA_LOGADA; });
       if(!alunaLocal && alunaRow){
         alunaLocal = {
           nome: alunaRow.nome, email: alunaRow.email, telefone: alunaRow.telefone || '',
