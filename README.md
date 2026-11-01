@@ -1,4 +1,4 @@
-[dna_musa_163.html](https://github.com/user-attachments/files/34247566/dna_musa_163.html)
+[dna_musa_164.html](https://github.com/user-attachments/files/34249111/dna_musa_164.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -229,6 +229,29 @@
   .evo-breve small{display:block;font-size:11px;color:var(--text-faint);margin-top:3px;}
   .evo-breve b{font-size:9.5px;letter-spacing:1.5px;color:var(--gold);border:1px solid var(--border-strong);border-radius:6px;padding:3px 6px;white-space:nowrap;}
   .fb-filtros{display:flex;gap:8px;margin:0 0 12px;}
+  .fb-bt.wpp{background:#25D366;color:#06210f;border-color:#25D366;font-weight:600;}
+  .resp-wpp-fundo{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:16px;}
+  .resp-wpp{width:min(560px,100%);max-height:92vh;overflow:auto;background:var(--card);border:1px solid var(--border-strong);border-radius:18px;padding:18px 20px;}
+  .resp-tit{font-size:16px;font-weight:600;margin:0;} .resp-sub{font-size:12px;color:var(--text-dim);margin:3px 0 0;}
+  .resp-cit{border-left:3px solid var(--gold-soft);background:var(--card-2);border-radius:8px;padding:9px 12px;font-size:12.5px;color:var(--text-dim);margin:10px 0 10px;}
+  .resp-previa{background:#005c4b;color:#e9edef;border-radius:10px;padding:9px 11px;font-size:12.5px;line-height:1.45;white-space:pre-line;}
+  .resp-marca{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--text-dim);margin-top:12px;}
+  .resp-rod{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
+  .al-topo{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 10px;}
+  .al-seg{display:inline-flex;gap:4px;background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:3px;}
+  .al-seg .chip{margin:0;border:none;background:transparent;} .al-seg .chip.active{background:rgba(232,197,138,.16);color:var(--gold-soft);}
+  .al-seg .chip b,.al-bt b{font-weight:600;margin-left:6px;opacity:.8;}
+  .al-busca{flex:1;min-width:180px;margin:0 !important;}
+  .al-botoes{display:flex;gap:6px;} .al-bt{background:var(--card-2);color:var(--gold-soft);margin:0;}
+  .al-filtros-pop{background:var(--card);border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin:0 0 10px;}
+  .al-pop-lbl{font-size:10.5px;letter-spacing:1.3px;text-transform:uppercase;color:var(--text-faint);margin:2px 0 8px;}
+  .al-pop-rod{display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
+  .al-link{font-size:12px;color:var(--text-faint);text-decoration:underline;cursor:pointer;}
+  .al-ativos{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 10px;} .al-ativos:empty{display:none;}
+  .pn-acao.pn-resolvido{color:var(--success);border-color:rgba(143,174,125,.45);background:rgba(143,174,125,.08);white-space:nowrap;}
+  .pn-item .pn-acoes{grid-area:acao;display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;}
+  .aviso-desfazer{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:999998;display:flex;gap:16px;align-items:center;background:#1f2b1d;border:1px solid rgba(143,174,125,.45);color:#cfe3c6;font-size:12.5px;padding:10px 16px;border-radius:12px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.45);}
+  .aviso-desfazer b{color:#a8d79a;text-decoration:underline;font-weight:600;}
   .carga-personal{position:fixed;top:10px;right:12px;z-index:9000;font-size:11px;padding:6px 12px;border-radius:14px;background:var(--card-2);border:1px solid var(--border-strong);color:var(--gold-soft);opacity:0;pointer-events:none;transition:opacity .25s;}
   .carga-personal.on{opacity:1;} .carga-personal.erro{color:#E2A33D;}
   .hh-dia{display:flex;align-items:center;gap:12px;margin:10px 0 2px;} .hh-dia b{display:block;font-size:17px;font-weight:600;line-height:1.25;} .hh-dia small{display:block;font-size:12px;color:var(--text-dim);margin-top:2px;}
@@ -1035,7 +1058,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-01-BH-CARGA-COMPLETA-PERSONAL</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-01-BI-RESOLVIDO-FILTROS-RESPOSTA</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1558,27 +1581,38 @@
         <h1 class="page-title" style="margin-top:0;">Alunas</h1>
         <p class="page-sub" id="alunas-count-label" style="margin-top:-6px;"></p>
         <div id="alertas-risco-emocional-area"></div>
-        <div class="filter-row" style="margin-bottom:12px;">
-          <div class="chip active" id="filtro-tab-ativas" onclick="alternarFiltroAlunas('ativas')">Ativas</div>
-          <div class="chip" id="filtro-tab-porvencer" onclick="alternarFiltroAlunas('porvencer')">Por vencer</div>
-          <div class="chip" id="filtro-tab-vencidas" onclick="alternarFiltroAlunas('vencidas')">Vencidas</div>
-          <div class="chip" style="background:var(--card-2);color:var(--gold-soft);" onclick="abrirTelaFunil()"><i class="ti ti-filter-cog" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Funil</div>
-          <div class="chip" id="chip-modo-selecao" style="background:var(--card-2);color:var(--gold-soft);" onclick="alternarModoSelecaoAlunas()"><i class="ti ti-checkbox" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Marcar</div>
+        <!-- Uma linha só: situação (com o número de cada), busca, Filtros (desafio e plano), Marcar e Funil -->
+        <div class="al-topo">
+          <div class="al-seg">
+            <span class="chip active" id="filtro-tab-ativas" onclick="alternarFiltroAlunas('ativas')">Ativas<b id="cont-tab-ativas"></b></span>
+            <span class="chip" id="filtro-tab-porvencer" onclick="alternarFiltroAlunas('porvencer')">Por vencer<b id="cont-tab-porvencer"></b></span>
+            <span class="chip" id="filtro-tab-vencidas" onclick="alternarFiltroAlunas('vencidas')">Vencidas<b id="cont-tab-vencidas"></b></span>
+          </div>
+          <input class="form-input al-busca" id="aluna-search" placeholder="Buscar aluna por nome..." oninput="renderAlunas()">
+          <div class="al-botoes">
+            <span class="chip al-bt" id="btn-filtros-alunas" onclick="alternarPainelFiltrosAlunas()"><i class="ti ti-adjustments-horizontal" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Filtros<b id="cont-filtros-alunas"></b></span>
+            <span class="chip al-bt" id="chip-modo-selecao" onclick="alternarModoSelecaoAlunas()"><i class="ti ti-checkbox" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Marcar</span>
+            <span class="chip al-bt" onclick="abrirTelaFunil()"><i class="ti ti-filter-cog" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Funil</span>
+          </div>
         </div>
-        <div class="filter-row" style="margin-bottom:8px;align-items:center;">
-          <span style="font-size:10.5px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase;margin-right:2px;">Desafio</span>
-          <div class="chip active" id="filtro-desafio-todas" onclick="alternarFiltroDesafio('todas')">Todas</div>
-          <div class="chip" id="filtro-desafio-fora" onclick="alternarFiltroDesafio('fora')">Fora de desafio</div>
-          <div class="chip" id="filtro-desafio-seca-empina" onclick="alternarFiltroDesafio('seca-empina')"><i class="ti ti-flag" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Seca e Empina</div>
-          <div class="chip" id="filtro-desafio-seca21" onclick="alternarFiltroDesafio('seca21')"><i class="ti ti-flag" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>SECA 21</div>
+        <div class="al-filtros-pop" id="painel-filtros-alunas" style="display:none;">
+          <p class="al-pop-lbl">Desafio</p>
+          <div class="filter-row">
+            <div class="chip active" id="filtro-desafio-todas" onclick="alternarFiltroDesafio('todas')">Todas</div>
+            <div class="chip" id="filtro-desafio-fora" onclick="alternarFiltroDesafio('fora')">Fora de desafio</div>
+            <div class="chip" id="filtro-desafio-seca-empina" onclick="alternarFiltroDesafio('seca-empina')"><i class="ti ti-flag" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Seca e Empina</div>
+            <div class="chip" id="filtro-desafio-seca21" onclick="alternarFiltroDesafio('seca21')"><i class="ti ti-flag" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>SECA 21</div>
+          </div>
+          <p class="al-pop-lbl">Plano</p>
+          <div class="filter-row">
+            <div class="chip active" id="filtro-plano-todos" onclick="alternarFiltroPlano('todos')">Todos</div>
+            <div class="chip" id="filtro-plano-consultoria" onclick="alternarFiltroPlano('consultoria')">Consultoria</div>
+            <div class="chip" id="filtro-plano-so-desafio" onclick="alternarFiltroPlano('so-desafio')">Só desafio</div>
+            <div class="chip" id="filtro-plano-consultoria-desafio" onclick="alternarFiltroPlano('consultoria-desafio')">Consultoria + desafio</div>
+          </div>
+          <div class="al-pop-rod"><span class="al-link" onclick="limparFiltrosAlunas()">Limpar</span><span class="chip active" onclick="alternarPainelFiltrosAlunas(false)">Pronto</span></div>
         </div>
-        <div class="filter-row" style="margin-bottom:12px;align-items:center;">
-          <span style="font-size:10.5px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase;margin-right:2px;">Plano</span>
-          <div class="chip active" id="filtro-plano-todos" onclick="alternarFiltroPlano('todos')">Todos</div>
-          <div class="chip" id="filtro-plano-consultoria" onclick="alternarFiltroPlano('consultoria')">Consultoria</div>
-          <div class="chip" id="filtro-plano-so-desafio" onclick="alternarFiltroPlano('so-desafio')">Só desafio</div>
-          <div class="chip" id="filtro-plano-consultoria-desafio" onclick="alternarFiltroPlano('consultoria-desafio')">Consultoria + desafio</div>
-        </div>
+        <div id="filtros-ativos-alunas" class="al-ativos"></div>
         <div id="barra-selecao-alunas" style="display:none;background:var(--card);border:1px solid var(--border-strong);border-radius:12px;padding:10px 12px;margin-bottom:12px;align-items:center;gap:8px;flex-wrap:wrap;">
           <span id="contagem-selecao-alunas" style="font-size:12px;color:var(--gold-soft);flex-shrink:0;">0 selecionada(s)</span>
           <select class="form-select" id="destino-mover-alunas" style="flex:1;min-width:140px;font-size:12px;padding:6px;">
@@ -1589,7 +1623,6 @@
           <span class="chip" style="cursor:pointer;background:var(--gold-soft);color:#1A1409;" onclick="confirmarMoverAlunasSelecionadas()">Mover</span>
           <span class="chip" style="cursor:pointer;" onclick="alternarModoSelecaoAlunas()">Cancelar</span>
         </div>
-        <div class="form-group"><input class="form-input" id="aluna-search" placeholder="Buscar aluna por nome..." oninput="renderAlunas()"></div>
         <div id="alunas-list"></div>
       </div>
 
@@ -1955,7 +1988,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-01-BH-CARGA-COMPLETA-PERSONAL';
+const VERSAO_APP = '2026-11-01-BI-RESOLVIDO-FILTROS-RESPOSTA';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -4524,6 +4557,35 @@ function alternarFiltroDesafio(filtro){
   renderAlunas();
 }
 
+// Cabeçalho da lista de alunas: número de cada situação, quantos filtros estão ligados e os filtros com ✕ pra tirar
+const NOMES_FILTRO_DESAFIO = { 'fora': 'Fora de desafio', 'seca-empina': 'Seca e Empina', 'seca21': 'SECA 21' };
+function atualizarCabecalhoAlunas(){
+  const conta = { ativas: 0, porvencer: 0, vencidas: 0 };
+  alunasPersonal.forEach(function(a){ const st = statusDoPlano(a); if(conta[st] !== undefined) conta[st]++; });
+  Object.keys(conta).forEach(function(k){ const el = document.getElementById('cont-tab-' + k); if(el) el.textContent = conta[k]; });
+  const ligados = [];
+  if(filtroDesafioAtivo !== 'todas' && NOMES_FILTRO_DESAFIO[filtroDesafioAtivo]) ligados.push({ txt: NOMES_FILTRO_DESAFIO[filtroDesafioAtivo], tira: "alternarFiltroDesafio('todas')" });
+  if(filtroPlanoAtivo !== 'todos' && NOMES_PLANO[filtroPlanoAtivo]) ligados.push({ txt: NOMES_PLANO[filtroPlanoAtivo], tira: "alternarFiltroPlano('todos')" });
+  const cont = document.getElementById('cont-filtros-alunas');
+  if(cont) cont.textContent = ligados.length ? ligados.length : '';
+  const btn = document.getElementById('btn-filtros-alunas');
+  if(btn && btn.classList) btn.classList.toggle('active', ligados.length > 0);
+  const area = document.getElementById('filtros-ativos-alunas');
+  if(area) area.innerHTML = ligados.length ? ligados.map(function(f){ return '<span class="chip active" onclick="' + f.tira + '">' + escaparHtmlFicha(f.txt) + ' ✕</span>'; }).join('') +
+    (ligados.length > 1 ? '<span class="al-link" onclick="limparFiltrosAlunas()">limpar filtros</span>' : '') : '';
+}
+function alternarPainelFiltrosAlunas(abrir){
+  const pop = document.getElementById('painel-filtros-alunas');
+  if(!pop) return;
+  const vai = abrir === undefined ? pop.style.display === 'none' : !!abrir;
+  pop.style.display = vai ? 'block' : 'none';
+}
+function limparFiltrosAlunas(){
+  filtroDesafioAtivo = 'todas'; filtroPlanoAtivo = 'todos';
+  alternarFiltroDesafio('todas'); // marca os chips e redesenha
+  alternarFiltroPlano('todos');
+}
+
 function alternarFiltroAlunas(filtro){
   filtroAlunasAtivo = filtro;
   ['ativas', 'porvencer', 'vencidas'].forEach(function(f){
@@ -4936,6 +4998,7 @@ function renderAlunas(){
     return bateBusca && bateStatus && bateDesafio && batePlano;
   }).sort(function(a, b){ return a.nome.localeCompare(b.nome, 'pt-BR'); });
   document.getElementById('alunas-count-label').textContent = filtradas.length + ' de ' + alunasPersonal.length + ' alunas';
+  atualizarCabecalhoAlunas();
   if(!window.alunasQtdVisivel) window.alunasQtdVisivel = 80;
   if(filtradas.length > 0){
     const cab = document.createElement('div');
@@ -10480,6 +10543,9 @@ function itensDaLinhaDoTempo(nome){
     if(!x || x.st !== 'enviada') return;
     itens.push({ de: 'nos', tipo: 'massa', data: x.em || r.criadoEm, origem: r.origem || 'Envio em massa', canal: 'WhatsApp', por: r.por || '', texto: personalizarTextoEnvio(r.texto, nome) });
   });
+  respostasFeedback.filter(function(r){ return r.aluna === nome; }).forEach(function(r){
+    itens.push({ de: 'nos', tipo: 'massa', data: r.em, origem: 'Resposta ao feedback', canal: 'WhatsApp', por: r.por || '', texto: r.texto });
+  });
   (guardado.avisosMassa || []).forEach(function(av){
     itens.push({ de: 'nos', tipo: 'massa', data: av.data, origem: 'Aviso em massa', canal: 'app', por: '', texto: av.texto });
   });
@@ -10498,7 +10564,7 @@ function alunasComLinhaDoTempo(){
 
 function textoDoItemDaLinha(x){
   if(x.tipo === 'massa') return x.texto || '';
-  if(x.tipo === 'duvida') return x.d.pergunta || '';
+  if(x.tipo === 'duvida') return textoDaDuvida(x.d);
   return x.f.comentario || '';
 }
 function htmlItemDaLinhaDoTempo(x){
@@ -10579,20 +10645,100 @@ function renderFeedbackAlunas(){
         if(x.f.desconforto) extra = '<span class="fc fc-ruim">Desconforto' + (x.f.exercicio ? ' em ' + escaparHtmlFicha(x.f.exercicio) : '') + (x.f.escala != null ? ' · ' + x.f.escala + '/10' : '') + '</span>';
       } else {
         titulo = 'Dúvida';
-        texto = escaparHtmlFicha(x.d.pergunta || '');
+        texto = escaparHtmlFicha(textoDaDuvida(x.d));
       }
       return '<div class="fb-item novo">' +
         '<div class="pn-av">' + escaparHtmlFicha(iniciaisDaAluna(x.aluna)) + '</div>' +
         '<div class="fb-corpo"><p class="fb-tit">' + escaparHtmlFicha(x.aluna) + ' <span>· ' + titulo + '</span></p>' +
           (texto ? '<p class="fb-txt">' + texto + '</p>' : '') +
           '<div class="fb-meta">' + extra + '<span>' + dataHoraCurta(x.data) + '</span><span class="fc fc-alerta">Novo</span></div></div>' +
-        '<div class="fb-acoes"><button class="fb-bt ouro" onclick="marcarFeedbackAlunaLido(\'' + chaveJs + '\')">' + (x.tipo === 'duvida' ? 'Marcar como respondida' : 'Marcar como lido') + '</button>' +
+        '<div class="fb-acoes"><button class="fb-bt wpp" onclick="abrirRespostaWhatsApp(\'' + chaveJs + '\')">Responder no WhatsApp</button>' +
+          '<button class="fb-bt ouro" onclick="marcarFeedbackAlunaLido(\'' + chaveJs + '\')">' + (x.tipo === 'duvida' ? 'Marcar como respondida' : 'Marcar como lido') + '</button>' +
           '<button class="fb-bt" onclick="abrirLinhaDoTempoDaAluna(\'' + nomeJs + '\')">Linha do tempo</button>' +
           '<button class="fb-bt" onclick="abrirFichaPeloNome(\'' + nomeJs + '\')">Abrir ficha</button></div>' +
       '</div>';
     }).join('');
   }
   area.innerHTML = html;
+}
+
+// ===== RESPONDER O FEEDBACK DIRETO NO WHATSAPP DA ALUNA =====
+// Só daqui pra lá: a mensagem dela citada + a sua resposta, pelo WhatsApp de quem está logado (Thiago ou Bianca).
+// A resposta fica na linha do tempo dela. O que ela responder no WhatsApp não volta pro app.
+const respostasFeedback = []; // { id, chaveFeedback, aluna, texto, por, em }
+let respostaWhatsAppAberta = null;
+
+function trechoDoFeedback(x){
+  let t = x.tipo === 'duvida' ? textoDaDuvida(x.d) : String(x.f.comentario || '').trim();
+  if(!t && x.tipo !== 'duvida' && x.f.desconforto) t = 'Desconforto' + (x.f.exercicio ? ' em ' + capitalizarNomeExercicio(String(x.f.exercicio)) : '') + (x.f.escala != null ? ' (nível ' + x.f.escala + ')' : '');
+  t = t.replace(/\s+/g, ' ');
+  return t.length > 160 ? t.slice(0, 157).trim() + '...' : t;
+}
+function montarMensagemDeResposta(x, resposta){
+  const d = new Date(x.data);
+  const quando = isNaN(d.getTime()) ? '' : String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+  const sobre = x.tipo === 'duvida' ? 'a dúvida que você mandou no app' : 'o que você comentou no app' + (x.f.dia ? ' (' + String(x.f.dia).toLowerCase() + (quando ? ', ' + quando : '') + ')' : (quando ? ' (' + quando + ')' : ''));
+  return 'Oi ' + primeiroNomeEnvio(x.aluna) + '! Sobre ' + sobre + ':\n_"' + trechoDoFeedback(x) + '"_\n\n' + String(resposta || '').trim();
+}
+function abrirRespostaWhatsApp(chave){
+  const x = itensFeedbackAlunas().find(function(i){ return i.chave === chave; });
+  if(!x) return false;
+  const a = alunasPersonal.find(function(al){ return al.nome === x.aluna; });
+  respostaWhatsAppAberta = { chave: chave };
+  let el = document.getElementById('modal-resposta-wpp');
+  if(!el){ el = document.createElement('div'); el.id = 'modal-resposta-wpp'; el.className = 'resp-wpp-fundo'; document.body.appendChild(el); }
+  el.style.display = 'flex';
+  el.innerHTML = '<div class="resp-wpp">' +
+    '<p class="resp-tit">Responder ' + escaparHtmlFicha(primeiroNomeEnvio(x.aluna)) + ' no WhatsApp</p>' +
+    '<p class="resp-sub">' + (a && a.telefone ? 'Ela recebe a mensagem dela citada e a sua resposta. Sai pelo seu WhatsApp (' + escaparHtmlFicha(NOME_PERSONAL_LOGADO || '') + ').' : '<b style="color:#E2A33D;">Ela não tem telefone cadastrado na ficha.</b>') + '</p>' +
+    '<div class="resp-cit">"' + escaparHtmlFicha(trechoDoFeedback(x)) + '"</div>' +
+    '<textarea class="form-input" id="resp-wpp-texto" rows="4" placeholder="Escreva a sua resposta..." oninput="atualizarPreviaRespostaWhatsApp()"></textarea>' +
+    '<p class="resp-sub" style="margin:10px 0 4px;">Como chega pra ela</p><div class="resp-previa" id="resp-wpp-previa"></div>' +
+    '<label class="resp-marca"><input type="checkbox" id="resp-wpp-lido" checked> ' + (x.tipo === 'duvida' ? 'Marcar como respondida ao enviar' : 'Marcar como lido ao enviar') + '</label>' +
+    '<div class="resp-rod"><button class="fb-bt" onclick="fecharRespostaWhatsApp()">Cancelar</button>' +
+    '<button class="fb-bt wpp" id="resp-wpp-enviar" onclick="enviarRespostaWhatsApp()"' + (a && a.telefone ? '' : ' disabled') + '>Enviar pelo WhatsApp</button></div></div>';
+  atualizarPreviaRespostaWhatsApp();
+  return true;
+}
+function atualizarPreviaRespostaWhatsApp(){
+  if(!respostaWhatsAppAberta) return;
+  const x = itensFeedbackAlunas().find(function(i){ return i.chave === respostaWhatsAppAberta.chave; });
+  const campo = document.getElementById('resp-wpp-texto'), previa = document.getElementById('resp-wpp-previa');
+  if(!x || !previa) return;
+  previa.textContent = montarMensagemDeResposta(x, (campo && campo.value) || '...');
+}
+function fecharRespostaWhatsApp(){
+  respostaWhatsAppAberta = null;
+  const el = document.getElementById('modal-resposta-wpp');
+  if(el){ el.style.display = 'none'; el.innerHTML = ''; }
+}
+async function enviarRespostaWhatsApp(){
+  if(!respostaWhatsAppAberta) return false;
+  const chave = respostaWhatsAppAberta.chave;
+  const x = itensFeedbackAlunas().find(function(i){ return i.chave === chave; });
+  const a = x ? alunasPersonal.find(function(al){ return al.nome === x.aluna; }) : null;
+  const campo = document.getElementById('resp-wpp-texto');
+  const resposta = String((campo && campo.value) || '').trim();
+  if(!x || !a) return false;
+  if(!resposta){ alert('Escreva a resposta antes de enviar.'); return false; }
+  if(!a.telefone){ alert('Ela não tem telefone cadastrado na ficha.'); return false; }
+  const marcarLido = !!(document.getElementById('resp-wpp-lido') || {}).checked;
+  const botao = document.getElementById('resp-wpp-enviar');
+  if(botao){ botao.disabled = true; botao.textContent = 'Enviando...'; }
+  const saida = await enviarWhatsApp(a.telefone, montarMensagemDeResposta(x, resposta));
+  if(!saida || !saida.sucesso){
+    if(botao){ botao.disabled = false; botao.textContent = 'Enviar pelo WhatsApp'; }
+    mostrarConfirmacaoSalvamento(false, 'Não consegui enviar pro WhatsApp dela: ' + ((saida && saida.motivo) || 'motivo não informado'));
+    return false;
+  }
+  const registro = { chaveFeedback: chave, aluna: a.nome, texto: resposta, por: NOME_PERSONAL_LOGADO || '', em: new Date().toISOString() };
+  const id = 'resp_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  respostasFeedback.push(Object.assign({ id: id }, registro));
+  salvarCatalogoPersonalConferindo('resposta_feedback', id, registro);
+  fecharRespostaWhatsApp();
+  if(marcarLido) marcarFeedbackAlunaLido(chave); else renderFeedbackAlunas();
+  mostrarConfirmacaoSalvamento(true, 'Resposta enviada pro WhatsApp da ' + primeiroNomeEnvio(a.nome) + '.');
+  return true;
 }
 
 function marcarFeedbackAlunaLido(chave){
@@ -13950,7 +14096,7 @@ function resumoDaFicha(a, prog, agora){
     else if(f.intensidade != null) atividades.push({ data: f.data, texto: 'Feedback do treino: intensidade ' + f.intensidade + ' de 10' });
   });
   ((prog.perguntasPerfilDNA && prog.perguntasPerfilDNA.respondidas) || []).forEach(function(r){ if(r && r.data) atividades.push({ data: r.data, texto: 'Respondeu uma pergunta do Perfil DNA' }); });
-  (a.duvidasSinalizadas || []).forEach(function(d){ if(d && d.data) atividades.push({ data: d.data, texto: 'Mandou uma dúvida: "' + String(d.pergunta || '').slice(0, 60) + '"', tag: d.resolvida ? null : 'sem resposta', classe: 'fc-ouro' }); });
+  (a.duvidasSinalizadas || []).forEach(function(d){ if(d && d.data) atividades.push({ data: d.data, texto: 'Mandou uma dúvida: "' + textoDaDuvida(d).slice(0, 60) + '"', tag: d.resolvida ? null : 'sem resposta', classe: 'fc-ouro' }); });
   atividades.sort(function(x, y){ return new Date(y.data) - new Date(x.data); });
   let score = null;
   try { score = calcularProbabilidadeSucesso(a.nome); } catch(e){}
@@ -15049,11 +15195,11 @@ function renderDuvidasSinalizadas(a){
   let html = '<p class="section-label" style="margin-top:22px;">Dúvidas que a Sol sinalizou pra você</p>';
   pendentes.forEach(function(d){
     const idxReal = a.duvidasSinalizadas.indexOf(d);
-    const mensagemWpp = encodeURIComponent('Oi ' + a.nome.split(' ')[0] + '! Vi sua pergunta: "' + d.pergunta + '". Deixa eu te explicar melhor:');
+    const mensagemWpp = encodeURIComponent('Oi ' + a.nome.split(' ')[0] + '! Vi sua pergunta: "' + textoDaDuvida(d) + '". Deixa eu te explicar melhor:');
     const linkWpp = 'https://wa.me/55' + (a.telefone || '').replace(/\D/g, '') + '?text=' + mensagemWpp;
     html += '<div class="info-box">' +
       '<p class="lbl">Pergunta da aluna</p>' +
-      '<p class="txt">"' + d.pergunta + '"</p>' +
+      '<p class="txt">"' + escaparHtmlFicha(textoDaDuvida(d)) + '"</p>' +
       '<p class="lbl" style="margin-top:8px;">O que a Sol respondeu</p>' +
       '<p class="txt">' + d.respostaSol + '</p>' +
       '<div style="display:flex;gap:8px;margin-top:10px;">' +
@@ -16366,6 +16512,10 @@ async function carregarCatalogoPersonal(forcar){
         salvarListaFeedbackGerador(listaLocal);
       } else if(row.tipo === 'feedback_aluna_lido'){
         if(row.chave && row.dados) lidosFeedbackAlunas[row.chave] = row.dados;
+      } else if(row.tipo === 'resposta_feedback'){
+        if(row.chave && row.dados && !respostasFeedback.some(function(r){ return r.id === row.chave; })) respostasFeedback.push(Object.assign({ id: row.chave }, row.dados));
+      } else if(row.tipo === 'atencao_resolvida'){
+        if(row.chave && row.dados && String(row.dados.em || '') >= String((atencaoResolvida[row.chave] || {}).em || '')) atencaoResolvida[row.chave] = row.dados;
       } else if(row.tipo === 'config_ranking'){
         if(row.dados.meta) metaComunidadePontos = row.dados.meta;
         if(row.dados.recompensa) metaComunidadeRecompensa = row.dados.recompensa;
@@ -16501,7 +16651,7 @@ function calcularRelatorioRespostas(){
   ativas.forEach(function(a){
     const prog = getProgressoAluna(a.nome);
     (a.duvidasSinalizadas || []).filter(function(d){ return !d.resolvida; }).forEach(function(d){
-      duvidas.push({ nome: a.nome, pergunta: d.pergunta });
+      duvidas.push({ nome: a.nome, pergunta: textoDaDuvida(d) });
     });
     (prog.feedbackTreino || []).slice(-3).forEach(function(f){
       if(f.desconforto) feedbacksComDesconforto.push({ nome: a.nome, dia: f.dia, exercicio: f.exercicio, escala: f.escalaDesconforto });
@@ -20551,6 +20701,7 @@ function calcularPainelDoPersonal(agora){
 
   return {
     clientesAtivos: m.clientesAtivos,
+    soDesafioAtivas: alunasPersonal.filter(function(a){ const st = status(a); return (st === 'ativas' || st === 'porvencer') && soDesafioComDesafioVigente(a, agora); }).length,
     totalAtivas: ativas.length,
     totalPorVencer: porVencer.length,
     paraEnviar: { total: amarelos.length + brancos.length, paraGerar: brancos.length, gerados: amarelos.length, maisAntigoDias: maisAntigoDias },
@@ -20570,7 +20721,7 @@ function montarItensAtencao(agora){
   // 1) Sinal emocional que a Sol levantou e ninguém viu ainda
   alunasPersonal.forEach(function(a){
     if(a.sinalRiscoEmocional && !a.sinalRiscoEmocional.visto){
-      itens.push({ prioridade: 1, ordem: 0, ficha: a, nome: a.nome, detalhe: 'A conversa com a Sol pediu atenção', tag: 'Sinal emocional', classe: 'pn-t-ruim', acao: { rotulo: 'Ver', onclick: "showPersonalView('sinalizacoes')" } });
+      itens.push({ chave: 'sinal|' + a.nome + '|' + (a.sinalRiscoEmocional.data || a.sinalRiscoEmocional.em || ''), prioridade: 1, ordem: 0, ficha: a, nome: a.nome, detalhe: 'A conversa com a Sol pediu atenção', tag: 'Sinal emocional', classe: 'pn-t-ruim', acao: { rotulo: 'Ver', onclick: "showPersonalView('sinalizacoes')" } });
     }
   });
 
@@ -20585,7 +20736,7 @@ function montarItensAtencao(agora){
     const lista = porPessoa[quem].slice().sort(function(x, y){ return new Date(y.data_hora) - new Date(x.data_hora); });
     const ultimo = lista[0];
     const ficha = fichaDoNomeDoErro(quem);
-    itens.push({ prioridade: 2, ordem: -new Date(ultimo.data_hora).getTime(), ficha: ficha, nome: ficha ? ficha.nome : quem,
+    itens.push({ chave: 'erro|' + quem + '|' + ultimo.data_hora, prioridade: 2, ordem: -new Date(ultimo.data_hora).getTime(), ficha: ficha, nome: ficha ? ficha.nome : quem,
       detalhe: 'Viu um erro no app às ' + horaCurtaPainel(ultimo.data_hora) + (ultimo.codigo ? ' · código ' + ultimo.codigo : '') + (lista.length > 1 ? ' · ' + lista.length + ' erros' : ''),
       tag: 'Erro no app', classe: 'pn-t-ruim', acao: { rotulo: 'Ver', onclick: 'abrirErrosDoPainel()' } });
   });
@@ -20596,7 +20747,7 @@ function montarItensAtencao(agora){
     // 3) Feedback pós-treino com desconforto
     if(sinais && sinais.feedbackRuim){
       const f = sinais.feedbackRuim;
-      itens.push({ prioridade: 3, ordem: -new Date(f.data).getTime(), ficha: a, nome: a.nome,
+      itens.push({ chave: 'fbruim|' + a.nome + '|' + f.data, feedbackData: f.data, prioridade: 3, ordem: -new Date(f.data).getTime(), ficha: a, nome: a.nome,
         detalhe: 'Relatou desconforto' + (f.exercicio ? ' no ' + f.exercicio : '') + (f.escalaDesconforto != null ? ' (nível ' + f.escalaDesconforto + ')' : '') + ' em ' + dataCurtaPainel(f.data),
         tag: 'Feedback negativo', classe: 'pn-t-ruim', acao: { rotulo: 'Abrir', onclick: abrirFicha(a) } });
     }
@@ -20604,7 +20755,7 @@ function montarItensAtencao(agora){
     // 4) Treino atrasado: estava entregue e passou do prazo do Controle
     if(entraNoControleDeTreinos(a, agora) && entregaVenceuPorPrazo(a, agora)){
       const d = diasCorridosDesde(a.dataFicouVerde, agora);
-      itens.push({ prioridade: 4, ordem: -(d || 0), ficha: a, nome: a.nome,
+      itens.push({ chave: 'atrasado|' + a.nome + '|' + a.dataFicouVerde, prioridade: 4, ordem: -(d || 0), ficha: a, nome: a.nome,
         detalhe: 'Treino entregue em ' + dataCurtaPainel(a.dataFicouVerde) + ' · passou o prazo de ' + diasParaVoltarAoBranco + ' dias',
         tag: 'Treino atrasado', classe: 'pn-t-alerta', acao: { rotulo: 'Gerar', onclick: abrirFicha(a) } });
     }
@@ -20612,8 +20763,8 @@ function montarItensAtencao(agora){
     // 5) Dúvida que ela mandou e ainda não foi respondida
     const duvidas = (a.duvidasSinalizadas || []).filter(function(d){ return !d.resolvida; });
     if(duvidas.length > 0){
-      const texto = String(duvidas[duvidas.length - 1].pergunta || '');
-      itens.push({ prioridade: 5, ordem: -duvidas.length, ficha: a, nome: a.nome,
+      const texto = textoDaDuvida(duvidas[duvidas.length - 1]);
+      itens.push({ chave: 'duvida|' + a.nome + '|' + (duvidas[duvidas.length - 1].data || '') + '|' + duvidas.length, prioridade: 5, ordem: -duvidas.length, ficha: a, nome: a.nome,
         detalhe: (duvidas.length > 1 ? duvidas.length + ' dúvidas sem resposta: ' : 'Dúvida sem resposta: ') + '"' + (texto.length > 60 ? texto.slice(0, 57) + '...' : texto) + '"',
         tag: 'Dúvida', classe: 'pn-t-ouro', acao: { rotulo: 'Abrir', onclick: abrirFicha(a) } });
     }
@@ -20622,7 +20773,7 @@ function montarItensAtencao(agora){
     const faltam = diasAteVencerPlano(a, agora);
     if(faltam !== null && faltam >= 0 && faltam <= DIAS_RENOVACAO_ALERTA && !a.statusPlanoManual){
       const wpp = linkWhatsAppDaAluna(a);
-      itens.push({ prioridade: 6, ordem: faltam, ficha: a, nome: a.nome,
+      itens.push({ chave: 'renovacao|' + a.nome + '|' + (a.dataFechouPlano || '') + '|' + (a.duracaoPlanoDias || ''), prioridade: 6, ordem: faltam, ficha: a, nome: a.nome,
         detalhe: faltam === 0 ? 'Plano vence hoje' : 'Plano vence em ' + faltam + (faltam === 1 ? ' dia' : ' dias'),
         tag: 'Renovação', classe: 'pn-t-ouro', acao: wpp ? { rotulo: 'WhatsApp', href: wpp } : { rotulo: 'Abrir', onclick: abrirFicha(a) } });
     }
@@ -20632,7 +20783,7 @@ function montarItensAtencao(agora){
       const d = diasCorridosDesde(sinais.ultimoTreinoEm, agora);
       if(d !== null && d >= DIAS_SEM_TREINO_ALERTA){
         const wpp = linkWhatsAppDaAluna(a);
-        itens.push({ prioridade: 8, ordem: -d, ficha: a, nome: a.nome, detalhe: d + ' dias sem registrar treino',
+        itens.push({ chave: 'sumiu|' + a.nome + '|' + sinais.ultimoTreinoEm, prioridade: 8, ordem: -d, ficha: a, nome: a.nome, detalhe: d + ' dias sem registrar treino',
           tag: 'Sumiu', classe: 'pn-t-alerta', acao: wpp ? { rotulo: 'Mensagem', href: wpp } : { rotulo: 'Abrir', onclick: abrirFicha(a) } });
       }
     }
@@ -20641,23 +20792,86 @@ function montarItensAtencao(agora){
   // 7) Aniversário hoje
   alunasAniversarioHoje().forEach(function(a){
     const wpp = linkWhatsAppDaAluna(a);
-    itens.push({ prioridade: 7, ordem: 0, ficha: a, nome: a.nome, detalhe: 'Faz aniversário hoje', tag: 'Aniversário', classe: 'pn-t-ouro',
+    itens.push({ chave: 'aniversario|' + a.nome + '|' + new Date(agora).getFullYear(), prioridade: 7, ordem: 0, ficha: a, nome: a.nome, detalhe: 'Faz aniversário hoje', tag: 'Aniversário', classe: 'pn-t-ouro',
       acao: wpp ? { rotulo: 'WhatsApp', href: wpp } : { rotulo: 'Abrir', onclick: abrirFicha(a) } });
   });
 
-  return itens.sort(function(x, y){ return (x.prioridade - y.prioridade) || (x.ordem - y.ordem); });
+  // o que você (ou a Bianca) já viu ou marcou como resolvido sai da lista; se acontecer de novo, a chave é outra e volta
+  return itens.filter(function(x){ return !itemAtencaoResolvido(x.chave); })
+    .sort(function(x, y){ return (x.prioridade - y.prioridade) || (x.ordem - y.ordem); });
+}
+
+// ===== "PRECISA DE VOCÊ HOJE": VER / ✓ RESOLVIDO TIRAM O ITEM DA LISTA =====
+// Guardado no catálogo (tipo "atencao_resolvida"), então vale pro painel do Thiago e pro da Bianca. Cada item tem uma
+// chave com o que aconteceu (ex: o horário do último erro, a data do feedback): se acontecer de novo, ele volta.
+const atencaoResolvida = {};  // chave -> { por, em }
+function itemAtencaoResolvido(chave){ return !!(chave && atencaoResolvida[chave] && !atencaoResolvida[chave].desfeito); }
+
+function resolverItemAtencao(chave, semAviso){
+  if(!chave || itemAtencaoResolvido(chave)) return false;
+  const item = (itensAtencaoAtuais || []).find(function(x){ return x.chave === chave; });
+  const dados = { por: NOME_PERSONAL_LOGADO || '', em: new Date().toISOString() };
+  atencaoResolvida[chave] = dados;
+  salvarCatalogoPersonalConferindo('atencao_resolvida', chave, dados);
+  // desconforto resolvido no painel: o feedback também fica lido na aba de feedbacks
+  if(item && item.feedbackData){
+    const chaveFb = item.nome + '|' + item.feedbackData;
+    if(!lidosFeedbackAlunas[chaveFb]){
+      lidosFeedbackAlunas[chaveFb] = dados;
+      salvarCatalogoPersonalConferindo('feedback_aluna_lido', chaveFb, dados);
+    }
+    try { atualizarBadgesFeedback(); } catch(e){}
+  }
+  redesenharListasDeAtencao();
+  if(!semAviso) avisoComDesfazer('Saiu da lista: ' + (item ? item.tag.toLowerCase() + ' · ' + item.nome : 'item resolvido'), function(){ desfazerResolverItemAtencao(chave); });
+  return true;
+}
+function desfazerResolverItemAtencao(chave){
+  if(!atencaoResolvida[chave]) return false;
+  const dados = { desfeito: true, por: NOME_PERSONAL_LOGADO || '', em: new Date().toISOString() };
+  atencaoResolvida[chave] = dados;
+  salvarCatalogoPersonalConferindo('atencao_resolvida', chave, dados);
+  redesenharListasDeAtencao();
+  return true;
+}
+// "Ver", "Abrir", "Gerar"...: tira da lista e faz a ação
+function abrirItemAtencao(chave, onclick){
+  resolverItemAtencao(chave);
+  try { if(onclick) (new Function(onclick))(); } catch(e){ console.warn('[painel] ação do item', e); }
+}
+function redesenharListasDeAtencao(){
+  try { if(telaPersonalAtual === 'dashboard-suporte') renderPainelSuporte(); else renderPainelDoPersonal(); } catch(e){}
+}
+// Aviso no rodapé com "Desfazer" (some sozinho em 6 segundos)
+function avisoComDesfazer(texto, aoDesfazer){
+  try {
+    const velho = document.getElementById('aviso-desfazer');
+    if(velho && velho.remove) velho.remove();
+    const el = document.createElement('div');
+    el.id = 'aviso-desfazer';
+    el.className = 'aviso-desfazer';
+    el.innerHTML = '<span>✓ ' + escaparHtmlFicha(texto) + '</span><b>Desfazer</b>';
+    el.onclick = function(){ try { aoDesfazer(); } catch(e){} if(el.remove) el.remove(); };
+    document.body.appendChild(el);
+    setTimeout(function(){ if(el.remove) el.remove(); }, 6000);
+  } catch(e){}
 }
 
 function htmlItemAtencao(item){
   const nomeTela = escaparHtmlFicha(item.nome);
   const abrir = item.ficha ? 'openAlunaDetail(' + alunasPersonal.indexOf(item.ficha) + ')' : (item.acao && item.acao.onclick ? item.acao.onclick : '');
+  // vai dentro de onclick="...": escapa aspas e também < > & (o navegador desfaz antes de rodar, a chave continua a mesma)
+  const praAtributo = function(t){ return String(t || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+  const chaveJs = praAtributo(item.chave), acaoJs = praAtributo(item.acao.onclick);
   const botao = item.acao.href
-    ? '<a class="pn-acao" href="' + item.acao.href + '" target="_blank" rel="noopener">' + item.acao.rotulo + '</a>'
-    : '<button class="pn-acao" onclick="' + item.acao.onclick + '">' + item.acao.rotulo + '</button>';
+    ? '<a class="pn-acao" href="' + item.acao.href + '" target="_blank" rel="noopener" onclick="resolverItemAtencao(\'' + chaveJs + '\')">' + item.acao.rotulo + '</a>'
+    : '<button class="pn-acao" onclick="abrirItemAtencao(\'' + chaveJs + '\', \'' + acaoJs + '\')">' + item.acao.rotulo + '</button>';
   return '<div class="pn-item">' +
     '<div class="pn-av">' + escaparHtmlFicha(iniciaisDaAluna(item.nome)) + '</div>' +
     '<div class="pn-txt"' + (abrir ? ' onclick="' + abrir + '"' : '') + '><p class="pn-nm">' + nomeTela + '</p><p class="pn-mt">' + escaparHtmlFicha(item.detalhe) + '</p></div>' +
-    '<span class="pn-tag ' + item.classe + '">' + item.tag + '</span>' + botao +
+    '<span class="pn-tag ' + item.classe + '">' + item.tag + '</span>' +
+    '<span class="pn-acoes">' + botao +
+    (item.chave ? '<button class="pn-acao pn-resolvido" title="Tirar da lista" onclick="resolverItemAtencao(\'' + chaveJs + '\')">✓ Resolvido</button>' : '') + '</span>' +
   '</div>';
 }
 
@@ -20672,6 +20886,12 @@ function htmlKpiPainel(icone, rotulo, numero, detalhe, onclick, extraClasse, ext
 function saudacaoDoPainel(agora){
   const h = new Date(agora).getHours();
   return h < 12 ? 'Bom dia' : (h < 18 ? 'Boa tarde' : 'Boa noite');
+}
+
+// "51 na consultoria · 19 só no desafio" (todas estão ativas; as só desafio não entram nas pendências de treino)
+function textoDivisaoDasAtivas(d){
+  const consultoria = Math.max(0, d.clientesAtivos - (d.soDesafioAtivas || 0));
+  return consultoria + ' na consultoria · ' + (d.soDesafioAtivas || 0) + ' só no desafio' + (d.totalPorVencer ? ' · ' + d.totalPorVencer + ' por vencer' : '');
 }
 
 function renderPainelDoPersonal(agora){
@@ -20693,7 +20913,7 @@ function renderPainelDoPersonal(agora){
     const f = d.faturamento;
     const pe = d.paraEnviar;
     elKpis.innerHTML =
-      htmlKpiPainel('aluna', 'Alunas ativas', d.clientesAtivos, d.totalAtivas + ' ativas e ' + d.totalPorVencer + ' por vencer', "showPersonalView('alunas')") +
+      htmlKpiPainel('aluna', 'Alunas ativas', d.clientesAtivos, textoDivisaoDasAtivas(d), "showPersonalView('alunas')") +
       htmlKpiPainel('halter', 'Treinos pra enviar', pe.total,
         pe.total === 0 ? 'nenhum pendente no Controle' : pe.paraGerar + ' pra gerar · ' + pe.gerados + ' gerados' + (pe.maisAntigoDias !== null ? ' · o mais antigo há ' + pe.maisAntigoDias + ' dias' : ''),
         "showPersonalView('controle')", pe.total > 0 ? 'pn-alerta' : '') +
@@ -21149,7 +21369,7 @@ function renderPainelSuporte(agora){
   if(el('sp-kpis')){
     const f = d.faturamento, pe = d.paraEnviar;
     el('sp-kpis').innerHTML =
-      htmlKpiPainel('aluna', 'Alunas ativas', d.clientesAtivos, d.totalAtivas + ' ativas e ' + d.totalPorVencer + ' por vencer', "showPersonalView('alunas')") +
+      htmlKpiPainel('aluna', 'Alunas ativas', d.clientesAtivos, textoDivisaoDasAtivas(d), "showPersonalView('alunas')") +
       htmlKpiPainel('halter', 'Treinos pra enviar', pe.total, pe.total === 0 ? 'nenhum pendente no Controle' : pe.paraGerar + ' pra gerar · ' + pe.gerados + ' gerados', "showPersonalView('controle')", pe.total > 0 ? 'pn-alerta' : '') +
       htmlKpiPainel('calendario', 'Planos por vencer', d.totalPorVencer, 'na aba Por vencer', "abrirAlunasNaAba('porvencer')") +
       htmlKpiPainel('subir', 'Faturamento do mês', formatarReaisPainel(f.valor), f.meta > 0 ? f.pct + '% da meta de ' + formatarReaisPainel(f.meta) : 'meta do mês ainda não definida',
@@ -23186,6 +23406,30 @@ if(type === 'central'){
   aplicarTransicaoSuave('detail-content');
 }
 
+// "Não entendeu o método Drop set no exercício Leg press". No bi-set a linha vem como "Bi-set|||A · 3x12|||B · 3x12":
+// antes saía "o método "" no exercício Bi-set|||ROSCA..." na tela do Personal.
+function textoDuvidaDoMetodo(linha, metodoObj){
+  const l = String(linha || '');
+  let metodo = metodoObj ? (typeof metodoObj === 'string' ? metodoObj : metodoObj.tipo) : '';
+  let nomes;
+  if(l.indexOf('|||') !== -1){
+    const partes = l.split('|||');
+    if(!metodo) metodo = partes[0].trim();
+    nomes = partes.slice(1).map(function(p){ return p.split(' · ')[0].trim(); }).filter(Boolean);
+  } else {
+    nomes = [l.split(' · ')[0].trim()];
+  }
+  const nomesBonitos = nomes.map(function(n){ return capitalizarNomeExercicio(n); });
+  const exercicios = nomesBonitos.length > 1 ? nomesBonitos.slice(0, -1).join(', ') + ' e ' + nomesBonitos[nomesBonitos.length - 1] : (nomesBonitos[0] || 'um exercício');
+  return 'Não entendeu o método ' + (metodo || 'do exercício') + (nomesBonitos.length > 1 ? ' nos exercícios ' : ' no exercício ') + exercicios;
+}
+// Mostra certo também as dúvidas que já foram salvas no formato antigo
+function textoDaDuvida(d){
+  const t = String((d && d.pergunta) || '');
+  const m = t.match(/^Não entendeu o método "([^"]*)" no exercício (.*)$/);
+  return m ? textoDuvidaDoMetodo(m[2], m[1] || null) : t;
+}
+
 function responderEntendimentoMetodo(idx, entendeu){
   const container = document.getElementById('metodo-pergunta-' + idx);
   if(!container) return;
@@ -23197,10 +23441,8 @@ function responderEntendimentoMetodo(idx, entendeu){
     const alunaAtual = obterAlunaLogadaOuCriar();
     if(alunaAtual){
       if(!alunaAtual.duvidasSinalizadas) alunaAtual.duvidasSinalizadas = [];
-      const nomeEx = dias[detailDiaAtual].ex[idx].split(' · ')[0];
       const metodoObj = dias[detailDiaAtual].metodos && dias[detailDiaAtual].metodos[idx];
-      const metodoNome = metodoObj ? (typeof metodoObj === 'string' ? metodoObj : metodoObj.tipo) : '';
-      alunaAtual.duvidasSinalizadas.push({ pergunta: 'Não entendeu o método "' + metodoNome + '" no exercício ' + nomeEx, respostaSol: 'Sinalizado automaticamente, sem resposta da Sol ainda. Revise com ela na próxima conversa.', resolvida: false, data: new Date().toISOString() });
+      alunaAtual.duvidasSinalizadas.push({ pergunta: textoDuvidaDoMetodo(dias[detailDiaAtual].ex[idx], metodoObj), respostaSol: 'Sinalizado automaticamente, sem resposta da Sol ainda. Revise com ela na próxima conversa.', resolvida: false, data: new Date().toISOString() });
       salvarPerfilAlunaNoSupabase(NOME_ALUNA_LOGADA);
     }
     container.innerHTML = '<p class="txt" style="font-size:12px;color:var(--gold-soft);">Sem problema! Já avisei seu personal pra explicar melhor na próxima conversa. Por enquanto, pode fazer o exercício sem o método extra, só as séries normais.</p>';
