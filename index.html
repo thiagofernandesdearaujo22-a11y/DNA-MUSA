@@ -1032,7 +1032,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-10-29-BC-LINHA-DO-TEMPO-E-TELAS-DESAFIO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-01-BD-TROCA-TREINO-F</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1952,7 +1952,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-10-29-BC-LINHA-DO-TEMPO-E-TELAS-DESAFIO';
+const VERSAO_APP = '2026-11-01-BD-TROCA-TREINO-F';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -12653,13 +12653,20 @@ async function iniciarGeracaoOuProgressaoParaNaoEnviados(){
   await executarGeracaoEmMassa(elegiveis, 'Geração/Progressão pra quem falta enviar');
 }
 
+// A cópia da semana que fica na tela (a variável "dias") nem sempre é o treino da aluna aberta: no login do Personal
+// ela é a semana de exemplo, em que o 6º e o 7º dia são DESCANSO, sem lista de exercícios. Mexer no Treino F ou G da
+// aluna tentava copiar a mudança pra lá e quebrava ("Não consegui trocar esse exercício"). Só copia quando esse dia
+// da tela tem lista de exercícios.
+function diaDaTelaComExercicios(diaIndex){
+  return (typeof dias !== 'undefined' && dias && dias[diaIndex] && Array.isArray(dias[diaIndex].ex)) ? dias[diaIndex] : null;
+}
+
 function editarSeriesReps(diaIndex, exIndex, novoValor){
   const a = alunaAberta;
   const nomeAtual = a.treinoAtual.dias[diaIndex].ex[exIndex].split(' · ')[0];
   a.treinoAtual.dias[diaIndex].ex[exIndex] = nomeAtual + ' · ' + novoValor.trim();
-  if(typeof dias !== 'undefined' && dias[diaIndex] && dias[diaIndex].ex[exIndex]){
-    dias[diaIndex].ex[exIndex] = nomeAtual + ' · ' + novoValor.trim();
-  }
+  const diaTela = diaDaTelaComExercicios(diaIndex);
+  if(diaTela && diaTela.ex[exIndex]) diaTela.ex[exIndex] = nomeAtual + ' · ' + novoValor.trim();
   sincronizarTreinoComSupabase(a);
   recalcularEAtualizarNomeDoDia(diaIndex);
 }
@@ -12824,7 +12831,8 @@ function removerExercicioTreino(diaIndex, exIndex){
     const dia = a.treinoAtual.dias[diaIndex];
     dia.ex.splice(exIndex, 1);
     reindexarMetodosAposRemocao(dia, exIndex);
-    if(typeof dias !== 'undefined' && dias[diaIndex] && dias[diaIndex].ex[exIndex] !== undefined) dias[diaIndex].ex.splice(exIndex, 1);
+    const diaTela = diaDaTelaComExercicios(diaIndex);
+    if(diaTela && diaTela.ex[exIndex] !== undefined) diaTela.ex.splice(exIndex, 1);
     sincronizarTreinoComSupabase(a);
     atualizarDiaPersonalNaTela(diaIndex);
     recalcularEAtualizarNomeDoDia(diaIndex);
@@ -12878,7 +12886,8 @@ function confirmarAdicionarExercicio(diaIndex){
   const nomeEscolhido = document.getElementById('add-exercicio-select-' + diaIndex).value;
   const a = alunaAberta;
   a.treinoAtual.dias[diaIndex].ex.push(nomeEscolhido + ' · 3x12');
-  if(typeof dias !== 'undefined' && dias[diaIndex]) dias[diaIndex].ex.push(nomeEscolhido + ' · 3x12');
+  const diaTela = diaDaTelaComExercicios(diaIndex);
+  if(diaTela) diaTela.ex.push(nomeEscolhido + ' · 3x12');
   sincronizarTreinoComSupabase(a);
   atualizarDiaPersonalNaTela(diaIndex);
   recalcularEAtualizarNomeDoDia(diaIndex);
@@ -12887,7 +12896,8 @@ function confirmarAdicionarExercicio(diaIndex){
 function adicionarExercicioTreino(diaIndex){
   const a = alunaAberta;
   a.treinoAtual.dias[diaIndex].ex.push('Novo exercício · 3x12');
-  if(typeof dias !== 'undefined' && dias[diaIndex]) dias[diaIndex].ex.push('Novo exercício · 3x12');
+  const diaTela = diaDaTelaComExercicios(diaIndex);
+  if(diaTela) diaTela.ex.push('Novo exercício · 3x12');
   sincronizarTreinoComSupabase(a);
   atualizarDiaPersonalNaTela(diaIndex);
 }
@@ -13263,11 +13273,11 @@ function confirmarSubstituicao(diaIndex, exIndex, novoNome){
     const setsReps = linhaAtual.split(' · ')[1] || '';
 
     a.treinoAtual.dias[diaIndex].ex[exIndex] = novoNome + ' · ' + setsReps;
-    if(typeof dias !== 'undefined' && dias[diaIndex] && dias[diaIndex].ex[exIndex]){
-      dias[diaIndex].ex[exIndex] = novoNome + ' · ' + setsReps;
-    }
+    const diaTela = diaDaTelaComExercicios(diaIndex);
+    if(diaTela && diaTela.ex[exIndex]) diaTela.ex[exIndex] = novoNome + ' · ' + setsReps;
 
     const prog = getProgressoAluna(a.nome);
+    if(!Array.isArray(prog.substituicoes)) prog.substituicoes = []; // progresso vindo do servidor sem essa lista
     prog.substituicoes.push({ semana: prog.semana, de: nomeAntigo, para: novoNome, motivo: null });
 
     sincronizarTreinoComSupabase(a);
