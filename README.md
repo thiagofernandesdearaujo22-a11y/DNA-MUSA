@@ -1,4 +1,4 @@
-[dna_musa_160.html](https://github.com/user-attachments/files/34246657/dna_musa_160.html)
+[dna_musa_161.html](https://github.com/user-attachments/files/34246972/dna_musa_161.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1033,7 +1033,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-01-BD-TROCA-TREINO-F</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-01-BF-TOUR-ESPERA-LOGIN</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1953,7 +1953,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-01-BD-TROCA-TREINO-F';
+const VERSAO_APP = '2026-11-01-BF-TOUR-ESPERA-LOGIN';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -11226,6 +11226,17 @@ function salvarPerfilNaFila(nomeAluna, tentativa){
 
 function tratarFalhaDeSalvamento(nomeAluna, motivo, tentativa, permanente){
   errosSalvamentoPerfil[nomeAluna] = { erro: motivo, em: new Date().toISOString() };
+  // No login da ALUNA o aviso vermelho só assusta (ela não tem o que fazer). Vai pro registro de erros, com o que ela
+  // tentou salvar, e o app tenta de novo em silêncio. Quem resolve é o Personal (ver o SQL de diagnóstico da ficha).
+  if(sessaoTipo === 'aluna'){
+    if(tentativa === 0){
+      let campos = '';
+      try { const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; }); campos = a ? detalhesDaMudancaPendente(a).map(function(d){ return d.campo; }).join(', ') : ''; } catch(e){}
+      registrarErroNoBanco(new Error('[Ficha da aluna] não salvou no servidor: ' + motivo + (campos ? '. Campos: ' + campos : '')), 'ficha_aluna_nao_salvou');
+    }
+    if(!permanente && tentativa < ATRASOS_NOVA_TENTATIVA_MS.length) setTimeout(function(){ salvarPerfilNaFila(nomeAluna, tentativa + 1); }, ATRASOS_NOVA_TENTATIVA_MS[tentativa]);
+    return;
+  }
   if(permanente){
     // Erro que tentar de novo não resolve (ficha sem e-mail, ficha repetida): avisa uma vez, com o motivo
     mostrarConfirmacaoSalvamento(false, 'NÃO salvou ' + nomeAluna + ': ' + motivo + '.');
@@ -17944,6 +17955,9 @@ function verificarEIniciarTourPrimeiraVez(){
     // Não interrompe quem está no meio de um treino (cronômetro do treino ou descanso rodando). Tenta
     // de novo na próxima vez que ela passar pela Início.
     if(cronometroRodando || cronometroDescansoAtivo) return;
+    // Com a pergunta "Salvar esse login?" aberta, o tour ficava por cima dela: a aluna não conseguia responder e
+    // parecia que o tour tinha travado. Agora o tour espera ela responder (responderLembrarLogin chama de novo).
+    if(perguntaDeLoginAberta()) return;
     iniciarTour();
   }, 600);
 }
@@ -18020,6 +18034,11 @@ function salvarPreferenciaLembrarLogin(valor){
   try { localStorage.setItem('musa_lembrar_login', valor); } catch(e){}
 }
 
+function perguntaDeLoginAberta(){
+  const modal = document.getElementById('modal-lembrar-login');
+  return !!(modal && modal.style && modal.style.display === 'flex');
+}
+
 function perguntarSeQuerLembrarLogin(){
   if(getPreferenciaLembrarLogin() !== null) return; // já respondeu antes, não pergunta de novo
   const modal = document.getElementById('modal-lembrar-login');
@@ -18030,6 +18049,7 @@ async function responderLembrarLogin(salvar){
   salvarPreferenciaLembrarLogin(salvar ? 'sim' : 'nao');
   const modal = document.getElementById('modal-lembrar-login');
   if(modal) modal.style.display = 'none';
+  try { if(sessaoTipo === 'aluna') verificarEIniciarTourPrimeiraVez(); } catch(e){} // o tour que esperou a resposta começa agora
   // Se ela disse "não salvar", a sessão atual continua funcionando normalmente até ela sair ou fechar.
   // O que muda é só a PRÓXIMA vez que o app abrir: aí sim não vai entrar sozinho de novo (ver restaurarSessaoAtiva).
 }
