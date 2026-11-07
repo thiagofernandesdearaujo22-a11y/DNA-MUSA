@@ -1,4 +1,4 @@
-[Uploading dna_musa_165.html…]()
+[dna_musa_166.html](https://github.com/user-attachments/files/34530099/dna_musa_166.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -300,7 +300,7 @@
   .fb-bt{height:30px;border-radius:9px;padding:0 11px;font-size:11.5px;font-weight:600;border:1px solid var(--border-strong);background:transparent;color:var(--gold-soft);cursor:pointer;font-family:inherit;white-space:nowrap;}
   .fb-bt.ouro{background:linear-gradient(135deg,#F4D9A5,#C9A063);color:#1A1409;border:none;}
   .fb-vazio{font-size:13px;color:var(--text-faint);text-align:center;padding:26px 0;}
-  @media (max-width:600px){ .fb-item{flex-wrap:wrap;} .fb-acoes{flex-direction:row;width:100%;justify-content:flex-end;} }
+  @media (max-width:600px){ .fb-item{flex-wrap:wrap;} .fb-acoes{flex-direction:row;flex-wrap:wrap;width:100%;justify-content:flex-start;} } /* no celular os 4 botões quebram linha, antes o primeiro saía da tela */
   .pg-box{background:var(--card);border:1px solid var(--border-strong);border-radius:20px;padding:18px;margin-top:10px;display:flex;flex-direction:column;gap:14px;}
   .pg-top{display:flex;flex-wrap:wrap;align-items:center;gap:10px;}
   .pg-top h3{margin:0;font-size:15.5px;font-weight:600;}
@@ -1016,6 +1016,9 @@
   .anel-helice{position:absolute;}
   .indicador-card{background:radial-gradient(140% 100% at 20% 0%,rgba(217,178,111,0.07),transparent 45%),linear-gradient(180deg,#171512,#12100E);}
   .indicador-barra-fill{background:linear-gradient(90deg,#C99A52,#F0CF8E);}
+  .fb-humor{display:flex;gap:8px;}
+  .fb-rosto{width:44px;height:44px;border-radius:50%;background:var(--card-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;filter:grayscale(.6);opacity:.75;}
+  .fb-rosto.on{filter:none;opacity:1;border-color:var(--gold);background:rgba(217,178,111,0.16);box-shadow:0 0 10px rgba(217,178,111,0.3);}
   .ap-ed{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--gold-soft);border:1px solid var(--border-strong);border-radius:20px;padding:5px 11px;cursor:pointer;background:rgba(217,178,111,0.08);}
   .ap-metodo{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.4px;padding:4px 10px;border-radius:20px;background:linear-gradient(180deg,#F0CF8E,#C99A52);color:#1E1608;}
   .ap-painel{background:var(--card-2);border:1px solid var(--border-strong);border-radius:14px;padding:12px;margin:0 0 10px;}
@@ -1092,7 +1095,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-06-BK-AULA-EDITAR-METODO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-07-BL-HUMOR-ANTES-DEPOIS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1702,7 +1705,7 @@
       <div id="personal-feedback-alunas" style="display:none;">
         <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
         <h1 class="page-title" style="margin-top:0;">Feedback das alunas</h1>
-        <p class="page-sub" style="margin-top:-6px;">Em "Novos" fica só o que ainda não foi lido (comentário ou desconforto no "Como foi o treino?" e dúvidas). Lido, vai pra linha do tempo da aluna, junto com o que disparamos em massa pra ela.</p>
+        <p class="page-sub" style="margin-top:-6px;">Em "Novos" fica só o que ainda não foi lido (comentário, desconforto ou quem chegou mal pro treino no "Como foi o treino?", e dúvidas). Lido, vai pra linha do tempo da aluna, junto com o que disparamos em massa pra ela.</p>
         <div id="area-feedback-alunas"></div>
       </div>
 
@@ -2023,7 +2026,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-06-BK-AULA-EDITAR-METODO';
+const VERSAO_APP = '2026-11-07-BL-HUMOR-ANTES-DEPOIS';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -5384,6 +5387,7 @@ function getCheckInHoje(nome){
 function salvarCampoCheckInEmocional(nome, campo, valor){
   const checkin = getCheckInHoje(nome);
   checkin[campo] = valor;
+  if(campo === 'humor') delete checkin.humorOrigem; // respondeu ela mesma: o "antes do treino" não muda mais esse humor
   renderCheckInEHabitos(nome);
 }
 
@@ -10217,8 +10221,19 @@ const lidosFeedbackAlunas = {};     // "aluna|data" -> { por, em }  (vem do cat�
 let filtroFeedbackTreinos = 'naolidos';
 let filtroFeedbackAlunas = 'naolidos';
 
+// Chegar mal pro treino (😞 ou 😕) também entra, pra equipe ver. Só o rosto, sem nada mais, não lota a caixa.
+function chegouMalProTreino(f){ return !!f && humorValido(f.humorAntes) && f.humorAntes <= 2; }
 function feedbackDaAlunaImporta(f){
-  return !!f && (!!(f.comentario && String(f.comentario).trim()) || f.desconforto === true);
+  return !!f && (!!(f.comentario && String(f.comentario).trim()) || f.desconforto === true || chegouMalProTreino(f));
+}
+function htmlEtiquetaAntesDepois(f){
+  if(!f || (!humorValido(f.humorAntes) && !humorValido(f.humorDepois))) return '';
+  const partes = [];
+  if(humorValido(f.humorAntes)) partes.push('chegou ' + rostoDoHumor(f.humorAntes));
+  if(humorValido(f.humorDepois)) partes.push('saiu ' + rostoDoHumor(f.humorDepois));
+  const cls = chegouMalProTreino(f) ? 'fc-ruim' : (humorValido(f.humorAntes) && humorValido(f.humorDepois) && f.humorDepois > f.humorAntes ? 'fc-ok' : '');
+  const t = partes.join(' · ');
+  return '<span class="fc ' + cls + '">' + t.charAt(0).toUpperCase() + t.slice(1) + '</span>';
 }
 
 function feedbacksQueImportam(prog, agora){
@@ -10227,7 +10242,8 @@ function feedbacksQueImportam(prog, agora){
   return ((prog && prog.feedbackTreino) || []).filter(function(f){
     const t = f && f.data ? new Date(f.data).getTime() : NaN;
     return feedbackDaAlunaImporta(f) && !isNaN(t) && t >= limite;
-  }).map(function(f){ return { data: f.data, dia: f.dia || '', comentario: f.comentario || '', desconforto: !!f.desconforto, exercicio: f.exercicio || '', escala: f.escalaDesconforto != null ? f.escalaDesconforto : null }; });
+  }).map(function(f){ return { data: f.data, dia: f.dia || '', comentario: f.comentario || '', desconforto: !!f.desconforto, exercicio: f.exercicio || '', escala: f.escalaDesconforto != null ? f.escalaDesconforto : null,
+      humorAntes: humorValido(f.humorAntes) ? f.humorAntes : null, humorDepois: humorValido(f.humorDepois) ? f.humorDepois : null }; });
 }
 
 function itensFeedbackAlunas(agora){
@@ -10548,7 +10564,8 @@ const mensagensLinhaDoTempo = {};     // nome -> { feedbacks: [...todos, sem lim
 
 function feedbacksDaLinhaDoTempo(prog){
   return ((prog && prog.feedbackTreino) || []).filter(function(f){ return feedbackDaAlunaImporta(f) && f.data && !isNaN(new Date(f.data).getTime()); })
-    .map(function(f){ return { data: f.data, dia: f.dia || '', comentario: f.comentario || '', desconforto: !!f.desconforto, exercicio: f.exercicio || '', escala: f.escalaDesconforto != null ? f.escalaDesconforto : null }; });
+    .map(function(f){ return { data: f.data, dia: f.dia || '', comentario: f.comentario || '', desconforto: !!f.desconforto, exercicio: f.exercicio || '', escala: f.escalaDesconforto != null ? f.escalaDesconforto : null,
+      humorAntes: humorValido(f.humorAntes) ? f.humorAntes : null, humorDepois: humorValido(f.humorDepois) ? f.humorDepois : null }; });
 }
 function guardarMensagensDaLinhaDoTempo(nome, prog){
   mensagensLinhaDoTempo[nome] = {
@@ -10608,7 +10625,8 @@ function htmlItemDaLinhaDoTempo(x){
   else if(x.tipo === 'duvida'){ tit = 'Dúvida'; cls = 'ela';
     if(x.d.respostaSol) extra += '<p class="ldt-resp"><b>Sol:</b> ' + escaparHtmlFicha(x.d.respostaSol) + '</p>'; }
   else { tit = 'Como foi ' + (/^treino\b/i.test(x.f.dia || '') ? 'o ' + escaparHtmlFicha(x.f.dia) : 'o treino' + (x.f.dia ? ' de ' + escaparHtmlFicha(x.f.dia) : '')); cls = 'ela';
-    if(x.f.desconforto) extra += '<span class="fc fc-ruim">Desconforto' + (x.f.exercicio ? ' em ' + escaparHtmlFicha(x.f.exercicio) : '') + (x.f.escala != null ? ' · ' + x.f.escala + '/10' : '') + '</span>'; }
+    if(x.f.desconforto) extra += '<span class="fc fc-ruim">Desconforto' + (x.f.exercicio ? ' em ' + escaparHtmlFicha(x.f.exercicio) : '') + (x.f.escala != null ? ' · ' + x.f.escala + '/10' : '') + '</span>';
+    extra += htmlEtiquetaAntesDepois(x.f); }
   const situacao = x.de === 'nos' ? (x.por ? '<span>por ' + escaparHtmlFicha(x.por) + '</span>' : '')
     : (!x.lido && x.antigo ? '' : x.lido ? '<span class="fc fc-ok">' + (x.tipo === 'duvida' ? 'Respondida' : 'Lido') + (x.lidoPor ? ' por ' + escaparHtmlFicha(x.lidoPor) : '') + (x.lidoEm ? ' em ' + dataHoraCurta(x.lidoEm) : '') + '</span>' : '<span class="fc fc-alerta">Novo</span>');
   const texto = textoDoItemDaLinha(x);
@@ -10678,6 +10696,7 @@ function renderFeedbackAlunas(){
         titulo = 'Como foi o treino' + (x.f.dia ? ' de ' + escaparHtmlFicha(x.f.dia) : '');
         texto = x.f.comentario ? escaparHtmlFicha(x.f.comentario) : '';
         if(x.f.desconforto) extra = '<span class="fc fc-ruim">Desconforto' + (x.f.exercicio ? ' em ' + escaparHtmlFicha(x.f.exercicio) : '') + (x.f.escala != null ? ' · ' + x.f.escala + '/10' : '') + '</span>';
+        extra += htmlEtiquetaAntesDepois(x.f);
       } else {
         titulo = 'Dúvida';
         texto = escaparHtmlFicha(textoDaDuvida(x.d));
@@ -10706,6 +10725,7 @@ let respostaWhatsAppAberta = null;
 function trechoDoFeedback(x){
   let t = x.tipo === 'duvida' ? textoDaDuvida(x.d) : String(x.f.comentario || '').trim();
   if(!t && x.tipo !== 'duvida' && x.f.desconforto) t = 'Desconforto' + (x.f.exercicio ? ' em ' + capitalizarNomeExercicio(String(x.f.exercicio)) : '') + (x.f.escala != null ? ' (nível ' + x.f.escala + ')' : '');
+  if(!t && x.tipo !== 'duvida' && chegouMalProTreino(x.f)) t = 'Antes do treino: ' + rostoDoHumor(x.f.humorAntes) + (humorValido(x.f.humorDepois) ? ', depois: ' + rostoDoHumor(x.f.humorDepois) : '');
   t = t.replace(/\s+/g, ' ');
   return t.length > 160 ? t.slice(0, 157).trim() + '...' : t;
 }
@@ -18138,7 +18158,7 @@ const PASSOS_TOUR = [
   { parte: 3, titulo: 'Treino concluído',
     texto: 'Ao registrar, aparece o resumo do treino: quantos minutos durou, quantas séries você fez, quantos treinos da semana já foram e quais cargas subiram em relação à semana anterior.' },
   { parte: 3, titulo: 'Como foi o treino?',
-    texto: 'Depois de registrar, aparece o formulário "Como foi o treino de hoje?". Conte se sentiu desconforto em algum exercício e qual foi a intensidade do treino, e deixe um comentário se quiser. Seu personal usa isso pra ajustar o seu treino.' },
+    texto: 'Depois de registrar, aparece o formulário "Como foi o treino de hoje?". Toque num rostinho pra contar como você estava antes do treino e como ficou depois. Conte também se sentiu desconforto em algum exercício e qual foi a intensidade do treino, e deixe um comentário se quiser. Seu personal usa isso pra ajustar o seu treino.' },
 
   // ===== PARTE 4: EVOLUÇÃO =====
   { parte: 4, preparar: tourIrParaCorpo, seletor: '.stat-grid', titulo: 'Corpo',
@@ -23866,6 +23886,8 @@ function renderPerguntaFeedbackTreino(diaIndex, valores, indiceEdicao, origem){
 
   return '<div class="info-box" id="area-feedback" style="margin-top:10px;">' +
     '<p class="lbl">' + (editando ? 'Corrigir o feedback do treino' : 'Como foi o treino de hoje?') + '</p>' +
+    htmlHumorDoTreino('antes', 'Antes do treino, como você estava?', v.humorAntes) +
+    htmlHumorDoTreino('depois', 'E agora?', v.humorDepois) +
     '<div class="form-group"><label class="form-label">Sentiu desconforto em algum exercício?</label>' +
       '<select class="form-select" id="feedback-desconforto" onchange="alternarCampoExercicioFeedback()"><option' + (desc ? '' : ' selected') + '>Não</option><option' + (desc ? ' selected' : '') + '>Sim</option></select></div>' +
     '<div class="form-group" id="feedback-exercicio-group" style="display:' + (desc ? 'block' : 'none') + ';">' +
@@ -23877,6 +23899,49 @@ function renderPerguntaFeedbackTreino(diaIndex, valores, indiceEdicao, origem){
     '<div class="form-group"><label class="form-label">Quer deixar algum comentário? (opcional)</label><textarea class="form-input" id="feedback-comentario" rows="2" placeholder="Como se sentiu, alguma observação...">' + escaparHtmlFicha(v.comentario || '') + '</textarea></div>' +
     '<button class="btn-gold" onclick="registrarFeedbackTreino(' + diaIndex + ',' + (editando ? indiceEdicao : 'null') + ',' + (origem === 'hub' ? "'hub'" : 'null') + ')">' + (editando ? 'Salvar correção' : 'Enviar') + '</button>' +
     '</div>';
+}
+
+// ===== ANTES E DEPOIS DO TREINO: um toque cada, dá pra pular =====
+// 1 a 5, a mesma escala do "Humor" do "Como você está hoje". O "antes" preenche o humor do dia dela (se ela ainda
+// não respondeu lá). O "depois" fica só no feedback: quase sempre é melhor e não pode inflar o humor do dia.
+const ROSTOS_HUMOR = ['😞', '😕', '😐', '🙂', '😄'];
+const humorDoTreinoEscolhido = { antes: null, depois: null };
+
+function rostoDoHumor(n){ return ROSTOS_HUMOR[n - 1] || ''; }
+function humorValido(n){ return Number.isInteger(n) && n >= 1 && n <= 5; }
+
+function htmlHumorDoTreino(campo, rotulo, valorAtual){
+  humorDoTreinoEscolhido[campo] = humorValido(valorAtual) ? valorAtual : null;
+  return '<div class="form-group"><label class="form-label">' + rotulo + '</label>' +
+    '<div class="fb-humor" id="fb-humor-' + campo + '">' + htmlRostosDoHumor(campo) + '</div></div>';
+}
+function htmlRostosDoHumor(campo){
+  return ROSTOS_HUMOR.map(function(r, i){
+    const n = i + 1;
+    return '<span class="fb-rosto' + (humorDoTreinoEscolhido[campo] === n ? ' on' : '') + '" onclick="escolherHumorDoTreino(\'' + campo + '\',' + n + ')">' + r + '</span>';
+  }).join('');
+}
+// Tocar de novo no mesmo rosto desmarca
+function escolherHumorDoTreino(campo, n){
+  humorDoTreinoEscolhido[campo] = humorDoTreinoEscolhido[campo] === n ? null : n;
+  const el = document.getElementById('fb-humor-' + campo);
+  if(el) el.innerHTML = htmlRostosDoHumor(campo);
+}
+
+// O "antes" vira o humor do dia, sem passar por cima do que ela mesma respondeu no "Como você está hoje"
+function aplicarHumorAntesNoDia(prog, dataISO, humorAntes){
+  if(!humorValido(humorAntes) || !dataISO) return false;
+  if(!prog.checkinsEmocionais) prog.checkinsEmocionais = {};
+  const c = prog.checkinsEmocionais[dataISO] || (prog.checkinsEmocionais[dataISO] = { data: dataISO });
+  const vazio = c.humor === null || c.humor === undefined || c.humor === '';
+  if(!vazio && c.humorOrigem !== 'treino') return false;
+  c.humor = humorAntes; c.humorOrigem = 'treino';
+  return true;
+}
+
+function textoAntesDepois(antes, depois){
+  if(humorValido(antes) && humorValido(depois)) return 'Você chegou ' + rostoDoHumor(antes) + ' e saiu ' + rostoDoHumor(depois) + '.';
+  return '';
 }
 
 function alternarCampoExercicioFeedback(){
@@ -23906,8 +23971,11 @@ function registrarFeedbackTreino(diaIndex, indiceEdicao, origem){
     exercicio: exercicioDesconforto,
     escalaDesconforto: escalaDesconforto,
     intensidade: isNaN(intensidadeInput) ? null : intensidadeInput,
-    comentario: comentario || null
+    comentario: comentario || null,
+    humorAntes: humorValido(humorDoTreinoEscolhido.antes) ? humorDoTreinoEscolhido.antes : null,
+    humorDepois: humorValido(humorDoTreinoEscolhido.depois) ? humorDoTreinoEscolhido.depois : null
   };
+  aplicarHumorAntesNoDia(prog, dataLocalISO(new Date(registro.data)), registro.humorAntes);
   let indiceDoRegistro;
   if(anterior){
     registro.editadoEm = new Date().toISOString(); // correção: substitui o registro, não cria outro
@@ -23920,6 +23988,8 @@ function registrarFeedbackTreino(diaIndex, indiceEdicao, origem){
   salvarProgressoNoSupabase(NOME_ALUNA_LOGADA); // faltava isso — sem essa linha, o feedback nunca chegava a ser salvo de verdade
 
   let msg = anterior ? 'Feedback corrigido!' : 'Obrigada pelo feedback! Isso ajuda a calibrar seus próximos treinos.';
+  const antesDepois = textoAntesDepois(registro.humorAntes, registro.humorDepois);
+  if(antesDepois) msg = antesDepois + ' ' + msg;
 
   // EXCEÇÃO: desconforto relatado num exercício específico dispara pedido de vídeo NA HORA,
   // sem esperar a regra de semana sim/semana não. Numa correção, só pede de novo se o desconforto é NOVO
