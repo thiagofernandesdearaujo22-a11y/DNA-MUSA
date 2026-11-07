@@ -1094,7 +1094,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-07-BL-HUMOR-ANTES-DEPOIS</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-07-BM-SEM-HIPERTROFIA-NUTRICAO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -2025,7 +2025,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-07-BL-HUMOR-ANTES-DEPOIS';
+const VERSAO_APP = '2026-11-07-BM-SEM-HIPERTROFIA-NUTRICAO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -3106,15 +3106,14 @@ function renderHome(){
 
     const indicadores = [
       { label: 'Constância', valor: pctConstancia, icone: 'constancia', caption: formatarComparativo(comparativo.constancia) },
-      { label: 'Hipertrofia', valor: nutriStats.temDados ? nutriStats.potencialHipertrofia : null, icone: 'hipertrofia', caption: nutriStats.temDados ? formatarComparativo(comparativo.hipertrofia) : 'Dados insuficientes' },
-      { label: 'Nutrição', valor: nutriStats.temDados ? nutriStats.respostaNutricional : null, icone: 'nutricao', caption: nutriStats.temDados ? formatarComparativo(comparativo.nutricao) : 'Dados insuficientes' },
+      // Hipertrofia e Nutrição saíram da tela da aluna (ficavam em "Dados insuficientes" pra quase todas)
       { label: 'Recuperação', valor: capRecuperacao, icone: 'recuperacao', caption: formatarComparativo(comparativo.recuperacao) },
       { label: 'Progressão', valor: capProgressao, icone: 'progressao', caption: formatarComparativo(comparativo.progressao) }
     ];
 
     if(grid){
       grid.innerHTML = indicadores.map(function(ind, i){
-        const ehLargo = i >= 3; // os 2 últimos (Recuperação, Progressão) ficam mais largos, igual ao conceito
+        const ehLargo = false; // 3 cartões iguais lado a lado
         const valorTexto = ind.valor == null ? '--' : ind.valor + '%';
         const larguraBarra = ind.valor == null ? 0 : Math.min(100, ind.valor);
         const corCaption = ind.caption.indexOf('▲') === 0 ? 'var(--success)' : 'var(--text-faint)';
@@ -18083,7 +18082,7 @@ const PASSOS_TOUR = [
   { parte: 1, preparar: tourIrParaInicio, seletor: '.dna-score-card', titulo: 'Seu DNA Score',
     texto: 'Esse número resume como seu treino está indo essa semana, juntando constância, progressão, recuperação e mais. Toque nele pra ver o detalhe de cada parte.' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '#home-indicadores-grid', titulo: 'Seus indicadores',
-    texto: 'Aqui você acompanha constância, hipertrofia, nutrição, recuperação e progressão separadamente, pra entender o que está puxando seu resultado pra cima ou pra baixo.' },
+    texto: 'Aqui você acompanha constância, recuperação e progressão separadamente, pra entender o que está puxando seu resultado pra cima ou pra baixo.' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '#link-ver-treinos-semana', titulo: 'Sua semana',
     texto: 'Cada bolinha é um dia da semana. Os treinos feitos ficam marcados, e o de hoje fica com o contorno dourado. Toque aqui pra ver a lista completa.' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '#botao-pergunta-perfil-area > div', titulo: 'Pergunta rápida',
@@ -23361,7 +23360,7 @@ if(type === 'central'){
     const stats = calcularEstatisticasAluna(NOME_ALUNA_LOGADA);
     let indsHtml = '';
     if(!stats.temDados){
-      ['Potencial de hipertrofia', 'Capacidade de recuperação', 'Constância', 'Resposta nutricional'].forEach(function(nome){
+      ['Constância', 'Capacidade de progressão', 'Capacidade de recuperação'].forEach(function(nome){
         indsHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-size:12px;color:var(--text-dim);">' + nome + '</span><span style="font-size:11px;color:var(--text-faint);border:1px dashed var(--border-strong);padding:3px 8px;border-radius:8px;">Calibrando</span></div>';
       });
     } else {
@@ -23382,16 +23381,10 @@ if(type === 'central'){
       });
       const nutriStats = calcularNutricaoStats(NOME_ALUNA_LOGADA);
       if(nutriStats.temDados){
-        [{ n: 'Potencial de hipertrofia', v: nutriStats.potencialHipertrofia }, { n: 'Resposta nutricional', v: nutriStats.respostaNutricional }, { n: 'Potencial de ganho de gordura', v: nutriStats.potencialGanhoGordura }, { n: 'Potencial de definição física', v: calcularPotencialDefinicao(NOME_ALUNA_LOGADA) }].forEach(function(i){
-          indsHtml += '<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span style="color:var(--text-dim);">' + i.n + '</span><span style="font-weight:600;">' + i.v + '</span></div><div style="background:#221F18;border-radius:6px;height:6px;overflow:hidden;margin-bottom:5px;"><div style="width:' + i.v + '%;height:100%;background:linear-gradient(90deg,#4C3E25,#E8C58A);"></div></div><p style="font-size:11px;color:var(--text-faint);margin:0;">' + explicacaoIndicador(i.n, i.v) + '</p></div>';
-        });
+        // Hipertrofia, nutrição, ganho de gordura e definição saíram da tela da aluna: ficam só os 3 indicadores acima
         if(nutriStats.retencaoHidricaEstimada > 0){
           indsHtml += '<div class="insight" style="margin-top:6px;"><p><b>Retenção hídrica estimada: ' + nutriStats.retencaoHidricaEstimada + '</b><br>Isso é água, não gordura, geralmente resolve em alguns dias voltando à hidratação normal. ' + (nutriStats.semanasComAlcool > 0 ? 'Parte disso pode estar ligado ao consumo de álcool relatado.' : '') + '</p></div>';
         }
-      } else {
-        ['Potencial de hipertrofia', 'Resposta nutricional'].forEach(function(nome){
-          indsHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-size:12px;color:var(--text-dim);">' + nome + '</span><span style="font-size:11px;color:var(--text-faint);border:1px dashed var(--border-strong);padding:3px 8px;border-radius:8px;">Calibrando</span></div>';
-        });
       }
     }
     const heroTexto = stats.temDados ? calcularProbabilidadeSucesso(NOME_ALUNA_LOGADA) + '%' : 'Calibrando, dia 1';
