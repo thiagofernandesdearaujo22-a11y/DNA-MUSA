@@ -1015,6 +1015,48 @@
   .anel-helice{position:absolute;}
   .indicador-card{background:radial-gradient(140% 100% at 20% 0%,rgba(217,178,111,0.07),transparent 45%),linear-gradient(180deg,#171512,#12100E);}
   .indicador-barra-fill{background:linear-gradient(90deg,#C99A52,#F0CF8E);}
+  /* ===== INÍCIO NOVA (proposta aprovada): semana no cartão do treino, indicadores no cartão do DNA, atalhos lado a lado ===== */
+  [data-view="home"] .home-hero + .home-semana{margin-top:-14px;border:1px solid rgba(217,178,111,0.55);border-top:1px solid var(--border);border-radius:0 0 22px 22px;background:linear-gradient(180deg,#14120F,#100E0C);}
+  [data-view="home"] .home-hero:has(+ .home-semana){border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom:none;}
+  [data-view="home"] .dna-score-card{flex-wrap:wrap;}
+  [data-view="home"] .dna-score-card #home-label-indicadores{display:none;}
+  [data-view="home"] .dna-score-card .indicadores-grid{display:block;width:100%;margin:6px 0 0;}
+  .ind-linha{margin-top:12px;}
+  .ind-linha p{display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-dim);margin:0;}
+  .ind-linha p b{color:var(--text);font-weight:600;}
+  .ind-barra{height:5px;border-radius:5px;background:rgba(217,178,111,0.13);overflow:hidden;margin-top:6px;}
+  .ind-barra i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#C99A52,#F0CF8E);}
+  .ind-vazio{font-size:12px;color:var(--text-faint);margin:12px 0 0;}
+  .home-atalhos{display:flex;gap:10px;margin-top:4px;}
+  .home-atalhos > div{flex:1;min-width:0;}
+  .home-atalhos > div:empty{display:none;}
+  .home-atalhos:not(:has(> div:not(:empty))){display:none;}
+  .home-atalhos .home-tarefa{flex-direction:column;align-items:flex-start !important;gap:8px;height:100%;margin-top:10px;padding:12px;}
+  .home-atalhos .home-tarefa > .ti-chevron-right,.home-atalhos .home-tarefa > i:last-child{display:none;}
+  .home-atalhos .home-tarefa .ht-txt p{font-size:13px;}
+  .home-atalhos .home-tarefa .ht-txt small{font-size:11px;}
+  .sem-descanso-linha{font-size:12.5px;color:var(--text-faint);margin:2px 4px 14px;}
+  .sem-descanso-linha .sem-desc-dia{color:var(--text-dim);cursor:pointer;}
+  .sem-dia .sem-sig.letra{font-family:'EB Garamond',serif;font-size:21px;font-weight:600;letter-spacing:0;border:1px solid var(--border);}
+  .sem-dia:not(.alvo):not(.feito) .sem-sig.letra{color:var(--gold-soft);}
+  .dia-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold);margin:14px 0 0;}
+  .dia-etiquetas{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px;}
+  .dia-etiquetas span{font-size:11px;padding:4px 10px;border-radius:20px;background:var(--card-2);border:1px solid var(--border);color:var(--text-dim);}
+  .dia-etiquetas span.fase{color:var(--gold-soft);border-color:var(--border-strong);}
+  .ex-txt{display:flex;flex-direction:column;gap:3px;min-width:0;}
+  .ex-txt > span{font-size:13.5px;color:var(--text);}
+  .ex-prescricao{font-size:11.5px;color:var(--text-faint);}
+  .ex-play{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;color:var(--gold-soft);font-size:13px;flex-shrink:0;margin-left:10px;cursor:pointer;}
+  .tag.tag-metodo{background:linear-gradient(180deg,#F0CF8E,#C99A52);color:#1E1608;cursor:pointer;}
+  .dica-lista-treino{text-align:center;font-size:11.5px;color:var(--text-faint);margin:10px 0 0;}
+  .iniciar-fixo{position:sticky;bottom:0;z-index:6;padding:14px 0 6px;margin-top:6px;background:linear-gradient(180deg,rgba(11,10,9,0),var(--bg) 35%);}
+  .iniciar-fixo #cronometro-btn{margin:0 !important;}
+  .iniciar-fixo #cronometro-display{display:none;}
+  .dna-perfil-hero{display:flex;justify-content:space-between;align-items:center;gap:12px;border-radius:20px;padding:18px 20px;margin:6px 0 14px;overflow:hidden;background:radial-gradient(120% 90% at 100% 0%,rgba(217,178,111,0.20),rgba(217,178,111,0) 55%),linear-gradient(180deg,#1A1713,#12100E);border:1px solid rgba(217,178,111,0.55);}
+  .dna-perfil-num{font-family:'EB Garamond',serif;font-size:48px;font-weight:600;color:var(--text);margin:2px 0 0;line-height:1;}
+  .dna-perfil-comp{font-size:12px;color:var(--text-dim);margin:6px 0 0;}
+  .dna-perfil-helice{flex-shrink:0;margin:-8px 0;}
+  .dna-perfil-inds{background:linear-gradient(180deg,#171512,#12100E);border:1px solid var(--border);border-radius:18px;padding:16px 16px 6px;}
   .fb-humor{display:flex;gap:8px;}
   .fb-rosto{width:44px;height:44px;border-radius:50%;background:var(--card-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;filter:grayscale(.6);opacity:.75;}
   .fb-rosto.on{filter:none;opacity:1;border-color:var(--gold);background:rgba(217,178,111,0.16);box-shadow:0 0 10px rgba(217,178,111,0.3);}
@@ -1094,7 +1136,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-07-BM-SEM-HIPERTROFIA-NUTRICAO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-08-BN-TELAS-NOVAS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1252,13 +1294,13 @@
       <!-- Início nova: o que ela veio fazer (o treino) primeiro. Preenchido por renderInicioDaAluna(). -->
       <div id="home-desafio-topo"></div>
       <div class="home-hero" id="home-treino-hoje"></div>
-      <div id="home-metas-dia"></div>
-      <div id="botao-desafio-area"></div>
-
+      <!-- A semana fica colada embaixo do cartão do treino: os dois viram um cartão só -->
       <div class="home-semana" id="link-ver-treinos-semana" onclick="abrirListaDeTreinosDaSemana()">
         <div class="home-semana-topo"><span id="home-semana-titulo">Sua semana</span><b id="resumo-dias-semana"></b></div>
         <div class="home-bolinhas" id="home-bolinhas"></div>
       </div>
+      <div id="home-metas-dia"></div>
+      <div id="botao-desafio-area"></div>
 
       <div class="dna-score-card" onclick="openDetail('dna')">
         <div class="dna-score-helix">
@@ -1283,15 +1325,18 @@
           <span class="dna-score-ring-valor" id="home-score-ring-valor">--</span>
           <svg class="anel-helice" width="24" height="42" viewBox="0 0 26 46" fill="none" stroke-linecap="round" aria-hidden="true"><defs><linearGradient id="anelHelGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F6DCA2"/><stop offset=".5" stop-color="#D9B26F"/><stop offset="1" stop-color="#9C7440"/></linearGradient></defs><g stroke="url(#anelHelGrad)"><path d="M5 8L21 11M5 17L21 20M5 26L21 29M5 35L21 38" stroke-width="1" opacity=".5"/><path d="M21 4C21 12 5 14 5 23S21 34 21 42" stroke-width="1.4" opacity=".45"/><path d="M5 4C5 12 21 14 21 23S5 34 5 42" stroke-width="1.9"/></g></svg>
         </div>
+        <!-- Constância, Recuperação e Progressão em barrinhas, dentro do cartão do DNA -->
+        <p class="section-label" id="home-label-indicadores">Seus indicadores</p>
+        <div class="indicadores-grid" id="home-indicadores-grid"></div>
       </div>
 
       <div id="botoes-cursos-area"></div>
-      <div id="botao-pergunta-perfil-area"></div>
-      <div id="botao-pergunta-roda-vida-area"></div>
+      <!-- Pergunta rápida e Roda da Vida: dois atalhos pequenos lado a lado -->
+      <div class="home-atalhos" id="home-atalhos">
+        <div id="botao-pergunta-perfil-area"></div>
+        <div id="botao-pergunta-roda-vida-area"></div>
+      </div>
       <div id="home-desafio-rodape"></div>
-
-      <p class="section-label" id="home-label-indicadores" style="margin-top:22px;">Seus indicadores</p>
-      <div class="indicadores-grid" id="home-indicadores-grid"></div>
 
       <div class="list-item" id="home-meu-progresso" style="cursor:pointer;margin-top:10px;" onclick="openLevel2('progresso')">
         <span><i class="ti ti-trending-up" style="margin-right:8px;color:var(--gold-soft);"></i>Meu progresso</span>
@@ -1306,7 +1351,7 @@
     <!-- DADOS (composição corporal) -->
     <div class="view" data-view="dados">
       <h1 class="page-title">Sua evolução</h1>
-      <div class="evo-abas"><div class="evo-aba on" data-evo="dados" onclick="trocarAbaEvolucao('dados')">Corpo</div><div class="evo-aba" data-evo="progresso" onclick="trocarAbaEvolucao('progresso')">Treino</div><div class="evo-aba" data-evo="rodadavida" onclick="trocarAbaEvolucao('rodadavida')">Roda da Vida</div></div>
+      <div class="evo-abas"><div class="evo-aba on" data-evo="dados" onclick="trocarAbaEvolucao('dados')">Corpo</div><div class="evo-aba" data-evo="hoje" onclick="trocarAbaEvolucao('hoje')">Hoje</div><div class="evo-aba" data-evo="historico" onclick="trocarAbaEvolucao('historico')">Histórico</div><div class="evo-aba" data-evo="rodadavida" onclick="trocarAbaEvolucao('rodadavida')">Roda</div></div>
       <p class="page-sub">Seu peso e sua composição, atualizados por você</p>
       <div id="card-reavaliacao"></div>
 
@@ -1342,8 +1387,8 @@
     <!-- MEU PROGRESSO -->
     <div class="view" data-view="progresso">
       <h1 class="page-title">Sua evolução</h1>
-      <div class="evo-abas"><div class="evo-aba" data-evo="dados" onclick="trocarAbaEvolucao('dados')">Corpo</div><div class="evo-aba on" data-evo="progresso" onclick="trocarAbaEvolucao('progresso')">Treino</div><div class="evo-aba" data-evo="rodadavida" onclick="trocarAbaEvolucao('rodadavida')">Roda da Vida</div></div>
-      <p class="page-sub">Seus treinos desde o início</p>
+      <div class="evo-abas"><div class="evo-aba" data-evo="dados" onclick="trocarAbaEvolucao('dados')">Corpo</div><div class="evo-aba on" data-evo="hoje" onclick="trocarAbaEvolucao('hoje')">Hoje</div><div class="evo-aba" data-evo="historico" onclick="trocarAbaEvolucao('historico')">Histórico</div><div class="evo-aba" data-evo="rodadavida" onclick="trocarAbaEvolucao('rodadavida')">Roda</div></div>
+      <p class="page-sub" id="evo-sub-treino">Como você está hoje e os hábitos do dia</p>
       <div id="area-progresso-conteudo"></div>
     </div>
 
@@ -1387,7 +1432,7 @@
     <!-- RODA DA VIDA -->
     <div class="view" data-view="rodadavida">
       <h1 class="page-title">Sua evolução</h1>
-      <div class="evo-abas"><div class="evo-aba" data-evo="dados" onclick="trocarAbaEvolucao('dados')">Corpo</div><div class="evo-aba" data-evo="progresso" onclick="trocarAbaEvolucao('progresso')">Treino</div><div class="evo-aba on" data-evo="rodadavida" onclick="trocarAbaEvolucao('rodadavida')">Roda da Vida</div></div>
+      <div class="evo-abas"><div class="evo-aba" data-evo="dados" onclick="trocarAbaEvolucao('dados')">Corpo</div><div class="evo-aba" data-evo="hoje" onclick="trocarAbaEvolucao('hoje')">Hoje</div><div class="evo-aba" data-evo="historico" onclick="trocarAbaEvolucao('historico')">Histórico</div><div class="evo-aba on" data-evo="rodadavida" onclick="trocarAbaEvolucao('rodadavida')">Roda</div></div>
       <p class="page-sub">Avalie 10 áreas da sua vida, uma vez por mês</p>
       <div id="area-rodadavida-conteudo"></div>
     </div>
@@ -2025,7 +2070,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-07-BM-SEM-HIPERTROFIA-NUTRICAO';
+const VERSAO_APP = '2026-11-08-BN-TELAS-NOVAS';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -2531,19 +2576,25 @@ function abrirListaDeTreinosDaSemana(){
     return 'Feito ' + (d.getDay() === 0 || d.getDay() === 6 ? 'no ' : 'na ') + nomeDia2 + ', ' + hora; // "no sábado", "na segunda"
   };
 
-  lista.innerHTML = dias.map(function(d, i){
-    const abrev = abreviacoes[d.n] || (d.desafio ? String(d.n || '').replace(/^Treino\s+/, '') : String(d.n || '').slice(0,3).toUpperCase());
+  // Consultoria: os dias de descanso (ainda não marcados) viram UMA linha embaixo, e cada cartão mostra a letra do treino
+  const descansosSoltos = [];
+  const htmlDias = dias.map(function(d, i){
+    const letra = !d.desafio ? letraDoTreino(d) : '';
+    const abrev = letra || abreviacoes[d.n] || (d.desafio ? String(d.n || '').replace(/^Treino\s+/, '') : String(d.n || '').slice(0,3).toUpperCase());
     const foiRegistrado = diasRegistradosEssaSemana.indexOf(d.n) !== -1;
     const ehAlvo = i === indiceAlvo;
     const classe = 'sem-dia' + (foiRegistrado ? ' feito' : '') + (d.descanso && !foiRegistrado ? ' descanso' : '') + (ehAlvo ? ' alvo' : '');
     const qtd = (d.ex || []).length;
     let titulo, sub;
+    if(d.descanso && !foiRegistrado && !d.desafio){ descansosSoltos.push(i); return ''; }
     if(d.descanso){
       titulo = '<span class="sem-nome">' + escaparHtmlFicha(d.n) + ' · Descanso</span>';
       sub = foiRegistrado ? textoFeito(d.n) + (alunaPodeDesfazerDia(prog, d.n) ? ' · segure pra desfazer' : '') : 'segure pra marcar como feito';
     } else {
       const fd = d.desafio ? partesDoFocoDoDesafio(d) : null;
-      titulo = '<span class="sem-nome' + (fd ? ' inteiro' : '') + '">' + escaparHtmlFicha(fd ? fd.titulo : (d.foco || d.n)) + '</span>' + (ehAlvo ? '<span class="sem-tag">' + (resumo.alvo.modo === 'hoje' ? 'HOJE' : 'PRÓXIMO') + '</span>' : '');
+      // "Treino A · Quadríceps e Glúteo" vira "Quadríceps e Glúteo": a letra já está no quadradinho
+      const nomeSemLetra = letra ? String(d.foco || d.n).replace(/^Treino\s+[A-Z]\s*·\s*/, '') : (d.foco || d.n);
+      titulo = '<span class="sem-nome' + (fd ? ' inteiro' : '') + '">' + escaparHtmlFicha(fd ? fd.titulo : nomeSemLetra) + '</span>' + (ehAlvo ? '<span class="sem-tag">' + (resumo.alvo.modo === 'hoje' ? 'HOJE' : 'PRÓXIMO') + '</span>' : '');
       if(foiRegistrado){
         sub = textoFeito(d.n) + (alunaPodeDesfazerDia(prog, d.n) ? ' · segure pra desfazer' : '');
       } else {
@@ -2551,23 +2602,33 @@ function abrirListaDeTreinosDaSemana(){
         if(fd && fd.detalhe) partes.push(fd.detalhe);
         if(qtd > 0) partes.push(qtd + (qtd === 1 ? ' exercício' : ' exercícios'));
         if(d.duracaoEstimadaMin) partes.push('cerca de ' + Math.round(d.duracaoEstimadaMin) + ' min');
-        if(!fd) partes.push('segure pra marcar como feito'); // no desafio a dica aparece uma vez só, embaixo da lista
-        sub = partes.join(' · ');
+        sub = partes.join(' · '); // a dica de segurar aparece uma vez só, embaixo da lista
       }
     }
     return '<div class="' + classe + '" data-feito="' + (foiRegistrado ? 'sim' : 'nao') + '" data-descanso="' + (d.descanso ? 'sim' : 'nao') + '" ' +
       'onclick="abrirDiaDaSemana(' + i + ')" ' +
       'onmousedown="iniciarPressionarDia(' + i + ')" onmouseup="cancelarPressionarDia()" onmouseleave="cancelarPressionarDia()" ' +
       'ontouchstart="iniciarPressionarDia(' + i + ')" ontouchend="cancelarPressionarDia()" ontouchmove="cancelarPressionarDia()">' +
-      '<div class="sem-sig">' + (d.descanso && !foiRegistrado ? '' : abrev) + '</div>' +
+      '<div class="sem-sig' + (letra ? ' letra' : '') + '">' + (d.descanso && !foiRegistrado ? '' : abrev) + '</div>' +
       '<div class="sem-txt"><p class="sem-tit">' + titulo + '</p><p class="sem-sub">' + sub + '</p></div>' +
       (foiRegistrado ? '<i class="ti ti-circle-check" style="color:var(--success);font-size:20px;flex-shrink:0;"></i>' : (d.descanso ? '' : '<i class="ti ti-chevron-right" style="color:var(--text-faint);font-size:18px;flex-shrink:0;"></i>')) +
       (ehAlvo && !d.descanso ? '<div class="sem-btn">Abrir treino</div>' : '') +
     '</div>';
-  }).join('');
+  });
+  let linhaDescanso = '';
+  if(descansosSoltos.length){
+    const nomes = descansosSoltos.map(function(i){
+      // segurar o nome do dia também marca como feito (quem treinou num dia de descanso)
+      return '<span class="sem-desc-dia" data-feito="nao" data-descanso="sim" onmousedown="iniciarPressionarDia(' + i + ')" onmouseup="cancelarPressionarDia()" onmouseleave="cancelarPressionarDia()" ' +
+        'ontouchstart="iniciarPressionarDia(' + i + ')" ontouchend="cancelarPressionarDia()" ontouchmove="cancelarPressionarDia()">' + escaparHtmlFicha(String(dias[i].n || '').toLowerCase()) + '</span>';
+    });
+    const juntos = nomes.length === 1 ? nomes[0] : nomes.slice(0, -1).join(', ') + ' e ' + nomes[nomes.length - 1];
+    linhaDescanso = '<p class="sem-descanso-linha">Descanso: ' + juntos + '</p>';
+  }
+  lista.innerHTML = htmlDias.join('') + linhaDescanso;
 
   const elDica = document.getElementById('semana-dica');
-  if(elDica && elDica.style) elDica.style.display = diasSaoDoDesafio(dias) ? '' : 'none';
+  if(elDica && elDica.style) elDica.style.display = ''; // "segure um treino pra marcar como feito", uma vez só
   const elSub = document.getElementById('semana-sub');
   if(elSub) elSub.textContent = resumo.totalTreinos > 0 ? 'Semana ' + prog.semana + ' · ' + resumo.totalFeitos + ' de ' + resumo.totalTreinos + ' treinos feitos' : 'Toque num dia pra abrir o treino completo';
   const elBarra = document.getElementById('semana-barra');
@@ -3068,7 +3129,7 @@ function renderHome(){
     if(elComparativo) elComparativo.textContent = 'Seus primeiros treinos vão formar esse número';
     if(elRingValor) elRingValor.textContent = '--';
     if(elRingProgresso) elRingProgresso.style.strokeDashoffset = '251';
-    if(grid) grid.innerHTML = '<div class="indicador-card" style="grid-column:span 6;"><p class="indicador-caption" style="margin:0;">Complete seu primeiro treino pra começar a ver seus indicadores aqui.</p></div>';
+    if(grid) grid.innerHTML = '<p class="ind-vazio">Complete seu primeiro treino pra começar a ver seus indicadores aqui.</p>';
   } else {
     const pctConstancia = Math.round((stats.totalConcluidos / stats.totalPlanejado) * 100);
     const alunaObj = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
@@ -3112,18 +3173,12 @@ function renderHome(){
     ];
 
     if(grid){
-      grid.innerHTML = indicadores.map(function(ind, i){
-        const ehLargo = false; // 3 cartões iguais lado a lado
+      // Barrinhas dentro do cartão do DNA (Constância, Recuperação e Progressão)
+      grid.innerHTML = indicadores.map(function(ind){
         const valorTexto = ind.valor == null ? '--' : ind.valor + '%';
         const larguraBarra = ind.valor == null ? 0 : Math.min(100, ind.valor);
-        const corCaption = ind.caption.indexOf('▲') === 0 ? 'var(--success)' : 'var(--text-faint)';
-        return '<div class="indicador-card' + (ehLargo ? ' largo' : '') + '" style="animation-delay:' + (0.08 * i) + 's;">' +
-          '<div class="indicador-icone">' + iconesIndicadorSvg[ind.icone] + '</div>' +
-          '<p class="indicador-label">' + ind.label + '</p>' +
-          '<p class="indicador-valor">' + valorTexto + '</p>' +
-          '<div class="indicador-barra-bg"><div class="indicador-barra-fill" style="width:' + larguraBarra + '%;"></div></div>' +
-          '<p class="indicador-caption" style="color:' + corCaption + ';">' + ind.caption + '</p>' +
-        '</div>';
+        return '<div class="ind-linha"><p><span>' + ind.label + '</span><b>' + valorTexto + '</b></p>' +
+          '<div class="ind-barra"><i style="width:' + larguraBarra + '%;"></i></div></div>';
       }).join('');
     }
   }
@@ -18063,7 +18118,10 @@ async function tourExpandirExercicio(){
   }
 }
 async function tourIrParaProgresso(){
-  if(!tourTelaAtiva('progresso')){ openLevel2('progresso'); await tourEsperar(450); }
+  if(!tourTelaAtiva('progresso') || abaHojeHistorico !== 'hoje'){ trocarAbaEvolucao('hoje'); await tourEsperar(450); }
+}
+async function tourIrParaHistorico(){
+  if(!tourTelaAtiva('progresso') || abaHojeHistorico !== 'historico'){ trocarAbaEvolucao('historico'); await tourEsperar(450); }
 }
 async function tourIrParaCorpo(){
   if(!tourTelaAtiva('dados')){ openLevel2('dados'); await tourEsperar(450); }
@@ -18163,14 +18221,14 @@ const PASSOS_TOUR = [
     texto: 'Na aba Corpo ficam o seu peso e o seu percentual de gordura. Se ainda não tiver nada, toque em "+ Registrar". Quando a última avaliação física passar de 90 dias, aparece no topo o aviso "Hora de reavaliar", com o botão pra registrar peso e medidas.',
     textoCentro: 'Em Evolução > Corpo ficam o seu peso e o seu percentual de gordura. Se ainda não tiver nada, toque em "+ Registrar". Quando a última avaliação física passar de 90 dias, aparece no topo o aviso "Hora de reavaliar", com o botão pra registrar peso e medidas.' },
   { parte: 4, preparar: tourIrParaProgresso, seletor: '#tour-checkin-box', titulo: 'Como você está hoje',
-    texto: 'Na aba Treino você registra como está hoje: humor, disposição, ansiedade e sono, de 1 a 5, e marca os hábitos do dia. Em cima aparece quantos dias seguidos você fez o check-in. Seu personal usa isso pra entender como você está além do treino, e cada dia respondido soma pontos no ranking.',
-    textoCentro: 'Em Evolução > Treino, em "Como você está hoje", você registra humor, disposição, ansiedade e sono, de 1 a 5, e marca os hábitos do dia. Em cima aparece quantos dias seguidos você fez o check-in. Seu personal usa isso pra entender como você está além do treino, e cada dia respondido soma pontos no ranking.' },
+    texto: 'Na aba Hoje você registra como está: humor, disposição, ansiedade e sono, de 1 a 5, e marca os hábitos do dia. Em cima aparece quantos dias seguidos você fez o check-in. Seu personal usa isso pra entender como você está além do treino, e cada dia respondido soma pontos no ranking.',
+    textoCentro: 'Em Evolução > Hoje, em "Como você está hoje", você registra humor, disposição, ansiedade e sono, de 1 a 5, e marca os hábitos do dia. Em cima aparece quantos dias seguidos você fez o check-in. Seu personal usa isso pra entender como você está além do treino, e cada dia respondido soma pontos no ranking.' },
   { parte: 4, preparar: tourIrParaProgresso, seletor: '#tour-chip-ontem', titulo: 'Esqueci de preencher ontem',
     texto: 'Esqueceu de preencher ontem? Toque aqui pra preencher o dia de ontem, que fica guardado na data certa. Manter os dias completos deixa o seu acompanhamento muito mais preciso.',
-    textoCentro: 'Esqueceu de preencher ontem? Em Evolução > Treino, logo abaixo do botão de salvar, o link "Esqueci de preencher ontem" deixa você preencher o dia de ontem, que fica guardado na data certa. Manter os dias completos deixa o seu acompanhamento muito mais preciso.' },
-  { parte: 4, preparar: tourIrParaProgresso, seletor: '#hub-corrigir-registros', titulo: 'Corrigir meus registros',
-    texto: 'Preencheu algo errado? Aqui no fim da tela você corrige o check-in de nutrição, os feedbacks de treino e as respostas do Perfil DNA. O peso e a composição se corrigem em Evolução > Corpo, em "Minha evolução", e a Roda da Vida tem "Corrigir uma resposta" na própria aba.',
-    textoCentro: 'Preencheu algo errado? Em Evolução > Treino, no fim, o bloco "Corrigir meus registros" deixa você corrigir o check-in de nutrição, os feedbacks de treino e as respostas do Perfil DNA. O peso e a composição se corrigem em Evolução > Corpo, em "Minha evolução", e a Roda da Vida tem "Corrigir uma resposta" na própria aba.' },
+    textoCentro: 'Esqueceu de preencher ontem? Em Evolução > Hoje, logo abaixo do botão de salvar, o link "Esqueci de preencher ontem" deixa você preencher o dia de ontem, que fica guardado na data certa. Manter os dias completos deixa o seu acompanhamento muito mais preciso.' },
+  { parte: 4, preparar: tourIrParaHistorico, seletor: '#hub-corrigir-registros', titulo: 'Corrigir meus registros',
+    texto: 'Preencheu algo errado? Aqui, no fim do Histórico, você corrige o check-in de nutrição, os feedbacks de treino e as respostas do Perfil DNA. O peso e a composição se corrigem em Evolução > Corpo, em "Minha evolução", e a Roda da Vida tem "Corrigir uma resposta" na própria aba.',
+    textoCentro: 'Preencheu algo errado? Em Evolução > Histórico, no fim, o bloco "Corrigir meus registros" deixa você corrigir o check-in de nutrição, os feedbacks de treino e as respostas do Perfil DNA. O peso e a composição se corrigem em Evolução > Corpo, em "Minha evolução", e a Roda da Vida tem "Corrigir uma resposta" na própria aba.' },
   { parte: 4, preparar: tourIrParaRodaDaVida, seletor: '.rv-acao', titulo: 'Sua Roda da Vida',
     texto: 'Não quer esperar a pergunta aparecer? Toque em "Responder uma área agora". O gráfico mostra como está cada área, e a linha tracejada é a rodada anterior, pra você comparar. Na lista, a seta mostra quanto cada área subiu ou caiu.',
     textoCentro: 'Na aba Roda da Vida, o botão "Responder uma área agora" deixa você responder sem esperar a pergunta aparecer. O gráfico mostra como está cada área, e a linha tracejada é a rodada anterior, pra você comparar. Na lista, a seta mostra quanto cada área subiu ou caiu.' },
@@ -18687,9 +18745,26 @@ function irParaAbaFixa(which){
   openLevel2(which);
 }
 
-// Abas do topo da Evolução (Corpo, Treino, Roda da Vida)
+// Abas do topo da Evolução: Corpo, Hoje, Histórico e Roda. "Hoje" (como você está e os hábitos, pra preencher
+// rapidinho) e "Histórico" (DNA Score, calendário, linha do tempo e correções) são as duas metades da antiga aba Treino.
+let abaHojeHistorico = 'hoje';
 function trocarAbaEvolucao(tela){
+  if(tela === 'hoje' || tela === 'historico'){ abaHojeHistorico = tela; tela = 'progresso'; }
   openLevel2(tela);
+}
+function aplicarAbaHojeHistorico(){
+  const hist = abaHojeHistorico === 'historico';
+  const h = document.getElementById('evo-hoje'), x = document.getElementById('evo-historico');
+  if(h && h.style) h.style.display = hist ? 'none' : '';
+  if(x && x.style) x.style.display = hist ? '' : 'none';
+  const sub = document.getElementById('evo-sub-treino');
+  if(sub) sub.textContent = hist ? 'Seus treinos desde o início' : 'Como você está hoje e os hábitos do dia';
+  try {
+    document.querySelectorAll('[data-view="progresso"] .evo-aba').forEach(function(t){
+      const k = t.getAttribute('data-evo');
+      t.classList.toggle('on', k === (hist ? 'historico' : 'hoje'));
+    });
+  } catch(e){}
 }
 
 /* ===== CHAT DE IA REAL ===== */
@@ -19405,6 +19480,18 @@ function nomeCompletoDoDia(n){
   return ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'].indexOf(n) !== -1 ? n + '-feira' : String(n || '');
 }
 
+// "4x12" e "50-60s" viram "4 × 12 · descanso 50-60s"
+// Hélice dourada grande do topo do "Seu perfil" (desenhada no código: nítida em qualquer tela e sem pesar)
+const HELICE_DNA_GRANDE = '<svg class="dna-perfil-helice" width="46" height="104" viewBox="0 0 46 104" fill="none" stroke-linecap="round" aria-hidden="true"><defs><linearGradient id="perfilHelGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F6DCA2"/><stop offset=".5" stop-color="#D9B26F"/><stop offset="1" stop-color="#9C7440"/></linearGradient></defs><g stroke="url(#perfilHelGrad)">' +
+  '<path d="M6 12L40 18M6 30L40 36M6 48L40 54M6 66L40 72M6 84L40 90" stroke-width="1.4" opacity=".5"/>' +
+  '<path d="M40 6C40 22 6 26 6 42S40 62 40 78S6 92 6 98" stroke-width="2" opacity=".45"/>' +
+  '<path d="M6 6C6 22 40 26 40 42S6 62 6 78S40 92 40 98" stroke-width="2.5"/></g></svg>';
+
+function textoPrescricaoDoExercicio(prescricao, descanso){
+  const p = String(prescricao || '').trim().replace(/^(\d+)\s*[xX]\s*/, '$1 × ');
+  return [p, descanso ? 'descanso ' + descanso : ''].filter(Boolean).join(' · ');
+}
+
 function envolverCardExercicio(j, html){
   return '<div class="ex-card" data-ex-idx="' + j + '">' + html + '</div>';
 }
@@ -19464,6 +19551,8 @@ function aplicarModoFocoTreino(){
   if(rot) rot.textContent = ativo ? 'Exercício ' + (exercicioDoFoco + 1) + ' de ' + total + (exercicioEstaFeito(exercicioDoFoco) ? ' · feito' : '') : '';
   const barra = document.getElementById('barra-foco');
   if(barra) barra.style.display = ativo ? 'flex' : 'none';
+  const sol = document.getElementById('botao-flutuante-sol'); // o balão do chat não cobre o "Próximo exercício"
+  if(sol && sol.style && sessaoTipo === 'aluna') sol.style.display = ativo ? 'none' : 'flex';
   const dica = document.getElementById('dica-lista-treino'); // a dica de "clique no nome" só faz sentido na lista
   if(dica) dica.style.display = ativo ? 'none' : '';
   const prox = document.getElementById('foco-prox');
@@ -19838,6 +19927,8 @@ function alternarCronometro(){
     cronometroRodando = true;
     btn.textContent = 'Pausar';
     if(!modoFocoTreino) entrarModoFocoTreino(); // "Iniciar treino" passa a mostrar um exercício por vez
+    // Começou pelo botão fixo de baixo: redesenha com o cronômetro (Pausar) no topo, longe dos botões do modo foco
+    if(btn.closest && btn.closest('.iniciar-fixo') && detailDiaAtual != null){ try { openDetail('dia', detailDiaAtual); } catch(e){} }
     cronometroInterval = setInterval(function(){
       cronometroSegundos++;
       const display = document.getElementById('cronometro-display');
@@ -20274,7 +20365,7 @@ function registrarNutricaoSemana(){
   salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
 
   const el = document.getElementById('area-nutricao') || document.getElementById('nutri-confirmacao');
-  if(el) el.innerHTML = '<p class="txt">Obrigada! Isso já ajustou sua Resposta Nutricional, Potencial de Hipertrofia, Potencial de Ganho de Gordura e Retenção Hídrica no DNA MUSA. Se digitou algo errado, dá pra corrigir em Evolução > Treino, no fim da tela, em "Corrigir meus registros".</p>';
+  if(el) el.innerHTML = '<p class="txt">Obrigada! Isso já ajustou sua Resposta Nutricional, Potencial de Hipertrofia, Potencial de Ganho de Gordura e Retenção Hídrica no DNA MUSA. Se digitou algo errado, dá pra corrigir em Evolução > Histórico, no fim da tela, em "Corrigir meus registros".</p>';
 }
 
 // ---- edição ----
@@ -23061,7 +23152,11 @@ function renderMeuProgressoConteudo(container, nome, a){
 
   let html = '';
 
-  // DNA Score + comparativo real (o que ela quer ver primeiro, ao abrir a tela)
+  // Aba "Hoje": como ela está e os hábitos do dia (o que ela preenche)
+  html += '<div id="evo-hoje"><div id="checkin-habitos-area"></div></div>';
+
+  // Aba "Histórico": DNA Score + comparativo, calendário, linha do tempo, gráfico e correções
+  html += '<div id="evo-historico">';
   html += '<div class="dna-score-card" onclick="openDetail(\'dna\')">' +
     '<div class="dna-score-left">' +
       '<p class="dna-score-label">DNA SCORE</p>' +
@@ -23072,8 +23167,6 @@ function renderMeuProgressoConteudo(container, nome, a){
     '</div>' +
   '</div>';
 
-  // Check-in emocional do dia + hábitos com pontuação (o que ela preenche, vem depois do que ela olha)
-  html += '<div id="checkin-habitos-area" style="margin-top:24px;"></div>';
 
   // Calendário de treinos (mês a mês, arrasta ou clica nas setinhas pra trocar de mês)
   html += '<p class="section-label" style="margin-top:20px;">Meu calendário de treinos</p>';
@@ -23129,7 +23222,9 @@ function renderMeuProgressoConteudo(container, nome, a){
   // fotos/comparação visual do corpo, e o Progresso não precisa segurar um "em breve" todo dia.
 
   html += '<p class="section-label" style="margin-top:24px;">Corrigir meus registros</p><div id="hub-corrigir-registros"></div>';
+  html += '</div>';
   container.innerHTML = html;
+  aplicarAbaHojeHistorico();
   renderCheckInEHabitos(nome);
   renderCalendarioTreinosAluna(nome);
   renderHubCorrigirRegistros(nome);
@@ -23387,14 +23482,19 @@ if(type === 'central'){
         }
       }
     }
-    const heroTexto = stats.temDados ? calcularProbabilidadeSucesso(NOME_ALUNA_LOGADA) + '%' : 'Calibrando, dia 1';
+    // Topo: o DNA Score (o mesmo número da Início), com a hélice dourada e a comparação com a semana anterior
+    const scoreDna = stats.temDados ? calcularProbabilidadeSucesso(NOME_ALUNA_LOGADA) : null;
+    const compDna = stats.temDados ? calcularComparativoScore(NOME_ALUNA_LOGADA) : null;
+    const textoComp = scoreDna == null ? 'Seus primeiros treinos vão formar esse número'
+      : (compDna == null ? 'Aguardando a próxima semana pra comparar' : (compDna > 0 ? '▲ +' + compDna + '% vs. semana anterior' : (compDna < 0 ? '▼ ' + compDna + '% vs. semana anterior' : 'Estável vs. semana anterior')));
     el.innerHTML =
-      '<p class="page-sub" style="margin-top:14px;">DNA MUSA</p>' +
-      '<h1 class="page-title" style="margin-top:0;">Perfil inteligente da ' + NOME_ALUNA_LOGADA.split(' ')[0] + '</h1>' +
-      '<div class="hero-card" style="cursor:default;">' +
-        '<p class="hero-eyebrow">Probabilidade de sucesso</p>' +
-        '<p class="ring-num" style="position:relative;font-size:18px;">' + heroTexto + '</p>' +
-      '</div>' + indsHtml;
+      '<p class="dia-eyebrow">DNA MUSA</p>' +
+      '<h1 class="page-title" style="margin-top:2px;">Seu perfil, ' + escaparHtmlFicha(NOME_ALUNA_LOGADA.split(' ')[0]) + '</h1>' +
+      '<div class="dna-perfil-hero">' +
+        '<div><p class="dna-score-label">DNA SCORE</p><p class="dna-perfil-num">' + (scoreDna == null ? '--' : scoreDna) + '</p><p class="dna-perfil-comp">' + textoComp + '</p></div>' +
+        HELICE_DNA_GRANDE +
+      '</div>' +
+      '<div class="dna-perfil-inds">' + indsHtml + '</div>';
   } else if(type === 'evolucao'){
     const stats = calcularEstatisticasAluna(NOME_ALUNA_LOGADA);
     if(!stats.temDados){
@@ -23468,13 +23568,13 @@ if(type === 'central'){
         d.ex.map(function(_, idx){ return '<div class="segmento-progresso" data-idx="' + idx + '" style="flex:1;height:5px;border-radius:3px;background:var(--border);transition:background .2s;"></div>'; }).join('') +
         '</div>';
 
-      corpoTreino = '<div class="badge">' + faseAtual + '</div>' +
-        '<button class="btn-gold" style="padding:16px;font-size:15px;margin:10px 0 4px;" id="cronometro-btn" onclick="alternarCronometro()">' + (cronometroRodando ? 'Pausar' : (cronometroSegundos > 0 ? 'Retomar' : 'Iniciar treino')) + '</button>' +
-        '<p style="text-align:center;font-size:11px;color:var(--text-faint);margin:0 0 4px;" id="cronometro-display" data-modo-cronometro="1">' + String(Math.floor(cronometroSegundos/60)).padStart(2,'0') + ':' + String(cronometroSegundos%60).padStart(2,'0') + '</p>' +
-        '<p id="dica-lista-treino" style="text-align:center;font-size:11.5px;color:var(--text-faint);margin:0 0 14px;">Clique no nome de cada exercício pra ver o vídeo de execução</p>' +
+      const treinoComecou = cronometroRodando || cronometroSegundos > 0;
+      const htmlCronometro = '<button class="btn-gold" style="padding:16px;font-size:15px;margin:10px 0 4px;" id="cronometro-btn" onclick="alternarCronometro()">' + (cronometroRodando ? 'Pausar' : (cronometroSegundos > 0 ? 'Retomar' : 'Iniciar treino')) + '</button>' +
+        '<p style="text-align:center;font-size:11px;color:var(--text-faint);margin:0 0 4px;" id="cronometro-display" data-modo-cronometro="1">' + String(Math.floor(cronometroSegundos/60)).padStart(2,'0') + ':' + String(cronometroSegundos%60).padStart(2,'0') + '</p>';
+      corpoTreino = (treinoComecou ? htmlCronometro : '') +
         '<div id="toast-celebracao-area"></div>' +
         renderBlocoPosturalDia(alunaAtual) +
-        '<p class="section-label">Treino do dia</p>' +
+        '<p class="section-label" style="margin-top:10px;">Treino do dia</p>' +
         barraProgresso +
         '<div class="foco-topo" id="foco-topo" style="display:none;"><span id="foco-rotulo"></span><span class="foco-lista" onclick="sairModoFocoTreino()">Ver lista completa</span></div>';
       d.ex.forEach(function(linha, j){
@@ -23570,11 +23670,13 @@ if(type === 'central'){
         corpoTreino += '<div class="ex-card" data-ex-idx="' + j + '">' + '<div class="list-item" style="flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;">' +
           '<div style="display:flex;">' +
             '<div style="flex:1;display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:14px 12px;" onclick="alternarExercicioExpandido(' + j + ')">' +
-              (d.desafio
-                // Desafio: número, nome sem CAIXA ALTA e o método numa etiqueta discreta
-                ? '<span class="ex-nome-desafio"><span class="ex-num">' + (j + 1) + '</span><span>' + escaparHtmlFicha(capitalizarNomeExercicio(nomeEx)) + (nomeMetodoExibicao ? ' <span class="tag-metodo-suave" onclick="mostrarInfoMetodo(\'' + nomeMetodoExibicao.replace(/'/g,"\\'") + '\', event)">' + nomeMetodoExibicao + ' ⓘ</span>' : '') + '</span></span>'
-                : '<span>' + nomeEx + (nomeMetodoExibicao ? ' <span class="tag tag-metodo" style="background:var(--gold-soft);color:#1A1409;cursor:pointer;" onclick="mostrarInfoMetodo(\'' + nomeMetodoExibicao.replace(/'/g,"\\'") + '\', event)">' + nomeMetodoExibicao + ' <i class="ti ti-info-circle" style="font-size:11px;vertical-align:-1px;"></i></span>' : '') + '</span>') +
-              '<span class="tag">' + (partes[1] || '') + (descanso ? ' · ⏱ ' + descanso : '') + '</span>' +
+              // Número, nome sem CAIXA ALTA, "4 × 12 · descanso 60s" embaixo, o método numa etiqueta e o ▶ do vídeo
+              '<span class="ex-nome-desafio"><span class="ex-num">' + (j + 1) + '</span><span class="ex-txt"><span>' + escaparHtmlFicha(capitalizarNomeExercicio(nomeEx)) +
+                (nomeMetodoExibicao ? (d.desafio
+                  ? ' <span class="tag-metodo-suave" onclick="mostrarInfoMetodo(\'' + nomeMetodoExibicao.replace(/'/g,"\\'") + '\', event)">' + nomeMetodoExibicao + ' ⓘ</span>'
+                  : ' <span class="tag tag-metodo" onclick="mostrarInfoMetodo(\'' + nomeMetodoExibicao.replace(/'/g,"\\'") + '\', event)">' + nomeMetodoExibicao + ' <i class="ti ti-info-circle" style="font-size:11px;vertical-align:-1px;"></i></span>') : '') +
+                '</span><small class="ex-prescricao">' + escaparHtmlFicha(textoPrescricaoDoExercicio(partes[1], descanso)) + '</small></span></span>' +
+              '<span class="ex-play" title="Ver o vídeo" onclick="abrirVideoApenasExercicio(\'' + nomeEx.replace(/'/g,"\\'") + '\', event)"><i class="ti ti-player-play-filled"></i></span>' +
             '</div>' +
             '<div style="width:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--card-2);" title="Ver opções parecidas" onclick="event.stopPropagation();alternarSubstituicoesInline(' + j + ',\'' + nomeEx.replace(/'/g,"\\'") + '\')">' +
               '<div style="width:3px;height:24px;border-radius:2px;background:var(--gold-soft);"></div>' +
@@ -23585,6 +23687,8 @@ if(type === 'central'){
         '</div>' + '</div>';
       });
       const jaRegistradoHoje = prog && (prog.diasConcluidos[prog.semana] || []).indexOf(d.n) !== -1;
+      corpoTreino += '<p id="dica-lista-treino" class="dica-lista-treino">Toque no exercício pra abrir as séries e a carga · ▶ abre o vídeo</p>' +
+        (treinoComecou ? '' : '<div class="iniciar-fixo" id="iniciar-fixo">' + htmlCronometro + '</div>');
       corpoTreino += '<button class="btn-gold" id="btn-registrar-treino-dia" style="margin-top:10px;' + (jaRegistradoHoje ? 'background:var(--success);color:#fff;' : '') + '" onclick="registrarTreinoDia(' + arg + ')">' + (jaRegistradoHoje ? '✓ Treino registrado' : 'Registrar treino de hoje') + '</button>' +
         (jaRegistradoHoje && alunaPodeDesfazerDia(prog, d.n) ? '<p class="txt" style="font-size:11.5px;text-align:center;color:var(--text-faint);margin:8px 0 0;cursor:pointer;text-decoration:underline;" onclick="desfazerRegistroDoDia(' + arg + ', \'detalhe\')">Registrei sem querer. Desfazer</p>' : '') +
         '<div id="registro-confirmacao" style="margin-top:10px;"></div>' +
@@ -23597,10 +23701,12 @@ if(type === 'central'){
     const qtdEx = (d.ex || []).length;
     const infoDia = (!d.descanso && !d.tabata && qtdEx) ? qtdEx + (qtdEx === 1 ? ' exercício' : ' exercícios') + (d.duracaoEstimadaMin ? ' · cerca de ' + Math.round(d.duracaoEstimadaMin) + ' min' : '') : '';
     const fdDia = d.desafio ? partesDoFocoDoDesafio(d) : null;
+    const letraDia = !fdDia ? letraDoTreino(d) : '';
+    const etiquetas = (!d.descanso && !d.tabata) ? [qtdEx ? qtdEx + (qtdEx === 1 ? ' exercício' : ' exercícios') : '', d.duracaoEstimadaMin ? 'cerca de ' + Math.round(d.duracaoEstimadaMin) + ' min' : ''].filter(Boolean) : [];
     el.innerHTML =
-      '<p class="page-sub" style="margin-top:14px;margin-bottom:2px;">' + (fdDia ? 'Treino ' + escaparHtmlFicha(fdDia.letra) : nomeCompletoDoDia(d.n)) + (d.hoje ? ' · hoje' : '') + '</p>' +
-      (!d.descanso && d.foco ? '<h1 class="page-title" style="margin:0 0 4px;font-size:24px;">' + escaparHtmlFicha(fdDia ? fdDia.titulo + (fdDia.detalhe ? ' · ' + fdDia.detalhe : '') : d.foco) + '</h1>' : '') +
-      (infoDia ? '<p style="font-size:12px;color:var(--text-faint);margin:0 0 12px;">' + infoDia + '</p>' : '') +
+      '<p class="dia-eyebrow">' + (fdDia ? 'Treino ' + escaparHtmlFicha(fdDia.letra) : (letraDia ? 'Treino ' + letraDia + ' · ' : '') + nomeCompletoDoDia(d.n)) + (d.hoje ? ' · hoje' : '') + '</p>' +
+      (!d.descanso && d.foco ? '<h1 class="page-title" style="margin:2px 0 8px;">' + escaparHtmlFicha(fdDia ? fdDia.titulo + (fdDia.detalhe ? ' · ' + fdDia.detalhe : '') : (letraDia ? String(d.foco).replace(/^Treino\s+[A-Z]\s*·\s*/, '') : d.foco)) + '</h1>' : '') +
+      ((etiquetas.length || (!d.descanso && !d.tabata)) ? '<div class="dia-etiquetas">' + etiquetas.map(function(t){ return '<span>' + t + '</span>'; }).join('') + (!d.descanso && !d.tabata ? '<span class="fase">' + escaparHtmlFicha(faseAtual) + '</span>' : '') + '</div>' : '') +
       corpoTreino;
     if(!d.descanso) atualizarBarraProgressoDia(d);
     aplicarModoFocoTreino();
