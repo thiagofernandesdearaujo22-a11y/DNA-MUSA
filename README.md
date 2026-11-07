@@ -1,4 +1,4 @@
-[dna_musa_164.html](https://github.com/user-attachments/files/34249111/dna_musa_164.html)
+[Uploading dna_musa_165.html…]()
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -13,24 +13,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>DNA Musa</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <!-- Ícones: pacote oficial no jsDelivr (o mesmo servidor que já carrega o Supabase). O endereço antigo do cdnjs ficou como reserva. -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
-    --bg: #0C0C0D;
-    --card: #171717;
-    --card-2: #1E1E1E;
-    --gold: #E8C58A;
-    --gold-soft: #F4D9A5;
+    --bg: #0B0A09;
+    --card: #151311;
+    --card-2: #1D1A16;
+    --gold: #DDB673;
+    --gold-soft: #F0CF8E;
     --gold-deep: #4C3E25;
-    --text: #FFFFFF;
-    --text-dim: #B8B8B8;
-    --text-faint: #8D8D8D;
-    --border: rgba(255,255,255,0.06);
-    --border-strong: rgba(232,197,138,0.35);
+    --text: #F3ECE1;
+    --text-dim: #B3A999;
+    --text-faint: #857C70;
+    --border: rgba(255,236,205,0.07);
+    --border-strong: rgba(217,178,111,0.42);
     --success: #8FAE7D;
     --success-soft: rgba(143,174,125,0.18);
   }
@@ -38,7 +38,7 @@
   body{
     margin:0;
     background:#000;
-    font-family:'Inter',sans-serif;
+    font-family:'Manrope',sans-serif;
     color:var(--text);
     display:flex;
     justify-content:center;
@@ -71,7 +71,7 @@
   .backbar{display:flex;align-items:center;gap:8px;padding:14px 20px 12px;cursor:pointer;color:var(--gold-soft);font-size:13px;flex-shrink:0;border-bottom:1px solid var(--border);}
 
   .top-logo-fixa{display:flex;align-items:center;justify-content:center;padding:14px 0 10px;flex-shrink:0;border-bottom:1px solid var(--border);}
-  .top-logo-fixa span{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--gold);letter-spacing:0.5px;}
+  .top-logo-fixa span{font-family:'EB Garamond',serif;font-size:15px;font-weight:700;color:var(--gold);letter-spacing:0.5px;}
 
   .bottom-nav-fixa{display:flex;flex-shrink:0;border-top:1px solid var(--border);background:var(--card);}
   .bottom-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px 8px;cursor:pointer;}
@@ -82,7 +82,7 @@
 
   /* ===== LAYOUT DESKTOP DO PERSONAL (sidebar), só entra em telas largas ===== */
   .sidebar-personal{ display:none; }
-  .sidebar-personal .side-logo{ font-family:'Playfair Display',serif; font-size:17px; font-weight:600; color:var(--gold-soft); padding:6px 10px 22px; letter-spacing:0.5px; }
+  .sidebar-personal .side-logo{ font-family:'EB Garamond',serif; font-size:17px; font-weight:600; color:var(--gold-soft); padding:6px 10px 22px; letter-spacing:0.5px; }
   .sidebar-personal .side-grupo-label{ font-size:10px; text-transform:uppercase; letter-spacing:0.6px; color:var(--text-faint); padding:14px 10px 6px; }
   .sidebar-personal .side-item{ display:flex; align-items:center; gap:10px; padding:10px 10px; border-radius:10px; cursor:pointer; font-size:13px; color:var(--text-dim); margin-bottom:2px; }
   .sidebar-personal .side-item i{ font-size:16px; width:18px; text-align:center; color:var(--text-faint); }
@@ -109,7 +109,7 @@
   /* ===== INÍCIO DA ALUNA (nova): treino de hoje primeiro, semana em bolinhas, score enxuto, tarefas no mesmo estilo ===== */
   .home-hero{border-radius:22px;padding:18px;margin:4px 0 14px;background:linear-gradient(150deg,rgba(232,197,138,0.22),rgba(232,197,138,0.04) 55%,var(--card));border:1px solid var(--border-strong);}
   .home-hero .hh-lbl{font-size:10.5px;letter-spacing:2px;color:var(--gold);font-weight:600;margin:0;text-transform:uppercase;}
-  .home-hero .hh-tit{font-family:'Playfair Display',serif;font-weight:600;font-size:22px;margin:6px 0 0;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .home-hero .hh-tit{font-family:'EB Garamond',serif;font-weight:600;font-size:22px;margin:6px 0 0;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
   .home-hero .hh-info{font-size:12.5px;color:var(--text-dim);margin:7px 0 0;display:flex;gap:14px;flex-wrap:wrap;}
   .home-hero .hh-info span{display:inline-flex;align-items:center;gap:5px;}
   .home-hero .hh-btn{height:48px;border-radius:14px;background:linear-gradient(135deg,#F4D9A5,#C9A063);color:#1A1409;font-weight:700;font-size:14.5px;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;cursor:pointer;border:none;width:100%;font-family:inherit;}
@@ -159,7 +159,7 @@
 
   /* ===== FICHA DA ALUNA (Personal) ===== */
   .ficha-cab{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:4px 0 14px;}
-  .ficha-av{width:52px;height:52px;font-size:18px;font-family:'Playfair Display',serif;}
+  .ficha-av{width:52px;height:52px;font-size:18px;font-family:'EB Garamond',serif;}
   .ficha-quem{flex:1;min-width:220px;}
   .ficha-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
   .fc{font-size:11px;font-weight:600;border-radius:20px;padding:4px 10px;background:var(--card-2);color:var(--text-dim);white-space:nowrap;}
@@ -177,7 +177,7 @@
   .ficha-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
   .fm{background:var(--card-2);border-radius:14px;padding:11px;}
   .fm small{display:block;font-size:10.5px;color:var(--text-faint);}
-  .fm b{display:block;font-family:'Playfair Display',serif;font-size:22px;margin:4px 0 2px;}
+  .fm b{display:block;font-family:'EB Garamond',serif;font-size:22px;margin:4px 0 2px;}
   .fm span{font-size:10.5px;color:var(--text-dim);}
   .ficha-semana{display:flex;gap:5px;margin-top:12px;}
   .fd{flex:1;text-align:center;font-size:10px;color:var(--text-faint);}
@@ -193,11 +193,11 @@
   /* ===== TREINO CONCLUÍDO ===== */
   .tc-card{border-radius:20px;padding:20px 16px 14px;margin-bottom:10px;text-align:center;background:linear-gradient(160deg,rgba(232,197,138,0.2),var(--card) 60%);border:1px solid var(--border-strong);}
   .tc-trofeu{width:64px;height:64px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;color:var(--gold-soft);background:radial-gradient(circle,rgba(232,197,138,0.35),rgba(232,197,138,0.05));border:1px solid var(--border-strong);}
-  .tc-tit{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;margin:0;}
+  .tc-tit{font-family:'EB Garamond',serif;font-size:24px;font-weight:600;margin:0;}
   .tc-sub{font-size:12px;color:var(--text-faint);margin:4px 0 14px;}
   .tc-nums{display:grid;gap:8px;margin-bottom:12px;}
   .tc-num{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 4px;}
-  .tc-num b{display:block;font-family:'Playfair Display',serif;font-size:21px;}
+  .tc-num b{display:block;font-family:'EB Garamond',serif;font-size:21px;}
   .tc-num small{font-size:10.5px;color:var(--text-faint);}
   .tc-cargas{text-align:left;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:8px 12px;}
   .tc-lbl{font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold);margin:4px 0 4px;font-weight:600;}
@@ -255,7 +255,7 @@
   .carga-personal{position:fixed;top:10px;right:12px;z-index:9000;font-size:11px;padding:6px 12px;border-radius:14px;background:var(--card-2);border:1px solid var(--border-strong);color:var(--gold-soft);opacity:0;pointer-events:none;transition:opacity .25s;}
   .carga-personal.on{opacity:1;} .carga-personal.erro{color:#E2A33D;}
   .hh-dia{display:flex;align-items:center;gap:12px;margin:10px 0 2px;} .hh-dia b{display:block;font-size:17px;font-weight:600;line-height:1.25;} .hh-dia small{display:block;font-size:12px;color:var(--text-dim);margin-top:2px;}
-  .hh-letra{width:46px;height:46px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--gold-soft);background:var(--card-2);border:1px solid var(--border);}
+  .hh-letra{width:46px;height:46px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'EB Garamond',serif;font-size:20px;font-weight:600;color:var(--gold-soft);background:var(--card-2);border:1px solid var(--border);}
   .s21-anel{display:flex;align-items:center;gap:16px;} .s21-anel-svg{flex-shrink:0;} .s21-anel-txt{flex:1;min-width:0;} .s21-anel .hh-tit{font-size:20px;margin:0;}
   .s21-ult{display:flex;align-items:center;gap:5px;margin-top:9px;} .s21-ult i{width:18px;height:18px;border-radius:50%;border:1.6px solid var(--text-faint);font-style:normal;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#0E1A12;}
   .s21-ult i.feito{background:var(--success);border-color:var(--success);} .s21-ult i.hoje{border-color:var(--gold-soft);} .s21-ult span{font-size:10.5px;color:var(--text-faint);margin-left:4px;}
@@ -308,7 +308,7 @@
   .pg-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
   .pg-k{background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:11px 13px;}
   .pg-k small{display:block;font-size:10px;letter-spacing:1px;color:var(--text-faint);text-transform:uppercase;}
-  .pg-k b{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;}
+  .pg-k b{font-family:'EB Garamond',serif;font-size:22px;font-weight:600;}
   .pg-k b i{font-style:normal;color:var(--gold-soft);}
   .pg-k span{display:block;font-size:11px;color:var(--text-faint);margin-top:1px;}
   .pg-k span.mais{color:var(--success);}
@@ -368,7 +368,7 @@
   .rv-lin b{font-weight:600;min-width:20px;text-align:right;}
   .rv-up{color:var(--success);font-size:11px;} .rv-down{color:#D9785A;font-size:11px;}
   .ck-seq{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 16px;margin:0 0 14px;}
-  .ck-seq b{font-family:'Playfair Display',serif;font-size:28px;color:var(--gold-soft);line-height:1;}
+  .ck-seq b{font-family:'EB Garamond',serif;font-size:28px;color:var(--gold-soft);line-height:1;}
   .ck-seq span{font-size:13px;color:var(--text-dim);flex:1;}
   .ck-seq small{font-size:11.5px;color:var(--text-faint);white-space:nowrap;}
   .ck-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:4px 14px;margin-bottom:14px;}
@@ -430,7 +430,7 @@
   .cd-c-ouro{background:rgba(232,197,138,.12);color:var(--gold-soft);} .cd-c-verde{background:rgba(169,221,180,.12);color:#A9DDB4;}
   .cd-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px;}
   .cd-k{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:11px 14px;}
-  .cd-k small{font-size:11px;color:var(--text-faint);} .cd-k b{display:block;font-family:'Playfair Display',serif;font-size:24px;margin-top:2px;color:var(--text);} .cd-k span{font-size:11px;color:var(--text-dim);}
+  .cd-k small{font-size:11px;color:var(--text-faint);} .cd-k b{display:block;font-family:'EB Garamond',serif;font-size:24px;margin-top:2px;color:var(--text);} .cd-k span{font-size:11px;color:var(--text-dim);}
   .cd-tab{display:flex;flex-direction:column;}
   .cd-lin{display:grid;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text);}
   .cd-lin > span{min-width:0;}
@@ -491,7 +491,7 @@
   .cd-ests{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;}
   .cd-est{background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:10px 11px;cursor:pointer;}
   .cd-est:hover{border-color:var(--gold);}
-  .cd-est-t{display:flex;align-items:center;justify-content:space-between;} .cd-est-t b{font-family:'Playfair Display',serif;font-size:20px;color:var(--gold-soft);}
+  .cd-est-t{display:flex;align-items:center;justify-content:space-between;} .cd-est-t b{font-family:'EB Garamond',serif;font-size:20px;color:var(--gold-soft);}
   .cd-est-v{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;margin-top:6px;font-size:11px;color:var(--text-faint);} .cd-est-v b{color:var(--text);}
   .cd-est small{font-size:9.5px;color:var(--text-faint);display:block;margin-top:5px;}
   .cd-nota{font-size:11.5px;color:var(--text-faint);line-height:1.5;margin:10px 0 0;}
@@ -508,7 +508,7 @@
   .cd-metodos > div{background:var(--card-2);border-radius:10px;padding:9px 10px;font-size:11.5px;color:var(--text-dim);line-height:1.55;} .cd-metodos b{display:block;color:var(--text);font-size:12px;margin-bottom:3px;}
   .cd-volta{font-size:12.5px;color:var(--gold);cursor:pointer;margin-bottom:6px;} .cd-verde-t{color:#A9DDB4;}
   .cd-topo{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
-  .cd-titulo{font-family:'Playfair Display',serif;font-weight:600;font-size:26px;margin:0;color:var(--text);}
+  .cd-titulo{font-family:'EB Garamond',serif;font-weight:600;font-size:26px;margin:0;color:var(--text);}
   .cd-topo-r{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
   .cd-nav{display:flex;gap:5px;} .cd-nav span{width:30px;height:30px;border-radius:9px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-dim);cursor:pointer;}
   .cd-nav span.on{border-color:var(--gold);color:var(--gold-soft);} .cd-nav span.off{opacity:.3;pointer-events:none;}
@@ -572,8 +572,8 @@
   .ctl-mais{font-size:12px;color:var(--gold);text-align:center;cursor:pointer;padding:6px 0 2px;}
   .ctl-vazio{font-size:12px;color:var(--text-faint);text-align:center;padding:10px 0;}
   .rk-pos{display:flex;align-items:center;gap:16px;border-radius:20px;padding:18px;margin:0 0 18px;border:1px solid var(--border-strong);background:linear-gradient(150deg,rgba(232,197,138,0.16),var(--card) 65%);}
-  .rk-num{font-family:'Playfair Display',serif;font-size:44px;font-weight:700;line-height:1;color:var(--gold-soft);flex-shrink:0;min-width:56px;text-align:center;}
-  .rk-num small{display:block;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:1px;color:var(--text-faint);font-weight:600;margin-top:6px;}
+  .rk-num{font-family:'EB Garamond',serif;font-size:44px;font-weight:700;line-height:1;color:var(--gold-soft);flex-shrink:0;min-width:56px;text-align:center;}
+  .rk-num small{display:block;font-family:'Manrope',sans-serif;font-size:10px;letter-spacing:1px;color:var(--text-faint);font-weight:600;margin-top:6px;}
   .rk-pos p{margin:0;font-size:13px;line-height:1.45;color:var(--text-dim);}
   .rk-pos p strong{display:block;color:var(--text);font-size:15px;margin-bottom:3px;}
   .rk-podio{display:flex;align-items:flex-end;gap:10px;margin:4px 0 14px;}
@@ -582,7 +582,7 @@
   .rk-pd.eu .rk-av{background:var(--gold-deep);border-color:var(--gold);}
   .rk-pd .rk-nome{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .rk-pd .rk-pts{font-size:11px;color:var(--text-faint);margin-bottom:6px;}
-  .rk-degrau{border-radius:12px 12px 0 0;background:var(--card);border:1px solid var(--border);display:flex;align-items:flex-start;justify-content:center;padding-top:8px;font-family:'Playfair Display',serif;font-size:20px;color:var(--gold-soft);}
+  .rk-degrau{border-radius:12px 12px 0 0;background:var(--card);border:1px solid var(--border);display:flex;align-items:flex-start;justify-content:center;padding-top:8px;font-family:'EB Garamond',serif;font-size:20px;color:var(--gold-soft);}
   .rk-lista{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:4px 14px;margin-bottom:18px;}
   .rk-lin{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--border);font-size:14px;}
   .rk-lin:first-child{border-top:none;}
@@ -622,7 +622,7 @@
   .env-txt{font-size:12.5px;margin:6px 0 8px;color:var(--text);line-height:1.4;white-space:pre-wrap;overflow-wrap:anywhere;max-height:54px;overflow:hidden;}
   .env-msg{background:var(--card-2);border-radius:12px;padding:11px 12px;font-size:12.5px;color:var(--text-dim);line-height:1.5;border-left:3px solid var(--gold);white-space:pre-wrap;overflow-wrap:anywhere;}
   .env-resumo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0;}
-  .env-resumo > div{background:var(--card-2);border-radius:10px;padding:8px 10px;} .env-resumo small{font-size:10.5px;color:var(--text-faint);} .env-resumo b{display:block;font-size:20px;font-family:'Playfair Display',serif;color:var(--text);}
+  .env-resumo > div{background:var(--card-2);border-radius:10px;padding:8px 10px;} .env-resumo small{font-size:10.5px;color:var(--text-faint);} .env-resumo b{display:block;font-size:20px;font-family:'EB Garamond',serif;color:var(--text);}
   .env-filtros{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
   .env-filtros span{font-size:11.5px;padding:5px 10px;border-radius:16px;background:var(--card-2);color:var(--text-dim);cursor:pointer;}
   .env-marcar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;margin:0 0 8px;border:1px solid var(--border);border-radius:12px;background:var(--card-2);}
@@ -639,7 +639,7 @@
   .env-busca{height:32px;padding:4px 10px;font-size:12px;width:190px;max-width:100%;}
   /* ===== Painel de suporte (Bianca) ===== */
   .sp-hero{background:linear-gradient(135deg,rgba(232,197,138,.16),rgba(232,197,138,.04));border:1px solid rgba(232,197,138,.32);border-radius:18px;padding:16px 18px;display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px;}
-  .sp-hero h2{font-family:'Playfair Display',serif;font-size:21px;font-weight:600;margin:0;color:var(--text);}
+  .sp-hero h2{font-family:'EB Garamond',serif;font-size:21px;font-weight:600;margin:0;color:var(--text);}
   .sp-hero .sp-exp{font-size:12.5px;color:var(--text-dim);margin:5px 0 0;line-height:1.5;}
   .sp-prog{margin-top:12px;} .sp-prog .pn-barra{height:8px;margin-top:0;} .sp-prog small{display:block;font-size:11px;color:var(--text-faint);margin-top:6px;}
   .sp-hero .pn-btn-gold{flex:none;width:auto;display:inline-flex;margin-top:12px;}
@@ -651,7 +651,7 @@
   .sp-funcs{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:16px;}
   .sp-f{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 15px;display:flex;flex-direction:column;gap:6px;position:relative;min-width:0;}
   .sp-f .sp-n{position:absolute;top:12px;right:12px;font-size:11px;font-weight:700;background:var(--gold);color:#1a1409;border-radius:10px;padding:2px 8px;}
-  .sp-f .sp-num{font-family:'Playfair Display',serif;font-size:13px;color:var(--gold);letter-spacing:1px;}
+  .sp-f .sp-num{font-family:'EB Garamond',serif;font-size:13px;color:var(--gold);letter-spacing:1px;}
   .sp-f b{font-size:15px;color:var(--text);} .sp-f .sp-d{font-size:11.5px;color:var(--text-faint);line-height:1.45;}
   .sp-f .sp-pend-txt{font-size:11.5px;color:#E2A33D;}
   .sp-f .sp-ac{margin-top:auto;display:flex;gap:6px;flex-wrap:wrap;padding-top:6px;}
@@ -662,7 +662,7 @@
   .sp-outras div{background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:9px 11px;font-size:12px;color:var(--text-dim);cursor:pointer;}
   .sp-outras div:hover{border-color:var(--border-strong);color:var(--text);}
   .pn-topo{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin:6px 0 18px;}
-  .pn-saudacao{font-family:'Playfair Display',serif;font-weight:600;font-size:26px;margin:0;line-height:1.15;}
+  .pn-saudacao{font-family:'EB Garamond',serif;font-weight:600;font-size:26px;margin:0;line-height:1.15;}
   .pn-sub{color:var(--text-faint);font-size:12.5px;margin:6px 0 0;}
   .pn-acoes{display:flex;gap:10px;align-items:center;flex-wrap:wrap;width:100%;}
   .pn-busca{flex:1 1 100%;min-width:0;height:42px;border-radius:12px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:0 14px;color:var(--text-faint);}
@@ -672,7 +672,7 @@
   .pn-kpi{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;cursor:pointer;min-width:0;}
   .pn-kpi .pn-l{display:flex;align-items:center;gap:8px;color:var(--text-dim);font-size:12px;}
   .pn-kpi .pn-l .pn-ic{color:var(--gold);width:16px;height:16px;}
-  .pn-kpi .pn-n{font-family:'Playfair Display',serif;font-weight:600;font-size:24px;margin:8px 0 0;line-height:1;white-space:nowrap;}
+  .pn-kpi .pn-n{font-family:'EB Garamond',serif;font-weight:600;font-size:24px;margin:8px 0 0;line-height:1;white-space:nowrap;}
   .pn-kpi .pn-d{font-size:11px;color:var(--text-faint);margin:7px 0 0;line-height:1.35;}
   .pn-kpi.pn-alerta{border-color:rgba(226,163,61,0.35);background:linear-gradient(160deg,rgba(226,163,61,0.08),var(--card) 60%);}
   .pn-kpi.pn-alerta .pn-l .pn-ic{color:#E2A33D;}
@@ -703,7 +703,7 @@
   .pn-seg{display:flex;height:12px;border-radius:8px;overflow:hidden;margin-top:14px;gap:3px;background:var(--card-2);}
   .pn-leg{display:flex;justify-content:space-between;margin-top:12px;gap:8px;}
   .pn-leg div{font-size:11.5px;color:var(--text-dim);}
-  .pn-leg b{display:block;font-family:'Playfair Display',serif;font-size:22px;color:var(--text);font-weight:600;margin-top:3px;}
+  .pn-leg b{display:block;font-family:'EB Garamond',serif;font-size:22px;color:var(--text);font-weight:600;margin-top:3px;}
   .pn-leg span{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;}
   .pn-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
   .pn-tile{background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:9px;cursor:pointer;min-width:0;transition:border-color .2s ease;}
@@ -714,7 +714,7 @@
   .pn-tile small{font-size:11px;color:var(--text-faint);font-weight:400;display:block;margin-top:3px;}
   .pn-so-celular{display:block;}
   /* menu lateral (computador) */
-  .sidebar-personal .side-logo small{display:block;font-family:'Inter',sans-serif;font-weight:500;font-size:9.5px;letter-spacing:2.2px;color:var(--text-faint);margin-top:4px;}
+  .sidebar-personal .side-logo small{display:block;font-family:'Manrope',sans-serif;font-weight:500;font-size:9.5px;letter-spacing:2.2px;color:var(--text-faint);margin-top:4px;}
   .sidebar-personal .side-item .pn-ic{color:var(--text-faint);}
   .sidebar-personal .side-item.ativo{background:linear-gradient(90deg,rgba(232,197,138,0.14),rgba(232,197,138,0.02));color:var(--gold-soft);box-shadow:inset 2px 0 0 var(--gold);}
   .sidebar-personal .side-item.ativo .pn-ic{color:var(--gold-soft);}
@@ -725,7 +725,7 @@
 
   .modal-overlay-avisos{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.72); z-index:200; align-items:center; justify-content:center; padding:24px; }
   .modal-overlay-avisos .modal-card{ background:var(--card); border:1px solid var(--border-strong); border-radius:18px; padding:24px 20px; max-width:340px; width:100%; text-align:center; }
-  .modal-overlay-avisos .modal-card h3{ font-family:'Playfair Display',serif; font-size:18px; color:var(--gold-soft); margin:0 0 10px; }
+  .modal-overlay-avisos .modal-card h3{ font-family:'EB Garamond',serif; font-size:18px; color:var(--gold-soft); margin:0 0 10px; }
   .modal-overlay-avisos .modal-card p{ font-size:13px; color:var(--text-dim); margin:0 0 20px; line-height:1.5; }
   .modal-overlay-avisos .modal-botoes{ display:flex; gap:10px; }
   .modal-overlay-avisos .modal-botoes button{ flex:1; border-radius:12px; padding:11px; font-size:13px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--card-2); color:var(--text-dim); font-family:inherit; }
@@ -776,7 +776,7 @@
   /* LAUNCHER */
   .launcher{padding-top:56px;text-align:center;}
   .brand{
-    font-family:'Playfair Display',serif;font-size:32px;font-weight:600;letter-spacing:1px;
+    font-family:'EB Garamond',serif;font-size:32px;font-weight:600;letter-spacing:1px;
     background:linear-gradient(135deg,#F4D9A5,#E8C58A 45%,#4C3E25);
     -webkit-background-clip:text;background-clip:text;color:transparent;margin:0;
   }
@@ -796,20 +796,20 @@
   .profile-card:hover{transform:translateY(-3px);}
   .avatar{width:78px;height:78px;border-radius:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;position:relative;}
   .avatar.gold{background:radial-gradient(circle at 30% 25%, #F4D9A5, #E8C58A 55%, #4C3E25 100%);box-shadow:0 8px 26px rgba(217,139,46,0.35);}
-  .avatar.gold span{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;color:#0B0B0C;}
+  .avatar.gold span{font-family:'EB Garamond',serif;font-size:30px;font-weight:600;color:#0B0B0C;}
   .avatar.dark{background:var(--card-2);border:1px solid var(--border);}
   .avatar.dark i{font-size:26px;color:var(--gold-soft);}
   .profile-name{font-size:12px;font-weight:600;margin:0;line-height:1.3;}
   .profile-desc{font-size:11px;color:var(--text-dim);margin:3px 0 0;line-height:1.3;}
 
-  h1.page-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;margin:18px 0 4px;}
+  h1.page-title{font-family:'EB Garamond',serif;font-size:22px;font-weight:600;margin:18px 0 4px;}
   .page-sub{font-size:12px;color:var(--text-dim);margin:0 0 18px;}
   .section-label{font-size:12px;font-weight:600;color:var(--gold-soft);text-transform:uppercase;letter-spacing:0.6px;margin:0 0 10px;}
 
   .hero-card{background:linear-gradient(135deg, #241E14, #16130D);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:16px;cursor:pointer;position:relative;overflow:hidden;}
   .hero-card::after{content:'';position:absolute;top:-40%;right:-20%;width:220px;height:220px;background:radial-gradient(circle, rgba(217,139,46,0.18), transparent 70%);}
   .hero-eyebrow{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold-soft);margin:0 0 8px;position:relative;}
-  .hero-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;margin:0 0 8px;position:relative;}
+  .hero-title{font-family:'EB Garamond',serif;font-size:19px;font-weight:600;margin:0 0 8px;position:relative;}
   .hero-cta{font-size:12px;color:var(--text-dim);margin:0;position:relative;}
 
   .pending-card{background:rgba(217,139,46,0.08);border:1px solid var(--border-strong);border-radius:14px;padding:12px 14px;margin-bottom:26px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;}
@@ -833,7 +833,7 @@
   .dna-score-helix i{font-size:22px;color:var(--gold-soft);}
   .dna-score-left{flex:1;}
   .dna-score-label{font-size:10px;letter-spacing:1.5px;color:var(--text-faint);text-transform:uppercase;margin:0 0 6px;}
-  .dna-score-numero{font-family:'Playfair Display',serif;font-size:48px;font-weight:700;color:var(--gold-soft);margin:0;line-height:1;}
+  .dna-score-numero{font-family:'EB Garamond',serif;font-size:48px;font-weight:700;color:var(--gold-soft);margin:0;line-height:1;}
   .dna-score-comparativo{font-size:12.5px;color:var(--success);margin:6px 0 0;font-weight:600;}
   .dna-score-ring{position:relative;width:76px;height:76px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
   .dna-score-ring-valor{position:absolute;font-size:15px;font-weight:700;color:var(--text);}
@@ -853,7 +853,7 @@
 
   @keyframes fadeSlideUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
   .stat-label{font-size:11px;color:var(--text-dim);margin:0;}
-  .stat-value{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;margin:4px 0 0;}
+  .stat-value{font-family:'EB Garamond',serif;font-size:20px;font-weight:600;margin:4px 0 0;}
   .stat-meta{font-size:11px;color:var(--text-faint);margin:4px 0 0;}
   .stat-meta.gold{color:var(--gold-soft);}
 
@@ -861,7 +861,7 @@
   .insight p{font-size:12px;margin:0;color:#EDE0BE;}
 
   .ring-wrap{display:flex;align-items:center;gap:18px;margin-bottom:20px;}
-  .ring-num{font-family:'Playfair Display',serif;font-size:26px;font-weight:600;margin:0;}
+  .ring-num{font-family:'EB Garamond',serif;font-size:26px;font-weight:600;margin:0;}
   .ring-label{font-size:12px;color:var(--text-dim);margin:2px 0 0;}
 
   .video-block{background:var(--card);border:1px solid var(--border);border-radius:16px;height:190px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;position:relative;overflow:hidden;}
@@ -878,7 +878,7 @@
 
   .info-box{background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:16px;}
   .info-box .lbl{font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold-soft);margin:0 0 6px;}
-  .card-item-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;margin:0 0 6px;color:var(--text);}
+  .card-item-title{font-family:'EB Garamond',serif;font-size:15px;font-weight:600;margin:0 0 6px;color:var(--text);}
   .info-box p.txt{font-size:13px;color:var(--text);margin:0 0 10px;line-height:1.5;}
   .info-box p.txt:last-child{margin-bottom:0;}
 
@@ -937,7 +937,7 @@
   .avatar.dark.admin i{color:var(--text-dim);}
   .alert-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px;}
   .alert-stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;}
-  .alert-stat .num{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;margin:0;}
+  .alert-stat .num{font-family:'EB Garamond',serif;font-size:20px;font-weight:600;margin:0;}
   .alert-stat .lbl2{font-size:11px;color:var(--text-dim);margin:2px 0 0;}
 
   .aluna-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;transition:border-color .2s ease;}
@@ -976,7 +976,7 @@
 
   .form-group{margin-bottom:12px;}
   .form-label{font-size:11px;color:var(--text-dim);margin:0 0 5px;display:block;}
-  .form-input, .form-select{width:100%;background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:9px 11px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;}
+  .form-input, .form-select{width:100%;background:var(--card-2);border:1px solid var(--border);border-radius:10px;padding:9px 11px;font-size:13px;color:var(--text);font-family:'Manrope',sans-serif;}
   .form-input:focus, .form-select:focus{outline:none;border-color:var(--border-strong);}
   .btn-gold{width:100%;background:linear-gradient(135deg,#F4D9A5,#E8C58A 55%,#4C3E25);color:#0B0B0C;font-weight:600;font-size:13px;border:none;border-radius:10px;padding:11px;cursor:pointer;margin-top:6px;}
   /* Hierarquia visual: dourado só pra ação que fecha uma etapa (iniciar treino, registrar o dia).
@@ -990,6 +990,40 @@
   .exercicio-item .ex-video{font-size:11px;margin-top:4px;display:inline-block;}
   .exercicio-item .ex-video.pending{color:#E2A33D;}
   .exercicio-item .ex-video.ok{color:var(--gold-soft);}
+  /* ===== TEMA OBSIDIAN GOLD: preto quente, ouro em degradê só nos destaques, EB Garamond nos títulos (a Cormorant deixava o acento de "Você" e "Abdômen" torto) e Manrope no texto ===== */
+  body{background:#050404;}
+  .phone{border-color:rgba(217,178,111,0.30);box-shadow:0 0 0 8px #0E0C0A,0 0 0 9px rgba(217,178,111,0.18),0 30px 80px rgba(0,0,0,0.6);}
+  h1.page-title{font-size:26px;font-weight:600;letter-spacing:.2px;line-height:1.1;background:linear-gradient(180deg,#FFF6E6,#E2D2B8);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .page-sub{color:var(--text-dim);}
+  .section-label{color:var(--text-faint);font-weight:700;letter-spacing:1.5px;font-size:11px;}
+  .list-item,.stat-card,.evo-abas{background:linear-gradient(180deg,#171512,#12100E);border-color:var(--border);}
+  .evo-aba.on{background:rgba(217,178,111,0.13);color:var(--gold-soft);font-weight:600;}
+  .btn-gold{background:linear-gradient(180deg,#F0CF8E,#C99A52);color:#1E1608;font-weight:700;box-shadow:0 6px 18px rgba(201,154,82,0.22),inset 0 1px 0 rgba(255,255,255,0.35);}
+  .bottom-nav-fixa{background:rgba(11,10,9,0.97);border-top-color:rgba(217,178,111,0.12);}
+  .home-marca-bloco{display:flex;align-items:center;gap:9px;}
+  #home-marca{font-size:21px !important;}
+  .home-hero{background:radial-gradient(120% 90% at 100% 0%,rgba(217,178,111,0.20),rgba(217,178,111,0) 55%),linear-gradient(180deg,#1A1713,#12100E);border:1px solid rgba(217,178,111,0.55);box-shadow:inset 0 1px 0 rgba(255,230,180,0.08),0 0 30px rgba(217,178,111,0.10);}
+  .home-hero .hh-tit{font-size:24px;font-weight:600;}
+  .home-hero .hh-btn{background:linear-gradient(180deg,#F0CF8E,#C99A52);color:#1E1608;box-shadow:0 6px 18px rgba(201,154,82,0.25),inset 0 1px 0 rgba(255,255,255,0.35);}
+  .home-semana{background:linear-gradient(180deg,#171512,#12100E);}
+  .home-bol.hoje{box-shadow:0 0 10px rgba(217,178,111,0.35);}
+  .dna-score-card{background:radial-gradient(90% 100% at 12% -5%,rgba(217,178,111,0.16),rgba(217,178,111,0.03) 40%,transparent 62%),linear-gradient(180deg,#171512,#12100E);}
+  .dna-score-numero{font-size:48px;color:var(--text);}
+  [data-view="home"] #home-score-numero{display:block;}
+  [data-view="home"] .dna-score-ring{width:84px;height:84px;}
+  [data-view="home"] .dna-score-ring > svg:first-child{width:84px;height:84px;filter:drop-shadow(0 0 5px rgba(217,178,111,0.45));overflow:visible;}
+  [data-view="home"] .dna-score-ring-valor{display:none;}
+  .anel-helice{position:absolute;}
+  .indicador-card{background:radial-gradient(140% 100% at 20% 0%,rgba(217,178,111,0.07),transparent 45%),linear-gradient(180deg,#171512,#12100E);}
+  .indicador-barra-fill{background:linear-gradient(90deg,#C99A52,#F0CF8E);}
+  .ap-ed{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;color:var(--gold-soft);border:1px solid var(--border-strong);border-radius:20px;padding:5px 11px;cursor:pointer;background:rgba(217,178,111,0.08);}
+  .ap-metodo{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.4px;padding:4px 10px;border-radius:20px;background:linear-gradient(180deg,#F0CF8E,#C99A52);color:#1E1608;}
+  .ap-painel{background:var(--card-2);border:1px solid var(--border-strong);border-radius:14px;padding:12px;margin:0 0 10px;}
+  .ap-painel .t{font-size:10.5px;letter-spacing:1.4px;color:var(--text-faint);font-weight:700;text-transform:uppercase;margin:0 0 6px;}
+  .ap-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .ap-chips span{font-size:11.5px;padding:6px 10px;border-radius:16px;border:1px solid var(--border);color:var(--text-dim);cursor:pointer;}
+  .ap-chips span.on{background:linear-gradient(180deg,#F0CF8E,#C99A52);color:#1E1608;border-color:transparent;font-weight:700;}
+  .ap-painel .ap-cancelar{margin:0;padding:10px 14px;width:auto;background:transparent;border:1px solid var(--border);color:var(--text-dim);box-shadow:none;}
 </style>
 </head>
 <body>
@@ -1005,7 +1039,7 @@
       <circle id="cronometro-fullscreen-ring" cx="110" cy="110" r="98" fill="none" stroke="url(#goldringcronometro)" stroke-width="8" stroke-linecap="round" stroke-dasharray="616" stroke-dashoffset="0"/>
       <defs><linearGradient id="goldringcronometro" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F4D9A5"/><stop offset="100%" stop-color="#E8C58A"/></linearGradient></defs>
     </svg>
-    <p id="cronometro-fullscreen-numero" style="font-family:'Playfair Display',serif;font-size:44px;font-weight:600;color:var(--text-main);">60s</p>
+    <p id="cronometro-fullscreen-numero" style="font-family:'EB Garamond',serif;font-size:44px;font-weight:600;color:var(--text-main);">60s</p>
   </div>
   <div style="display:flex;gap:16px;margin-top:32px;">
     <button onclick="pausarOuRetomarCronometro()" id="cronometro-fullscreen-btn" class="btn-gold" style="width:auto;padding:12px 28px;margin:0;">Pausar</button>
@@ -1016,7 +1050,7 @@
 
 <div id="banner-notificacao-simulada" style="display:none;position:fixed;top:16px;left:16px;right:16px;max-width:358px;margin:0 auto;background:var(--card-2);border:1px solid var(--border-strong);border-radius:16px;padding:14px;z-index:10000;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
   <div style="display:flex;align-items:flex-start;gap:10px;">
-    <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;color:#1A1409;font-family:'Playfair Display',serif;">D</div>
+    <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;color:#1A1409;font-family:'EB Garamond',serif;">D</div>
     <div style="flex:1;">
       <p style="font-size:10px;color:var(--text-faint);margin:0 0 2px;text-transform:uppercase;letter-spacing:0.5px;">DNA MUSA · agora</p>
       <p id="banner-notif-titulo" style="font-size:13px;font-weight:600;margin:0 0 2px;"></p>
@@ -1058,7 +1092,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-01-BI-RESOLVIDO-FILTROS-RESPOSTA</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-06-BK-AULA-EDITAR-METODO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1192,10 +1226,10 @@
     <!-- HOME (aluna) -->
     <div class="view" data-view="home">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
-        <div>
-          <p id="home-marca" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold);margin:0;letter-spacing:0.5px;">DNA MUSA</p>
+        <div class="home-marca-bloco"><svg class="logo-helice" width="13" height="32" viewBox="0 0 14 34" fill="none" stroke-linecap="round" aria-hidden="true"><defs><linearGradient id="logoHelGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F6DCA2"/><stop offset=".5" stop-color="#D9B26F"/><stop offset="1" stop-color="#9C7440"/></linearGradient></defs><g stroke="url(#logoHelGrad)"><path d="M3 5L11 9M3 13L11 17M3 21.5L11 25.5" stroke-width=".9" opacity=".55"/><path d="M11 3C11 9 3 11 3 17S11 25 11 31" stroke-width="1.2" opacity=".45"/><path d="M3 3C3 9 11 11 11 17S3 25 3 31" stroke-width="1.6"/></g></svg><div>
+          <p id="home-marca" style="font-family:'EB Garamond',serif;font-size:22px;font-weight:700;color:var(--gold);margin:0;letter-spacing:0.5px;">DNA MUSA</p>
           <p id="home-marca-sub" style="font-size:9.5px;letter-spacing:2px;color:var(--text-faint);text-transform:uppercase;margin:2px 0 0;">Team Fernandes</p>
-        </div>
+        </div></div>
         <div style="display:flex;gap:8px;align-items:center;position:relative;">
           <div id="botao-tutorial-home" role="button" aria-label="Ver tutorial do aplicativo" title="Ver tutorial" style="width:36px;height:36px;border-radius:50%;background:var(--card-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;" onclick="reverTour()">
             <span style="font-size:15px;font-weight:600;color:var(--gold-soft);line-height:1;">?</span>
@@ -1245,6 +1279,7 @@
             <defs><linearGradient id="homeRingGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F4D9A5"/><stop offset="100%" stop-color="#E8C58A"/></linearGradient></defs>
           </svg>
           <span class="dna-score-ring-valor" id="home-score-ring-valor">--</span>
+          <svg class="anel-helice" width="24" height="42" viewBox="0 0 26 46" fill="none" stroke-linecap="round" aria-hidden="true"><defs><linearGradient id="anelHelGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F6DCA2"/><stop offset=".5" stop-color="#D9B26F"/><stop offset="1" stop-color="#9C7440"/></linearGradient></defs><g stroke="url(#anelHelGrad)"><path d="M5 8L21 11M5 17L21 20M5 26L21 29M5 35L21 38" stroke-width="1" opacity=".5"/><path d="M21 4C21 12 5 14 5 23S21 34 21 42" stroke-width="1.4" opacity=".45"/><path d="M5 4C5 12 21 14 21 23S5 34 5 42" stroke-width="1.9"/></g></svg>
         </div>
       </div>
 
@@ -1320,14 +1355,14 @@
 
     <!-- DESAFIO SECA E EMPINA -->
     <div class="view" data-view="desafio-seca-empina">
-      <p id="se-titulo-desafio" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold);margin:0 0 4px;letter-spacing:0.5px;">Desafio Seca e Empina</p>
+      <p id="se-titulo-desafio" style="font-family:'EB Garamond',serif;font-size:22px;font-weight:700;color:var(--gold);margin:0 0 4px;letter-spacing:0.5px;">Desafio Seca e Empina</p>
       <p class="page-sub" id="se-subtitulo-estrutura"></p>
       <div id="se-lista-dias"></div>
     </div>
 
     <!-- PERGUNTA DE PERFIL DNA -->
     <div class="view" data-view="pergunta-perfil-dna">
-      <p style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold);margin:0 0 16px;letter-spacing:0.5px;">Uma pergunta rápida</p>
+      <p style="font-family:'EB Garamond',serif;font-size:20px;font-weight:700;color:var(--gold);margin:0 0 16px;letter-spacing:0.5px;">Uma pergunta rápida</p>
       <div class="info-box">
         <p class="txt" style="font-size:15px;font-weight:600;margin:0 0 14px;" id="pergunta-perfil-texto"></p>
         <textarea class="form-input" id="pergunta-perfil-resposta" rows="4" placeholder="Escreve com suas palavras, sem pressa..."></textarea>
@@ -1338,7 +1373,7 @@
 
     <!-- PERGUNTA DE RODA DA VIDA (uma área por vez) -->
     <div class="view" data-view="pergunta-roda-vida">
-      <p style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold);margin:0 0 6px;letter-spacing:0.5px;">Roda da Vida</p>
+      <p style="font-family:'EB Garamond',serif;font-size:20px;font-weight:700;color:var(--gold);margin:0 0 6px;letter-spacing:0.5px;">Roda da Vida</p>
       <p class="page-sub" style="margin:0 0 16px;">De 0 a 5, como está essa área da sua vida agora?</p>
       <div class="info-box">
         <p class="txt" style="font-size:15px;font-weight:600;margin:0 0 14px;" id="pergunta-roda-vida-texto"></p>
@@ -1838,7 +1873,7 @@
       </div>
 
       <div id="personal-aula-presencial" style="display:none;">
-        <div class="local-back" onclick="showPersonalView('aluna')"><i class="ti ti-arrow-left"></i><span>Voltar pra ficha</span></div>
+        <div class="local-back" onclick="voltarDaAulaPresencialPraFicha()"><i class="ti ti-arrow-left"></i><span>Voltar pra ficha</span></div>
         <h1 class="page-title" style="margin-top:0;" id="ap-titulo">Modo Aula Presencial</h1>
         <p class="page-sub">Edite a carga e as repetições dela em tempo real, direto na sua tela, como ela faria pelo celular. Tudo que você confirmar aparece no treino dela.</p>
         <div id="ap-conteudo"></div>
@@ -1954,7 +1989,7 @@
   <div style="width:56px;height:56px;border-radius:50%;background:var(--card-2);border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold-soft)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M10.363 3.591l-8.106 13.535a1.914 1.914 0 0 0 1.636 2.874h16.214a1.914 1.914 0 0 0 1.636 -2.874l-8.106 -13.535a1.914 1.914 0 0 0 -3.274 0z"/><path d="M12 16h.01"/></svg>
   </div>
-  <p style="font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--text);margin:0 0 8px;">Algo não carregou direito</p>
+  <p style="font-family:'EB Garamond',serif;font-size:19px;font-weight:700;color:var(--text);margin:0 0 8px;">Algo não carregou direito</p>
   <p style="font-size:13px;color:var(--text-dim);margin:0 0 10px;max-width:280px;">Toca em recarregar pra abrir de novo. Seus dados estão salvos e o seu personal já foi avisado.</p>
   <p id="codigo-erro-generico" style="font-size:11px;color:var(--text-faint);margin:0 0 20px;letter-spacing:1px;"></p>
   <button class="btn-gold" style="width:auto;padding:12px 28px;" onclick="window.location.reload()">Recarregar</button>
@@ -1964,7 +1999,7 @@
   <div style="width:56px;height:56px;border-radius:50%;background:var(--card-2);border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
     <i class="ti ti-bell-ringing" style="font-size:26px;color:var(--gold-soft);"></i>
   </div>
-  <p style="font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--text);margin:0 0 8px;">Não perca nenhum aviso do seu treino</p>
+  <p style="font-family:'EB Garamond',serif;font-size:19px;font-weight:700;color:var(--text);margin:0 0 8px;">Não perca nenhum aviso do seu treino</p>
   <p style="font-size:13px;color:var(--text-dim);margin:0 0 26px;max-width:290px;">Ative as notificações pra saber na hora quando seu personal ajustar algo, mandar uma mensagem, ou quando for hora de registrar seu treino.</p>
   <button class="btn-gold" style="width:auto;padding:12px 28px;margin-bottom:10px;" onclick="aceitarNotificacoes()">Quero receber</button>
   <span style="font-size:13px;color:var(--text-faint);cursor:pointer;" onclick="recusarNotificacoes()">Agora não</span>
@@ -1974,7 +2009,7 @@
   <div style="width:56px;height:56px;border-radius:50%;background:var(--card-2);border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
     <i class="ti ti-heart-handshake" style="font-size:26px;color:var(--gold-soft);"></i>
   </div>
-  <p style="font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--text);margin:0 0 8px;">Combinado! 🤝</p>
+  <p style="font-family:'EB Garamond',serif;font-size:19px;font-weight:700;color:var(--text);margin:0 0 8px;">Combinado! 🤝</p>
   <p style="font-size:13px;color:var(--text-dim);margin:0 0 26px;max-width:290px;">Suas notificações vão te ajudar a nunca perder um ajuste do seu treino, e também vão contribuir com o preenchimento do seu perfil DNA — quanto mais completo, mais preciso fica seu acompanhamento e seu suporte. Obrigado pela confiança!</p>
   <button class="btn-gold" style="width:auto;padding:12px 28px;" onclick="fecharTelaObrigadoNotificacao()">Entendi</button>
 </div>
@@ -1988,7 +2023,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-01-BI-RESOLVIDO-FILTROS-RESPOSTA';
+const VERSAO_APP = '2026-11-06-BK-AULA-EDITAR-METODO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -8797,7 +8832,7 @@ function htmlAnelDoDesafio(st){
     '<circle cx="42" cy="42" r="36" fill="none" stroke="rgba(232,197,138,0.16)" stroke-width="7"/>' +
     '<circle cx="42" cy="42" r="36" fill="none" stroke="#E8C58A" stroke-width="7" stroke-linecap="round" stroke-dasharray="' + c + '" stroke-dashoffset="' + Math.round(c * (1 - feito)) + '" transform="rotate(-90 42 42)"/>' +
     '<text x="42" y="41" text-anchor="middle" fill="#F2EDE4" font-family="Playfair Display, serif" font-size="22" font-weight="600">' + st.dia + '</text>' +
-    '<text x="42" y="57" text-anchor="middle" fill="#A39A8C" font-family="Inter, sans-serif" font-size="10">de ' + st.total + '</text></svg>';
+    '<text x="42" y="57" text-anchor="middle" fill="#A39A8C" font-family="Manrope, sans-serif" font-size="10">de ' + st.total + '</text></svg>';
 }
 
 // Os últimos 5 dias do desafio: verde em quem treinou naquele dia (academia ou em casa)
@@ -13210,6 +13245,7 @@ function contarTreinoDaAulaPresencial(a, d){
 
 function renderModoAulaPresencial(){
   const a = alunaModoPresencial;
+  if(a) alunaAberta = a; // a aula abre da ficha dela; as mesmas regras de método da ficha valem aqui
   const area = document.getElementById('ap-conteudo');
   if(!a || !area) return;
   const prog = getProgressoAluna(a.nome);
@@ -13235,7 +13271,8 @@ function renderModoAulaPresencial(){
         const parceiros = (metodoDoEx && typeof metodoDoEx === 'object' && metodoDoEx.parceiros) ? metodoDoEx.parceiros.filter(function(p){ return !!p; }) : [];
         return '<div style="border-top:1px solid var(--border);padding:10px 0;">' +
           '<p style="font-size:12.5px;font-weight:600;margin:0 0 6px;cursor:pointer;text-decoration:underline;text-decoration-color:var(--gold-soft);" onclick="abrirVideoApenasExercicio(\'' + nome.replace(/'/g,"\\'") + '\', event)">' + linha + '</p>' +
-          (parceiros.length > 0 ? '<span class="tag" style="background:var(--gold-soft);color:#1A1409;margin-bottom:6px;display:inline-block;">' + metodoDoEx.tipo + '</span>' : '') +
+          htmlBotaoEdicaoAulaPresencial(di, ei, metodoDoEx) +
+          htmlPainelEdicaoAulaPresencial(a, di, ei) +
           (ultimo ? '<p class="txt" style="font-size:10.5px;color:var(--text-faint);margin:0 0 6px;">Último registrado: ' + ultimo.carga + 'kg x ' + ultimo.reps + '</p>' : '') +
           '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">' +
             '<input type="text" inputmode="decimal" placeholder="kg" id="ap-carga-' + di + '-' + ei + '" class="form-input" style="width:70px;padding:8px;" value="' + (ultimo ? ultimo.carga : '') + '">' +
@@ -13298,6 +13335,178 @@ function confirmarSerieComoPersonal(diaIndex, exIndex, nomeExercicio){
     if(selo){ selo.className = 'fc fc-ok'; selo.textContent = 'Treino contado nesta semana'; }
     mostrarConfirmacaoSalvamento(true, 'Treino de ' + d.n + ' contado como feito pra ' + a.nome + '.');
   }
+}
+
+// ===== AULA PRESENCIAL: editar série e método de um exercício sem voltar pra ficha =====
+// Abre um painel embaixo do exercício com séries x repetições, o método (os mesmos que a ficha libera pro nível
+// dela) e, em bi-set, tri-set ou combinar, o exercício parceiro. Só grava ao tocar em "Salvar no treino dela":
+// muda o treino de verdade (igual a editar pela ficha) e aparece no celular dela.
+let edicaoAulaPresencial = null;     // { di, ei, series, reps, texto, modoTexto, metodo, parceiros }
+let aulaPresencialMudouTreino = false;
+
+function nomeDoMetodo(m){ return !m ? '' : (typeof m === 'object' ? (m.tipo || '') : String(m)); }
+
+function htmlBotaoEdicaoAulaPresencial(di, ei, metodoDoEx){
+  const m = nomeDoMetodo(metodoDoEx);
+  const aberto = edicaoAulaPresencial && edicaoAulaPresencial.di === di && edicaoAulaPresencial.ei === ei;
+  return '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 8px;">' +
+    (aberto ? '' : '<span class="ap-ed" onclick="abrirEdicaoAulaPresencial(' + di + ',' + ei + ')">✎ Editar série ou método</span>') +
+    (m && m !== 'Nenhum' ? '<span class="ap-metodo">' + escaparHtmlFicha(m) + '</span>' : '') +
+  '</div>';
+}
+
+// "4x10" vira séries 4 e repetições 10. Se a linha não seguir esse formato ("30s", "até a falha"), vira um campo só.
+function separarSeriesReps(linha){
+  const prescricao = String(linha || '').split(' · ').slice(1).join(' · ').trim();
+  const m = prescricao.match(/^(\d+)\s*[xX×]\s*(.+)$/);
+  return m ? { series: m[1], reps: m[2].trim(), texto: '' } : { series: '', reps: '', texto: prescricao };
+}
+
+function abrirEdicaoAulaPresencial(di, ei){
+  const a = alunaModoPresencial;
+  if(!a || !a.treinoAtual || !a.treinoAtual.dias[di]) return;
+  const d = a.treinoAtual.dias[di];
+  const atual = d.metodos && d.metodos[ei];
+  const sr = separarSeriesReps(d.ex[ei]);
+  edicaoAulaPresencial = { di: di, ei: ei, series: sr.series, reps: sr.reps, texto: sr.texto, modoTexto: sr.texto !== '',
+    metodo: nomeDoMetodo(atual) || 'Nenhum', parceiros: (atual && atual.parceiros) ? atual.parceiros.slice() : [] };
+  rerenderAulaPresencialMantendoCampos();
+}
+
+function cancelarEdicaoAulaPresencial(){
+  edicaoAulaPresencial = null;
+  rerenderAulaPresencialMantendoCampos();
+}
+
+function quantosParceirosDoMetodo(m){ return m === 'Tri-set' ? 2 : ((m === 'Bi-set' || m === 'Combinar') ? 1 : 0); }
+
+function htmlPainelEdicaoAulaPresencial(a, di, ei){
+  const e = edicaoAulaPresencial;
+  if(!e || e.di !== di || e.ei !== ei) return '';
+  const linha = a.treinoAtual.dias[di].ex[ei];
+  const linhaAntiga = String(linha).indexOf('|||') !== -1; // bi-set no formato antigo, numa linha só
+  const permitidos = metodosPermitidosAgora(a);
+  const metodos = permitidos.slice();
+  if(e.metodo && metodos.indexOf(e.metodo) === -1) metodos.push(e.metodo); // o que já está salvo sempre aparece
+  const nomePrincipal = extrairNomeExercicioDeLinha(linha);
+  const qtd = quantosParceirosDoMetodo(e.metodo);
+  let parceirosHtml = '';
+  if(qtd > 0){
+    const opcoes = opcoesDeParceiroCombo(nomePrincipal, e.metodo !== 'Combinar');
+    for(let p = 0; p < qtd; p++){
+      const escolhido = e.parceiros[p] || '';
+      parceirosHtml += '<select class="form-select" id="ap-ed-parceiro-' + p + '" style="font-size:12px;padding:8px;margin-bottom:8px;" onchange="definirParceiroEdicaoAulaPresencial(' + p + ', this.value)">' +
+        '<option value="">+ escolher exercício parceiro' + (qtd > 1 ? ' ' + (p + 1) : '') + '</option>' +
+        opcoes.map(function(o){ return '<option value="' + o.nome.replace(/"/g, '&quot;') + '"' + (o.nome === escolhido ? ' selected' : '') + '>' + escaparHtmlFicha(o.nome) + '</option>'; }).join('') +
+      '</select>';
+    }
+  }
+  const campoSeries = linhaAntiga
+    ? '<p class="txt" style="font-size:11.5px;color:var(--text-faint);margin:0 0 12px;">Esse exercício está num formato antigo de bi-set. As séries dele você muda pela ficha.</p>'
+    : (e.modoTexto
+      ? '<input class="form-input" id="ap-ed-texto" style="padding:8px;margin-bottom:12px;" value="' + praAtributoAula(e.texto) + '">'
+      : '<div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;"><input class="form-input" id="ap-ed-series" inputmode="numeric" style="width:60px;padding:8px;" value="' + praAtributoAula(e.series) + '"><span style="color:var(--text-faint);">x</span><input class="form-input" id="ap-ed-reps" style="width:80px;padding:8px;" value="' + praAtributoAula(e.reps) + '"></div>');
+  return '<div class="ap-painel" id="ap-painel-edicao">' +
+    '<p class="t">Séries e repetições</p>' + campoSeries +
+    '<p class="t">Método</p>' +
+    (permitidos.length === 1 && permitidos[0] === 'Nenhum' ? '<p class="txt" style="font-size:11.5px;color:var(--text-faint);margin:0 0 8px;">Pelo nível ou pela fase dela, a ficha ainda não libera métodos (a mesma regra da ficha).</p>' : '') +
+    '<div class="ap-chips">' + metodos.map(function(m){
+      return '<span class="' + (m === e.metodo ? 'on' : '') + '" onclick="escolherMetodoEdicaoAulaPresencial(\'' + m.replace(/'/g, "\\'") + '\')">' + escaparHtmlFicha(m) + '</span>';
+    }).join('') + '</div>' +
+    (qtd > 0 ? '<p class="t">' + (qtd > 1 ? 'Parceiros do ' : 'Parceiro do ') + escaparHtmlFicha(e.metodo.toLowerCase()) + '</p>' + parceirosHtml : '') +
+    '<div style="display:flex;gap:8px;margin-top:4px;"><button class="btn-gold" style="margin:0;padding:10px;" onclick="salvarEdicaoAulaPresencial()">Salvar no treino dela</button>' +
+    '<button class="btn-gold ap-cancelar" onclick="cancelarEdicaoAulaPresencial()">Cancelar</button></div>' +
+  '</div>';
+}
+
+function praAtributoAula(t){ return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
+// Guarda o que já foi digitado no painel antes de redesenhar (trocar de método redesenha)
+function lerCamposDoPainelAulaPresencial(){
+  const e = edicaoAulaPresencial; if(!e) return;
+  const s = document.getElementById('ap-ed-series'), r = document.getElementById('ap-ed-reps'), t = document.getElementById('ap-ed-texto');
+  if(e.modoTexto){ if(t) e.texto = t.value; } else { if(s) e.series = s.value; if(r) e.reps = r.value; }
+}
+
+function escolherMetodoEdicaoAulaPresencial(m){
+  const e = edicaoAulaPresencial; if(!e) return;
+  lerCamposDoPainelAulaPresencial();
+  e.metodo = m;
+  e.parceiros = e.parceiros.slice(0, quantosParceirosDoMetodo(m));
+  rerenderAulaPresencialMantendoCampos();
+}
+
+function definirParceiroEdicaoAulaPresencial(p, nome){
+  const e = edicaoAulaPresencial; if(!e) return;
+  e.parceiros[p] = nome;
+}
+
+// Redesenha a aula sem perder as cargas e repetições que você já digitou nos outros exercícios
+function rerenderAulaPresencialMantendoCampos(){
+  const area = document.getElementById('ap-conteudo');
+  const guardados = {};
+  if(area && area.querySelectorAll){
+    area.querySelectorAll('input[id^="ap-carga-"], input[id^="ap-reps-"]').forEach(function(el){ guardados[el.id] = el.value; });
+    area.querySelectorAll('[id^="ap-resultado-"]').forEach(function(el){ if(el.innerHTML) guardados['#' + el.id] = el.innerHTML; });
+  }
+  renderModoAulaPresencial();
+  Object.keys(guardados).forEach(function(id){
+    const el = document.getElementById(id.charAt(0) === '#' ? id.slice(1) : id);
+    if(!el) return;
+    if(id.charAt(0) === '#') el.innerHTML = guardados[id]; else el.value = guardados[id];
+  });
+}
+
+function salvarEdicaoAulaPresencial(){
+  const a = alunaModoPresencial, e = edicaoAulaPresencial;
+  if(!a || !e) return;
+  lerCamposDoPainelAulaPresencial();
+  const d = a.treinoAtual.dias[e.di];
+  const linha = d.ex[e.ei];
+  // 1) Séries e repetições
+  let novaPrescricao = null;
+  if(String(linha).indexOf('|||') === -1){
+    if(e.modoTexto){
+      novaPrescricao = String(e.texto).trim();
+    } else {
+      const series = String(e.series).trim(), reps = String(e.reps).trim();
+      if(!/^\d+$/.test(series) || !reps){ alert('Preenche as séries (um número) e as repetições.'); return; }
+      novaPrescricao = series + 'x' + reps;
+    }
+    if(!novaPrescricao){ alert('Preenche as séries e as repetições.'); return; }
+  }
+  // 2) Método e parceiros, com a mesma checagem da ficha
+  const qtd = quantosParceirosDoMetodo(e.metodo);
+  const parceiros = e.parceiros.slice(0, qtd);
+  if(qtd > 0){
+    for(let p = 0; p < qtd; p++){
+      if(!parceiros[p]){ alert('Escolhe o exercício parceiro do ' + e.metodo.toLowerCase() + '.'); return; }
+      const v = validarCombinacaoBiset(extrairNomeExercicioDeLinha(linha), parceiros[p]);
+      if(!v.valido){ alert('Essa combinação não é recomendada: ' + v.motivo); return; }
+    }
+  }
+  if(novaPrescricao !== null){
+    const nomeAtual = String(linha).split(' · ')[0];
+    d.ex[e.ei] = nomeAtual + ' · ' + novaPrescricao;
+    recalcularNomeDoTreinoPorVolume(d);
+  }
+  if(!d.metodos) d.metodos = {};
+  if(!e.metodo || e.metodo === 'Nenhum') delete d.metodos[e.ei];
+  else d.metodos[e.ei] = qtd > 0 ? { tipo: e.metodo, parceiros: parceiros } : e.metodo;
+  sincronizarTreinoComSupabase(a);
+  aulaPresencialMudouTreino = true;
+  edicaoAulaPresencial = null;
+  rerenderAulaPresencialMantendoCampos();
+  mostrarConfirmacaoSalvamento(true, 'Salvo no treino de ' + a.nome + '.');
+}
+
+// Voltando pra ficha depois de mudar o treino aqui, a ficha é redesenhada pra já mostrar a mudança
+function voltarDaAulaPresencialPraFicha(){
+  const a = alunaModoPresencial;
+  edicaoAulaPresencial = null;
+  const i = a ? alunasPersonal.indexOf(a) : -1;
+  if(aulaPresencialMudouTreino && i !== -1){ aulaPresencialMudouTreino = false; openAlunaDetail(i); return; }
+  showPersonalView('aluna');
 }
 
 // Uma linha normal é "Nome · 3x12". Um bi-set é "Bi-set|||Nome1 · 3x12|||Nome2 · 3x12" — sem essa
@@ -13780,6 +13989,16 @@ function aplicarMetodoExercicio(di, ei, metodo){
 // restringirMesmoGrupo=true (padrão, Bi-set/Tri-set): só mostra parceiro do MESMO grupo muscular do
 // principal. O método "Combinar" passa false aqui de propósito — é exatamente a diferença dele pros
 // outros dois: pode juntar qualquer exercício de qualquer grupo, sem essa restrição.
+function opcoesDeParceiroCombo(nomePrincipal, restringirMesmoGrupo){
+  if(restringirMesmoGrupo === undefined) restringirMesmoGrupo = true;
+  const exPrincipalBanco = exerciciosBanco.find(function(e){ return e.nome.toUpperCase() === nomePrincipal.toUpperCase(); });
+  const grupo = exPrincipalBanco ? (exPrincipalBanco.grupo || exPrincipalBanco.categoria) : null;
+  return exerciciosBanco.filter(function(e){
+    const grupoDoEx = e.grupo || e.categoria;
+    return exercicioPodeSerPrescrito(e) && (!restringirMesmoGrupo || !grupo || grupoDoEx === grupo) && e.nome.toUpperCase() !== nomePrincipal.toUpperCase();
+  }).sort(function(x, y){ return x.nome.localeCompare(y.nome, 'pt-BR'); });
+}
+
 function htmlCaixasParceirosCombo(nomePrincipal, quantosParceiros, parceirosAtuais, restringirMesmoGrupo){
   if(restringirMesmoGrupo === undefined) restringirMesmoGrupo = true;
   const exPrincipalBanco = exerciciosBanco.find(function(e){ return e.nome.toUpperCase() === nomePrincipal.toUpperCase(); });
@@ -22919,7 +23138,7 @@ function calcularEstatisticasAluna(nome){
   const totalPlanejado = totalSemanas * totalDiasDeTreino();
   let progressoes = 0;
   Object.keys(prog.historico).forEach(function(ex){
-    prog.historico[ex].forEach(function(r){ if(r.sugestao.texto === 'Aumentar carga') progressoes++; });
+    prog.historico[ex].forEach(function(r){ if(r && r.sugestao && r.sugestao.texto === 'Aumentar carga') progressoes++; }); // registro sem sugestão (feito por fora) não pode travar a tela
   });
   return { totalConcluidos: totalConcluidos, totalPlanejado: totalPlanejado, progressoes: progressoes, temDados: totalConcluidos > 0 };
 }
