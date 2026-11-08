@@ -1,4 +1,4 @@
-[Uploading dna_musa_168.html…]()
+[dna_musa_169.html](https://github.com/user-attachments/files/34532164/dna_musa_169.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1058,6 +1058,45 @@
   .dna-perfil-comp{font-size:12px;color:var(--text-dim);margin:6px 0 0;}
   .dna-perfil-helice{flex-shrink:0;margin:-8px 0;}
   .dna-perfil-inds{background:linear-gradient(180deg,#171512,#12100E);border:1px solid var(--border);border-radius:18px;padding:16px 16px 6px;}
+  .av-janela{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:900;align-items:center;justify-content:center;padding:18px;}
+  .av-cartao{background:var(--card);border:1px solid var(--border-strong);border-radius:18px;padding:20px 18px;width:100%;max-width:400px;max-height:86vh;overflow-y:auto;}
+  .av-tit{font-family:'EB Garamond',serif;font-size:21px;font-weight:600;color:var(--text);margin:0 0 6px;}
+  .av-txt{font-size:12.5px;color:var(--text-dim);margin:0 0 12px;line-height:1.5;}
+  .av-carregando{font-size:13px;color:var(--gold-soft);margin:10px 0;}
+  .av-item{border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:10px;}
+  .av-item.ja{opacity:.7;}
+  .av-marca{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--gold-soft);margin-bottom:10px;}
+  .av-campos{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .av-campos label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--text-faint);}
+  .av-campos input{padding:8px;}
+  .av-botoes{display:flex;gap:8px;margin-top:12px;}
+  .av-botoes .btn-gold{margin:0;padding:12px;}
+  .av-botoes .av-sec{background:transparent;border:1px solid var(--border-strong);color:var(--gold-soft);box-shadow:none;}
+  .av-tabela p{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--text-dim);margin:0;padding:7px 0;border-bottom:1px solid var(--border);}
+  .av-tabela p b{color:var(--text);font-weight:600;white-space:nowrap;}
+  .av-sub{font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--text-faint);font-weight:700;margin:14px 0 4px;}
+  .av-outros summary{font-size:12px;color:var(--gold-soft);cursor:pointer;margin:12px 0 4px;}
+  .av-apagar{text-align:center;font-size:12px;color:#C9784A;text-decoration:underline;cursor:pointer;margin:14px 0 0;}
+  .av-grafs{background:linear-gradient(180deg,#171512,#12100E);border:1px solid var(--border);border-radius:16px;padding:12px 14px;margin-bottom:10px;}
+  .av-graf p{display:flex;justify-content:space-between;font-size:12px;color:var(--text-dim);margin:6px 0 2px;}
+  .av-graf p b{color:var(--text);}
+  .av-periodo{font-size:10.5px;color:var(--text-faint);text-align:right;margin:6px 0 0;}
+  .av-linha{cursor:pointer;}
+  .av-linha span{display:flex;flex-direction:column;gap:2px;}
+  .av-linha small{font-size:11.5px;color:var(--text-faint);}
+  .av-botao-pdf{margin-top:6px;}
+  .av-resumo{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--text-faint);}
+  .av-resumo b{color:var(--text);font-weight:600;}
+  .av-comp-op{padding:10px 12px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;color:var(--text-dim);}
+  .av-comp-tabela{overflow-x:auto;margin:4px -4px 0;}
+  .av-comp-tabela table{width:100%;border-collapse:collapse;font-size:12px;}
+  .av-comp-tabela th{font-size:11.5px;color:var(--gold-soft);font-weight:600;padding:6px 4px;text-align:right;}
+  .av-comp-tabela th small{display:block;font-size:9.5px;color:var(--text-faint);font-weight:400;}
+  .av-comp-tabela td{padding:7px 4px;border-top:1px solid var(--border);text-align:right;color:var(--text);white-space:nowrap;}
+  .av-comp-tabela td:first-child{text-align:left;color:var(--text-dim);white-space:normal;}
+  .av-comp-tabela td small{color:var(--text-faint);font-size:10px;}
+  .av-comp-tabela .av-dif{color:var(--gold-soft);font-weight:600;}
+  .av-botao-comparar{margin-top:6px;background:transparent;border:1px solid var(--border-strong);color:var(--gold-soft);box-shadow:none;}
   .fb-humor{display:flex;gap:8px;}
   .fb-rosto{width:44px;height:44px;border-radius:50%;background:var(--card-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;filter:grayscale(.6);opacity:.75;}
   .fb-rosto.on{filter:none;opacity:1;border-color:var(--gold);background:rgba(217,178,111,0.16);box-shadow:0 0 10px rgba(217,178,111,0.3);}
@@ -1116,6 +1155,7 @@
 <div class="phone" id="phone-container">
   <div class="notch"></div>
   <div class="sidebar-personal" id="sidebar-personal"></div>
+  <div class="av-janela" id="janela-avaliacao" onclick="if(event.target === this) fecharJanelaAvaliacao()"><div class="av-cartao" id="janela-avaliacao-conteudo"></div></div>
   <div class="modal-overlay-avisos" id="modal-aceitar-avisos">
     <div class="modal-card">
       <h3>Avisos do seu personal</h3>
@@ -1137,7 +1177,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-08-BN-TELAS-NOVAS</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-08-BP-LEITOR-PDF-GRATIS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1371,6 +1411,8 @@
 
       <button class="btn-gold" style="margin-top:12px;" onclick="iniciarRegistroComposicaoNova()"><i class="ti ti-clipboard-plus" style="margin-right:6px;"></i>Registrar novas informações</button>
       <div id="area-registro-composicao"></div>
+
+      <div id="area-avaliacoes-pdf"></div>
 
       <p class="section-label" style="margin-top:22px;">Avaliações</p>
       <div class="row" id="row-avaliacao"></div>
@@ -2071,7 +2113,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-08-BN-TELAS-NOVAS';
+const VERSAO_APP = '2026-11-08-BP-LEITOR-PDF-GRATIS';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -3194,8 +3236,11 @@ function renderAvaliacoes(){
   rowAval.innerHTML = '';
   const alunaObj = alunasPersonal.find(function(a){ return a.nome === NOME_ALUNA_LOGADA; });
   let subAval = 'Ainda não realizada';
-  if(alunaObj && alunaObj.dataAnamnese){
-    const dataBase = new Date(alunaObj.dataAnamnese);
+  // A última avaliação é a mais recente entre a anamnese e as avaliações em PDF
+  const ultimaAvPdf = alunaObj ? (alunaObj.avaliacoesFisicas || []).map(function(x){ return x.data; }).filter(Boolean).sort().pop() : null;
+  const dataUltimaAvaliacao = (ultimaAvPdf && (!alunaObj.dataAnamnese || ultimaAvPdf > String(alunaObj.dataAnamnese).slice(0, 10))) ? ultimaAvPdf + 'T12:00:00' : (alunaObj ? alunaObj.dataAnamnese : null);
+  if(alunaObj && dataUltimaAvaliacao){
+    const dataBase = new Date(dataUltimaAvaliacao);
     const hoje = new Date();
     const diasPassados = Math.floor((hoje - dataBase) / (1000*60*60*24));
     const dataProxima = new Date(dataBase.getTime() + 90*24*60*60*1000);
@@ -3213,8 +3258,8 @@ function renderAvaliacoes(){
   // Passou dos 90 dias: o aviso vira um card no topo, com o botão pra registrar (antes era só um texto pequeno)
   const cardReav = document.getElementById('card-reavaliacao');
   if(cardReav){
-    const precisa = alunaObj && alunaObj.dataAnamnese && subAval.indexOf('já está na hora de reavaliar') !== -1;
-    const diasDesde = precisa ? Math.floor((new Date() - new Date(alunaObj.dataAnamnese)) / 86400000) : 0;
+    const precisa = alunaObj && dataUltimaAvaliacao && subAval.indexOf('já está na hora de reavaliar') !== -1;
+    const diasDesde = precisa ? Math.floor((new Date() - new Date(dataUltimaAvaliacao)) / 86400000) : 0;
     cardReav.innerHTML = precisa
       ? '<div class="evo-reav"><p><strong>Hora de reavaliar</strong>Sua última avaliação física foi há ' + diasDesde + ' dias. Registrar peso e medidas agora mostra o quanto você já mudou.</p>' +
         '<button class="btn-gold" style="margin-top:12px;" onclick="iniciarRegistroComposicaoNova()">Registrar peso e medidas</button></div>'
@@ -3223,6 +3268,7 @@ function renderAvaliacoes(){
 
   renderComposicaoAtual(alunaObj);
   renderMinhaEvolucao(alunaObj);
+  renderAvaliacoesPdfAluna(alunaObj);
 }
 
 function renderComposicaoAtual(a){
@@ -3589,6 +3635,443 @@ function renderEditorPesoComposicaoPersonal(a){
   const conteudo = htmlEditorPesoComposicao(a, 'personal');
   return '<p class="section-label" style="margin-top:22px;">Peso e composição (corrigir registros)</p>' +
     '<div id="editor-peso-composicao-personal">' + (conteudo || '<p class="txt" style="color:var(--text-faint);">Ela ainda não registrou peso nem composição.</p>') + '</div>';
+}
+
+// ===== AVALIAÇÃO FÍSICA EM PDF (aba Corpo da aluna e ficha no Personal) =====
+// A aluna, o Thiago ou a Bianca escolhem o PDF da avaliação (Webdiet ou outro aplicativo que exporta PDF com texto).
+// O PRÓPRIO APP lê o PDF no celular (pdf.js), sem IA e sem custo: acha os nomes de sempre (Peso, Altura, Percentual de
+// Gordura, Massa muscular, Massa magra, medidas...) e as datas. Relatório de evolução com várias datas vira uma
+// avaliação por data, e a data que já está salva fica de fora (não duplica). Os números entram como vieram (sem edição).
+// O arquivo vai pra pasta privada "avaliacoes", pra abrir depois no "Ver o PDF". PDF escaneado ou foto não tem texto:
+// o app avisa e a pessoa registra pelo "Registrar novas informações" de sempre.
+const PDFJS_URL = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
+const PDFJS_WORKER_URL = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+let promessaPdfJs = null;
+function carregarPdfJs(){
+  if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if(promessaPdfJs) return promessaPdfJs;
+  promessaPdfJs = new Promise(function(ok, falha){
+    const tag = document.createElement('script');
+    tag.src = PDFJS_URL;
+    tag.onload = function(){ if(!window.pdfjsLib){ falha(new Error('o leitor de PDF não carregou')); return; } window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_URL; ok(window.pdfjsLib); };
+    tag.onerror = function(){ promessaPdfJs = null; falha(new Error('Sem internet pra abrir o leitor de PDF. Tente de novo.')); };
+    document.head.appendChild(tag);
+  });
+  return promessaPdfJs;
+}
+
+// Junta os pedacinhos de texto do PDF em linhas (mesma altura), na ordem da esquerda pra direita, com espaço onde tem vão
+function linhasDosItensDoPdf(itens){
+  const grupos = {};
+  (itens || []).forEach(function(i){
+    if(!i || !String(i.s || '').trim()) return;
+    const k = Math.round(i.y / 2.5);
+    (grupos[k] = grupos[k] || []).push(i);
+  });
+  return Object.keys(grupos).map(Number).sort(function(a, b){ return b - a; }).map(function(k){
+    let texto = '', fim = null;
+    grupos[k].sort(function(a, b){ return a.x - b.x; }).forEach(function(i){
+      if(fim !== null && i.x - fim > Math.max(1.2, 0.18 * (i.h || 10))) texto += ' ';
+      texto += i.s; fim = i.x + (i.w || 0);
+    });
+    return texto.replace(/\s+/g, ' ').trim();
+  }).filter(Boolean);
+}
+
+async function linhasDoArquivoPdf(arquivo){
+  const pdfjs = await carregarPdfJs();
+  const doc = await pdfjs.getDocument({ data: new Uint8Array(await arquivo.arrayBuffer()) }).promise;
+  let linhas = [];
+  for(let p = 1; p <= Math.min(doc.numPages, 12); p++){
+    const pg = await doc.getPage(p);
+    const tc = await pg.getTextContent();
+    linhas = linhas.concat(linhasDosItensDoPdf(tc.items.map(function(i){ return { s: i.str, x: i.transform[4], y: i.transform[5], w: i.width, h: Math.abs(i.transform[3]) }; })));
+  }
+  return linhas;
+}
+
+// ===== Leitor das linhas: de "Peso atual (Kg) 70.3 69.5 ↓ (-0.8) 66.6" pra { peso: 70.3 } em cada data =====
+const RE_DATA_PDF = /^(\d{2})\/(\d{2})\/(\d{4}),?$/;
+const RE_NUMERO_PDF = /^-?\d+(?:[.,]\d+)?(?:kg|cm|mm|%|kcal)?$/i;
+function semAcento(t){ return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+function isoDaDataPdf(tok){ const m = String(tok).match(RE_DATA_PDF); return m ? m[3] + '-' + m[2] + '-' + m[1] : null; }
+
+// Separa a linha em nome (o que vem antes do 1º número ou "-") e valores (números e "-"), jogando fora setas e "(−0.8)"
+function separarLinhaDoPdf(linha){
+  const toks = String(linha).split(' ').filter(Boolean);
+  let i = 0;
+  while(i < toks.length && !(RE_NUMERO_PDF.test(toks[i]) || toks[i] === '-')) i++;
+  const valores = [];
+  toks.slice(i).forEach(function(t){
+    if(t === '-'){ valores.push(null); return; }
+    if(/^[↑↓]$/.test(t) || /^\(.*\)$/.test(t) || /^\(/.test(t) || /\)$/.test(t)) return;
+    if(RE_NUMERO_PDF.test(t)) valores.push(parseFloat(t.replace(',', '.')));
+  });
+  return { nome: toks.slice(0, i).join(' ').replace(/:$/, '').trim(), valores: valores };
+}
+
+// Qual campo é essa linha (pelo nome, sem acento). null = vai pra "outros dados" (dobras, diâmetros...)
+function campoDaLinhaDoPdf(nome){
+  const n = semAcento(nome).replace(/\s+/g, ' ');
+  if(/classif|risco/.test(n)) return { ignorar: true };
+  const pct = /%/.test(n);
+  if(/peso muscular|massa muscular|musculo esqueletico/.test(n)) return { campo: 'massaMuscular' };
+  if(/massa (livre de gordura|magra|isenta)/.test(n)) return { campo: pct ? 'massaMagraPct' : 'massaMagra' };
+  if(/percentual de gordura|% de gordura|gordura \(%\)|% gordura|gordura corporal \(%\)|^gordura %|percentual de massa gorda/.test(n)) return { campo: 'gordura' };
+  if(/massa (de )?gordura|massa gorda|massa gordurosa|gordura \(kg\)/.test(n)) return { campo: 'massaGorda' };
+  if(/^peso( atual| corporal| total)?( \(kg\))?$|^massa corporal( total)?/.test(n)) return { campo: 'peso' };
+  if(/^(altura|estatura)/.test(n)) return { campo: 'altura' };
+  if(/^idade/.test(n)) return { campo: 'idade' };
+  if(/indice de massa corporal|^imc/.test(n)) return { campo: 'imc' };
+  if(/massa ossea/.test(n)) return { campo: 'massaOssea' };
+  if(/agua corporal|agua total|% de agua/.test(n)) return { campo: 'agua' };
+  if(/gordura visceral/.test(n)) return { campo: 'gorduraVisceral' };
+  if(/metabolismo basal|taxa metabolica basal|^tmb/.test(n)) return { campo: 'metabolismoBasal' };
+  if(/cintura\/quadril|^rcq/.test(n)) return { campo: 'rcq' };
+  if(/^(circ|perimetro|cintura|quadril|abdom|braco|coxa|panturrilha|torax|ombro|pescoco)/.test(n) && !/musc/.test(n)){
+    if(/cintura/.test(n)) return { medida: 'cintura' };
+    if(/quadril/.test(n)) return { medida: 'quadril' };
+    if(/abdom/.test(n)) return { medida: 'abdomen' };
+    if(/braco/.test(n) && !/contraid/.test(n)) return { medida: 'braco' };
+    if(/coxa/.test(n) && !/distal|proximal/.test(n)) return { medida: 'coxa' };
+    if(/panturrilha/.test(n)) return { medida: 'panturrilha' };
+    if(/torax/.test(n)) return { medida: 'torax' };
+    if(/ombro/.test(n)) return { medida: 'ombro' };
+    if(/pescoco/.test(n)) return { medida: 'pescoco' };
+  }
+  return null;
+}
+
+const FAIXAS_AVALIACAO_PDF = { peso: [25, 300], altura: [100, 230], idade: [8, 110], imc: [10, 80], gordura: [2, 75], massaGorda: [1, 200], massaMagra: [10, 200], massaMagraPct: [20, 98],
+  massaMuscular: [5, 150], massaOssea: [0.5, 20], agua: [20, 80], gorduraVisceral: [1, 60], metabolismoBasal: [500, 5000], rcq: [0.4, 1.6] };
+
+function lerAvaliacoesDoTexto(linhas){
+  const L = (linhas || []).map(function(l){ return String(l || '').trim(); }).filter(Boolean);
+  const texto = L.join('\n');
+  const fonte = /webdiet/i.test(texto) ? 'Webdiet' : null;
+  // Tabela de evolução: a linha com as datas das colunas (2 ou mais, ou 1 seguida de "-")
+  let datas = null;
+  for(const l of L){
+    const toks = l.split(' ');
+    const ds = toks.map(isoDaDataPdf).filter(Boolean);
+    if(ds.length >= 2 || (ds.length === 1 && toks.indexOf('-') !== -1 && !/\d{2}:\d{2}/.test(l))){ datas = ds; break; }
+  }
+  if(!datas){
+    // Uma avaliação só: a data da linha que fala de avaliação/data; senão a 1ª data que não é a hora da impressão
+    const comData = L.filter(function(l){ return /\d{2}\/\d{2}\/\d{4}/.test(l); });
+    const preferida = comData.find(function(l){ return /avalia|data/i.test(semAcento(l)) && !/\d{2}:\d{2}/.test(l); }) || comData.find(function(l){ return !/\d{2}:\d{2}/.test(l); }) || comData[0];
+    const m = preferida ? preferida.match(/(\d{2})\/(\d{2})\/(\d{4})/) : null;
+    datas = [m ? m[3] + '-' + m[2] + '-' + m[1] : null];
+  }
+  const avs = datas.map(function(d){ return { data: d, medidas: {}, outros: [] }; });
+  for(let k = 0; k < L.length; k++){
+    let sep = separarLinhaDoPdf(L[k]);
+    if(!sep.valores.some(function(v){ return v != null; })) continue;
+    if(!sep.nome){
+      // nome quebrado em outra linha (ex: "(Kg/m²)" com o "2" pequeno): usa o nome da linha de baixo, se ela não tem número
+      const prox = L[k + 1] ? separarLinhaDoPdf(L[k + 1]) : null;
+      if(prox && prox.nome && !prox.valores.length){ sep = { nome: prox.nome, valores: sep.valores }; k++; } else continue;
+    }
+    if(RE_DATA_PDF.test(sep.nome.split(' ').pop() || '') || /^parametro/.test(semAcento(sep.nome))) continue;
+    const alvo = campoDaLinhaDoPdf(sep.nome);
+    if(alvo && alvo.ignorar) continue;
+    const unidade = (sep.nome.match(/\((kg|cm|mm|%|g\/ml|kcal)\)/i) || [])[1] || '';
+    avs.forEach(function(av, c){
+      const v = sep.valores[c];
+      if(v == null || isNaN(v)) return;
+      if(alvo && alvo.campo){ const f = FAIXAS_AVALIACAO_PDF[alvo.campo]; if(!f || (v >= f[0] && v <= f[1])) av[alvo.campo] = v; }
+      else if(alvo && alvo.medida){ if(v > 5 && v < 250) av.medidas[alvo.medida] = v; }
+      else if(av.outros.length < 60) av.outros.push({ nome: sep.nome.replace(/\s*\([^)]*\)\s*$/, '').slice(0, 60), valor: v, unidade: unidade });
+    });
+  }
+  const principais = ['peso', 'altura', 'gordura', 'massaMuscular', 'massaMagra', 'massaMagraPct', 'massaGorda', 'imc'];
+  const lidas = avs.filter(function(av){ return principais.some(function(c){ return av[c] != null; }); });
+  lidas.sort(function(x, y){ return String(x.data || '').localeCompare(String(y.data || '')); });
+  return { fonte: fonte, avaliacoes: lidas };
+}
+const TAMANHO_MAXIMO_PDF_AVALIACAO = 10 * 1024 * 1024;
+const ROTULOS_AVALIACAO = [
+  ['peso', 'Peso', 'kg'], ['altura', 'Altura', 'cm'], ['idade', 'Idade', 'anos'], ['imc', 'IMC', ''], ['gordura', 'Gordura', '%'],
+  ['massaGorda', 'Massa gorda', 'kg'], ['massaMagra', 'Massa magra', 'kg'], ['massaMagraPct', 'Massa magra', '%'], ['massaMuscular', 'Massa muscular', 'kg'], ['massaOssea', 'Massa óssea', 'kg'],
+  ['agua', 'Água corporal', '%'], ['gorduraVisceral', 'Gordura visceral', ''], ['metabolismoBasal', 'Metabolismo basal', 'kcal'], ['rcq', 'Cintura/quadril', '']
+];
+const ROTULOS_MEDIDAS = [['cintura', 'Cintura'], ['quadril', 'Quadril'], ['abdomen', 'Abdômen'], ['braco', 'Braço'], ['coxa', 'Coxa'], ['panturrilha', 'Panturrilha'], ['torax', 'Tórax'], ['ombro', 'Ombro'], ['pescoco', 'Pescoço']];
+// O resumo de cada avaliação na confirmação (os números vêm do PDF como estão: sem edição, regra do Thiago)
+const CAMPOS_RESUMO_AVALIACAO = [['peso', 'Peso', 'kg'], ['gordura', 'Gordura', '%'], ['massaMuscular', 'Massa muscular', 'kg'], ['massaMagra', 'Massa magra', 'kg']];
+let leituraAvaliacao = null; // { nomeAluna, ctx, fonte, arquivo, nomeArquivo, itens: [{ av, jaRegistrada }] }
+
+function numeroBR(v, casas){ if(v == null || v === '' || isNaN(v)) return '--'; const n = Number(v); return (casas != null ? n.toFixed(casas) : String(Math.round(n * 100) / 100)).replace('.', ','); }
+function dataBRdeISO(iso){ const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? m[3] + '/' + m[2] + '/' + m[1] : 'sem data'; }
+function isoDeDataBR(br){ const m = String(br || '').match(/^(\d{2})\/(\d{2})\/(\d{4})/); return m ? m[3] + '-' + m[2] + '-' + m[1] : null; }
+
+function abrirJanelaAvaliacao(html){
+  const j = document.getElementById('janela-avaliacao'), c = document.getElementById('janela-avaliacao-conteudo');
+  if(c) c.innerHTML = html;
+  if(j && j.style) j.style.display = 'flex';
+}
+function fecharJanelaAvaliacao(){
+  const j = document.getElementById('janela-avaliacao');
+  if(j && j.style) j.style.display = 'none';
+  leituraAvaliacao = null;
+}
+
+function escolherPdfAvaliacao(nomeAluna, ctx){
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'application/pdf,.pdf';
+  input.onchange = function(){ const f = input.files && input.files[0]; if(f) lerPdfAvaliacao(nomeAluna, ctx, f); };
+  input.click();
+}
+
+// Pasta do PDF: a da própria aluna (pelo login dela). O Personal sobe na pasta dela também; se ela nunca entrou no app,
+// numa pasta pelo e-mail (só o Personal abre).
+function pastaDaAvaliacao(a){
+  if(sessaoTipo === 'aluna' && sessaoUsuarioAtual && sessaoUsuarioAtual.id) return sessaoUsuarioAtual.id;
+  return a.authId || ('sem-login-' + String(a.email || a.nome || 'aluna').toLowerCase().replace(/[^a-z0-9]+/g, '-'));
+}
+
+async function lerPdfAvaliacao(nomeAluna, ctx, arquivo){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a || !arquivo) return;
+  if(!/\.pdf$/i.test(arquivo.name || '') && arquivo.type !== 'application/pdf'){ alert('Escolha um arquivo em PDF.'); return; }
+  if(arquivo.size > TAMANHO_MAXIMO_PDF_AVALIACAO){ alert('Esse PDF passa de 10 MB. Tente exportar de novo, só com as páginas da avaliação.'); return; }
+  abrirJanelaAvaliacao('<p class="av-tit">Lendo a avaliação</p><p class="av-carregando">Isso leva alguns segundos...</p>');
+  try {
+    const dados = lerAvaliacoesDoTexto(await linhasDoArquivoPdf(arquivo));
+    if(!dados.avaliacoes.length) throw new Error('Não achei os números da avaliação nesse PDF. Se ele for escaneado ou uma foto, o app não consegue ler: registre pelo "Registrar novas informações".');
+    // Guarda o PDF na pasta privada (pra abrir depois). Se não der, a avaliação entra mesmo assim, só sem o "Ver o PDF".
+    let caminho = null;
+    if(supabaseClient){
+      caminho = pastaDaAvaliacao(a) + '/' + Date.now() + '.pdf';
+      let envio = null;
+      try { envio = await supabaseClient.storage.from('avaliacoes').upload(caminho, arquivo, { contentType: 'application/pdf', upsert: false }); } catch(e){ envio = { error: e }; }
+      if(envio && envio.error){ registrarErroNoBanco(new Error('PDF da avaliação não foi guardado: ' + (envio.error.message || envio.error)), 'avaliacao_pdf_guardar'); caminho = null; }
+    }
+    mostrarAvaliacoesLidas(nomeAluna, ctx, dados, caminho, arquivo.name);
+  } catch(erro){
+    registrarErroNoBanco(erro, 'avaliacao_pdf_ler');
+    abrirJanelaAvaliacao('<p class="av-tit">Não deu pra ler esse PDF</p><p class="av-txt">' + escaparHtmlFicha(erro && erro.message ? erro.message : 'Tente de novo em instantes.') + '</p>' +
+      '<div class="av-botoes"><button class="btn-gold" onclick="fecharJanelaAvaliacao()">Fechar</button></div>');
+  }
+}
+
+function novasNoPdf(itens){ return itens.filter(function(it){ return !it.jaRegistrada; }).length; }
+
+// O que veio do PDF, marcando as datas que ela já tem registradas (essas vêm desmarcadas, pra não duplicar)
+function prepararAvaliacoesLidas(a, lidas){
+  const ja = {};
+  (a.avaliacoesFisicas || []).forEach(function(x){ if(x && x.data) ja[x.data] = true; });
+  return (lidas || []).map(function(av){ return { av: av, jaRegistrada: !!(av && av.data && ja[av.data]) }; });
+}
+
+function mostrarAvaliacoesLidas(nomeAluna, ctx, dados, arquivo, nomeArquivo){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  leituraAvaliacao = { nomeAluna: nomeAluna, ctx: ctx, fonte: dados.fonte || null, arquivo: arquivo, nomeArquivo: nomeArquivo || '', itens: prepararAvaliacoesLidas(a, dados.avaliacoes) };
+  const itens = leituraAvaliacao.itens;
+  abrirJanelaAvaliacao('<p class="av-tit">Confira os números</p>' +
+    '<p class="av-txt">' + (itens.length === 1 ? 'Achei 1 avaliação' : 'Achei ' + itens.length + ' avaliações') + (dados.fonte ? ' (' + escaparHtmlFicha(dados.fonte) + ')' : '') + '.' +
+      (novasNoPdf(itens) < itens.length ? ' As datas que já estão salvas ficam de fora, pra não repetir: ' + (novasNoPdf(itens) === 0 ? 'nenhuma é nova.' : (novasNoPdf(itens) === 1 ? 'só 1 é nova.' : novasNoPdf(itens) + ' são novas.')) : '') + '</p>' +
+    itens.map(function(it, i){
+      const resumo = CAMPOS_RESUMO_AVALIACAO.filter(function(c){ return it.av[c[0]] != null; }).map(function(c){ return '<span>' + c[1] + ' <b>' + numeroBR(it.av[c[0]]) + (c[2] ? ' ' + c[2] : '') + '</b></span>'; }).join('');
+      return '<div class="av-item' + (it.jaRegistrada ? ' ja' : '') + '">' +
+        '<label class="av-marca"><input type="checkbox" id="av-c-' + i + '"' + (it.jaRegistrada ? '' : ' checked') + '> <b>' + dataBRdeISO(it.av.data) + '</b>' + (it.jaRegistrada ? ' · já salva' : ' · nova') + '</label>' +
+        '<div class="av-resumo">' + (resumo || '<span>Só medidas e outros dados</span>') + '</div></div>';
+    }).join('') +
+    '<div class="av-botoes"><button class="btn-gold av-sec" onclick="fecharJanelaAvaliacao()">Cancelar</button><button class="btn-gold" onclick="salvarAvaliacoesLidas()">Salvar</button></div>');
+}
+
+// Junta as avaliações na ficha (uma por data) e, se a mais nova é mais recente que o peso atual, atualiza o peso e a % de gordura
+function aplicarAvaliacoesConfirmadas(a, novas, meta){
+  if(!a.avaliacoesFisicas) a.avaliacoesFisicas = [];
+  let n = 0;
+  novas.forEach(function(av, i){
+    const registro = Object.assign({}, av, {
+      id: 'av' + Date.now().toString(36) + i, fonte: meta.fonte || null, arquivo: meta.arquivo || null, nomeArquivo: meta.nomeArquivo || null,
+      enviadoPor: sessaoTipo === 'aluna' ? 'aluna' : (NOME_PERSONAL_LOGADO || 'personal'), em: new Date().toISOString()
+    });
+    const igual = av.data ? a.avaliacoesFisicas.findIndex(function(x){ return x.data === av.data; }) : -1;
+    if(igual !== -1){
+      const antes = a.avaliacoesFisicas[igual];
+      if(!registro.arquivo && antes.arquivo){ registro.arquivo = antes.arquivo; registro.nomeArquivo = antes.nomeArquivo; } // não perde o PDF de antes
+      a.avaliacoesFisicas[igual] = registro;
+    } else a.avaliacoesFisicas.push(registro);
+    n++;
+  });
+  a.avaliacoesFisicas.sort(function(x, y){ return String(x.data || '').localeCompare(String(y.data || '')); });
+  const comData = a.avaliacoesFisicas.filter(function(x){ return x.data && (x.peso != null || x.gordura != null); });
+  const ultima = comData[comData.length - 1];
+  if(ultima){
+    const atualIso = a.composicaoAtual ? isoDeDataBR(a.composicaoAtual.data) : null;
+    if(!a.composicaoAtual || !atualIso || atualIso < ultima.data){
+      if(!a.composicaoHistorico) a.composicaoHistorico = [];
+      if(a.composicaoAtual && (a.composicaoAtual.peso != null || a.composicaoAtual.gordura != null)) a.composicaoHistorico.push(Object.assign({}, a.composicaoAtual));
+      a.composicaoAtual = { peso: ultima.peso, gordura: ultima.gordura, massaMagra: ultima.massaMagra, pesoMuscular: ultima.massaMuscular, data: dataBRdeISO(ultima.data), origem: 'avaliacao' };
+    }
+  }
+  return n;
+}
+
+function salvarAvaliacoesLidas(){
+  const L = leituraAvaliacao;
+  if(!L) return;
+  const a = alunasPersonal.find(function(x){ return x.nome === L.nomeAluna; });
+  if(!a) return;
+  const escolhidas = [];
+  for(let i = 0; i < L.itens.length; i++){
+    const marca = document.getElementById('av-c-' + i);
+    if(!marca || !marca.checked) continue;
+    escolhidas.push(JSON.parse(JSON.stringify(L.itens[i].av))); // os números entram como vieram do PDF
+  }
+  if(!escolhidas.length){
+    if(novasNoPdf(L.itens) === 0){ fecharJanelaAvaliacao(); mostrarConfirmacaoSalvamento(true, 'Essas avaliações já estavam salvas. Nada repetido.'); return; }
+    alert('Marque pelo menos uma avaliação pra salvar.'); return;
+  }
+  const n = aplicarAvaliacoesConfirmadas(a, escolhidas, L);
+  salvarPerfilAlunaNoSupabase(a.nome);
+  const ctx = L.ctx;
+  fecharJanelaAvaliacao();
+  atualizarTelasDeAvaliacao(a, ctx);
+  mostrarConfirmacaoSalvamento(true, n === 1 ? 'Avaliação salva.' : n + ' avaliações salvas.');
+}
+
+function atualizarTelasDeAvaliacao(a, ctx){
+  if(ctx === 'aluna'){ renderAvaliacoes(); } // redesenha a aba Corpo inteira (peso atual, "última avaliação", gráfico e lista)
+  else {
+    const area = document.getElementById('avaliacoes-pdf-personal');
+    if(area) area.innerHTML = htmlAvaliacoesFisicas(a, 'personal');
+    const ed = document.getElementById('editor-peso-composicao-personal');
+    if(ed) ed.innerHTML = htmlEditorPesoComposicao(a, 'personal');
+  }
+}
+
+// Gráfico de evolução (peso, gordura e massa muscular) e a lista das avaliações
+function htmlAvaliacoesFisicas(a, ctx){
+  const lista = (a.avaliacoesFisicas || []).slice();
+  const nomeJs = String(a.nome).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  let html = '<p class="section-label" style="margin-top:22px;">Avaliações físicas</p>';
+  const series = [['peso', 'Peso (kg)', '#E8C58A'], ['gordura', 'Gordura (%)', '#F4D9A5'], ['massaMuscular', 'Massa muscular (kg)', '#C99A52']];
+  const graficos = series.map(function(s){
+    const pts = lista.filter(function(x){ return x[s[0]] != null; });
+    if(pts.length < 2) return '';
+    const g = gerarSvgLinhaEvolucao(pts.map(function(x){ return Number(x[s[0]]); }), 300, 60, s[2]);
+    return g ? '<div class="av-graf"><p><span>' + s[1] + '</span><b>' + numeroBR(pts[0][s[0]]) + ' → ' + numeroBR(pts[pts.length - 1][s[0]]) + '</b></p>' + g + '</div>' : '';
+  }).filter(Boolean);
+  if(graficos.length) html += '<div class="av-grafs">' + graficos.join('') + '<p class="av-periodo">' + dataBRdeISO(lista[0].data) + ' até ' + dataBRdeISO(lista[lista.length - 1].data) + '</p></div>';
+  html += lista.slice().reverse().map(function(x){
+    const resumo = [x.peso != null ? numeroBR(x.peso) + ' kg' : '', x.gordura != null ? numeroBR(x.gordura) + '% gordura' : '', x.massaMuscular != null ? numeroBR(x.massaMuscular) + ' kg músculo' : ''].filter(Boolean).join(' · ');
+    return '<div class="list-item av-linha" onclick="abrirDetalheAvaliacao(\'' + nomeJs + '\',\'' + escaparHtmlFicha(x.id) + '\',\'' + ctx + '\')">' +
+      '<span><b>' + dataBRdeISO(x.data) + '</b><small>' + escaparHtmlFicha(resumo || 'ver os dados') + '</small></span><i class="ti ti-chevron-right" style="color:var(--text-faint);"></i></div>';
+  }).join('');
+  if(!lista.length) html += '<p class="txt" style="color:var(--text-faint);font-size:12px;margin:0 0 8px;">' + (ctx === 'aluna' ? 'Tem o PDF da sua avaliação física? Manda aqui que o app lê os números e monta o gráfico da sua evolução.' : 'Nenhuma avaliação em PDF ainda.') + '</p>';
+  if(lista.length >= 2) html += '<button class="btn-gold av-sec av-botao-comparar" onclick="abrirComparacaoAvaliacoes(\'' + nomeJs + '\',\'' + ctx + '\')"><i class="ti ti-arrows-diff" style="margin-right:6px;"></i>Comparar avaliações</button>';
+  html += '<button class="btn-gold av-botao-pdf" onclick="escolherPdfAvaliacao(\'' + nomeJs + '\',\'' + ctx + '\')"><i class="ti ti-file-upload" style="margin-right:6px;"></i>' + (lista.length ? 'Registrar nova avaliação (PDF)' : 'Registrar avaliação (PDF)') + '</button>';
+  return html;
+}
+function renderAvaliacoesPdfAluna(a){
+  const area = document.getElementById('area-avaliacoes-pdf');
+  if(area && a) area.innerHTML = htmlAvaliacoesFisicas(a, 'aluna');
+}
+function renderAvaliacoesPdfPersonal(a){
+  return '<div id="avaliacoes-pdf-personal">' + htmlAvaliacoesFisicas(a, 'personal') + '</div>';
+}
+
+function abrirDetalheAvaliacao(nomeAluna, id, ctx){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  const x = a && (a.avaliacoesFisicas || []).find(function(v){ return v.id === id; });
+  if(!x) return;
+  const nomeJs = String(nomeAluna).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  const linhas = ROTULOS_AVALIACAO.filter(function(r){ return x[r[0]] != null; }).map(function(r){ return '<p><span>' + r[1] + '</span><b>' + numeroBR(x[r[0]]) + (r[2] ? ' ' + r[2] : '') + '</b></p>'; }).join('');
+  const medidas = ROTULOS_MEDIDAS.filter(function(r){ return x.medidas && x.medidas[r[0]] != null; }).map(function(r){ return '<p><span>' + r[1] + '</span><b>' + numeroBR(x.medidas[r[0]]) + ' cm</b></p>'; }).join('');
+  const outros = (x.outros || []).map(function(o){ return '<p><span>' + escaparHtmlFicha(o.nome) + '</span><b>' + numeroBR(o.valor) + (o.unidade ? ' ' + escaparHtmlFicha(o.unidade) : '') + '</b></p>'; }).join('');
+  const podeApagar = ctx !== 'aluna' || x.enviadoPor === 'aluna';
+  abrirJanelaAvaliacao('<p class="av-tit">Avaliação de ' + dataBRdeISO(x.data) + '</p>' +
+    (x.fonte ? '<p class="av-txt">' + escaparHtmlFicha(x.fonte) + '</p>' : '') +
+    '<div class="av-tabela">' + (linhas || '<p><span>Sem dados principais</span></p>') + '</div>' +
+    (medidas ? '<p class="av-sub">Medidas</p><div class="av-tabela">' + medidas + '</div>' : '') +
+    (outros ? '<details class="av-outros"><summary>Outros dados (' + x.outros.length + ')</summary><div class="av-tabela">' + outros + '</div></details>' : '') +
+    '<div class="av-botoes">' + (x.arquivo ? '<button class="btn-gold av-sec" onclick="verPdfDaAvaliacao(\'' + escaparHtmlFicha(x.arquivo) + '\')">Ver o PDF</button>' : '') +
+      '<button class="btn-gold" onclick="fecharJanelaAvaliacao()">Fechar</button></div>' +
+    (podeApagar ? '<p class="av-apagar" onclick="apagarAvaliacaoFisica(\'' + nomeJs + '\',\'' + escaparHtmlFicha(x.id) + '\',\'' + ctx + '\')">Apagar essa avaliação</p>' : ''));
+}
+
+// ===== COMPARAR 2 OU 3 AVALIAÇÕES =====
+const MAX_COMPARAR_AVALIACOES = 3;
+function abrirComparacaoAvaliacoes(nomeAluna, ctx){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  const lista = a ? (a.avaliacoesFisicas || []) : [];
+  if(lista.length < 2) return;
+  const nomeJs = String(nomeAluna).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  const ultimas = lista.slice(-2).map(function(x){ return x.id; }); // já vêm marcadas as 2 mais recentes
+  abrirJanelaAvaliacao('<p class="av-tit">Comparar avaliações</p><p class="av-txt">Marque de 2 a 3 datas.</p>' +
+    lista.slice().reverse().map(function(x){
+      return '<label class="av-marca av-comp-op"><input type="checkbox" class="av-comp" value="' + escaparHtmlFicha(x.id) + '"' + (ultimas.indexOf(x.id) !== -1 ? ' checked' : '') + ' onchange="limitarComparacao(this)"> <b>' + dataBRdeISO(x.data) + '</b>' +
+        (x.peso != null ? ' · ' + numeroBR(x.peso) + ' kg' : '') + '</label>';
+    }).join('') +
+    '<div class="av-botoes"><button class="btn-gold av-sec" onclick="fecharJanelaAvaliacao()">Cancelar</button><button class="btn-gold" onclick="compararAvaliacoesMarcadas(\'' + nomeJs + '\',\'' + ctx + '\')">Comparar</button></div>');
+}
+function marcadasNaComparacao(){
+  let caixas = [];
+  try { caixas = Array.prototype.slice.call(document.querySelectorAll('.av-comp') || []); } catch(e){}
+  return caixas.filter(function(c){ return c.checked; }).map(function(c){ return c.value; });
+}
+function limitarComparacao(caixa){
+  if(caixa && caixa.checked && marcadasNaComparacao().length > MAX_COMPARAR_AVALIACOES){
+    caixa.checked = false;
+    alert('Dá pra comparar no máximo ' + MAX_COMPARAR_AVALIACOES + ' avaliações de cada vez.');
+  }
+}
+function compararAvaliacoesMarcadas(nomeAluna, ctx){ mostrarComparacaoAvaliacoes(nomeAluna, ctx, marcadasNaComparacao()); }
+
+// Tabela: uma coluna por data (da mais antiga pra mais nova) e a diferença entre a primeira e a última
+function htmlComparacaoAvaliacoes(lista){
+  const cols = lista.slice().sort(function(x, y){ return String(x.data || '').localeCompare(String(y.data || '')); });
+  const linhas = [];
+  ROTULOS_AVALIACAO.forEach(function(r){ linhas.push({ rot: r[1], un: r[2], val: function(x){ return x[r[0]]; } }); });
+  ROTULOS_MEDIDAS.forEach(function(r){ linhas.push({ rot: r[1], un: 'cm', val: function(x){ return x.medidas ? x.medidas[r[0]] : null; } }); });
+  const corpo = linhas.filter(function(l){ return cols.some(function(x){ return l.val(x) != null; }); }).map(function(l){
+    const vs = cols.map(function(x){ return l.val(x); });
+    const ini = vs[0], fim = vs[vs.length - 1];
+    let dif = '';
+    if(ini != null && fim != null){
+      const d = Math.round((fim - ini) * 100) / 100;
+      dif = d === 0 ? '=' : (d > 0 ? '↑ +' : '↓ ') + numeroBR(d);
+    }
+    return '<tr><td>' + l.rot + (l.un ? ' <small>' + l.un + '</small>' : '') + '</td>' + vs.map(function(v){ return '<td>' + (v == null ? '-' : numeroBR(v)) + '</td>'; }).join('') + '<td class="av-dif">' + dif + '</td></tr>';
+  }).join('');
+  return '<div class="av-comp-tabela"><table><thead><tr><th></th>' + cols.map(function(x){ return '<th>' + dataBRdeISO(x.data).slice(0, 5) + '<small>' + dataBRdeISO(x.data).slice(6) + '</small></th>'; }).join('') + '<th>Diferença</th></tr></thead><tbody>' + corpo + '</tbody></table></div>';
+}
+function mostrarComparacaoAvaliacoes(nomeAluna, ctx, ids){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  const escolhidas = (a.avaliacoesFisicas || []).filter(function(x){ return ids.indexOf(x.id) !== -1; });
+  if(escolhidas.length < 2 || escolhidas.length > MAX_COMPARAR_AVALIACOES){ alert('Marque de 2 a ' + MAX_COMPARAR_AVALIACOES + ' avaliações pra comparar.'); return; }
+  const nomeJs = String(nomeAluna).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  abrirJanelaAvaliacao('<p class="av-tit">Comparação</p>' + htmlComparacaoAvaliacoes(escolhidas) +
+    '<div class="av-botoes"><button class="btn-gold av-sec" onclick="abrirComparacaoAvaliacoes(\'' + nomeJs + '\',\'' + ctx + '\')">Trocar datas</button><button class="btn-gold" onclick="fecharJanelaAvaliacao()">Fechar</button></div>');
+}
+
+async function verPdfDaAvaliacao(caminho){
+  try {
+    const r = await supabaseClient.storage.from('avaliacoes').createSignedUrl(caminho, 300);
+    if(r.error || !r.data) throw r.error || new Error('sem link');
+    window.open(r.data.signedUrl, '_blank');
+  } catch(e){
+    registrarErroNoBanco(e, 'avaliacao_pdf_abrir');
+    mostrarConfirmacaoSalvamento(false, 'Não consegui abrir o PDF agora. Tente de novo em instantes.');
+  }
+}
+
+function apagarAvaliacaoFisica(nomeAluna, id, ctx){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  if(!a) return;
+  const i = (a.avaliacoesFisicas || []).findIndex(function(v){ return v.id === id; });
+  if(i === -1) return;
+  if(ctx === 'aluna' && a.avaliacoesFisicas[i].enviadoPor !== 'aluna'){ alert('Essa avaliação foi registrada pelo seu personal. Pra apagar, fala com ele.'); return; }
+  if(!confirm('Apagar a avaliação de ' + dataBRdeISO(a.avaliacoesFisicas[i].data) + '? O peso e a gordura atuais não mudam.')) return;
+  a.avaliacoesFisicas.splice(i, 1);
+  salvarPerfilAlunaNoSupabase(a.nome);
+  fecharJanelaAvaliacao();
+  atualizarTelasDeAvaliacao(a, ctx);
 }
 
 // ===== Fluxo de registro de novas informações de composição =====
@@ -11398,7 +11881,8 @@ function montarDadosExtrasDaAluna(a){
     anamneseTreino: a.anamneseTreino || null,
     anamnesesAnteriores: a.anamnesesAnteriores || [], // respostas de antes, quando ela responde a anamnese de novo
     respondeuDeNovoEm: a.respondeuDeNovoEm || null,   // respostas 14 a 17 da anamnese (experiência de treino)
-    cursosLiberados: a.cursosLiberados || [] // cursos do app liberados pra ela (ex: 'seca21'). Ela lê a própria ficha no login
+    cursosLiberados: a.cursosLiberados || [], // cursos do app liberados pra ela (ex: 'seca21'). Ela lê a própria ficha no login
+    avaliacoesFisicas: a.avaliacoesFisicas || [] // avaliações lidas de PDF (Webdiet, bioimpedância...), uma por data
   };
 }
 
@@ -14626,7 +15110,7 @@ function openAlunaDetail(i){
     '</div>' +
     '<div class="ficha-sec" data-ficha="historico">' +
     '<p class="section-label" style="margin-top:18px;">Linha do tempo das mensagens</p>' + htmlLinhaDoTempoDaAluna(a.nome, 5) +
-    renderSecaoColapsavel('Acompanhamento e histórico', renderElegibilidadeFase(a) + renderFunilEngajamento(a) + renderLinhaDoTempo(a) + renderPromocaoNivel(a) + renderBlocoPeriodizacao(a) + renderHistoricoPrioridade(a) + renderEditorPesoComposicaoPersonal(a) + renderTecnicaPendente(a) + renderProgressao(a), 'acompanhamento') +
+    renderSecaoColapsavel('Acompanhamento e histórico', renderElegibilidadeFase(a) + renderFunilEngajamento(a) + renderLinhaDoTempo(a) + renderPromocaoNivel(a) + renderBlocoPeriodizacao(a) + renderHistoricoPrioridade(a) + renderEditorPesoComposicaoPersonal(a) + renderAvaliacoesPdfPersonal(a) + renderTecnicaPendente(a) + renderProgressao(a), 'acompanhamento') +
     '<p class="page-sub" style="margin-top:10px;">Anamnese respondida em ' + (a.dataAnamnese || 'data desconhecida') + '</p>' +
     '</div>';
   if(fichaAbertaNome !== a.nome){ fichaAbertaNome = a.nome; abaFichaAtual = 'geral'; } // outra aluna: começa na Visão geral
