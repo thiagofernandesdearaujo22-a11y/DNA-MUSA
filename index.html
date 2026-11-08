@@ -592,6 +592,7 @@
   .rk-ganhar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
   .rk-ganhar span{font-size:12.5px;color:var(--text-dim);background:var(--card);border:1px solid var(--border);border-radius:20px;padding:7px 12px;}
   .rk-ganhar b{color:var(--gold-soft);}
+  .ck-chip.auto{cursor:default;} .ck-chip.auto small{display:block;font-size:9.5px;color:var(--text-faint);margin-left:4px;}
   .sem-dia{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 14px;margin-bottom:10px;cursor:pointer;flex-wrap:wrap;}
   .sem-dia .sem-sig{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;letter-spacing:.5px;background:var(--card-2);color:var(--text-dim);flex-shrink:0;}
   .sem-dia .sem-txt{flex:1;min-width:0;}
@@ -1176,7 +1177,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-08-BP-LEITOR-PDF-GRATIS</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-09-BQ-PONTOS-AUTOMATICOS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -2112,7 +2113,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-08-BP-LEITOR-PDF-GRATIS';
+const VERSAO_APP = '2026-11-09-BQ-PONTOS-AUTOMATICOS';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -5935,7 +5936,17 @@ function getHabitosHojeAluna(nome){
   return prog.habitosDoDia[data];
 }
 
+// "Treino concluído" marca sozinho: vale o treino registrado naquele dia (inclusive na aula presencial e o rápido)
+function treinoRegistradoNaData(prog, dataISO){
+  return ((prog && prog.horariosTreino) || []).some(function(h){ return h && h.data && dataLocalISO(new Date(h.data)) === dataISO; });
+}
+function habitoMarcadoNoDia(prog, habitosDoDia, habitoId, dataISO){
+  if(habitoId === 'treino') return treinoRegistradoNaData(prog, dataISO);
+  return !!(habitosDoDia && habitosDoDia[habitoId]);
+}
+
 function alternarHabitoDoDia(nome, habitoId){
+  if(habitoId === 'treino') return; // automático: marca quando ela registra o treino do dia
   const habitosHoje = getHabitosHojeAluna(nome);
   habitosHoje[habitoId] = !habitosHoje[habitoId];
   renderCheckInEHabitos(nome);
@@ -5973,7 +5984,8 @@ function salvarProgressoDoDiaAgora(nome){
 
 function calcularPontosHabitosHoje(nome){
   const habitosHoje = getHabitosHojeAluna(nome);
-  return CATALOGO_HABITOS_DIARIOS.reduce(function(soma, h){ return soma + (habitosHoje[h.id] ? h.pontos : 0); }, 0);
+  const prog = getProgressoAluna(nome), data = getDataEmEdicaoCheckIn();
+  return CATALOGO_HABITOS_DIARIOS.reduce(function(soma, h){ return soma + (habitoMarcadoNoDia(prog, habitosHoje, h.id, data) ? h.pontos : 0); }, 0);
 }
 
 // Um dia só conta como check-in se ela respondeu alguma coisa (abrir a tela já cria o dia vazio)
@@ -6000,7 +6012,9 @@ function renderCheckInEHabitos(nome){
   const checkin = getCheckInHoje(nome);
   const habitosHoje = getHabitosHojeAluna(nome);
   const pontosHoje = calcularPontosHabitosHoje(nome);
-  const totalConcluidos = CATALOGO_HABITOS_DIARIOS.filter(function(h){ return habitosHoje[h.id]; }).length;
+  const progHab = getProgressoAluna(nome), dataHab = getDataEmEdicaoCheckIn();
+  const marcadoHab = function(id){ return habitoMarcadoNoDia(progHab, habitosHoje, id, dataHab); };
+  const totalConcluidos = CATALOGO_HABITOS_DIARIOS.filter(function(h){ return marcadoHab(h.id); }).length;
   const nomeJs = nome.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
   function botaoEscala(campo, valorAtual){
@@ -6033,7 +6047,11 @@ function renderCheckInEHabitos(nome){
     '</div>' +
     '<p class="section-label">Hábitos de hoje <span class="tag">' + totalConcluidos + ' de ' + CATALOGO_HABITOS_DIARIOS.length + ' · ' + pontosHoje + ' pts</span></p>' +
     '<div class="ck-hab">' + CATALOGO_HABITOS_DIARIOS.map(function(h){
-      const marcado = !!habitosHoje[h.id];
+      const marcado = marcadoHab(h.id);
+      if(h.id === 'treino'){ // automático: não é de tocar
+        return '<span class="ck-chip auto' + (marcado ? ' on' : '') + '" title="Marca sozinho quando você registra o treino">' +
+          '<i class="ti ' + (marcado ? 'ti-check' : h.icone) + '"></i>' + h.label + ' <b>' + (marcado ? '' : '+') + h.pontos + '</b><small>' + (marcado ? 'automático' : 'marca ao registrar') + '</small></span>';
+      }
       return '<span class="ck-chip' + (marcado ? ' on' : '') + '" onclick="alternarHabitoDoDia(\'' + nomeJs + '\',\'' + h.id + '\')">' +
         '<i class="ti ' + (marcado ? 'ti-check' : h.icone) + '"></i>' + h.label + ' <b>' + (marcado ? '' : '+') + h.pontos + '</b></span>';
     }).join('') + '</div>' +
@@ -23067,7 +23085,48 @@ function calcularPontosRankingPublico(nome){
   });
   pontos += checkinsRecentes.length * 3;
 
-  return pontos;
+  return pontos + calcularBonusRankingPublico(prog, nomesDiasDeTreino, semanaMaisAntiga, semanaAtual, Date.now());
+}
+
+// Bônus automáticos (combinado com o Thiago), nas mesmas 4 semanas do ranking:
+// semana completa +20, a cada 3 treinos seguidos do plano sem pular nenhum +10, a cada 7 dias seguidos de check-in +10,
+// e os hábitos que só ela sabe (hidratação, alimentação, sono, autocuidado, meditou) com os pontos de cada um.
+// O "Treino concluído" dos hábitos não entra aqui, porque o treino registrado já vale +10 lá em cima.
+const BONUS_SEMANA_COMPLETA = 20, BONUS_TREINOS_SEGUIDOS = 10, TREINOS_SEGUIDOS_PRO_BONUS = 3, BONUS_CHECKIN_SEGUIDO = 10, DIAS_CHECKIN_PRO_BONUS = 7;
+function calcularBonusRankingPublico(prog, nomesDiasDeTreino, semanaMaisAntiga, semanaAtual, agora){
+  let bonus = 0;
+  if(!nomesDiasDeTreino.length) return 0;
+  // Semana completa e treinos seguidos (na ordem do plano, de semana em semana)
+  let seguidos = 0;
+  for(let s = semanaMaisAntiga; s <= semanaAtual; s++){
+    const feitos = prog.diasConcluidos[s] || [];
+    if(nomesDiasDeTreino.every(function(n){ return feitos.indexOf(n) !== -1; })) bonus += BONUS_SEMANA_COMPLETA;
+    // (na semana atual, os dias que ainda não chegaram só "zeram" depois do último treino dela, então não tiram bônus)
+    for(let i = 0; i < nomesDiasDeTreino.length; i++){
+      if(feitos.indexOf(nomesDiasDeTreino[i]) !== -1){
+        seguidos++;
+        if(seguidos % TREINOS_SEGUIDOS_PRO_BONUS === 0) bonus += BONUS_TREINOS_SEGUIDOS;
+      } else seguidos = 0;
+    }
+  }
+  // Dias seguidos de check-in (nos últimos 28 dias)
+  const mapa = prog.checkinsEmocionais || {};
+  let sequencia = 0;
+  for(let d = 27; d >= 0; d--){
+    const iso = dataLocalISO(new Date(agora - d * 86400000));
+    if(checkinTemResposta(mapa[iso])){ sequencia++; if(sequencia % DIAS_CHECKIN_PRO_BONUS === 0) bonus += BONUS_CHECKIN_SEGUIDO; }
+    else sequencia = 0;
+  }
+  // Hábitos marcados por ela (menos o treino, que já conta)
+  const pontosHabito = {};
+  CATALOGO_HABITOS_DIARIOS.forEach(function(h){ if(h.id !== 'treino') pontosHabito[h.id] = h.pontos; });
+  const limite = dataLocalISO(new Date(agora - 27 * 86400000));
+  Object.keys(prog.habitosDoDia || {}).forEach(function(iso){
+    if(iso < limite) return;
+    const dia = prog.habitosDoDia[iso] || {};
+    Object.keys(pontosHabito).forEach(function(id){ if(dia[id]) bonus += pontosHabito[id]; });
+  });
+  return bonus;
 }
 
 // Recalcula e sincroniza os pontos dela no ranking público — chamado sempre que algo relevante pra
@@ -23170,7 +23229,7 @@ function htmlRankingPublico(r){
 
   // Mesmas regras de calcularPontosRankingPublico
   const ganhar = '<p class="section-label">Como ganhar pontos</p>' +
-    '<div class="rk-ganhar"><span>Treino registrado <b>+10</b></span><span>Exercício com carga que subiu <b>+15</b></span><span>Check-in do dia <b>+3</b></span><span>Conta as últimas <b>4 semanas</b></span></div>';
+    '<div class="rk-ganhar"><span>Treino registrado <b>+10</b></span><span>Exercício com carga que subiu <b>+15</b></span><span>Check-in do dia <b>+3</b></span><span>Semana completa <b>+20</b></span><span>3 treinos seguidos <b>+10</b></span><span>7 dias seguidos de check-in <b>+10</b></span><span>Hábitos do dia <b>+5 a +10</b></span><span>Conta as últimas <b>4 semanas</b></span></div>';
 
   return topo + corpo + ganhar;
 }
