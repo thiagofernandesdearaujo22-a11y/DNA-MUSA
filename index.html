@@ -116,11 +116,9 @@
   [data-view="home"].modo-so-desafio .dna-score-card,
   [data-view="home"].modo-so-desafio #botao-desafio-area,
   [data-view="home"].modo-so-desafio #botoes-cursos-area,
-  [data-view="home"].modo-so-desafio #botao-pergunta-perfil-area,
-  [data-view="home"].modo-so-desafio #botao-pergunta-roda-vida-area,
   [data-view="home"].modo-so-desafio #home-label-indicadores,
   [data-view="home"].modo-so-desafio #home-indicadores-grid,
-  [data-view="home"].modo-so-desafio #home-meu-progresso,
+  [data-view="home"].modo-so-desafio #home-pra-voce,
   [data-view="home"].modo-so-desafio #botao-tutorial-home{display:none !important;}
   .s21-hero .s21-grande{font-size:34px;-webkit-line-clamp:1;}
   .s21-dots{display:flex;gap:3px;margin-top:12px;}
@@ -1028,14 +1026,6 @@
   .ind-barra{height:5px;border-radius:5px;background:rgba(217,178,111,0.13);overflow:hidden;margin-top:6px;}
   .ind-barra i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#C99A52,#F0CF8E);}
   .ind-vazio{font-size:12px;color:var(--text-faint);margin:12px 0 0;}
-  .home-atalhos{display:flex;gap:10px;margin-top:4px;}
-  .home-atalhos > div{flex:1;min-width:0;}
-  .home-atalhos > div:empty{display:none;}
-  .home-atalhos:not(:has(> div:not(:empty))){display:none;}
-  .home-atalhos .home-tarefa{flex-direction:column;align-items:flex-start !important;gap:8px;height:100%;margin-top:10px;padding:12px;}
-  .home-atalhos .home-tarefa > .ti-chevron-right,.home-atalhos .home-tarefa > i:last-child{display:none;}
-  .home-atalhos .home-tarefa .ht-txt p{font-size:13px;}
-  .home-atalhos .home-tarefa .ht-txt small{font-size:11px;}
   .sem-descanso-linha{font-size:12.5px;color:var(--text-faint);margin:2px 4px 14px;}
   .sem-descanso-linha .sem-desc-dia{color:var(--text-dim);cursor:pointer;}
   .sem-dia .sem-sig.letra{font-family:'EB Garamond',serif;font-size:21px;font-weight:600;letter-spacing:0;border:1px solid var(--border);}
@@ -1108,6 +1098,60 @@
   .ap-chips span{font-size:11.5px;padding:6px 10px;border-radius:16px;border:1px solid var(--border);color:var(--text-dim);cursor:pointer;}
   .ap-chips span.on{background:linear-gradient(180deg,#F0CF8E,#C99A52);color:#1E1608;border-color:transparent;font-weight:700;}
   .ap-painel .ap-cancelar{margin:0;padding:10px 14px;width:auto;background:transparent;border:1px solid var(--border);color:var(--text-dim);box-shadow:none;}
+  /* ===== Aprender, "Pra você hoje" e a janelinha das perguntas ===== */
+  .apr-eyebrow{font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold-soft);margin:6px 0 2px;}
+  .apr-titulo{margin-top:0 !important;}
+  .apr-sec{margin-top:20px !important;}
+  .apr-sec-link{display:flex;justify-content:space-between;align-items:center;}
+  .apr-sec-link span{color:var(--gold-soft);letter-spacing:0;text-transform:none;font-weight:600;font-size:12px;cursor:pointer;}
+  .apr-fileira{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;margin:0 -16px;padding-left:16px;padding-right:16px;scrollbar-width:none;}
+  .apr-fileira::-webkit-scrollbar{display:none;}
+  .apr-vcard{position:relative;flex:0 0 132px;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;}
+  .apr-vcard-thumb,.apr-item-thumb,.pv-thumb{position:relative;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#2A2219,#14110E);overflow:hidden;flex-shrink:0;}
+  .apr-vcard-thumb{height:78px;}
+  .apr-vcard-thumb img,.apr-item-thumb img,.pv-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55;}
+  .apr-play{position:relative;width:26px;height:26px;border-radius:50%;background:rgba(11,10,9,.65);border:1px solid var(--border-strong);color:var(--gold-soft);font-size:10px;display:flex;align-items:center;justify-content:center;}
+  .apr-vcard-txt{display:block;padding:8px 10px 10px;}
+  .apr-vcard-txt b,.apr-item-txt b{display:block;font-size:12.5px;font-weight:600;color:var(--text);line-height:1.3;}
+  .apr-vcard-txt small,.apr-item-txt small{display:block;font-size:11px;color:var(--text-faint);margin-top:2px;}
+  .apr-visto{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--success);color:#0E1A12;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .apr-cont{background:var(--card);border:1px solid var(--border-strong);border-radius:16px;padding:14px;cursor:pointer;}
+  .apr-cont-lbl{font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--text-faint);font-weight:700;margin:0 0 4px;}
+  .apr-cont-tit{font-family:'EB Garamond',serif;font-size:19px;color:var(--text);margin:0 0 10px;line-height:1.2;}
+  .apr-cont small,.apr-trilha small{font-size:11px;color:var(--text-faint);display:block;margin-top:6px;}
+  .apr-barra{display:block;height:4px;border-radius:3px;background:rgba(255,236,205,0.08);overflow:hidden;}
+  .apr-barra i{display:block;height:100%;background:linear-gradient(90deg,#F0CF8E,#C99A52);border-radius:3px;}
+  .apr-trilha{flex:0 0 150px;background:linear-gradient(160deg,rgba(217,178,111,0.16),var(--card) 60%);border:1px solid var(--border);border-radius:14px;padding:14px 12px 12px;cursor:pointer;}
+  .apr-trilha-nome{font-family:'EB Garamond',serif;font-size:18px;color:var(--text);margin:0 0 18px;line-height:1.15;}
+  .apr-trilha .apr-barra{margin-top:8px;}
+  .apr-chips{flex-wrap:wrap;margin-bottom:6px !important;}
+  .apr-busca{margin:4px 0 12px;}
+  .apr-lista{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:4px 12px;}
+  .apr-item{position:relative;display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+  .apr-item:last-child{border-bottom:none;}
+  .apr-item-thumb{width:64px;height:40px;border-radius:9px;}
+  .apr-item-txt{flex:1;min-width:0;}
+  .apr-item .apr-visto{position:static;flex-shrink:0;}
+  .apr-vazio{font-size:12.5px;color:var(--text-faint);}
+  .pv-card{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border-strong);border-radius:18px;padding:12px;margin:0 0 14px;cursor:pointer;box-shadow:0 0 18px rgba(217,178,111,0.08);}
+  .pv-thumb{width:62px;height:46px;border-radius:10px;border:1px solid var(--border-strong);}
+  .pv-txt{flex:1;min-width:0;}
+  .pv-txt b{display:block;font-size:14px;font-weight:600;color:var(--text);line-height:1.3;}
+  .pv-txt small{display:block;font-size:11.5px;color:var(--text-faint);margin-top:2px;}
+  .pv-txt small.pv-lbl{font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;margin:0 0 3px;}
+  #area-feedback .pv-card{margin-top:12px;}
+  .sheet-fundo{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9000;display:flex;align-items:flex-end;justify-content:center;}
+  .sheet{width:100%;max-width:480px;background:#14110E;border:1px solid var(--border-strong);border-bottom:none;border-radius:22px 22px 0 0;padding:12px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,0.5);}
+  .sheet-alca{display:block;width:40px;height:4px;border-radius:2px;background:rgba(255,236,205,0.18);margin:0 auto 14px;}
+  .sheet-lbl{font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;color:var(--gold-soft);margin:0 0 6px;}
+  .sheet-tit{font-family:'EB Garamond',serif;font-size:22px;color:var(--text);line-height:1.25;margin:0 0 12px;}
+  .sheet-resp{width:100%;resize:none;margin-bottom:12px;}
+  .sheet-notas{display:flex;gap:8px;margin-bottom:14px;}
+  .sheet-nota{flex:1;height:44px;border-radius:12px;border:1px solid var(--border);background:var(--card-2);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--text-dim);cursor:pointer;}
+  .sheet-nota.on{background:linear-gradient(180deg,#F0CF8E,#C99A52);color:#1E1608;border-color:transparent;}
+  .sheet-botoes{display:flex;gap:10px;}
+  .sheet-botoes button{margin:0;flex:1;}
+  .sheet-botoes .btn-gold{flex:1.5;}
 </style>
 </head>
 <body>
@@ -1177,7 +1221,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-09-BQ-PONTOS-AUTOMATICOS</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-09-BR-APRENDER</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1278,8 +1322,8 @@
               <p class="profile-name">Composição</p>
             </div>
             <div class="satelite satelite-esquerda" onclick="openLevel2('mentoria')">
-              <div class="avatar gold"><span style="color:var(--text-dim);font-size:18px;">M</span></div>
-              <p class="profile-name">Mentoria</p>
+              <div class="avatar gold"><span style="color:var(--text-dim);font-size:18px;">A</span></div>
+              <p class="profile-name">Aprender</p>
             </div>
             <div class="satelite satelite-direita" onclick="openLevel2('progresso')">
               <div class="avatar gold"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:var(--text-dim);"><path d="M3 17l5-6 4 3 6-8 3 3v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg></div>
@@ -1343,6 +1387,9 @@
       <div id="home-metas-dia"></div>
       <div id="botao-desafio-area"></div>
 
+      <!-- "Pra você hoje": um vídeo curto que combina com o treino dela, em cima do DNA. Preenchido por renderPraVoceHoje(). -->
+      <div id="home-pra-voce"></div>
+
       <div class="dna-score-card" onclick="openDetail('dna')">
         <div class="dna-score-helix">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold-soft)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
@@ -1372,17 +1419,8 @@
       </div>
 
       <div id="botoes-cursos-area"></div>
-      <!-- Pergunta rápida e Roda da Vida: dois atalhos pequenos lado a lado -->
-      <div class="home-atalhos" id="home-atalhos">
-        <div id="botao-pergunta-perfil-area"></div>
-        <div id="botao-pergunta-roda-vida-area"></div>
-      </div>
+      <!-- A pergunta rápida e a Roda da Vida não ficam mais aqui: aparecem sozinhas numa janelinha (mostrarPerguntaAutomaticaSePuder) -->
       <div id="home-desafio-rodape"></div>
-
-      <div class="list-item" id="home-meu-progresso" style="cursor:pointer;margin-top:10px;" onclick="openLevel2('progresso')">
-        <span><i class="ti ti-trending-up" style="margin-right:8px;color:var(--gold-soft);"></i>Meu progresso</span>
-        <i class="ti ti-chevron-right" style="color:var(--text-faint);"></i>
-      </div>
     </div>
 
     <div id="botao-flutuante-sol" style="display:none;position:fixed;bottom:90px;right:16px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#F4D9A5,#E8C58A);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.4);z-index:500;" onclick="openLevel2('chatia')">
@@ -1484,20 +1522,9 @@
     <div class="view" data-view="aulas-ex"><div id="aulas-ex-conteudo"></div></div>
 
     <!-- MENTORIA -->
+    <!-- APRENDER (antiga Mentoria): vídeos do treino do dia, continue de onde parou, trilhas e a biblioteca. Preenchido por renderAprender(). -->
     <div class="view" data-view="mentoria">
-      <h1 class="page-title">Mentoria</h1>
-      <p class="page-sub">Cursos e conteúdos completos</p>
-
-      <p class="section-label">Suporte e técnica</p>
-      <p class="page-sub" style="margin-top:-6px;">Sugestões rápidas</p>
-      <div class="row" id="row-suporte"></div>
-
-      <p class="section-label" style="margin-top:16px;">Dicas rápidas</p>
-      <div class="row" id="row-dicas"></div>
-
-      <p class="section-label" style="margin-top:16px;">Biblioteca completa</p>
-      <div class="filter-row" id="filter-row"></div>
-      <div class="poster-grid" id="poster-grid"></div>
+      <div id="aprender-conteudo"></div>
     </div>
 
     <!-- PERSONAL -->
@@ -1876,7 +1903,7 @@
       <div id="personal-conteudo" style="display:none;">
         <div class="local-back" onclick="showPersonalView('dashboard')"><i class="ti ti-arrow-left"></i><span>Painel</span></div>
         <h1 class="page-title" style="margin-top:0;">Biblioteca de conteúdo</h1>
-        <p class="page-sub">Isso alimenta diretamente a Mentoria das alunas</p>
+        <p class="page-sub">Isso alimenta diretamente a aba Aprender das alunas</p>
 
         <button class="btn-secondary" style="margin-bottom:14px;" onclick="mostrarFormularioCurso()"><i class="ti ti-school" style="margin-right:6px;"></i>Criar curso</button>
         <div id="cursos-list-personal"></div>
@@ -2066,7 +2093,7 @@
         <svg class="nav-icon-svg nav-traco" width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/></svg><span>Aulas</span>
       </div>
       <div class="bottom-nav-item" data-nav="mentoria" onclick="irParaAbaFixa('mentoria')">
-        <svg class="nav-icon-svg nav-traco" width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/></svg><span>Mentoria</span>
+        <svg class="nav-icon-svg nav-traco" width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/></svg><span>Aprender</span>
       </div>
       <div class="bottom-nav-item" data-nav="ranking" onclick="irParaAbaFixa('ranking')">
         <svg class="nav-icon-svg nav-traco" width="22" height="22" viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M12 13v4M8 21h8M9 17h6"/></svg><span>Ranking</span>
@@ -2113,7 +2140,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-09-BQ-PONTOS-AUTOMATICOS';
+const VERSAO_APP = '2026-11-09-BR-APRENDER';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -3129,6 +3156,7 @@ function renderInicioDaAluna(agora){
       return '<div class="home-dia"><div class="' + classes + '">' + dentro + '</div>' + escaparHtmlFicha(b.letra) + '</div>';
     }).join('');
   }
+  try { renderPraVoceHoje(agora); } catch(e){}
   return r;
 }
 
@@ -4198,14 +4226,6 @@ function finalizarRegistroComposicao(){
   renderMinhaEvolucao(a);
 }
 
-const rowSuporte = document.getElementById('row-suporte');
-poster(rowSuporte, 'Execução: agachamento livre', '4 min', function(){ openDetail('video'); });
-poster(rowSuporte, 'Como ajustar sua carga', '3 min', function(){ openDetail('video'); });
-poster(rowSuporte, 'Fale com seu personal', 'Suporte direto', function(){ openDetail('video'); });
-
-const rowDicas = document.getElementById('row-dicas');
-poster(rowDicas, 'Amplitude no leg press', '2 min', function(){ openDetail('video'); });
-poster(rowDicas, 'Postura no agachamento', '2 min', function(){ openDetail('video'); });
 
 const conteudos = [
   {n:'Plano Nutricional MUSA+', cat:'Nutrição', locked:true, preco:'R$ 97/mês', desc:'Plano alimentar prescrito, individualizado, integrado ao seu DNA MUSA. Em breve, pagamentos ainda não estão ativos na plataforma.'},
@@ -4358,7 +4378,6 @@ const conteudos = [
 ];
 
 const categorias = ['Todos', 'Cursos completos', 'Introdução', 'Métodos de treino', 'Exercícios de coxa', 'Exercícios de glúteo', 'Nutrição', 'Alongamentos', 'Mobilidades', 'Manobras respiratórias', 'Ajustes e orientações', 'Curso: Fit 30', 'Curso: Corpo de Musa', 'Curso: Seca barriga', 'Conteúdo geral'];
-let filtroAtivo = 'Todos';
 
 // Reorganização da Mentoria: as 13 categorias ficavam soltas numa lista só (155 itens), sem
 // hierarquia — difícil de navegar e com itens repetidos entre os atalhos do topo e a biblioteca.
@@ -4377,7 +4396,6 @@ const ICONE_SECAO_MENTORIA = {
   'Cursos completos': 'ti-school', 'Métodos de treino': 'ti-list-numbers', 'Execução e técnica': 'ti-player-play',
   'Mobilidade e postura': 'ti-stretching', 'Nutrição': 'ti-apple', 'Conteúdo geral': 'ti-video'
 };
-let secaoMentoriaAberta = null; // null = mostra o grid de seções; com valor = mostra os itens daquela seção
 
 // ===== CURSOS DO APP (SECA 21 e os próximos) =====
 // Achado: o catálogo de cursos criado pela tela do Personal (cursosPersonal) NUNCA é carregado no celular da aluna
@@ -4439,57 +4457,14 @@ function cursosDoAppVisiveis(){
 function listaDeConteudosDaMentoria(){
   return conteudos.concat(cursosDoAppVisiveis().map(cursoDoAppComoConteudo));
 }
-// A lista de seções só era montada na carga da página (quando ainda não se sabe quem está logada): redesenha ao abrir
+// A aba Aprender (antiga Mentoria) é desenhada ao abrir, porque depende de quem está logada e do treino dela
 function atualizarMentoriaAoAbrir(){
-  if(secaoMentoriaAberta) renderGrid(); else renderSecoesMentoria();
+  abaAprender = 'inicio'; // tocar em "Aprender" no menu sempre volta pro começo da aba
+  buscaBiblioteca = '';
+  renderAprender();
 }
 
 function obterSecaoDoConteudo(c){ return MAPA_CATEGORIA_PARA_SECAO[c.cat] || 'Conteúdo geral'; }
-
-function renderSecoesMentoria(){
-  const grid = document.getElementById('poster-grid');
-  const filterRowEl = document.getElementById('filter-row');
-  filterRowEl.innerHTML = '';
-  const contagemPorSecao = {};
-  listaDeConteudosDaMentoria().forEach(function(c){
-    if(sessaoTipo === 'aluna' && !alunaTemAcessoAoConteudo(c)) return;
-    const secao = obterSecaoDoConteudo(c);
-    contagemPorSecao[secao] = (contagemPorSecao[secao] || 0) + 1;
-  });
-  grid.innerHTML = Object.keys(ICONE_SECAO_MENTORIA).filter(function(s){ return contagemPorSecao[s] > 0; }).map(function(secao){
-    return '<div class="vposter" style="aspect-ratio:auto;padding:16px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;" onclick="abrirSecaoMentoria(\'' + secao + '\')">' +
-      '<i class="ti ' + ICONE_SECAO_MENTORIA[secao] + '" style="font-size:26px;color:var(--gold-soft);"></i>' +
-      '<p class="vtitle" style="text-align:center;">' + secao + '</p>' +
-      '<p style="font-size:11px;color:var(--text-faint);margin:0;">' + contagemPorSecao[secao] + ' item(ns)</p>' +
-    '</div>';
-  }).join('');
-}
-
-function abrirSecaoMentoria(secao){
-  secaoMentoriaAberta = secao;
-  filtroAtivo = 'Todos';
-  const categoriasDaSecao = ['Todos'].concat(categorias.filter(function(c){ return c !== 'Todos' && MAPA_CATEGORIA_PARA_SECAO[c] === secao; }));
-  const filterRowEl = document.getElementById('filter-row');
-  filterRowEl.innerHTML = '<span class="chip" style="background:var(--card-2);" onclick="voltarParaSecoesMentoria()"><i class="ti ti-arrow-left" style="margin-right:4px;"></i>Seções</span>';
-  categoriasDaSecao.forEach(function(cat){
-    const chip = document.createElement('div');
-    chip.className = 'chip' + (cat === filtroAtivo ? ' active' : '');
-    chip.textContent = cat;
-    chip.onclick = function(){
-      filtroAtivo = cat;
-      filterRowEl.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
-      chip.classList.add('active');
-      renderGrid();
-    };
-    filterRowEl.appendChild(chip);
-  });
-  renderGrid();
-}
-
-function voltarParaSecoesMentoria(){
-  secaoMentoriaAberta = null;
-  renderSecoesMentoria();
-}
 
 function alunaTemAcessoAoConteudo(c){
   if(!c.exclusivoDeCurso) return true; // conteúdo solto normal, sempre visível
@@ -4501,30 +4476,504 @@ function alunaTemAcessoAoConteudo(c){
   return (cursoDoItem.alunasLiberadas || []).indexOf(NOME_ALUNA_LOGADA) !== -1;
 }
 
+// Depois de cadastrar um conteúdo novo (tela do Personal): se a aba Aprender estiver aberta, redesenha
 function renderGrid(){
-  const grid = document.getElementById('poster-grid');
-  grid.innerHTML = '';
-  const lista = listaDeConteudosDaMentoria().filter(function(c){
-    if(secaoMentoriaAberta && obterSecaoDoConteudo(c) !== secaoMentoriaAberta) return false;
-    if(filtroAtivo !== 'Todos' && c.cat !== filtroAtivo) return false;
-    if(sessaoTipo === 'aluna' && !alunaTemAcessoAoConteudo(c)) return false;
-    return true;
-  });
-  lista.forEach(function(c){
-    const el = document.createElement('div');
-    el.className = 'vposter';
-    el.innerHTML =
-      '<div class="vcover">' +
-        (c.locked ? '<div class="lock-icon"><i class="ti ti-lock"></i></div>' : '') +
-        '<i class="ti ti-player-play play"></i>' +
-      '</div>' +
-      '<p class="vtitle">' + c.n + '</p>' +
-      (c.preco ? '<p style="font-size:11px;color:var(--gold-soft);margin:2px 0 0;">' + c.preco + '</p>' : '');
-    el.onclick = function(){ openDetail('conteudo', c); };
-    grid.appendChild(el);
-  });
+  const v = document.querySelector('[data-view="mentoria"]');
+  if(v && v.classList && v.classList.contains('active')) renderAprender();
 }
-renderSecoesMentoria(); // mostra as seções primeiro, não a lista plana de 155 itens
+
+// ===================================================================================================
+// APRENDER (antiga Mentoria), "PRA VOCÊ HOJE" NA INÍCIO E A SUGESTÃO DE VÍDEO DEPOIS DO "COMO FOI O TREINO?"
+// A tela de treino não muda. Os vídeos dos exercícios vêm do Banco de exercícios (o mesmo ▶ do treino).
+// O que ela já assistiu fica no progresso dela: videosVistos (vídeos soltos), aulasVistas (aulas de cada trilha)
+// e ultimaAula (pro "Continue de onde parou").
+// ===================================================================================================
+let abaAprender = 'inicio';          // 'inicio' ou 'biblioteca'
+let catBiblioteca = 'execucao';      // a Biblioteca abre em Execução (sem o "Tudo")
+let buscaBiblioteca = '';
+// O que cada toque abre, separado por tela (aprender, inicio, feedback), guardado aqui pra não montar texto com aspas no onclick
+let videosNaTela = { aprender: [], inicio: [], feedback: [] };
+
+const CHIPS_BIBLIOTECA = [
+  { id: 'execucao', rotulo: 'Execução', secao: 'Execução e técnica' },
+  { id: 'metodos', rotulo: 'Métodos', secao: 'Métodos de treino' },
+  { id: 'mobilidade', rotulo: 'Mobilidade', secao: 'Mobilidade e postura' },
+  { id: 'cursos', rotulo: 'Cursos', secao: 'Cursos completos' },
+  { id: 'nutricao', rotulo: 'Nutrição', secao: 'Nutrição' },
+  { id: 'geral', rotulo: 'Geral', secao: 'Conteúdo geral' }
+];
+// Trilhas: os cursos de verdade (com aulas em sequência). As categorias "Curso: ..." viram uma trilha cada.
+// (Manobras respiratórias não entra: já existe o curso "Manobras Respiratórias, Curso Completo" com as aulas em ordem)
+const CATEGORIAS_QUE_SAO_TRILHA = ['Curso: Fit 30', 'Curso: Corpo de Musa', 'Curso: Seca barriga'];
+
+function idDoVideoYoutube(url){
+  const e = getEmbedUrl(url || '');
+  return e ? e.split('/embed/')[1] : '';
+}
+function miniaturaDoVideo(url){
+  const id = idDoVideoYoutube(url);
+  return id ? 'https://img.youtube.com/vi/' + id + '/mqdefault.jpg' : '';
+}
+function htmlMiniatura(url, classe){
+  const m = miniaturaDoVideo(url);
+  return '<span class="' + classe + '">' + (m ? '<img src="' + m + '" alt="" loading="lazy" onerror="this.remove()">' : '') + '<span class="apr-play">▶</span></span>';
+}
+
+// "Agachamento livre · 3x12" -> ["Agachamento livre"]; bi-set "Bi-set|||A · 3x12|||B · 3x12" -> ["A", "B"]
+function nomesDosExerciciosDaLinha(linha){
+  const l = String(linha || '');
+  if(l.indexOf('|||') !== -1) return l.split('|||').slice(1).map(function(p){ return p.split(' · ')[0].trim(); }).filter(Boolean);
+  const n = extrairNomeExercicioDeLinha(l).trim();
+  return n ? [n] : [];
+}
+function exercicioDoBancoPeloNome(nome){
+  let ex = null;
+  try { ex = buscarExercicioNoBanco(nome); } catch(e){}
+  if(!ex) ex = mobilidadeBanco.find(function(m){ return m.nome.toUpperCase() === String(nome).toUpperCase(); }) || null;
+  return ex;
+}
+function videoDoExercicio(nome){
+  const ex = exercicioDoBancoPeloNome(nome);
+  if(ex && ex.video) return ex.video;
+  try { return linkDaAulaDoExercicio(nome) || ''; } catch(e){ return ''; }
+}
+
+// Os exercícios de um dia do treino que têm vídeo, sem repetir
+function aulasDoTreinoDoDia(indice){
+  const d = dias[indice];
+  if(!d || d.descanso) return [];
+  const vistos = {}, lista = [];
+  (d.ex || []).forEach(function(l){
+    nomesDosExerciciosDaLinha(l).forEach(function(nome){
+      const k = semAcentoMinusculo(nome).trim();
+      if(vistos[k]) return;
+      vistos[k] = true;
+      const url = videoDoExercicio(nome);
+      if(!url) return;
+      const ex = exercicioDoBancoPeloNome(nome);
+      lista.push({ tipo: 'exercicio', chave: 'ex:' + k, nome: nome, titulo: capitalizarNomeExercicio(nome), video: url, detalhe: ex && ex.grupo ? ex.grupo : '' });
+    });
+  });
+  return lista;
+}
+
+// O treino da vez (o de hoje, o próximo ou um que ficou pra trás), igual ao card da Início. Semana completa ou sem treino: null
+function treinoDaVezDaAluna(agora){
+  if(agora === undefined) agora = Date.now();
+  let r = null;
+  try { r = montarResumoDaSemanaDaAluna(getProgressoAluna(NOME_ALUNA_LOGADA), dias, agora); } catch(e){ return null; }
+  if(!r || r.totalTreinos === 0 || r.semanaCompleta || !r.alvo || !dias[r.alvo.indice]) return null;
+  return { indice: r.alvo.indice, modo: r.alvo.modo, dia: dias[r.alvo.indice] };
+}
+function nomeCurtoDoTreino(d){
+  if(d.desafio){ try { return 'Treino ' + partesDoFocoDoDesafio(d).letra; } catch(e){} }
+  const m = String(d.foco || '').match(/^Treino\s+([A-Z])\b/);
+  return m ? 'Treino ' + m[1] : d.n;
+}
+
+function progressoDaAlunaLogada(){
+  try { return getProgressoAluna(NOME_ALUNA_LOGADA); } catch(e){ return {}; }
+}
+function videoJaVisto(chave){
+  const p = progressoDaAlunaLogada();
+  return !!(p.videosVistos && p.videosVistos[chave]);
+}
+function marcarVideoVisto(chave){
+  if(sessaoTipo !== 'aluna' || !chave) return;
+  const p = getProgressoAluna(NOME_ALUNA_LOGADA);
+  if(!p.videosVistos) p.videosVistos = {};
+  p.videosVistos[chave] = new Date().toISOString();
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+}
+
+// Guarda o que o toque vai abrir e devolve o onclick
+function onclickDoVideo(item, tela){
+  const lista = videosNaTela[tela] || (videosNaTela[tela] = []);
+  lista.push(item);
+  return 'abrirVideoDaTela(\'' + tela + '\',' + (lista.length - 1) + ')';
+}
+function abrirVideoDaTela(tela, i){
+  const item = (videosNaTela[tela] || [])[i];
+  if(!item) return false;
+  if(item.tipo === 'trilha'){ abrirTrilha(item.chave); return true; }
+  if(item.tipo === 'conteudo'){
+    if(!item.conteudo.aulas) marcarVideoVisto(item.chave);
+    openDetail('conteudo', item.conteudo);
+    return true;
+  }
+  marcarVideoVisto(item.chave);
+  abrirVideoApenasExercicio(item.titulo, null, item.video); // o título não acha no banco, então usa o link guardado
+  return true;
+}
+
+// ---------- Trilhas ----------
+function trilhasDaAluna(){
+  const trilhas = [];
+  cursosDoAppVisiveis().forEach(function(c){
+    trilhas.push({ chave: 'app:' + c.id, nome: c.nome, aulas: c.aulas, cursoDoAppId: c.id });
+  });
+  conteudos.forEach(function(c){
+    if(!c.aulas || !c.aulas.length || c.locked) return;
+    if(sessaoTipo === 'aluna' && !alunaTemAcessoAoConteudo(c)) return;
+    trilhas.push({ chave: 'c:' + c.n, nome: c.n, aulas: c.aulas, conteudo: c });
+  });
+  CATEGORIAS_QUE_SAO_TRILHA.forEach(function(cat){
+    const itens = conteudos.filter(function(c){ return c.cat === cat && c.video && !c.locked && (sessaoTipo !== 'aluna' || alunaTemAcessoAoConteudo(c)); });
+    if(!itens.length) return;
+    trilhas.push({ chave: 'cat:' + cat, nome: cat.replace(/^Curso:\s*/, ''), aulas: itens.map(function(c){ return { titulo: c.n, video: c.video }; }) });
+  });
+  return trilhas;
+}
+function trilhaPelaChave(chave){
+  return trilhasDaAluna().find(function(t){ return t.chave === chave; }) || null;
+}
+function aulasVistasDaTrilha(chave){
+  const p = progressoDaAlunaLogada();
+  return ((p.aulasVistas || {})[chave] || []).slice();
+}
+function chaveDaTrilhaDoCurso(c){
+  if(!c) return '';
+  if(c.trilhaChave) return c.trilhaChave;
+  if(c.cursoDoAppId) return 'app:' + c.cursoDoAppId;
+  return 'c:' + c.n;
+}
+// Chamado quando ela dá play numa aula (playAula)
+function registrarAulaVista(c, i){
+  if(sessaoTipo !== 'aluna' || !c) return;
+  const chave = chaveDaTrilhaDoCurso(c);
+  const p = getProgressoAluna(NOME_ALUNA_LOGADA);
+  if(!p.aulasVistas) p.aulasVistas = {};
+  if(!p.aulasVistas[chave]) p.aulasVistas[chave] = [];
+  if(p.aulasVistas[chave].indexOf(i) === -1) p.aulasVistas[chave].push(i);
+  p.ultimaAula = { chave: chave, aula: i, em: new Date().toISOString() };
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+}
+function abrirTrilha(chave, aula){
+  const t = trilhaPelaChave(chave);
+  if(!t) return false;
+  if(t.cursoDoAppId) abrirCursoDoApp(t.cursoDoAppId);
+  else openDetail('conteudo', t.conteudo ? t.conteudo : { n: t.nome, cat: 'Trilha', locked: false, desc: t.aulas.length + ' aulas, na ordem.', aulas: t.aulas, trilhaChave: t.chave });
+  if(aula != null && currentCursoMeta && currentCursoMeta.aulas && currentCursoMeta.aulas[aula]){
+    const tela = document.getElementById('detail-content');
+    // o SECA 21 da aluna é a tela "Treinos em casa" (tem o próprio registro), então ali não pula direto pra aula
+    if(!(t.cursoDoAppId === 'seca21' && sessaoTipo === 'aluna')) playAula(aula);
+    if(tela) tela.scrollTop = 0;
+  }
+  return true;
+}
+// "Continue de onde parou": a próxima aula ainda não vista da última trilha que ela abriu
+function continueDeOndeParou(){
+  const p = progressoDaAlunaLogada();
+  if(!p.ultimaAula) return null;
+  const t = trilhaPelaChave(p.ultimaAula.chave);
+  if(!t || !t.aulas.length) return null;
+  const vistas = aulasVistasDaTrilha(t.chave);
+  if(vistas.length >= t.aulas.length) return null; // terminou a trilha
+  let prox = -1;
+  for(let i = p.ultimaAula.aula + 1; i < t.aulas.length; i++){ if(vistas.indexOf(i) === -1){ prox = i; break; } }
+  if(prox === -1){ for(let i = 0; i < t.aulas.length; i++){ if(vistas.indexOf(i) === -1){ prox = i; break; } } }
+  if(prox === -1) return null;
+  return { trilha: t, aula: prox, vistas: vistas.length };
+}
+function abrirContinueDeOndeParou(){
+  const c = continueDeOndeParou();
+  if(!c) return false;
+  return abrirTrilha(c.trilha.chave, c.aula);
+}
+
+// ---------- Biblioteca ----------
+function chaveDoConteudo(c){ return 'c:' + c.n; }
+function itensDaBiblioteca(catId){
+  const chip = CHIPS_BIBLIOTECA.find(function(x){ return x.id === catId; });
+  if(!chip) return [];
+  const itens = [], nomes = {};
+  // Execução: primeiro os exercícios do treino dela (todos os dias), com o vídeo do Banco de exercícios
+  if(catId === 'execucao'){
+    dias.forEach(function(d, i){
+      aulasDoTreinoDoDia(i).forEach(function(a){
+        if(nomes[a.chave]) return;
+        nomes[a.chave] = true;
+        itens.push(a);
+      });
+    });
+  }
+  listaDeConteudosDaMentoria().forEach(function(c){
+    if(obterSecaoDoConteudo(c) !== chip.secao) return;
+    if(sessaoTipo === 'aluna' && !alunaTemAcessoAoConteudo(c)) return;
+    const k = chaveDoConteudo(c);
+    if(nomes[k]) return; // a lista tem alguns repetidos (ex.: "Ajuste De Cargas")
+    nomes[k] = true;
+    itens.push({ tipo: 'conteudo', chave: k, titulo: c.n, video: c.video || '', conteudo: c, detalhe: c.aulas ? c.aulas.length + ' aulas' : (c.locked ? (c.preco || 'Em breve') : c.cat) });
+  });
+  return itens;
+}
+// Busca em tudo: conteúdos e todos os exercícios com vídeo do Banco
+function buscarNaBibliotecaTudo(termo){
+  const t = semAcentoMinusculo(termo).trim();
+  if(!t) return [];
+  const achou = [], nomes = {};
+  listaDeConteudosDaMentoria().forEach(function(c){
+    if(sessaoTipo === 'aluna' && !alunaTemAcessoAoConteudo(c)) return;
+    if(semAcentoMinusculo(c.n + ' ' + c.cat).indexOf(t) === -1) return;
+    const k = chaveDoConteudo(c);
+    if(nomes[k]) return;
+    nomes[k] = true;
+    achou.push({ tipo: 'conteudo', chave: k, titulo: c.n, video: c.video || '', conteudo: c, detalhe: c.cat });
+  });
+  exerciciosBanco.forEach(function(e){
+    if(!e.video) return;
+    if(semAcentoMinusculo(e.nome + ' ' + (e.grupo || '')).indexOf(t) === -1) return;
+    const k = 'ex:' + semAcentoMinusculo(e.nome).trim();
+    if(nomes[k]) return;
+    nomes[k] = true;
+    achou.push({ tipo: 'exercicio', chave: k, nome: e.nome, titulo: capitalizarNomeExercicio(e.nome), video: e.video, detalhe: e.grupo || '' });
+  });
+  return achou.slice(0, 40);
+}
+
+function htmlItemDaBiblioteca(item){
+  const visto = videoJaVisto(item.chave);
+  return '<div class="apr-item" onclick="' + onclickDoVideo(item, 'aprender') + '">' + htmlMiniatura(item.video, 'apr-item-thumb') +
+    '<span class="apr-item-txt"><b>' + escaparHtmlFicha(item.titulo) + '</b>' + (item.detalhe ? '<small>' + escaparHtmlFicha(item.detalhe) + '</small>' : '') + '</span>' +
+    (visto ? '<span class="apr-visto" title="Já assistiu">✓</span>' : '') + '</div>';
+}
+function htmlListaDaBiblioteca(){
+  if(buscaBiblioteca.trim()){
+    const achou = buscarNaBibliotecaTudo(buscaBiblioteca);
+    return '<p class="section-label">Resultados · ' + achou.length + '</p>' +
+      (achou.length ? '<div class="apr-lista">' + achou.map(htmlItemDaBiblioteca).join('') + '</div>' : '<p class="apr-vazio">Nada encontrado com esse nome. Tente outra palavra, por exemplo "glúteo" ou "agachamento".</p>');
+  }
+  const chip = CHIPS_BIBLIOTECA.find(function(x){ return x.id === catBiblioteca; }) || CHIPS_BIBLIOTECA[0];
+  const itens = itensDaBiblioteca(chip.id);
+  return '<p class="section-label">' + escaparHtmlFicha(chip.rotulo) + ' · ' + itens.length + (itens.length === 1 ? ' vídeo' : ' vídeos') + '</p>' +
+    (itens.length ? '<div class="apr-lista">' + itens.map(htmlItemDaBiblioteca).join('') + '</div>' : '<p class="apr-vazio">Ainda não tem vídeo aqui.</p>');
+}
+function chipsDaBibliotecaComItens(){
+  return CHIPS_BIBLIOTECA.filter(function(c){ return c.id !== 'geral' || itensDaBiblioteca('geral').length > 0; });
+}
+
+// ---------- A tela ----------
+function renderAprender(){
+  const area = document.getElementById('aprender-conteudo');
+  if(!area) return;
+  videosNaTela.aprender = [];
+  if(abaAprender === 'biblioteca'){
+    area.innerHTML = '<div class="local-back" onclick="voltarProAprender()"><i class="ti ti-arrow-left"></i><span>Aprender</span></div>' +
+      '<p class="apr-eyebrow">Aprender</p><h1 class="page-title apr-titulo">Biblioteca</h1>' +
+      '<input class="form-input apr-busca" id="apr-busca" type="search" placeholder="Buscar: agachamento, glúteo, dieta..." value="' + escaparHtmlFicha(buscaBiblioteca) + '" oninput="buscarNaBiblioteca(this.value)">' +
+      '<div class="filter-row apr-chips">' + chipsDaBibliotecaComItens().map(function(c){
+        return '<div class="chip' + (c.id === catBiblioteca && !buscaBiblioteca.trim() ? ' active' : '') + '" onclick="trocarCategoriaBiblioteca(\'' + c.id + '\')">' + c.rotulo + '</div>';
+      }).join('') + '</div>' +
+      '<div id="apr-lista-biblioteca">' + htmlListaDaBiblioteca() + '</div>';
+    return;
+  }
+
+  let html = '<p class="apr-eyebrow">Aprender</p><h1 class="page-title apr-titulo">Aulas pro seu treino</h1><p class="page-sub">Vídeos curtos do Thiago</p>';
+
+  const vez = treinoDaVezDaAluna();
+  const doTreino = vez ? aulasDoTreinoDoDia(vez.indice) : [];
+  if(doTreino.length){
+    html += '<p class="section-label apr-sec">' + (vez.modo === 'hoje' ? 'Do seu treino de hoje' : 'Do seu próximo treino') + ' · ' + escaparHtmlFicha(nomeCurtoDoTreino(vez.dia)) + '</p>' +
+      '<div class="apr-fileira">' + doTreino.map(function(a){
+        return '<div class="apr-vcard" onclick="' + onclickDoVideo(a, 'aprender') + '">' + htmlMiniatura(a.video, 'apr-vcard-thumb') +
+          '<span class="apr-vcard-txt"><b>' + escaparHtmlFicha(a.titulo) + '</b>' + (a.detalhe ? '<small>' + escaparHtmlFicha(a.detalhe) + '</small>' : '') + '</span>' +
+          (videoJaVisto(a.chave) ? '<span class="apr-visto">✓</span>' : '') + '</div>';
+      }).join('') + '</div>';
+  }
+
+  const cont = continueDeOndeParou();
+  if(cont){
+    const aula = cont.trilha.aulas[cont.aula];
+    const pct = Math.round(cont.vistas / cont.trilha.aulas.length * 100);
+    html += '<p class="section-label apr-sec">Continue de onde parou</p>' +
+      '<div class="apr-cont" onclick="abrirContinueDeOndeParou()">' +
+        '<p class="apr-cont-lbl">Curso · ' + escaparHtmlFicha(cont.trilha.nome) + '</p>' +
+        '<p class="apr-cont-tit">' + escaparHtmlFicha(rotuloDaAulaNaLista(aula, cont.aula)) + '</p>' +
+        '<span class="apr-barra"><i style="width:' + pct + '%"></i></span>' +
+        '<small>' + cont.vistas + ' de ' + cont.trilha.aulas.length + ' aulas</small></div>';
+  }
+
+  const trilhas = trilhasDaAluna();
+  if(trilhas.length){
+    html += '<p class="section-label apr-sec">Suas trilhas</p><div class="apr-fileira">' + trilhas.map(function(t){
+      const vistas = aulasVistasDaTrilha(t.chave).length;
+      const pct = Math.round(vistas / t.aulas.length * 100);
+      return '<div class="apr-trilha" onclick="' + onclickDoVideo({ tipo: 'trilha', chave: t.chave }, 'aprender') + '">' +
+        '<p class="apr-trilha-nome">' + escaparHtmlFicha(t.nome) + '</p>' +
+        '<small>' + t.aulas.length + ' aulas' + (vistas ? ' · ' + vistas + ' vistas' : '') + '</small>' +
+        '<span class="apr-barra"><i style="width:' + pct + '%"></i></span></div>';
+    }).join('') + '</div>';
+  }
+
+  html += '<p class="section-label apr-sec apr-sec-link">Biblioteca <span onclick="abrirBiblioteca(\'execucao\')">Abrir</span></p>' +
+    '<div class="filter-row apr-chips">' + chipsDaBibliotecaComItens().map(function(c){
+      return '<div class="chip" onclick="abrirBiblioteca(\'' + c.id + '\')">' + c.rotulo + '</div>';
+    }).join('') + '</div>';
+  area.innerHTML = html;
+}
+function abrirBiblioteca(catId){
+  abaAprender = 'biblioteca';
+  catBiblioteca = CHIPS_BIBLIOTECA.some(function(c){ return c.id === catId; }) ? catId : 'execucao';
+  buscaBiblioteca = '';
+  renderAprender();
+}
+function trocarCategoriaBiblioteca(catId){
+  catBiblioteca = catId;
+  buscaBiblioteca = '';
+  renderAprender();
+}
+// Só troca a lista (redesenhar o campo de busca tiraria o teclado da tela no celular)
+function buscarNaBiblioteca(texto){
+  buscaBiblioteca = String(texto || '');
+  videosNaTela.aprender = [];
+  const lista = document.getElementById('apr-lista-biblioteca');
+  if(lista) lista.innerHTML = htmlListaDaBiblioteca();
+}
+function voltarProAprender(){
+  abaAprender = 'inicio';
+  buscaBiblioteca = '';
+  renderAprender();
+}
+
+// ---------- Início: "Pra você hoje" (em cima do DNA) ----------
+function numeroDoDia(agora){ return Math.floor(new Date(dataLocalISO(new Date(agora)) + 'T12:00:00').getTime() / 86400000); }
+function escolherVideoPraVoceHoje(agora){
+  if(agora === undefined) agora = Date.now();
+  const vez = treinoDaVezDaAluna(agora);
+  if(vez){
+    const lista = aulasDoTreinoDoDia(vez.indice);
+    if(lista.length){
+      const nova = lista.find(function(a){ return !videoJaVisto(a.chave); });
+      const a = nova || lista[numeroDoDia(agora) % lista.length];
+      return Object.assign({}, a, { titulo: 'Execução: ' + a.titulo, sub: vez.modo === 'hoje' ? 'Combina com o treino de hoje' : 'Combina com o seu próximo treino' });
+    }
+  }
+  // Sem treino pra fazer (descanso ou semana completa): um vídeo de mobilidade, trocando a cada dia
+  const mob = conteudos.filter(function(c){ return (c.cat === 'Mobilidades' || c.cat === 'Alongamentos') && c.video && !c.locked; });
+  if(!mob.length) return null;
+  const c = mob[numeroDoDia(agora) % mob.length];
+  return { tipo: 'conteudo', chave: chaveDoConteudo(c), titulo: c.n, video: c.video, conteudo: c, sub: 'Pra cuidar do corpo hoje' };
+}
+function renderPraVoceHoje(agora){
+  const area = document.getElementById('home-pra-voce');
+  if(!area) return null;
+  if(sessaoTipo !== 'aluna'){ area.innerHTML = ''; return null; }
+  const v = escolherVideoPraVoceHoje(agora);
+  if(!v){ area.innerHTML = ''; return null; }
+  videosNaTela.inicio = [];
+  area.innerHTML = htmlCardDeVideo('Pra você hoje', v, 'inicio');
+  return v;
+}
+function htmlCardDeVideo(etiqueta, v, tela){
+  return '<div class="pv-card" onclick="' + onclickDoVideo(v, tela) + '">' + htmlMiniatura(v.video, 'pv-thumb') +
+    '<span class="pv-txt"><small class="pv-lbl">' + escaparHtmlFicha(etiqueta) + '</small><b>' + escaparHtmlFicha(v.titulo) + '</b>' +
+    (v.sub ? '<small>' + escaparHtmlFicha(v.sub) + '</small>' : '') + '</span></div>';
+}
+
+// ---------- Depois do "Como foi o treino?": desconforto num exercício sugere o vídeo dele ----------
+function htmlSugestaoVideoDoDesconforto(exercicio){
+  const nome = nomesDosExerciciosDaLinha(exercicio)[0];
+  if(!nome) return '';
+  const url = videoDoExercicio(nome);
+  if(!url) return '';
+  videosNaTela.feedback = [];
+  return htmlCardDeVideo('Pra te ajudar agora', { tipo: 'exercicio', chave: 'ex:' + semAcentoMinusculo(nome).trim(), nome: nome, titulo: 'Execução: ' + capitalizarNomeExercicio(nome), video: url, sub: 'Reveja o movimento antes do próximo treino' }, 'feedback');
+}
+
+// ---------- Perguntas que aparecem sozinhas (pergunta rápida e Roda da Vida) ----------
+// No máximo 1 vez por dia, só ao abrir a Início, nunca no treino, no tour ou no feedback, e uma de cada vez:
+// a pergunta rápida primeiro; se as duas estão esperando, alterna (a Roda da Vida fica pra outro dia).
+const ATRASO_PERGUNTA_AUTOMATICA_MS = 1200;
+function escolherPerguntaAutomatica(prog, hojeISO){
+  if(!prog || prog.perguntaAutoEm === hojeISO) return null;
+  const perfil = prog.perguntasPerfilDNA && prog.perguntasPerfilDNA.pendente;
+  const roda = prog.rodaDaVidaPendente;
+  if(perfil && roda) return prog.perguntaAutoUltimoTipo === 'perfil' ? 'roda' : 'perfil';
+  if(perfil) return 'perfil';
+  if(roda) return 'roda';
+  return null;
+}
+function agendarPerguntaAutomatica(){
+  setTimeout(function(){ try { mostrarPerguntaAutomaticaSePuder(); } catch(e){} }, ATRASO_PERGUNTA_AUTOMATICA_MS);
+}
+function podeMostrarPerguntaAgora(){
+  if(sessaoTipo !== 'aluna') return false;
+  if(level2 !== 'home') return false;
+  const home = document.querySelector('[data-view="home"]');
+  if(!home || !home.classList || !home.classList.contains('active')) return false; // abriu um treino ou outra tela
+  if(tourEmAndamento) return false;
+  if(!tourJaVisto()) return false; // o tour da primeira vez vai abrir: a pergunta fica pra outro dia
+  try { if(alunaLogadaNoModoSoDesafio()) return false; } catch(e){}
+  if(document.getElementById('janela-pergunta-auto')) return false;
+  return true;
+}
+function mostrarPerguntaAutomaticaSePuder(agora){
+  if(!podeMostrarPerguntaAgora()) return null;
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  const hoje = dataLocalISO(new Date(agora === undefined ? Date.now() : agora));
+  const tipo = escolherPerguntaAutomatica(prog, hoje);
+  if(!tipo) return null;
+  prog.perguntaAutoEm = hoje;
+  prog.perguntaAutoUltimoTipo = tipo;
+  salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  const janela = document.createElement('div');
+  janela.id = 'janela-pergunta-auto';
+  janela.className = 'sheet-fundo';
+  janela.innerHTML = htmlJanelaPergunta(tipo, prog);
+  document.body.appendChild(janela);
+  return tipo;
+}
+let notaRodaNaJanela = null;
+function htmlJanelaPergunta(tipo, prog){
+  notaRodaNaJanela = null;
+  let meio;
+  if(tipo === 'perfil'){
+    meio = '<p class="sheet-lbl">Uma pergunta rápida · menos de 1 min</p>' +
+      '<p class="sheet-tit">' + escaparHtmlFicha(prog.perguntasPerfilDNA.pendente.texto) + '</p>' +
+      '<textarea class="form-input sheet-resp" id="janela-pergunta-resposta" rows="3" placeholder="Escreve com suas palavras..."></textarea>';
+  } else {
+    const p = prog.rodaDaVidaPendente;
+    meio = '<p class="sheet-lbl">Roda da Vida · uma área</p>' +
+      '<p class="sheet-tit">De 0 a 5, como está ' + escaparHtmlFicha(String(p.label || '').toLowerCase()) + ' na sua vida hoje?</p>' +
+      '<div class="sheet-notas" id="janela-pergunta-notas">' + [0, 1, 2, 3, 4, 5].map(function(n){
+        return '<span class="sheet-nota" data-nota="' + n + '" onclick="escolherNotaRodaNaJanela(' + n + ')">' + n + '</span>';
+      }).join('') + '</div>';
+  }
+  return '<div class="sheet" data-tipo="' + tipo + '"><span class="sheet-alca"></span>' + meio +
+    '<div class="sheet-botoes"><button class="btn-secondary" onclick="fecharJanelaPergunta()">Depois</button>' +
+    '<button class="btn-gold" onclick="responderJanelaPergunta(\'' + tipo + '\')">Responder</button></div></div>';
+}
+function escolherNotaRodaNaJanela(n){
+  notaRodaNaJanela = n;
+  const caixa = document.getElementById('janela-pergunta-notas');
+  if(caixa && caixa.innerHTML) caixa.innerHTML = caixa.innerHTML.replace(/ on"/g, '"').replace('class="sheet-nota" data-nota="' + n + '"', 'class="sheet-nota on" data-nota="' + n + '"');
+}
+function fecharJanelaPergunta(){
+  const j = document.getElementById('janela-pergunta-auto');
+  if(j && j.remove) j.remove();
+}
+function responderJanelaPergunta(tipo){
+  const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
+  if(tipo === 'perfil'){
+    const campo = document.getElementById('janela-pergunta-resposta');
+    const resposta = campo ? String(campo.value || '').trim() : '';
+    if(!resposta){ alert('Escreve alguma coisa antes de enviar, mesmo que curta.'); return false; }
+    const pendente = prog.perguntasPerfilDNA && prog.perguntasPerfilDNA.pendente;
+    if(!pendente){ fecharJanelaPergunta(); return false; }
+    prog.perguntasPerfilDNA.respondidas.push({ perguntaId: pendente.perguntaId, texto: pendente.texto, categoria: pendente.categoria, resposta: resposta, data: new Date().toISOString() });
+    prog.perguntasPerfilDNA.pendente = null;
+    salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
+  } else {
+    if(notaRodaNaJanela == null){ alert('Escolhe uma nota de 0 a 5.'); return false; }
+    const pendente = prog.rodaDaVidaPendente;
+    if(!pendente){ fecharJanelaPergunta(); return false; }
+    prog.rodaDaVidaPendente = null;
+    salvarCampoRodaDaVida(NOME_ALUNA_LOGADA, pendente.areaId, notaRodaNaJanela); // já salva e confere se fechou o ciclo
+  }
+  fecharJanelaPergunta();
+  mostrarConfirmacaoSalvamento(true, 'Obrigada! Sua resposta foi enviada.');
+  return true;
+}
 
 /* ===== PERSONAL ===== */
 
@@ -8854,7 +9303,7 @@ function abrirTelaDesafioSeca21(){
   const sn = semanaAtualDoSeca21(st), totalSemanas = Math.ceil(st.total / 7);
   sub.textContent = 'Dia ' + st.dia + ' de ' + st.total + ' · semana ' + sn + ' de ' + totalSemanas + ' · ' + nivelSeca21PeloNivel(a.desafioAtivo.nivel) + ' ' + a.desafioAtivo.frequencia + 'x por semana';
   if(!semana){
-    lista.innerHTML = '<div class="info-box"><p class="txt" style="margin:0 0 10px;">Seu treino do SECA 21 está sendo preparado e aparece aqui assim que for liberado. Enquanto isso, as aulas do desafio já estão na Mentoria.</p>' +
+    lista.innerHTML = '<div class="info-box"><p class="txt" style="margin:0 0 10px;">Seu treino do SECA 21 está sendo preparado e aparece aqui assim que for liberado. Enquanto isso, as aulas do desafio já estão liberadas.</p>' +
       '<button class="btn-gold" onclick="irParaAbaFixa(\'mentoria\')">Ver as aulas</button></div>';
     return;
   }
@@ -9476,7 +9925,7 @@ function htmlRodapeSoDesafio(a){
 function atualizarMenuDoDesafio(soDesafio){
   const t = document.querySelector('[data-nav="treino"] span'), m = document.querySelector('[data-nav="mentoria"] span');
   if(t) t.textContent = soDesafio ? 'Treinos' : 'Treino';
-  if(m) m.textContent = soDesafio ? 'Em casa' : 'Mentoria';
+  if(m) m.textContent = soDesafio ? 'Em casa' : 'Aprender';
   // Só desafio: sai a Evolução, entra "Aulas" (aulas dos exercícios); "Mentoria" vira "Treinos em casa" (ícone de casa)
   const ev = document.querySelector('[data-nav="evolucao"]'), au = document.querySelector('[data-nav="aulas-ex"]');
   if(ev && ev.style) ev.style.display = soDesafio ? 'none' : '';
@@ -17200,7 +17649,7 @@ function alternarSubabaExercicios(qual){
 function renderMetodosReferencia(){
   const view = document.getElementById('subaba-metodos-view');
   const metodos = conteudos.filter(function(c){ return c.cat === 'Métodos de treino'; });
-  let html = '<p class="page-sub" style="margin-top:-4px;">Referência dos métodos de intensidade, mesmo conteúdo já disponível na Mentoria</p>';
+  let html = '<p class="page-sub" style="margin-top:-4px;">Referência dos métodos de intensidade, mesmo conteúdo já disponível na aba Aprender</p>';
   metodos.forEach(function(m){
     html += '<div class="exercicio-item" style="cursor:pointer;" onclick="playConteudoMetodo(\'' + m.n.replace(/'/g,"\\'") + '\')">' +
       '<p class="ex-name">' + m.n + '</p>' +
@@ -17674,7 +18123,7 @@ function renderConteudoPersonal(){
       '<p class="ex-name">' + c.n + (c.locked ? ' <i class="ti ti-lock" style="font-size:11px;color:var(--gold-soft);"></i>' : '') + '</p>' +
       '<p class="ex-meta">' + c.cat + '</p>' +
       '<label style="display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--text-faint);margin-top:4px;">' +
-        '<input type="checkbox" style="width:13px;height:13px;" ' + (c.exclusivoDeCurso ? 'checked' : '') + ' onchange="alternarExclusividadeItemCurso(' + idx + ')"> Exclusivo de curso (não aparece solto na Mentoria)' +
+        '<input type="checkbox" style="width:13px;height:13px;" ' + (c.exclusivoDeCurso ? 'checked' : '') + ' onchange="alternarExclusividadeItemCurso(' + idx + ')"> Exclusivo de curso (não aparece solto na aba Aprender)' +
       '</label>';
     list.appendChild(el);
   });
@@ -17872,7 +18321,7 @@ function fecharCursoParaTodas(idCurso){
   if(!curso) return;
   const liberadas = alunasPersonal.filter(function(a){ return alunaTemCursoLiberado(a, idCurso); });
   if(liberadas.length === 0){ alert('O ' + curso.nome + ' já está fechado pra todas.'); return; }
-  if(!confirm('Fechar o ' + curso.nome + ' pra ' + liberadas.length + ' aluna(s)? Elas deixam de ver o curso na Mentoria.')) return;
+  if(!confirm('Fechar o ' + curso.nome + ' pra ' + liberadas.length + ' aluna(s)? Elas deixam de ver o curso na aba Aprender.')) return;
   liberadas.forEach(function(a){
     a.cursosLiberados = (a.cursosLiberados || []).filter(function(id){ return id !== idCurso; });
     salvarPerfilAlunaNoSupabase(a.nome);
@@ -18645,21 +19094,20 @@ const PASSOS_TOUR = [
     texto: 'Aqui você acompanha constância, recuperação e progressão separadamente, pra entender o que está puxando seu resultado pra cima ou pra baixo.' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '#link-ver-treinos-semana', titulo: 'Sua semana',
     texto: 'Cada bolinha é um dia da semana. Os treinos feitos ficam marcados, e o de hoje fica com o contorno dourado. Toque aqui pra ver a lista completa.' },
-  { parte: 1, preparar: tourIrParaInicio, seletor: '#botao-pergunta-perfil-area > div', titulo: 'Pergunta rápida',
-    texto: 'Esse atalho traz uma pergunta curta sobre a sua rotina, o que te motiva ou o que atrapalha. Ele aparece de tempos em tempos, e às vezes também durante o descanso do treino. Suas respostas ajudam seu personal a te conhecer melhor e a ajustar o seu acompanhamento. Se não puder responder agora, é só tocar em "Responder depois".',
-    textoCentro: 'Às vezes aparece um atalho com uma pergunta curta sobre a sua rotina, o que te motiva ou o que atrapalha. Ele surge de tempos em tempos, e às vezes também durante o descanso do treino. Suas respostas ajudam seu personal a te conhecer melhor e a ajustar o seu acompanhamento. Se não puder responder na hora, é só tocar em "Responder depois".' },
-  { parte: 1, preparar: tourIrParaInicio, seletor: '#botao-pergunta-roda-vida-area > div', titulo: 'Roda da Vida',
-    texto: 'Esse atalho traz uma área da sua vida pra você avaliar de 0 a 5, como saúde, trabalho, família e finanças. Aparece uma área de cada vez, e leva poucos segundos. Quando você completa as 10 áreas, o seu gráfico fica pronto e o botão some por cerca de 2 meses, até começar uma nova rodada pra você comparar.',
-    textoCentro: 'Às vezes aparece um atalho com uma área da sua vida pra você avaliar de 0 a 5, como saúde, trabalho, família e finanças. Aparece uma área de cada vez, e leva poucos segundos. Quando você completa as 10 áreas, o seu gráfico fica pronto e o botão some por cerca de 2 meses, até começar uma nova rodada pra você comparar.' },
+  { parte: 1, preparar: tourIrParaInicio, seletor: '#home-pra-voce > div', titulo: 'Pra você hoje',
+    texto: 'Um vídeo curto que combina com o seu treino, por exemplo a execução de um exercício que você vai fazer. Em dia de descanso, vem um de mobilidade. Toque pra assistir.',
+    textoCentro: 'Na tela inicial aparece um vídeo curto que combina com o seu treino, por exemplo a execução de um exercício que você vai fazer. Em dia de descanso, vem um de mobilidade. Toque pra assistir.' },
+  { parte: 1, preparar: tourIrParaInicio, titulo: 'Perguntas rápidas',
+    texto: 'De vez em quando, ao abrir o app, aparece uma janelinha embaixo com uma pergunta curta: sobre a sua rotina, o que te motiva ou o que atrapalha, ou uma área da sua Roda da Vida pra dar uma nota de 0 a 5. É no máximo uma por dia e nunca no meio do treino. Se não puder responder na hora, é só tocar em "Depois".' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '#botao-desafio-area > div', titulo: 'Seu desafio', fallback: 'pular',
     condicao: function(){ try { return !!obterAlunaLogadaOuCriar().desafioAtivo; } catch(e){ return false; } },
     texto: 'Como você está num desafio, esse botão leva aos treinos dele e mostra em qual estrutura você está. Você pode treinar qualquer estrutura que já tenha sido liberada.' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="treino"]', rolar: false, titulo: 'Treino',
     texto: 'A lista completa da sua semana, dia a dia. É por aqui que você abre qualquer treino, registra as séries e acompanha a sua carga.' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="evolucao"]', rolar: false, titulo: 'Evolução',
-    texto: 'Tudo da sua evolução num lugar só, em três abas: Corpo (peso, medidas e avaliação), Treino (calendário e progresso) e Roda da Vida.' },
-  { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="mentoria"]', rolar: false, titulo: 'Mentoria',
-    texto: 'Cursos completos, explicação de métodos de treino, mobilidade e muito mais, organizado por seção.' },
+    texto: 'Tudo da sua evolução num lugar só, em quatro abas: Corpo (peso, medidas e avaliação), Hoje (como você está e os hábitos), Histórico (DNA Score, calendário e progresso) e Roda da Vida.' },
+  { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="mentoria"]', rolar: false, titulo: 'Aprender',
+    texto: 'Os vídeos dos exercícios do seu treino do dia, os cursos com o ponto onde você parou e a biblioteca completa: execução, métodos, mobilidade, cursos e nutrição, com busca.' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '[data-nav="ranking"]', rolar: false, titulo: 'Ranking',
     texto: 'Sua posição no ranking, quanto falta pra passar a próxima colocada e como ganhar pontos. Conta treinos registrados, cargas que subiram e check-ins das últimas 4 semanas.' },
   { parte: 1, preparar: tourIrParaInicio, seletor: '#botao-flutuante-sol', rolar: false, titulo: 'Fale com a Sol',
@@ -18776,6 +19224,7 @@ function tourAoRedimensionar(){
 function iniciarTour(){
   if(tourEmAndamento) return;
   tourEmAndamento = true;
+  try { fecharJanelaPergunta(); } catch(e){} // a janelinha da pergunta nunca fica por cima do tour
   indiceTourAtual = 0;
   tourCriarCamadas();
   try { window.addEventListener('resize', tourAoRedimensionar); } catch(e){}
@@ -19217,7 +19666,7 @@ function openLevel2(which){
   if(which === 'personal'){ showPersonalView('dashboard'); carregarTudoDoPersonal('entrada'); iniciarPresencaEquipe(); iniciarRealtimeConversas(); iniciarAtualizacaoAutomaticaDoPersonal(); }
   if(which === 'chatia'){ inicializarChatIA(); }
   if(which === 'mentoria'){ atualizarMentoriaAoAbrir(); }
-  if(which === 'home' && typeof renderHome === 'function'){ renderHome(); verificarAvancoEstruturaDesafio(); renderBotaoDesafio(); renderBotoesCursosLiberados(); verificarPerguntaPerfilPendente(); renderBotaoPerguntaPerfil(); verificarPerguntaRodaDaVidaPendente(); renderBotaoPerguntaRodaDaVida(); verificarEIniciarTourPrimeiraVez(); }
+  if(which === 'home' && typeof renderHome === 'function'){ renderHome(); verificarAvancoEstruturaDesafio(); renderBotaoDesafio(); renderBotoesCursosLiberados(); verificarPerguntaPerfilPendente(); renderBotaoPerguntaPerfil(); verificarPerguntaRodaDaVidaPendente(); renderBotaoPerguntaRodaDaVida(); verificarEIniciarTourPrimeiraVez(); agendarPerguntaAutomatica(); }
   if(which === 'dados' && typeof renderAvaliacoes === 'function'){ renderAvaliacoes(); }
   if(which === 'progresso' && typeof renderMeuProgresso === 'function'){ renderMeuProgresso(); }
   if(which === 'ranking' && typeof renderRanking === 'function'){ renderRanking(); renderRankingPublico(); }
@@ -20509,6 +20958,7 @@ function renderPlaylist(){
 function playAula(i){
   const c = currentCursoMeta;
   const a = c.aulas[i];
+  try { registrarAulaVista(c, i); } catch(e){} // pro "Continue de onde parou" e o progresso das trilhas
   const embed = getEmbedUrl(a.video);
   const titulo = tituloDaAula(a, i);
   const el = document.getElementById('detail-content');
@@ -24647,7 +25097,8 @@ function registrarFeedbackTreino(diaIndex, indiceEdicao, origem){
     return;
   }
   const el = document.getElementById('area-feedback');
-  if(el) el.innerHTML = '<p class="txt">' + msg + ' <span style="cursor:pointer;text-decoration:underline;color:var(--text-faint);" onclick="editarFeedbackTreino(' + indiceDoRegistro + ',' + diaIndex + ')">Editar</span></p>';
+  if(el) el.innerHTML = '<p class="txt">' + msg + ' <span style="cursor:pointer;text-decoration:underline;color:var(--text-faint);" onclick="editarFeedbackTreino(' + indiceDoRegistro + ',' + diaIndex + ')">Editar</span></p>' +
+    (desconforto && exercicioDesconforto ? htmlSugestaoVideoDoDesconforto(exercicioDesconforto) : ''); // o vídeo do exercício que incomodou
 }
 
 // Reabre o formulário já preenchido com o que foi enviado, pra corrigir
