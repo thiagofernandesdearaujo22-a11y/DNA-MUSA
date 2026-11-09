@@ -1264,7 +1264,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-09-BS-CONTROLE-GRUPOS</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-09-BT-ENDERECO-GRUPOS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -2188,7 +2188,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-09-BS-CONTROLE-GRUPOS';
+const VERSAO_APP = '2026-11-09-BT-ENDERECO-GRUPOS';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -9594,7 +9594,7 @@ function htmlCaixaPlanoEDesafio(a){
 // Tabelas: tarefas_grupo_whatsapp (a tarefa) e itens_grupo_whatsapp (cada aluna, com o lote e o resultado).
 // ===================================================================================================
 // Se o Supabase der outro endereço pra função (como foi com o "hyper-action"), troque aqui:
-const ENDERECO_FUNCAO_GRUPOS = 'grupos-whatsapp';
+const ENDERECO_FUNCAO_GRUPOS = 'smooth-handler'; // endereço real da função "grupos-whatsapp" no Supabase
 const OPCOES_POR_LOTE_GRUPO = [3, 5, 8, 10];
 const OPCOES_INTERVALO_GRUPO = [5, 10, 15, 30];
 const NOMES_STATUS_ITEM_GRUPO = { na_fila: 'Na fila', processando: 'Adicionando', entrou: 'Entrou', convite: 'Convite enviado', fora: 'Ficou de fora', cancelado: 'Cancelado' };
