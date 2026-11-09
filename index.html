@@ -1152,6 +1152,49 @@
   .sheet-botoes{display:flex;gap:10px;}
   .sheet-botoes button{margin:0;flex:1;}
   .sheet-botoes .btn-gold{flex:1.5;}
+  /* ===== Controle de grupos do WhatsApp (Personal) ===== */
+  .cg-eye{font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold-soft);margin:6px 0 2px;}
+  .cg-numero{display:flex;align-items:center;gap:8px;margin:2px 0 12px;font-size:12px;color:var(--text-faint);}
+  .cg-criar{margin:0 0 4px;}
+  .cg-g{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 14px;margin-bottom:9px;cursor:pointer;}
+  .cg-g.on{border-color:var(--border-strong);background:linear-gradient(160deg,rgba(217,178,111,0.12),var(--card) 60%);}
+  .cg-av{width:40px;height:40px;border-radius:12px;background:var(--card-2);border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;font-family:'EB Garamond',serif;font-size:19px;color:var(--gold-soft);flex-shrink:0;}
+  .cg-gt{flex:1;min-width:0;}
+  .cg-gt b{display:block;font-size:14px;font-weight:600;color:var(--text);}
+  .cg-gt small{display:block;font-size:11.5px;color:var(--text-faint);margin-top:2px;}
+  .cg-seta{color:var(--text-faint);font-size:18px;}
+  .cg-tag{font-size:10.5px;font-weight:700;padding:4px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;}
+  .cg-tag.t-ok{background:rgba(143,174,125,0.16);color:var(--success);} .cg-tag.t-gold{background:rgba(217,178,111,0.16);color:var(--gold-soft);}
+  .cg-tag.t-warn{background:rgba(226,163,61,0.15);color:#E2A33D;} .cg-tag.t-bad{background:rgba(201,120,74,0.16);color:#C9784A;} .cg-tag.t-fila{background:rgba(255,236,205,0.06);color:var(--text-faint);}
+  .cg-nums{display:flex;gap:8px;margin:4px 0 6px;}
+  .cg-nums div{flex:1;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 8px;text-align:center;}
+  .cg-nums b{display:block;font-family:'EB Garamond',serif;font-size:26px;line-height:1;color:var(--text);} .cg-nums b.g{color:var(--gold-soft);} .cg-nums b.w{color:#E2A33D;}
+  .cg-nums small{font-size:10.5px;color:var(--text-faint);}
+  .cg-sub{font-size:12px;color:var(--text-faint);margin:0 0 10px;}
+  .cg-chips{flex-wrap:wrap;margin:10px 0 8px !important;}
+  .cg-busca{margin-bottom:8px;}
+  .cg-acoes-lista{display:flex;justify-content:space-between;font-size:12px;color:var(--gold-soft);margin:2px 2px 6px;}
+  .cg-acoes-lista span{cursor:pointer;}
+  .cg-al{display:flex;align-items:center;gap:11px;padding:10px 2px;border-bottom:1px solid var(--border);cursor:pointer;}
+  .cg-al.off{cursor:default;}
+  .cg-ck{width:22px;height:22px;border-radius:7px;border:1.6px solid var(--text-faint);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;}
+  .cg-ck.on{background:linear-gradient(180deg,#F0CF8E,#C99A52);border-color:transparent;color:#1E1608;}
+  .cg-al.off .cg-ck{opacity:.25;}
+  .cg-barra{position:sticky;bottom:0;background:#14110E;border:1px solid var(--border-strong);border-radius:16px;padding:12px 14px 14px;margin-top:14px;z-index:5;}
+  .cg-barra p{font-size:12px;color:var(--text-dim);margin:0 0 9px;display:flex;justify-content:space-between;gap:8px;}
+  .cg-barra p b{color:var(--gold-soft);}
+  .cg-barra .btn-gold{margin:0;}
+  .cg-barra .btn-gold[disabled]{opacity:.45;}
+  .cg-lotes{display:flex;gap:8px;margin-bottom:10px;}
+  .cg-lotes .cg-campo{flex:1;margin:0;}
+  .cg-campo{display:block;margin-bottom:10px;}
+  .cg-campo small{display:block;font-size:11px;color:var(--text-faint);margin-bottom:4px;}
+  .cg-prog{height:6px;border-radius:4px;background:rgba(255,236,205,0.08);overflow:hidden;margin:6px 0 8px;}
+  .cg-prog i{display:block;height:100%;background:linear-gradient(90deg,#F0CF8E,#C99A52);}
+  .cg-erro{border-color:#C9784A !important;}
+  .cg-vazio{font-size:12.5px;color:var(--text-faint);}
+  .cg-botoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+  .cg-botoes button{flex:1;margin:0;min-width:110px;}
 </style>
 </head>
 <body>
@@ -1221,7 +1264,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-09-BR-APRENDER</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-09-BS-CONTROLE-GRUPOS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1591,6 +1634,11 @@
         <p class="section-label" style="margin-top:18px;">Ferramenta específica</p>
         <button class="btn-secondary" style="margin-bottom:14px;" onclick="mostrarFormularioAvisarTreinoAjustado()"><i class="ti ti-barbell" style="margin-right:6px;"></i>Avisar treino ajustado (WhatsApp + Aplicativo juntos)</button>
         <div id="avisar-treino-ajustado-area"></div>
+      </div>
+
+      <!-- Controle de grupos do WhatsApp: preenchido por renderControleGrupos() -->
+      <div id="personal-grupos" style="display:none;">
+        <div id="grupos-conteudo"></div>
       </div>
 
       <div id="personal-envios" style="display:none;">
@@ -2140,7 +2188,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-09-BR-APRENDER';
+const VERSAO_APP = '2026-11-09-BS-CONTROLE-GRUPOS';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -9536,6 +9584,415 @@ function htmlCaixaPlanoEDesafio(a){
     '</select>' + detalhe + '</div>';
 }
 
+// (o Controle de grupos fica logo abaixo)
+
+// ===================================================================================================
+// CONTROLE DE GRUPOS DO WHATSAPP (tela do Personal)
+// Lista os grupos do número ligado na Z-API, mostra quem já está em cada um e adiciona alunas EM LOTES
+// (ou cria um grupo novo e coloca o resto em lotes). Quem faz o trabalho é a função "grupos-whatsapp" do
+// Supabase, que roda sozinha a cada minuto: dá pra fechar o app no meio. O token da Z-API nunca vem pro app.
+// Tabelas: tarefas_grupo_whatsapp (a tarefa) e itens_grupo_whatsapp (cada aluna, com o lote e o resultado).
+// ===================================================================================================
+// Se o Supabase der outro endereço pra função (como foi com o "hyper-action"), troque aqui:
+const ENDERECO_FUNCAO_GRUPOS = 'grupos-whatsapp';
+const OPCOES_POR_LOTE_GRUPO = [3, 5, 8, 10];
+const OPCOES_INTERVALO_GRUPO = [5, 10, 15, 30];
+const NOMES_STATUS_ITEM_GRUPO = { na_fila: 'Na fila', processando: 'Adicionando', entrou: 'Entrou', convite: 'Convite enviado', fora: 'Ficou de fora', cancelado: 'Cancelado' };
+const CLASSE_STATUS_ITEM_GRUPO = { na_fila: 't-fila', processando: 't-gold', entrou: 't-ok', convite: 't-warn', fora: 't-bad', cancelado: 't-fila' };
+
+let cg = { tela: 'lista', remetente: 'Thiago', grupos: null, meuNumero: '', carregando: false, erro: '', grupo: null, carregandoGrupo: false, erroGrupo: '',
+  tarefas: [], itens: [], tarefaAberta: null, filtro: 'faltam', busca: '', marcadas: {}, porLote: 5, intervalo: 10, nomeNovo: '', desafioNovo: '' };
+
+// ----- Telefones (as mesmas regras da função do servidor) -----
+function normalizarTelefoneGrupo(t){
+  let d = String(t || '').replace(/\D/g, '');
+  if(d.length >= 12 && d.indexOf('55') === 0) d = d.slice(2);
+  if(d.length < 10 || d.length > 11) return '';
+  if(/^(\d)\1+$/.test(d)) return '';
+  return '55' + d;
+}
+function chaveDoTelefoneGrupo(t){
+  let d = String(t || '').split('@')[0].replace(/\D/g, '');
+  if(d.indexOf('55') === 0 && d.length >= 12) d = d.slice(2);
+  if(d.length === 11 && d[2] === '9') d = d.slice(0, 2) + d.slice(3);
+  return d.length === 10 ? d : '';
+}
+function mesmoTelefoneGrupo(a, b){ const x = chaveDoTelefoneGrupo(a), y = chaveDoTelefoneGrupo(b); return !!x && x === y; }
+function telefoneMascaradoGrupo(t){
+  const n = normalizarTelefoneGrupo(t);
+  return n ? '(' + n.slice(2, 4) + ') 9xxxx-' + n.slice(-4) : '';
+}
+
+// ----- Falar com o servidor -----
+async function chamarFuncaoGrupos(acao, dados){
+  if(!supabaseClient) return { ok: false, erro: 'sem conexão com o servidor' };
+  let jwt = SUPABASE_ANON_KEY;
+  try { const s = await supabaseClient.auth.getSession(); if(s && s.data && s.data.session) jwt = s.data.session.access_token; } catch(e){}
+  try {
+    const r = await fetch(SUPABASE_URL + '/functions/v1/' + ENDERECO_FUNCAO_GRUPOS, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + jwt },
+      body: JSON.stringify(Object.assign({ acao: acao, remetente: cg.remetente }, dados || {}))
+    });
+    let corpo = {};
+    try { corpo = await r.json(); } catch(e){ corpo = {}; }
+    if(!r.ok || corpo.error) return { ok: false, erro: corpo.error || ('HTTP ' + r.status + (r.status === 404 ? ': a função "' + ENDERECO_FUNCAO_GRUPOS + '" não foi encontrada no Supabase' : '')) };
+    return { ok: true, dados: corpo };
+  } catch(e){
+    return { ok: false, erro: 'não consegui falar com o servidor (' + (e && e.message || e) + ')' };
+  }
+}
+
+async function carregarGruposDoNumero(){
+  cg.carregando = true; cg.erro = '';
+  renderControleGrupos();
+  const r = await chamarFuncaoGrupos('grupos');
+  cg.carregando = false;
+  if(r.ok){ cg.grupos = (r.dados.grupos || []).slice().sort(function(a, b){ return String(a.nome).localeCompare(String(b.nome), 'pt-BR'); }); cg.meuNumero = r.dados.meuNumero || ''; }
+  else { cg.grupos = null; cg.erro = r.erro; }
+  await carregarTarefasDeGrupo();
+  renderControleGrupos();
+}
+
+async function carregarTarefasDeGrupo(){
+  if(!supabaseClient) return;
+  try {
+    const t = await supabaseClient.from('tarefas_grupo_whatsapp').select('*').order('id', { ascending: false }).limit(30);
+    cg.tarefas = t.data || [];
+    const ids = cg.tarefas.map(function(x){ return x.id; });
+    if(ids.length){
+      const i = await supabaseClient.from('itens_grupo_whatsapp').select('*').in('tarefa_id', ids).order('lote', { ascending: true }).order('id', { ascending: true });
+      cg.itens = i.data || [];
+    } else cg.itens = [];
+  } catch(e){ console.warn('[grupos] tarefas', e); }
+}
+
+// ----- Quem são as alunas -----
+function alunasParaGrupos(){
+  return alunasPersonal.filter(function(a){ return a.email; });
+}
+function itensDaTarefa(id){ return cg.itens.filter(function(i){ return i.tarefa_id === id; }); }
+function tarefasDoGrupo(grupoId){ return cg.tarefas.filter(function(t){ return t.grupo_id === grupoId; }); }
+// Situação da aluna em relação ao grupo aberto (ou ao grupo novo, que ainda não tem ninguém)
+function situacaoDaAlunaNoGrupo(a, grupo){
+  const tel = normalizarTelefoneGrupo(a.telefone);
+  if(!tel) return 'sem-telefone';
+  if(grupo && (grupo.participantes || []).some(function(p){ return mesmoTelefoneGrupo(p.telefone, tel); })) return 'no-grupo';
+  const tarefas = grupo ? tarefasDoGrupo(grupo.id) : [];
+  const itens = cg.itens.filter(function(i){ return tarefas.some(function(t){ return t.id === i.tarefa_id; }) && mesmoTelefoneGrupo(i.telefone, tel); });
+  if(itens.some(function(i){ return i.status === 'na_fila' || i.status === 'processando'; })) return 'na-fila';
+  if(itens.some(function(i){ return i.status === 'convite'; })) return 'convite';
+  return 'falta';
+}
+function alunaPassaNoFiltro(a, filtro){
+  if(filtro === 'todas') return true;
+  if(filtro === 'faltam') return statusDoPlano(a) !== 'vencidas';
+  if(filtro === 'consultoria') return (a.plano || 'consultoria') !== 'so-desafio' && statusDoPlano(a) !== 'vencidas';
+  if(filtro.indexOf('desafio:') === 0) return idDoDesafio(a) === filtro.slice(8);
+  return true;
+}
+function filtrosDeGrupo(){
+  const lista = [{ id: 'faltam', rotulo: cg.tela === 'criar' ? 'Ativas' : 'Todas que faltam' }];
+  Object.keys(DESAFIOS_DO_APP).forEach(function(id){
+    if(alunasParaGrupos().some(function(a){ return idDoDesafio(a) === id; })) lista.push({ id: 'desafio:' + id, rotulo: DESAFIOS_DO_APP[id].nome });
+  });
+  lista.push({ id: 'consultoria', rotulo: 'Consultoria' }, { id: 'todas', rotulo: 'Todas (até vencidas)' });
+  return lista;
+}
+function alunasDaListaDeGrupo(){
+  const g = cg.tela === 'grupo' ? cg.grupo : null;
+  const busca = semAcentoMinusculo(cg.busca).trim();
+  return alunasParaGrupos().filter(function(a){
+    if(busca && semAcentoMinusculo(a.nome).indexOf(busca) === -1) return false;
+    return alunaPassaNoFiltro(a, cg.filtro);
+  }).map(function(a){ return { a: a, sit: situacaoDaAlunaNoGrupo(a, g) }; })
+    .sort(function(x, y){ const o = { falta: 0, convite: 1, 'na-fila': 2, 'no-grupo': 3, 'sem-telefone': 4 }; return (o[x.sit] - o[y.sit]) || x.a.nome.localeCompare(y.a.nome, 'pt-BR'); });
+}
+function nomesMarcadosDeGrupo(){ return Object.keys(cg.marcadas).filter(function(n){ return cg.marcadas[n]; }); }
+
+// ----- Lotes: quando cada um sai -----
+function montarLotesDeGrupo(nomes, porLote, intervaloMin, agora){
+  return nomes.map(function(nome, i){
+    const lote = Math.floor(i / porLote) + 1;
+    return { nome: nome, lote: lote, agendado: new Date(agora + (lote - 1) * intervaloMin * 60000).toISOString() };
+  });
+}
+function horaCurtaGrupo(iso){ const d = new Date(iso); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+
+// ----- Ações -----
+function abrirControleGrupos(){
+  cg.tela = 'lista';
+  if(!cg.remetenteEscolhido){ cg.remetenteEscolhido = true; if(NOME_PERSONAL_LOGADO === 'Bianca') cg.remetente = 'Bianca'; } // cada uma começa no próprio número
+  // enquanto a tela de uma tarefa estiver aberta, atualiza sozinha a cada 30 segundos
+  if(!cg.relogio) cg.relogio = setInterval(function(){ if(telaPersonalAtual === 'grupos' && cg.tela === 'tarefa') atualizarTarefaDeGrupo(); }, 30000);
+  if(cg.grupos === null && !cg.carregando) carregarGruposDoNumero();
+  else renderControleGrupos();
+}
+function trocarRemetenteGrupos(quem){
+  cg.remetenteEscolhido = true;
+  cg.remetente = quem === 'Bianca' ? 'Bianca' : 'Thiago';
+  cg.grupos = null; cg.grupo = null;
+  carregarGruposDoNumero();
+}
+async function abrirGrupoDoWhatsApp(grupoId){
+  const g = (cg.grupos || []).find(function(x){ return x.id === grupoId; });
+  cg.tela = 'grupo'; cg.grupo = { id: grupoId, nome: g ? g.nome : 'Grupo', participantes: [], souAdmin: null };
+  cg.marcadas = {}; cg.filtro = 'faltam'; cg.busca = ''; cg.erroGrupo = ''; cg.carregandoGrupo = true;
+  renderControleGrupos();
+  const r = await chamarFuncaoGrupos('grupo', { grupoId: grupoId });
+  cg.carregandoGrupo = false;
+  if(r.ok) cg.grupo = { id: r.dados.id || grupoId, nome: r.dados.nome || cg.grupo.nome, participantes: r.dados.participantes || [], souAdmin: r.dados.souAdmin };
+  else cg.erroGrupo = r.erro;
+  await carregarTarefasDeGrupo();
+  renderControleGrupos();
+}
+function abrirCriarGrupo(){
+  cg.tela = 'criar'; cg.grupo = null; cg.marcadas = {}; cg.filtro = 'faltam'; cg.busca = ''; cg.nomeNovo = ''; cg.desafioNovo = '';
+  renderControleGrupos();
+}
+function voltarPraListaDeGrupos(){ cg.tela = 'lista'; renderControleGrupos(); }
+function marcarAlunaNoGrupo(nome){
+  const it = alunasDaListaDeGrupo().find(function(x){ return x.a.nome === nome; });
+  if(!it || it.sit !== 'falta') return false; // quem já está, está na fila, tem convite ou não tem telefone não marca
+  cg.marcadas[nome] = !cg.marcadas[nome];
+  renderControleGrupos();
+  return true;
+}
+function marcarTodasQueFaltamNoGrupo(){
+  alunasDaListaDeGrupo().forEach(function(x){ if(x.sit === 'falta') cg.marcadas[x.a.nome] = true; });
+  renderControleGrupos();
+}
+function desmarcarTodasNoGrupo(){ cg.marcadas = {}; renderControleGrupos(); }
+function trocarFiltroDeGrupo(f){ cg.filtro = f; renderControleGrupos(); }
+function buscarAlunaNoGrupo(t){
+  cg.busca = String(t || '');
+  const lista = document.getElementById('cg-lista-alunas');
+  if(lista) lista.innerHTML = htmlListaAlunasDeGrupo(); // só a lista (o campo de busca continua com o teclado aberto)
+}
+function ajustarLoteDeGrupo(campo, valor){
+  const n = parseInt(valor, 10);
+  if(campo === 'porLote' && OPCOES_POR_LOTE_GRUPO.indexOf(n) !== -1) cg.porLote = n;
+  if(campo === 'intervalo' && OPCOES_INTERVALO_GRUPO.indexOf(n) !== -1) cg.intervalo = n;
+  renderControleGrupos();
+}
+
+// Começar: grava a tarefa e as alunas com o lote de cada uma, e pede pro servidor fazer o 1º lote na hora
+async function comecarTarefaDeGrupo(){
+  const nomes = nomesMarcadosDeGrupo();
+  const criando = cg.tela === 'criar';
+  if(!nomes.length){ alert('Marque pelo menos uma aluna.'); return false; }
+  if(criando && !String(cg.nomeNovo || '').trim()){ alert('Dê um nome pro grupo.'); return false; }
+  if(!criando && cg.grupo && cg.grupo.souAdmin === false){ alert('O número do app não é administrador desse grupo. Torne ele administrador no WhatsApp e abra o grupo de novo.'); return false; }
+  const lotes = montarLotesDeGrupo(nomes, cg.porLote, cg.intervalo, Date.now());
+  const nLotes = lotes.length ? lotes[lotes.length - 1].lote : 0;
+  const nomeGrupo = criando ? String(cg.nomeNovo).trim() : cg.grupo.nome;
+  if(!confirm((criando ? 'Criar o grupo "' + nomeGrupo + '" com ' : 'Adicionar ') + nomes.length + (nomes.length === 1 ? ' aluna' : ' alunas') + (criando ? '' : ' no grupo "' + nomeGrupo + '"') +
+    ', em ' + nLotes + (nLotes === 1 ? ' lote' : ' lotes') + ' de até ' + cg.porLote + ', a cada ' + cg.intervalo + ' min, pelo número do(a) ' + cg.remetente + '?' +
+    (nLotes > 1 ? ' Termina por volta das ' + horaCurtaGrupo(lotes[lotes.length - 1].agendado) + '.' : ''))) return false;
+  if(!supabaseClient){ alert('Sem conexão com o servidor.'); return false; }
+  const t = await supabaseClient.from('tarefas_grupo_whatsapp').insert({ tipo: criando ? 'criar' : 'adicionar', grupo_id: criando ? null : cg.grupo.id, grupo_nome: nomeGrupo,
+    remetente: cg.remetente, por_lote: cg.porLote, intervalo_min: cg.intervalo, desafio_id: criando && cg.desafioNovo ? cg.desafioNovo : null }).select().single();
+  if(t.error || !t.data){ mostrarConfirmacaoSalvamento(false, 'Não consegui começar: ' + ((t.error && t.error.message) || 'erro desconhecido') + '. Confira se o passo 1 (tabelas) foi rodado no Supabase.'); return false; }
+  const porNome = {};
+  alunasParaGrupos().forEach(function(a){ porNome[a.nome] = a; });
+  const linhas = lotes.map(function(l){ return { tarefa_id: t.data.id, aluna_nome: l.nome, telefone: normalizarTelefoneGrupo(porNome[l.nome] && porNome[l.nome].telefone), lote: l.lote, agendado_para: l.agendado }; });
+  const i = await supabaseClient.from('itens_grupo_whatsapp').insert(linhas);
+  if(i.error){
+    await supabaseClient.from('tarefas_grupo_whatsapp').update({ status: 'cancelada', erro: 'não consegui gravar as alunas' }).eq('id', t.data.id);
+    mostrarConfirmacaoSalvamento(false, 'Não consegui gravar as alunas: ' + i.error.message);
+    return false;
+  }
+  cg.marcadas = {};
+  cg.tarefaAberta = t.data.id; cg.tela = 'tarefa';
+  await carregarTarefasDeGrupo();
+  renderControleGrupos();
+  chamarFuncaoGrupos('processar').then(function(){ return atualizarTarefaDeGrupo(); }); // o 1º lote sai na hora
+  return true;
+}
+
+async function atualizarTarefaDeGrupo(){
+  await carregarTarefasDeGrupo();
+  if(cg.tela === 'tarefa') renderControleGrupos();
+}
+function abrirTarefaDeGrupo(id){ cg.tarefaAberta = id; cg.tela = 'tarefa'; renderControleGrupos(); atualizarTarefaDeGrupo(); }
+
+async function pausarTarefaDeGrupo(id){
+  await supabaseClient.from('tarefas_grupo_whatsapp').update({ status: 'pausada', atualizado_em: new Date().toISOString() }).eq('id', id);
+  await atualizarTarefaDeGrupo();
+}
+// Retomar: o que falta é reagendado a partir de agora, mantendo o intervalo entre os lotes
+async function retomarTarefaDeGrupo(id){
+  const t = cg.tarefas.find(function(x){ return x.id === id; });
+  if(!t) return false;
+  const faltam = itensDaTarefa(id).filter(function(i){ return i.status === 'na_fila'; });
+  const lotes = faltam.map(function(i){ return i.lote; }).filter(function(l, k, arr){ return arr.indexOf(l) === k; }).sort(function(a, b){ return a - b; });
+  const agora = Date.now();
+  for(let k = 0; k < lotes.length; k++){
+    await supabaseClient.from('itens_grupo_whatsapp').update({ agendado_para: new Date(agora + k * t.intervalo_min * 60000).toISOString() }).eq('tarefa_id', id).eq('lote', lotes[k]).eq('status', 'na_fila');
+  }
+  await supabaseClient.from('tarefas_grupo_whatsapp').update({ status: 'rodando', erro: null, atualizado_em: new Date().toISOString() }).eq('id', id);
+  await atualizarTarefaDeGrupo();
+  chamarFuncaoGrupos('processar').then(function(){ return atualizarTarefaDeGrupo(); });
+  return true;
+}
+async function cancelarTarefaDeGrupo(id){
+  if(!confirm('Cancelar quem ainda está na fila? Quem já entrou continua no grupo.')) return false;
+  await supabaseClient.from('itens_grupo_whatsapp').update({ status: 'cancelado' }).eq('tarefa_id', id).eq('status', 'na_fila');
+  await supabaseClient.from('tarefas_grupo_whatsapp').update({ status: 'cancelada', atualizado_em: new Date().toISOString() }).eq('id', id);
+  await atualizarTarefaDeGrupo();
+  return true;
+}
+
+// ----- Telas -----
+function renderControleGrupos(){
+  const area = document.getElementById('grupos-conteudo');
+  if(!area) return;
+  if(cg.tela === 'grupo') area.innerHTML = htmlGrupoAbertoDoWhatsApp();
+  else if(cg.tela === 'criar') area.innerHTML = htmlCriarGrupoDoWhatsApp();
+  else if(cg.tela === 'tarefa') area.innerHTML = htmlTarefaDeGrupo();
+  else area.innerHTML = htmlListaDeGruposDoWhatsApp();
+}
+
+function htmlResumoTarefa(t){
+  const it = itensDaTarefa(t.id);
+  const feitos = it.filter(function(i){ return ['entrou', 'convite', 'fora', 'cancelado'].indexOf(i.status) !== -1; }).length;
+  const totalLotes = it.reduce(function(m, i){ return Math.max(m, i.lote); }, 0);
+  const proximo = it.filter(function(i){ return i.status === 'na_fila'; }).sort(function(a, b){ return a.agendado_para < b.agendado_para ? -1 : 1; })[0];
+  const loteAtual = proximo ? proximo.lote : totalLotes;
+  return { it: it, feitos: feitos, total: it.length, totalLotes: totalLotes, proximo: proximo, loteAtual: loteAtual };
+}
+function rotuloStatusTarefa(t){
+  return { rodando: 'Adicionando', pausada: 'Pausada', cancelada: 'Cancelada', concluida: 'Concluída' }[t.status] || t.status;
+}
+
+function htmlListaDeGruposDoWhatsApp(){
+  let h = '<p class="cg-eye">Painel do Personal</p><h1 class="page-title" style="margin-top:0;">Controle de grupos</h1>' +
+    '<p class="page-sub">Os grupos do número ligado no app. Adicione alunas em lotes ou crie um grupo novo.</p>' +
+    '<div class="cg-numero"><span>Número:</span>' + ['Thiago', 'Bianca'].map(function(q){
+      return '<span class="chip' + (cg.remetente === q ? ' active' : '') + '" onclick="trocarRemetenteGrupos(\'' + q + '\')">' + q + '</span>';
+    }).join('') + '</div>' +
+    '<button class="btn-gold cg-criar" onclick="abrirCriarGrupo()">+ Criar grupo novo</button>';
+
+  const andamento = cg.tarefas.filter(function(t){ return t.status === 'rodando' || t.status === 'pausada'; });
+  if(andamento.length){
+    h += '<p class="section-label" style="margin-top:18px;">Em andamento · ' + andamento.length + '</p>' + andamento.map(function(t){
+      const r = htmlResumoTarefa(t);
+      return '<div class="cg-g on" onclick="abrirTarefaDeGrupo(' + t.id + ')"><div class="cg-av">' + escaparHtmlFicha(String(t.grupo_nome).charAt(0).toUpperCase()) + '</div>' +
+        '<div class="cg-gt"><b>' + escaparHtmlFicha(t.grupo_nome) + '</b><small>' + r.feitos + ' de ' + r.total + ' feitas · lote ' + r.loteAtual + ' de ' + r.totalLotes + (t.erro ? ' · com aviso' : '') + '</small></div>' +
+        '<span class="cg-tag ' + (t.status === 'pausada' ? 't-warn' : 't-gold') + '">' + rotuloStatusTarefa(t) + '</span></div>';
+    }).join('');
+  }
+
+  if(cg.carregando) return h + '<p class="section-label" style="margin-top:18px;">Seus grupos</p><p class="cg-vazio">Buscando os grupos do número do(a) ' + cg.remetente + '...</p>';
+  if(cg.erro) return h + '<div class="info-box cg-erro"><p class="txt"><b>Não consegui buscar os grupos.</b> ' + escaparHtmlFicha(cg.erro) + '</p>' +
+    '<p class="txt" style="font-size:12px;color:var(--text-faint);margin-top:6px;">Confira se a função "' + ENDERECO_FUNCAO_GRUPOS + '" foi publicada no Supabase e se o número está conectado na Z-API.</p>' +
+    '<button class="btn-secondary" style="margin-top:10px;" onclick="carregarGruposDoNumero()">Tentar de novo</button></div>';
+  const grupos = cg.grupos || [];
+  h += '<p class="section-label" style="margin-top:18px;">Seus grupos · ' + grupos.length + '</p>';
+  if(!grupos.length) return h + '<p class="cg-vazio">Esse número ainda não está em nenhum grupo.</p>';
+  h += grupos.map(function(g){
+    const desafio = Object.keys(gruposDosDesafios).find(function(id){ const c = gruposDosDesafios[id] || {}; return c.grupo === g.id || c.grupoId === g.id; });
+    const rodando = cg.tarefas.some(function(t){ return t.grupo_id === g.id && t.status === 'rodando'; });
+    return '<div class="cg-g" onclick="abrirGrupoDoWhatsApp(\'' + escaparHtmlFicha(g.id) + '\')"><div class="cg-av">' + escaparHtmlFicha(String(g.nome).charAt(0).toUpperCase()) + '</div>' +
+      '<div class="cg-gt"><b>' + escaparHtmlFicha(g.nome) + '</b><small>' + (desafio ? 'ligado ao ' + escaparHtmlFicha((DESAFIOS_DO_APP[desafio] || {}).nome || desafio) : 'toque pra ver quem está') + '</small></div>' +
+      (rodando ? '<span class="cg-tag t-gold">Adicionando</span>' : '<span class="cg-seta">›</span>') + '</div>';
+  }).join('');
+  return h + '<div class="info-box" style="margin-top:10px;"><p class="txt" style="font-size:12px;margin:0;">Só dá pra adicionar pessoas nos grupos em que o número do app é administrador.</p></div>';
+}
+
+function htmlListaAlunasDeGrupo(){
+  const lista = alunasDaListaDeGrupo();
+  if(!lista.length) return '<p class="cg-vazio">Nenhuma aluna nesse filtro.</p>';
+  const tags = { 'no-grupo': ['t-ok', 'No grupo'], 'sem-telefone': ['t-bad', 'Sem telefone'], 'na-fila': ['t-fila', 'Na fila'], convite: ['t-warn', 'Convite pendente'] };
+  return lista.map(function(x){
+    const a = x.a, nomeJs = escaparNomeParaClique(a.nome), pode = x.sit === 'falta', on = pode && cg.marcadas[a.nome];
+    const sub = [nomeDoDesafioDaAluna(a) || NOMES_PLANO[a.plano || 'consultoria'] || '', telefoneMascaradoGrupo(a.telefone)].filter(Boolean).join(' · ');
+    return '<div class="cg-al' + (pode ? '' : ' off') + '"' + (pode ? ' onclick="marcarAlunaNoGrupo(\'' + nomeJs + '\')"' : '') + '>' +
+      '<span class="cg-ck' + (on ? ' on' : '') + '">' + (on ? '✓' : '') + '</span>' +
+      '<div class="cg-gt"><b>' + escaparHtmlFicha(a.nome) + '</b>' + (sub ? '<small>' + escaparHtmlFicha(sub) + '</small>' : '') + '</div>' +
+      (tags[x.sit] ? '<span class="cg-tag ' + tags[x.sit][0] + '">' + tags[x.sit][1] + '</span>' : '') + '</div>';
+  }).join('');
+}
+
+function htmlMarcacaoDeAlunas(){
+  return '<div class="filter-row cg-chips">' + filtrosDeGrupo().map(function(f){
+      return '<div class="chip' + (cg.filtro === f.id ? ' active' : '') + '" onclick="trocarFiltroDeGrupo(\'' + f.id + '\')">' + escaparHtmlFicha(f.rotulo) + '</div>';
+    }).join('') + '</div>' +
+    '<input class="form-input cg-busca" type="search" placeholder="Buscar aluna pelo nome" value="' + escaparHtmlFicha(cg.busca) + '" oninput="buscarAlunaNoGrupo(this.value)">' +
+    '<div class="cg-acoes-lista"><span onclick="marcarTodasQueFaltamNoGrupo()">Marcar todas que faltam</span><span onclick="desmarcarTodasNoGrupo()">Desmarcar</span></div>' +
+    '<div id="cg-lista-alunas">' + htmlListaAlunasDeGrupo() + '</div>';
+}
+
+function htmlBarraDeLotes(rotuloBotao, bloqueado){
+  const n = nomesMarcadosDeGrupo().length;
+  const lotes = montarLotesDeGrupo(nomesMarcadosDeGrupo(), cg.porLote, cg.intervalo, Date.now());
+  const nLotes = lotes.length ? lotes[lotes.length - 1].lote : 0;
+  const sel = function(campo, opcoes, atual, sufixo){
+    return '<label class="cg-campo"><small>' + (campo === 'porLote' ? 'Por lote' : 'Intervalo') + '</small><select class="form-select" onchange="ajustarLoteDeGrupo(\'' + campo + '\',this.value)">' +
+      opcoes.map(function(o){ return '<option value="' + o + '"' + (o === atual ? ' selected' : '') + '>' + o + sufixo + '</option>'; }).join('') + '</select></label>';
+  };
+  return '<div class="cg-barra"><p><span><b>' + n + (n === 1 ? ' marcada' : ' marcadas') + '</b>' + (n ? ' · ' + nLotes + (nLotes === 1 ? ' lote' : ' lotes') : '') + '</span>' +
+    '<span>' + (nLotes > 1 ? 'termina por volta das ' + horaCurtaGrupo(lotes[lotes.length - 1].agendado) : (n ? 'sai na hora' : '')) + '</span></p>' +
+    '<div class="cg-lotes">' + sel('porLote', OPCOES_POR_LOTE_GRUPO, cg.porLote, ' alunas') + sel('intervalo', OPCOES_INTERVALO_GRUPO, cg.intervalo, ' min') + '</div>' +
+    '<button class="btn-gold"' + (n && !bloqueado ? '' : ' disabled') + ' onclick="comecarTarefaDeGrupo()">' + rotuloBotao + '</button></div>';
+}
+
+function htmlGrupoAbertoDoWhatsApp(){
+  const g = cg.grupo || { participantes: [] };
+  let h = '<div class="local-back" onclick="voltarPraListaDeGrupos()"><i class="ti ti-arrow-left"></i><span>Seus grupos</span></div>' +
+    '<p class="cg-eye">Grupo</p><h1 class="page-title" style="margin-top:0;">' + escaparHtmlFicha(g.nome || 'Grupo') + '</h1>';
+  if(cg.carregandoGrupo) return h + '<p class="cg-vazio">Buscando quem está no grupo...</p>';
+  if(cg.erroGrupo) return h + '<div class="info-box cg-erro"><p class="txt"><b>Não consegui abrir o grupo.</b> ' + escaparHtmlFicha(cg.erroGrupo) + '</p><button class="btn-secondary" style="margin-top:10px;" onclick="abrirGrupoDoWhatsApp(\'' + escaparHtmlFicha(g.id) + '\')">Tentar de novo</button></div>';
+  const base = alunasParaGrupos().map(function(a){ return situacaoDaAlunaNoGrupo(a, g); });
+  const noGrupo = base.filter(function(s){ return s === 'no-grupo'; }).length;
+  const faltam = alunasParaGrupos().filter(function(a){ return statusDoPlano(a) !== 'vencidas' && situacaoDaAlunaNoGrupo(a, g) === 'falta'; }).length;
+  const convites = base.filter(function(s){ return s === 'convite'; }).length;
+  h += '<div class="cg-nums"><div><b>' + noGrupo + '</b><small>No grupo</small></div><div><b class="g">' + faltam + '</b><small>Faltam</small></div><div><b class="w">' + convites + '</b><small>Convite pendente</small></div></div>' +
+    '<p class="cg-sub">' + (g.participantes || []).length + ' pessoas no grupo ao todo (contando quem não é aluna do app).</p>';
+  if(g.souAdmin === false) h += '<div class="info-box cg-erro"><p class="txt" style="margin:0;"><b>O número do(a) ' + cg.remetente + ' não é administrador desse grupo.</b> No WhatsApp: dados do grupo > participantes > tornar administrador. Depois abra o grupo de novo aqui.</p></div>';
+  else if(g.souAdmin === null) h += '<div class="info-box"><p class="txt" style="margin:0;font-size:12px;">Não consegui confirmar se o número do app é administrador. Se não for, a Z-API recusa e a tarefa pausa com o aviso.</p></div>';
+  const tarefas = tarefasDoGrupo(g.id).filter(function(t){ return t.status === 'rodando' || t.status === 'pausada'; });
+  if(tarefas.length) h += tarefas.map(function(t){ const r = htmlResumoTarefa(t); return '<div class="cg-g on" onclick="abrirTarefaDeGrupo(' + t.id + ')"><div class="cg-gt"><b>' + rotuloStatusTarefa(t) + ': lote ' + r.loteAtual + ' de ' + r.totalLotes + '</b><small>' + r.feitos + ' de ' + r.total + ' feitas · toque pra acompanhar</small></div><span class="cg-seta">›</span></div>'; }).join('');
+  return h + htmlMarcacaoDeAlunas() + htmlBarraDeLotes('Começar a adicionar', g.souAdmin === false);
+}
+
+function htmlCriarGrupoDoWhatsApp(){
+  const opcoesDesafio = '<option value="">Nenhum</option>' + Object.keys(DESAFIOS_DO_APP).map(function(id){ return '<option value="' + id + '"' + (cg.desafioNovo === id ? ' selected' : '') + '>' + escaparHtmlFicha(DESAFIOS_DO_APP[id].nome) + '</option>'; }).join('');
+  return '<div class="local-back" onclick="voltarPraListaDeGrupos()"><i class="ti ti-arrow-left"></i><span>Seus grupos</span></div>' +
+    '<p class="cg-eye">Novo grupo</p><h1 class="page-title" style="margin-top:0;">Criar grupo</h1>' +
+    '<label class="cg-campo"><small>Nome do grupo</small><input class="form-input" maxlength="100" placeholder="Ex: SECA 21 · Turma Dezembro" value="' + escaparHtmlFicha(cg.nomeNovo) + '" oninput="cg.nomeNovo=this.value"></label>' +
+    '<label class="cg-campo"><small>Ligar a um desafio (as mensagens automáticas dele passam a ir pra esse grupo)</small><select class="form-select" onchange="cg.desafioNovo=this.value">' + opcoesDesafio + '</select></label>' +
+    '<div class="info-box"><p class="txt" style="margin:0;font-size:12px;">O grupo é criado com o primeiro lote, pelo número do(a) ' + cg.remetente + ', e as outras entram em lotes. A foto do grupo você coloca depois, no próprio WhatsApp.</p></div>' +
+    htmlMarcacaoDeAlunas() + htmlBarraDeLotes('Criar grupo', false);
+}
+
+function htmlTarefaDeGrupo(){
+  const t = cg.tarefas.find(function(x){ return x.id === cg.tarefaAberta; });
+  const voltar = '<div class="local-back" onclick="voltarPraListaDeGrupos()"><i class="ti ti-arrow-left"></i><span>Seus grupos</span></div>';
+  if(!t) return voltar + '<p class="cg-vazio">Carregando...</p>';
+  const r = htmlResumoTarefa(t);
+  const pct = r.total ? Math.round(r.feitos / r.total * 100) : 0;
+  let h = voltar + '<p class="cg-eye">' + escaparHtmlFicha(t.grupo_nome) + '</p>' +
+    '<h1 class="page-title" style="margin-top:0;">' + (t.status === 'concluida' ? 'Concluída' : t.status === 'cancelada' ? 'Cancelada' : 'Lote ' + r.loteAtual + ' de ' + r.totalLotes) + '</h1>' +
+    '<div class="cg-prog"><i style="width:' + pct + '%"></i></div>' +
+    '<p class="cg-sub">' + r.feitos + ' de ' + r.total + ' feitas' +
+      (t.status === 'rodando' && r.proximo ? ' · próximo lote às ' + horaCurtaGrupo(r.proximo.agendado_para) + '. Pode fechar o app, continua no servidor.' : '') +
+      (t.status === 'pausada' ? ' · pausada' : '') + '</p>';
+  if(t.erro) h += '<div class="info-box cg-erro"><p class="txt" style="margin:0;"><b>Aviso:</b> ' + escaparHtmlFicha(t.erro) + '</p></div>';
+  if(t.link_convite) h += '<div class="info-box"><p class="txt" style="margin:0;font-size:12px;">Link do grupo: <b>' + escaparHtmlFicha(t.link_convite) + '</b></p></div>';
+  h += r.it.map(function(i){
+    const quando = i.feito_em ? horaCurtaGrupo(i.feito_em) : (i.status === 'na_fila' ? 'lote ' + i.lote + ' · ' + horaCurtaGrupo(i.agendado_para) : '');
+    return '<div class="cg-al"><div class="cg-gt"><b>' + escaparHtmlFicha(i.aluna_nome) + '</b><small>' + escaparHtmlFicha([quando, i.motivo].filter(Boolean).join(' · ')) + '</small></div>' +
+      '<span class="cg-tag ' + (CLASSE_STATUS_ITEM_GRUPO[i.status] || 't-fila') + '">' + (NOMES_STATUS_ITEM_GRUPO[i.status] || i.status) + '</span></div>';
+  }).join('');
+  const botoes = [];
+  botoes.push('<button class="btn-secondary" onclick="atualizarTarefaDeGrupo()">Atualizar</button>');
+  if(t.status === 'rodando') botoes.push('<button class="btn-secondary" onclick="pausarTarefaDeGrupo(' + t.id + ')">Pausar</button>');
+  if(t.status === 'pausada') botoes.push('<button class="btn-gold" onclick="retomarTarefaDeGrupo(' + t.id + ')">Retomar</button>');
+  if(t.status === 'rodando' || t.status === 'pausada') botoes.push('<button class="btn-secondary" onclick="cancelarTarefaDeGrupo(' + t.id + ')">Cancelar o resto</button>');
+  return h + '<div class="cg-botoes">' + botoes.join('') + '</div>';
+}
+
 // ===== MENSAGEM NO GRUPO DO DESAFIO (WhatsApp) =====
 // Quando a aluna registra o treino do desafio, o app só anota na fila do servidor ("fila_grupo_desafio"). Quem manda
 // pro grupo é a função "fila-grupo-desafio" do Supabase: uma mensagem por vez, com 5 a 30 segundos entre uma e outra,
@@ -16490,6 +16947,7 @@ const ferramentasPersonal = [
   { titulo: 'Conversas', icone: 'ti-brand-whatsapp', view: 'conversas' },
   { titulo: 'Controle de Treinos', icone: 'ti-list-check', view: 'controle' },
   { titulo: 'Controle de desafios', icone: 'ti-flag', view: 'desafios' },
+  { titulo: 'Controle de grupos', icone: 'ti-users-group', view: 'grupos' },
   { titulo: 'Feedback dos treinos', icone: 'ti-notes', view: 'feedback-treinos' },
   { titulo: 'Feedback das alunas', icone: 'ti-message-dots', view: 'feedback-alunas' },
   { titulo: 'Banco de exercícios', icone: 'ti-video', view: 'exercicios' },
@@ -16544,6 +17002,7 @@ function renderSidebarPersonal(){
   if(ehSuporte) html += item('conversas', 'conversa', 'Conversas');
   html += item('controle', 'controle', 'Controle de treinos', '<span class="side-badge" id="side-badge-controle" style="display:none;"></span>');
   html += item('desafios', 'bandeira', 'Controle de desafios', '<span class="side-badge" id="side-badge-desafios" style="display:none;"></span>');
+  html += item('grupos', 'alunas', 'Controle de grupos');
   html += item('feedback-treinos', 'lista', 'Feedback dos treinos', '<span class="side-badge" id="side-badge-fb-treinos" style="display:none;"></span>');
   html += item('feedback-alunas', 'conversa', 'Feedback das alunas', '<span class="side-badge" id="side-badge-fb-alunas" style="display:none;"></span>');
 
@@ -16730,7 +17189,7 @@ function showPersonalView(which){
   renderFerramentasPersonal();
   atualizarSidebarAtiva(which);
   telaPersonalAtual = which;
-  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes','comunicacao','ferramentas-treino','inteligencia','relatorios','faturamento','dashboard-suporte','conversas','aula-presencial','feedback-treinos','feedback-alunas','envios','anamneses'].forEach(function(v){
+  ['dashboard','alunas','aluna','resumo-aluna','exercicios','conteudo','treinos','desafios','mobilidade','patologias','desvios','corrida','funil','controle','sinalizacoes','comunicacao','ferramentas-treino','inteligencia','relatorios','faturamento','dashboard-suporte','conversas','aula-presencial','feedback-treinos','feedback-alunas','envios','anamneses','grupos'].forEach(function(v){
     document.getElementById('personal-' + v).style.display = (v === which) ? 'block' : 'none';
   });
   if(which === 'sinalizacoes'){ renderSinalizacoes(); }
@@ -16751,6 +17210,7 @@ function showPersonalView(which){
     if(el) el.innerHTML = parados ? '<b style="color:#E2A33D;">· ' + parados + (parados === 1 ? ' parou no meio' : ' pararam no meio') + '</b>' : '';
   }
   if(which === 'envios'){ renderEnvios(); }
+  if(which === 'grupos'){ abrirControleGrupos(); }
   if(which === 'ferramentas-treino'){ renderInfoCardGerarTreino(); }
   if(which === 'inteligencia'){ renderRelatoriosTendencias(); }
   if(which === 'faturamento'){ renderFaturamentoMetas(); }
@@ -22386,6 +22846,7 @@ function atualizarTelasDoPersonal(){
     'feedback-treinos': function(){ renderFeedbackTreinos(); },
     'anamneses': function(){ renderAnamneses(); },
     'envios': function(){ renderEnvios(); },
+    'grupos': function(){ carregarTarefasDeGrupo().then(renderControleGrupos); },
     'comunicacao': function(){ renderCentralDeAvisos(); },
     'sinalizacoes': function(){ renderSinalizacoes(); },
     'conversas': function(){ renderListaConversas(); }
