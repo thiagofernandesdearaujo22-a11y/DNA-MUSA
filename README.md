@@ -1,4 +1,4 @@
-[dna_musa_173.html](https://github.com/user-attachments/files/34668505/dna_musa_173.html)
+[dna_musa_174.html](https://github.com/user-attachments/files/34668578/dna_musa_174.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1267,7 +1267,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-10-BU-TREINOS-EM-CASA</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-11-BV-LOGIN-FICHA-CERTA</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -2191,7 +2191,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-10-BU-TREINOS-EM-CASA';
+const VERSAO_APP = '2026-11-11-BV-LOGIN-FICHA-CERTA';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -12703,6 +12703,15 @@ async function garantirSessaoValida(){
   }
 }
 
+// Fichas de OUTRAS alunas (outro e-mail) presas na mesma conta de login
+async function outrasFichasNaMesmaConta(authId, email){
+  if(!authId || !supabaseClient) return [];
+  try {
+    const r = await supabaseClient.from('alunas').select('nome, email').eq('auth_id', authId);
+    return ((r && r.data) || []).filter(function(x){ return minusculoSemEspaco(x.email) !== minusculoSemEspaco(email); });
+  } catch(e){ return []; }
+}
+
 async function sincronizarTreinoComSupabase(a){
   if(!supabaseClient){ mostrarConfirmacaoSalvamento(false, 'Sem conexão com o Supabase agora.'); return { ok: false, motivo: 'sem conexão' }; }
   if(!(await garantirSessaoValida())){ mostrarConfirmacaoSalvamento(false, 'Sessão inválida — o ajuste não foi salvo. Entra de novo.'); return { ok: false, motivo: 'sessão inválida' }; }
@@ -12724,6 +12733,14 @@ async function sincronizarTreinoComSupabase(a){
     }
 
     if(alunaRow.auth_id){
+      // Trava: se essa conta de login também tem a ficha de OUTRA aluna presa nela, o treino iria pro celular da outra
+      const presas = await outrasFichasNaMesmaConta(alunaRow.auth_id, a.email);
+      if(presas.length){
+        const nomes = presas.map(function(o){ return o.nome; }).join(', ');
+        mostrarConfirmacaoSalvamento(false, 'Não enviei: o login de ' + a.nome + ' também está ligado à ficha de ' + nomes + '. Corrija na Auditoria de acessos (soltar o vínculo errado) e envie de novo.');
+        registrarProblemaDeConta('Envio de treino bloqueado: ' + a.nome + ' divide a conta de login com ' + nomes + '.');
+        return { ok: false, motivo: 'conta de login dividida com ' + nomes };
+      }
       // Ela já tem login: salva no lugar "oficial" (tabela treinos), que é o que o app dela lê ao entrar
       const saidaTreino = await salvarTreinoNoSupabase(alunaRow.auth_id, a.treinoAtual);
       return saidaTreino && saidaTreino.sucesso ? { ok: true, verificado: true } : { ok: false, motivo: saidaTreino ? saidaTreino.erro : 'falha ao salvar' };
@@ -19175,23 +19192,18 @@ async function loginAluna(){
 
     sessaoUsuarioAtual = data.user;
 
-    // Descobre o nome real dela (pode já existir cadastro feito pelo Personal com o mesmo e-mail)
-    let { data: alunaRow, error: erroAlunaRow } = await supabaseClient.from('alunas').select('*').eq('auth_id', data.user.id).maybeSingle();
-
-    // Recuperação automática: se não achou pelo auth_id, tenta achar pelo e-mail — cobre o caso de
-    // uma conta de login criada sem o vínculo ter sido salvo corretamente (ex: falha de rede no meio
-    // do primeiro cadastro). Se achar por e-mail, conserta o vínculo na hora, sem precisar travar
-    // o acesso dela nem depender do Personal pra corrigir manualmente.
-    if((erroAlunaRow || !alunaRow) && email){
-      const tentativaPorEmail = await supabaseClient.from('alunas').select('*').eq('email', email).maybeSingle();
-      if(tentativaPorEmail.data){
-        alunaRow = tentativaPorEmail.data;
-        erroAlunaRow = null;
-        await supabaseClient.from('alunas').update({ auth_id: data.user.id }).eq('email', email);
-      }
+    // Descobre QUAL ficha é dela: a do mesmo e-mail da conta. Se a conta tiver fichas de outras alunas presas nela
+    // (vínculo errado antigo), não abre a de outra pessoa (ver resolverFichaDaContaLogada)
+    const resolvida = await resolverFichaDaContaLogada(data.user, email);
+    if(resolvida.bloqueio){
+      try { await supabaseClient.auth.signOut(); } catch(e){}
+      sessaoUsuarioAtual = null;
+      erroEl.textContent = resolvida.bloqueio;
+      erroEl.style.display = 'block';
+      return;
     }
-
-    if(erroAlunaRow || !alunaRow){
+    const alunaRow = resolvida.ficha;
+    if(resolvida.erro || !alunaRow){
       // NUNCA deixa passar em silêncio — sem isso, o sistema ficaria com o nome padrão travado e mostraria dados de outra pessoa
       erroEl.textContent = 'Login funcionou, mas não achei seu cadastro completo no banco. Avisa seu personal (erro: cadastro sem auth_id vinculado).';
       erroEl.style.display = 'block';
@@ -19416,6 +19428,14 @@ async function executarSalvamentoProgresso(nomeAluna){
     if(!a || !a.email) return;
     const { data: alunaRow } = await supabaseClient.from('alunas').select('auth_id').eq('email', a.email).maybeSingle();
     if(!alunaRow || !alunaRow.auth_id) return; // sem login ainda, não tem onde salvar
+    // Personal salvando o progresso de uma aluna cuja conta tem outra ficha presa: não grava (iria pra outra pessoa)
+    if(sessaoTipo === 'personal'){
+      const presas = await outrasFichasNaMesmaConta(alunaRow.auth_id, a.email);
+      if(presas.length){
+        mostrarConfirmacaoSalvamento(false, 'Não salvei o progresso de ' + a.nome + ': o login dela também está ligado à ficha de ' + presas.map(function(o){ return o.nome; }).join(', ') + '. Corrija na Auditoria de acessos.');
+        return;
+      }
+    }
 
     const pacote = {
       prog: getProgressoAluna(nomeAluna),
@@ -20233,6 +20253,51 @@ function fichaLocalDaAlunaQueEntrou(alunaRow){
   return a;
 }
 
+// ===== QUAL FICHA É DE QUEM ENTROU (proteção contra "entrou a Laine e apareceu a Eduarda") =====
+// A conta de login (Authentication) pode ter MAIS DE UMA ficha presa nela (auth_id igual), por engano antigo de
+// vínculo: a "conta dividida" que a Auditoria de acessos mostra. Antes, o app pegava "a" ficha da conta sem conferir
+// (e, ao reabrir o app, usava o nome guardado em "perfis"), e podia abrir a ficha de OUTRA aluna. Agora a regra é:
+//   1) vale a ficha com o MESMO e-mail da conta de login (quem sabe a senha desse e-mail é a dona);
+//   2) se nenhuma ficha tem esse e-mail e só UMA está ligada à conta, vale ela (o personal trocou o e-mail da ficha),
+//      mas fica registrado pra conferir;
+//   3) duas ou mais fichas ligadas e nenhuma com o e-mail da conta: NÃO abre nenhuma, avisa e registra.
+// Qualquer ficha "a mais" presa na conta é registrada no registro de erros, com os nomes, pra corrigir na Auditoria.
+function minusculoSemEspaco(t){ return String(t || '').trim().toLowerCase(); }
+async function resolverFichaDaContaLogada(usuario, emailDigitado){
+  const emailConta = minusculoSemEspaco(usuario && usuario.email) || minusculoSemEspaco(emailDigitado);
+  const r1 = await supabaseClient.from('alunas').select('*').eq('auth_id', usuario.id);
+  if(r1.error) return { erro: r1.error.message };
+  const ligadas = r1.data || [];
+  let dona = emailConta ? (ligadas.find(function(x){ return minusculoSemEspaco(x.email) === emailConta; }) || null) : null;
+  if(!dona && emailConta){
+    const r2 = await supabaseClient.from('alunas').select('*').eq('email', emailConta);
+    dona = ((r2 && r2.data) || []).find(function(x){ return minusculoSemEspaco(x.email) === emailConta; }) || null;
+    if(dona && dona.auth_id !== usuario.id){
+      // a ficha com o e-mail dela ainda não estava ligada a essa conta: liga agora (como já era feito antes)
+      await supabaseClient.from('alunas').update({ auth_id: usuario.id }).eq('email', dona.email);
+      dona = Object.assign({}, dona, { auth_id: usuario.id });
+    }
+  }
+  const outras = ligadas.filter(function(x){ return x !== dona && minusculoSemEspaco(x.email) !== emailConta; });
+  if(dona){
+    if(outras.length) registrarProblemaDeConta('Conta de login ' + emailConta + ' (de ' + dona.nome + ') também tem presa(s): ' + outras.map(function(o){ return o.nome; }).join(', ') + '. Abriu a ficha certa. Corrija na Auditoria de acessos.');
+    return { ficha: dona, outras: outras };
+  }
+  if(ligadas.length === 1){
+    registrarProblemaDeConta('Conta de login ' + emailConta + ' abriu a ficha de ' + ligadas[0].nome + ', que está com outro e-mail (' + (ligadas[0].email || 'sem e-mail') + '). Confira se é ela mesma.');
+    return { ficha: ligadas[0], outras: [], emailDiferente: true };
+  }
+  if(ligadas.length > 1){
+    registrarProblemaDeConta('BLOQUEADO: a conta de login ' + emailConta + ' está presa em ' + ligadas.length + ' fichas (' + ligadas.map(function(o){ return o.nome; }).join(', ') + ') e nenhuma tem esse e-mail. O app não abriu nenhuma. Corrija na Auditoria de acessos.');
+    return { bloqueio: 'Seu login está ligado a mais de um cadastro, então não abri nenhum pra não mostrar os dados de outra pessoa. Avise seu personal, ele corrige rapidinho.', outras: ligadas };
+  }
+  return { ficha: null, outras: [] };
+}
+function registrarProblemaDeConta(texto){
+  try { console.warn('[Conta] ' + texto); } catch(e){}
+  try { registrarErroNoBanco(new Error('[Conta] ' + texto), 'CONTA'); } catch(e){}
+}
+
 function obterAlunaLogadaOuCriar(){
   let a = alunasPersonal.find(function(x){ return x.nome === NOME_ALUNA_LOGADA; });
   if(!a){
@@ -20303,9 +20368,33 @@ async function restaurarSessaoAtiva(){
       if(NOME_PERSONAL_LOGADO === 'Bianca') showPersonalView('dashboard-suporte'); // ela vai direto pra 2ª Dashboard, não pra padrão do Thiago
       perguntarSeQuerLembrarLogin();
     } else if(perfilRow.tipo === 'aluna'){
-      NOME_ALUNA_LOGADA = perfilRow.nome;
-      const { data: alunaRow } = await supabaseClient.from('alunas').select('*').eq('auth_id', sessao.user.id).maybeSingle();
-      let alunaLocal = alunaRow ? fichaLocalDaAlunaQueEntrou(alunaRow) : alunasPersonal.find(function(x){ return x.nome === NOME_ALUNA_LOGADA; });
+      // Antes: o nome vinha de "perfis" e a ficha de "a" ficha ligada à conta, sem conferir de quem era.
+      // Agora é a mesma regra do login: a ficha do mesmo e-mail da conta (ver resolverFichaDaContaLogada).
+      const resolvida = await resolverFichaDaContaLogada(sessao.user, '');
+      if(resolvida.bloqueio){
+        try { await supabaseClient.auth.signOut(); } catch(e){}
+        sessaoUsuarioAtual = null;
+        NOME_ALUNA_LOGADA = null;
+        dias = [];
+        const erroEl = document.getElementById('login-aluna-erro');
+        if(erroEl){ erroEl.textContent = resolvida.bloqueio; erroEl.style.display = 'block'; }
+        mostrarConfirmacaoSalvamento(false, resolvida.bloqueio);
+        return;
+      }
+      const alunaRow = resolvida.ficha || null;
+      if(!alunaRow){
+        // sem ficha ligada a essa conta: não inventa (antes usava o nome de "perfis", que podia ser de outra pessoa)
+        mostrarDiagnostico('Sessão de aluna sem ficha ligada à conta (' + (sessao.user.email || '?') + ').', true);
+        try { await supabaseClient.auth.signOut(); } catch(e){}
+        sessaoUsuarioAtual = null;
+        NOME_ALUNA_LOGADA = null;
+        return;
+      }
+      NOME_ALUNA_LOGADA = alunaRow.nome;
+      if(perfilRow.nome && minusculoSemEspaco(perfilRow.nome) !== minusculoSemEspaco(alunaRow.nome) && minusculoSemEspaco(perfilRow.nome) !== minusculoSemEspaco(String(sessao.user.email || '').split('@')[0])){
+        registrarProblemaDeConta('Perfil da conta ' + (sessao.user.email || '?') + ' diz "' + perfilRow.nome + '", mas a ficha dela é "' + alunaRow.nome + '". Abriu a ficha.');
+      }
+      let alunaLocal = fichaLocalDaAlunaQueEntrou(alunaRow);
       if(!alunaLocal && alunaRow){
         alunaLocal = {
           nome: alunaRow.nome, email: alunaRow.email, telefone: alunaRow.telefone || '',
