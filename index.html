@@ -1287,7 +1287,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-20-CB-PROGREDIR-ESCOLHENDO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-20-CD-DIA-COM-EXERCICIO-NAO-E-DESCANSO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -2215,7 +2215,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-20-CB-PROGREDIR-ESCOLHENDO';
+const VERSAO_APP = '2026-11-20-CD-DIA-COM-EXERCICIO-NAO-E-DESCANSO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -12709,6 +12709,21 @@ function extrairLetraDoTreino(foco){
 // Recalcula o nome de um dia específico a partir do treino que está de fato prescrito agora,
 // preservando a letra do treino (Treino A, B, C...) já atribuída. Chame isso sempre que
 // adicionar, remover, trocar exercício, ou mudar séries/reps de um dia já existente.
+// Regra (20/11): dia com exercício prescrito nunca é descanso. Caso real: um treino de braço foi colocado na
+// sexta, que estava marcada como descanso; o app seguia mostrando "Descanso" e a progressão pulava esse dia.
+// Tira a marca de descanso e dá o nome do dia pelo que está prescrito nele.
+function normalizarDiasComExercicio(dias){
+  (dias || []).forEach(function(d){
+    if(!d || !d.descanso || !(d.ex || []).some(function(l){ return String(l || '').trim(); })) return;
+    d.descanso = false;
+    if(!d.foco || /^\s*descanso\s*$/i.test(d.foco)){
+      let nome = '';
+      try { nome = gerarDescricaoTreinoPorVolume(d.ex); } catch(e){}
+      d.foco = nome || 'Treino do dia';
+    }
+  });
+  return dias;
+}
 function recalcularNomeDoTreinoPorVolume(dia){
   if(dia.descanso || dia.tabata) return; // dia de descanso ou Tabata não segue essa lógica de nome
   const letra = extrairLetraDoTreino(dia.foco);
@@ -13791,6 +13806,7 @@ function textoDoMetodoProg(m){ return m === METODO_PROG.drop ? 'drop set na últ
 // (pausa, constância, menos de 4 semanas...). Só desafio e "sem treino" continuam de fora.
 function planejarProgressaoPelasRegras(a, agora, opcoes){
   if(agora === undefined) agora = Date.now();
+  if(a && a.treinoAtual) normalizarDiasComExercicio(a.treinoAtual.dias);
   const situacao = situacaoDaAlunaParaProgressao(a, agora);
   const forcar = !!(opcoes && opcoes.ignorarSituacao) && ['fora', 'cedo'].indexOf(situacao.lista) !== -1;
   if(!situacao.entra && !forcar) return { aluna: a.nome, entra: false, lista: situacao.lista, motivo: situacao.motivo };
@@ -14277,6 +14293,30 @@ function aplicarRemocoesDaProgressao(diasNovos, ajustes){
 // O treino como ficaria depois de progredir (mesma conta do botão Confirmar), já com os ajustes
 // 20/11: com treino atual, a progressão é a do MOTOR DE REGRAS (parte do treino dela e muda só o que as regras mandam).
 // Antes gerava a semana inteira de novo, e saíam coisas como dois legs e 5 séries numa iniciante.
+// Treino gerado do zero também respeita a faixa de séries do nível (F1 a F3) e nunca sai com o mesmo exercício
+// (ou dois legs) no mesmo dia. Caso real de 20/11: o gerador deu 5 séries e dois legs pra uma aluna.
+function ajustarTreinoGeradoAsRegras(a, diasSemana){
+  const nivel = nivelDaAlunaProg(a), faixa = REGRAS_PROG.series[nivel];
+  (diasSemana || []).forEach(function(d){
+    if(!d || d.descanso || !d.ex) return;
+    const vistos = {}; let legs = 0;
+    d.ex = d.ex.filter(function(l){
+      const p = partesDaLinhaProg(l);
+      if(p.combo) return true;
+      const k = baseDoNomeProg(p.nome), k2 = 'p:' + chaveDeParecidoDoExercicio(p.nome);
+      const eLeg = ehLegPressNome(p.nome) && !ehExercicioUnilateral(p.nome);
+      if(vistos[k] || vistos[k2] || (eLeg && legs >= 1)) return false;
+      vistos[k] = vistos[k2] = true; if(eLeg) legs++;
+      return true;
+    }).map(function(l){
+      const p = partesDaLinhaProg(l);
+      if(p.combo || !p.series) return l;
+      const n = Math.min(faixa[1], Math.max(faixa[0], p.series));
+      return n === p.series ? l : montarLinhaProg(p.nome, n, p.resto);
+    });
+  });
+  return diasSemana;
+}
 function planoDaProgressaoNaTela(a){
   if(!a || !a.treinoAtual || !(a.treinoAtual.dias || []).some(function(d){ return d && !d.descanso && (d.ex || []).length; })) return null;
   try { return planejarProgressaoPelasRegras(a, Date.now(), { ignorarSituacao: true }); } catch(e){ try { registrarErroNoBanco(e, 'motor_regras'); } catch(x){} return null; }
@@ -14289,7 +14329,7 @@ function simularTreinoProgredido(a){
     dias = JSON.parse(JSON.stringify(plano.dias));
   } else {
     const perfilNovo = construirPerfilAluna(Object.assign({}, a, { progressaoManualForcada: alvo }));
-    const semana = gerarTreinoSemanal(perfilNovo);
+    const semana = ajustarTreinoGeradoAsRegras(a, gerarTreinoSemanal(perfilNovo));
     dias = NOMES_DIAS_PROGRESSAO.map(function(nome, i){
       if(i < semana.length) return Object.assign({ n: nome }, semana[i]);
       return { n: nome, foco: 'Descanso', descanso: true, ex: [] };
@@ -14660,7 +14700,7 @@ async function construirEAtribuirTreino(nomeAluna, opcoes){
     if(plano && !plano.entra && opcoes.soPelasRegras) return { ok: false, foraDasRegras: true, motivo: plano.motivo };
   }
   const usarPlano = !!(plano && plano.entra);
-  const semana = usarPlano ? plano.dias.filter(function(d){ return d && !d.descanso && (d.ex || []).length; }) : gerarTreinoSemanal(perfil);
+  const semana = usarPlano ? plano.dias.filter(function(d){ return d && !d.descanso && (d.ex || []).length; }) : ajustarTreinoGeradoAsRegras(a, gerarTreinoSemanal(perfil));
   const nomesDias = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
   const semanaComNome = usarPlano ? JSON.parse(JSON.stringify(plano.dias)) : nomesDias.map(function(nome, i){
     if(i < semana.length) return Object.assign({ n: nome }, semana[i]);
@@ -14674,7 +14714,7 @@ async function construirEAtribuirTreino(nomeAluna, opcoes){
   if(ajustesDaTela) a.ajustesProgressao = null;
   if(estadoProgressao[a.nome]) delete estadoProgressao[a.nome];
 
-  a.treinoAtual = { fase: rotuloFaseParaAluna(a), volume: usarPlano ? 'Progredido pelas suas regras' : 'Gerado automaticamente, revise antes de confirmar', dias: semanaComNome };
+  a.treinoAtual = { fase: rotuloFaseParaAluna(a), volume: usarPlano ? 'Progredido pelas suas regras' : 'Gerado automaticamente, revise antes de confirmar', dias: normalizarDiasComExercicio(semanaComNome) };
   if(usarPlano){
     a.regrasProgressao = plano.memoria;
     // J3: a nota "última progressão" que fica no treino dela (o que mudou e por quê)
@@ -15258,6 +15298,7 @@ function confirmarAdicionarExercicio(diaIndex){
 function adicionarExercicioTreino(diaIndex){
   const a = alunaAberta;
   a.treinoAtual.dias[diaIndex].ex.push('Novo exercício · 3x12');
+  normalizarDiasComExercicio(a.treinoAtual.dias);
   const diaTela = diaDaTelaComExercicios(diaIndex);
   if(diaTela) diaTela.ex.push('Novo exercício · 3x12');
   sincronizarTreinoComSupabase(a);
@@ -16286,7 +16327,7 @@ async function buscarTreinoRealDaAluna(a, i){
     if(alunaRow.auth_id){
       const { data: treinoData } = await supabaseClient.from('treinos').select('*').eq('aluna_id', alunaRow.auth_id).order('updated_at', { ascending: false }).limit(1).maybeSingle();
       if(treinoData){
-        a.treinoAtual = { fase: treinoData.fase, volume: treinoData.volume, dias: treinoData.dias };
+        a.treinoAtual = { fase: treinoData.fase, volume: treinoData.volume, dias: normalizarDiasComExercicio(treinoData.dias) };
         if(alunaAberta === a) openAlunaDetail(i);
       } else if(alunaRow.treino_atual_backup){
         // Plano B: ela tem login, mas por algum motivo a tabela oficial ficou sem essa linha —
@@ -16589,6 +16630,7 @@ async function carregarProgressoParaFicha(a){
 function openAlunaDetail(i){
   const a = alunasPersonal[i];
   alunaAberta = a;
+  if(a && a.treinoAtual) normalizarDiasComExercicio(a.treinoAtual.dias); // dia com exercício nunca aparece como descanso
   // Corrige sozinho, sem precisar de nenhum botão: se o nome do dia (Segunda, Terça...) estiver fora
   // da posição certa — sequela de reordenações feitas antes da correção que fixou o nome por posição —
   // já resolve na hora de abrir a ficha, silenciosamente. Isso roda de novo quando o treino real chega
@@ -20185,7 +20227,7 @@ function aplicarTreinoRecebidoDoSupabase(treinoRow){
     a = { nome: NOME_ALUNA_LOGADA, status: 'ok', statusLabel: 'Ativa recente', nivel: 'Iniciante', freq: '3x por semana' };
     alunasPersonal.push(a);
   }
-  a.treinoAtual = { fase: treinoRow.fase, volume: treinoRow.volume, dias: treinoRow.dias };
+  a.treinoAtual = { fase: treinoRow.fase, volume: treinoRow.volume, dias: normalizarDiasComExercicio(treinoRow.dias) };
   dias = treinoRow.dias;
   try { ligarTreinoDoDesafioNoModoSoDesafio(); } catch(e){} // aluna só do desafio: o treino da consultoria não aparece
   const viewAtiva = document.querySelector('.view.active');
@@ -20215,6 +20257,7 @@ function contarExerciciosMudados(diasAntigos, diasNovos){
 }
 
 async function salvarTreinoNoSupabase(alunaId, treinoAtual, opcoes){
+  if(treinoAtual) normalizarDiasComExercicio(treinoAtual.dias);
   // Busca o treino atual (o mais recente salvo) pra comparar e decidir: isso é um ajuste grande
   // (3+ exercícios mudaram — vira uma entrada nova no histórico) ou um ajuste pequeno (só atualiza
   // o registro atual, sem empilhar histórico)?
@@ -23217,7 +23260,7 @@ async function carregarTreinosDeTodasAtivas(){
         });
         comAuthId.forEach(function(a){
           const treinoRow = maisRecentePorAluna[a.authId];
-          if(treinoRow) a.treinoAtual = { fase: treinoRow.fase, volume: treinoRow.volume, dias: treinoRow.dias };
+          if(treinoRow) a.treinoAtual = { fase: treinoRow.fase, volume: treinoRow.volume, dias: normalizarDiasComExercicio(treinoRow.dias) };
         });
       }
     }
@@ -23227,7 +23270,7 @@ async function carregarTreinosDeTodasAtivas(){
     semTreinoCarregado.forEach(function(a){
       if(a.treinoAtual) return;
       const info = infoPorEmail[a.email.toLowerCase()];
-      if(info && info.treino_atual_backup) a.treinoAtual = info.treino_atual_backup;
+      if(info && info.treino_atual_backup){ a.treinoAtual = info.treino_atual_backup; normalizarDiasComExercicio(a.treinoAtual.dias); }
     });
   } catch(erroDeRede){
     console.warn('Sem conexão pra buscar treinos em bloco agora:', erroDeRede);
