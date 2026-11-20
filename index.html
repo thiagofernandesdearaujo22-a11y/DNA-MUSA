@@ -672,6 +672,22 @@
   .pn-busca{flex:1 1 100%;min-width:0;height:42px;border-radius:12px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:0 14px;color:var(--text-faint);}
   .pn-busca input{flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--text);font-size:13px;font-family:inherit;}
   .pn-btn-gold{flex:1 1 100%;justify-content:center;height:42px;border-radius:12px;padding:0 16px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:linear-gradient(135deg,#F4D9A5,#C9A063);color:#1A1409;font-family:inherit;white-space:nowrap;}
+  .pn-btn-sec{background:transparent;color:var(--gold-soft);border:1px solid rgba(232,197,138,0.45);}
+  .et-box{background:var(--card);border:1px solid var(--border-strong);border-radius:18px;padding:14px;margin:0 0 14px;}
+  .et-box h3{margin:0 0 4px;font-size:15px;font-weight:600;}
+  .et-sub{margin:0 0 10px;font-size:12px;color:var(--text-faint);}
+  .et-modos{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+  .et-modos span{padding:7px 11px;border-radius:999px;border:1px solid var(--border);font-size:12.5px;cursor:pointer;}
+  .et-modos span.on{background:rgba(232,197,138,0.16);border-color:var(--gold);color:var(--gold-soft);}
+  .et-opc{display:flex;align-items:center;gap:8px;font-size:12.5px;margin:6px 0;}
+  .et-barra{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:12.5px;margin:8px 0;}
+  .et-barra a{color:var(--gold-soft);cursor:pointer;text-decoration:underline;}
+  .et-lista{max-height:380px;overflow-y:auto;border-top:1px solid var(--border);}
+  .et-lin{display:flex;align-items:flex-start;gap:10px;padding:9px 2px;border-bottom:1px solid var(--border);cursor:pointer;}
+  .et-lin input{width:18px;height:18px;margin-top:2px;accent-color:var(--gold);flex:none;}
+  .et-lin b{display:block;font-size:13px;font-weight:600;}
+  .et-lin small{display:block;font-size:11.5px;color:var(--text-faint);}
+  .et-lin small.fora{color:#E2A33D;}
   .pn-kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
   .pn-kpi{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;cursor:pointer;min-width:0;}
   .pn-kpi .pn-l{display:flex;align-items:center;gap:8px;color:var(--text-dim);font-size:12px;}
@@ -1271,7 +1287,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-20-CA-PROGRESSAO-PELAS-REGRAS</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-20-CB-PROGREDIR-ESCOLHENDO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1592,9 +1608,11 @@
           <div class="pn-acoes">
             <label class="pn-busca"><svg class="pn-ic" viewBox="0 0 24 24" style="width:16px;height:16px;"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="pn-busca-aluna" placeholder="Buscar aluna" autocomplete="off" onkeydown="if(event.key==='Enter') buscarAlunaDoPainel(this.value)"></label>
             <button class="pn-btn-gold" onclick="iniciarGeracaoOuProgressaoParaNaoEnviados()"><svg class="pn-ic" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M12 3l2.2 5.3L20 9l-4.4 3.8L17 18.5 12 15.6 7 18.5l1.4-5.7L4 9l5.8-.7z"/></svg>Gerar treinos pendentes</button>
+            <button class="pn-btn-gold pn-btn-sec" onclick="abrirEscolhaDeTreinos()"><svg class="pn-ic" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>Progredir ou gerar, escolhendo as alunas</button>
           </div>
         </div>
 
+        <div id="escolha-treinos-area"></div>
         <div id="geracao-massa-area"></div>
 
         <div class="pn-kpis" id="pn-kpis"></div>
@@ -2197,7 +2215,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-20-CA-PROGRESSAO-PELAS-REGRAS';
+const VERSAO_APP = '2026-11-20-CB-PROGREDIR-ESCOLHENDO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -14795,7 +14813,8 @@ async function verificarReplicasDeTreino(){
   area.innerHTML = html;
 }
 
-async function executarGeracaoEmMassa(elegiveis, rotuloAcao){
+async function executarGeracaoEmMassa(elegiveis, rotuloAcao, opcoesMassa){
+  const om = opcoesMassa || { modo: 'progredir', mesmoFora: false };
   const area = document.getElementById('geracao-massa-area');
   const resultados = { geradas: 0, progredidas: 0, verificadas: 0, apenasBackup: 0, erros: [], comPendencia: [], foraDasRegras: [] };
 
@@ -14804,7 +14823,7 @@ async function executarGeracaoEmMassa(elegiveis, rotuloAcao){
     area.innerHTML = '<div class="info-box"><p class="lbl">Processando ' + (idx+1) + ' de ' + elegiveis.length + '...</p><p class="txt">' + a.nome + '</p></div>';
     try {
       const jaTinhaTreino = !!(a.treinoAtual && (a.treinoAtual.dias || []).some(function(d){ return d && !d.descanso && (d.ex || []).length; }));
-      const saida = await construirEAtribuirTreino(a.nome, jaTinhaTreino ? { progredir: true, soPelasRegras: true } : null);
+      const saida = await construirEAtribuirTreino(a.nome, jaTinhaTreino && om.modo !== 'novo' ? { progredir: true, soPelasRegras: !om.mesmoFora, ignorarSituacao: !!om.mesmoFora } : null);
       if(saida.foraDasRegras){ resultados.foraDasRegras.push({ nome: a.nome, motivo: saida.motivo }); continue; }
       if(!saida.ok){ resultados.erros.push({ nome: a.nome, motivo: saida.motivo }); continue; }
       if(jaTinhaTreino) a.progressaoManualForcada = (a.progressaoManualForcada || 0) + 1;
@@ -14812,7 +14831,7 @@ async function executarGeracaoEmMassa(elegiveis, rotuloAcao){
         resultados.erros.push({ nome: a.nome, motivo: 'gerou mas NÃO salvou: ' + (saida.salvamento ? saida.salvamento.motivo : 'desconhecido') });
         continue;
       }
-      if(jaTinhaTreino) resultados.progredidas++; else resultados.geradas++;
+      if(jaTinhaTreino && om.modo !== 'novo') resultados.progredidas++; else resultados.geradas++;
       if(saida.salvamento.verificado) resultados.verificadas++; else resultados.apenasBackup++;
       marcarStatusControleCiclo(a.nome, 'amarelo');
 
@@ -14832,7 +14851,7 @@ async function executarGeracaoEmMassa(elegiveis, rotuloAcao){
 
   area.innerHTML = '<div class="info-box" style="border-color:var(--success);">' +
     '<p class="lbl" style="color:var(--success);">✓ ' + rotuloAcao + ' concluído</p>' +
-    '<p class="txt">' + resultados.geradas + ' geradas pela primeira vez · ' + resultados.progredidas + ' progredidas</p>' +
+    '<p class="txt">' + resultados.geradas + ' com treino novo do zero · ' + resultados.progredidas + ' progredidas</p>' +
     '<p class="txt" style="font-size:11px;color:var(--success);margin-top:4px;">✓ ' + resultados.verificadas + ' confirmadas de verdade (lidas de volta do banco)</p>' +
     (resultados.apenasBackup > 0 ? '<p class="txt" style="font-size:11px;color:var(--gold-soft);margin-top:2px;">⚠ ' + resultados.apenasBackup + ' salvas só no backup (login ainda não vinculado a essas)</p>' : '') +
     '<p class="txt" style="font-size:11px;color:' + (resultados.erros.length > 0 ? '#E2A33D' : 'var(--text-faint)') + ';margin-top:4px;">' + resultados.erros.length + ' com erro real</p>' +
@@ -14903,6 +14922,97 @@ async function iniciarGeracaoOuProgressaoParaNaoEnviados(){
   }
   if(!confirm('Isso vai gerar (quem ainda não tem) ou progredir pelas suas regras (quem já tem) o treino de ' + elegiveis.length + ' aluna(s) que ainda não foram marcadas como enviadas. Quem as regras deixam de fora (pausa, constância baixa, desconforto forte, mudou frequência...) fica com o treino igual e aparece numa lista no fim.' + (semEmail > 0 ? ' (' + semEmail + ' outra(s) ficaram de fora por não ter e-mail cadastrado.)' : '') + ' Continuar?')) return;
   await executarGeracaoEmMassa(elegiveis, 'Geração/Progressão pra quem falta enviar');
+}
+
+// ===== PROGREDIR OU GERAR, ESCOLHENDO AS ALUNAS (pedido do Thiago, 20/11) =====
+// Além do "Gerar treinos pendentes" (só quem não está como enviado), essa caixinha lista TODAS as alunas ativas da consultoria,
+// com caixa de marcar (todas ou algumas), e deixa escolher: progredir pelas regras (quem tem treino; quem não tem ganha um novo)
+// ou gerar um treino novo do zero. Opção pra progredir também quem as regras deixariam de fora (ex.: menos de 4 semanas no app).
+let escolhaTreinos = null;
+let alunasDaEscolhaNaTela = [];
+function alunasParaEscolherTreino(){
+  const agora = Date.now();
+  return alunasPersonal.filter(function(a){ return entraNoControleDeTreinos(a, agora); })
+    .sort(function(x, y){ return String(x.nome).localeCompare(String(y.nome), 'pt-BR'); });
+}
+function temTreinoParaProgredir(a){ return !!(a && a.treinoAtual && (a.treinoAtual.dias || []).some(function(d){ return d && !d.descanso && (d.ex || []).length; })); }
+function abrirEscolhaDeTreinos(){
+  const area = document.getElementById('escolha-treinos-area');
+  if(!area) return false;
+  if(escolhaTreinos){ escolhaTreinos = null; area.innerHTML = ''; return true; }
+  escolhaTreinos = { marcadas: {}, modo: 'progredir', mesmoFora: false, busca: '' };
+  renderEscolhaDeTreinos();
+  return true;
+}
+function situacaoNaEscolha(a){
+  if(!a.email) return { txt: 'Sem e-mail cadastrado: não dá pra salvar o treino dela', fora: true };
+  if(escolhaTreinos.modo === 'novo') return { txt: temTreinoParaProgredir(a) ? 'Treino atual é arquivado e ela ganha um treino novo do zero' : 'Sem treino: ganha um treino novo', fora: false };
+  if(!temTreinoParaProgredir(a)) return { txt: 'Sem treino: ganha um treino novo', fora: false };
+  let st = { entra: true };
+  try { st = situacaoDaAlunaParaProgressao(a); } catch(e){}
+  if(st.entra) return { txt: 'Progride pelas suas regras', fora: false };
+  if(['fora', 'cedo'].indexOf(st.lista) !== -1) return { txt: st.motivo + (escolhaTreinos.mesmoFora ? ' · vai progredir mesmo assim' : ' · fica igual'), fora: !escolhaTreinos.mesmoFora };
+  return { txt: st.motivo + ' · fica igual (use "Gerar treino novo" pra ela)', fora: true };
+}
+function renderEscolhaDeTreinos(){
+  const area = document.getElementById('escolha-treinos-area');
+  if(!area || !escolhaTreinos) return;
+  const e = escolhaTreinos, termo = semAcentoMinusculo(e.busca || '').trim();
+  const todas = alunasParaEscolherTreino();
+  alunasDaEscolhaNaTela = todas.filter(function(a){ return !termo || semAcentoMinusculo(a.nome).indexOf(termo) !== -1; });
+  const nMarcadas = todas.filter(function(a){ return e.marcadas[a.nome]; }).length;
+  area.innerHTML = '<div class="et-box"><h3>Progredir ou gerar, escolhendo as alunas</h3>' +
+    '<p class="et-sub">Todas as alunas ativas da consultoria, enviadas ou não. Marque todas ou algumas. Toda versão de antes fica nos treinos arquivados de cada uma.</p>' +
+    '<div class="et-modos"><span class="' + (e.modo === 'progredir' ? 'on' : '') + '" onclick="mudarModoEscolha(\'progredir\')">Progredir pelas regras</span>' +
+      '<span class="' + (e.modo === 'novo' ? 'on' : '') + '" onclick="mudarModoEscolha(\'novo\')">Gerar treino novo do zero</span></div>' +
+    (e.modo === 'progredir' ? '<label class="et-opc"><input type="checkbox" id="et-mesmo-fora"' + (e.mesmoFora ? ' checked' : '') + ' onchange="escolhaTreinos.mesmoFora=this.checked;renderEscolhaDeTreinos()">Progredir também quem as regras deixariam de fora (pausa, constância baixa, menos de 4 semanas no app)</label>' : '') +
+    '<div class="et-barra"><b>' + nMarcadas + ' de ' + todas.length + ' marcadas</b><a onclick="marcarTodasNaEscolha(true)">Marcar todas</a><a onclick="marcarTodasNaEscolha(false)">Desmarcar</a>' +
+      '<input class="form-input" style="flex:1;min-width:140px;font-size:16px;padding:6px 10px;" placeholder="Buscar aluna" value="' + escaparHtmlFicha(e.busca || '') + '" oninput="escolhaTreinos.busca=this.value;renderListaDaEscolha()"></div>' +
+    '<div class="et-lista" id="et-lista">' + htmlListaDaEscolha() + '</div>' +
+    '<button class="btn-gold" style="margin-top:12px;"' + (nMarcadas ? '' : ' disabled') + ' onclick="confirmarEscolhaDeTreinos()">' + (e.modo === 'novo' ? 'Gerar treino novo pra ' : 'Progredir ') + nMarcadas + (nMarcadas === 1 ? ' aluna' : ' alunas') + '</button></div>';
+}
+function htmlListaDaEscolha(){
+  if(!alunasDaEscolhaNaTela.length) return '<p class="et-sub" style="padding:10px 0;">Nenhuma aluna encontrada.</p>';
+  return alunasDaEscolhaNaTela.map(function(a, i){
+    const sit = situacaoNaEscolha(a);
+    return '<label class="et-lin"><input type="checkbox"' + (escolhaTreinos.marcadas[a.nome] ? ' checked' : '') + ' onchange="marcarNaEscolha(' + i + ',this.checked)">' +
+      '<span><b>' + escaparHtmlFicha(a.nome) + '</b><small' + (sit.fora ? ' class="fora"' : '') + '>' + escaparHtmlFicha(sit.txt) + '</small></span></label>';
+  }).join('');
+}
+function renderListaDaEscolha(){
+  const termo = semAcentoMinusculo(escolhaTreinos.busca || '').trim();
+  alunasDaEscolhaNaTela = alunasParaEscolherTreino().filter(function(a){ return !termo || semAcentoMinusculo(a.nome).indexOf(termo) !== -1; });
+  const l = document.getElementById('et-lista');
+  if(l) l.innerHTML = htmlListaDaEscolha();
+}
+function mudarModoEscolha(modo){ escolhaTreinos.modo = modo; renderEscolhaDeTreinos(); }
+function marcarNaEscolha(i, marcar){
+  const a = alunasDaEscolhaNaTela[i];
+  if(!a) return;
+  if(marcar) escolhaTreinos.marcadas[a.nome] = true; else delete escolhaTreinos.marcadas[a.nome];
+  renderEscolhaDeTreinos();
+}
+function marcarTodasNaEscolha(marcar){
+  alunasDaEscolhaNaTela.forEach(function(a){ if(marcar) escolhaTreinos.marcadas[a.nome] = true; else delete escolhaTreinos.marcadas[a.nome]; });
+  renderEscolhaDeTreinos();
+}
+async function confirmarEscolhaDeTreinos(){
+  const e = escolhaTreinos;
+  if(!e) return false;
+  const sel = alunasParaEscolherTreino().filter(function(a){ return e.marcadas[a.nome]; });
+  if(!sel.length) return false;
+  const semEmail = sel.filter(function(a){ return !a.email; }).length;
+  const elegiveis = sel.filter(function(a){ return a.email; });
+  const texto = e.modo === 'novo'
+    ? 'Gerar um treino NOVO do zero pra ' + elegiveis.length + ' aluna(s)? O treino atual de cada uma fica nos arquivados.'
+    : 'Progredir pelas suas regras o treino de ' + elegiveis.length + ' aluna(s)? Quem não tem treino ganha um novo.' + (e.mesmoFora ? ' Inclusive quem as regras deixariam de fora.' : ' Quem as regras deixam de fora fica igual e aparece numa lista no fim.') + ' O treino de antes fica nos arquivados.';
+  if(!confirm(texto + (semEmail ? ' (' + semEmail + ' sem e-mail ficam de fora.)' : ''))) return false;
+  const opcoes = { modo: e.modo, mesmoFora: e.mesmoFora };
+  escolhaTreinos = null;
+  const area = document.getElementById('escolha-treinos-area');
+  if(area) area.innerHTML = '';
+  await executarGeracaoEmMassa(elegiveis, e.modo === 'novo' ? 'Treino novo pras escolhidas' : 'Progressão das escolhidas', opcoes);
+  return true;
 }
 
 // A cópia da semana que fica na tela (a variável "dias") nem sempre é o treino da aluna aberta: no login do Personal
