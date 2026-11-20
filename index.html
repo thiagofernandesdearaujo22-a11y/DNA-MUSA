@@ -1266,7 +1266,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-18-BY-REGRAS-DO-LOTE-1</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-19-BZ-DESAFIO-REGISTRO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -2192,7 +2192,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-18-BY-REGRAS-DO-LOTE-1';
+const VERSAO_APP = '2026-11-19-BZ-DESAFIO-REGISTRO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -2676,7 +2676,7 @@ function abrirListaDeTreinosDaSemana(){
   const lista = document.getElementById('lista-dias-semana');
   const abreviacoes = { 'Segunda':'SEG', 'Terça':'TER', 'Quarta':'QUA', 'Quinta':'QUI', 'Sexta':'SEX', 'Sábado':'SÁB', 'Domingo':'DOM' };
   const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
-  const diasRegistradosEssaSemana = prog.diasConcluidos[prog.semana] || [];
+  const diasRegistradosEssaSemana = feitosDaSemanaNaTela(prog, dias);
   // Mesmo cálculo da Início: qual é o próximo treino (fica em destaque) e quantos já foram
   const resumo = montarResumoDaSemanaDaAluna(prog, dias, Date.now());
   const indiceAlvo = resumo.alvo ? resumo.alvo.indice : -1;
@@ -2783,7 +2783,7 @@ function cancelarPressionarDia(){
 function confirmarRegistroRapidoDoDia(indice){
   const d = dias[indice];
   const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
-  const jaRegistrado = (prog.diasConcluidos[prog.semana] || []).indexOf(d.n) !== -1;
+  const jaRegistrado = feitosDaSemanaNaTela(prog, dias).indexOf(d.n) !== -1;
   if(jaRegistrado){
     // Dia que já está feito: segurar passa a oferecer o DESFAZER (antes só registrava de novo, à toa)
     if(alunaPodeDesfazerDia(prog, d.n)) desfazerRegistroDoDia(indice, 'lista');
@@ -2810,7 +2810,7 @@ function mesmaDataLocal(iso, referencia){
 // A aluna pode desfazer esse dia? Só se está registrado nessa semana e a regra deixa
 function alunaPodeDesfazerDia(prog, nomeDia){
   if(REGRA_DESFAZER_DIA_ALUNA === 'nunca') return false;
-  if((prog.diasConcluidos[prog.semana] || []).indexOf(nomeDia) === -1) return false;
+  if(feitosDaSemanaNaTela(prog, dias).indexOf(nomeDia) === -1) return false;
   if(REGRA_DESFAZER_DIA_ALUNA === 'sempre') return true;
   return (prog.horariosTreino || []).some(function(h){ return h.dia === nomeDia && h.data && mesmaDataLocal(h.data); });
 }
@@ -2850,6 +2850,7 @@ function desfazerRegistroDoDia(indice, origem){
   }
   if(!confirm('Desfazer o registro de "' + d.n + '"? O dia volta a ficar como não feito. As cargas que você confirmou nos exercícios continuam salvas.')) return;
   removerRegistroDoDia(prog, prog.semana, d.n);
+  if(d.desafio) desmarcarNaSemanaDoDesafio(prog, d.n);
   salvarProgressoNoSupabase(NOME_ALUNA_LOGADA);
   if(origem === 'detalhe') openDetail('dia', indice);
   else abrirListaDeTreinosDaSemana();
@@ -2871,6 +2872,7 @@ function registrarDiaRapido(indice){
   if(!prog.horariosTreino) prog.horariosTreino = [];
   const agora = new Date();
   prog.horariosTreino.push({ dia: d.n, hora: agora.getHours(), minuto: agora.getMinutes(), data: agora.toISOString(), registroRapido: true });
+  if(d.desafio) marcarNaSemanaDoDesafio(prog, d.n); // semana do desafio (a mesma da tela do SECA 21)
   // NÃO chama checarConclusaoSemana aqui — isso violava a regra já estabelecida de que a virada de
   // semana só acontece por calendário (segunda 00:00). Chamar isso a cada registro fazia a semana
   // avançar assim que ela completava todos os dias, mesmo no meio da semana, fazendo os registros
@@ -3110,7 +3112,7 @@ function letraDoTreino(d){
 // Calcula tudo a partir da lista de dias e do progresso, sem mexer em nada
 function montarResumoDaSemanaDaAluna(prog, listaDias, agora){
   const lista = listaDias || [];
-  const feitos = (prog && prog.diasConcluidos && prog.diasConcluidos[prog.semana]) || [];
+  const feitos = feitosDaSemanaNaTela(prog, lista);
   const nomeHoje = NOMES_DIA_POR_GETDAY[new Date(agora === undefined ? Date.now() : agora).getDay()];
   const idxHoje = lista.findIndex(function(d){ return d && d.n === nomeHoje; });
   const ehTreino = function(d){ return d && !d.descanso; };
@@ -5967,8 +5969,13 @@ function situacaoDoSeca21(a, agora){
   const hoje = dataLocalISO(new Date(agora === undefined ? Date.now() : agora));
   const dia = diasCorridosDesde(d.dataInicio + 'T12:00:00', agora === undefined ? Date.now() : agora) + 1;
   const total = diasCorridosDesde(d.dataInicio + 'T12:00:00', new Date(d.dataFim + 'T12:00:00').getTime()) + 1;
-  return { dia: Math.max(1, Math.min(dia, total)), total: total, faltam: Math.max(0, total - dia), comecou: hoje >= d.dataInicio, terminou: hoje > d.dataFim };
+  const prazoRegistro = dataISOMaisDias(d.dataFim, DIAS_PRA_REGISTRAR_DEPOIS_DO_FIM);
+  return { dia: Math.max(1, Math.min(dia, total)), total: total, faltam: Math.max(0, total - dia), comecou: hoje >= d.dataInicio, terminou: hoje > d.dataFim,
+    prazoRegistro: prazoRegistro, dentroDoPrazo: hoje >= d.dataInicio && hoje <= prazoRegistro, emTolerancia: hoje > d.dataFim && hoje <= prazoRegistro };
 }
+// Pedido do Thiago (19/11): depois que o SECA 21 termina, a aluna ainda tem 15 dias pra registrar os treinos que ficaram
+// faltando da última semana (academia e em casa). Contam no desafio e vão pro grupo. Passado esse prazo, fecha como antes.
+const DIAS_PRA_REGISTRAR_DEPOIS_DO_FIM = 15;
 
 // ===== LISTA DE ALUNAS: situação, último registro e o menu "⋯" =====
 // Situação do plano numa palavra (a lista antiga mostrava o "Lead antigo · a confirmar" do cadastro, que ficava velho)
@@ -7018,7 +7025,7 @@ function totalDiasDeTreino(){
 // registrado (ela fez alguma atividade nele) não deve contar pra "quantos treinos ela já fez".
 function contarDiasDeTreinoConcluidos(prog){
   const nomesDiasDeTreino = dias.filter(function(d){ return !d.descanso; }).map(function(d){ return d.n; });
-  const registrados = prog.diasConcluidos[prog.semana] || [];
+  const registrados = feitosDaSemanaNaTela(prog, dias); // treino do desafio: conta pela semana do desafio
   return registrados.filter(function(nome){ return nomesDiasDeTreino.indexOf(nome) !== -1; }).length;
 }
 
@@ -9340,7 +9347,7 @@ function abrirTelaDesafioSeca21(){
   const a = obterAlunaLogadaOuCriar();
   if(!estaNoSeca21(a)) return;
   const st = situacaoDoSeca21(a);
-  if(!st || st.terminou) return;
+  if(!st || (st.terminou && !st.emTolerancia)) return;
   openLevel2('desafio-seca-empina');
   const titulo = document.getElementById('se-titulo-desafio');
   if(titulo) titulo.textContent = 'Desafio SECA 21';
@@ -9353,7 +9360,9 @@ function abrirTelaDesafioSeca21(){
     return;
   }
   const sn = semanaAtualDoSeca21(st), totalSemanas = Math.ceil(st.total / 7);
-  sub.textContent = 'Dia ' + st.dia + ' de ' + st.total + ' · semana ' + sn + ' de ' + totalSemanas + ' · ' + nivelSeca21PeloNivel(a.desafioAtivo.nivel) + ' ' + a.desafioAtivo.frequencia + 'x por semana';
+  sub.textContent = st.emTolerancia
+    ? 'O desafio terminou em ' + dataCurtaBR(a.desafioAtivo.dataFim) + '. Até ' + dataCurtaBR(st.prazoRegistro) + ' você ainda pode registrar os treinos que faltaram da última semana.'
+    : 'Dia ' + st.dia + ' de ' + st.total + ' · semana ' + sn + ' de ' + totalSemanas + ' · ' + nivelSeca21PeloNivel(a.desafioAtivo.nivel) + ' ' + a.desafioAtivo.frequencia + 'x por semana';
   if(!semana){
     lista.innerHTML = '<div class="info-box"><p class="txt" style="margin:0 0 10px;">Seu treino do SECA 21 está sendo preparado e aparece aqui assim que for liberado. Enquanto isso, os treinos em casa do desafio já estão liberados.</p>' +
       (alunaTemTreinosEmCasa(a) ? '<button class="btn-gold" onclick="abrirCursoDoApp(\'seca21\')">Ver os treinos em casa</button>' : '') + '</div>';
@@ -9404,7 +9413,7 @@ function seca21PodeDesfazer(prog, sn, nomeDia){
 function marcarDiaSeca21Feito(indiceDia){
   const a = obterAlunaLogadaOuCriar();
   const semana = treinoSeca21DaAluna(a), st = situacaoDoSeca21(a);
-  if(!semana || !st || !st.comecou || st.terminou || !semana.dias[indiceDia]) return;
+  if(!semana || !st || !st.dentroDoPrazo || !semana.dias[indiceDia]) return;
   const d = semana.dias[indiceDia], chave = chaveRegistroSeca21(semanaAtualDoSeca21(st));
   const prog = getProgressoAluna(NOME_ALUNA_LOGADA);
   if(!prog.desafioDiasConcluidos) prog.desafioDiasConcluidos = {};
@@ -10010,7 +10019,7 @@ function chaveDoDiaNoGrupo(a, idDesafio, agora){
 
 function linhaDaFilaDoGrupo(a, nomeTreino, agora){
   const m = modoDoDesafioDaAluna(a);
-  if(!m || !m.ativo) return null;
+  if(!m || !m.registra) return null; // durante o desafio e nos dias de tolerância depois do fim
   const id = idDoDesafio(a);
   return { chave: chaveDoDiaNoGrupo(a, id, agora), desafio_id: id, desafio_nome: (DESAFIOS_DO_APP[id] || {}).nome || a.desafioAtivo.nome || 'desafio',
     aluna_primeiro_nome: primeiroNomeEnvio(a.nome), treino: nomeTreino || null, dia_desafio: m.st.dia, total_dias: m.st.total };
@@ -10053,7 +10062,7 @@ function motivoDeNaoIrProGrupo(a){
   const st = situacaoDoSeca21(a);
   if(!st) return 'não consegui ler as datas do desafio';
   if(!st.comecou) return 'o desafio dela só começa em ' + a.desafioAtivo.dataInicio;
-  if(st.terminou) return 'o desafio dela terminou em ' + a.desafioAtivo.dataFim;
+  if(st.terminou) return 'o desafio dela terminou em ' + a.desafioAtivo.dataFim + ' e o prazo pra registrar acabou em ' + st.prazoRegistro;
   return 'motivo desconhecido';
 }
 
@@ -10063,7 +10072,7 @@ function motivoDeNaoIrProGrupo(a){
 function registrosDoDesafioDaAluna(prog, a){
   const id = idDoDesafio(a), turma = (a.desafioAtivo && a.desafioAtivo.turma) || null, d = a.desafioAtivo || {};
   return (prog.registrosDoDesafio || []).filter(function(r){
-    return r.desafio === id && (r.turma || null) === turma && (!d.dataInicio || r.dia >= d.dataInicio) && (!d.dataFim || r.dia <= d.dataFim);
+    return r.desafio === id && (r.turma || null) === turma && (!d.dataInicio || r.dia >= d.dataInicio) && (!d.dataFim || r.dia <= dataISOMaisDias(d.dataFim, DIAS_PRA_REGISTRAR_DEPOIS_DO_FIM));
   });
 }
 function treinosNoDesafioDaAluna(a){
@@ -10202,7 +10211,7 @@ function modoDoDesafioDaAluna(a){
   if(!a || !estaNoSeca21(a)) return null;
   const st = situacaoDoSeca21(a);
   if(!st) return null;
-  return { soDesafio: planoDaAluna(a).plano === 'so-desafio', st: st, ativo: st.comecou && !st.terminou };
+  return { soDesafio: planoDaAluna(a).plano === 'so-desafio', st: st, ativo: st.comecou && !st.terminou, registra: !!st.dentroDoPrazo };
 }
 
 function alunaLogadaNoModoSoDesafio(){
@@ -10230,6 +10239,47 @@ function diasDoSeca21ParaModoTreino(semana){
 
 function diasSaoDoDesafio(lista){ return !!(lista && lista.length && lista.every(function(d){ return d && d.desafio === 'seca21'; })); }
 
+// Treino do SECA 21 na aba Treino: a semana é a do DESAFIO (7 dias a partir do início dela), não a do calendário.
+// Antes a lista zerava toda segunda-feira, no meio da semana do desafio quando ele não começava numa segunda, e o app
+// voltava a pedir o Treino A: os últimos treinos da semana (C, ou D e E) não chegavam a vez. E o registro feito por aqui
+// não aparecia na tela do SECA 21. Agora as duas telas usam o mesmo registro (desafioDiasConcluidos da semana do desafio).
+function chaveDaSemanaDoDesafioNaTela(listaDias){
+  if(!diasSaoDoDesafio(listaDias)) return null;
+  let a = null;
+  try { a = obterAlunaLogadaOuCriar(); } catch(e){ return null; }
+  const st = a && estaNoSeca21(a) ? situacaoDoSeca21(a) : null;
+  return st ? chaveRegistroSeca21(semanaAtualDoSeca21(st), a) : null;
+}
+function feitosDaSemanaNaTela(prog, listaDias){
+  const k = chaveDaSemanaDoDesafioNaTela(listaDias === undefined ? dias : listaDias);
+  if(k) return ((prog && prog.desafioDiasConcluidos) || {})[k] || [];
+  return (prog && prog.diasConcluidos && prog.diasConcluidos[prog.semana]) || [];
+}
+function marcarNaSemanaDoDesafio(prog, nomeDia){
+  const k = chaveDaSemanaDoDesafioNaTela(dias);
+  if(!k) return false;
+  if(!prog.desafioDiasConcluidos) prog.desafioDiasConcluidos = {};
+  if(!prog.desafioDiasConcluidos[k]) prog.desafioDiasConcluidos[k] = [];
+  if(prog.desafioDiasConcluidos[k].indexOf(nomeDia) === -1) prog.desafioDiasConcluidos[k].push(nomeDia);
+  if(!prog.desafioRegistroEm) prog.desafioRegistroEm = {};
+  prog.desafioRegistroEm[k + '|' + nomeDia] = new Date().toISOString();
+  return true;
+}
+function desmarcarNaSemanaDoDesafio(prog, nomeDia){
+  const k = chaveDaSemanaDoDesafioNaTela(dias);
+  if(!k) return false;
+  const lista = (prog.desafioDiasConcluidos || {})[k] || [];
+  const i = lista.indexOf(nomeDia);
+  if(i !== -1) lista.splice(i, 1);
+  if(prog.desafioRegistroEm) delete prog.desafioRegistroEm[k + '|' + nomeDia];
+  if(prog.registrosDoDesafio){ // sai da contagem do desafio (o de hoje, desse treino)
+    const hoje = dataLocalISO(new Date());
+    const j = prog.registrosDoDesafio.map(function(r){ return r.tipo === 'academia' && r.treino === nomeDia && r.dia === hoje; }).lastIndexOf(true);
+    if(j !== -1) prog.registrosDoDesafio.splice(j, 1);
+  }
+  return true;
+}
+
 // Só desafio: a aluna vê SÓ o material do desafio. Mesmo que ela tenha um treino de consultoria guardado (de antes,
 // ou criado por engano), ele não aparece: durante o desafio o treino é o do SECA 21; sem treino do desafio liberado,
 // ou antes de começar, ou depois do fim, não aparece treino nenhum. O treino da consultoria continua guardado na
@@ -10240,7 +10290,7 @@ function ligarTreinoDoDesafioNoModoSoDesafio(){
   const m = modoDoDesafioDaAluna(a);
   const semana = treinoSeca21DaAluna(a);
   if(m && m.soDesafio){
-    dias = m.ativo && semana ? diasDoSeca21ParaModoTreino(semana) : [];
+    dias = m.registra && semana ? diasDoSeca21ParaModoTreino(semana) : [];
     return dias.length > 0;
   }
   // Não é (mais) só desafio: se o que está na tela é o treino do desafio, volta o da consultoria (se tiver)
@@ -10270,6 +10320,10 @@ function proximoTreinoDoSeca21(a, st){
 
 function htmlTopoSoDesafio(a, m){
   const st = m.st, d = a.desafioAtivo;
+  if(st.emTolerancia){
+    return '<div class="home-hero s21-hero"><p class="hh-lbl">Seu desafio</p><p class="hh-tit">O SECA 21 terminou</p>' + htmlBolinhasDoDesafio(st) +
+      '<p class="hh-info">Terminou em ' + dataCurtaBR(d.dataFim) + '. Ficou algum treino da última semana sem registrar? Até ' + dataCurtaBR(st.prazoRegistro) + ' ainda dá pra marcar na aba Treino, e ele conta no desafio.</p></div>';
+  }
   if(st.terminou){
     return '<div class="home-hero s21-hero"><p class="hh-lbl">Seu desafio</p><p class="hh-tit">O SECA 21 terminou</p>' + htmlBolinhasDoDesafio(st) +
       '<p class="hh-info">Terminou em ' + dataCurtaBR(d.dataFim) + '. Os treinos do desafio saíram do app, mas a sua evolução continua salva.</p></div>';
@@ -10481,7 +10535,7 @@ function aplicarModoDesafioNaInicio(){
   if(!so) return;
   if(el('home-data')) el('home-data').textContent = nivelSeca21PeloNivel(a.desafioAtivo.nivel) + ' · ' + a.desafioAtivo.frequencia + 'x por semana';
   const hero = el('home-treino-hoje');
-  if(hero && (!m.ativo || !treinoSeca21DaAluna(a))){
+  if(hero && (!m.registra || !treinoSeca21DaAluna(a))){
     hero.innerHTML = m.st.terminou
       ? '<p class="hh-lbl">E agora?</p><p class="hh-tit">Continue com um treino montado só pra você</p><a class="hh-btn" href="' + linkConsultoriaDoDesafio() + '" target="_blank" rel="noopener">Conhecer a consultoria</a>'
       : (!m.st.comecou
@@ -10497,7 +10551,7 @@ function aplicarModoDesafioNaInicio(){
 function alunaTemTreinosEmCasa(a){
   if(!a || !estaNoSeca21(a) || !alunaTemCursoLiberado(a, 'seca21') || !cursoDoAppPorId('seca21')) return false;
   const st = situacaoDoSeca21(a);
-  return !!(st && !st.terminou);
+  return !!(st && st.dentroDoPrazo);
 }
 function htmlTrocaConsultoriaDesafio(ativa, a){
   if(a === undefined){ try { a = obterAlunaLogadaOuCriar(); } catch(e){ a = null; } }
@@ -10518,7 +10572,7 @@ function atualizarTrocaDaAbaTreino(){
   if(titulo) titulo.textContent = m && m.soDesafio ? 'Treinos do SECA 21' : 'Sua semana';
   atualizarMenuDoDesafio(!!(m && m.soDesafio));
   if(!area) return;
-  area.innerHTML = m && !m.soDesafio && m.ativo && (treinoSeca21DaAluna(a) || alunaTemTreinosEmCasa(a)) ? htmlTrocaConsultoriaDesafio('consultoria', a) : '';
+  area.innerHTML = m && !m.soDesafio && m.registra && (treinoSeca21DaAluna(a) || alunaTemTreinosEmCasa(a)) ? htmlTrocaConsultoriaDesafio('consultoria', a) : '';
 }
 
 // ===== ALUNA: botão condicional na home, tela do desafio, marcar dia como feito =====
@@ -10540,8 +10594,14 @@ function renderBotaoDesafio(){
   if(estaNoSeca21(a)){
     // Com o treino liberado, abre a tela do desafio; sem treino ainda, mostra o dia e leva pras aulas na Mentoria
     const st = situacaoDoSeca21(a);
-    if(!st || st.terminou){ area.innerHTML = ''; return; }
+    if(!st || (st.terminou && !st.emTolerancia)){ area.innerHTML = ''; return; }
     const temTreino = !!treinoSeca21DaAluna(a);
+    if(st.emTolerancia){
+      area.innerHTML = '<div class="home-hero s21-verde"><p class="hh-lbl">Desafio SECA 21</p><p class="hh-tit">O desafio terminou em ' + dataCurtaBR(a.desafioAtivo.dataFim) + '</p>' + htmlBolinhasDoDesafio(st) +
+        '<p class="hh-info">Ficou algum treino da última semana sem registrar? Até ' + dataCurtaBR(st.prazoRegistro) + ' ainda dá pra marcar, e ele conta no desafio.</p>' +
+        (temTreino ? '<button class="hh-btn" onclick="abrirTelaDesafioSeca21()">Registrar treino do desafio</button>' : '') + htmlAtalhoTreinosEmCasaNaInicio(a) + '</div>';
+      return;
+    }
     if(st.comecou && temTreino){
       const prox = proximoTreinoDoSeca21(a, st);
       area.innerHTML = '<div class="home-hero s21-verde"><p class="hh-lbl">Desafio SECA 21 <span class="s21-tag">por tempo determinado</span></p>' +
@@ -22159,7 +22219,7 @@ function podeRegistrarAulaEmCasa(c){
   let a = null;
   try { a = obterAlunaLogadaOuCriar(); } catch(e){ return false; }
   const m = modoDoDesafioDaAluna(a);
-  return !!(m && m.ativo);
+  return !!(m && m.registra);
 }
 function nomeDoTreinoEmCasa(c, i){ return 'Treino em casa · ' + tituloDaAula(c.aulas[i], i); }
 function aulaJaRegistradaHoje(c, i){
@@ -22168,8 +22228,31 @@ function aulaJaRegistradaHoje(c, i){
     return (prog.registrosDoDesafio || []).some(function(r){ return r.tipo === 'casa' && r.treino === nome && r.dia === hoje; });
   } catch(e){ return false; }
 }
+// Quando o "Registrar treino" não aparece, a aluna via só "Próxima aula" e não sabia por quê (caso real, 19/11).
+// Agora a tela diz o motivo, e o motivo fica registrado nos erros do app pra você conferir a ficha dela.
+function motivoSemRegistroDaAula(c){
+  if(!c || c.cursoDoAppId !== 'seca21' || sessaoTipo !== 'aluna') return null;
+  let a = null;
+  try { a = obterAlunaLogadaOuCriar(); } catch(e){ return null; }
+  if(!a) return null;
+  if(!estaNoSeca21(a)) return { aluna: 'Seus treinos em casa estão liberados, mas no app você ainda não está inscrita no SECA 21, então o registro não aparece. Avise seu personal pra ele conferir a sua inscrição.', log: 'curso liberado sem inscrição no SECA 21' };
+  const st = situacaoDoSeca21(a);
+  if(!st) return null;
+  if(!st.comecou) return { aluna: 'No app, o seu SECA 21 começa em ' + dataCurtaBR(a.desafioAtivo.dataInicio) + '. O registro aparece a partir desse dia. Se a data estiver errada, avise seu personal.', log: 'desafio ainda não começou (início ' + a.desafioAtivo.dataInicio + ')' };
+  if(!st.dentroDoPrazo) return { aluna: 'No app, o seu SECA 21 terminou em ' + dataCurtaBR(a.desafioAtivo.dataFim) + ' e o prazo pra registrar acabou em ' + dataCurtaBR(st.prazoRegistro) + '. Se a data estiver errada, avise seu personal.', log: 'prazo acabou (fim ' + a.desafioAtivo.dataFim + ', prazo ' + st.prazoRegistro + ')' };
+  return null;
+}
+let motivoSemRegistroJaAvisado = {};
 function htmlBotaoRegistrarAula(c, i){
-  if(!podeRegistrarAulaEmCasa(c)) return '';
+  if(!podeRegistrarAulaEmCasa(c)){
+    const mot = motivoSemRegistroDaAula(c);
+    if(!mot) return '';
+    if(!motivoSemRegistroJaAvisado[mot.log]){
+      motivoSemRegistroJaAvisado[mot.log] = true;
+      try { registrarErroNoBanco(new Error('[Em casa] ' + NOME_ALUNA_LOGADA + ' abriu um treino em casa sem o "Registrar treino": ' + mot.log), 'registro_em_casa_escondido'); } catch(e){}
+    }
+    return '<div class="info-box" style="margin-top:14px;"><p class="txt" style="margin:0;">' + escaparHtmlFicha(mot.aluna) + '</p></div>';
+  }
   if(aulaJaRegistradaHoje(c, i)) return '<div class="btn-gold" style="margin-top:14px;background:var(--card-2);color:var(--success);border:1px solid var(--success);text-align:center;">✓ Treino registrado hoje</div>';
   return '<button class="btn-gold" style="margin-top:14px;background:var(--success);color:#0E1A12;" onclick="registrarAulaEmCasa(' + i + ')">✓ Registrar treino</button>';
 }
@@ -25825,7 +25908,7 @@ if(type === 'central'){
           '<div id="ex-expandido-' + j + '" style="display:none;padding:0 12px 12px;">' + conteudoExpandido + '</div>' +
         '</div>' + '</div>';
       });
-      const jaRegistradoHoje = prog && (prog.diasConcluidos[prog.semana] || []).indexOf(d.n) !== -1;
+      const jaRegistradoHoje = prog && feitosDaSemanaNaTela(prog, dias).indexOf(d.n) !== -1;
       corpoTreino += '<p id="dica-lista-treino" class="dica-lista-treino">Toque no exercício pra abrir as séries e a carga · ▶ abre o vídeo</p>' +
         (treinoComecou ? '' : '<div class="iniciar-fixo" id="iniciar-fixo">' + htmlCronometro + '</div>');
       corpoTreino += '<button class="btn-gold" id="btn-registrar-treino-dia" style="margin-top:10px;' + (jaRegistradoHoje ? 'background:var(--success);color:#fff;' : '') + '" onclick="registrarTreinoDia(' + arg + ')">' + (jaRegistradoHoje ? '✓ Treino registrado' : 'Registrar treino de hoje') + '</button>' +
@@ -26583,6 +26666,7 @@ function registrarTreinoDia(diaIndex){
     // usadas pra sugestão de progressão; só deixaram de ser obrigatórias pra fechar o dia.
     if(!prog.diasConcluidos[prog.semana]) prog.diasConcluidos[prog.semana] = [];
     if(prog.diasConcluidos[prog.semana].indexOf(d.n) === -1) prog.diasConcluidos[prog.semana].push(d.n);
+    if(d.desafio) marcarNaSemanaDoDesafio(prog, d.n); // semana do desafio (a mesma da tela do SECA 21)
     if(!prog.horariosTreino) prog.horariosTreino = [];
     const agora = new Date();
     prog.horariosTreino.push({ dia: d.n, hora: agora.getHours(), minuto: agora.getMinutes(), data: agora.toISOString() });
