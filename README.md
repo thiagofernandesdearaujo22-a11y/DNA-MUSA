@@ -1,4 +1,4 @@
-[dna_musa_176.html](https://github.com/user-attachments/files/35183154/dna_musa_176.html)
+[dna_musa_177.html](https://github.com/user-attachments/files/35183688/dna_musa_177.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -302,6 +302,11 @@
   @media (max-width:600px){ .fb-item{flex-wrap:wrap;} .fb-acoes{flex-direction:row;flex-wrap:wrap;width:100%;justify-content:flex-start;} } /* no celular os 4 botões quebram linha, antes o primeiro saía da tela */
   .pg-box{background:var(--card);border:1px solid var(--border-strong);border-radius:20px;padding:18px;margin-top:10px;display:flex;flex-direction:column;gap:14px;}
   .pg-top{display:flex;flex-wrap:wrap;align-items:center;gap:10px;}
+  .pg-motor{background:rgba(232,197,138,0.08);border:1px solid rgba(232,197,138,0.35);border-radius:14px;padding:10px 12px;font-size:12.5px;color:var(--text-soft,var(--text));}
+  .pg-motor p{margin:6px 0 0;color:var(--text-faint);}
+  .pg-motivos{border-top:1px solid var(--border);padding-top:10px;font-size:12.5px;}
+  .pg-motivos-tit{margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--text-faint);text-transform:uppercase;}
+  .pg-motivos p{margin:0 0 6px;color:var(--text-faint);}.pg-motivos b{color:var(--text);font-weight:600;}
   .pg-top h3{margin:0;font-size:15.5px;font-weight:600;}
   .pg-top .pg-x{margin-left:auto;font-size:11.5px;color:var(--text-faint);}
   .pg-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
@@ -1267,7 +1272,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-19-BZ-DESAFIO-REGISTRO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-20-CA-PROGRESSAO-PELAS-REGRAS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -2193,7 +2198,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-19-BZ-DESAFIO-REGISTRO';
+const VERSAO_APP = '2026-11-20-CA-PROGRESSAO-PELAS-REGRAS';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -7522,13 +7527,17 @@ function aplicarRegrasFixasNoDia(dia){
   removerElevacoesPelvicasExcedentesNoDia(dia);
 }
 
+// Leg press em qualquer nome: "LEG PRESS 45", "LEG PRESS HORIZONTAL" e também "LEG HORIZONTAL" (antes esse escapava
+// da regra e o treino saía com dois legs no mesmo dia, caso real de 20/11)
+function ehLegPressNome(nome){ return /^LEG\b|LEG PRESS|LEG HORIZONTAL/.test(nomeLimpoDoExercicio(nome)); }
+
 // Nunca 2 Leg Press no mesmo treino — a não ser que um dos dois seja unilateral, aí os dois podem
 // conviver (trabalham de formas diferentes o suficiente pra não ser redundante).
 function removerLegsExcedentesNoDia(dia){
   let jaTemLeg = false;
   dia.ex = dia.ex.filter(function(linha){
     const nomes = extrairTodosNomesDeLinha(linha);
-    const algumLeg = nomes.some(function(n){ return n.toUpperCase().indexOf('LEG PRESS') !== -1; });
+    const algumLeg = nomes.some(function(n){ return ehLegPressNome(n); });
     if(!algumLeg) return true;
     const algumUnilateral = nomes.some(function(n){ return ehExercicioUnilateral(n); });
     if(algumUnilateral) return true; // exceção: um dos dois sendo unilateral, pode ter os dois no dia
@@ -7845,7 +7854,7 @@ function gerarSemanaDesafio(numeroEstrutura, frequencia, seedVariacao){
           const ehUni = ehExercicioUnilateral(nome);
           if(ehUni && estado.temUnilateralNoDia) continue;
           const nomeUpper = nome.toUpperCase();
-          const ehLeg = nomeUpper.indexOf('LEG PRESS') !== -1;
+          const ehLeg = ehLegPressNome(nome);
           const ehAfundo = nomeUpper.indexOf('AFUNDO') !== -1;
           // Já respeita na hora de escolher (2 Leg Press só se um for unilateral, 1 afundo por dia) —
           // antes o filtro removia DEPOIS de escolhido e a meta de volume ficava alguns pontos abaixo
@@ -11581,7 +11590,7 @@ function validarPrescricao(perfil, semana){
   diasDeTreino.forEach(function(d){
     const unilateraisNoDia = d.ex.filter(function(linha){ return ehExercicioUnilateral(extrairNomeExercicioDeLinha(linha)); });
     if(unilateraisNoDia.length > 1) diasComProblemaUnilateral.push(d.n);
-    const legsNoDia = d.ex.filter(function(linha){ return extrairNomeExercicioDeLinha(linha).toUpperCase().indexOf('LEG PRESS') !== -1; });
+    const legsNoDia = d.ex.filter(function(linha){ return ehLegPressNome(extrairNomeExercicioDeLinha(linha)); });
     const algumLegUnilateral = legsNoDia.some(function(linha){ return ehExercicioUnilateral(extrairNomeExercicioDeLinha(linha)); });
     if(legsNoDia.length > 1 && !algumLegUnilateral) diasComDoisLegs.push(d.n);
   });
@@ -12774,7 +12783,7 @@ async function outrasFichasNaMesmaConta(authId, email){
   } catch(e){ return []; }
 }
 
-async function sincronizarTreinoComSupabase(a){
+async function sincronizarTreinoComSupabase(a, opcoes){
   if(!supabaseClient){ mostrarConfirmacaoSalvamento(false, 'Sem conexão com o Supabase agora.'); return { ok: false, motivo: 'sem conexão' }; }
   if(!(await garantirSessaoValida())){ mostrarConfirmacaoSalvamento(false, 'Sessão inválida — o ajuste não foi salvo. Entra de novo.'); return { ok: false, motivo: 'sessão inválida' }; }
   if(!a.email){ mostrarConfirmacaoSalvamento(false, 'Essa aluna não tem e-mail cadastrado, não dá pra salvar no banco.'); return { ok: false, motivo: 'sem e-mail' }; }
@@ -12804,7 +12813,7 @@ async function sincronizarTreinoComSupabase(a){
         return { ok: false, motivo: 'conta de login dividida com ' + nomes };
       }
       // Ela já tem login: salva no lugar "oficial" (tabela treinos), que é o que o app dela lê ao entrar
-      const saidaTreino = await salvarTreinoNoSupabase(alunaRow.auth_id, a.treinoAtual);
+      const saidaTreino = await salvarTreinoNoSupabase(alunaRow.auth_id, a.treinoAtual, opcoes);
       return saidaTreino && saidaTreino.sucesso ? { ok: true, verificado: true } : { ok: false, motivo: saidaTreino ? saidaTreino.erro : 'falha ao salvar' };
     } else {
       // Sempre salva também aqui, pelo e-mail, com ou sem login — assim o treino nunca se perde,
@@ -13510,7 +13519,7 @@ function confirmarProgressaoManual(nomeAluna){
   a.progressaoManualForcada = (a.progressaoManualForcada || 0) + 1;
   a.regressao = null; a.treinoAntesDaRegressao = null; // progrediu: a regressão acabou
   salvarPerfilAlunaNoSupabase(nomeAluna);
-  gerarTreinoAutomaticoParaAluna(nomeAluna);
+  gerarTreinoAutomaticoParaAluna(nomeAluna, { progredir: true, ignorarSituacao: true, jaContou: true });
   if(a.telefone) enviarWhatsApp(a.telefone, templatesAvisos.treinoProgredido(a));
   enviarAvisoInApp(nomeAluna, 'Seu treino acabou de ser atualizado, com evolução de carga/variedade. Já pode conferir! 💪', 'ajuste_treino');
 }
@@ -13696,6 +13705,7 @@ function candidatosDaTrocaProg(a, nomeAtual, modo, ctx){
     if(nivel === 'Iniciante' && ehExercicioUnilateral(e.nome) && !/AFUNDO/.test(l) && !/MAQUINA|POLIA|CADEIRA|CAMA|GUIAD|ARTICULAD/.test(l)) return false; // A4, C6
     if(joelho && (ehExercicioPliometrico(e) || /PLIOM|AFUNDO|BULGARO|PASSADA|AVANCO|STEP/.test(l))) return false; // A6
     if(/AFUNDO|BULGARO|PASSADA|AVANCO/.test(l) && ctx.temAfundoNoDia) return false;         // A9
+    if(ehLegPressNome(e.nome) && !ehExercicioUnilateral(e.nome) && ctx.temLegNoDia && !ehLegPressNome(nomeAtual)) return false; // nunca 2 legs
     if(nivel !== 'Iniciante' && obterPalavraChaveMovimento(e.nome) !== padraoAtual && ctx.padroesNoDia[obterPalavraChaveMovimento(e.nome)]) return false; // A10
     if(trocaEstaBloqueada(nomeAtual, e.nome)) return false;                                  // "Não faz sentido" que você marcou
     return true;
@@ -13760,10 +13770,13 @@ function metodoParaProg(a, nome, tipo){
 function textoDoMetodoProg(m){ return m === METODO_PROG.drop ? 'drop set na última série' : (m === METODO_PROG.restPause ? 'rest pause' : 'pirâmide crescente'); }
 
 // O plano da progressão de uma aluna. Não mexe em nada dela.
-function planejarProgressaoPelasRegras(a, agora){
+// opcoes.ignorarSituacao: você abriu a progressão dela na mão e decidiu progredir mesmo ela estando fora da regra
+// (pausa, constância, menos de 4 semanas...). Só desafio e "sem treino" continuam de fora.
+function planejarProgressaoPelasRegras(a, agora, opcoes){
   if(agora === undefined) agora = Date.now();
   const situacao = situacaoDaAlunaParaProgressao(a, agora);
-  if(!situacao.entra) return { aluna: a.nome, entra: false, lista: situacao.lista, motivo: situacao.motivo };
+  const forcar = !!(opcoes && opcoes.ignorarSituacao) && ['fora', 'cedo'].indexOf(situacao.lista) !== -1;
+  if(!situacao.entra && !forcar) return { aluna: a.nome, entra: false, lista: situacao.lista, motivo: situacao.motivo };
   const prog = getProgressoAluna(a.nome);
   const nivel = nivelDaAlunaProg(a);
   const memoria = a.regrasProgressao || {};
@@ -13781,14 +13794,33 @@ function planejarProgressaoPelasRegras(a, agora){
   const mudancas = [], semRegistro = [], entraram = [], sairam = [];
   let comBoaProgressao = 0, comDado = 0;
   const diasNovos = JSON.parse(JSON.stringify(a.treinoAtual.dias));
+  if(forcar) mudancas.push({ dia: '', tipo: 'aviso', antes: '', depois: '', motivo: 'Pelas regras ela ficaria de fora (' + situacao.motivo + '), mas você abriu a progressão dela: segue com as regras.' });
   if(intensidadeAlta) mudancas.push({ dia: '', tipo: 'aviso', antes: '', depois: '', motivo: 'Intensidade 9 ou 10 nos dois últimos treinos: essa progressão segura (só a carga continua subindo), sem troca, método nem série a mais (I4)' });
   if(intensidadeBaixa) mudancas.push({ dia: '', tipo: 'aviso', antes: '', depois: '', motivo: 'Intensidade 5 ou menos nos dois últimos treinos: progride mais rápido, com uma troca a mais por treino e "subiu pouco" contando como "subiu" (I3)' });
 
   diasNovos.forEach(function(d){
     if(!d || d.descanso || !(d.ex || []).length) return;
     d.metodos = d.metodos || {};
-    const ctx = { noDia: {}, sairamAntes: sairamAntes, padroesNoDia: {}, temAfundoNoDia: false };
+    const ctx = { noDia: {}, sairamAntes: sairamAntes, padroesNoDia: {}, temAfundoNoDia: false, temLegNoDia: d.ex.some(function(l){ return !partesDaLinhaProg(l).combo && ehLegPressNome(partesDaLinhaProg(l).nome) && !ehExercicioUnilateral(partesDaLinhaProg(l).nome); }) };
     d.ex.forEach(function(l){ extrairTodosNomesDeLinha(l).forEach(function(n){ const x = nomeLimpoDoExercicio(n); ctx.noDia[x] = true; ctx.padroesNoDia[obterPalavraChaveMovimento(n)] = true; if(/AFUNDO|BULGARO|PASSADA|AVANCO/.test(x)) ctx.temAfundoNoDia = true; }); });
+    // 0) Limpeza do treino que já estava aí (gerado antes das regras): o mesmo exercício duas vezes no dia
+    // (inclusive com outro nome, como LEG HORIZONTAL e LEG PRESS HORIZONTAL), dois legs sem um ser unilateral,
+    // e séries fora da faixa do nível (F1 a F3). Caso real de 20/11: iniciante com dois legs e 5 séries.
+    const vistosNoDia = {}; let legsNoDia = 0;
+    const repetidos = {};
+    d.ex.forEach(function(l, i){
+      const p = partesDaLinhaProg(l);
+      if(p.combo) return;
+      const k = baseDoNomeProg(p.nome), k2 = chaveDeParecidoDoExercicio(p.nome);
+      const eLeg = ehLegPressNome(p.nome) && !ehExercicioUnilateral(p.nome);
+      if(vistosNoDia[k] || vistosNoDia['p:' + k2] || (eLeg && legsNoDia >= 1)) repetidos[i] = eLeg && !vistosNoDia[k] && !vistosNoDia['p:' + k2] ? 'Dois legs no mesmo dia (sem nenhum ser unilateral)' : 'O mesmo exercício duas vezes no dia';
+      vistosNoDia[k] = true; vistosNoDia['p:' + k2] = true; if(eLeg) legsNoDia++;
+      if(p.series && (p.series > faixaSeries[1] || p.series < faixaSeries[0])){
+        const novo = Math.min(faixaSeries[1], Math.max(faixaSeries[0], p.series));
+        d.ex[i] = montarLinhaProg(p.nome, novo, p.resto);
+        mudancas.push({ dia: d.n, tipo: novo < p.series ? 'menos_serie' : 'mais_serie', antes: p.nome, depois: d.ex[i], motivo: p.series + ' séries está fora da faixa da ' + nivel.toLowerCase() + ' (' + (faixaSeries[0] === faixaSeries[1] ? faixaSeries[0] : faixaSeries[0] + ' a ' + faixaSeries[1]) + ' séries, F1 a F3)' });
+      }
+    });
     const primeiroMulti = d.ex.findIndex(function(l){ const p = partesDaLinhaProg(l); return !p.combo && linhaEhMultiarticularProg(p.nome); });
     // 1) o que cada exercício pede
     const pedidos = d.ex.map(function(l, i){
@@ -13803,6 +13835,7 @@ function planejarProgressaoPelasRegras(a, agora){
       const base = { i: i, p: p, grupo: grupo, ehEnfase: ehEnfase, carga: carga, temMetodo: !!d.metodos[i] };
       let pct = carga.ganho != null ? ' (' + String(carga.de).replace('.', ',') + ' pra ' + String(carga.para).replace('.', ',') + ' kg, ' + (carga.ganho >= 0 ? '+' : '') + Math.round(carga.ganho * 100) + '%)' : '';
       const lp = nomeLimpoDoExercicio(p.nome);
+      if(repetidos[i]) return Object.assign(base, { acao: 'trocar', modo: 'grupo', obrigatorio: true, prioridade: 110, motivo: repetidos[i] + ': esse sai e entra outro do mesmo grupo' });
       if(nivel === 'Iniciante' && ex && ehExercicioPliometrico(ex)) return Object.assign(base, { acao: 'trocar', modo: 'lado', obrigatorio: true, prioridade: 100, motivo: 'Iniciante não recebe pliométrico (A5)' });
       if(/JOELHO/i.test(String(a.restricoes || '')) && ((ex && ehExercicioPliometrico(ex)) || /PLIOM|AFUNDO|BULGARO|PASSADA|AVANCO|STEP/.test(lp))) return Object.assign(base, { acao: 'trocar', modo: 'lado', obrigatorio: true, prioridade: 100, motivo: 'Queixa no joelho: sai pliométrico, afundo, passada, step e búlgaro (A6)' });
       if(desc) return Object.assign(base, { acao: 'trocar', maisFacil: true, modo: (desc.escalaDesconforto || 0) >= REGRAS_PROG.escalaDesconfortoVoltaDegrau ? 'abaixo' : 'lado', obrigatorio: true, prioridade: 100, motivo: 'Desconforto ' + (desc.escalaDesconforto || '?') + '/10 nas últimas 4 semanas (A13' + ((desc.escalaDesconforto || 0) >= REGRAS_PROG.escalaDesconfortoVoltaDegrau ? ', C4: um degrau abaixo' : '') + ')' });
@@ -14225,19 +14258,31 @@ function aplicarRemocoesDaProgressao(diasNovos, ajustes){
 }
 
 // O treino como ficaria depois de progredir (mesma conta do botão Confirmar), já com os ajustes
+// 20/11: com treino atual, a progressão é a do MOTOR DE REGRAS (parte do treino dela e muda só o que as regras mandam).
+// Antes gerava a semana inteira de novo, e saíam coisas como dois legs e 5 séries numa iniciante.
+function planoDaProgressaoNaTela(a){
+  if(!a || !a.treinoAtual || !(a.treinoAtual.dias || []).some(function(d){ return d && !d.descanso && (d.ex || []).length; })) return null;
+  try { return planejarProgressaoPelasRegras(a, Date.now(), { ignorarSituacao: true }); } catch(e){ try { registrarErroNoBanco(e, 'motor_regras'); } catch(x){} return null; }
+}
 function simularTreinoProgredido(a){
   const alvo = (a.progressaoManualForcada || 0) + 1;
-  const perfilNovo = construirPerfilAluna(Object.assign({}, a, { progressaoManualForcada: alvo }));
-  const semana = gerarTreinoSemanal(perfilNovo);
-  const dias = NOMES_DIAS_PROGRESSAO.map(function(nome, i){
-    if(i < semana.length) return Object.assign({ n: nome }, semana[i]);
-    return { n: nome, foco: 'Descanso', descanso: true, ex: [] };
-  });
+  const plano = planoDaProgressaoNaTela(a);
+  let dias;
+  if(plano && plano.entra){
+    dias = JSON.parse(JSON.stringify(plano.dias));
+  } else {
+    const perfilNovo = construirPerfilAluna(Object.assign({}, a, { progressaoManualForcada: alvo }));
+    const semana = gerarTreinoSemanal(perfilNovo);
+    dias = NOMES_DIAS_PROGRESSAO.map(function(nome, i){
+      if(i < semana.length) return Object.assign({ n: nome }, semana[i]);
+      return { n: nome, foco: 'Descanso', descanso: true, ex: [] };
+    });
+  }
   const ajustes = a.ajustesProgressao && a.ajustesProgressao.alvo === alvo ? a.ajustesProgressao : null;
   const revertidas = aplicarAjustesNaProgressao(a.treinoAtual ? a.treinoAtual.dias : null, dias, ajustes);
   const final = JSON.parse(JSON.stringify(dias));
   aplicarRemocoesDaProgressao(final, ajustes);
-  return { dias: dias, final: final, revertidas: revertidas, alvo: alvo, ajustes: ajustes };
+  return { dias: dias, final: final, revertidas: revertidas, alvo: alvo, ajustes: ajustes, plano: plano };
 }
 
 function ajustesDaProgressao(a){
@@ -14328,6 +14373,14 @@ function renderProgressaoPendente(nomeAluna){
       diagnostico.gargalos.map(function(g){ return '<span class="fc fc-alerta">' + escaparHtmlFicha(g) + '</span>'; }).join('') +
     '</div>';
 
+  if(sim.plano && sim.plano.entra){
+    const avisos = sim.plano.mudancas.filter(function(x){ return x.tipo === 'aviso' && !x.dia; });
+    html += '<div class="pg-motor"><b>Pelas suas regras.</b> Parte do treino atual dela e muda só o que as regras pedem. O motivo de cada mudança está embaixo do dia.' +
+      avisos.map(function(x){ return '<p>' + escaparHtmlFicha(x.motivo) + '</p>'; }).join('') +
+      (sim.plano.semRegistro.length ? '<p>' + sim.plano.semRegistro.length + ' exercício(s) sem 4 registros de carga ficam iguais (B10).</p>' : '') + '</div>';
+  } else if(sim.plano && !sim.plano.entra){
+    html += '<div class="pg-motor"><b>Treino novo.</b> ' + escaparHtmlFicha(sim.plano.motivo) + '. Por isso aqui aparece um treino gerado do zero.</div>';
+  }
   if(diasDeTreino.length === 0){
     html += '<p class="txt" style="color:var(--text-faint);margin:0;">O treino progredido não tem dias de treino pra comparar.</p>';
   } else {
@@ -14390,6 +14443,12 @@ function renderProgressaoPendente(nomeAluna){
       return linha;
     }).join('');
 
+    if(sim.plano && sim.plano.entra){
+      const doDia = sim.plano.mudancas.filter(function(x){ return x.dia === est.diaAberto && x.tipo !== 'mantem'; });
+      const geral = sim.plano.mudancas.filter(function(x){ return !x.dia && x.tipo !== 'aviso'; });
+      if(doDia.length || geral.length) html += '<div class="pg-motivos"><p class="pg-motivos-tit">Por que mudou</p>' + doDia.concat(geral).map(function(x){
+        return '<p><b>' + escaparHtmlFicha(x.tipo === 'aviso' ? 'Atenção' : (x.antes || '')) + '</b> ' + escaparHtmlFicha(x.motivo) + '</p>'; }).join('') + '</div>';
+    }
     const faltam = diasDeTreino.filter(function(d){ return !est.vistos[d.n]; }).map(function(d){ return d.n; });
     html += '<div class="pg-rod"><div class="pg-info">' + (faltam.length === 0 ? '<b>Todos os dias revisados.</b>' : '<b>' + escaparHtmlFicha(est.diaAberto) + ' revisada.</b> Faltam ' + faltam.join(', ').replace(/, ([^,]*)$/, ' e $1') + '.') + '</div>' +
       '<button class="btn-gold" onclick="confirmarProgressaoManual(\'' + nomeJs + '\')">Confirmar e progredir o treino</button></div>';
@@ -14570,14 +14629,23 @@ function rotuloFaseParaAluna(a){
   return rotulos[infoBloco.blocoTecnico] || 'Base';
 }
 
-async function construirEAtribuirTreino(nomeAluna){
+async function construirEAtribuirTreino(nomeAluna, opcoes){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return { ok: false, motivo: 'aluna não encontrada' };
 
   const perfil = construirPerfilAluna(a);
-  const semana = gerarTreinoSemanal(perfil);
+  // Progressão de quem já tem treino: motor de regras (o mesmo da tela de conferir). Treino novo: gerador de sempre.
+  let plano = null;
+  if(opcoes && opcoes.progredir && a.treinoAtual){
+    // a tela de conferir calculou antes de somar +1 na contagem de progressões: calcula igual, pra sair exatamente o que você viu
+    const comoNaTela = opcoes.jaContou ? Object.assign({}, a, { progressaoManualForcada: Math.max(0, (a.progressaoManualForcada || 0) - 1) }) : a;
+    try { plano = planejarProgressaoPelasRegras(comoNaTela, Date.now(), { ignorarSituacao: !!opcoes.ignorarSituacao }); } catch(e){ plano = null; try { registrarErroNoBanco(e, 'motor_regras'); } catch(x){} }
+    if(plano && !plano.entra && opcoes.soPelasRegras) return { ok: false, foraDasRegras: true, motivo: plano.motivo };
+  }
+  const usarPlano = !!(plano && plano.entra);
+  const semana = usarPlano ? plano.dias.filter(function(d){ return d && !d.descanso && (d.ex || []).length; }) : gerarTreinoSemanal(perfil);
   const nomesDias = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
-  const semanaComNome = nomesDias.map(function(nome, i){
+  const semanaComNome = usarPlano ? JSON.parse(JSON.stringify(plano.dias)) : nomesDias.map(function(nome, i){
     if(i < semana.length) return Object.assign({ n: nome }, semana[i]);
     return { n: nome, foco: 'Descanso', descanso: true, ex: [] };
   });
@@ -14589,8 +14657,15 @@ async function construirEAtribuirTreino(nomeAluna){
   if(ajustesDaTela) a.ajustesProgressao = null;
   if(estadoProgressao[a.nome]) delete estadoProgressao[a.nome];
 
-  a.treinoAtual = { fase: rotuloFaseParaAluna(a), volume: 'Gerado automaticamente, revise antes de confirmar', dias: semanaComNome };
-  const saidaSalvamento = await sincronizarTreinoComSupabase(a);
+  a.treinoAtual = { fase: rotuloFaseParaAluna(a), volume: usarPlano ? 'Progredido pelas suas regras' : 'Gerado automaticamente, revise antes de confirmar', dias: semanaComNome };
+  if(usarPlano){
+    a.regrasProgressao = plano.memoria;
+    // J3: a nota "última progressão" que fica no treino dela (o que mudou e por quê)
+    a.ultimaProgressao = { em: new Date().toISOString(), por: (typeof NOME_PERSONAL_LOGADO !== 'undefined' && NOME_PERSONAL_LOGADO) || 'Personal',
+      mudancas: plano.mudancas.filter(function(x){ return x.tipo !== 'mantem'; }).slice(0, 60), semRegistro: plano.semRegistro.slice(0, 40) };
+    salvarPerfilAlunaNoSupabase(a.nome);
+  }
+  const saidaSalvamento = await sincronizarTreinoComSupabase(a, { novaVersao: true });
 
   const resultado = validarPrescricao(perfil, semana);
   // Orquestração: conecta o Auditor de Patologia no MESMO checklist que já roda após toda geração,
@@ -14611,8 +14686,8 @@ async function construirEAtribuirTreino(nomeAluna){
   return { ok: true, resultado: resultado, salvamento: saidaSalvamento };
 }
 
-function gerarTreinoAutomaticoParaAluna(nomeAluna){
-  construirEAtribuirTreino(nomeAluna).then(function(saida){
+function gerarTreinoAutomaticoParaAluna(nomeAluna, opcoes){
+  construirEAtribuirTreino(nomeAluna, opcoes).then(function(saida){
     if(!saida.ok) return;
     const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
     const i = alunasPersonal.indexOf(a);
@@ -14723,16 +14798,17 @@ async function verificarReplicasDeTreino(){
 
 async function executarGeracaoEmMassa(elegiveis, rotuloAcao){
   const area = document.getElementById('geracao-massa-area');
-  const resultados = { geradas: 0, progredidas: 0, verificadas: 0, apenasBackup: 0, erros: [], comPendencia: [] };
+  const resultados = { geradas: 0, progredidas: 0, verificadas: 0, apenasBackup: 0, erros: [], comPendencia: [], foraDasRegras: [] };
 
   for(let idx = 0; idx < elegiveis.length; idx++){
     const a = elegiveis[idx];
     area.innerHTML = '<div class="info-box"><p class="lbl">Processando ' + (idx+1) + ' de ' + elegiveis.length + '...</p><p class="txt">' + a.nome + '</p></div>';
     try {
-      const jaTinhaTreino = !!a.treinoAtual;
-      if(jaTinhaTreino) a.progressaoManualForcada = (a.progressaoManualForcada || 0) + 1;
-      const saida = await construirEAtribuirTreino(a.nome);
+      const jaTinhaTreino = !!(a.treinoAtual && (a.treinoAtual.dias || []).some(function(d){ return d && !d.descanso && (d.ex || []).length; }));
+      const saida = await construirEAtribuirTreino(a.nome, jaTinhaTreino ? { progredir: true, soPelasRegras: true } : null);
+      if(saida.foraDasRegras){ resultados.foraDasRegras.push({ nome: a.nome, motivo: saida.motivo }); continue; }
       if(!saida.ok){ resultados.erros.push({ nome: a.nome, motivo: saida.motivo }); continue; }
+      if(jaTinhaTreino) a.progressaoManualForcada = (a.progressaoManualForcada || 0) + 1;
       if(!saida.salvamento || !saida.salvamento.ok){
         resultados.erros.push({ nome: a.nome, motivo: 'gerou mas NÃO salvou: ' + (saida.salvamento ? saida.salvamento.motivo : 'desconhecido') });
         continue;
@@ -14763,6 +14839,11 @@ async function executarGeracaoEmMassa(elegiveis, rotuloAcao){
     '<p class="txt" style="font-size:11px;color:' + (resultados.erros.length > 0 ? '#E2A33D' : 'var(--text-faint)') + ';margin-top:4px;">' + resultados.erros.length + ' com erro real</p>' +
     (resultados.erros.length > 0 ? '<p class="txt" style="font-size:11px;color:#E2A33D;margin-top:6px;">' + resultados.erros.map(function(e){ return e.nome + ' (' + e.motivo + ')'; }).join('<br>') + '</p>' : '') +
   '</div>' +
+  (resultados.foraDasRegras.length > 0
+    ? '<div class="info-box" style="border-color:var(--gold);margin-top:8px;"><p class="lbl">' + resultados.foraDasRegras.length + ' aluna(s) não progrediram pelas regras (o treino delas ficou igual)</p>' +
+        resultados.foraDasRegras.map(function(f){ return '<p class="txt" style="font-size:11.5px;margin-top:6px;"><b>' + escaparHtmlFicha(f.nome) + '</b>: ' + escaparHtmlFicha(f.motivo) + '</p>'; }).join('') +
+        '<p class="txt" style="font-size:11px;color:var(--text-faint);margin-top:6px;">Se quiser progredir alguma mesmo assim, abra a ficha dela e use "Progredir treino".</p></div>'
+    : '') +
   (resultados.comPendencia.length > 0
     ? '<div class="info-box" style="border-color:#C9784A;margin-top:8px;">' +
         '<p class="lbl" style="color:#C9784A;">⚠ ' + resultados.comPendencia.length + ' aluna(s) com pendência na auditoria — revisar antes de considerar pronto</p>' +
@@ -14821,7 +14902,7 @@ async function iniciarGeracaoOuProgressaoParaNaoEnviados(){
       : 'Todo mundo já está marcado como enviado (verde) no Controle de Treinos. Nada pendente agora.');
     return;
   }
-  if(!confirm('Isso vai gerar (quem ainda não tem) ou progredir (quem já tem) o treino de ' + elegiveis.length + ' aluna(s) que ainda não foram marcadas como enviadas.' + (semEmail > 0 ? ' (' + semEmail + ' outra(s) ficaram de fora por não ter e-mail cadastrado.)' : '') + ' Continuar?')) return;
+  if(!confirm('Isso vai gerar (quem ainda não tem) ou progredir pelas suas regras (quem já tem) o treino de ' + elegiveis.length + ' aluna(s) que ainda não foram marcadas como enviadas. Quem as regras deixam de fora (pausa, constância baixa, desconforto forte, mudou frequência...) fica com o treino igual e aparece numa lista no fim.' + (semEmail > 0 ? ' (' + semEmail + ' outra(s) ficaram de fora por não ter e-mail cadastrado.)' : '') + ' Continuar?')) return;
   await executarGeracaoEmMassa(elegiveis, 'Geração/Progressão pra quem falta enviar');
 }
 
@@ -15796,18 +15877,60 @@ async function abrirTreinosArquivados(nomeAluna){
       return;
     }
 
+    historicoArquivadoAberto[nomeAluna] = historico;
     area.innerHTML = '<p class="txt" style="color:var(--gold-soft);cursor:pointer;margin-bottom:8px;" onclick="document.getElementById(\'treinos-arquivados-area\').innerHTML=\'\';"><i class="ti ti-x" style="font-size:11px;margin-right:4px;"></i>Fechar histórico</p>' +
+      (historico.length === 1 ? '<p class="txt" style="font-size:11.5px;color:var(--text-faint);margin:0 0 8px;">Só tem a versão atual salva. Progressões feitas antes de 20/11 com poucas trocas atualizavam o treino no lugar, sem guardar o anterior. A partir de agora, toda progressão guarda o treino de antes aqui.</p>' : '') +
       historico.map(function(t, idx){
       const dataHora = new Date(t.updated_at).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
-      const rotulo = idx === 0 ? 'Atual' : 'Ajuste anterior';
-      return '<div class="list-item" style="flex-direction:column;align-items:stretch;">' +
-        '<div style="display:flex;justify-content:space-between;"><span>' + dataHora + '</span><span class="tag">' + rotulo + ' · ' + t.fase + '</span></div>' +
-        '<p style="font-size:11px;color:var(--text-faint);margin:4px 0 0;">' + t.dias.length + ' dias de treino</p>' +
+      const rotulo = idx === 0 ? 'Atual' : 'Anterior';
+      const nomeJs = nomeAluna.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      return '<div class="list-item" style="flex-direction:column;align-items:stretch;cursor:pointer;" onclick="abrirVersaoArquivada(\'' + nomeJs + '\',' + idx + ')">' +
+        '<div style="display:flex;justify-content:space-between;"><span>' + dataHora + '</span><span class="tag">' + rotulo + ' · ' + escaparHtmlFicha(t.fase || '') + '</span></div>' +
+        '<p style="font-size:11px;color:var(--text-faint);margin:4px 0 0;">' + (t.dias || []).filter(function(d){ return d && !d.descanso; }).length + ' dias de treino · ' + (idx === 0 ? 'toque pra ver' : 'toque pra ver e comparar com o atual') + '</p>' +
+        '<div id="versao-arquivada-' + idx + '"></div>' +
       '</div>';
     }).join('');
   } catch(erroDeRede){
     area.innerHTML = '<div class="info-box"><p class="txt">Sem conexão com o histórico agora, tenta de novo.</p></div>';
   }
+}
+
+// J3: "última progressão: feito X por Y", dentro do treino da aluna
+function htmlUltimaProgressao(a){
+  const u = a && a.ultimaProgressao;
+  if(!u || !u.em) return '';
+  const quando = new Date(u.em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  const itens = (u.mudancas || []).filter(function(m){ return m.tipo !== 'aviso' || !m.dia; });
+  return '<details class="info-box" style="margin:6px 0 12px;"><summary style="cursor:pointer;font-size:12.5px;"><b>Última progressão:</b> ' + quando + ' por ' + escaparHtmlFicha(u.por || 'Personal') + ' · ' + itens.length + (itens.length === 1 ? ' mudança' : ' mudanças') + '</summary>' +
+    itens.map(function(m){ return '<p class="txt" style="font-size:11.5px;margin:6px 0 0;"><b>' + escaparHtmlFicha((m.dia ? m.dia + ' · ' : '') + (m.antes || 'Atenção')) + '</b> ' + escaparHtmlFicha(m.motivo) + '</p>'; }).join('') +
+    ((u.semRegistro || []).length ? '<p class="txt" style="font-size:11px;color:var(--text-faint);margin:6px 0 0;">' + u.semRegistro.length + ' exercício(s) sem registro de carga ficaram iguais.</p>' : '') + '</details>';
+}
+
+// Abre uma versão arquivada: o treino daquela data, dia por dia. Nas versões anteriores, marca o que é diferente do atual
+// (o que saiu ou mudou de séries/método), pra você ver a diferença que a progressão deu.
+const historicoArquivadoAberto = {};
+function linhasDoDiaArquivado(d){
+  return (d.ex || []).map(function(l, i){
+    const m = d.metodos && d.metodos[i] ? nomeDoMetodo(d.metodos[i]) : '';
+    return String(l).replace(/\|\|\|/g, ' + ').replace(/^Bi-set \+ /, 'Bi-set: ') + (m ? ' · ' + m : '');
+  });
+}
+function abrirVersaoArquivada(nomeAluna, idx){
+  const lista = historicoArquivadoAberto[nomeAluna];
+  const caixa = document.getElementById('versao-arquivada-' + idx);
+  if(!lista || !lista[idx] || !caixa) return false;
+  if(caixa.innerHTML){ caixa.innerHTML = ''; return true; }
+  const atual = lista[0], versao = lista[idx];
+  const diaAtual = function(n){ return (atual.dias || []).find(function(x){ return x.n === n; }) || { ex: [] }; };
+  caixa.innerHTML = '<div style="margin-top:8px;" onclick="event.stopPropagation()">' + (versao.dias || []).filter(function(d){ return d && !d.descanso && (d.ex || []).length; }).map(function(d){
+    const agora = linhasDoDiaArquivado(diaAtual(d.n));
+    return '<p style="font-size:12px;font-weight:600;margin:8px 0 2px;">' + escaparHtmlFicha(d.n + ' · ' + (d.foco || '')) + '</p>' +
+      linhasDoDiaArquivado(d).map(function(l){
+        const mudou = idx > 0 && agora.indexOf(l) === -1;
+        return '<p style="font-size:11.5px;margin:1px 0;' + (mudou ? 'color:var(--gold-soft);' : 'color:var(--text-faint);') + '">' + (mudou ? '• ' : '') + escaparHtmlFicha(l) + '</p>';
+      }).join('');
+  }).join('') + (idx > 0 ? '<p style="font-size:11px;color:var(--text-faint);margin-top:8px;">Em dourado: o que era assim nessa versão e não está igual no treino atual.</p>' : '') + '</div>';
+  return true;
 }
 
 function regerarTabataParaAluna(nomeAluna, di){
@@ -16503,7 +16626,7 @@ function openAlunaDetail(i){
     '<button class="btn-secondary" style="margin-bottom:18px;" onclick="abrirResumoCompletoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-file-description" style="margin-right:6px;"></i>Resumo completo (diagnóstico, avaliação, plano)</button>' +
     '<p class="section-label" style="margin-top:4px;">2 · Gerar o treino</p>' +
     treinoAcoesHtml +
-    '<p class="section-label" style="margin-top:18px;">3 · Treino atual (toque no dia pra ajustar)</p>' +
+    '<p class="section-label" style="margin-top:18px;">3 · Treino atual (toque no dia pra ajustar)</p>' + htmlUltimaProgressao(a) +
     '<p style="font-size:12px;color:var(--gold-soft);margin:6px 0 12px;cursor:pointer;" onclick="abrirTreinosArquivados(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-archive" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Ver treinos arquivados (histórico)</p>' +
     '<div id="treinos-arquivados-area"></div>' +
     treinoHtml +
@@ -18164,7 +18287,7 @@ for(let __i = exerciciosBanco.length - 1; __i >= 0; __i--){
 // e o Thiago definiu Intermediário (17/11): "nivelForcado" troca mesmo o nível que já existia. A outra ("FLEXÕ NÓRDICA")
 // já estava como Intermediário no banco. A PRANCHA VENTRAL serve pros dois ambientes (Thiago, 17/11).
 // FLEXÃO ADAPTADA NO SOFÁ é de casa (Thiago, conferência do lote 1, 18/11; no bloco K tinha ficado academia).
-const CORRECOES_BANCO = {"ambiente":{"4 APOIOS COM CANELEIRA - ALTO":"Casa","ABDUCAO DE QUADRIL COM CANELEIRA":"Casa","ABDUCAO QUADRIL DEITADO":"Casa","ABDUCAO QUADRIL NO SOLO":"Casa","CRUCIFIXO DEITADO":"Casa","EXTENSAO DE QUADRIL COM CANELEIRA NO BANCO":"Casa","EXTENSAO DE QUADRIL COM CANELEIRAS NO BANCO":"Casa","FLEX. DE JOELHOS NO SOLO":"Casa","FLEXAO DE QUADRIL DEITADO":"Casa","GLUT. 4 APOIOS JOE. ESTENDIDO":"Casa","GLUT. 4 APOIOS JOE. FLETIDO":"Casa","GLUTEO 4 APOIOS COM CANELEIRAS":"Casa","MANGUITO DEITADO":"Casa","PUSH UP PLUS EM 4 APOIOS":"Casa","FLEXAO FECHADA NO SOLO":"Ambos","FLEXAO NO SOLO":"Ambos","FLEXAO NO SOLO ADAPTADA":"Ambos","SENTA E LEVANTA":"Ambos","PRANCHA VENTRAL":"Ambos","FLEXAO ADAPTADA NO SOFA":"Casa"},"nivelMinimo":{"ABDOMINAL CANIVETE":"Intermediário","ABS BICICLETA ALT":"Avançado","ABS BICICLETA UNIL.":"Intermediário","ABS CRUZADO ALTO":"Intermediário","ABS ESCALADA":"Intermediário","ABS ESCALADA LATERAL":"Avançado","ABS FLEXAO ALTERNADA E CURTA QUADRIL":"Intermediário","ABS INFRA":"Iniciante","ABS INFRA CURTO":"Iniciante","ABS OBLICUO TOCANDO O PE":"Avançado","ABS REMADOR COMPLETO":"Avançado","ABS REMADOR CURTO":"Iniciante","ABS REMADOR CURTO C":"Iniciante","ABS SUPRA":"Iniciante","ABS TESOURINHA":"Iniciante","AGACHAMENTO FRONTAL NO SQUAT ( ESTIMULO GLUTEOS )":"Intermediário","AJOELHA E LEVANTA":"Iniciante","AVANCO":"Intermediário","BURP ADAPTADO!! EM CASA":"Intermediário","CADEIRA ADUTORA ( FECHAR )":"Iniciante","CROOS OVER":"Iniciante","CROSSOVER DIAGONAL":"Iniciante","CRUCIFIXO COM HALTERES":"Iniciante","CRUCIFIXO DEITADO":"Iniciante","CRUCIFIXO DEITADO EM CASA":"Iniciante","CRUCIFIXO INV COM APOIO":"Iniciante","CRUCIFIXO INVERSO":"Iniciante","CRUCIFIXO INVERSO C PESO":"Iniciante","CRUCIFIXO INVERSO COM APOIO":"Intermediário","CRUCIFIXO INVERSO COM HALTERES":"Iniciante","CRUCIFIXO INVERSO COM PESO EM CASA":"Iniciante","CRUCIFIXO INVERSO UNILATERAL NA POLIA":"Intermediário","CRUCIFIXO NA MAQUINA -FLY":"Iniciante","DESENVOLVIMENTO FRONTAL":"Iniciante","DESENVOLVIMENTO FRONTAL COM BARRA":"Intermediário","DESENVOLVIMENTO FRONTAL COM MOCHILA":"Iniciante","DESENVOLVIMENTO FRONTAL EM CASA":"Iniciante","DESENVOLVIMENTO FRONTAL GUIADA":"Intermediário","DESENVOLVIMENTO FRONTAL HALTERES":"Iniciante","DESENVOLVIMENTO FRONTAL NA MAQUINA":"Iniciante","DESENVOLVIMENTRO FRONTAL COM MOCHILA":"Iniciante","DOUBLE BICEPS":"Intermediário","ELEVACAO DIAGONAL EM CASA":"Iniciante","ELEVACAO DIAGONAL H":"Iniciante","ELEVACAO FRONTAL":"Iniciante","ELEVACAO FRONTAL ALTERNADA":"Iniciante","ELEVACAO FRONTAL ALTERNADA EM CASA":"Iniciante","ELEVACAO FRONTAL C BARRA":"Intermediário","ELEVACAO FRONTAL COM BARRA EM CASA":"Iniciante","ELEVACAO FRONTAL COM HALTERS":"Iniciante","ELEVACAO FRONTAL HALTERES":"Iniciante","ELEVACAO FRONTAL NA POLIA":"Iniciante","ELEVACAO FRONTAL PEGADA NEUTRA EM CASA":"Iniciante","ELEVACAO LATERAL":"Iniciante","ELEVACAO LATERAL COM HALTERES":"Iniciante","ELEVACAO LATERAL EM CASA":"Iniciante","ELEVACAO LATERAL HALTERES":"Iniciante","ELEVACAO LATERAL INCLINADA NA ROLDANA":"Intermediário","ENCOLHIMENTO":"Iniciante","EXTENSAO DE OMBROS":"Iniciante","EXTENSAO DE OMBROS EM CASA":"Iniciante","EXTENSAO HORIZINTAL HALTER":"Intermediário","EXTENSAO HORIZONTAL DE OMBROS":"Iniciante","EXTENSAO HORIZONTAL NA POLIA":"Intermediário","EXTENSAO HORIZONTAL POLIA":"Intermediário","EXTENSAO HORIZONTAL UNI NA POLIA":"Intermediário","EXTENSAO HORIZONTAL UNILATERAL NA POLIA":"Intermediário","EXTENSAO HORIZONTAL VOADOR":"Intermediário","EXTENSAO LOMBAR DINAMICA":"Iniciante","EXTENSAO LOMBAR GUIADO":"Iniciante","FACEPULL COM":"Intermediário","FACEPULL NA POLIA":"Intermediário","FLEXAO ADAPTADA NO SOFA":"Iniciante","FLEXAO COTOVELOS ROLDANA":"Iniciante","FLEXAO DE BRACOS ADP":"Iniciante","FLEXAO DE COTOVELO COM MOCHILA":"Iniciante","FLEXAO DE COTOVELO MOCHILA":"Iniciante","FLEXAO DIAGONAL NA POLIA":"Intermediário","FLEXAO FECHADA NO SOLO":"Intermediário","FLEXAO NO SOLO":"Intermediário","FLEXAO NO SOLO ADAPTADA":"Iniciante","FLEXAO NO SOLO EM CASA":"Intermediário","FLEXAO PLANTAR":"Iniciante","FLEXAO PLANTAR NA MAQUINA":"Iniciante","FLY":"Iniciante","MANGUITO DEITADO":"Iniciante","MANGUITO ROT. EXTERNA":"Iniciante","MANGUITO ROTACAO EXTERNA":"Iniciante","MANGUITO UNILATERAL":"Iniciante","MERGULHO NA PARALELA":"Avançado","PANTURRILHA SENTADO NA MAQUINA":"Iniciante","POLICHINELO":"Iniciante","POLICHINELO (VARIACAO)":"Iniciante","POLICHINELO EM CASA":"Iniciante","PRANCHA ALTA":"Iniciante","PRANCHA DINAMICA":"Avançado","PRANCHA LATERAL":"Intermediário","PRANCHA LATERAL ADAP.":"Intermediário","PRANCHA LATERAL DINAMICA":"Intermediário","PRANCHA VENTRAL":"Iniciante","PRANCHA VENTRAL 3 APOIOS":"Intermediário","PRANCHA VENTRAL DINAMICA OMBRO":"Avançado","PULDOWN COM BARRA NA POLIA":"Intermediário","PULLDOWN COM BARRA":"Intermediário","PULLDOWN COM CORDA":"Intermediário","PULLDOWN COM CORDA NA POLIA":"Intermediário","PULLDOWN COM CORDA POLIA":"Intermediário","PULLOVER":"Iniciante","PULLOVER COM HALTERES":"Iniciante","PUSH UP COM BARRA":"Iniciante","PUSH UP PLUS - VARIACAO":"Iniciante","PUSH UP PLUS EM 4 APOIOS":"Iniciante","PUXADA ABERTA ARTICULADA":"Iniciante","PUXADA ABERTA FRONTAL":"Iniciante","PUXADA ABERTA FRONTAL Y":"Iniciante","PUXADA COM TRIANGULO":"Intermediário","PUXADA FRONTAL ABERTA ARTICULADA":"Iniciante","PUXADA FRONTAL BARRA FIXA":"Avançado","PUXADA FRONTAL SUPINADA":"Iniciante","PUXADA NEUTRA BARRA FIXA":"Avançado","PUXADA NEUTRA FRONTAL":"Intermediário","PUXADA SUPINADA":"Iniciante","REMADA ABE CURV C BARRA":"Intermediário","REMADA ABERTA C/ HALTER":"Intermediário","REMADA ABERTA COM APOIO":"Iniciante","REMADA ABERTA COM APOIO NA MAQUINA":"Iniciante","REMADA ABERTA COM BARRA":"Intermediário","REMADA ABERTA COM HALTERES":"Intermediário","REMADA ABERTA COM HALTERES SUP":"Intermediário","REMADA ABERTA COM LENCOL":"Intermediário","REMADA ABERTA COM PESO EM CASA":"Intermediário","REMADA ABERTA CURVADA COM BARRA EM CASA":"Intermediário","REMADA ABERTA ELASTICA":"Iniciante","REMADA ABERTA NA POLIA":"Intermediário","REMADA ABERTA NO TRX":"Iniciante","REMADA ABERTA POLIA":"Intermediário","REMADA ABERTA PRONADA":"Intermediário","REMADA ABERTA PRONADA NA MAQUINA":"Iniciante","REMADA ABERTA SUPINADA":"Intermediário","REMADA ABERTA UNILATERAL NA POLIA":"Intermediário","REMADA ARTICULAR ABERTA":"Iniciante","REMADA ARTICULAR FECHADA":"Iniciante","REMADA BAIXA":"Iniciante","REMADA BAIXA NEUTRA":"Iniciante","REMADA BAIXA Y":"Iniciante","REMADA CAVALINHO":"Intermediário","REMADA CURVADA ABERTA":"Intermediário","REMADA CURVADA ABERTA NA MAQUINA":"Iniciante","REMADA CURVADA COM HALTERES":"Intermediário","REMADA CURVADA COM MOCHILA":"Intermediário","REMADA CURVADA FECHADA NA MAQUINA":"Iniciante","REMADA CURVADA SUPINADA":"Intermediário","REMADA FECHADA ARTICULAR":"Iniciante","REMADA FECHADA COM APOIO":"Iniciante","REMADA FECHADA COM APOIO NA MAQUINA":"Iniciante","REMADA FECHADA CURVADA":"Intermediário","REMADA FECHADA NA MAQUINA":"Iniciante","REMADA FECHADA PRONADA NA MAQUINA":"Iniciante","REMADA FECHADA UNILATERAL NA POLIA":"Intermediário","REMADA NEUTRA CURVADA EM CASA":"Iniciante","REMADA UNI AMPLITUDE ELEVADA":"Intermediário","REMADA UNI COM HALTERES":"Iniciante","REMADA UNILATERAL COM HALTERES":"Intermediário","REMADA UNILATERAL COM MOCHILA":"Iniciante","RETRACAO DE ESCAPULAS":"Iniciante","ROSCA 21 COM BARRA":"Intermediário","ROSCA ALTERNADA COM HALTERES":"Iniciante","ROSCA ALTERNADA COM ISOMETRIA":"Iniciante","ROSCA BICEPS ALTERNADA":"Iniciante","ROSCA BICEPS ALTERNADA EM CASA":"Iniciante","ROSCA BICEPS COM BARRA EM CASA":"Iniciante","ROSCA CONCENTRADA":"Iniciante","ROSCA DIRETA 21":"Intermediário","ROSCA DIRETA ALTERNADA COM HALTERES":"Iniciante","ROSCA DIRETA ALTERNADA COM ISOMETRIA":"Iniciante","ROSCA DIRETA COM BARRA W":"Iniciante","ROSCA DIRETA COM CORDA NA POLIA":"Iniciante","ROSCA DIRETA COM HALTERES":"Iniciante","ROSCA DIRETA INCLINADA":"Iniciante","ROSCA MARTELO ALTERNADA":"Iniciante","ROSCA MARTELO ALTERNADA COM HALTERES":"Iniciante","ROSCA MARTELO COM CORDA":"Iniciante","ROSCA MARTELO COM CORDA NA POLIA":"Iniciante","ROSCA MARTELO COM HALTERES":"Iniciante","ROSCA MARTELO NA POLIA":"Iniciante","ROSCA SCOTT":"Iniciante","ROSCA SCOTT NA MAQUINA":"Iniciante","ROSCA SCOTT UNILATERAL":"Iniciante","SKIPPING EM CASA":"Iniciante","SOBE E DESCE CADEIRA":"Avançado","SUPER MAN":"Iniciante","SUPINO DECLINADO NA MAQUINA":"Iniciante","SUPINO INCLINADO ARTICULAR":"Iniciante","SUPINO INCLINADO COM BARRA":"Iniciante","SUPINO INCLINADO COM HALTERES":"Iniciante","SUPINO INCLINADO HALTERES":"Iniciante","SUPINO INCLINADO NA MAQUINA":"Iniciante","SUPINO RETO ARTICULAR":"Iniciante","SUPINO RETO COM BARRA":"Iniciante","SUPINO RETO COM BARRA EM CASA":"Iniciante","SUPINO RETO COM HALTERES":"Iniciante","SUPINO RETO NA MAQUINA":"Iniciante","TRICEPS APOIADO":"Iniciante","TRICEPS BANCO EM CASA":"Iniciante","TRICEPS BARRA NA POLIA":"Iniciante","TRICEPS COICE NA POLIA":"Iniciante","TRICEPS COICE POLIA":"Intermediário","TRICEPS COICE UNI NA POLIA":"Iniciante","TRICEPS COICE UNILATERAL NA POLIA":"Intermediário","TRICEPS COM BARRA NA POLIA":"Iniciante","TRICEPS COM BARRA POLIA":"Iniciante","TRICEPS COM CORDA NA POLIA":"Iniciante","TRICEPS CORDA":"Iniciante","TRICEPS CORDA N POLIA":"Iniciante","TRICEPS CORDA POLIA":"Iniciante","TRICEPS FRA UNIL":"Intermediário","TRICEPS FRAN BIL":"Iniciante","TRICEPS FRANCES APOIADO":"Iniciante","TRICEPS FRANCES BIL":"Iniciante","TRICEPS FRANCES BILATERAL":"Iniciante","TRICEPS FRANCES BILATERAL EM CASA":"Iniciante","TRICEPS FRANCES UNILATERAL":"Intermediário","TRICEPS FRANCES UNILATERAL EM CASA":"Iniciante","TRICEPS POLIA ALTA":"Iniciante","TRICEPS ROLDANA COM BARRA":"Iniciante","TRICEPS SUPINADO":"Iniciante","TRICEPS SUPINADO EM CASA":"Iniciante","TRICEPS TESTA":"Iniciante","TRICEPS TESTA COM BARRA":"Iniciante","TRICEPS TESTA EM CASA":"Iniciante","TRICEPS UNI NA POLIA":"Iniciante","TRICEPS UNILATERAL NA POLIA":"Intermediário","VAI E VEM DE FRENTE E COSTAS":"Intermediário","VOADOR":"Iniciante"},"foraDeUso":["ABS QUADRIL CONTRA O SOLO","PUXADA ABERTA SUPINADA"],"juntar":["ABDUCAO DE QUADRIL NA POLIA COM ROTACAO","AGACHAMENTO FRONTAL NO SQUAT ( ESTIMULO GLUTEOS )","CADEIRA ABDUTORA INCLINADO","CADEIRA FLEXORA YES","CRUCIFIXO COM HALTERES","CRUCIFIXO INVERSO COM APOIO","DESENVOLVIMENTO FRONTAL COM BARRA","EXTENSAO DE QUADRIL COM CANELEIRA NO BANCO","EXTENSAO DE QUADRIL NA POLIA - TRONCO INCLINADO","EXTENSAO DE QUADRIL NA POLIA COM TRONCO INCLINADO","EXTENSAO DE QUADRIL POLIA","LEG PRESS 45","LEVANTAMENTO TERRA","MANGUITO ROTACAO EXTERNA","PULLDOWN COM BARRA","PUSH UP COM BARRA","PUXADA ABERTA FRONTAL","REMADA ABERTA POLIA","REMADA NEUTRA CURVADA EM CASA","RETRACAO DE ESCAPULAS","ROSCA BICEPS COM BARRA EM CASA","TRICEPS COM BARRA POLIA","TRICEPS CORDA POLIA","TRICEPS FRANCES BILATERAL","TRICEPS POLIA ALTA","TRICEPS SUPINADO EM CASA"],"nivelForcado":{"FLEXAO NORDICA REVERSA":"Intermediário"}};
+const CORRECOES_BANCO = {"ambiente":{"4 APOIOS COM CANELEIRA - ALTO":"Casa","ABDUCAO DE QUADRIL COM CANELEIRA":"Casa","ABDUCAO QUADRIL DEITADO":"Casa","ABDUCAO QUADRIL NO SOLO":"Casa","CRUCIFIXO DEITADO":"Casa","EXTENSAO DE QUADRIL COM CANELEIRA NO BANCO":"Casa","EXTENSAO DE QUADRIL COM CANELEIRAS NO BANCO":"Casa","FLEX. DE JOELHOS NO SOLO":"Casa","FLEXAO DE QUADRIL DEITADO":"Casa","GLUT. 4 APOIOS JOE. ESTENDIDO":"Casa","GLUT. 4 APOIOS JOE. FLETIDO":"Casa","GLUTEO 4 APOIOS COM CANELEIRAS":"Casa","MANGUITO DEITADO":"Casa","PUSH UP PLUS EM 4 APOIOS":"Casa","FLEXAO FECHADA NO SOLO":"Ambos","FLEXAO NO SOLO":"Ambos","FLEXAO NO SOLO ADAPTADA":"Ambos","SENTA E LEVANTA":"Ambos","PRANCHA VENTRAL":"Ambos","FLEXAO ADAPTADA NO SOFA":"Casa"},"nivelMinimo":{"ABDOMINAL CANIVETE":"Intermediário","ABS BICICLETA ALT":"Avançado","ABS BICICLETA UNIL.":"Intermediário","ABS CRUZADO ALTO":"Intermediário","ABS ESCALADA":"Intermediário","ABS ESCALADA LATERAL":"Avançado","ABS FLEXAO ALTERNADA E CURTA QUADRIL":"Intermediário","ABS INFRA":"Iniciante","ABS INFRA CURTO":"Iniciante","ABS OBLICUO TOCANDO O PE":"Avançado","ABS REMADOR COMPLETO":"Avançado","ABS REMADOR CURTO":"Iniciante","ABS REMADOR CURTO C":"Iniciante","ABS SUPRA":"Iniciante","ABS TESOURINHA":"Iniciante","AGACHAMENTO FRONTAL NO SQUAT ( ESTIMULO GLUTEOS )":"Intermediário","AJOELHA E LEVANTA":"Iniciante","AVANCO":"Intermediário","BURP ADAPTADO!! EM CASA":"Intermediário","CADEIRA ADUTORA ( FECHAR )":"Iniciante","CROOS OVER":"Iniciante","CROSSOVER DIAGONAL":"Iniciante","CRUCIFIXO COM HALTERES":"Iniciante","CRUCIFIXO DEITADO":"Iniciante","CRUCIFIXO DEITADO EM CASA":"Iniciante","CRUCIFIXO INV COM APOIO":"Iniciante","CRUCIFIXO INVERSO":"Iniciante","CRUCIFIXO INVERSO C PESO":"Iniciante","CRUCIFIXO INVERSO COM APOIO":"Intermediário","CRUCIFIXO INVERSO COM HALTERES":"Iniciante","CRUCIFIXO INVERSO COM PESO EM CASA":"Iniciante","CRUCIFIXO INVERSO UNILATERAL NA POLIA":"Intermediário","CRUCIFIXO NA MAQUINA -FLY":"Iniciante","DESENVOLVIMENTO FRONTAL":"Iniciante","DESENVOLVIMENTO FRONTAL COM BARRA":"Intermediário","DESENVOLVIMENTO FRONTAL COM MOCHILA":"Iniciante","DESENVOLVIMENTO FRONTAL EM CASA":"Iniciante","DESENVOLVIMENTO FRONTAL GUIADA":"Intermediário","DESENVOLVIMENTO FRONTAL HALTERES":"Iniciante","DESENVOLVIMENTO FRONTAL NA MAQUINA":"Iniciante","DESENVOLVIMENTRO FRONTAL COM MOCHILA":"Iniciante","DOUBLE BICEPS":"Intermediário","ELEVACAO DIAGONAL EM CASA":"Iniciante","ELEVACAO DIAGONAL H":"Iniciante","ELEVACAO FRONTAL":"Iniciante","ELEVACAO FRONTAL ALTERNADA":"Iniciante","ELEVACAO FRONTAL ALTERNADA EM CASA":"Iniciante","ELEVACAO FRONTAL C BARRA":"Intermediário","ELEVACAO FRONTAL COM BARRA EM CASA":"Iniciante","ELEVACAO FRONTAL COM HALTERS":"Iniciante","ELEVACAO FRONTAL HALTERES":"Iniciante","ELEVACAO FRONTAL NA POLIA":"Iniciante","ELEVACAO FRONTAL PEGADA NEUTRA EM CASA":"Iniciante","ELEVACAO LATERAL":"Iniciante","ELEVACAO LATERAL COM HALTERES":"Iniciante","ELEVACAO LATERAL EM CASA":"Iniciante","ELEVACAO LATERAL HALTERES":"Iniciante","ELEVACAO LATERAL INCLINADA NA ROLDANA":"Intermediário","ENCOLHIMENTO":"Iniciante","EXTENSAO DE OMBROS":"Iniciante","EXTENSAO DE OMBROS EM CASA":"Iniciante","EXTENSAO HORIZINTAL HALTER":"Intermediário","EXTENSAO HORIZONTAL DE OMBROS":"Iniciante","EXTENSAO HORIZONTAL NA POLIA":"Intermediário","EXTENSAO HORIZONTAL POLIA":"Intermediário","EXTENSAO HORIZONTAL UNI NA POLIA":"Intermediário","EXTENSAO HORIZONTAL UNILATERAL NA POLIA":"Intermediário","EXTENSAO HORIZONTAL VOADOR":"Intermediário","EXTENSAO LOMBAR DINAMICA":"Iniciante","EXTENSAO LOMBAR GUIADO":"Iniciante","FACEPULL COM":"Intermediário","FACEPULL NA POLIA":"Intermediário","FLEXAO ADAPTADA NO SOFA":"Iniciante","FLEXAO COTOVELOS ROLDANA":"Iniciante","FLEXAO DE BRACOS ADP":"Iniciante","FLEXAO DE COTOVELO COM MOCHILA":"Iniciante","FLEXAO DE COTOVELO MOCHILA":"Iniciante","FLEXAO DIAGONAL NA POLIA":"Intermediário","FLEXAO FECHADA NO SOLO":"Intermediário","FLEXAO NO SOLO":"Intermediário","FLEXAO NO SOLO ADAPTADA":"Iniciante","FLEXAO NO SOLO EM CASA":"Intermediário","FLEXAO PLANTAR":"Iniciante","FLEXAO PLANTAR NA MAQUINA":"Iniciante","FLY":"Iniciante","MANGUITO DEITADO":"Iniciante","MANGUITO ROT. EXTERNA":"Iniciante","MANGUITO ROTACAO EXTERNA":"Iniciante","MANGUITO UNILATERAL":"Iniciante","MERGULHO NA PARALELA":"Avançado","PANTURRILHA SENTADO NA MAQUINA":"Iniciante","POLICHINELO":"Iniciante","POLICHINELO (VARIACAO)":"Iniciante","POLICHINELO EM CASA":"Iniciante","PRANCHA ALTA":"Iniciante","PRANCHA DINAMICA":"Avançado","PRANCHA LATERAL":"Intermediário","PRANCHA LATERAL ADAP.":"Intermediário","PRANCHA LATERAL DINAMICA":"Intermediário","PRANCHA VENTRAL":"Iniciante","PRANCHA VENTRAL 3 APOIOS":"Intermediário","PRANCHA VENTRAL DINAMICA OMBRO":"Avançado","PULDOWN COM BARRA NA POLIA":"Intermediário","PULLDOWN COM BARRA":"Intermediário","PULLDOWN COM CORDA":"Intermediário","PULLDOWN COM CORDA NA POLIA":"Intermediário","PULLDOWN COM CORDA POLIA":"Intermediário","PULLOVER":"Iniciante","PULLOVER COM HALTERES":"Iniciante","PUSH UP COM BARRA":"Iniciante","PUSH UP PLUS - VARIACAO":"Iniciante","PUSH UP PLUS EM 4 APOIOS":"Iniciante","PUXADA ABERTA ARTICULADA":"Iniciante","PUXADA ABERTA FRONTAL":"Iniciante","PUXADA ABERTA FRONTAL Y":"Iniciante","PUXADA COM TRIANGULO":"Intermediário","PUXADA FRONTAL ABERTA ARTICULADA":"Iniciante","PUXADA FRONTAL BARRA FIXA":"Avançado","PUXADA FRONTAL SUPINADA":"Iniciante","PUXADA NEUTRA BARRA FIXA":"Avançado","PUXADA NEUTRA FRONTAL":"Intermediário","PUXADA SUPINADA":"Iniciante","REMADA ABE CURV C BARRA":"Intermediário","REMADA ABERTA C/ HALTER":"Intermediário","REMADA ABERTA COM APOIO":"Iniciante","REMADA ABERTA COM APOIO NA MAQUINA":"Iniciante","REMADA ABERTA COM BARRA":"Intermediário","REMADA ABERTA COM HALTERES":"Intermediário","REMADA ABERTA COM HALTERES SUP":"Intermediário","REMADA ABERTA COM LENCOL":"Intermediário","REMADA ABERTA COM PESO EM CASA":"Intermediário","REMADA ABERTA CURVADA COM BARRA EM CASA":"Intermediário","REMADA ABERTA ELASTICA":"Iniciante","REMADA ABERTA NA POLIA":"Intermediário","REMADA ABERTA NO TRX":"Iniciante","REMADA ABERTA POLIA":"Intermediário","REMADA ABERTA PRONADA":"Intermediário","REMADA ABERTA PRONADA NA MAQUINA":"Iniciante","REMADA ABERTA SUPINADA":"Intermediário","REMADA ABERTA UNILATERAL NA POLIA":"Intermediário","REMADA ARTICULAR ABERTA":"Iniciante","REMADA ARTICULAR FECHADA":"Iniciante","REMADA BAIXA":"Iniciante","REMADA BAIXA NEUTRA":"Iniciante","REMADA BAIXA Y":"Iniciante","REMADA CAVALINHO":"Intermediário","REMADA CURVADA ABERTA":"Intermediário","REMADA CURVADA ABERTA NA MAQUINA":"Iniciante","REMADA CURVADA COM HALTERES":"Intermediário","REMADA CURVADA COM MOCHILA":"Intermediário","REMADA CURVADA FECHADA NA MAQUINA":"Iniciante","REMADA CURVADA SUPINADA":"Intermediário","REMADA FECHADA ARTICULAR":"Iniciante","REMADA FECHADA COM APOIO":"Iniciante","REMADA FECHADA COM APOIO NA MAQUINA":"Iniciante","REMADA FECHADA CURVADA":"Intermediário","REMADA FECHADA NA MAQUINA":"Iniciante","REMADA FECHADA PRONADA NA MAQUINA":"Iniciante","REMADA FECHADA UNILATERAL NA POLIA":"Intermediário","REMADA NEUTRA CURVADA EM CASA":"Iniciante","REMADA UNI AMPLITUDE ELEVADA":"Intermediário","REMADA UNI COM HALTERES":"Iniciante","REMADA UNILATERAL COM HALTERES":"Intermediário","REMADA UNILATERAL COM MOCHILA":"Iniciante","RETRACAO DE ESCAPULAS":"Iniciante","ROSCA 21 COM BARRA":"Intermediário","ROSCA ALTERNADA COM HALTERES":"Iniciante","ROSCA ALTERNADA COM ISOMETRIA":"Iniciante","ROSCA BICEPS ALTERNADA":"Iniciante","ROSCA BICEPS ALTERNADA EM CASA":"Iniciante","ROSCA BICEPS COM BARRA EM CASA":"Iniciante","ROSCA CONCENTRADA":"Iniciante","ROSCA DIRETA 21":"Intermediário","ROSCA DIRETA ALTERNADA COM HALTERES":"Iniciante","ROSCA DIRETA ALTERNADA COM ISOMETRIA":"Iniciante","ROSCA DIRETA COM BARRA W":"Iniciante","ROSCA DIRETA COM CORDA NA POLIA":"Iniciante","ROSCA DIRETA COM HALTERES":"Iniciante","ROSCA DIRETA INCLINADA":"Iniciante","ROSCA MARTELO ALTERNADA":"Iniciante","ROSCA MARTELO ALTERNADA COM HALTERES":"Iniciante","ROSCA MARTELO COM CORDA":"Iniciante","ROSCA MARTELO COM CORDA NA POLIA":"Iniciante","ROSCA MARTELO COM HALTERES":"Iniciante","ROSCA MARTELO NA POLIA":"Iniciante","ROSCA SCOTT":"Iniciante","ROSCA SCOTT NA MAQUINA":"Iniciante","ROSCA SCOTT UNILATERAL":"Iniciante","SKIPPING EM CASA":"Iniciante","SOBE E DESCE CADEIRA":"Avançado","SUPER MAN":"Iniciante","SUPINO DECLINADO NA MAQUINA":"Iniciante","SUPINO INCLINADO ARTICULAR":"Iniciante","SUPINO INCLINADO COM BARRA":"Iniciante","SUPINO INCLINADO COM HALTERES":"Iniciante","SUPINO INCLINADO HALTERES":"Iniciante","SUPINO INCLINADO NA MAQUINA":"Iniciante","SUPINO RETO ARTICULAR":"Iniciante","SUPINO RETO COM BARRA":"Iniciante","SUPINO RETO COM BARRA EM CASA":"Iniciante","SUPINO RETO COM HALTERES":"Iniciante","SUPINO RETO NA MAQUINA":"Iniciante","TRICEPS APOIADO":"Iniciante","TRICEPS BANCO EM CASA":"Iniciante","TRICEPS BARRA NA POLIA":"Iniciante","TRICEPS COICE NA POLIA":"Iniciante","TRICEPS COICE POLIA":"Intermediário","TRICEPS COICE UNI NA POLIA":"Iniciante","TRICEPS COICE UNILATERAL NA POLIA":"Intermediário","TRICEPS COM BARRA NA POLIA":"Iniciante","TRICEPS COM BARRA POLIA":"Iniciante","TRICEPS COM CORDA NA POLIA":"Iniciante","TRICEPS CORDA":"Iniciante","TRICEPS CORDA N POLIA":"Iniciante","TRICEPS CORDA POLIA":"Iniciante","TRICEPS FRA UNIL":"Intermediário","TRICEPS FRAN BIL":"Iniciante","TRICEPS FRANCES APOIADO":"Iniciante","TRICEPS FRANCES BIL":"Iniciante","TRICEPS FRANCES BILATERAL":"Iniciante","TRICEPS FRANCES BILATERAL EM CASA":"Iniciante","TRICEPS FRANCES UNILATERAL":"Intermediário","TRICEPS FRANCES UNILATERAL EM CASA":"Iniciante","TRICEPS POLIA ALTA":"Iniciante","TRICEPS ROLDANA COM BARRA":"Iniciante","TRICEPS SUPINADO":"Iniciante","TRICEPS SUPINADO EM CASA":"Iniciante","TRICEPS TESTA":"Iniciante","TRICEPS TESTA COM BARRA":"Iniciante","TRICEPS TESTA EM CASA":"Iniciante","TRICEPS UNI NA POLIA":"Iniciante","TRICEPS UNILATERAL NA POLIA":"Intermediário","VAI E VEM DE FRENTE E COSTAS":"Intermediário","VOADOR":"Iniciante"},"foraDeUso":["ABS QUADRIL CONTRA O SOLO","PUXADA ABERTA SUPINADA"],"juntar":["ABDUCAO DE QUADRIL NA POLIA COM ROTACAO","AGACHAMENTO FRONTAL NO SQUAT ( ESTIMULO GLUTEOS )","CADEIRA ABDUTORA INCLINADO","CADEIRA FLEXORA YES","CRUCIFIXO COM HALTERES","CRUCIFIXO INVERSO COM APOIO","DESENVOLVIMENTO FRONTAL COM BARRA","EXTENSAO DE QUADRIL COM CANELEIRA NO BANCO","EXTENSAO DE QUADRIL NA POLIA - TRONCO INCLINADO","EXTENSAO DE QUADRIL NA POLIA COM TRONCO INCLINADO","EXTENSAO DE QUADRIL POLIA","LEG PRESS 45","LEVANTAMENTO TERRA","MANGUITO ROTACAO EXTERNA","PULLDOWN COM BARRA","PUSH UP COM BARRA","PUXADA ABERTA FRONTAL","REMADA ABERTA POLIA","REMADA NEUTRA CURVADA EM CASA","RETRACAO DE ESCAPULAS","ROSCA BICEPS COM BARRA EM CASA","TRICEPS COM BARRA POLIA","TRICEPS CORDA POLIA","TRICEPS FRANCES BILATERAL","TRICEPS POLIA ALTA","TRICEPS SUPINADO EM CASA"],"nivelForcado":{"FLEXAO NORDICA REVERSA":"Intermediário"},"juntarParecidos":[["LEG HORIZONTAL","LEG PRESS HORIZONTAL"]]};
 var ALIAS_BANCO = {}; // nome limpo que saiu -> nome do exercício que ficou
 function nomeLimpoDoExercicio(nome){
   return String(nome || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -18216,6 +18339,10 @@ function aplicarCorrecoesDoBanco(){
   });
   CORRECOES_BANCO.juntar.forEach(function(k){
     resumo.juntados += juntarExerciciosRepetidos(exerciciosBanco.filter(function(e){ return nomeLimpoDoExercicio(e.nome) === k; }));
+  });
+  // Nomes diferentes pro mesmo exercício (20/11: LEG HORIZONTAL = LEG PRESS HORIZONTAL): vira um só, o nome antigo acha o que ficou
+  (CORRECOES_BANCO.juntarParecidos || []).forEach(function(nomes){
+    resumo.juntados += juntarExerciciosRepetidos(exerciciosBanco.filter(function(e){ return nomes.indexOf(nomeLimpoDoExercicio(e.nome)) !== -1; }));
   });
   return resumo;
 }
@@ -19978,13 +20105,15 @@ function contarExerciciosMudados(diasAntigos, diasNovos){
   return totalMudancas;
 }
 
-async function salvarTreinoNoSupabase(alunaId, treinoAtual){
+async function salvarTreinoNoSupabase(alunaId, treinoAtual, opcoes){
   // Busca o treino atual (o mais recente salvo) pra comparar e decidir: isso é um ajuste grande
   // (3+ exercícios mudaram — vira uma entrada nova no histórico) ou um ajuste pequeno (só atualiza
   // o registro atual, sem empilhar histórico)?
   const { data: treinoAnterior } = await supabaseClient.from('treinos').select('*').eq('aluna_id', alunaId).order('updated_at', { ascending: false }).limit(1).maybeSingle();
   const qtdExerciciosMudados = treinoAnterior ? contarExerciciosMudados(treinoAnterior.dias, treinoAtual.dias) : 999;
-  const ehAjusteGrande = qtdExerciciosMudados >= 3;
+  // Progressão (botão Progredir ou Gerar treinos pendentes) sempre vira uma versão nova: o treino de antes fica nos arquivados.
+  // Antes, progressão com menos de 3 exercícios trocados (métodos e séries não contavam) sobrescrevia o treino de antes.
+  const ehAjusteGrande = qtdExerciciosMudados >= 3 || !!(opcoes && opcoes.novaVersao);
 
   let linhaInserida, erroInsert;
   if(treinoAnterior && !ehAjusteGrande){
