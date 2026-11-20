@@ -1287,7 +1287,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-20-CD-DIA-COM-EXERCICIO-NAO-E-DESCANSO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-20-CE-CARGA-LEVADA-E-METODO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -2215,7 +2215,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-20-CD-DIA-COM-EXERCICIO-NAO-E-DESCANSO';
+const VERSAO_APP = '2026-11-20-CE-CARGA-LEVADA-E-METODO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -7163,6 +7163,84 @@ function extrairExercicios(a){
   return nomes;
 }
 
+// ===== MÉTODO NO REGISTRO DE CARGA e CARGA LEVADA PRO TREINO NOVO (20/11) =====
+// Cada registro de carga guarda a data e o método do exercício naquele treino (rest pause, drop set...).
+// Carga com método e carga sem método não se comparam: 100 kg no rest pause não vira "queda" quando ela volta
+// pra 60 kg numa série normal. Registro antigo (sem o método guardado) conta como o método do treino de agora.
+function metodoDoExercicioNosDias(diasTreino, nome){
+  const alvo = nomeLimpoDoExercicio(nome); let achado = null;
+  (diasTreino || []).some(function(d){
+    if(!d || d.descanso) return false;
+    return (d.ex || []).some(function(l, i){
+      const linha = String(l || ''), combo = linha.indexOf('|||') !== -1;
+      const nomes = combo ? linha.split('|||').slice(1).map(function(x){ return x.trim().split(' · ')[0]; }) : [linha.split(' · ')[0]];
+      if(!nomes.some(function(n){ return nomeLimpoDoExercicio(n) === alvo; })) return false;
+      achado = combo ? linha.split('|||')[0].trim() : nomeDoMetodo(d.metodos && d.metodos[i]);
+      return true;
+    });
+  });
+  return achado; // null: o exercício não está nesse treino
+}
+function diasDoTreinoDaAlunaPorNome(nomeAluna){
+  const a = (typeof alunasPersonal !== 'undefined' ? alunasPersonal : []).find(function(x){ return x && x.nome === nomeAluna; });
+  if(a && a.treinoAtual && a.treinoAtual.dias) return a.treinoAtual.dias;
+  try { if(nomeAluna === NOME_ALUNA_LOGADA && typeof dias !== 'undefined' && Array.isArray(dias)) return dias; } catch(e){}
+  return [];
+}
+function carimbarRegistroDeCarga(registro, nomeAluna, nomeEx){
+  registro.em = new Date().toISOString();
+  registro.metodo = metodoDoExercicioNosDias(diasDoTreinoDaAlunaPorNome(nomeAluna), nomeEx) || '';
+  return registro;
+}
+function metodoDoRegistro(r, metodoSeNaoGuardou){ return r && typeof r.metodo === 'string' ? r.metodo : (metodoSeNaoGuardou || ''); }
+// Data do registro: a guardada, ou a estimada pela semana (as semanas da aluna viram no calendário).
+function dataDoRegistroDeCarga(prog, r){
+  if(r && r.em) return new Date(r.em);
+  if(!prog || !prog.semanaIniciadaEm || !r || !r.semana) return null;
+  const d = new Date(prog.semanaIniciadaEm); d.setDate(d.getDate() - 7 * ((prog.semana || 1) - r.semana)); return d;
+}
+function todosRegistrosDoExercicio(prog, nome){
+  const alvo = nomeLimpoDoExercicio(nome); let regs = [];
+  Object.keys((prog && prog.historico) || {}).forEach(function(k){ if(nomeLimpoDoExercicio(k) === alvo) regs = regs.concat(prog.historico[k] || []); });
+  return regs.filter(function(r){ return r && typeof r.carga === 'number' && r.carga > 0; }).sort(function(x, y){
+    const dx = dataDoRegistroDeCarga(prog, x), dy = dataDoRegistroDeCarga(prog, y);
+    return (dx && dy) ? dx - dy : (x.semana || 0) - (y.semana || 0);
+  });
+}
+function dataCurtaDoRegistro(prog, r){
+  const d = dataDoRegistroDeCarga(prog, r);
+  return d ? String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') : 'semana ' + r.semana;
+}
+// Carga que vai pro treino novo: a última que ela usou nesse exercício, no mesmo método de agora.
+// "mantido": estava no treino de antes. "voltou": ela já fez numa época anterior. "primeira": nunca registrou.
+function cargaLevadaParaExercicio(prog, nome, metodoNovo, diasAntes){
+  const regs = todosRegistrosDoExercicio(prog, nome);
+  if(!regs.length) return { origem: 'primeira' };
+  const metodoAntes = metodoDoExercicioNosDias(diasAntes, nome);
+  const origem = metodoAntes !== null ? 'mantido' : 'voltou';
+  const padrao = metodoAntes || '';
+  const mesmo = regs.filter(function(r){ return metodoDoRegistro(r, padrao) === (metodoNovo || ''); });
+  if(mesmo.length){ const u = mesmo[mesmo.length - 1]; return { origem: origem, carga: u.carga, ultimo: u, data: dataCurtaDoRegistro(prog, u) }; }
+  const u = regs[regs.length - 1];
+  return { origem: origem, carga: null, ultimo: u, data: dataCurtaDoRegistro(prog, u), metodoDaUltima: metodoDoRegistro(u, padrao) };
+}
+function htmlCargaLevadaNaProgressao(a, nome, metodoNovo, diasAntes){
+  const c = cargaLevadaParaExercicio(getProgressoAluna(a.nome), nome, metodoNovo, diasAntes);
+  const est = 'display:block;font-style:normal;font-size:11px;margin-top:3px;';
+  if(c.origem === 'primeira') return '<em style="' + est + 'color:var(--text-faint);">Primeira vez: sem carga anterior</em>';
+  if(c.carga == null) return '<em style="' + est + 'color:var(--gold-soft);">Da última vez foi com ' + escaparHtmlFicha(c.metodoDaUltima || 'série normal') + ' (' + String(c.ultimo.carga).replace('.', ',') + ' kg, ' + c.data + ')' + (metodoNovo ? ', agora é ' + escaparHtmlFicha(metodoNovo) : ', agora é série normal') + ': ajuste a carga</em>';
+  return '<em style="' + est + 'color:var(--gold-soft);">Carga: ' + String(c.carga).replace('.', ',') + ' kg · ' + (c.origem === 'mantido' ? 'última em ' : 'já fez em ') + c.data + '</em>';
+}
+// Na tela da aluna: a nota da última vez, procurando pelo nome limpo e no mesmo método do treino de hoje.
+function htmlNotaUltimaCargaDaAluna(prog, nomeEx, metodoHoje, estilo, comTextoSugestao){
+  if(!prog) return '';
+  const c = cargaLevadaParaExercicio(prog, nomeEx, metodoHoje, null);
+  if(c.origem === 'primeira') return '';
+  const u = c.ultimo;
+  if(c.carga == null) return '<p style="' + estilo + '">Da última vez foi com ' + escaparHtmlFicha(c.metodoDaUltima || 'série normal') + ': ' + u.carga + 'kg × ' + u.reps + ' reps. Hoje ' + (metodoHoje ? 'é ' + escaparHtmlFicha(metodoHoje) : 'é série normal') + ', então ajuste a carga.</p>';
+  return '<p style="' + estilo + '">Semana ' + u.semana + ': ' + u.carga + 'kg × ' + u.reps + ' reps' + (u.sugestao ? (comTextoSugestao ? ' · ' + u.sugestao.texto + ' → sugestão hoje: ' : ' → sugestão: ') + u.sugestao.valor + 'kg' : '') + '</p>';
+}
+
 function sugerirAjusteCarga(carga, reps){
   if(reps >= 12) return { texto: 'Aumentar carga', valor: Math.round((carga * 1.08) * 2) / 2 };
   if(reps >= 10) return { texto: 'Manter, pequeno aumento no próximo ciclo', valor: carga };
@@ -7179,7 +7257,7 @@ function registrarSessao(){
   const prog = getProgressoAluna(alunaAberta.nome);
   if(!prog.historico[nome]) prog.historico[nome] = [];
   const sugestao = sugerirAjusteCarga(carga, reps);
-  prog.historico[nome].push({ semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao });
+  prog.historico[nome].push(carimbarRegistroDeCarga({ semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao }, alunaAberta.nome, nome));
   const i = alunasPersonal.indexOf(alunaAberta);
   openAlunaDetail(i);
 }
@@ -13656,6 +13734,23 @@ function registrosDoExercicioProg(a, prog, nome){
     .sort(function(x, y){ return (x.semana || 0) - (y.semana || 0); });
 }
 
+// Com método e sem método não se comparam (20/11): usa os registros na condição do último registro
+// (sem método, rest pause, drop set...). Se nessa condição ainda não tem registro suficiente, usa a condição
+// com mais registros. Registro antigo, sem o método guardado, conta como o método do treino de agora.
+function registrosNaMesmaCondicaoProg(a, regs, nome){
+  if(!regs || !regs.length) return regs || [];
+  const noTreino = typeof metodoDoExercicioNosDias === 'function' ? metodoDoExercicioNosDias(((a && a.treinoAtual) || {}).dias, nome) : null;
+  const padrao = noTreino || '';
+  const cond = function(r){ return typeof metodoDoRegistro === 'function' ? metodoDoRegistro(r, padrao) : padrao; };
+  const grupos = {};
+  regs.forEach(function(r){ const k = cond(r); (grupos[k] = grupos[k] || []).push(r); });
+  const ultimaK = cond(regs[regs.length - 1]);
+  if(grupos[ultimaK].length >= REGRAS_PROG.minimoRegistros) return grupos[ultimaK];
+  let melhor = null;
+  Object.keys(grupos).forEach(function(k){ if(grupos[k].length >= REGRAS_PROG.minimoRegistros && (!melhor || grupos[k].length > melhor.length)) melhor = grupos[k]; });
+  return melhor || grupos[ultimaK];
+}
+
 // B: como foi a carga. B2: repetição caindo junto não muda a conta.
 function classificarCargaProg(regs){
   if(regs.length < REGRAS_PROG.minimoRegistros) return { tipo: 'sem_registro', registros: regs.length };
@@ -13863,7 +13958,7 @@ function planejarProgressaoPelasRegras(a, agora, opcoes){
       const grupo = grupoDoExercicioProg(ex);
       const ehEnfase = !!grupoEnfase && grupo === grupoEnfase;
       const desc = desconfortoDoExercicioProg(prog, p.nome, agora);
-      const carga = classificarCargaProg(registrosDoExercicioProg(a, prog, p.nome));
+      const carga = classificarCargaProg(registrosNaMesmaCondicaoProg(a, registrosDoExercicioProg(a, prog, p.nome), p.nome));
       if(carga.tipo !== 'sem_registro'){ comDado++; if(carga.tipo === 'muito' || carga.tipo === 'significativa') comBoaProgressao++; }
       const base = { i: i, p: p, grupo: grupo, ehEnfase: ehEnfase, carga: carga, temMetodo: !!d.metodos[i] };
       let pct = carga.ganho != null ? ' (' + String(carga.de).replace('.', ',') + ' pra ' + String(carga.para).replace('.', ',') + ' kg, ' + (carga.ganho >= 0 ? '+' : '') + Math.round(carga.ganho * 100) + '%)' : '';
@@ -14456,7 +14551,8 @@ function renderProgressaoPendente(nomeAluna){
       const metNovo = par.novo && diaNovo.metodos ? nomeDoMetodo(diaNovo.metodos[par.novo.i]) : '';
       const caixa = function(lado, p, cls, etiqueta, met, anterior){
         if(!p) return '<div class="pg-ex vazio">' + (lado === 'esq' ? 'não tinha' : 'sai do treino') + '</div>';
-        return '<div class="pg-ex ' + cls + '"><b>' + (etiqueta || '') + escaparHtmlFicha(p.nome) + (met ? '<span class="pg-met">' + escaparHtmlFicha(met) + '</span>' : '') + '</b><small>' + textoDoVolume(p, anterior) + '</small></div>';
+        const carga = lado === 'dir' && !p.combo ? htmlCargaLevadaNaProgressao(a, p.nome, metNovo, diasAtuais) : '';
+        return '<div class="pg-ex ' + cls + '"><b>' + (etiqueta || '') + escaparHtmlFicha(p.nome) + (met ? '<span class="pg-met">' + escaparHtmlFicha(met) + '</span>' : '') + '</b><small>' + textoDoVolume(p, anterior) + '</small>' + carga + '</div>';
       };
       const chaveTroca = est.diaAberto + '|' + (par.novo ? par.novo.i : '');
       const ehSua = par.novo && ajDia.trocas[chaveTroca];
@@ -15526,7 +15622,7 @@ function confirmarSerieComoPersonal(diaIndex, exIndex, nomeExercicio){
   const prog = getProgressoAluna(a.nome);
   if(!prog.historico[nomeExercicio]) prog.historico[nomeExercicio] = [];
   const sugestao = sugerirAjusteCarga(carga, reps);
-  const registro = { semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao };
+  const registro = carimbarRegistroDeCarga({ semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao }, a.nome, nomeExercicio);
   const idxExistente = prog.historico[nomeExercicio].findIndex(function(r){ return r.semana === prog.semana; });
   if(idxExistente !== -1) prog.historico[nomeExercicio][idxExistente] = registro;
   else prog.historico[nomeExercicio].push(registro);
@@ -26104,11 +26200,8 @@ if(type === 'central'){
         }
         const partes = linha.split(' · ');
         const nomeEx = partes[0];
-        let notaSemanaAnterior = '';
-        if(prog && prog.historico[nomeEx] && prog.historico[nomeEx].length){
-          const ultimo = prog.historico[nomeEx][prog.historico[nomeEx].length - 1];
-          notaSemanaAnterior = '<p style="font-size:11px;color:var(--gold-soft);margin:4px 0 8px;">Semana ' + ultimo.semana + ': ' + ultimo.carga + 'kg × ' + ultimo.reps + ' reps' + (ultimo.sugestao ? ' · ' + ultimo.sugestao.texto + ' → sugestão hoje: ' + ultimo.sugestao.valor + 'kg' : '') + '</p>';
-        }
+        // a última carga dela, procurando pelo nome limpo e no mesmo método de hoje (com método e sem método não se misturam)
+        const notaSemanaAnterior = htmlNotaUltimaCargaDaAluna(prog, nomeEx, nomeDoMetodo(metodoDesseDia), 'font-size:11px;color:var(--gold-soft);margin:4px 0 8px;', true);
         const exBanco = buscarExercicioNoBanco(nomeEx);
         const repsMatch = (partes[1] || '').match(/x(\d+)/);
         const repsAlvo = repsMatch ? parseInt(repsMatch[1], 10) : null;
@@ -26360,11 +26453,7 @@ function renderCardBiset(linha, j, prog){
     }
     pillsBiset += '</div>';
 
-    let nota = '';
-    if(prog && prog.historico[nomeEx] && prog.historico[nomeEx].length){
-      const ultimo = prog.historico[nomeEx][prog.historico[nomeEx].length - 1];
-      nota = '<p style="font-size:11px;color:var(--gold-soft);margin:2px 0 6px;">Semana ' + ultimo.semana + ': ' + ultimo.carga + 'kg × ' + ultimo.reps + ' reps' + (ultimo.sugestao ? ' → sugestão: ' + ultimo.sugestao.valor + 'kg' : '') + '</p>';
-    }
+    const nota = htmlNotaUltimaCargaDaAluna(prog, nomeEx, metodoNome, 'font-size:11px;color:var(--gold-soft);margin:2px 0 6px;', false);
     html += '<div style="border-top:1px dashed var(--border);padding-top:8px;margin-top:4px;">' +
       '<div style="display:flex;justify-content:space-between;"><span>' + nomeEx + '</span><span class="tag">' + (partes[1] || '') + (ehUltimoDoPar && descansoBiset ? ' · ⏱ ' + descansoBiset + ' após o par' : ' · sem descanso →') + '</span></div>' +
       pillsBiset +
@@ -26816,7 +26905,7 @@ function confirmarSerieExercicio(idx, nomeExercicio){
   // Se ela confirmar de novo o mesmo exercício na mesma semana (por engano ou pra corrigir), substitui
   // o registro em vez de duplicar.
   const sugestao = sugerirAjusteCarga(carga, reps);
-  const registro = { semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao };
+  const registro = carimbarRegistroDeCarga({ semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao }, NOME_ALUNA_LOGADA, nomeExercicio);
   const idxExistente = prog.historico[nomeExercicio].findIndex(function(r){ return r.semana === prog.semana; });
   const existente = idxExistente !== -1 ? prog.historico[nomeExercicio][idxExistente] : null;
 
@@ -26934,7 +27023,7 @@ function registrarTreinoDia(diaIndex){
         if(isNaN(carga) || isNaN(reps)) return;
         if(!prog.historico[item.nome]) prog.historico[item.nome] = [];
         const sugestao = sugerirAjusteCarga(carga, reps);
-        const registro = { semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao };
+        const registro = carimbarRegistroDeCarga({ semana: prog.semana, carga: carga, reps: reps, sugestao: sugestao }, NOME_ALUNA_LOGADA, item.nome);
         const idxExistente = prog.historico[item.nome].findIndex(function(r){ return r.semana === prog.semana; });
         if(idxExistente !== -1) prog.historico[item.nome][idxExistente] = registro; // já tinha confirmado esse exercício antes, substitui em vez de duplicar
         else prog.historico[item.nome].push(registro);
