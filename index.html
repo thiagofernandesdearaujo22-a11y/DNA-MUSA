@@ -1287,7 +1287,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-20-CE-CARGA-LEVADA-E-METODO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-20-CG-RELATORIOS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1609,10 +1609,12 @@
             <label class="pn-busca"><svg class="pn-ic" viewBox="0 0 24 24" style="width:16px;height:16px;"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="pn-busca-aluna" placeholder="Buscar aluna" autocomplete="off" onkeydown="if(event.key==='Enter') buscarAlunaDoPainel(this.value)"></label>
             <button class="pn-btn-gold" onclick="iniciarGeracaoOuProgressaoParaNaoEnviados()"><svg class="pn-ic" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M12 3l2.2 5.3L20 9l-4.4 3.8L17 18.5 12 15.6 7 18.5l1.4-5.7L4 9l5.8-.7z"/></svg>Gerar treinos pendentes</button>
             <button class="pn-btn-gold pn-btn-sec" onclick="abrirEscolhaDeTreinos()"><svg class="pn-ic" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>Progredir ou gerar, escolhendo as alunas</button>
+            <button class="pn-btn-gold pn-btn-sec" onclick="abrirRelatorios()"><svg class="pn-ic" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Relatórios (30 ou 90 dias)</button>
           </div>
         </div>
 
         <div id="escolha-treinos-area"></div>
+        <div id="relatorios-area"></div>
         <div id="geracao-massa-area"></div>
 
         <div class="pn-kpis" id="pn-kpis"></div>
@@ -2215,7 +2217,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-20-CE-CARGA-LEVADA-E-METODO';
+const VERSAO_APP = '2026-11-20-CG-RELATORIOS';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -15066,6 +15068,309 @@ async function iniciarGeracaoOuProgressaoParaNaoEnviados(){
 // ou gerar um treino novo do zero. Opção pra progredir também quem as regras deixariam de fora (ex.: menos de 4 semanas no app).
 let escolhaTreinos = null;
 let alunasDaEscolhaNaTela = [];
+// ===== RELATÓRIO MENSAL (30 ou 90 dias) (20/11) =====
+// Um relatório por aluna, em texto pronto pro WhatsApp: frequência, faltas, cargas, progressões, feedbacks
+// e os pontos pra conversar com ela. Vai pro WhatsApp do suporte (Bianca), que encaminha pra aluna.
+// Também tem o relatório geral da consultoria. Só fatos dos registros: nada inventado.
+const TELEFONE_SUPORTE_RELATORIOS = '51989999669'; // Bianca, suporte do DNA
+let relatorios = null; // { dias: 30|90, textos: { nome: texto }, geral: texto, enviados: { nome: true }, busca: '' }
+
+// O período fecha em semanas inteiras (as semanas da aluna viram no calendário, de segunda a segunda):
+// 30 dias = as 4 últimas semanas fechadas mais a atual; 90 dias = as 13 últimas mais a atual.
+function inicioDoPeriodoRel(dias, agora){
+  const n = Math.round(dias / 7);
+  const ini = obterInicioSemanaCalendario(new Date(agora || Date.now()));
+  return new Date(new Date(ini).getTime() - n * 7 * 86400000);
+}
+function dataCurtaRel(d){ return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0'); }
+function kgRel(v){ return String(Math.round(v * 10) / 10).replace('.', ',') + ' kg'; }
+
+// Semanas do progresso dela que caem dentro do período (pelo início da semana, segunda a segunda)
+function semanasDoPeriodoRel(prog, inicio, fim){
+  const lista = [];
+  for(let s = 1; s <= (prog.semana || 1); s++){
+    const faixa = intervaloDaSemanaDoProgresso(prog, s);
+    if(faixa.inicio >= inicio.getTime() - 3600000 && faixa.inicio < fim.getTime()) lista.push({ semana: s, inicio: new Date(faixa.inicio), feitos: (prog.diasConcluidos && prog.diasConcluidos[s]) || [] });
+  }
+  return lista;
+}
+
+// Junta tudo o que o relatório precisa, sem texto. Serve pro relatório da aluna e pro geral.
+function dadosDoRelatorioDaAluna(a, dias, agora, versoes){
+  const fim = new Date(agora || Date.now()), inicio = inicioDoPeriodoRel(dias, agora);
+  const prog = getProgressoAluna(a.nome);
+  const freq = frequenciaDaAlunaProg(a) || ((a.treinoAtual && a.treinoAtual.dias) || []).filter(function(d){ return d && !d.descanso && (d.ex || []).length; }).length || 0;
+  const semanas = semanasDoPeriodoRel(prog, inicio, fim);
+  const semanaAtual = semanas.length && semanas[semanas.length - 1].semana === prog.semana ? semanas[semanas.length - 1] : null;
+  // a semana em andamento conta o que já foi feito, mas não conta como falta o que ainda pode ser feito
+  const fechadas = semanas.filter(function(s){ return s !== semanaAtual; });
+  const feitos = semanas.reduce(function(t, s){ return t + s.feitos.length; }, 0);
+  const esperados = freq * fechadas.length + (semanaAtual ? semanaAtual.feitos.length : 0);
+  const semTreino = fechadas.filter(function(s){ return !s.feitos.length; });
+  const horarios = ((prog.horariosTreino) || []).map(function(h){ return new Date(h.data); }).filter(function(d){ return !isNaN(d) && d >= inicio && d < fim; }).sort(function(x, y){ return x - y; });
+
+  // Cargas: por exercício, só comparando a mesma condição (sem método com sem método)
+  const metodoNoTreino = function(nome){ return metodoDoExercicioNosDias((a.treinoAtual || {}).dias, nome) || ''; };
+  const porNome = {};
+  Object.keys(prog.historico || {}).forEach(function(k){ const l = nomeLimpoDoExercicio(k); if(!porNome[l]) porNome[l] = k; });
+  let nRegistros = 0;
+  const cargas = [];
+  Object.keys(porNome).forEach(function(l){
+    const nome = porNome[l];
+    const regs = todosRegistrosDoExercicio(prog, nome).filter(function(r){ const d = dataDoRegistroDeCarga(prog, r); return d && d >= inicio && d < fim; });
+    if(!regs.length) return;
+    nRegistros += regs.length;
+    const padrao = metodoNoTreino(nome);
+    const k = metodoDoRegistro(regs[regs.length - 1], padrao);
+    const mesmos = regs.filter(function(r){ return metodoDoRegistro(r, padrao) === k; });
+    const item = { nome: nome, metodo: k, ultima: mesmos[mesmos.length - 1], registros: regs.length };
+    if(mesmos.length >= 2){
+      item.de = mesmos[0].carga; item.para = mesmos[mesmos.length - 1].carga;
+      item.pct = Math.round((item.para / item.de - 1) * 100);
+      item.tipo = item.pct > 0 ? 'subiu' : (item.pct < 0 ? 'caiu' : 'parada');
+      if(item.tipo === 'parada') item.semanasParada = Object.keys(mesmos.reduce(function(o, r){ o[r.semana] = 1; return o; }, {})).length;
+    } else item.tipo = 'pouco';
+    cargas.push(item);
+  });
+
+  // Feedbacks do período
+  const feedbacks = ((prog.feedbackTreino) || []).filter(function(f){ const t = new Date(f.data); return !isNaN(t) && t >= inicio && t < fim; });
+  const intensidades = feedbacks.map(function(f){ return f.intensidade; }).filter(function(n){ return typeof n === 'number'; });
+  const desconfortos = feedbacks.filter(function(f){ return f.desconforto; });
+  const comentarios = feedbacks.filter(function(f){ return f.comentario; }).slice(-3);
+
+  // Progressões: as versões do treino salvas no período (arquivados). Sem acesso ao banco, a última progressão guardada.
+  const progressoes = [];
+  if(versoes && versoes.length){
+    const ord = versoes.slice().sort(function(x, y){ return new Date(x.updated_at) - new Date(y.updated_at); });
+    ord.forEach(function(v, i){
+      const t = new Date(v.updated_at);
+      if(i === 0 || t < inicio || t >= fim) return;
+      const nomes = function(ver){ const o = {}; (ver.dias || []).forEach(function(d){ if(d && !d.descanso) (d.ex || []).forEach(function(l){ extrairTodosNomesDeLinha(l).forEach(function(n){ o[nomeLimpoDoExercicio(n)] = n; }); }); }); return o; };
+      const antes = nomes(ord[i - 1]), depois = nomes(v);
+      progressoes.push({ em: t, entraram: Object.keys(depois).filter(function(k){ return !antes[k]; }).map(function(k){ return depois[k]; }), sairam: Object.keys(antes).filter(function(k){ return !depois[k]; }).map(function(k){ return antes[k]; }) });
+    });
+  } else if(a.ultimaProgressao && new Date(a.ultimaProgressao.em) >= inicio && new Date(a.ultimaProgressao.em) < fim){
+    const u = a.ultimaProgressao;
+    progressoes.push({ em: new Date(u.em), entraram: (u.mudancas || []).filter(function(m){ return /troca|degrau/.test(m.tipo); }).map(function(m){ return m.depois; }),
+      sairam: (u.mudancas || []).filter(function(m){ return /troca|degrau/.test(m.tipo); }).map(function(m){ return m.antes; }),
+      metodos: (u.mudancas || []).filter(function(m){ return m.tipo === 'metodo'; }).map(function(m){ return m.depois; }) });
+  }
+  return { a: a, dias: dias, inicio: inicio, fim: fim, freq: freq, semanas: semanas, fechadas: fechadas, feitos: feitos, esperados: esperados,
+    pct: esperados ? Math.round(Math.min(feitos, esperados) / esperados * 100) : null, semTreino: semTreino, ultimoTreino: horarios[horarios.length - 1] || null,
+    cargas: cargas, nRegistros: nRegistros, feedbacks: feedbacks, intensidades: intensidades, desconfortos: desconfortos, comentarios: comentarios, progressoes: progressoes };
+}
+
+function textoDoRelatorioDaAluna(r){
+  const a = r.a, L = [];
+  L.push('*RELATÓRIO DNA MUSA · ' + a.nome + '*');
+  L.push('Período: ' + dataCurtaRel(r.inicio) + ' a ' + dataCurtaRel(r.fim) + ' (' + r.dias + ' dias)');
+  L.push('Nível: ' + (a.nivel || 'não informado') + (r.freq ? ' · ' + r.freq + 'x por semana' : ''));
+  L.push('');
+  L.push('*Frequência*');
+  L.push('Treinos marcados: ' + r.feitos + (r.esperados ? ' de ' + r.esperados + ' (' + r.pct + '%)' : ''));
+  L.push('Faltas: ' + Math.max(0, r.esperados - r.feitos));
+  L.push('Semanas sem nenhum treino: ' + (r.semTreino.length ? r.semTreino.map(function(s){ return 'semana de ' + dataCurtaRel(s.inicio); }).join(', ') : 'nenhuma'));
+  if(r.ultimoTreino) L.push('Último treino marcado: ' + dataCurtaRel(r.ultimoTreino));
+  L.push('');
+  L.push('*Cargas*');
+  const subiram = r.cargas.filter(function(c){ return c.tipo === 'subiu'; }).sort(function(x, y){ return y.pct - x.pct; });
+  const paradas = r.cargas.filter(function(c){ return c.tipo === 'parada'; });
+  const cairam = r.cargas.filter(function(c){ return c.tipo === 'caiu'; });
+  L.push('Registros: ' + r.nRegistros + (r.cargas.length ? ' em ' + r.cargas.length + (r.cargas.length === 1 ? ' exercício' : ' exercícios') : ''));
+  if(r.cargas.length) L.push('Subiram: ' + subiram.length + ' · Paradas: ' + paradas.length + ' · Caíram: ' + cairam.length);
+  const met = function(c){ return c.metodo ? ', com ' + c.metodo : ''; };
+  subiram.forEach(function(c){ L.push('Subiu: ' + c.nome + ': ' + kgRel(c.de) + ' para ' + kgRel(c.para) + ' (+' + c.pct + '%' + met(c) + ')'); });
+  paradas.forEach(function(c){ L.push('Parada: ' + c.nome + ': ' + kgRel(c.para) + met(c)); });
+  cairam.forEach(function(c){ L.push('Caiu: ' + c.nome + ': ' + kgRel(c.de) + ' para ' + kgRel(c.para) + ' (' + c.pct + '%' + met(c) + ')'); });
+  if(!r.cargas.length) L.push('Nenhuma carga registrada no período.');
+  L.push('');
+  L.push('*Progressões do treino*');
+  if(!r.progressoes.length) L.push('Nenhuma no período.');
+  r.progressoes.forEach(function(p){
+    L.push(dataCurtaRel(p.em) + ':');
+    L.push('Entrou: ' + (p.entraram.length ? p.entraram.join(', ') : 'nenhum exercício novo'));
+    L.push('Saiu: ' + (p.sairam.length ? p.sairam.join(', ') : 'nenhum'));
+    if(p.metodos && p.metodos.length) L.push('Método: ' + p.metodos.join(', '));
+  });
+  L.push('');
+  L.push('*Feedbacks*');
+  L.push('Respondidos: ' + r.feedbacks.length);
+  if(r.intensidades.length) L.push('Intensidade média: ' + String(Math.round(r.intensidades.reduce(function(t, n){ return t + n; }, 0) / r.intensidades.length * 10) / 10).replace('.', ',') + ' de 10');
+  L.push('Desconforto: ' + (r.desconfortos.length ? r.desconfortos.map(function(f){ return (f.exercicio || 'sem exercício informado') + (f.escalaDesconforto != null ? ' ' + f.escalaDesconforto + '/10' : '') + ' em ' + dataCurtaRel(new Date(f.data)); }).join('; ') : 'nenhum'));
+  r.comentarios.forEach(function(f){ L.push('Comentário (' + dataCurtaRel(new Date(f.data)) + '): "' + String(f.comentario).replace(/\s+/g, ' ').trim() + '"'); });
+  L.push('');
+  L.push('*Pontos pro feedback*');
+  const pontos = [];
+  if(r.pct != null && r.pct >= 90) pontos.push('Constância de ' + r.pct + '% no período');
+  if(r.pct != null && r.pct < 60) pontos.push('Frequência abaixo do combinado: ' + r.feitos + ' de ' + r.esperados + ' treinos');
+  if(r.semTreino.length >= 2) pontos.push(r.semTreino.length + ' semanas sem treino');
+  if(subiram.length) pontos.push('Maior evolução: ' + subiram[0].nome + ' (+' + subiram[0].pct + '%)');
+  paradas.filter(function(c){ return (c.semanasParada || 0) >= 3; }).forEach(function(c){ pontos.push(c.nome + ' com a carga parada há ' + c.semanasParada + ' semanas'); });
+  if(cairam.length) pontos.push('Carga caiu em ' + cairam.map(function(c){ return c.nome; }).join(', '));
+  if(r.desconfortos.length) pontos.push('Conferir o desconforto relatado');
+  if(!r.nRegistros) pontos.push('Não registrou carga: reforçar a importância de registrar');
+  if(!r.feedbacks.length) pontos.push('Não respondeu nenhum feedback no período');
+  L.push(pontos.length ? pontos.join('\n') : 'Nada fora do normal no período.');
+  return L.join('\n');
+}
+
+function textoDoRelatorioGeral(lista, dias, agora){
+  const fim = new Date(agora || Date.now()), inicio = inicioDoPeriodoRel(dias, agora);
+  const comPct = lista.filter(function(r){ return r.pct != null; });
+  const media = comPct.length ? Math.round(comPct.reduce(function(t, r){ return t + r.pct; }, 0) / comPct.length) : null;
+  const L = ['*RELATÓRIO GERAL DNA MUSA*', 'Período: ' + dataCurtaRel(inicio) + ' a ' + dataCurtaRel(fim) + ' (' + dias + ' dias)', 'Alunas no relatório: ' + lista.length, ''];
+  L.push('*Frequência*');
+  L.push('Média de constância: ' + (media != null ? media + '%' : 'sem dados'));
+  const top = comPct.slice().sort(function(x, y){ return y.pct - x.pct; }).slice(0, 5);
+  if(top.length) L.push('Mais constantes: ' + top.map(function(r){ return r.a.nome + ' (' + r.pct + '%)'; }).join(', '));
+  const baixas = comPct.filter(function(r){ return r.pct < 60; }).sort(function(x, y){ return x.pct - y.pct; });
+  L.push('Abaixo de 60%: ' + (baixas.length ? baixas.map(function(r){ return r.a.nome + ' (' + r.pct + '%)'; }).join(', ') : 'nenhuma'));
+  const sumidas = lista.filter(function(r){ return r.semTreino.length >= 2; });
+  L.push('2 semanas ou mais sem treino: ' + (sumidas.length ? sumidas.map(function(r){ return r.a.nome; }).join(', ') : 'nenhuma'));
+  L.push('');
+  L.push('*Cargas*');
+  L.push('Registros no período: ' + lista.reduce(function(t, r){ return t + r.nRegistros; }, 0));
+  const semCarga = lista.filter(function(r){ return !r.nRegistros; });
+  L.push('Sem nenhum registro de carga: ' + (semCarga.length ? semCarga.map(function(r){ return r.a.nome; }).join(', ') : 'nenhuma'));
+  L.push('');
+  L.push('*Progressões*');
+  L.push('Progressões feitas: ' + lista.reduce(function(t, r){ return t + r.progressoes.length; }, 0));
+  L.push('');
+  L.push('*Feedbacks*');
+  L.push('Respondidos: ' + lista.reduce(function(t, r){ return t + r.feedbacks.length; }, 0));
+  const comDesc = lista.filter(function(r){ return r.desconfortos.length; });
+  L.push('Com desconforto relatado: ' + (comDesc.length ? comDesc.map(function(r){ return r.a.nome; }).join(', ') : 'nenhuma'));
+  return L.join('\n');
+}
+
+async function versoesDoTreinoParaRelatorio(a){
+  try {
+    if(!supabaseClient || !a.authId) return null;
+    const { data } = await supabaseClient.from('treinos').select('updated_at, dias').eq('aluna_id', a.authId).order('updated_at', { ascending: false });
+    return data || null;
+  } catch(e){ return null; }
+}
+async function gerarRelatorioDaAluna(nome){
+  const a = alunasPersonal.find(function(x){ return x.nome === nome; });
+  if(!a || !relatorios) return null;
+  const versoes = await versoesDoTreinoParaRelatorio(a);
+  const dados = dadosDoRelatorioDaAluna(a, relatorios.dias, Date.now(), versoes);
+  relatorios.dados[nome] = dados;
+  relatorios.textos[nome] = textoDoRelatorioDaAluna(dados);
+  return relatorios.textos[nome];
+}
+
+function abrirRelatorios(){
+  const area = document.getElementById('relatorios-area');
+  if(!area) return;
+  if(relatorios){ relatorios = null; area.innerHTML = ''; return; }
+  relatorios = { dias: 30, textos: {}, dados: {}, geral: '', enviados: {}, busca: '', aberto: null };
+  renderRelatorios();
+}
+function mudarPeriodoDosRelatorios(dias){
+  if(!relatorios || relatorios.dias === dias) return;
+  relatorios = { dias: dias, textos: {}, dados: {}, geral: '', enviados: {}, busca: relatorios.busca, aberto: null }; // mudou o período: gera de novo
+  renderRelatorios();
+}
+function renderRelatorios(){
+  const area = document.getElementById('relatorios-area');
+  if(!area || !relatorios) return;
+  const r = relatorios, termo = semAcentoMinusculo(r.busca || '').trim();
+  const todas = alunasParaEscolherTreino().filter(function(a){ return !termo || semAcentoMinusculo(a.nome).indexOf(termo) !== -1; });
+  const nGerados = Object.keys(r.textos).length;
+  area.innerHTML = '<div class="et-box"><h3>Relatórios</h3>' +
+    '<p class="et-sub">Últimos ' + r.dias + ' dias de cada aluna: frequência, faltas, cargas, progressões e feedbacks. "Enviar pro suporte" manda o texto pro WhatsApp da Bianca, que encaminha pra aluna.</p>' +
+    '<div class="et-modos"><span class="' + (r.dias === 30 ? 'on' : '') + '" onclick="mudarPeriodoDosRelatorios(30)">30 dias</span><span class="' + (r.dias === 90 ? 'on' : '') + '" onclick="mudarPeriodoDosRelatorios(90)">90 dias</span></div>' +
+    '<button class="btn-gold" style="margin:8px 0 6px;" onclick="gerarRelatoriosDeTodas()">Gerar relatório de todas</button>' +
+    '<button class="btn-gold" style="margin:0 0 6px;background:transparent;color:var(--gold);border:1px solid var(--gold);" onclick="gerarRelatorioGeral()">Relatório geral da consultoria</button>' +
+    (nGerados ? '<button class="btn-gold" style="margin:0 0 6px;background:transparent;color:var(--gold);border:1px solid var(--gold);" onclick="enviarTodosRelatoriosProSuporte()">Enviar os ' + nGerados + ' gerados pro suporte</button>' : '') +
+    (r.geral ? htmlCaixaDoRelatorio('__geral', r.geral) : '') +
+    '<div class="et-barra"><b>' + nGerados + ' de ' + alunasParaEscolherTreino().length + ' gerados</b>' +
+      '<input class="form-input" style="flex:1;min-width:140px;font-size:16px;padding:6px 10px;" placeholder="Buscar aluna" value="' + escaparHtmlFicha(r.busca || '') + '" oninput="relatorios.busca=this.value;renderRelatorios()"></div>' +
+    '<div class="et-lista">' + (todas.length ? todas.map(function(a){
+      const nomeJs = a.nome.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      const t = r.textos[a.nome], d = r.dados[a.nome];
+      const info = !t ? 'ainda não gerado' : (r.enviados[a.nome] ? 'enviado pro suporte · ' : 'gerado · ') + d.feitos + (d.esperados ? ' de ' + d.esperados : '') + ' treinos' + (d.semTreino.length ? ' · ' + d.semTreino.length + (d.semTreino.length === 1 ? ' semana sem treino' : ' semanas sem treino') : '');
+      return '<div class="et-lin" style="display:block;"><div style="display:flex;flex-direction:column;gap:6px;">' +
+        '<span><b>' + escaparHtmlFicha(a.nome) + '</b><small>' + escaparHtmlFicha(info) + '</small></span>' +
+        (t ? '<span style="display:flex;gap:6px;flex-wrap:wrap;">' +
+            '<button class="pg-b" onclick="enviarRelatorioProSuporte(\'' + nomeJs + '\')">Enviar pro suporte</button>' +
+            '<button class="pg-b" onclick="baixarRelatorio(\'' + nomeJs + '\')">Baixar</button>' +
+            '<button class="pg-b" onclick="copiarRelatorio(\'' + nomeJs + '\')">Copiar texto</button>' +
+            '<button class="pg-b" onclick="verRelatorio(\'' + nomeJs + '\')">' + (r.aberto === a.nome ? 'Fechar' : 'Ver') + '</button></span>'
+          : '<span><button class="pg-b" onclick="gerarERenderRelatorio(\'' + nomeJs + '\')">Gerar</button></span>') +
+        '</div>' + (t && r.aberto === a.nome ? htmlCaixaDoRelatorio(a.nome, t) : '') + '</div>';
+    }).join('') : '<p class="et-sub" style="padding:10px 0;">Nenhuma aluna encontrada.</p>') + '</div></div>';
+}
+function htmlCaixaDoRelatorio(chave, texto){
+  return '<pre style="white-space:pre-wrap;font-family:inherit;font-size:12px;line-height:1.45;background:rgba(221,182,115,0.06);border:1px solid rgba(221,182,115,0.25);border-radius:12px;padding:10px 12px;margin:8px 0;">' + escaparHtmlFicha(texto) + '</pre>' +
+    (chave === '__geral' ? '<div style="display:flex;gap:6px;margin-bottom:8px;"><button class="pg-b" onclick="enviarRelatorioProSuporte(\'__geral\')">Enviar pro suporte</button><button class="pg-b" onclick="baixarRelatorio(\'__geral\')">Baixar</button><button class="pg-b" onclick="copiarRelatorio(\'__geral\')">Copiar texto</button></div>' : '');
+}
+function textoDoRelatorioPorChave(chave){ return !relatorios ? '' : (chave === '__geral' ? relatorios.geral : relatorios.textos[chave] || ''); }
+async function gerarERenderRelatorio(nome){ await gerarRelatorioDaAluna(nome); if(relatorios) relatorios.aberto = nome; renderRelatorios(); }
+function verRelatorio(nome){ if(!relatorios) return; relatorios.aberto = relatorios.aberto === nome ? null : nome; renderRelatorios(); }
+async function gerarRelatoriosDeTodas(){
+  if(!relatorios) return;
+  const lista = alunasParaEscolherTreino();
+  for(let i = 0; i < lista.length; i++){ await gerarRelatorioDaAluna(lista[i].nome); }
+  renderRelatorios();
+  return lista.length;
+}
+async function gerarRelatorioGeral(){
+  if(!relatorios) return;
+  const lista = alunasParaEscolherTreino();
+  for(let i = 0; i < lista.length; i++){ if(!relatorios.dados[lista[i].nome]) await gerarRelatorioDaAluna(lista[i].nome); }
+  relatorios.geral = textoDoRelatorioGeral(lista.map(function(a){ return relatorios.dados[a.nome]; }).filter(Boolean), relatorios.dias, Date.now());
+  renderRelatorios();
+  return relatorios.geral;
+}
+async function enviarRelatorioProSuporte(chave){
+  const texto = textoDoRelatorioPorChave(chave);
+  if(!texto) return { sucesso: false };
+  const r = await enviarWhatsApp(TELEFONE_SUPORTE_RELATORIOS, texto);
+  const ok = !!(r && (r.sucesso || r.ok));
+  if(ok && relatorios) relatorios.enviados[chave] = true;
+  try { mostrarConfirmacaoSalvamento(ok, ok ? 'Relatório enviado pro suporte' : 'Não consegui enviar' + (r && r.motivo ? ': ' + r.motivo : '')); } catch(e){}
+  renderRelatorios();
+  return r;
+}
+// Envio em fila: um de cada vez, com o intervalo mínimo entre envios que o enviarWhatsApp já respeita (anti-bloqueio)
+async function enviarTodosRelatoriosProSuporte(){
+  if(!relatorios) return 0;
+  const nomes = Object.keys(relatorios.textos).filter(function(n){ return !relatorios.enviados[n]; });
+  if(!nomes.length || !confirm('Enviar ' + nomes.length + (nomes.length === 1 ? ' relatório' : ' relatórios') + ' pro WhatsApp do suporte? Vai um de cada vez, com intervalo entre eles.')) return 0;
+  let n = 0;
+  for(let i = 0; i < nomes.length; i++){
+    const r = await enviarWhatsApp(TELEFONE_SUPORTE_RELATORIOS, relatorios.textos[nomes[i]]);
+    if(r && (r.sucesso || r.ok)){ relatorios.enviados[nomes[i]] = true; n++; }
+    else break; // recusou: para a fila, não insiste (insistir é o que bloqueia o número)
+  }
+  renderRelatorios();
+  return n;
+}
+function nomeDoArquivoDoRelatorio(chave){
+  const base = chave === '__geral' ? 'geral' : semAcentoMinusculo(chave).replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+  return 'relatorio_' + base + '_' + (relatorios ? relatorios.dias : 30) + 'dias_' + dataLocalISO(new Date()) + '.txt';
+}
+function baixarRelatorio(chave){
+  const texto = textoDoRelatorioPorChave(chave);
+  if(!texto) return false;
+  try {
+    const url = URL.createObjectURL(new Blob([texto], { type: 'text/plain;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url; link.download = nomeDoArquivoDoRelatorio(chave);
+    document.body.appendChild(link); link.click(); link.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+    return true;
+  } catch(e){ return false; }
+}
+function copiarRelatorio(chave){
+  const texto = textoDoRelatorioPorChave(chave);
+  if(!texto) return false;
+  try { navigator.clipboard.writeText(texto); mostrarConfirmacaoSalvamento(true, 'Texto copiado'); return true; } catch(e){ return false; }
+}
+
 function alunasParaEscolherTreino(){
   const agora = Date.now();
   return alunasPersonal.filter(function(a){ return entraNoControleDeTreinos(a, agora); })
@@ -16161,6 +16466,72 @@ function linhasDoDiaArquivado(d){
     return String(l).replace(/\|\|\|/g, ' + ').replace(/^Bi-set \+ /, 'Bi-set: ') + (m ? ' · ' + m : '');
   });
 }
+// ===== ARQUIVADOS: TOCAR NO EXERCÍCIO (20/11) =====
+// O que aconteceu com o exercício enquanto aquela versão do treino valeu: método, primeira e última carga,
+// evolução (só comparando a mesma condição: sem método com sem método), registros e desconforto.
+function periodoDaVersaoArquivada(lista, idx){
+  const inicio = new Date(lista[idx].updated_at);
+  const fim = idx > 0 ? new Date(lista[idx - 1].updated_at) : new Date();
+  return { inicio: inicio, fim: fim };
+}
+function resumoDoExercicioNoPeriodo(prog, nome, metodoDaVersao, inicio, fim){
+  const iniSemana = obterInicioSemanaCalendario(inicio);
+  const regs = todosRegistrosDoExercicio(prog, nome).filter(function(r){
+    const d = dataDoRegistroDeCarga(prog, r);
+    if(!d) return false;
+    return (r.em ? d >= inicio : d >= iniSemana) && d < fim;
+  });
+  const cond = function(r){ return metodoDoRegistro(r, metodoDaVersao || ''); };
+  const alvo = nomeLimpoDoExercicio(nome);
+  const desconfortos = ((prog && prog.feedbackTreino) || []).filter(function(f){
+    const t = new Date(f.data);
+    return f.desconforto && f.exercicio && nomeLimpoDoExercicio(f.exercicio) === alvo && t >= inicio && t < fim;
+  });
+  const resumo = { regs: regs, primeira: regs[0] || null, ultima: regs[regs.length - 1] || null, desconfortos: desconfortos, semanas: {} };
+  regs.forEach(function(r){ resumo.semanas[r.semana] = true; });
+  if(resumo.ultima){
+    const k = cond(resumo.ultima);
+    const mesmos = regs.filter(function(r){ return cond(r) === k; });
+    if(mesmos.length >= 2 && mesmos[0].carga > 0) resumo.evolucao = { de: mesmos[0].carga, para: mesmos[mesmos.length - 1].carga, metodo: k, pct: Math.round((mesmos[mesmos.length - 1].carga / mesmos[0].carga - 1) * 100) };
+    if(k){ const sem = regs.filter(function(r){ return !cond(r); }); resumo.ultimaSemMetodo = sem[sem.length - 1] || null; }
+  }
+  resumo.cond = cond;
+  return resumo;
+}
+function abrirInfoDoExercicioArquivado(nomeAluna, idx, di, i){
+  const caixa = document.getElementById('info-arq-' + idx + '-' + di + '-' + i);
+  const lista = historicoArquivadoAberto[nomeAluna];
+  if(!caixa || !lista || !lista[idx]) return false;
+  if(caixa.innerHTML){ caixa.innerHTML = ''; return true; }
+  const d = (lista[idx].dias || [])[di]; if(!d) return false;
+  const nome = String(d.ex[i] || '').split(' · ')[0];
+  const metodo = nomeDoMetodo(d.metodos && d.metodos[i]);
+  const per = periodoDaVersaoArquivada(lista, idx);
+  const prog = getProgressoAluna(nomeAluna);
+  const r = resumoDoExercicioNoPeriodo(prog, nome, metodo, per.inicio, per.fim);
+  const dt = function(x){ return String(x.getDate()).padStart(2, '0') + '/' + String(x.getMonth() + 1).padStart(2, '0'); };
+  const kg = function(v){ return String(v).replace('.', ',') + ' kg'; };
+  const comMet = function(reg){ const m = r.cond(reg); return m ? escaparHtmlFicha(m) : 'sem método'; };
+  const linha = function(rot, val){ return '<div style="display:flex;justify-content:space-between;gap:10px;font-size:11.5px;padding:2px 0;"><span style="color:var(--text-faint);">' + rot + '</span><span style="text-align:right;">' + val + '</span></div>'; };
+  let h = '<div onclick="event.stopPropagation()" style="background:rgba(221,182,115,0.07);border:1px solid rgba(221,182,115,0.3);border-radius:12px;padding:9px 11px;margin:4px 0 8px;">' +
+    '<p style="font-size:12.5px;font-weight:700;color:var(--gold-soft);margin:0 0 2px;">' + escaparHtmlFicha(nome) + '</p>' +
+    '<p style="font-size:10.5px;color:var(--text-faint);margin:0 0 6px;">Nesse treino (' + dt(per.inicio) + ' a ' + dt(per.fim) + ')</p>';
+  h += linha('Método', metodo ? escaparHtmlFicha(metodo) : 'nenhum');
+  if(!r.regs.length){
+    h += linha('Cargas', 'nenhum registro nesse período');
+  } else {
+    h += linha('Primeira carga', kg(r.primeira.carga) + ' · ' + dataCurtaDoRegistro(prog, r.primeira) + ' · ' + comMet(r.primeira));
+    h += linha('Última carga', '<b style="color:var(--gold-soft);">' + kg(r.ultima.carga) + '</b> · ' + dataCurtaDoRegistro(prog, r.ultima) + ' · ' + comMet(r.ultima));
+    if(r.ultimaSemMetodo) h += linha('Última sem método', kg(r.ultimaSemMetodo.carga) + ' · ' + dataCurtaDoRegistro(prog, r.ultimaSemMetodo));
+    h += linha('Evolução', r.evolucao ? '<span style="color:' + (r.evolucao.pct >= 0 ? 'var(--success)' : 'var(--danger, #d98a7a)') + ';">' + (r.evolucao.pct >= 0 ? '+' : '') + r.evolucao.pct + '% (' + String(r.evolucao.de).replace('.', ',') + ' → ' + String(r.evolucao.para).replace('.', ',') + ', ' + (r.evolucao.metodo ? escaparHtmlFicha(r.evolucao.metodo) : 'sem método') + ')</span>' : 'poucos registros pra comparar');
+  }
+  const nSem = Object.keys(r.semanas).length;
+  h += linha('Registros', r.regs.length + (r.regs.length === 1 ? ' registro' : ' registros') + (nSem ? ' em ' + nSem + (nSem === 1 ? ' semana' : ' semanas') : ''));
+  h += linha('Desconforto', r.desconfortos.length ? r.desconfortos.map(function(f){ return (f.escalaDesconforto != null ? f.escalaDesconforto + '/10' : 'sim') + ' em ' + dt(new Date(f.data)); }).join(', ') : 'nenhum');
+  caixa.innerHTML = h + '</div>';
+  return true;
+}
+
 function abrirVersaoArquivada(nomeAluna, idx){
   const lista = historicoArquivadoAberto[nomeAluna];
   const caixa = document.getElementById('versao-arquivada-' + idx);
@@ -16170,10 +16541,16 @@ function abrirVersaoArquivada(nomeAluna, idx){
   const diaAtual = function(n){ return (atual.dias || []).find(function(x){ return x.n === n; }) || { ex: [] }; };
   caixa.innerHTML = '<div style="margin-top:8px;" onclick="event.stopPropagation()">' + (versao.dias || []).filter(function(d){ return d && !d.descanso && (d.ex || []).length; }).map(function(d){
     const agora = linhasDoDiaArquivado(diaAtual(d.n));
+    const di = (versao.dias || []).indexOf(d);
+    const nomeJs = nomeAluna.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     return '<p style="font-size:12px;font-weight:600;margin:8px 0 2px;">' + escaparHtmlFicha(d.n + ' · ' + (d.foco || '')) + '</p>' +
-      linhasDoDiaArquivado(d).map(function(l){
+      linhasDoDiaArquivado(d).map(function(l, i){
         const mudou = idx > 0 && agora.indexOf(l) === -1;
-        return '<p style="font-size:11.5px;margin:1px 0;' + (mudou ? 'color:var(--gold-soft);' : 'color:var(--text-faint);') + '">' + (mudou ? '• ' : '') + escaparHtmlFicha(l) + '</p>';
+        // toque no exercício: o que aconteceu com ele enquanto essa versão valeu (bi-set fica de fora)
+        const clicavel = String(d.ex[i] || '').indexOf('|||') === -1;
+        return '<p style="font-size:11.5px;margin:1px 0;' + (clicavel ? 'cursor:pointer;' : '') + (mudou ? 'color:var(--gold-soft);' : 'color:var(--text-faint);') + '"' +
+          (clicavel ? ' onclick="abrirInfoDoExercicioArquivado(\'' + nomeJs + '\',' + idx + ',' + di + ',' + i + ')"' : '') + '>' + (mudou ? '• ' : '') + escaparHtmlFicha(l) + '</p>' +
+          (clicavel ? '<div id="info-arq-' + idx + '-' + di + '-' + i + '"></div>' : '');
       }).join('');
   }).join('') + (idx > 0 ? '<p style="font-size:11px;color:var(--text-faint);margin-top:8px;">Em dourado: o que era assim nessa versão e não está igual no treino atual.</p>' : '') + '</div>';
   return true;
