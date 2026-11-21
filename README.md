@@ -1,4 +1,4 @@
-[dna_musa_182.html](https://github.com/user-attachments/files/35199524/dna_musa_182.html)
+[dna_musa_183.html](https://github.com/user-attachments/files/35200003/dna_musa_183.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1288,7 +1288,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-20-CG-RELATORIOS</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-21-CH-REGRAS-DO-LOTE-2</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -2218,7 +2218,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-20-CG-RELATORIOS';
+const VERSAO_APP = '2026-11-21-CH-REGRAS-DO-LOTE-2';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -13691,6 +13691,16 @@ const COMPLEXOS_LIVRES_PROG = /^(AGACHAMENTO LIVRE|AGACHAMENTO FRONTAL$|LEVANTAM
 const SEM_METODO_PROG = /PULLOVER|FACEPULL|CRUCIFIXO INV|ABDUCAO D?E? ?QUADRIL.*POLIA|\bADP\b|ADAPTAD|ELASTIC|\bPC\b|PESO (DO )?CORP|STIFF UNI|PRANCHA|\bABS\b|ABDOMINAL|BURP|POLICHINELO|SKIPPING|SENTA E LEVANTA|PLIOM/;
 const DROP_OK_PROG = /MAQUINA|CADEIRA|^LEG |HACK|GUIAD|SMITH|ARTICULAD|^(REMADA|SUPINO|DESENVOLVIMENTO).*HALTER|EXTENSORA|FLEXORA/;
 const SEM_DROP_PROG = /POLIA|PENDULAR|TERRA|STIFF|AGACHAMENTO LIVRE|UNI\b|UNILATERAL/;
+// Lote 2: aluna do online faz drop set sozinha só onde trocar o peso é rápido (halteres e máquina de pino).
+// Leg, hack, guiado, elevação pélvica na máquina e outras de anilha: rest pause. Presencial (com você do lado) segue o drop.
+const DROP_ONLINE_OK_PROG = /HALTER|CADEIRA|CAMA|EXTENSORA|FLEXORA/;
+const PESO_CORPORAL_PROG = /\bPC\b|PESO (DO )?CORP/;   // lote 2: avançada não recebe peso corporal fora de bi-set
+const LIMITE_REDUCAO_ENFASE_PROG = { 'Iniciante': 20 }; // lote 2: iniciante bem acima do teto volta pra até 20 séries na semana
+// Presencial: teve aula presencial registrada nos últimos 30 dias
+function alunaEhPresencialProg(a, agora){
+  const prog = getProgressoAluna(a.nome), desde = (agora || Date.now()) - 30 * 86400000;
+  return ((prog && prog.horariosTreino) || []).some(function(h){ return h && h.origem === 'aula_presencial' && new Date(h.data).getTime() >= desde; });
+}
 const MAQUINA_ESTAVEL_PROG = /MAQUINA|CADEIRA|CAMA |^LEG |HACK|GUIAD|SMITH|ARTICULAD/;
 // "O mesmo exercício com outro nome" (CADEIRA FLEXORA YES e CADEIRA FLEXORA, EXTENSÃO DE QUADRIL e ... VARIAÇÃO): não conta como troca
 function baseDoNomeProg(nome){
@@ -13832,6 +13842,7 @@ function candidatosDaTrocaProg(a, nomeAtual, modo, ctx){
     if(!(casa ? exercicioServeParaCasa(e) : (servePraAcademia(e) && !ehExercicioElastico(e)))) return false; // A1, A15
     if(!nivelPermiteExercicio(nivel, e)) return false;
     if(nivel === 'Iniciante' && ehExercicioPliometrico(e)) return false;                    // A5
+    if(nivel === 'Avançado' && PESO_CORPORAL_PROG.test(l)) return false;                     // lote 2
     if(nivel === 'Iniciante' && ehExercicioUnilateral(e.nome) && !/AFUNDO/.test(l) && !/MAQUINA|POLIA|CADEIRA|CAMA|GUIAD|ARTICULAD/.test(l)) return false; // A4, C6
     if(joelho && (ehExercicioPliometrico(e) || /PLIOM|AFUNDO|BULGARO|PASSADA|AVANCO|STEP/.test(l))) return false; // A6
     if(/AFUNDO|BULGARO|PASSADA|AVANCO/.test(l) && ctx.temAfundoNoDia) return false;         // A9
@@ -13894,7 +13905,7 @@ function metodoParaProg(a, nome, tipo){
   if(a.ambienteTreino === 'Casa') return null;
   if(nivel === 'Iniciante') return (a.progressaoManualForcada || 0) < 2 ? null : METODO_PROG.piramide; // E1; E3 a E5
   if(COMPLEXOS_LIVRES_PROG.test(l) || /TERRA|STIFF|BOM DIA/.test(l)) return METODO_PROG.piramide;   // E15 e lote 1
-  if(tipo !== 'pequena' && DROP_OK_PROG.test(l) && !SEM_DROP_PROG.test(l)) return METODO_PROG.drop;
+  if(tipo !== 'pequena' && DROP_OK_PROG.test(l) && !SEM_DROP_PROG.test(l) && (DROP_ONLINE_OK_PROG.test(l) || alunaEhPresencialProg(a))) return METODO_PROG.drop;
   return METODO_PROG.restPause;                                                                      // B6 e lote 1: polia, pendular
 }
 function textoDoMetodoProg(m){ return m === METODO_PROG.drop ? 'drop set na última série' : (m === METODO_PROG.restPause ? 'rest pause' : 'pirâmide crescente'); }
@@ -13967,6 +13978,8 @@ function planejarProgressaoPelasRegras(a, agora, opcoes){
       let pct = carga.ganho != null ? ' (' + String(carga.de).replace('.', ',') + ' pra ' + String(carga.para).replace('.', ',') + ' kg, ' + (carga.ganho >= 0 ? '+' : '') + Math.round(carga.ganho * 100) + '%)' : '';
       const lp = nomeLimpoDoExercicio(p.nome);
       if(repetidos[i]) return Object.assign(base, { acao: 'trocar', modo: 'grupo', obrigatorio: true, prioridade: 110, motivo: repetidos[i] + ': esse sai e entra outro do mesmo grupo' });
+      if(nivel === 'Avançado' && PESO_CORPORAL_PROG.test(lp)) return Object.assign(base, { acao: 'trocar', modo: 'grupo', obrigatorio: true, prioridade: 105, motivo: 'Avançada não recebe exercício de peso corporal fora de bi-set (lote 2)' });
+      if(a.ambienteTreino !== 'Casa' && !(i === 0 && (grupo === 'Glúteos' || /ABDUCAO|GLUTEO|QUADRIL|PONTE/.test(lp))) && ((ex && ehExercicioElastico(ex)) || /ELASTIC/.test(lp))) return Object.assign(base, { acao: 'trocar', modo: 'lado', obrigatorio: true, prioridade: 105, motivo: 'Na academia, elástico só entra como pré-ativação de glúteo, no começo do treino: troca por um de academia (lote 2)' });
       if(nivel === 'Iniciante' && ex && ehExercicioPliometrico(ex)) return Object.assign(base, { acao: 'trocar', modo: 'lado', obrigatorio: true, prioridade: 100, motivo: 'Iniciante não recebe pliométrico (A5)' });
       if(/JOELHO/i.test(String(a.restricoes || '')) && ((ex && ehExercicioPliometrico(ex)) || /PLIOM|AFUNDO|BULGARO|PASSADA|AVANCO|STEP/.test(lp))) return Object.assign(base, { acao: 'trocar', modo: 'lado', obrigatorio: true, prioridade: 100, motivo: 'Queixa no joelho: sai pliométrico, afundo, passada, step e búlgaro (A6)' });
       if(desc) return Object.assign(base, { acao: 'trocar', maisFacil: true, modo: (desc.escalaDesconforto || 0) >= REGRAS_PROG.escalaDesconfortoVoltaDegrau ? 'abaixo' : 'lado', obrigatorio: true, prioridade: 100, motivo: 'Desconforto ' + (desc.escalaDesconforto || '?') + '/10 nas últimas 4 semanas (A13' + ((desc.escalaDesconforto || 0) >= REGRAS_PROG.escalaDesconfortoVoltaDegrau ? ', C4: um degrau abaixo' : '') + ')' });
@@ -14018,7 +14031,7 @@ function planejarProgressaoPelasRegras(a, agora, opcoes){
       if(metodos >= maxMetodos) return 'limite';
       d.metodos[x.i] = m; metodos++;
       const porque = m === METODO_PROG.piramide ? (nivel === 'Iniciante' ? 'iniciante só recebe pirâmide crescente (E5)' : 'livre com anilha ou que pega lombar: pirâmide crescente (E15)')
-        : (m === METODO_PROG.restPause ? (tipoCarga === 'pequena' ? 'progressão pequena: rest pause, não drop set (B6)' : 'rest pause (polia, pendular ou carga leve: drop não cabe)') : 'drop set na última série');
+        : (m === METODO_PROG.restPause ? (tipoCarga === 'pequena' ? 'progressão pequena: rest pause, não drop set (B6)' : (DROP_OK_PROG.test(nomeLimpoDoExercicio(x.p.nome)) && !SEM_DROP_PROG.test(nomeLimpoDoExercicio(x.p.nome)) ? 'aluna do online: drop set só com halteres ou máquina de pino, aqui vai rest pause (lote 2)' : 'rest pause (polia, pendular ou carga leve: drop não cabe)')) : 'drop set na última série');
       mudancas.push({ dia: d.n, tipo: 'metodo', antes: x.p.nome, depois: x.p.nome + ' + ' + textoDoMetodoProg(m), motivo: (motivo || x.motivo) + ' → ' + porque });
       return 'ok';
     };
@@ -14061,7 +14074,27 @@ function planejarProgressaoPelasRegras(a, agora, opcoes){
     mudancas.push({ dia: d.n, tipo: 'mais_serie', antes: melhor.p.nome, depois: d.ex[melhor.i], motivo: motivo + ' (' + total + ' pra ' + (total + 1) + ' séries na semana)' });
     return true;
   };
-  somarSerie(grupoEnfase, '+1 série na ênfase (' + (grupoEnfase || '') + '), até o teto (F5)');
+  // Lote 2: iniciante muito acima do teto (caso real: 26 séries de glúteo) tira séries da ênfase até o limite,
+  // começando pelos exercícios com mais séries e sem descer da faixa do nível.
+  const reduzirEnfase = function(grupo){
+    const limite = LIMITE_REDUCAO_ENFASE_PROG[nivel];
+    if(!grupo || !limite) return false;
+    const itens = [];
+    diasNovos.forEach(function(d){ if(!d || d.descanso) return; (d.ex || []).forEach(function(l, i){ const p = partesDaLinhaProg(l); if(p.combo || !p.series) return; if(grupoDoExercicioProg(buscarExercicioNoBanco(p.nome)) === grupo) itens.push({ d: d, i: i }); }); });
+    const series = function(it){ return partesDaLinhaProg(it.d.ex[it.i]).series; };
+    let total = itens.reduce(function(t, it){ return t + series(it); }, 0);
+    if(total <= limite) return false;
+    const antes = total, tirados = [];
+    while(total > limite){
+      const cands = itens.filter(function(it){ return series(it) > faixaSeries[0]; }).sort(function(x, y){ return series(y) - series(x); });
+      if(!cands.length) break;
+      const it = cands[0], p = partesDaLinhaProg(it.d.ex[it.i]);
+      it.d.ex[it.i] = montarLinhaProg(p.nome, p.series - 1, p.resto); total--; tirados.push(it);
+    }
+    tirados.filter(function(it, k){ return tirados.indexOf(it) === k; }).forEach(function(it){ mudancas.push({ dia: it.d.n, tipo: 'menos_serie', antes: partesDaLinhaProg(it.d.ex[it.i]).nome, depois: it.d.ex[it.i], motivo: 'Iniciante com ' + antes + ' séries de ' + grupo + ' na semana: volta pra até ' + limite + ' (lote 2)' }); });
+    return true;
+  };
+  if(!reduzirEnfase(grupoEnfase)) somarSerie(grupoEnfase, '+1 série na ênfase (' + (grupoEnfase || '') + '), até o teto (F5)');
   let novaFrac = fracSegundo;
   if(grupoSegundo && grupoSegundo !== grupoEnfase && fracSegundo >= 1){ if(somarSerie(grupoSegundo, '+1 série no segundo grupo (' + grupoSegundo + '), 70% do aumento da ênfase (H4)')) novaFrac = fracSegundo - 1; }
 
