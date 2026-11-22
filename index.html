@@ -1287,7 +1287,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-22-CJ-GRUPOS-DE-SUPORTE</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-22-CK-TELAS-NOVAS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1607,9 +1607,7 @@
           </div>
           <div class="pn-acoes">
             <label class="pn-busca"><svg class="pn-ic" viewBox="0 0 24 24" style="width:16px;height:16px;"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="pn-busca-aluna" placeholder="Buscar aluna" autocomplete="off" onkeydown="if(event.key==='Enter') buscarAlunaDoPainel(this.value)"></label>
-            <button class="pn-btn-gold" onclick="iniciarGeracaoOuProgressaoParaNaoEnviados()"><svg class="pn-ic" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M12 3l2.2 5.3L20 9l-4.4 3.8L17 18.5 12 15.6 7 18.5l1.4-5.7L4 9l5.8-.7z"/></svg>Gerar treinos pendentes</button>
-            <button class="pn-btn-gold pn-btn-sec" onclick="abrirEscolhaDeTreinos()"><svg class="pn-ic" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>Progredir ou gerar, escolhendo as alunas</button>
-            <button class="pn-btn-gold pn-btn-sec" onclick="abrirRelatorios()"><svg class="pn-ic" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Relatórios (30 ou 90 dias)</button>
+            
           </div>
         </div>
 
@@ -1626,10 +1624,19 @@
           </div>
           <div class="pn-direita">
             <div class="pn-caixa">
-              <h2>Controle de treinos<span class="pn-link" onclick="showPersonalView('controle')">Abrir controle</span></h2>
-              <div id="pn-controle"></div>
+              <h2>Treinos<span class="pn-link" onclick="showPersonalView('controle')">Abrir controle</span></h2>
+              <div id="pn-acoes-treino"></div>
+              <div id="pn-controle" style="margin-top:12px;"></div>
             </div>
             <div class="pn-caixa">
+              <h2>Mensagens dos desafios<span class="pn-link" onclick="showPersonalView('desafios')">Abrir desafios</span></h2>
+              <div id="pn-desafios-msg"></div>
+            </div>
+            <div class="pn-caixa">
+              <h2>Grupos de suporte<span class="pn-link" onclick="showPersonalView('grupos');abrirGruposDeSuporte()">Abrir</span></h2>
+              <div id="pn-suporte"></div>
+            </div>
+            <div class="pn-caixa pn-so-celular">
               <h2>Ferramentas</h2>
               <div class="pn-tiles" id="atalhos-dashboard-area"></div>
             </div>
@@ -2217,7 +2224,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-22-CJ-GRUPOS-DE-SUPORTE';
+const VERSAO_APP = '2026-11-22-CK-TELAS-NOVAS';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -2935,10 +2942,10 @@ function calcularComparativoSemanal(nome){
   let progAtual = 0, progAnterior = 0, temHistoricoAnterior = false;
   Object.keys(prog.historico).forEach(function(ex){
     prog.historico[ex].forEach(function(r){
-      if(r.semana === semanaAtual && r.sugestao.texto === 'Aumentar carga') progAtual++;
+      if(r.semana === semanaAtual && r.sugestao && r.sugestao.texto === 'Aumentar carga') progAtual++;
       if(r.semana === semanaAnterior){
         temHistoricoAnterior = true;
-        if(r.sugestao.texto === 'Aumentar carga') progAnterior++;
+        if(r.sugestao && r.sugestao.texto === 'Aumentar carga') progAnterior++;
       }
     });
   });
@@ -9982,10 +9989,18 @@ const CONFIG_SUPORTE = {
 let gruposDeSuporte = {};      // nome da aluna -> { grupo, nome, link, em } (vem do servidor, tipo "grupo_suporte")
 let marcadasSuporte = {};
 
-function alunasParaSuporte(){ return alunasParaEscolherTreino(); } // as ativas da consultoria
+// As ativas da consultoria, mais a "aluna de teste" com o número do Thiago (22/11): dá pra testar a criação do grupo
+// exatamente como sai pra uma aluna, quantas vezes quiser. Ela não existe na lista de alunas e não entra em contagem nenhuma.
+const NOME_ALUNA_TESTE_SUPORTE = 'Thiago (aluna de teste)';
+function alunaDeTesteSuporte(){ return { nome: NOME_ALUNA_TESTE_SUPORTE, telefone: CONFIG_SUPORTE.telefoneTeste, alunaDeTeste: true }; }
+function alunasParaSuporte(){ return [alunaDeTesteSuporte()].concat(alunasParaEscolherTreino()); }
 function tarefasDeSuporte(){ return cg.tarefas.filter(function(t){ return t.tipo === 'suporte'; }); }
 // Situação de cada aluna: já tem grupo, está na fila, ou não tem
 function situacaoSuporteDaAluna(a){
+  if(a.alunaDeTeste){ // a de teste pode criar de novo sempre que quiser; só fica "na fila" enquanto o grupo dela está saindo
+    const naFila = tarefasDeSuporte().some(function(t){ return t.status !== 'cancelada' && itensDaTarefa(t.id).some(function(i){ return i.aluna_nome === a.nome && (i.status === 'na_fila' || i.status === 'processando'); }); });
+    return naFila ? { tipo: 'fila' } : { tipo: 'sem' };
+  }
   if(gruposDeSuporte[a.nome]) return { tipo: 'tem', em: gruposDeSuporte[a.nome].em };
   let achou = null;
   tarefasDeSuporte().filter(function(t){ return !t.teste; }).forEach(function(t){
@@ -10049,12 +10064,13 @@ function abrirGruposDeSuporte(){ cg.tela = 'suporte'; renderControleGrupos(); ca
 function marcarSuporte(i, marcar){ const a = alunasParaSuporte()[i]; if(!a) return; if(marcar) marcadasSuporte[a.nome] = true; else delete marcadasSuporte[a.nome]; renderControleGrupos(); }
 function marcarTodasSemGrupoSuporte(marcar){
   marcadasSuporte = {};
-  if(marcar) alunasParaSuporte().forEach(function(a){ if(situacaoSuporteDaAluna(a).tipo === 'sem') marcadasSuporte[a.nome] = true; });
+  if(marcar) alunasParaSuporte().forEach(function(a){ if(!a.alunaDeTeste && situacaoSuporteDaAluna(a).tipo === 'sem') marcadasSuporte[a.nome] = true; });
   renderControleGrupos();
 }
 function htmlGruposDeSuporte(){
   const lista = alunasParaSuporte(), sit = lista.map(situacaoSuporteDaAluna);
-  const nTem = sit.filter(function(x){ return x.tipo === 'tem'; }).length, nFila = sit.filter(function(x){ return x.tipo === 'fila'; }).length;
+  const reais = lista.filter(function(a){ return !a.alunaDeTeste; });
+  const nTem = sit.filter(function(x, i){ return !lista[i].alunaDeTeste && x.tipo === 'tem'; }).length, nFila = sit.filter(function(x, i){ return !lista[i].alunaDeTeste && x.tipo === 'fila'; }).length;
   const marcadas = lista.filter(function(a, i){ return marcadasSuporte[a.nome] && sit[i].tipo === 'sem'; });
   const dt = function(iso){ return iso ? new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : ''; };
   let h = '<div class="local-back" onclick="voltarPraListaDeGrupos()"><i class="ti ti-arrow-left"></i><span>Seus grupos</span></div>' +
@@ -10063,10 +10079,14 @@ function htmlGruposDeSuporte(){
     '<div class="info-box" style="margin:12px 0;"><p class="txt" style="margin:0 0 8px;"><b>Primeiro, o teste:</b> cria "Teste · Time DNA Musa" só com você e a Bianca, com a boas-vindas. Confira no WhatsApp se ficou certo antes de criar os das alunas.</p>' +
       '<button class="btn-gold" onclick="criarGrupoDeTesteSuporte()">Criar grupo de teste</button></div>' +
     '<details style="margin-bottom:12px;"><summary class="txt" style="cursor:pointer;color:var(--gold-soft);">Ver a boas-vindas</summary><pre style="white-space:pre-wrap;font-family:inherit;font-size:12px;line-height:1.45;margin:8px 0 0;">' + escaparHtmlFicha(CONFIG_SUPORTE.mensagem.replace(/\{nome\}/g, 'Ana')) + '</pre></details>' +
-    '<p class="section-label">' + nTem + ' de ' + lista.length + ' com grupo' + (nFila ? ' · ' + nFila + ' na fila' : '') + '</p>' +
+    '<p class="section-label">' + nTem + ' de ' + reais.length + ' com grupo' + (nFila ? ' · ' + nFila + ' na fila' : '') + '</p>' +
     '<div class="cg-barra" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:8px;"><a style="color:var(--gold);cursor:pointer;font-size:12.5px;" onclick="marcarTodasSemGrupoSuporte(true)">Marcar todas sem grupo</a><a style="color:var(--text-faint);cursor:pointer;font-size:12.5px;" onclick="marcarTodasSemGrupoSuporte(false)">Desmarcar</a></div>';
   h += lista.map(function(a, i){
     const x = sit[i];
+    if(a.alunaDeTeste) return '<label class="et-lin" style="display:flex;align-items:center;gap:10px;border:1px dashed rgba(221,182,115,0.4);border-radius:10px;padding:8px 10px;margin-bottom:6px;">' +
+      (x.tipo === 'sem' ? '<input type="checkbox"' + (marcadasSuporte[a.nome] ? ' checked' : '') + ' onchange="marcarSuporte(' + i + ',this.checked)">' : '<span style="width:16px;"></span>') +
+      '<span style="flex:1;"><b>' + escaparHtmlFicha(a.nome) + '</b><small>teu número · grupo "Thiago · Time DNA Musa" igual ao de uma aluna · pode criar de novo quando quiser</small></span>' +
+      (x.tipo === 'fila' ? '<span class="tag">Na fila</span>' : '<button class="pg-b" onclick="event.stopPropagation();criarGrupoSuporteDaAluna(' + JSON.stringify(a.nome).replace(/"/g, '&quot;') + ')">Criar agora</button>') + '</label>';
     const rotulo = x.tipo === 'tem' ? '<span class="tag" style="color:var(--success);">Tem grupo' + (x.em ? ' · ' + dt(x.em) : '') + '</span>'
       : x.tipo === 'fila' ? '<span class="tag">' + (x.pausada ? 'Fila pausada' : 'Na fila · ' + dt(x.em)) + '</span>'
       : x.tipo === 'semtel' ? '<span class="tag" style="color:#C9784A;">Sem telefone</span>'
@@ -11932,7 +11952,7 @@ function renderProgressao(a){
     if(registros.length === 0) return;
     logHtml += '<p style="font-size:12px;font-weight:600;color:var(--text-dim);margin:10px 0 6px;">' + nomeEx + '</p>';
     registros.forEach(function(r){
-      logHtml += '<div class="list-item"><span>Semana ' + r.semana + ' · ' + r.carga + 'kg × ' + r.reps + ' reps</span><span class="tag">' + r.sugestao.texto + ' → ' + r.sugestao.valor + 'kg</span></div>';
+      logHtml += '<div class="list-item"><span>Semana ' + r.semana + ' · ' + r.carga + 'kg × ' + r.reps + ' reps</span><span class="tag">' + (r.sugestao ? r.sugestao.texto + ' → ' + r.sugestao.valor + 'kg' : 'registrado') + '</span></div>';
     });
   });
   if(!logHtml){
@@ -13141,6 +13161,8 @@ function montarDadosExtrasDaAluna(a){
     duracaoPlanoDias: a.duracaoPlanoDias || null,
     valorPlano: a.valorPlano != null ? a.valorPlano : null,
     statusPagamento: a.statusPagamento || null,
+    planoFechadoEm: a.planoFechadoEm || null, // dia em que o plano (ou a renovação) foi fechado: conta no faturamento desse mês
+    renovacoes: a.renovacoes || [],          // histórico de planos: cada renovação com início, duração, valor e pagamento
     tabataSugestaoRespondida: a.tabataSugestaoRespondida || false,
     composicaoAtual: a.composicaoAtual || null,
     queixaDor: a.queixaDor || false,
@@ -17106,9 +17128,162 @@ function confirmarTransformarEmTabata(nomeAluna){
 // Nada saiu da ficha: cada parte que já existia só mudou de lugar.
 let abaFichaAtual = 'geral';
 let fichaAbertaNome = null;
+// ===== PLANO, RENOVAÇÃO E ABAS NOVAS DA FICHA (22/11) =====
+// Renovar: calendário (começa no dia seguinte ao fim do plano atual), 3/6/12 meses ou outro, valor da tabela de preços
+// (dá pra mudar na hora) e pago ou pendente. A renovação vai pro histórico de planos, conta no faturamento do mês em
+// que foi fechada e coloca a aluna sozinha no Funil de relacionamento, na etapa "Início" (o funil é calculado pela data
+// de início e pela duração do plano). Valores e pagamento só aparecem pro Thiago.
+const PRECOS_PADRAO_PLANOS = { '90': 497, '180': 797, '365': 897 };
+let precosDosPlanos = Object.assign({}, PRECOS_PADRAO_PLANOS);   // a tabela fica no Faturamento (catálogo "precos_planos")
+const NOMES_DURACAO_PLANO = { '30': 'Mensal', '90': 'Trimestral', '180': 'Semestral', '365': 'Anual' };
+let renovacaoAberta = null; // { nome, inicio, dias, valor, pagamento }
+
+function veValoresDoPlano(){ return NOME_PERSONAL_LOGADO !== 'Bianca'; }
+function isoMaisDias(iso, dias){ const p = String(iso).slice(0, 10).split('-'); const d = new Date(+p[0], +p[1] - 1, +p[2]); d.setDate(d.getDate() + dias); return dataLocalISO(d); }
+function fimDoPlanoISO(a){ return a.dataFechouPlano && a.duracaoPlanoDias ? isoMaisDias(a.dataFechouPlano, parseInt(a.duracaoPlanoDias, 10)) : null; }
+function dataBR(iso){ const p = String(iso || '').slice(0, 10).split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : ''; }
+function nomeDaDuracao(dias){ return NOMES_DURACAO_PLANO[String(dias)] || (dias ? dias + ' dias' : ''); }
+function etapaDoFunilDaAluna(a){
+  const nomes = { inicio: 'Início', meio: 'Meio', fim: 'Fim', recuperacao: 'Remarketing' };
+  const e = ['inicio', 'meio', 'fim', 'recuperacao'].find(function(x){ try { return alunaNoEstagioFunil(a, x); } catch(err){ return false; } });
+  return e ? nomes[e] : null;
+}
+const NAO_INFORMADO = '<span style="color:var(--text-faint);font-style:italic;">não informado</span>';
+function valorOuNaoInformado(v){ return (v == null || String(v).trim() === '') ? NAO_INFORMADO : escaparHtmlFicha(String(v)); }
+
+function htmlCardPlanoDaFicha(a){
+  const nomeJs = String(a.nome).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  const fim = fimDoPlanoISO(a), faltam = diasAteVencerPlano(a, Date.now()), etapa = etapaDoFunilDaAluna(a);
+  const linha = function(r, v){ return '<div style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding:5px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-faint);">' + r + '</span><span style="text-align:right;">' + v + '</span></div>'; };
+  let h = '<div class="info-box" id="card-plano-ficha" style="margin-bottom:14px;border-color:rgba(221,182,115,0.4);"><p style="font-size:14px;font-weight:700;margin:0 0 8px;">Plano</p>';
+  if(a.dataFechouPlano && a.duracaoPlanoDias){
+    h += linha('Tipo', escaparHtmlFicha(nomeDaDuracao(a.duracaoPlanoDias))) + linha('Período', dataBR(a.dataFechouPlano) + ' a ' + dataBR(fim)) +
+      linha(faltam !== null && faltam < 0 ? 'Venceu há' : 'Faltam', faltam === null ? NAO_INFORMADO : '<b style="color:' + (faltam < 0 ? '#C9784A' : faltam <= 30 ? '#E2A33D' : 'inherit') + ';">' + Math.abs(faltam) + (Math.abs(faltam) === 1 ? ' dia' : ' dias') + '</b>') +
+      linha('Etapa no funil', etapa ? escaparHtmlFicha(etapa) : NAO_INFORMADO) +
+      (veValoresDoPlano() ? linha('Valor', a.valorPlano != null ? formatarReaisPainel(a.valorPlano) + ' · ' + (a.statusPagamento === 'pendente' ? '<b style="color:#E2A33D;">pendente</b>' : 'pago') : NAO_INFORMADO) : '');
+  } else h += '<p class="txt" style="margin:0 0 6px;">Plano ' + NAO_INFORMADO + '. Use "Renovar plano" pra registrar o plano dela.</p>';
+  h += '<div style="display:flex;gap:8px;margin-top:10px;"><button class="btn-gold" style="width:auto;padding:8px 16px;" onclick="abrirRenovacaoDoPlano(\'' + nomeJs + '\')">Renovar plano</button></div>';
+  if(renovacaoAberta && renovacaoAberta.nome === a.nome) h += htmlFormularioRenovacao(a);
+  return h + '</div>';
+}
+function abrirRenovacaoDoPlano(nome){
+  const a = alunasPersonal.find(function(x){ return x.nome === nome; });
+  if(!a) return false;
+  if(renovacaoAberta && renovacaoAberta.nome === nome){ renovacaoAberta = null; redesenharCardDoPlano(a); return true; }
+  const fim = fimDoPlanoISO(a), hoje = dataLocalISO(new Date());
+  const inicio = fim && fim >= hoje ? fim : hoje; // começa no dia seguinte ao fim do plano atual (o fim é o primeiro dia sem plano)
+  renovacaoAberta = { nome: nome, inicio: inicio, dias: 90, valor: precosDosPlanos['90'], pagamento: 'pendente' };
+  redesenharCardDoPlano(a);
+  return true;
+}
+function redesenharCardDoPlano(a){
+  const el = document.getElementById('card-plano-ficha');
+  if(el && el.outerHTML !== undefined){ try { el.outerHTML = htmlCardPlanoDaFicha(a); return; } catch(e){} }
+  const i = alunasPersonal.indexOf(a); if(i !== -1) openAlunaDetail(i);
+}
+function mudarRenovacao(campo, valor){
+  if(!renovacaoAberta) return;
+  const a = alunasPersonal.find(function(x){ return x.nome === renovacaoAberta.nome; });
+  if(campo === 'dias'){ const d = parseInt(valor, 10); if(d > 0){ renovacaoAberta.dias = d; if(precosDosPlanos[String(d)] != null) renovacaoAberta.valor = precosDosPlanos[String(d)]; } }
+  if(campo === 'outro'){ const d = parseInt(valor, 10); if(d > 0) renovacaoAberta.dias = d; }
+  if(campo === 'inicio' && /^\d{4}-\d{2}-\d{2}$/.test(valor)) renovacaoAberta.inicio = valor;
+  if(campo === 'valor'){ const v = parseCargaBR(String(valor)); renovacaoAberta.valor = isNaN(v) ? null : v; }
+  if(campo === 'pagamento') renovacaoAberta.pagamento = valor === 'pago' ? 'pago' : 'pendente';
+  if(a && campo !== 'valor') redesenharCardDoPlano(a);
+}
+function htmlFormularioRenovacao(a){
+  const r = renovacaoAberta, nomeJs = String(a.nome).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  const opc = [['90', '3 meses'], ['180', '6 meses'], ['365', '12 meses · só em lançamento']];
+  const fimNovo = isoMaisDias(r.inicio, r.dias);
+  return '<div id="form-renovacao" style="margin-top:12px;background:rgba(221,182,115,0.06);border:1px solid rgba(221,182,115,0.45);border-radius:14px;padding:12px;">' +
+    '<p style="font-size:13px;font-weight:700;margin:0 0 8px;">Renovar plano</p>' +
+    '<label class="form-label" style="font-size:11.5px;">Começa em</label><input class="form-input" type="date" style="width:auto;font-size:13px;padding:6px 10px;" value="' + r.inicio + '" onchange="mudarRenovacao(\'inicio\', this.value)">' +
+    '<p class="form-label" style="font-size:11.5px;margin:10px 0 6px;">Por quanto tempo</p><div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+      opc.map(function(o){ return '<span class="chip' + (String(r.dias) === o[0] ? ' active' : '') + '" style="cursor:pointer;" onclick="mudarRenovacao(\'dias\', ' + o[0] + ')">' + o[1] + '</span>'; }).join('') +
+      '<span class="chip' + (opc.some(function(o){ return String(r.dias) === o[0]; }) ? '' : ' active') + '" style="cursor:pointer;" onclick="var d = prompt(\'Quantos dias?\', \'' + r.dias + '\'); if(d) mudarRenovacao(\'outro\', d)">Outro' + (opc.some(function(o){ return String(r.dias) === o[0]; }) ? '' : ' · ' + r.dias + ' dias') + '</span></div>' +
+    (veValoresDoPlano() ? '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;align-items:flex-end;">' +
+      '<div><label class="form-label" style="font-size:11.5px;">Valor (R$)</label><input class="form-input" style="width:120px;font-size:13px;padding:6px 10px;" inputmode="decimal" value="' + (r.valor != null ? String(r.valor).replace('.', ',') : '') + '" onchange="mudarRenovacao(\'valor\', this.value)"></div>' +
+      '<div style="display:flex;gap:6px;">' + ['pendente', 'pago'].map(function(p){ return '<span class="chip' + (r.pagamento === p ? ' active' : '') + '" style="cursor:pointer;" onclick="mudarRenovacao(\'pagamento\', \'' + p + '\')">' + (p === 'pago' ? 'Pago' : 'Pendente') + '</span>'; }).join('') + '</div></div>' : '') +
+    '<p class="txt" style="font-size:12px;margin:10px 0 0;">Novo período: ' + dataBR(r.inicio) + ' a ' + dataBR(fimNovo) + ' · entra no funil em "Início"</p>' +
+    '<div style="display:flex;gap:8px;margin-top:10px;"><button class="btn-gold" style="width:auto;padding:8px 16px;" onclick="confirmarRenovacaoDoPlano(\'' + nomeJs + '\')">Confirmar renovação</button>' +
+    '<button class="btn-secondary" style="width:auto;padding:8px 16px;" onclick="abrirRenovacaoDoPlano(\'' + nomeJs + '\')">Cancelar</button></div></div>';
+}
+function confirmarRenovacaoDoPlano(nome){
+  const a = alunasPersonal.find(function(x){ return x.nome === nome; });
+  const r = renovacaoAberta;
+  if(!a || !r || r.nome !== nome) return false;
+  const anterior = a.dataFechouPlano ? { inicio: a.dataFechouPlano, dias: a.duracaoPlanoDias || null, valor: a.valorPlano != null ? a.valorPlano : null, pagamento: a.statusPagamento || null, fechadoEm: a.planoFechadoEm || null } : null;
+  const hoje = dataLocalISO(new Date());
+  a.renovacoes = (a.renovacoes || []);
+  if(anterior && !a.renovacoes.some(function(x){ return x.inicio === anterior.inicio; })) a.renovacoes.push(Object.assign({ tipo: 'plano anterior' }, anterior));
+  a.renovacoes.push({ tipo: anterior ? 'renovação' : 'plano', inicio: r.inicio, dias: r.dias, valor: veValoresDoPlano() ? r.valor : (a.valorPlano != null ? a.valorPlano : null), pagamento: r.pagamento, fechadoEm: hoje, por: NOME_PERSONAL_LOGADO || '' });
+  a.dataFechouPlano = r.inicio;
+  a.duracaoPlanoDias = r.dias;
+  if(veValoresDoPlano()){ a.valorPlano = r.valor; a.statusPagamento = r.pagamento; }
+  a.planoFechadoEm = hoje;
+  delete a.estagioFunilManual;           // o funil volta a ser calculado: começa em "Início"
+  a.statusPlanoManual = 'ativas';        // renovou: está ativa
+  renovacaoAberta = null;
+  try { salvarPerfilAlunaNoSupabase(nome); } catch(e){}
+  mostrarConfirmacaoSalvamento(true, 'Plano renovado: ' + dataBR(a.dataFechouPlano) + ' a ' + dataBR(fimDoPlanoISO(a)) + '. Ela entrou no funil em "Início".');
+  const i = alunasPersonal.indexOf(a); if(i !== -1) openAlunaDetail(i);
+  try { renderAlunas(); } catch(e){}
+  return true;
+}
+
+// Aba "Plano e dados": plano + histórico de planos, a anamnese e os dados (o que nunca foi preenchido aparece como não informado)
+function htmlPlanoEDados(a){
+  const linha = function(r, v){ return '<div style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-faint);">' + r + '</span><span style="text-align:right;">' + v + '</span></div>'; };
+  const hist = (a.renovacoes || []).slice().reverse();
+  let h = '<p class="section-label" style="margin-top:4px;">Histórico de planos</p><div class="info-box">' +
+    (hist.length ? hist.map(function(x){ return linha(dataBR(x.fechadoEm || x.inicio) + ' · ' + escaparHtmlFicha(x.tipo || 'plano'), escaparHtmlFicha(nomeDaDuracao(x.dias)) + ' · ' + dataBR(x.inicio) + ' a ' + dataBR(isoMaisDias(x.inicio, x.dias || 0)) +
+      (veValoresDoPlano() && x.valor != null ? ' · ' + formatarReaisPainel(x.valor) + (x.pagamento === 'pendente' ? ' (pendente)' : '') : '')); }).join('')
+      : '<p class="txt" style="margin:0;">Nenhuma renovação registrada ainda. As próximas aparecem aqui.</p>') + '</div>';
+  h += '<p class="section-label" style="margin-top:16px;">Anamnese</p><div class="info-box">' +
+    linha('Respondida em', a.dataAnamnese ? dataBR(a.dataAnamnese) : NAO_INFORMADO) + linha('Objetivo', valorOuNaoInformado(a.objetivo)) + linha('Pirâmide', valorOuNaoInformado(a.piramide)) +
+    linha('Restrições', valorOuNaoInformado(a.restricoes)) + linha('Academia', valorOuNaoInformado(a.academia)) + linha('Frequência', valorOuNaoInformado(a.freq)) + '</div>';
+  h += '<p class="section-label" style="margin-top:16px;">Dados</p><div class="info-box">' +
+    linha('E-mail', valorOuNaoInformado(a.email)) + linha('Telefone', valorOuNaoInformado(a.telefone)) + linha('Data de nascimento', a.dataNascimento ? dataBR(a.dataNascimento) : NAO_INFORMADO) +
+    linha('Peso inicial', a.peso ? escaparHtmlFicha(String(a.peso)) + ' kg' : NAO_INFORMADO) + linha('Altura', a.altura ? escaparHtmlFicha(String(a.altura)) + ' m' : NAO_INFORMADO) +
+    '<p class="txt" style="font-size:11.5px;margin:8px 0 0;">Pra editar: "Resumo completo", na aba Treino.</p></div>';
+  return h;
+}
+
+// Aba "Cargas e evolução": cada exercício do treino atual com as últimas cargas (e o método de cada uma)
+function htmlCargasEEvolucao(a){
+  const prog = getProgressoAluna(a.nome);
+  const nomes = [];
+  ((a.treinoAtual || {}).dias || []).forEach(function(d){ if(!d || d.descanso) return; (d.ex || []).forEach(function(l){ extrairTodosNomesDeLinha(l).forEach(function(n){ if(nomes.indexOf(n) === -1) nomes.push(n); }); }); });
+  if(!nomes.length) return '<p class="txt">Ela ainda não tem treino.</p>';
+  const linhas = nomes.map(function(n){
+    const regs = todosRegistrosDoExercicio(prog, n).slice(-6);
+    const celulas = regs.map(function(r){ const m = metodoDoRegistro(r, ''); return '<span style="display:inline-block;margin:0 10px 2px 0;">' + dataCurtaDoRegistro(prog, r) + ': <b>' + String(r.carga).replace('.', ',') + ' kg</b>' + (m ? ' <small style="color:var(--gold-soft);">' + escaparHtmlFicha(m) + '</small>' : '') + '</span>'; }).join('');
+    return '<div style="padding:8px 0;border-bottom:1px solid var(--border);"><p style="font-size:13px;font-weight:600;margin:0 0 3px;">' + escaparHtmlFicha(n) + '</p><div style="font-size:12px;color:var(--text-dim);">' + (celulas || '<span style="color:var(--text-faint);font-style:italic;">nenhum registro de carga</span>') + '</div></div>';
+  }).join('');
+  return '<p class="section-label" style="margin-top:4px;">Últimas cargas de cada exercício do treino atual</p><div class="info-box">' + linhas + '</div>';
+}
+
+// Aba "Histórico": uma linha do tempo só, com treinos registrados, cargas, feedbacks, progressões, planos e a anamnese
+function eventosDaAluna(a){
+  const prog = getProgressoAluna(a.nome), ev = [];
+  (prog.horariosTreino || []).forEach(function(h){ if(h && h.data) ev.push({ em: h.data, tipo: 'Treino', texto: 'Registrou o treino de ' + (h.dia || '') + (h.origem === 'aula_presencial' ? ' (aula presencial)' : '') }); });
+  (prog.feedbackTreino || []).forEach(function(f){ if(f && f.data) ev.push({ em: f.data, tipo: f.desconforto ? 'Desconforto' : 'Feedback', texto: (f.desconforto ? 'Desconforto' + (f.exercicio ? ' no ' + f.exercicio : '') + (f.escalaDesconforto != null ? ', nível ' + f.escalaDesconforto : '') : 'Feedback' + (typeof f.intensidade === 'number' ? ': intensidade ' + f.intensidade : '')) + (f.comentario ? ' · "' + f.comentario + '"' : '') }); });
+  if(a.ultimaProgressao && a.ultimaProgressao.em) ev.push({ em: a.ultimaProgressao.em, tipo: 'Progressão', texto: 'Progressão do treino' + (a.ultimaProgressao.por ? ' por ' + a.ultimaProgressao.por : '') + ' · ' + ((a.ultimaProgressao.mudancas || []).filter(function(m){ return m.tipo !== 'mantem' && m.tipo !== 'aviso'; }).length) + ' mudanças' });
+  (a.renovacoes || []).forEach(function(r){ if(r.tipo === 'plano anterior') return; ev.push({ em: (r.fechadoEm || r.inicio) + 'T12:00:00', tipo: 'Plano', texto: (r.tipo === 'renovação' ? 'Renovou o plano' : 'Fechou o plano') + ': ' + nomeDaDuracao(r.dias) + ', ' + dataBR(r.inicio) + ' a ' + dataBR(isoMaisDias(r.inicio, r.dias || 0)) }); });
+  if(a.dataAnamnese) ev.push({ em: String(a.dataAnamnese).slice(0, 10) + 'T12:00:00', tipo: 'Anamnese', texto: 'Respondeu a anamnese' });
+  return ev.filter(function(e){ return !isNaN(new Date(e.em)); }).sort(function(x, y){ return new Date(y.em) - new Date(x.em); });
+}
+function htmlLinhaDoTempoCompleta(a){
+  const ev = eventosDaAluna(a).slice(0, 40);
+  if(!ev.length) return '<p class="txt">Nada registrado ainda.</p>';
+  return '<div class="info-box">' + ev.map(function(e){ const d = new Date(e.em);
+    return '<div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid var(--border);font-size:12.5px;"><span style="color:var(--text-faint);width:62px;flex-shrink:0;">' + String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '</span>' +
+      '<span style="flex:1;">' + escaparHtmlFicha(e.texto) + '</span><span class="tag" style="font-size:10.5px;">' + e.tipo + '</span></div>'; }).join('') + '</div>';
+}
+
 // Prescrição de treino junta o que eram 3 abas (Prescrição, Treino e o acesso): ajusta nível/frequência, gera,
 // ajusta a semana logo abaixo e manda pelo WhatsApp no fim. Histórico fica só com o acompanhamento.
-const ABAS_DA_FICHA = [['geral', 'Visão geral'], ['treino', 'Prescrição de treino'], ['historico', 'Histórico']];
+const ABAS_DA_FICHA = [['geral', 'Visão geral'], ['treino', 'Treino'], ['cargas', 'Cargas e evolução'], ['plano', 'Plano e dados'], ['historico', 'Histórico']];
 
 function abasDaFicha(){
   return '<div class="ficha-abas">' + ABAS_DA_FICHA.map(function(x){
@@ -17364,6 +17539,7 @@ function openAlunaDetail(i){
   el.innerHTML =
     cabecalhoFichaAluna(a) + abasDaFicha() +
     '<div class="ficha-sec" data-ficha="geral">' +
+    htmlCardPlanoDaFicha(a) +
     painelGeralDaFicha(a) +
     '<div id="resumo-ia-area" style="margin-bottom:18px;"></div>' +
     (objetivoSugereTabata(a) && !a.tabataSugestaoRespondida ? (
@@ -17455,7 +17631,10 @@ function openAlunaDetail(i){
     ) +
     '<div id="acesso-gerado-area"></div>' +
     '</div>' +
+    '<div class="ficha-sec" data-ficha="cargas">' + htmlCargasEEvolucao(a) + '</div>' +
+    '<div class="ficha-sec" data-ficha="plano">' + htmlPlanoEDados(a) + '</div>' +
     '<div class="ficha-sec" data-ficha="historico">' +
+    '<p class="section-label" style="margin-top:4px;">Linha do tempo</p>' + htmlLinhaDoTempoCompleta(a) +
     '<p class="section-label" style="margin-top:18px;">Linha do tempo das mensagens</p>' + htmlLinhaDoTempoDaAluna(a.nome, 5) +
     renderSecaoColapsavel('Acompanhamento e histórico', renderElegibilidadeFase(a) + renderFunilEngajamento(a) + renderLinhaDoTempo(a) + renderPromocaoNivel(a) + renderBlocoPeriodizacao(a) + renderHistoricoPrioridade(a) + renderEditorPesoComposicaoPersonal(a) + renderAvaliacoesPdfPersonal(a) + renderTecnicaPendente(a) + renderProgressao(a), 'acompanhamento') +
     '<p class="page-sub" style="margin-top:10px;">Anamnese respondida em ' + (a.dataAnamnese || 'data desconhecida') + '</p>' +
@@ -17651,7 +17830,7 @@ function gerarLinhaDoTempo(a){
 
   Object.keys(prog.historico || {}).forEach(function(nomeEx){
     prog.historico[nomeEx].forEach(function(r){
-      if(r.sugestao.texto === 'Aumentar carga'){
+      if(r.sugestao && r.sugestao.texto === 'Aumentar carga'){ // registro sem sugestão (feito por fora) não pode travar a ficha
         eventos.push({ semana: r.semana, icone: 'trending-up', texto: 'Progressão de carga em ' + nomeEx + ' → ' + r.sugestao.valor + 'kg' });
       }
     });
@@ -18398,90 +18577,82 @@ function renderFerramentasPersonal(){
   renderSidebarPersonal();
 }
 
+// ===== MENU DO LADO EM 6 ÁREAS (22/11) =====
+// Hoje, Alunas, Treinos, Conversas, Negócio e Biblioteca. A área da tela aberta mostra os itens dela embaixo; as outras
+// ficam fechadas, com a soma das contagens. Negócio (faturamento) é só do Thiago: a Bianca vê vencimentos e renovações
+// pelo Funil, na área Alunas.
+function areasDoMenuPersonal(){
+  const ehSuporte = NOME_PERSONAL_LOGADO === 'Bianca';
+  const areas = [
+    { id: 'hoje', nome: 'Hoje', icone: 'painel', itens: ehSuporte ? [['dashboard-suporte', 'Painel de suporte']] : [['dashboard', 'Painel do dia']] },
+    { id: 'alunas', nome: 'Alunas', icone: 'alunas', itens: [['alunas', 'Lista'], ['anamneses', 'Anamneses', 'side-badge-anamneses'], ['funil', 'Funil e renovações']] },
+    { id: 'treinos', nome: 'Treinos', icone: 'controle', itens: [['controle', 'Controle de treinos', 'side-badge-controle'], ['desafios', 'Desafios', 'side-badge-desafios'], ['ferramentas-treino', 'Ferramentas e auditorias']] },
+    { id: 'conversas', nome: 'Conversas', icone: 'conversa', itens: [['feedback-alunas', 'Feedback das alunas', 'side-badge-fb-alunas'], ['feedback-treinos', 'Feedback dos treinos', 'side-badge-fb-treinos'],
+      ['grupos', 'Grupos e suporte'], ['conversas', 'Conversas'], ['comunicacao', 'Comunicação'], ['envios', 'Envios em massa'], ['sinalizacoes', 'Sinalizações']].concat(ehSuporte ? [] : [['dashboard-suporte', 'Painel da Bianca']]) },
+    { id: 'negocio', nome: 'Negócio', icone: 'dinheiro', soThiago: true, itens: [['faturamento', 'Faturamento e preços'], ['relatorios', 'Relatórios da semana'], ['inteligencia', 'Inteligência de mercado']] },
+    { id: 'biblioteca', nome: 'Biblioteca', icone: 'livro', itens: [['exercicios', 'Exercícios'], ['treinos', 'Treinos prontos'], ['conteudo', 'Conteúdo'], ['mobilidade', 'Mobilidade'], ['patologias', 'Patologias'], ['desvios', 'Desvios posturais'], ['corrida', 'Corrida']] }
+  ];
+  return areas.filter(function(a){ return !(a.soThiago && ehSuporte); });
+}
+function areaDaTelaPersonal(view){
+  const a = areasDoMenuPersonal().find(function(x){ return x.itens.some(function(it){ return it[0] === view; }); });
+  if(a) return a.id;
+  return view === 'aluna' || view === 'resumo-aluna' ? 'alunas' : (view === 'aula-presencial' ? 'treinos' : null);
+}
+
 function renderSidebarPersonal(){
   const sidebar = document.getElementById('sidebar-personal');
   if(!sidebar || sidebar.dataset.rendered) return;
   sidebar.dataset.rendered = 'true';
-
-  // 3 grupos temáticos, pra não ficar uma lista enorme solta — cada um abre/fecha, e o grupo com a
-  // tela ativa já vem aberto sozinho (ver atualizarSidebarAtiva)
-  const grupos = [
-    { nome: 'Atendimento & Suporte', views: ['dashboard-suporte','sinalizacoes','conversas','controle'] },
-    { nome: 'Bancos de referência', views: ['exercicios','patologias','desvios','corrida'] },
-    { nome: 'Conteúdo pras alunas', views: ['conteudo','treinos','mobilidade'] }
-  ];
-
-  // Ícones desenhados no app (não dependem do pacote de fora) + contador de treinos pra enviar no Controle
-  const iconeDaTela = { sinalizacoes: 'coracao', conversas: 'conversa', controle: 'controle', exercicios: 'video', conteudo: 'livro', treinos: 'lista',
-    mobilidade: 'alongar', desafios: 'bandeira', patologias: 'cruz', desvios: 'postura', corrida: 'correr', alunas: 'alunas' };
-  const item = function(view, icone, titulo, extra){
-    return '<div class="side-item" data-side-view="' + view + '" onclick="showPersonalView(\'' + view + '\')">' + iconePainel(icone) + titulo + (extra || '') + '</div>';
-  };
-
-  const ehSuporte = NOME_PERSONAL_LOGADO === 'Bianca'; // login de suporte: painel próprio e Conversas perto do topo
+  const ehSuporte = NOME_PERSONAL_LOGADO === 'Bianca';
   let html = '<div class="side-logo">DNA MUSA<small>' + (ehSuporte ? 'PAINEL DE SUPORTE' : 'PAINEL DO PERSONAL') + '</small></div>';
-  html += ehSuporte ? item('dashboard-suporte', 'painel', 'Painel de suporte') : item('dashboard', 'painel', 'Painel');
-  html += item('alunas', 'alunas', 'Alunas');
-  html += item('anamneses', 'lista', 'Anamneses', '<span class="side-badge" id="side-badge-anamneses" style="display:none;"></span>');
-  if(ehSuporte) html += item('conversas', 'conversa', 'Conversas');
-  html += item('controle', 'controle', 'Controle de treinos', '<span class="side-badge" id="side-badge-controle" style="display:none;"></span>');
-  html += item('desafios', 'bandeira', 'Controle de desafios', '<span class="side-badge" id="side-badge-desafios" style="display:none;"></span>');
-  html += item('grupos', 'alunas', 'Controle de grupos');
-  html += item('feedback-treinos', 'lista', 'Feedback dos treinos', '<span class="side-badge" id="side-badge-fb-treinos" style="display:none;"></span>');
-  html += item('feedback-alunas', 'conversa', 'Feedback das alunas', '<span class="side-badge" id="side-badge-fb-alunas" style="display:none;"></span>');
-
-  grupos.forEach(function(grupo, gi){
-    const itensDoGrupo = ferramentasPersonal.filter(function(f){ return grupo.views.indexOf(f.view) !== -1 && f.view !== 'controle' && !(ehSuporte && f.view === 'conversas'); }); // os feedbacks ficam fora dos grupos, com número, como o Controle
-    html += '<div class="side-grupo-header" onclick="alternarGrupoSidebar(' + gi + ')" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:10px;margin-top:6px;border-radius:8px;">' +
-      '<span style="font-size:10.5px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-faint);">' + grupo.nome + '</span>' +
-      '<svg class="pn-ic" id="chevron-sidebar-grupo-' + gi + '" viewBox="0 0 24 24" style="width:13px;height:13px;color:var(--text-faint);transition:transform .2s;"><path d="M6 9l6 6 6-6"/></svg>' +
-    '</div>' +
-    '<div id="sidebar-grupo-' + gi + '" style="display:none;">' +
-      itensDoGrupo.map(function(f){
-        return '<div class="side-item" data-side-view="' + f.view + '" onclick="' + (f.acaoEspecial ? f.acaoEspecial + '()' : "showPersonalView('" + f.view + "')") + '">' + iconePainel(iconeDaTela[f.view]) + f.titulo + '</div>';
-      }).join('') +
-    '</div>';
+  areasDoMenuPersonal().forEach(function(area){
+    html += '<div class="side-item side-area" data-side-area="' + area.id + '" onclick="showPersonalView(\'' + area.itens[0][0] + '\')">' + iconePainel(area.icone) + area.nome +
+      '<span class="side-badge" id="side-badge-area-' + area.id + '" style="display:none;"></span></div>' +
+      '<div class="side-sub" id="side-sub-' + area.id + '" style="display:none;padding:0 0 6px 30px;">' +
+      area.itens.map(function(it){
+        return '<div class="side-item" data-side-view="' + it[0] + '" style="font-size:12.5px;padding:7px 10px;" onclick="showPersonalView(\'' + it[0] + '\')">' + it[1] +
+          (it[2] ? '<span class="side-badge" id="' + it[2] + '" style="display:none;"></span>' : '') + '</div>';
+      }).join('') + '</div>';
   });
-
-  // Equipe no rodapé do menu: quem está logado, a outra pessoa (online ou não) e Sair
+  // Equipe e conexão no rodapé do menu: quem está logado, a outra pessoa (online ou não), de quando são os dados, e Sair
   html += '<div class="side-equipe">' +
+    '<div id="side-conexao" style="font-size:11px;color:var(--text-faint);margin-bottom:8px;"></div>' +
     (NOME_PERSONAL_LOGADO ? '<div class="side-pessoa"><span class="pn-av" style="width:26px;height:26px;font-size:10px;">' + iniciaisDaAluna(NOME_PERSONAL_LOGADO) + '</span>' + NOME_PERSONAL_LOGADO + ' (você)' + (ehSuporte ? ' · suporte' : '') + '</div>' : '') +
     '<div id="area-presenca-equipe"></div>' +
     '<div class="side-item side-sair" onclick="goBack()">' + iconePainel('sair') + 'Sair</div>' +
   '</div>';
-
   sidebar.innerHTML = html;
   atualizarBadgesFeedback();
   atualizarBadgeDesafios();
 }
 
-function alternarGrupoSidebar(indice){
-  const el = document.getElementById('sidebar-grupo-' + indice);
-  const chevron = document.getElementById('chevron-sidebar-grupo-' + indice);
-  if(!el) return;
-  const abrindo = el.style.display === 'none';
-  el.style.display = abrindo ? 'block' : 'none';
-  if(chevron) chevron.style.transform = abrindo ? 'rotate(180deg)' : 'rotate(0deg)';
-}
+function alternarGrupoSidebar(indice){ return false; } // os grupos antigos do menu viraram as áreas
 
 function atualizarSidebarAtiva(which){
   const sidebar = document.getElementById('sidebar-personal');
   if(!sidebar) return;
+  const area = areaDaTelaPersonal(which);
   sidebar.querySelectorAll('.side-item').forEach(function(el){
-    el.classList.toggle('ativo', el.getAttribute('data-side-view') === which);
+    if(el.getAttribute('data-side-view')) el.classList.toggle('ativo', el.getAttribute('data-side-view') === which);
+    if(el.getAttribute('data-side-area')) el.classList.toggle('ativo', el.getAttribute('data-side-area') === area);
   });
-  // Sempre abre sozinho o grupo que contém a tela em que você está — assim nunca fica "escondida"
-  // dentro de um grupo fechado sem você perceber onde foi parar
-  const itemAtivo = sidebar.querySelector('.side-item.ativo[data-side-view="' + which + '"]');
-  if(itemAtivo){
-    const grupoPai = itemAtivo.closest('[id^="sidebar-grupo-"]');
-    if(grupoPai){
-      grupoPai.style.display = 'block';
-      const indice = grupoPai.id.replace('sidebar-grupo-', '');
-      const chevron = document.getElementById('chevron-sidebar-grupo-' + indice);
-      if(chevron) chevron.style.transform = 'rotate(180deg)';
-    }
-  }
+  areasDoMenuPersonal().forEach(function(a){
+    const sub = document.getElementById('side-sub-' + a.id);
+    if(sub) sub.style.display = a.id === area ? 'block' : 'none';
+  });
+  atualizarBadgesDasAreas();
+  const con = document.getElementById('side-conexao');
+  if(con) con.innerHTML = textoDaConexaoDoPainel();
+}
+// A área fechada mostra a soma das contagens dos itens dela
+function atualizarBadgesDasAreas(){
+  areasDoMenuPersonal().forEach(function(a){
+    let soma = 0;
+    a.itens.forEach(function(it){ const b = it[2] && document.getElementById(it[2]); if(b && b.style.display !== 'none') soma += parseInt(b.textContent, 10) || 0; });
+    const el = document.getElementById('side-badge-area-' + a.id);
+    if(el){ el.textContent = soma; el.style.display = soma > 0 ? 'inline-block' : 'none'; }
+  });
 }
 
 // A anamnese guarda a data em formato brasileiro (dd/mm/aaaa, às vezes com pontos, dois pontos, ou
@@ -18610,6 +18781,7 @@ function showPersonalView(which){
   // A Bianca nunca vê a 1ª Dashboard (a do Thiago) — qualquer tentativa de ir pra 'dashboard'
   // (inclusive os links "Voltar ao Painel" espalhados pelo app) já redireciona pra 2ª Dashboard dela.
   if(which === 'dashboard' && NOME_PERSONAL_LOGADO === 'Bianca') which = 'dashboard-suporte';
+  if(which === 'faturamento' && NOME_PERSONAL_LOGADO === 'Bianca') which = 'dashboard-suporte'; // faturamento é só do Thiago
   renderFerramentasPersonal();
   atualizarSidebarAtiva(which);
   telaPersonalAtual = which;
@@ -19825,6 +19997,8 @@ async function carregarCatalogoPersonal(forcar){
       } else if(row.tipo === 'envio_massa'){
         const atual = enviosEmMassa[row.chave];
         if(row.chave && row.dados && row.dados.ordem && !enviosRodandoAgora[row.chave] && (!atual || String(row.dados.atualizadoEm || '') >= String(atual.atualizadoEm || ''))) enviosEmMassa[row.chave] = row.dados;
+      } else if(row.tipo === 'precos_planos'){
+        if(row.dados) ['90', '180', '365'].forEach(function(k){ if(typeof row.dados[k] === 'number') precosDosPlanos[k] = row.dados[k]; });
       } else if(row.tipo === 'grupo_suporte'){
         if(row.chave && row.dados) gruposDeSuporte[row.chave] = row.dados;
       } else if(row.tipo === 'grupo_desafio'){
@@ -23959,7 +24133,7 @@ function calcularMetricasNegocio(){
   const mesAtual = hoje.getMonth(), anoAtual = hoje.getFullYear();
   const faturamentoMes = alunasPersonal.reduce(function(soma, a){
     if(!a.dataFechouPlano || a.valorPlano == null) return soma;
-    const dataFechou = new Date(a.dataFechouPlano + 'T00:00:00');
+    const dataFechou = new Date(String(a.planoFechadoEm || a.dataFechouPlano).slice(0, 10) + 'T00:00:00');
     if(dataFechou.getMonth() === mesAtual && dataFechou.getFullYear() === anoAtual) return soma + a.valorPlano;
     return soma;
   }, 0);
@@ -23992,7 +24166,33 @@ function renderFaturamentoMetas(){
     '<div class="alert-row" style="grid-template-columns:1fr;margin-bottom:14px;">' +
       '<div class="alert-stat"><p class="num">R$ ' + faturamentoFormatado + '</p><p class="lbl2">Faturamento do mês</p></div>' +
     '</div>' +
+    htmlFechamentosDoMes() +
+    htmlTabelaDePrecos() +
     renderMetaFinanceiraConteudo(m);
+}
+// Fechado no mês (planos e renovações pelo dia em que foram fechados), separando pago e pendente
+function htmlFechamentosDoMes(){
+  const hoje = new Date(), mes = dataLocalISO(hoje).slice(0, 7);
+  const doMes = alunasPersonal.filter(function(a){ return a.valorPlano != null && a.dataFechouPlano && String(a.planoFechadoEm || a.dataFechouPlano).slice(0, 7) === mes; });
+  const pago = doMes.filter(function(a){ return a.statusPagamento !== 'pendente'; }).reduce(function(t, a){ return t + a.valorPlano; }, 0);
+  const pend = doMes.filter(function(a){ return a.statusPagamento === 'pendente'; });
+  return '<div class="info-box" style="margin-bottom:14px;"><p style="font-size:14px;font-weight:700;margin:0 0 6px;">Fechado nesse mês</p>' +
+    '<p class="txt" style="margin:0;">' + doMes.length + (doMes.length === 1 ? ' plano' : ' planos') + ' · ' + formatarReaisPainel(pago) + ' pago · ' + formatarReaisPainel(pend.reduce(function(t, a){ return t + a.valorPlano; }, 0)) + ' pendente' + '</p>' +
+    (pend.length ? '<p class="txt" style="font-size:12px;margin:6px 0 0;color:#E2A33D;">Pendentes: ' + pend.map(function(a){ return escaparHtmlFicha(a.nome); }).join(', ') + '</p>' : '') + '</div>';
+}
+// Tabela de preços (só do Thiago): vem preenchida na renovação, dá pra mudar a qualquer momento
+function htmlTabelaDePrecos(){
+  const campo = function(dias, rotulo){ return '<div style="flex:1;min-width:130px;"><label class="form-label" style="font-size:11.5px;">' + rotulo + '</label><input class="form-input" inputmode="decimal" style="font-size:13px;padding:6px 10px;" value="' + String(precosDosPlanos[dias] != null ? precosDosPlanos[dias] : '').replace('.', ',') + '" onchange="salvarPrecoDoPlano(\'' + dias + '\', this.value)"></div>'; };
+  return '<div class="info-box" style="margin-bottom:14px;"><p style="font-size:14px;font-weight:700;margin:0 0 8px;">Tabela de preços</p><div style="display:flex;gap:10px;flex-wrap:wrap;">' +
+    campo('90', 'Trimestral (R$)') + campo('180', 'Semestral (R$)') + campo('365', 'Anual, só em lançamento (R$)') + '</div></div>';
+}
+function salvarPrecoDoPlano(dias, valor){
+  const v = parseCargaBR(String(valor));
+  if(isNaN(v) || v < 0) return false;
+  precosDosPlanos[dias] = v;
+  salvarCatalogoPersonalConferindo('precos_planos', 'tabela', Object.assign({}, precosDosPlanos, { em: new Date().toISOString() }));
+  mostrarConfirmacaoSalvamento(true, 'Preço salvo.');
+  return true;
 }
 
 // Ícone + rótulo + descrição curta, cada linha abrindo sua própria tela — substitui o formato antigo
@@ -24006,6 +24206,7 @@ function renderAtalhosDashboard(){
     { view: 'faturamento', icone: 'ti-cash', titulo: 'Faturamento & Metas', desc: 'Meta do mês e sugestões pra bater' }
   ];
   function montarHtml(lista){
+    lista = lista.filter(function(a){ return !(a.view === 'faturamento' && NOME_PERSONAL_LOGADO === 'Bianca'); }); // faturamento é só do Thiago
     return lista.map(function(a){
       return '<div class="list-item" style="cursor:pointer;margin-bottom:8px;" onclick="showPersonalView(\'' + a.view + '\')">' +
         '<span style="display:flex;align-items:center;gap:12px;">' +
@@ -24124,6 +24325,40 @@ function fichaDoNomeDoErro(quem){
   return alunasPersonal.find(function(a){ return semAcentoMinusculo(a.nomeBase || a.nome).trim() === alvo || semAcentoMinusculo(a.nome).trim() === alvo; }) || null;
 }
 
+// Os dados do servidor já chegaram nessa sessão? Sem eles (sem internet), as telas dizem "sem conexão" em vez de zero.
+// Sem servidor nenhum ligado (modo local de teste), vale o que está no aparelho.
+function dadosDoServidorCarregados(){
+  if(!supabaseClient) return true;
+  return !!(ultimaCargaDoPersonal && !(ultimaCargaDoPersonal.alunas && ultimaCargaDoPersonal.alunas.erro));
+}
+function textoDaConexaoDoPainel(){
+  if(!dadosDoServidorCarregados()) return '<span style="color:#C9784A;">● Sem conexão · os números podem estar desatualizados</span>';
+  const em = ultimaCargaDoPersonalEm ? new Date(ultimaCargaDoPersonalEm) : new Date();
+  return '<span style="color:var(--success);">●</span> Conectado · dados de ' + String(em.getHours()).padStart(2, '0') + ':' + String(em.getMinutes()).padStart(2, '0');
+}
+// Cards da direita do Hoje: Treinos (os 3 botões), mensagens dos desafios (▶/■) e grupos de suporte
+function renderCardsDoHoje(d){
+  const elA = document.getElementById('pn-acoes-treino');
+  if(elA) elA.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px;">' +
+    '<button class="pn-btn-gold" onclick="iniciarGeracaoOuProgressaoParaNaoEnviados()">Gerar treinos pendentes' + (d && d.paraEnviar && d.paraEnviar.paraGerar ? ' (' + d.paraEnviar.paraGerar + ')' : '') + '</button>' +
+    '<button class="pn-btn-gold pn-btn-sec" onclick="abrirEscolhaDeTreinos()">Progredir ou gerar, escolhendo as alunas</button>' +
+    '<button class="pn-btn-gold pn-btn-sec" onclick="abrirRelatorios()">Relatórios de 30 ou 90 dias</button></div>';
+  const elD = document.getElementById('pn-desafios-msg');
+  if(elD){
+    const ids = Object.keys(DESAFIOS_DO_APP).filter(function(id){ return gruposDosDesafios[id] && gruposDosDesafios[id].grupo; });
+    elD.innerHTML = ids.length ? ids.map(function(id){ return '<p style="font-size:12px;color:var(--text-faint);margin:0 0 4px;">' + escaparHtmlFicha(DESAFIOS_DO_APP[id].nome || id) + '</p>' + htmlPlayStopDoDesafio(id); }).join('')
+      : '<p class="pn-vazio" style="padding:4px 0;">Nenhum grupo de desafio ligado. Cole o link do grupo no Controle de desafios.</p>';
+  }
+  const elS = document.getElementById('pn-suporte');
+  if(elS){
+    const lista = alunasParaSuporte().filter(function(a){ return !a.alunaDeTeste; }), sit = lista.map(situacaoSuporteDaAluna);
+    const tem = sit.filter(function(x){ return x.tipo === 'tem'; }).length, fila = sit.filter(function(x){ return x.tipo === 'fila'; }).length;
+    const pct = lista.length ? Math.round(tem / lista.length * 100) : 0;
+    elS.innerHTML = '<p style="font-size:12.5px;margin:0 0 6px;">' + tem + ' de ' + lista.length + ' alunas com grupo' + (fila ? ' · ' + fila + ' na fila' : '') + '</p>' +
+      '<div class="pn-barra"><i style="width:' + pct + '%"></i></div>';
+  }
+}
+
 // Todos os números e a lista do painel, calculados de uma vez a partir das fichas (sem tocar em nada)
 function calcularPainelDoPersonal(agora){
   if(agora === undefined) agora = Date.now();
@@ -24153,6 +24388,14 @@ function calcularPainelDoPersonal(agora){
     paraEnviar: { total: amarelos.length + brancos.length, paraGerar: brancos.length, gerados: amarelos.length, maisAntigoDias: maisAntigoDias },
     controle: { verde: verdes.length, amarelo: amarelos.length, branco: brancos.length, total: ativas.length },
     faturamento: { valor: m.faturamentoMes, meta: meta, pct: meta > 0 ? Math.min(100, Math.round((m.faturamentoMes / meta) * 100)) : null },
+    renovacoes: (function(){ // planos que vencem nos próximos 30 dias (só quem tem data de plano de verdade)
+      const lista = alunasPersonal.filter(function(a){ const st = status(a); if(st !== 'ativas' && st !== 'porvencer') return false; const f = diasAteVencerPlano(a, agora); return f !== null && f >= 0 && f <= 30; });
+      return { total: lista.length, semana: lista.filter(function(a){ return diasAteVencerPlano(a, agora) <= 7; }).length };
+    })(),
+    anamneses: (function(){ // anamneses respondidas nos últimos 7 dias, com a data verdadeira da última
+      const lista = listaDeAnamneses().filter(function(a){ return diasDesdeAnamnese(a, agora) < 7; });
+      return { total: lista.length, ultima: lista[0] || null };
+    })(),
     atencao: montarItensAtencao(agora)
   };
 }
@@ -24358,16 +24601,19 @@ function renderPainelDoPersonal(agora){
   if(elKpis){
     const f = d.faturamento;
     const pe = d.paraEnviar;
+    // Só número de verdade: enquanto os dados do servidor não chegaram (sem internet), o painel diz isso em vez de zero
+    const semDados = !dadosDoServidorCarregados();
+    const kpi = function(icone, titulo, valor, sub, onclick, classe){ return semDados ? htmlKpiPainel(icone, titulo, '...', 'sem conexão com o servidor', onclick, '') : htmlKpiPainel(icone, titulo, valor, sub, onclick, classe); };
+    const an = d.anamneses, rn = d.renovacoes;
     elKpis.innerHTML =
-      htmlKpiPainel('aluna', 'Alunas ativas', d.clientesAtivos, textoDivisaoDasAtivas(d), "showPersonalView('alunas')") +
-      htmlKpiPainel('halter', 'Treinos pra enviar', pe.total,
+      kpi('aluna', 'Alunas ativas', d.clientesAtivos, textoDivisaoDasAtivas(d), "showPersonalView('alunas')") +
+      kpi('halter', 'Treinos pra enviar', pe.total,
         pe.total === 0 ? 'nenhum pendente no Controle' : pe.paraGerar + ' pra gerar · ' + pe.gerados + ' gerados' + (pe.maisAntigoDias !== null ? ' · o mais antigo há ' + pe.maisAntigoDias + ' dias' : ''),
         "showPersonalView('controle')", pe.total > 0 ? 'pn-alerta' : '') +
-      htmlKpiPainel('calendario', 'Planos por vencer', d.totalPorVencer, 'na aba Por vencer', "abrirAlunasNaAba('porvencer')") +
-      htmlKpiPainel('subir', 'Faturamento do mês', formatarReaisPainel(f.valor),
-        f.meta > 0 ? f.pct + '% da meta de ' + formatarReaisPainel(f.meta) : 'toque pra definir a meta do mês',
-        "showPersonalView('faturamento')", '', f.meta > 0 ? '<div class="pn-barra"><i style="width:' + f.pct + '%"></i></div>' : '');
+      kpi('calendario', 'Renovações em 30 dias', rn.total, rn.total === 0 ? 'nenhum plano vencendo' : (rn.semana ? rn.semana + ' vence' + (rn.semana === 1 ? '' : 'm') + ' essa semana' : 'nenhum essa semana'), "abrirAlunasNaAba('porvencer')", rn.semana ? 'pn-alerta' : '') +
+      kpi('lista', 'Anamneses novas (7 dias)', an.total, an.ultima ? 'última: ' + dataCurtaBR(String(an.ultima.dataAnamnese).slice(0, 10)) + ', ' + an.ultima.nome : 'nenhuma nessa semana', "showPersonalView('anamneses')");
   }
+  renderCardsDoHoje(d);
 
   const elLista = document.getElementById('pn-lista-atencao');
   const elCnt = document.getElementById('pn-contagem-atencao');
@@ -24793,7 +25039,7 @@ const TELAS_JA_NAS_FUNCOES_SUPORTE = ['conversas', 'comunicacao', 'controle', 'f
 function htmlOutrasTelasSuporte(){
   const extras = [
     { titulo: 'Relatórios da semana', view: 'relatorios' },
-    { titulo: 'Faturamento e metas', view: 'faturamento' },
+    { titulo: 'Funil e renovações', view: 'funil' },
     { titulo: 'Inteligência de mercado', view: 'inteligencia' }
   ];
   const telas = extras.concat(ferramentasPersonal.filter(function(f){ return TELAS_JA_NAS_FUNCOES_SUPORTE.indexOf(f.view) === -1; }));
@@ -24819,8 +25065,8 @@ function renderPainelSuporte(agora){
       htmlKpiPainel('aluna', 'Alunas ativas', d.clientesAtivos, textoDivisaoDasAtivas(d), "showPersonalView('alunas')") +
       htmlKpiPainel('halter', 'Treinos pra enviar', pe.total, pe.total === 0 ? 'nenhum pendente no Controle' : pe.paraGerar + ' pra gerar · ' + pe.gerados + ' gerados', "showPersonalView('controle')", pe.total > 0 ? 'pn-alerta' : '') +
       htmlKpiPainel('calendario', 'Planos por vencer', d.totalPorVencer, 'na aba Por vencer', "abrirAlunasNaAba('porvencer')") +
-      htmlKpiPainel('subir', 'Faturamento do mês', formatarReaisPainel(f.valor), f.meta > 0 ? f.pct + '% da meta de ' + formatarReaisPainel(f.meta) : 'meta do mês ainda não definida',
-        "showPersonalView('faturamento')", '', f.meta > 0 ? '<div class="pn-barra"><i style="width:' + f.pct + '%"></i></div>' : '');
+      // a Bianca vê vencimentos e renovações; faturamento (valores) é só do Thiago
+      htmlKpiPainel('relogio', 'Renovações em 30 dias', d.renovacoes.total, d.renovacoes.total === 0 ? 'nenhum plano vencendo' : (d.renovacoes.semana ? d.renovacoes.semana + ' essa semana' : 'nenhum essa semana'), "showPersonalView('funil')", d.renovacoes.semana ? 'pn-alerta' : '');
   }
   if(el('sp-lista-atencao')){
     const lista = listaAtencaoSuporteCompleta ? d.atencao : d.atencao.slice(0, ITENS_ATENCAO_VISIVEIS);
@@ -27842,7 +28088,7 @@ function exportarRelatorioEvolucao(nome){
   nomesExercicios.forEach(function(nomeEx){
     html += '<p style="margin-bottom:2px;"><b>' + nomeEx + '</b></p><table>';
     prog.historico[nomeEx].forEach(function(r){
-      html += '<tr><td>Semana ' + r.semana + '</td><td>' + r.carga + 'kg × ' + r.reps + ' reps</td><td>' + r.sugestao.texto + '</td></tr>';
+      html += '<tr><td>Semana ' + r.semana + '</td><td>' + r.carga + 'kg × ' + r.reps + ' reps</td><td>' + (r.sugestao ? r.sugestao.texto : '') + '</td></tr>';
     });
     html += '</table>';
   });
