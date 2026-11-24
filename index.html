@@ -1287,7 +1287,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-22-CK-TELAS-NOVAS</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-24-CM-PREFERENCIA-DE-CONTATO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1621,6 +1621,10 @@
           <div class="pn-caixa">
             <h2>Precisa de você hoje <span class="pn-cnt" id="pn-contagem-atencao" style="display:none;"></span><span class="pn-link" id="pn-ver-todas" style="display:none;" onclick="alternarListaAtencaoCompleta()">Ver todas</span></h2>
             <div id="pn-lista-atencao"><p class="pn-vazio">Carregando...</p></div>
+          </div>
+          <div class="pn-caixa">
+            <h2>Conversas da semana<span class="pn-link" onclick="showPersonalView('dashboard-suporte')">Abrir a Central de Suporte</span></h2>
+            <div id="pn-conversas"></div>
           </div>
           <div class="pn-direita">
             <div class="pn-caixa">
@@ -2224,7 +2228,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-22-CK-TELAS-NOVAS';
+const VERSAO_APP = '2026-11-24-CM-PREFERENCIA-DE-CONTATO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -6098,6 +6102,52 @@ function confirmarMoverAlunasSelecionadas(){
   alternarModoSelecaoAlunas(); // já limpa a seleção, esconde a barra e re-renderiza
 }
 
+// ===== LISTA DE ALUNAS NO COMPUTADOR (24/11): vencimento na coluna do plano e o resumo abrindo na lateral =====
+function telaLargaPersonal(){ try { return typeof window !== 'undefined' && window.innerWidth >= 1100; } catch(e){ return false; } }
+function textoVencimentoNaLista(a, agora){
+  const f = diasAteVencerPlano(a, agora);
+  if(f === null) return '<small style="display:block;color:var(--text-faint);font-style:italic;">vencimento não informado</small>';
+  const fim = fimDoPlanoISO(a);
+  return '<small style="display:block;' + (f < 0 ? 'color:#C9784A;' : f <= 30 ? 'color:#E2A33D;' : 'color:var(--text-faint);') + '">' + (f < 0 ? 'venceu ' : 'vence ') + dataBR(fim).slice(0, 5) + '</small>';
+}
+let resumoLateralAberto = null;
+function abrirResumoLateralDaAluna(i){
+  const a = alunasPersonal[i];
+  if(!a) return false;
+  let el = document.getElementById('resumo-lateral-aluna');
+  if(!el){ el = document.createElement('div'); el.id = 'resumo-lateral-aluna'; document.body.appendChild(el); }
+  if(resumoLateralAberto === a.nome && el.innerHTML){ fecharResumoLateral(); return true; }
+  resumoLateralAberto = a.nome;
+  el.innerHTML = htmlResumoLateralDaAluna(a, i);
+  el.style.cssText = 'position:fixed;top:0;right:0;bottom:0;width:390px;max-width:92vw;background:var(--card);border-left:1px solid rgba(221,182,115,0.3);box-shadow:-30px 0 60px rgba(0,0,0,.5);padding:22px 20px;overflow-y:auto;z-index:900;';
+  return true;
+}
+function fecharResumoLateral(){ const el = document.getElementById('resumo-lateral-aluna'); if(el){ el.innerHTML = ''; el.style.cssText = 'display:none;'; } resumoLateralAberto = null; }
+function htmlResumoLateralDaAluna(a, i){
+  const agora = Date.now(), nomeJs = String(a.nome).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  const linha = function(r, v){ return '<div style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text-faint);">' + r + '</span><span style="text-align:right;">' + v + '</span></div>'; };
+  const f = diasAteVencerPlano(a, agora), etapa = etapaDoFunilDaAluna(a), ult = ultimoRegistroDaListaDeAlunas(a, agora), tre = situacaoDoControleDaAluna(a, agora);
+  const sup = typeof situacaoSuporteDaAluna === 'function' ? situacaoSuporteDaAluna(a) : { tipo: 'sem' };
+  return '<div style="display:flex;justify-content:space-between;align-items:flex-start;"><div><p style="font-family:\'EB Garamond\',serif;font-size:24px;margin:0;">' + escaparHtmlFicha(a.nome) + '</p>' +
+      '<p style="font-size:12px;color:var(--text-faint);margin:4px 0 0;">' + [textoGenuino(a, 'nivel', 'nível não informado'), textoGenuino(a, 'freq', 'frequência não informada'), valorOuNaoInformado(a.ambienteTreino)].join(' · ') + '</p></div>' +
+      '<span style="cursor:pointer;color:var(--text-faint);font-size:18px;" onclick="fecharResumoLateral()">✕</span></div>' +
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:14px 0;"><button class="btn-gold" style="width:auto;padding:8px 14px;" onclick="fecharResumoLateral();openAlunaDetail(' + i + ')">Abrir ficha completa</button>' +
+      (a.telefone ? '<a class="btn-secondary" style="width:auto;padding:8px 14px;text-decoration:none;" target="_blank" rel="noopener" href="' + linkWhatsAppDaAluna(a) + '">WhatsApp</a>' : '') +
+      '<button class="btn-secondary" style="width:auto;padding:8px 14px;" onclick="fecharResumoLateral();openAlunaDetail(' + i + ');abrirRenovacaoDoPlano(\'' + nomeJs + '\')">Renovar plano</button></div>' +
+    linha('Plano', a.dataFechouPlano && a.duracaoPlanoDias ? escaparHtmlFicha(nomeDaDuracao(a.duracaoPlanoDias)) + ' · até ' + dataBR(fimDoPlanoISO(a)) : NAO_INFORMADO) +
+    linha('Faltam', f === null ? NAO_INFORMADO : (f < 0 ? '<b style="color:#C9784A;">venceu há ' + Math.abs(f) + ' dias</b>' : f + (f === 1 ? ' dia' : ' dias'))) +
+    linha('Etapa no funil', etapa ? escaparHtmlFicha(etapa) : NAO_INFORMADO) +
+    (veValoresDoPlano() ? linha('Valor', a.valorPlano != null ? formatarReaisPainel(a.valorPlano) + (a.statusPagamento === 'pendente' ? ' · pendente' : ' · pago') : NAO_INFORMADO) : '') +
+    linha('Anamnese', a.dataAnamnese ? 'respondida em ' + dataBR(a.dataAnamnese) : NAO_INFORMADO) +
+    linha('Objetivo', textoGenuino(a, 'objetivo')) +
+    linha('Treino', escaparHtmlFicha(tre.texto)) +
+    linha('Último registro', ult.texto || NAO_INFORMADO) +
+    linha('Última progressão', a.ultimaProgressao && a.ultimaProgressao.em ? dataBR(dataLocalISO(new Date(a.ultimaProgressao.em))) : NAO_INFORMADO) +
+    linha('Grupo de suporte', sup.tipo === 'tem' ? 'tem' : sup.tipo === 'fila' ? 'na fila' : sup.tipo === 'semtel' ? 'sem telefone' : 'não tem') +
+    linha('Preferência de contato', escaparHtmlFicha(textoPreferenciaContato(a))) +
+    '<p style="font-size:12px;font-weight:700;margin:16px 0 6px;">Linha do tempo</p>' + htmlLinhaDoTempoCompleta(a);
+}
+
 function renderAlunas(){
   const list = document.getElementById('alunas-list');
   const termo = (document.getElementById('aluna-search') ? document.getElementById('aluna-search').value : '').toUpperCase();
@@ -6133,7 +6183,7 @@ function renderAlunas(){
     const pl = planoDaAluna(a);
     const niv = nivelDaAluna(a);
     const nomeDesafio = nomeDoDesafioDaAluna(a);
-    const meta = [a.freq].filter(Boolean).join(' · ') // o nível agora tem coluna própria + (a.valorPlano != null ? ' · R$ ' + a.valorPlano.toFixed(2).replace('.', ',') : '');
+    const meta = campoNaoInformado(a, 'freq') ? 'frequência não informada' : [a.freq].filter(Boolean).join(' · ') // o nível agora tem coluna própria + (a.valorPlano != null ? ' · R$ ' + a.valorPlano.toFixed(2).replace('.', ',') : '');
     el.innerHTML =
       '<div class="al-quem" data-abrir="1">' +
         (modoSelecaoAlunasAtivo ? '<input type="checkbox" class="checkbox-selecao-aluna" ' + (marcada ? 'checked' : '') + ' style="flex-shrink:0;width:18px;height:18px;">' : '') +
@@ -6142,6 +6192,7 @@ function renderAlunas(){
         '<p class="aluna-meta">' + escaparHtmlFicha(meta) + '</p></div>' +
       '</div>' +
       '<div class="al-c-plano"><span class="fc al-plano ' + (pl.plano === 'consultoria' ? '' : (pl.plano === 'so-desafio' ? 'fc-verde' : 'fc-ouro')) + '"' + (pl.sugerido ? ' title="Sugerido pelo app. Confirme no menu ⋯"' : '') + '>' + NOMES_PLANO[pl.plano] + (pl.sugerido ? '?' : '') + '</span>' +
+        textoVencimentoNaLista(a, agora) +
         (nomeDesafio ? '<span class="fc fc-verde al-desafio"><i class="ti ti-flag" style="font-size:9px;vertical-align:-1px;margin-right:3px;"></i>' + escaparHtmlFicha(nomeDesafio) + '</span>' : '') + '</div>' +
       '<div class="al-niv"><span class="fc ' + (niv.nivel ? '' : 'fc-alerta') + '">' + (niv.nivel || 'A confirmar') + '</span><small>' + ORIGENS_NIVEL[niv.origem] + '</small></div>' +
       '<div class="al-c-sit"><span class="fc al-sit ' + sit.classe + '">' + sit.texto + '</span></div>' +
@@ -6152,7 +6203,7 @@ function renderAlunas(){
     if(modoSelecaoAlunasAtivo){
       el.querySelector('[data-abrir]').onclick = function(){ alternarSelecaoAluna(a.nome); };
     } else {
-      el.querySelector('[data-abrir]').onclick = function(){ openAlunaDetail(i); };
+      el.querySelector('[data-abrir]').onclick = function(){ if(telaLargaPersonal()) abrirResumoLateralDaAluna(i); else openAlunaDetail(i); };
     }
     list.appendChild(el);
   });
@@ -9970,6 +10021,115 @@ async function cancelarTarefaDeGrupo(id){
   return true;
 }
 
+// ===== PREFERÊNCIA DE CONTATO (24/11) =====
+// A aluna responde no grupo de suporte (1 toda semana, 2 a cada 15 dias, 3 quando ela precisar). A função "receber-grupos"
+// guarda a resposta no servidor (catálogo "preferencia_contato"); aqui o app usa pra montar as Conversas da semana e as
+// listas. Quem escolheu "quando eu precisar" sai das conversas, mas os alertas (sumiu, desconforto, dúvida, plano) continuam.
+const PREFS_CONTATO = { semanal: 'Toda semana', quinzenal: 'A cada 15 dias', quando_precisar: 'Quando ela precisar' };
+const DIAS_PREF_CONTATO = { semanal: 7, quinzenal: 15 };
+const DIAS_SEM_RESPOSTA_CONTATO = 3;
+let preferenciasContato = {}; // nome -> { pref, respondidoEm, texto, origem, perguntadoEm, paraConferir }
+
+function preferenciaContatoDaAluna(a){ return preferenciasContato[a.nome] || {}; }
+function situacaoPreferenciaContato(a, agora){
+  const p = preferenciaContatoDaAluna(a);
+  if(p.pref) return { tipo: 'respondeu', pref: p.pref };
+  if(p.paraConferir) return { tipo: 'conferir', texto: p.paraConferir.texto, em: p.paraConferir.em };
+  if(p.perguntadoEm) return (agora || Date.now()) - new Date(p.perguntadoEm).getTime() >= DIAS_SEM_RESPOSTA_CONTATO * 864e5 ? { tipo: 'sem_resposta', em: p.perguntadoEm } : { tipo: 'aguardando', em: p.perguntadoEm };
+  return { tipo: 'nao_perguntada' };
+}
+function textoPreferenciaContato(a){
+  const p = preferenciaContatoDaAluna(a);
+  if(p.pref) return PREFS_CONTATO[p.pref] + (p.origem === 'manual' ? ' (marcado por ' + (p.por || 'vocês') + ')' : (p.respondidoEm ? ' (respondeu em ' + dataBR(dataLocalISO(new Date(p.respondidoEm))) + ')' : ''));
+  if(p.paraConferir) return 'respondeu "' + String(p.paraConferir.texto).slice(0, 60) + '" (conferir)';
+  if(p.perguntadoEm) return 'perguntada em ' + dataBR(dataLocalISO(new Date(p.perguntadoEm))) + ', sem resposta';
+  return 'ainda não perguntada';
+}
+function marcarPreferenciaContato(nome, pref){
+  if(pref && !PREFS_CONTATO[pref]) return false;
+  const atual = preferenciasContato[nome] || {};
+  preferenciasContato[nome] = Object.assign({}, atual, pref ? { pref: pref, respondidoEm: new Date().toISOString(), origem: 'manual', por: NOME_PERSONAL_LOGADO || '', paraConferir: null } : { pref: null });
+  salvarCatalogoPersonalConferindo('preferencia_contato', nome, preferenciasContato[nome]);
+  mostrarConfirmacaoSalvamento(true, pref ? 'Preferência marcada: ' + PREFS_CONTATO[pref] + '.' : 'Preferência limpa.');
+  try { if(telaPersonalAtual === 'grupos') renderControleGrupos(); } catch(e){}
+  return true;
+}
+// Manda a pergunta num grupo de suporte (pelo número da Bianca) e anota que foi perguntado
+async function perguntarPreferenciaNoGrupo(nome){
+  const g = gruposDeSuporte[nome];
+  if(!g || !g.grupo) return { ok: false, erro: 'sem grupo de suporte' };
+  const texto = CONFIG_SUPORTE.pergunta.replace(/\{nome\}/g, String(nome).trim().split(/\s+/)[0]);
+  const r = await chamarFuncaoGrupos('mensagem', { remetente: CONFIG_SUPORTE.remetente, grupoId: g.grupo, texto: texto, perguntaContato: true, alunaNome: nome });
+  if(r && r.ok !== false){ preferenciasContato[nome] = Object.assign({}, preferenciasContato[nome] || {}, { perguntadoEm: new Date().toISOString(), paraConferir: null }); }
+  return r;
+}
+function alunasPraPerguntarPreferencia(){
+  return alunasParaEscolherTreino().filter(function(a){ return gruposDeSuporte[a.nome] && situacaoPreferenciaContato(a).tipo === 'nao_perguntada'; });
+}
+// Pras que já tinham grupo antes disso: a pergunta sai em fila, com o intervalo anti-bloqueio de sempre
+async function perguntarPreferenciaPraQuemJaTemGrupo(){
+  const lista = alunasPraPerguntarPreferencia();
+  if(!lista.length){ alert('Todas as alunas com grupo já foram perguntadas.'); return 0; }
+  if(!confirm('Mandar a pergunta da preferência de contato nos grupos de ' + lista.length + (lista.length === 1 ? ' aluna' : ' alunas') + ', um de cada vez, com intervalo entre eles?')) return 0;
+  let n = 0;
+  for(let i = 0; i < lista.length; i++){
+    const r = await perguntarPreferenciaNoGrupo(lista[i].nome);
+    if(!r || r.ok === false){ mostrarConfirmacaoSalvamento(false, 'Parei no grupo de ' + lista[i].nome + ': ' + ((r && r.erro) || 'erro')); break; } // recusou: para, não insiste
+    n++;
+    if(i < lista.length - 1) await pausaEntreEnviosWhatsApp();
+  }
+  try { renderControleGrupos(); } catch(e){}
+  return n;
+}
+function htmlBotoesPreferencia(nome){
+  const nj = JSON.stringify(nome).replace(/"/g, '&quot;');
+  return Object.keys(PREFS_CONTATO).map(function(k){ return '<button class="pg-b" onclick="event.stopPropagation();marcarPreferenciaContato(' + nj + ',\'' + k + '\')">' + PREFS_CONTATO[k] + '</button>'; }).join('');
+}
+// Bloco da tela de grupos: quantas em cada preferência, e as listas pra conferir e sem resposta
+function htmlPreferenciasDeContato(){
+  const ativas = alunasParaEscolherTreino(), agora = Date.now();
+  const cont = { semanal: 0, quinzenal: 0, quando_precisar: 0 }, conferir = [], semResp = [];
+  ativas.forEach(function(a){ const s = situacaoPreferenciaContato(a, agora); if(s.tipo === 'respondeu') cont[s.pref]++; else if(s.tipo === 'conferir') conferir.push({ a: a, s: s }); else if(s.tipo === 'sem_resposta') semResp.push({ a: a, s: s }); });
+  const faltam = alunasPraPerguntarPreferencia().length;
+  let h = '<p class="section-label" style="margin-top:20px;">Preferência de contato</p><div class="info-box">' +
+    '<p class="txt" style="margin:0 0 8px;">' + Object.keys(PREFS_CONTATO).map(function(k){ return PREFS_CONTATO[k] + ': <b>' + cont[k] + '</b>'; }).join(' · ') + '</p>' +
+    (faltam ? '<button class="btn-secondary" style="width:auto;padding:7px 14px;" onclick="perguntarPreferenciaPraQuemJaTemGrupo()">Mandar a pergunta pras ' + faltam + ' que já têm grupo e ainda não foram perguntadas</button>' : '');
+  if(conferir.length) h += '<p style="font-size:12.5px;font-weight:700;margin:12px 0 4px;">Resposta pra conferir</p>' + conferir.map(function(x){
+    return '<div style="padding:6px 0;border-top:1px solid var(--border);font-size:12.5px;"><b>' + escaparHtmlFicha(x.a.nome) + '</b>: "' + escaparHtmlFicha(String(x.s.texto).slice(0, 120)) + '"<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">' + htmlBotoesPreferencia(x.a.nome) + '</div></div>'; }).join('');
+  if(semResp.length) h += '<p style="font-size:12.5px;font-weight:700;margin:12px 0 4px;">Sem resposta há ' + DIAS_SEM_RESPOSTA_CONTATO + ' dias ou mais</p>' + semResp.map(function(x){
+    return '<div style="padding:6px 0;border-top:1px solid var(--border);font-size:12.5px;"><b>' + escaparHtmlFicha(x.a.nome) + '</b> <small style="color:var(--text-faint);">perguntada em ' + dataBR(dataLocalISO(new Date(x.s.em))) + '</small><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">' + htmlBotoesPreferencia(x.a.nome) + '</div></div>'; }).join('');
+  return h + '</div>';
+}
+
+// ----- A conversa do grupo de suporte no app -----
+let conversasDosGrupos = {}; // nome -> [mensagens]
+async function carregarConversaDoGrupo(nome){
+  if(!supabaseClient) return [];
+  const r = await supabaseClient.from('mensagens_grupos').select('*').eq('aluna_nome', nome).order('data_hora', { ascending: false }).limit(60);
+  conversasDosGrupos[nome] = ((r && r.data) || []).slice().reverse();
+  const el = document.getElementById('conversa-grupo-' + nomeSeguroId(nome));
+  if(el) el.innerHTML = htmlConversaDoGrupo(nome);
+  return conversasDosGrupos[nome];
+}
+function nomeSeguroId(nome){ return String(nome || '').normalize('NFD').replace(/[^a-zA-Z0-9]/g, ''); }
+function htmlConversaDoGrupo(nome){
+  const lista = conversasDosGrupos[nome];
+  if(!lista) return '<p class="txt" style="font-size:12px;">Carregando a conversa...</p>';
+  if(!lista.length) return '<p class="txt" style="font-size:12px;">Nenhuma mensagem do grupo guardada ainda.</p>';
+  return lista.map(function(m){
+    const d = new Date(m.data_hora);
+    return '<div style="display:flex;' + (m.da_aluna ? '' : 'justify-content:flex-end;') + 'margin:4px 0;"><div style="max-width:80%;padding:7px 10px;border-radius:10px;font-size:12.5px;line-height:1.4;' + (m.da_aluna ? 'background:var(--card-2);' : 'background:rgba(221,182,115,0.14);') + '">' +
+      '<small style="display:block;color:var(--text-faint);font-size:10.5px;">' + escaparHtmlFicha(m.da_aluna ? (m.nome_remetente || 'Aluna') : (m.de_mim ? 'Bianca (app)' : (m.nome_remetente || 'Equipe'))) + ' · ' + String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + '</small>' +
+      escaparHtmlFicha(m.texto || '') + '</div></div>';
+  }).join('');
+}
+function htmlBlocoConversaDoGrupo(a){
+  if(!gruposDeSuporte[a.nome]) return '';
+  const nj = JSON.stringify(a.nome).replace(/"/g, '&quot;');
+  return '<p class="section-label" style="margin-top:18px;">Conversa do grupo de suporte</p><div class="info-box"><div id="conversa-grupo-' + nomeSeguroId(a.nome) + '">' +
+    (conversasDosGrupos[a.nome] ? htmlConversaDoGrupo(a.nome) : '<button class="btn-secondary" style="width:auto;padding:7px 14px;" onclick="carregarConversaDoGrupo(' + nj + ')">Carregar a conversa</button>') + '</div></div>';
+}
+
 // ===== GRUPOS DE SUPORTE INDIVIDUAIS (22/11) =====
 // Um grupo de WhatsApp por aluna ativa: a aluna, o Thiago e a Bianca (que cria, pelo número dela, o único ativo na Z-API).
 // Os dois viram administradores e a boas-vindas sai na hora. Em lotes: 2 grupos a cada 5 minutos, até 20 por dia.
@@ -9984,7 +10144,12 @@ const CONFIG_SUPORTE = {
     'Aqui tu tem a mim e a Bia pra te dar todo o suporte que precisar. Dúvidas de treino, vídeos de execução e as nossas conversas semanais ficam por aqui.\n\n' +
     'Pra começar, me conta: qual é o teu objetivo principal agora? Seja bem específica e conta também o que mais te incomoda no teu corpo hoje.\n\n' +
     'Essas informações vão nos dar o norte pra fechar o ano e começar 2027 com o teu treino ajustado de forma ainda mais assertiva. Conta tudo!!\n\n' +
-    'Thiago, Time DNA Musa'
+    'Thiago, Time DNA Musa',
+  // 24/11: a pergunta da preferência de contato, numa mensagem separada logo depois da boas-vindas (e de novo na renovação)
+  pergunta: 'Uma última coisa, {nome}, pra gente te acompanhar do teu jeito: como tu prefere o nosso contato? Responde só com o número:\n\n' +
+    '1. Quero que vocês me chamem toda semana pra saber como eu tô\n' +
+    '2. Pode me chamar de vez em quando, a cada 15 dias\n' +
+    '3. Prefiro chamar vocês quando eu precisar'
 };
 let gruposDeSuporte = {};      // nome da aluna -> { grupo, nome, link, em } (vem do servidor, tipo "grupo_suporte")
 let marcadasSuporte = {};
@@ -10026,7 +10191,7 @@ async function gravarTarefaDeSuporte(linhasAlunas, teste){
   if(!supabaseClient){ alert('Sem conexão com o servidor.'); return null; }
   const c = CONFIG_SUPORTE;
   const t = await supabaseClient.from('tarefas_grupo_whatsapp').insert({ tipo: 'suporte', grupo_nome: teste ? 'Teste · Time DNA Musa' : c.nome, remetente: c.remetente,
-    por_lote: c.porLote, intervalo_min: c.intervaloMin, mensagem: c.mensagem, admins: c.admins.join(','), teste: !!teste }).select().single();
+    por_lote: c.porLote, intervalo_min: c.intervaloMin, mensagem: c.mensagem, mensagem2: c.pergunta, admins: c.admins.join(','), teste: !!teste }).select().single();
   if(t.error || !t.data){ mostrarConfirmacaoSalvamento(false, 'Não consegui começar: ' + ((t.error && t.error.message) || 'erro desconhecido') + '. Confira se o SQL dos grupos de suporte (5_grupos_de_suporte.sql) foi rodado no Supabase.'); return null; }
   const i = await supabaseClient.from('itens_grupo_whatsapp').insert(linhasAlunas.map(function(l){ return Object.assign({ tarefa_id: t.data.id, status: 'na_fila' }, l); }));
   if(i.error){
@@ -10093,9 +10258,10 @@ function htmlGruposDeSuporte(){
       : '<button class="pg-b" onclick="event.stopPropagation();criarGrupoSuporteDaAluna(' + JSON.stringify(a.nome).replace(/"/g, '&quot;') + ')">Criar agora</button>';
     return '<label class="et-lin" style="display:flex;align-items:center;gap:10px;">' +
       (x.tipo === 'sem' ? '<input type="checkbox"' + (marcadasSuporte[a.nome] ? ' checked' : '') + ' onchange="marcarSuporte(' + i + ',this.checked)">' : '<span style="width:16px;"></span>') +
-      '<span style="flex:1;"><b>' + escaparHtmlFicha(a.nome) + '</b><small>' + escaparHtmlFicha(nomeDoGrupoSuporteApp(a.nome)) + '</small></span>' + rotulo + '</label>';
+      '<span style="flex:1;"><b>' + escaparHtmlFicha(a.nome) + '</b><small>' + escaparHtmlFicha(nomeDoGrupoSuporteApp(a.nome)) + (x.tipo === 'tem' ? ' · contato: ' + escaparHtmlFicha(textoPreferenciaContato(a)) : '') + '</small></span>' + rotulo + '</label>';
   }).join('');
   h += '<button class="btn-gold" style="margin-top:12px;"' + (marcadas.length ? '' : ' disabled') + ' onclick="criarGruposDeSuporte(Object.keys(marcadasSuporte))">Criar ' + marcadas.length + (marcadas.length === 1 ? ' grupo' : ' grupos') + ' de suporte</button>';
+  h += htmlPreferenciasDeContato();
   return h;
 }
 function nomeDoGrupoSuporteApp(nome){ return CONFIG_SUPORTE.nome.replace(/\{nome\}/g, String(nome || '').trim().split(/\s+/)[0] || 'Aluna'); }
@@ -13162,6 +13328,7 @@ function montarDadosExtrasDaAluna(a){
     valorPlano: a.valorPlano != null ? a.valorPlano : null,
     statusPagamento: a.statusPagamento || null,
     planoFechadoEm: a.planoFechadoEm || null, // dia em que o plano (ou a renovação) foi fechado: conta no faturamento desse mês
+    naoInformado: a.naoInformado || [],      // campos que nunca foram respondidos (a tela mostra "não informado")
     renovacoes: a.renovacoes || [],          // histórico de planos: cada renovação com início, duração, valor e pagamento
     tabataSugestaoRespondida: a.tabataSugestaoRespondida || false,
     composicaoAtual: a.composicaoAtual || null,
@@ -13455,6 +13622,7 @@ function editarNivelAluna(nomeAluna, novoNivel){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
   a.nivel = novoNivel;
+  if(a.naoInformado) a.naoInformado = a.naoInformado.filter(function(x){ return x !== 'nivel'; }); // definido por você: deixa de ser "não informado"
   return aplicarEdicaoEregenerarTreino(nomeAluna);
 }
 
@@ -13469,6 +13637,7 @@ function editarFrequenciaAluna(nomeAluna, novaFreq){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   if(!a) return;
   a.freq = novaFreq;
+  if(a.naoInformado) a.naoInformado = a.naoInformado.filter(function(x){ return x !== 'freq'; }); // definido por você: deixa de ser "não informado"
   return aplicarEdicaoEregenerarTreino(nomeAluna);
 }
 
@@ -16733,6 +16902,26 @@ function abrirInfoDoExercicioArquivado(nomeAluna, idx, di, i){
   return true;
 }
 
+// ===== VOLTAR O TREINO PRA UMA VERSÃO ARQUIVADA (24/11) =====
+// O treino de agora não se perde: a versão escolhida volta como uma versão NOVA, e a de agora vai pros arquivados.
+async function voltarParaVersaoArquivada(nomeAluna, idx){
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
+  const lista = historicoArquivadoAberto[nomeAluna];
+  if(!a || !lista || !lista[idx] || idx === 0) return false;
+  const v = lista[idx];
+  const quando = new Date(v.updated_at).toLocaleDateString('pt-BR');
+  if(!confirm('Voltar o treino de ' + nomeAluna.split(' ')[0] + ' pra versão de ' + quando + '? O treino de agora vai pros arquivados (não se perde) e ela passa a ver essa versão.')) return false;
+  a.treinoAtual = { fase: v.fase || (a.treinoAtual && a.treinoAtual.fase) || '', volume: 'Voltou pra versão de ' + quando, dias: JSON.parse(JSON.stringify(v.dias || [])) };
+  normalizarDiasComExercicio(a.treinoAtual.dias);
+  a.versaoRestaurada = { de: v.updated_at, em: new Date().toISOString(), por: NOME_PERSONAL_LOGADO || '' };
+  const r = await sincronizarTreinoComSupabase(a, { novaVersao: true });
+  try { salvarPerfilAlunaNoSupabase(nomeAluna); } catch(e){}
+  mostrarConfirmacaoSalvamento(!!(r && r.ok !== false), r && r.ok === false ? 'Não consegui salvar a volta: ' + (r.motivo || 'erro') : 'Pronto: o treino voltou pra versão de ' + quando + '.');
+  const area = document.getElementById('treinos-arquivados-area'); if(area) area.innerHTML = '';
+  const i = alunasPersonal.indexOf(a); if(i !== -1) openAlunaDetail(i);
+  return true;
+}
+
 function abrirVersaoArquivada(nomeAluna, idx){
   const lista = historicoArquivadoAberto[nomeAluna];
   const caixa = document.getElementById('versao-arquivada-' + idx);
@@ -16753,7 +16942,8 @@ function abrirVersaoArquivada(nomeAluna, idx){
           (clicavel ? ' onclick="abrirInfoDoExercicioArquivado(\'' + nomeJs + '\',' + idx + ',' + di + ',' + i + ')"' : '') + '>' + (mudou ? '• ' : '') + escaparHtmlFicha(l) + '</p>' +
           (clicavel ? '<div id="info-arq-' + idx + '-' + di + '-' + i + '"></div>' : '');
       }).join('');
-  }).join('') + (idx > 0 ? '<p style="font-size:11px;color:var(--text-faint);margin-top:8px;">Em dourado: o que era assim nessa versão e não está igual no treino atual.</p>' : '') + '</div>';
+  }).join('') + (idx > 0 ? '<p style="font-size:11px;color:var(--text-faint);margin-top:8px;">Em dourado: o que era assim nessa versão e não está igual no treino atual.</p>' +
+    '<button class="btn-secondary" style="margin-top:10px;width:auto;padding:8px 14px;" onclick="event.stopPropagation();voltarParaVersaoArquivada(\'' + nomeAluna.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\',' + idx + ')">Voltar o treino pra esta versão</button>' : '') + '</div>';
   return true;
 }
 
@@ -17128,6 +17318,41 @@ function confirmarTransformarEmTabata(nomeAluna){
 // Nada saiu da ficha: cada parte que já existia só mudou de lugar.
 let abaFichaAtual = 'geral';
 let fichaAbertaNome = null;
+// A sugestão de Tabata saiu da Visão geral e ficou na aba Treino (24/11)
+function htmlSugestaoTabataDaFicha(a){
+  return (objetivoSugereTabata(a) && !a.tabataSugestaoRespondida ? (
+      '<div class="info-box" style="margin-bottom:12px;border-color:var(--border-strong);">' +
+        '<p class="lbl">💡 Sugestão baseada no objetivo dela</p>' +
+        '<p class="txt">O objetivo relatado por ela menciona emagrecimento/definição. Um protocolo Tabata (circuito intervalado, ' + (a.nivel || 'Iniciante') + ') pode complementar bem o treino resistido nesse caso. Quer que eu já deixe pronto pra você aplicar num dos dias?</p>' +
+        '<div style="display:flex;gap:8px;margin-top:8px;">' +
+          '<span class="chip" style="cursor:pointer;background:var(--success-soft);color:var(--success);" onclick="responderSugestaoTabata(\'' + a.nome.replace(/'/g,"\\'") + '\',true)">Sim, quero ver</span>' +
+          '<span class="chip" style="cursor:pointer;" onclick="responderSugestaoTabata(\'' + a.nome.replace(/'/g,"\\'") + '\',false)">Não, obrigado</span>' +
+        '</div>' +
+      '</div>'
+    ) : '');
+}
+// Aba Treino (24/11): a semana inteira lado a lado no computador, com a última carga de cada exercício
+function htmlSemanaLadoALado(a){
+  const dias = ((a.treinoAtual || {}).dias || []).filter(function(d){ return d && !d.descanso && (d.ex || []).length; });
+  if(!dias.length) return '<p class="txt">Ela ainda não tem treino. Use "Gerar o treino" abaixo.</p>';
+  const prog = getProgressoAluna(a.nome);
+  const info = a.treinoAtual.fase ? escaparHtmlFicha(a.treinoAtual.fase) : '';
+  const desde = a.dataFicouVerde ? 'desde ' + dataBR(dataLocalISO(new Date(a.dataFicouVerde))) : '';
+  const ultProg = a.ultimaProgressao && a.ultimaProgressao.em ? 'última progressão ' + dataBR(dataLocalISO(new Date(a.ultimaProgressao.em))) : '';
+  return '<p class="section-label" style="margin-top:4px;">Treino atual' + ([info, desde, ultProg].filter(Boolean).length ? ' · ' + [info, desde, ultProg].filter(Boolean).join(' · ') : '') + '</p>' +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;">' + dias.map(function(d){
+      return '<div class="info-box" style="margin:0;padding:10px 12px;"><p style="font-size:13px;font-weight:700;margin:0 0 6px;">' + escaparHtmlFicha(d.n) + '<small style="display:block;font-weight:400;color:var(--text-faint);">' + escaparHtmlFicha(d.foco || '') + '</small></p>' +
+        (d.ex || []).map(function(l, i){
+          const p = partesDaLinhaProg(l);
+          if(p.combo) return '<p style="font-size:12px;margin:5px 0;">' + escaparHtmlFicha(String(l).replace(/\|\|\|/g, ' + ')) + '</p>';
+          const c = cargaLevadaParaExercicio(prog, p.nome, nomeDoMetodo(d.metodos && d.metodos[i]), a.treinoAtual.dias);
+          const met = nomeDoMetodo(d.metodos && d.metodos[i]);
+          return '<p style="font-size:12px;margin:5px 0;border-top:1px solid var(--border);padding-top:5px;">' + escaparHtmlFicha(p.nome) + (met ? ' <small style="color:var(--gold-soft);">' + escaparHtmlFicha(met) + '</small>' : '') +
+            '<small style="display:block;color:var(--text-faint);">' + escaparHtmlFicha(String(l).split(' · ').slice(1).join(' · ')) + (c.carga != null ? ' · última carga ' + String(c.carga).replace('.', ',') + ' kg' : (c.origem === 'primeira' ? ' · sem registro' : '')) + '</small></p>';
+        }).join('') + '</div>';
+    }).join('') + '</div>';
+}
+
 // ===== PLANO, RENOVAÇÃO E ABAS NOVAS DA FICHA (22/11) =====
 // Renovar: calendário (começa no dia seguinte ao fim do plano atual), 3/6/12 meses ou outro, valor da tabela de preços
 // (dá pra mudar na hora) e pago ou pendente. A renovação vai pro histórico de planos, conta no faturamento do mês em
@@ -17150,6 +17375,13 @@ function etapaDoFunilDaAluna(a){
 }
 const NAO_INFORMADO = '<span style="color:var(--text-faint);font-style:italic;">não informado</span>';
 function valorOuNaoInformado(v){ return (v == null || String(v).trim() === '') ? NAO_INFORMADO : escaparHtmlFicha(String(v)); }
+// Campo que veio vazio do banco: o app usa um padrão por dentro (ex.: "Iniciante", "3x por semana", "Nenhuma relatada"),
+// mas a tela mostra que não foi informado, pra não parecer resposta dela.
+function campoNaoInformado(a, campo){ return !!(a && a.naoInformado && a.naoInformado.indexOf(campo) !== -1); }
+function textoGenuino(a, campo, rotulo){
+  if(campoNaoInformado(a, campo) || a[campo] == null || String(a[campo]).trim() === '') return '<i style="font-style:italic;opacity:.7;">' + (rotulo || 'não informado') + '</i>';
+  return escaparHtmlFicha(String(a[campo]));
+}
 
 function htmlCardPlanoDaFicha(a){
   const nomeJs = String(a.nome).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
@@ -17226,6 +17458,8 @@ function confirmarRenovacaoDoPlano(nome){
   renovacaoAberta = null;
   try { salvarPerfilAlunaNoSupabase(nome); } catch(e){}
   mostrarConfirmacaoSalvamento(true, 'Plano renovado: ' + dataBR(a.dataFechouPlano) + ' a ' + dataBR(fimDoPlanoISO(a)) + '. Ela entrou no funil em "Início".');
+  // renovou: a pergunta da preferência de contato vai de novo no grupo dela (a preferência pode mudar com o tempo)
+  if(gruposDeSuporte[nome]) perguntarPreferenciaNoGrupo(nome).catch(function(){});
   const i = alunasPersonal.indexOf(a); if(i !== -1) openAlunaDetail(i);
   try { renderAlunas(); } catch(e){}
   return true;
@@ -17239,14 +17473,49 @@ function htmlPlanoEDados(a){
     (hist.length ? hist.map(function(x){ return linha(dataBR(x.fechadoEm || x.inicio) + ' · ' + escaparHtmlFicha(x.tipo || 'plano'), escaparHtmlFicha(nomeDaDuracao(x.dias)) + ' · ' + dataBR(x.inicio) + ' a ' + dataBR(isoMaisDias(x.inicio, x.dias || 0)) +
       (veValoresDoPlano() && x.valor != null ? ' · ' + formatarReaisPainel(x.valor) + (x.pagamento === 'pendente' ? ' (pendente)' : '') : '')); }).join('')
       : '<p class="txt" style="margin:0;">Nenhuma renovação registrada ainda. As próximas aparecem aqui.</p>') + '</div>';
+  h += '<p class="section-label" style="margin-top:16px;">Preferência de contato</p><div class="info-box">' + linha('Como prefere o contato', escaparHtmlFicha(textoPreferenciaContato(a))) +
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">' + htmlBotoesPreferencia(a.nome) + (gruposDeSuporte[a.nome] ? '<button class="pg-b" onclick="perguntarPreferenciaNoGrupo(' + JSON.stringify(a.nome).replace(/"/g, '&quot;') + ').then(function(){ mostrarConfirmacaoSalvamento(true, \'Pergunta enviada no grupo.\'); })">Perguntar de novo no grupo</button>' : '') + '</div></div>';
   h += '<p class="section-label" style="margin-top:16px;">Anamnese</p><div class="info-box">' +
-    linha('Respondida em', a.dataAnamnese ? dataBR(a.dataAnamnese) : NAO_INFORMADO) + linha('Objetivo', valorOuNaoInformado(a.objetivo)) + linha('Pirâmide', valorOuNaoInformado(a.piramide)) +
-    linha('Restrições', valorOuNaoInformado(a.restricoes)) + linha('Academia', valorOuNaoInformado(a.academia)) + linha('Frequência', valorOuNaoInformado(a.freq)) + '</div>';
+    linha('Respondida em', a.dataAnamnese ? dataBR(a.dataAnamnese) : NAO_INFORMADO) + linha('Objetivo', textoGenuino(a, 'objetivo')) + linha('Pirâmide', textoGenuino(a, 'piramide')) +
+    linha('Restrições', textoGenuino(a, 'restricoes')) + linha('Academia', textoGenuino(a, 'academia')) + linha('Frequência', textoGenuino(a, 'freq')) + linha('Nível', textoGenuino(a, 'nivel')) + '</div>';
   h += '<p class="section-label" style="margin-top:16px;">Dados</p><div class="info-box">' +
     linha('E-mail', valorOuNaoInformado(a.email)) + linha('Telefone', valorOuNaoInformado(a.telefone)) + linha('Data de nascimento', a.dataNascimento ? dataBR(a.dataNascimento) : NAO_INFORMADO) +
     linha('Peso inicial', a.peso ? escaparHtmlFicha(String(a.peso)) + ' kg' : NAO_INFORMADO) + linha('Altura', a.altura ? escaparHtmlFicha(String(a.altura)) + ' m' : NAO_INFORMADO) +
-    '<p class="txt" style="font-size:11.5px;margin:8px 0 0;">Pra editar: "Resumo completo", na aba Treino.</p></div>';
+    '<button class="btn-secondary" style="width:auto;padding:7px 14px;margin-top:10px;" onclick="alternarEdicaoDadosFicha(\'' + String(a.nome).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')">' + (edicaoDadosFicha === a.nome ? 'Fechar edição' : 'Editar') + '</button>' +
+    (edicaoDadosFicha === a.nome ? htmlFormEdicaoDadosFicha(a) : '') + '</div>';
   return h;
+}
+// Um "Editar" só, com um "Salvar" no fim (no lugar dos vários "Salvar" do Resumo completo)
+let edicaoDadosFicha = null;
+function alternarEdicaoDadosFicha(nome){
+  edicaoDadosFicha = edicaoDadosFicha === nome ? null : nome;
+  const a = alunasPersonal.find(function(x){ return x.nome === nome; }); const i = alunasPersonal.indexOf(a);
+  if(i !== -1){ openAlunaDetail(i); abrirAbaDaFicha('plano'); }
+}
+const CAMPOS_EDICAO_FICHA = [['telefone', 'Telefone', 'text'], ['dataNascimento', 'Data de nascimento', 'date'], ['peso', 'Peso inicial (kg)', 'text'], ['altura', 'Altura (m)', 'text'],
+  ['objetivo', 'Objetivo', 'text'], ['restricoes', 'Restrições', 'text'], ['academia', 'Academia', 'text']];
+function htmlFormEdicaoDadosFicha(a){
+  const nomeJs = String(a.nome).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  return '<div style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">' + CAMPOS_EDICAO_FICHA.map(function(c){
+    return '<div><label class="form-label" style="font-size:11.5px;">' + c[1] + '</label><input class="form-input" type="' + c[2] + '" id="ed-ficha-' + c[0] + '" style="font-size:13px;padding:6px 10px;" value="' + escaparHtmlFicha(a[c[0]] == null ? '' : String(a[c[0]])) + '"></div>';
+  }).join('') + '</div><button class="btn-gold" style="width:auto;padding:8px 18px;margin-top:10px;" onclick="salvarEdicaoDadosFicha(\'' + nomeJs + '\')">Salvar</button>';
+}
+function salvarEdicaoDadosFicha(nome){
+  const a = alunasPersonal.find(function(x){ return x.nome === nome; });
+  if(!a) return false;
+  CAMPOS_EDICAO_FICHA.forEach(function(c){
+    const el = document.getElementById('ed-ficha-' + c[0]); if(!el) return;
+    const v = String(el.value || '').trim();
+    if(c[0] === 'peso' || c[0] === 'altura'){ const n = parseCargaBR(v); a[c[0]] = v === '' || isNaN(n) ? null : n; }
+    else a[c[0]] = v === '' ? (c[0] === 'dataNascimento' ? null : '') : v;
+    if(v !== '' && a.naoInformado) a.naoInformado = a.naoInformado.filter(function(x){ return x !== c[0]; });
+  });
+  if(a.peso && a.altura) a.imc = Math.round(a.peso / (a.altura * a.altura) * 10) / 10;
+  try { salvarPerfilAlunaNoSupabase(nome); } catch(e){}
+  mostrarConfirmacaoSalvamento(true, 'Dados salvos.');
+  edicaoDadosFicha = null;
+  const i = alunasPersonal.indexOf(a); if(i !== -1){ openAlunaDetail(i); abrirAbaDaFicha('plano'); }
+  return true;
 }
 
 // Aba "Cargas e evolução": cada exercício do treino atual com as últimas cargas (e o método de cada uma)
@@ -17347,7 +17616,7 @@ function cabecalhoFichaAluna(a, agora){
   if(sit === 'ativas'){ const ctl = situacaoDoControleDaAluna(a, agora); chips.push('<span class="fc ' + ctl.classe + '">' + ctl.texto + '</span>'); }
   const ultimo = ultimoTreinoRegistrado(prog);
   if(ultimo) chips.push('<span class="fc">Último treino: ' + quandoFoiTexto(ultimo, agora) + '</span>');
-  chips.push('<span class="fc">' + escaparHtmlFicha([a.nivel, a.freq, a.ambienteTreino || 'Academia'].filter(Boolean).join(' · ')) + '</span>');
+  chips.push('<span class="fc">' + [textoGenuino(a, 'nivel', 'nível não informado'), textoGenuino(a, 'freq', 'frequência não informada'), escaparHtmlFicha(a.ambienteTreino || 'Academia')].join(' · ') + '</span>');
 
   const wpp = linkWhatsAppDaAluna(a);
   const principal = a.treinoAtual
@@ -17542,16 +17811,6 @@ function openAlunaDetail(i){
     htmlCardPlanoDaFicha(a) +
     painelGeralDaFicha(a) +
     '<div id="resumo-ia-area" style="margin-bottom:18px;"></div>' +
-    (objetivoSugereTabata(a) && !a.tabataSugestaoRespondida ? (
-      '<div class="info-box" style="margin-bottom:12px;border-color:var(--border-strong);">' +
-        '<p class="lbl">💡 Sugestão baseada no objetivo dela</p>' +
-        '<p class="txt">O objetivo relatado por ela menciona emagrecimento/definição. Um protocolo Tabata (circuito intervalado, ' + (a.nivel || 'Iniciante') + ') pode complementar bem o treino resistido nesse caso. Quer que eu já deixe pronto pra você aplicar num dos dias?</p>' +
-        '<div style="display:flex;gap:8px;margin-top:8px;">' +
-          '<span class="chip" style="cursor:pointer;background:var(--success-soft);color:var(--success);" onclick="responderSugestaoTabata(\'' + a.nome.replace(/'/g,"\\'") + '\',true)">Sim, quero ver</span>' +
-          '<span class="chip" style="cursor:pointer;" onclick="responderSugestaoTabata(\'' + a.nome.replace(/'/g,"\\'") + '\',false)">Não, obrigado</span>' +
-        '</div>' +
-      '</div>'
-    ) : '') +
     (detectarRiscoAbandonoPorConstancia(a.nome) ? (
       '<div class="info-box" style="margin-top:14px;border-color:#E2A33D;">' +
         '<p class="lbl" style="color:#E2A33D;">⚠ Risco de abandono</p>' +
@@ -17563,7 +17822,8 @@ function openAlunaDetail(i){
     renderMotor8(a.nome) +
     '</div>' +
     '<div class="ficha-sec" data-ficha="treino">' +
-    '<p class="section-label" style="margin-top:4px;">1 · Prescrição</p>' +
+    htmlSemanaLadoALado(a) +
+    '<details class="ajustes-prescricao" style="margin:14px 0 8px;"><summary class="section-label" style="cursor:pointer;margin-top:4px;">1 · Ajustes da prescrição (nível, frequência, onde treina, pirâmide) · toque pra abrir</summary>' +
     '<div class="stat-grid">' +
       '<div class="stat-card"><p class="stat-label">Nível</p>' +
         '<select class="form-select" style="font-size:13px;padding:6px;margin-top:4px;" onchange="editarNivelAluna(\'' + a.nome.replace(/'/g,"\\'") + '\',this.value)">' +
@@ -17605,6 +17865,8 @@ function openAlunaDetail(i){
     '</div>' +
     '<p style="font-size:11px;color:var(--text-faint);margin:-8px 0 12px;">Ajustar aqui atualiza automaticamente toda a estrutura de treino gerada. O gerador nunca mistura exercício de academia com exercício de casa</p>' +
     '<button class="btn-secondary" style="margin-bottom:18px;" onclick="abrirResumoCompletoAluna(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-file-description" style="margin-right:6px;"></i>Resumo completo (diagnóstico, avaliação, plano)</button>' +
+    '</details>' +
+    htmlSugestaoTabataDaFicha(a) +
     '<p class="section-label" style="margin-top:4px;">2 · Gerar o treino</p>' +
     treinoAcoesHtml +
     '<p class="section-label" style="margin-top:18px;">3 · Treino atual (toque no dia pra ajustar)</p>' + htmlUltimaProgressao(a) +
@@ -17635,6 +17897,7 @@ function openAlunaDetail(i){
     '<div class="ficha-sec" data-ficha="plano">' + htmlPlanoEDados(a) + '</div>' +
     '<div class="ficha-sec" data-ficha="historico">' +
     '<p class="section-label" style="margin-top:4px;">Linha do tempo</p>' + htmlLinhaDoTempoCompleta(a) +
+    htmlBlocoConversaDoGrupo(a) +
     '<p class="section-label" style="margin-top:18px;">Linha do tempo das mensagens</p>' + htmlLinhaDoTempoDaAluna(a.nome, 5) +
     renderSecaoColapsavel('Acompanhamento e histórico', renderElegibilidadeFase(a) + renderFunilEngajamento(a) + renderLinhaDoTempo(a) + renderPromocaoNivel(a) + renderBlocoPeriodizacao(a) + renderHistoricoPrioridade(a) + renderEditorPesoComposicaoPersonal(a) + renderAvaliacoesPdfPersonal(a) + renderTecnicaPendente(a) + renderProgressao(a), 'acompanhamento') +
     '<p class="page-sub" style="margin-top:10px;">Anamnese respondida em ' + (a.dataAnamnese || 'data desconhecida') + '</p>' +
@@ -18376,7 +18639,7 @@ function renderControleTreinos(){
   html += '<div class="ctl-cols">' +
     coluna('pendentes', 'Pendentes', 'var(--text-dim)', 'Precisam de treino novo', incolores, function(a){
       const d = subPendente(a);
-      return item(a, d.sub, d.classe, '<button class="ctl-bt ouro" onclick="event.stopPropagation();gerarTreinoPeloControle(IDX)">' + (a.treinoAtual ? 'Gerar' : 'Prescrever') + '</button>');
+      return item(a, (a.treinoAtual ? 'pra progredir · ' : 'pra gerar · ') + d.sub, d.classe, '<button class="ctl-bt ouro" onclick="event.stopPropagation();gerarTreinoPeloControle(IDX)">' + (a.treinoAtual ? 'Gerar' : 'Prescrever') + '</button>');
     }) +
     coluna('gerados', 'Gerados', '#E2C13D', 'Prontos, falta mandar pra aluna', amarelos, function(a){
       return item(a, 'gerado, falta enviar', '', '<button class="ctl-bt" onclick="event.stopPropagation();marcarEnviadoPeloControle(IDX)">Marcar enviado</button>');
@@ -18386,9 +18649,36 @@ function renderControleTreinos(){
       return item(a, d.sub, d.classe, '<button class="ctl-bt" onclick="event.stopPropagation();openAlunaDetail(IDX)">Ver</button>');
     }) +
   '</div>' +
-  '<p class="txt" style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:12px;">' + ativas.length + (ativas.length === 1 ? ' aluna ativa' : ' alunas ativas') + ' no controle</p>';
+  '<p class="txt" style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:12px;">' + ativas.length + (ativas.length === 1 ? ' aluna ativa' : ' alunas ativas') + ' no controle</p>' +
+  htmlProximasProgressoes(verdes, agora);
 
   container.innerHTML = html;
+}
+// Próximas progressões (24/11): quem volta pra Pendentes nos próximos 14 dias, e quantos exercícios do treino dela têm
+// registro de carga suficiente pro motor decidir. Exercício sem registro suficiente fica como está na progressão.
+function htmlProximasProgressoes(enviadas, agora){
+  const lista = enviadas.map(function(a){
+    const d = a.dataFicouVerde ? diasCorridosDesde(a.dataFicouVerde, agora) : null;
+    if(d === null) return null;
+    const falta = diasParaVoltarAoBranco - d;
+    if(falta < 0 || falta > 14) return null;
+    const desde = new Date(a.dataFicouVerde);
+    const prog = getProgressoAluna(a.nome);
+    // quantos exercícios do treino de agora já têm registro suficiente pro motor decidir (o resto ele só mantém)
+    const nomes = [];
+    ((a.treinoAtual || {}).dias || []).forEach(function(dd){ if(dd && !dd.descanso) (dd.ex || []).forEach(function(l){ const p = partesDaLinhaProg(l); if(!p.combo && nomes.indexOf(p.nome) === -1) nomes.push(p.nome); }); });
+    const comDado = nomes.filter(function(n){ return registrosDoExercicioProg(a, prog, n).length >= REGRAS_PROG.minimoRegistros; }).length;
+    return { a: a, falta: falta, em: isoMaisDias(dataLocalISO(desde), diasParaVoltarAoBranco), comDado: comDado, total: nomes.length };
+  }).filter(Boolean).sort(function(x, y){ return x.falta - y.falta; });
+  const cab = '<p class="section-label" style="margin-top:20px;">Próximas progressões (14 dias)</p>';
+  if(!lista.length) return cab + '<p class="txt" style="font-size:12px;color:var(--text-faint);">Ninguém progride nos próximos 14 dias.</p>';
+  return cab + '<div class="info-box" style="padding:6px 12px;">' + lista.map(function(x){
+    const i = alunasPersonal.indexOf(x.a), pouco = x.total > 0 && x.comDado < x.total / 2;
+    return '<div style="display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12.5px;cursor:pointer;" onclick="openAlunaDetail(' + i + ')">' +
+      '<span style="flex:1;"><b>' + escaparHtmlFicha(x.a.nome) + '</b><small style="display:block;color:var(--text-faint);">treino desde ' + dataBR(dataLocalISO(new Date(x.a.dataFicouVerde))) + ' · progride em ' + dataBR(x.em) + (x.falta === 0 ? ' (hoje)' : ' (em ' + x.falta + (x.falta === 1 ? ' dia)' : ' dias)')) + '</small></span>' +
+      '<span>' + x.comDado + ' de ' + x.total + ' exercícios com registro</span>' +
+      '<span class="tag" style="' + (pouco ? 'color:#E2A33D;' : 'color:var(--success);') + '">' + (pouco ? 'Pouco registro: muda pouco' : 'Registro bom') + '</span></div>';
+  }).join('') + '</div>';
 }
 
 async function enviarCredenciaisPorWhatsApp(nomeAluna){
@@ -18733,6 +19023,7 @@ async function sincronizarListaAlunasDoSupabase(){
         dataFechouPlano: row.data_fechou_plano || null,
         duracaoPlanoDias: row.duracao_plano_dias || null,
         dataAnamnese: row.data_anamnese || null, // sem anamnese respondida: sem data (antes virava "respondida hoje" todo dia)
+        naoInformado: ['nivel', 'freq', 'restricoes', 'objetivo', 'piramide', 'academia'].filter(function(c){ return !row[c] || !String(row[c]).trim(); }),
         status: 'ok',
         statusLabel: 'Ativa recente',
         recemChegadaDaAnamnese: true,
@@ -19999,6 +20290,8 @@ async function carregarCatalogoPersonal(forcar){
         if(row.chave && row.dados && row.dados.ordem && !enviosRodandoAgora[row.chave] && (!atual || String(row.dados.atualizadoEm || '') >= String(atual.atualizadoEm || ''))) enviosEmMassa[row.chave] = row.dados;
       } else if(row.tipo === 'precos_planos'){
         if(row.dados) ['90', '180', '365'].forEach(function(k){ if(typeof row.dados[k] === 'number') precosDosPlanos[k] = row.dados[k]; });
+      } else if(row.tipo === 'preferencia_contato'){
+        if(row.chave && row.dados) preferenciasContato[row.chave] = row.dados;
       } else if(row.tipo === 'grupo_suporte'){
         if(row.chave && row.dados) gruposDeSuporte[row.chave] = row.dados;
       } else if(row.tipo === 'grupo_desafio'){
@@ -24336,8 +24629,50 @@ function textoDaConexaoDoPainel(){
   const em = ultimaCargaDoPersonalEm ? new Date(ultimaCargaDoPersonalEm) : new Date();
   return '<span style="color:var(--success);">●</span> Conectado · dados de ' + String(em.getHours()).padStart(2, '0') + ':' + String(em.getMinutes()).padStart(2, '0');
 }
+// ===== CONVERSAS DA SEMANA (24/11) =====
+// Toda aluna ativa tem uma conversa por semana. Quem ainda não teve nos últimos 7 dias aparece com um roteiro curto
+// montado com os dados da semana dela (treinos, carga que subiu, último feedback e desconforto). Só fatos registrados.
+function roteiroSemanalDaAluna(a, agora){
+  const prog = getProgressoAluna(a.nome), desde = (agora || Date.now()) - 7 * 864e5, partes = [];
+  const treinos = (prog.horariosTreino || []).filter(function(h){ return h && new Date(h.data).getTime() >= desde; }).length;
+  const freq = frequenciaDaAlunaProg(a);
+  partes.push(treinos + (freq ? ' de ' + freq : '') + (treinos === 1 ? ' treino' : ' treinos') + ' na semana');
+  let subiu = null;
+  Object.keys(prog.historico || {}).forEach(function(k){
+    const regs = todosRegistrosDoExercicio(prog, k), ult = regs[regs.length - 1], ant = regs[regs.length - 2];
+    const dt = ult && dataDoRegistroDeCarga(prog, ult);
+    if(ult && ant && dt && dt.getTime() >= desde && ult.carga > ant.carga && metodoDoRegistro(ult, '') === metodoDoRegistro(ant, '') && (!subiu || ult.carga - ant.carga > subiu.dif)) subiu = { nome: k, de: ant.carga, para: ult.carga, dif: ult.carga - ant.carga };
+  });
+  if(subiu) partes.push('subiu ' + subiu.nome + ' de ' + String(subiu.de).replace('.', ',') + ' pra ' + String(subiu.para).replace('.', ',') + ' kg');
+  const fb = (prog.feedbackTreino || []).filter(function(f){ return f && new Date(f.data).getTime() >= desde; });
+  const desc = fb.filter(function(f){ return f.desconforto; })[0];
+  if(desc) partes.push('relatou desconforto' + (desc.exercicio ? ' no ' + desc.exercicio : ''));
+  else if(fb.length && typeof fb[fb.length - 1].intensidade === 'number') partes.push('intensidade ' + fb[fb.length - 1].intensidade + ' no último feedback');
+  if(!treinos) partes.push('perguntar o que atrapalhou a semana');
+  return partes.join(' · ');
+}
+function conversasDaSemana(agora){
+  agora = agora || Date.now();
+  const ativas = alunasParaEscolherTreino();
+  // a preferência dela manda: toda semana (e quem não respondeu) 7 dias, a cada 15 dias 15, e "quando eu precisar" fica de fora
+  const naLista = ativas.filter(function(a){ return preferenciaContatoDaAluna(a).pref !== 'quando_precisar'; });
+  const prazo = function(a){ return DIAS_PREF_CONTATO[preferenciaContatoDaAluna(a).pref] || 7; };
+  const feitas = naLista.filter(function(a){ return a.suporteUltimoContato && agora - new Date(a.suporteUltimoContato).getTime() < prazo(a) * 864e5; });
+  const faltam = naLista.filter(function(a){ return feitas.indexOf(a) === -1; });
+  return { total: naLista.length, feitas: feitas.length, faltam: faltam, quandoPrecisar: ativas.length - naLista.length };
+}
+
 // Cards da direita do Hoje: Treinos (os 3 botões), mensagens dos desafios (▶/■) e grupos de suporte
 function renderCardsDoHoje(d){
+  const elC = document.getElementById('pn-conversas');
+  if(elC){
+    const c = conversasDaSemana();
+    const pct = c.total ? Math.round(c.feitas / c.total * 100) : 100;
+    elC.innerHTML = '<p style="font-size:12.5px;margin:0 0 6px;">' + c.feitas + ' de ' + c.total + ' conversas em dia (toda semana ou a cada 15 dias, como cada uma escolheu)' + (c.quandoPrecisar ? ' · ' + c.quandoPrecisar + ' preferem chamar quando precisar' : '') + '</p><div class="pn-barra"><i style="width:' + pct + '%"></i></div>' +
+      (c.faltam.length ? c.faltam.slice(0, 4).map(function(a){ return '<div style="padding:7px 0;border-top:1px solid var(--border);font-size:12.5px;cursor:pointer;" onclick="openAlunaDetail(' + alunasPersonal.indexOf(a) + ')"><b>' + escaparHtmlFicha(a.nome) + '</b><small style="display:block;color:var(--text-faint);">' + escaparHtmlFicha(roteiroSemanalDaAluna(a)) + '</small></div>'; }).join('') +
+        (c.faltam.length > 4 ? '<p style="font-size:11.5px;color:var(--text-faint);margin:6px 0 0;">e mais ' + (c.faltam.length - 4) + '</p>' : '')
+      : '<p class="pn-vazio" style="padding:6px 0;">Todas as conversas da semana feitas.</p>');
+  }
   const elA = document.getElementById('pn-acoes-treino');
   if(elA) elA.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px;">' +
     '<button class="pn-btn-gold" onclick="iniciarGeracaoOuProgressaoParaNaoEnviados()">Gerar treinos pendentes' + (d && d.paraEnviar && d.paraEnviar.paraGerar ? ' (' + d.paraEnviar.paraGerar + ')' : '') + '</button>' +
