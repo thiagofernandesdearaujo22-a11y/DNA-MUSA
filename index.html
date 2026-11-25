@@ -1287,7 +1287,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-25-CN-RESPOSTA-NO-TESTE</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-25-CO-REGREDIR-TREINOS</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -1613,6 +1613,7 @@
 
         <div id="escolha-treinos-area"></div>
         <div id="relatorios-area"></div>
+        <div id="regressao-massa-area"></div>
         <div id="geracao-massa-area"></div>
 
         <div class="pn-kpis" id="pn-kpis"></div>
@@ -2228,7 +2229,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-25-CN-RESPOSTA-NO-TESTE';
+const VERSAO_APP = '2026-11-25-CO-REGREDIR-TREINOS';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -13344,6 +13345,7 @@ function montarDadosExtrasDaAluna(a){
     regressao: a.regressao || null, // regressão ativa (motivo, região, nível, até quando)
     treinoAntesDaRegressao: a.treinoAntesDaRegressao || null, // pra desfazer a regressão
     historicoRegressoes: a.historicoRegressoes || [],
+    voltaDeVersao: a.voltaDeVersao || null, // 25/11: voltou pra um treino arquivado (de qual, quando, quem, motivo)
     composicaoHistorico: a.composicaoHistorico || [],
     pesoHistorico: a.pesoHistorico || [],
     // Peso e altura iniciais (e o IMC calculado deles) nunca eram salvos: ao carregar alunas do banco o app
@@ -16807,7 +16809,9 @@ async function abrirTreinosArquivados(nomeAluna){
       const rotulo = idx === 0 ? 'Atual' : 'Anterior';
       const nomeJs = nomeAluna.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
       return '<div class="list-item" style="flex-direction:column;align-items:stretch;cursor:pointer;" onclick="abrirVersaoArquivada(\'' + nomeJs + '\',' + idx + ')">' +
-        '<div style="display:flex;justify-content:space-between;"><span>' + dataHora + '</span><span class="tag">' + rotulo + ' · ' + escaparHtmlFicha(t.fase || '') + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;"><span>' + dataHora + '</span><span style="display:flex;gap:8px;align-items:center;"><span class="tag">' + rotulo + ' · ' + escaparHtmlFicha(t.fase || '') + '</span>' +
+          (idx > 0 ? '<button class="pg-b" style="border:1px solid var(--gold);color:var(--gold);font-weight:700;" onclick="event.stopPropagation();abrirConfirmacaoRegredir(\'' + nomeJs + '\',' + idx + ')">Regredir para este treino</button>' : '') + '</span></div>' +
+        '<div id="regredir-box-' + idx + '"></div>' +
         '<p style="font-size:11px;color:var(--text-faint);margin:4px 0 0;">' + (t.dias || []).filter(function(d){ return d && !d.descanso; }).length + ' dias de treino · ' + (idx === 0 ? 'toque pra ver' : 'toque pra ver e comparar com o atual') + '</p>' +
         '<div id="versao-arquivada-' + idx + '"></div>' +
       '</div>';
@@ -16905,22 +16909,194 @@ function abrirInfoDoExercicioArquivado(nomeAluna, idx, di, i){
 
 // ===== VOLTAR O TREINO PRA UMA VERSÃO ARQUIVADA (24/11) =====
 // O treino de agora não se perde: a versão escolhida volta como uma versão NOVA, e a de agora vai pros arquivados.
-async function voltarParaVersaoArquivada(nomeAluna, idx){
+// ===== REGREDIR PARA UM TREINO ARQUIVADO (25/11) =====
+// A aluna volta a usar um treino arquivado. Vira uma versão NOVA (o de agora vai pros arquivados, nada se perde) e a
+// próxima progressão roda o motor normal em cima dele. As cargas sugeridas seguem a regra de sempre (a última registrada
+// de cada exercício; o que saiu e voltou leva a carga antiga). Fica anotado em "voltaDeVersao" (de qual, quando, quem, motivo).
+function ehLinhaDeRegressao(t){ return /^Voltou pr(a|o) (versão|treino) de/.test(String((t && t.volume) || '')); }
+function dataHoraBR(iso){ return new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+async function regredirAlunaParaVersao(a, v, op){
+  op = op || {};
+  const agora = new Date().toISOString(), quando = new Date(v.updated_at).toLocaleDateString('pt-BR');
+  a.treinoAtual = { fase: v.fase || (a.treinoAtual && a.treinoAtual.fase) || '', volume: 'Voltou pro treino de ' + quando, dias: JSON.parse(JSON.stringify(v.dias || [])) };
+  normalizarDiasComExercicio(a.treinoAtual.dias);
+  a.voltaDeVersao = { de: v.updated_at, em: agora, por: NOME_PERSONAL_LOGADO || '', motivo: String(op.motivo || '').trim().slice(0, 160), manterData: !!op.manterData };
+  a.versaoRestaurada = { de: v.updated_at, em: agora, por: NOME_PERSONAL_LOGADO || '' };
+  if(!op.manterData && (a.dataFicouVerde || a.statusControleCiclo === 'verde')) a.dataFicouVerde = agora; // as 4 semanas contam de hoje
+  a.ultimaProgressao = null; // a progressão desfeita não aparece mais como "última progressão"
+  const r = await sincronizarTreinoComSupabase(a, { novaVersao: true });
+  try { salvarPerfilAlunaNoSupabase(a.nome); } catch(e){}
+  return r || { ok: true };
+}
+// Caixinha de confirmação, dentro do card do treino arquivado
+function abrirConfirmacaoRegredir(nomeAluna, idx){
+  const lista = historicoArquivadoAberto[nomeAluna];
+  const caixa = document.getElementById('regredir-box-' + idx);
+  if(!lista || !lista[idx] || idx === 0 || !caixa) return false;
+  if(caixa.innerHTML){ caixa.innerHTML = ''; return true; }
+  const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; }) || {};
+  const v = lista[idx], quando = new Date(v.updated_at).toLocaleDateString('pt-BR'), nomeJs = nomeAluna.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  const temCiclo = !!a.dataFicouVerde;
+  const novaData = dataBR(isoMaisDias(dataLocalISO(new Date()), diasParaVoltarAoBranco));
+  const dataAtual = temCiclo ? dataBR(isoMaisDias(dataLocalISO(new Date(a.dataFicouVerde)), diasParaVoltarAoBranco)) : '';
+  caixa.innerHTML = '<div class="info-box" style="margin-top:10px;border-color:rgba(221,182,115,0.45);" onclick="event.stopPropagation()">' +
+    '<p style="font-size:14px;font-weight:700;margin:0 0 8px;">Regredir ' + escaparHtmlFicha(nomeAluna.split(' ')[0]) + ' para o treino de ' + quando + '?</p>' +
+    '<p class="txt" style="font-size:12.5px;margin:4px 0;">• O treino de agora vai pros arquivados. Nada se perde.</p>' +
+    '<p class="txt" style="font-size:12.5px;margin:4px 0;">• Ela passa a ver o treino de ' + quando + ' no app, a partir de hoje.</p>' +
+    '<p class="txt" style="font-size:12.5px;margin:4px 0;">• Cargas sugeridas: a última que ela registrou em cada exercício.</p>' +
+    '<p class="txt" style="font-size:12.5px;margin:4px 0;">• A próxima progressão parte desse treino, com todas as regras do motor.</p>' +
+    (temCiclo ? '<p style="font-size:12px;color:var(--text-faint);margin:10px 0 4px;">Próxima progressão:</p>' +
+      '<label class="et-opc"><input type="radio" name="rg-data-' + idx + '" id="rg-hoje-' + idx + '" checked> Contar 4 semanas a partir de hoje (fica ' + novaData + ')</label>' +
+      '<label class="et-opc"><input type="radio" name="rg-data-' + idx + '"> Manter a data que já estava (' + dataAtual + ')</label>' : '') +
+    '<p style="font-size:12px;color:var(--text-faint);margin:10px 0 4px;">Motivo (opcional, fica na linha do tempo):</p>' +
+    '<input class="form-input" id="rg-motivo-' + idx + '" style="font-size:16px;padding:7px 10px;" placeholder="ex.: dor no joelho, viagem, voltou de pausa">' +
+    '<div style="display:flex;gap:10px;align-items:center;margin-top:12px;"><button class="btn-gold" style="width:auto;padding:9px 18px;" onclick="event.stopPropagation();voltarParaVersaoArquivada(\'' + nomeJs + '\',' + idx + ',{ manterData: !(document.getElementById(\'rg-hoje-' + idx + '\') || { checked: true }).checked, motivo: (document.getElementById(\'rg-motivo-' + idx + '\') || {}).value })">Regredir</button>' +
+    '<a style="color:var(--text-faint);cursor:pointer;font-size:13px;" onclick="event.stopPropagation();document.getElementById(\'regredir-box-' + idx + '\').innerHTML=\'\'">Cancelar</a></div></div>';
+  return true;
+}
+// op vem da caixinha (já confirmado). Sem op (chamada antiga), pergunta antes.
+async function voltarParaVersaoArquivada(nomeAluna, idx, op){
   const a = alunasPersonal.find(function(x){ return x.nome === nomeAluna; });
   const lista = historicoArquivadoAberto[nomeAluna];
   if(!a || !lista || !lista[idx] || idx === 0) return false;
   const v = lista[idx];
   const quando = new Date(v.updated_at).toLocaleDateString('pt-BR');
-  if(!confirm('Voltar o treino de ' + nomeAluna.split(' ')[0] + ' pra versão de ' + quando + '? O treino de agora vai pros arquivados (não se perde) e ela passa a ver essa versão.')) return false;
-  a.treinoAtual = { fase: v.fase || (a.treinoAtual && a.treinoAtual.fase) || '', volume: 'Voltou pra versão de ' + quando, dias: JSON.parse(JSON.stringify(v.dias || [])) };
-  normalizarDiasComExercicio(a.treinoAtual.dias);
-  a.versaoRestaurada = { de: v.updated_at, em: new Date().toISOString(), por: NOME_PERSONAL_LOGADO || '' };
-  const r = await sincronizarTreinoComSupabase(a, { novaVersao: true });
-  try { salvarPerfilAlunaNoSupabase(nomeAluna); } catch(e){}
-  mostrarConfirmacaoSalvamento(!!(r && r.ok !== false), r && r.ok === false ? 'Não consegui salvar a volta: ' + (r.motivo || 'erro') : 'Pronto: o treino voltou pra versão de ' + quando + '.');
+  if(!op && !confirm('Regredir ' + nomeAluna.split(' ')[0] + ' para o treino de ' + quando + '? O treino de agora vai pros arquivados (não se perde) e ela passa a ver esse treino.')) return false;
+  const r = await regredirAlunaParaVersao(a, v, op || {});
+  mostrarConfirmacaoSalvamento(!!(r && r.ok !== false), r && r.ok === false ? 'Não consegui salvar a regressão: ' + (r.motivo || 'erro') : 'Pronto: ' + nomeAluna.split(' ')[0] + ' voltou pro treino de ' + quando + '.');
   const area = document.getElementById('treinos-arquivados-area'); if(area) area.innerHTML = '';
   const i = alunasPersonal.indexOf(a); if(i !== -1) openAlunaDetail(i);
   return true;
+}
+// Aviso na aba Treino depois de regredir
+function htmlAvisoVoltaDeVersao(a){
+  const v = a && a.voltaDeVersao;
+  if(!v || !v.de) return '';
+  const prox = a.dataFicouVerde ? dataBR(isoMaisDias(dataLocalISO(new Date(a.dataFicouVerde)), diasParaVoltarAoBranco)) : '';
+  return '<div class="info-box" style="margin:6px 0 12px;border-color:rgba(221,182,115,0.35);"><p class="txt" style="font-size:12.5px;margin:0;"><b style="color:var(--gold-soft);">Regrediu para o treino de ' + new Date(v.de).toLocaleDateString('pt-BR') + '</b> em ' + dataBR(dataLocalISO(new Date(v.em))) +
+    (v.por ? ', por ' + escaparHtmlFicha(v.por) : '') + (v.motivo ? ' · motivo: ' + escaparHtmlFicha(v.motivo) : '') + '<br>A próxima progressão' + (prox ? ' (' + prox + ')' : '') + ' vai partir deste treino.</p></div>';
+}
+
+// ----- Regredir treinos em massa (painel Hoje) -----
+// Pra desfazer progressões feitas num intervalo: cada aluna volta pro último treino salvo ANTES da data de corte.
+// Mostra a lista antes de mexer em qualquer coisa. Quem não teve treino novo depois do corte, quem não tem treino antes
+// e quem já foi regredida ficam de fora sozinhas. Até 2 treinos antes do corte pra escolher, por aluna.
+const CORTE_REGRESSAO_PADRAO = '2026-11-20T17:00';
+const HORAS_ALERTA_ANTES_DO_CORTE = 3;
+let regressaoMassa = null;
+function abrirRegressaoEmMassa(){
+  const area = document.getElementById('regressao-massa-area');
+  if(!area) return false;
+  if(regressaoMassa){ regressaoMassa = null; area.innerHTML = ''; return true; }
+  regressaoMassa = { corte: CORTE_REGRESSAO_PADRAO, linhas: null, marcadas: {}, escolha: {}, manterData: true, rodando: false, feitas: {}, erros: {} };
+  renderRegressaoEmMassa();
+  carregarRegressaoEmMassa();
+  return true;
+}
+function corteDaRegressaoMs(){ return new Date(regressaoMassa.corte).getTime(); } // horário do aparelho (Brasília)
+// Monta a situação de cada aluna a partir dos treinos salvos dela (do mais novo pro mais velho)
+function situacaoRegressaoDaAluna(hist, corteMs){
+  hist = (hist || []).slice().sort(function(x, y){ return new Date(y.updated_at) - new Date(x.updated_at); });
+  if(!hist.length) return { tipo: 'nada' };
+  if(ehLinhaDeRegressao(hist[0])) return { tipo: 'ja', atual: hist[0] };
+  const depois = hist.filter(function(t){ return new Date(t.updated_at).getTime() >= corteMs; });
+  if(!depois.length) return { tipo: 'nada' };
+  const vistos = {}, antes = [];
+  hist.forEach(function(t){
+    if(new Date(t.updated_at).getTime() >= corteMs || antes.length >= 2) return;
+    const k = JSON.stringify([t.fase || '', t.dias || []]);
+    if(vistos[k]) return; // mesma versão salva duas vezes: mostra uma só
+    vistos[k] = true; antes.push(t);
+  });
+  if(!antes.length) return { tipo: 'sem_anterior', atual: hist[0], depois: depois };
+  return { tipo: 'regredir', atual: hist[0], depois: depois, antes: antes,
+    perto: hist.filter(function(t){ const ms = new Date(t.updated_at).getTime(); return ms < corteMs && corteMs - ms <= HORAS_ALERTA_ANTES_DO_CORTE * 36e5; }) };
+}
+async function carregarRegressaoEmMassa(){
+  if(!regressaoMassa) return;
+  const r0 = regressaoMassa;
+  const alunas = alunasPersonal.filter(function(a){ return a.email; });
+  try {
+    const emails = alunas.map(function(a){ return a.email; });
+    const { data: linhasAlunas } = await supabaseClient.from('alunas').select('email, auth_id').in('email', emails);
+    const idPorEmail = {};
+    (linhasAlunas || []).forEach(function(l){ if(l.email && l.auth_id) idPorEmail[l.email.toLowerCase()] = l.auth_id; });
+    const ids = Object.keys(idPorEmail).map(function(k){ return idPorEmail[k]; });
+    const { data: treinos } = ids.length ? await supabaseClient.from('treinos').select('id, aluna_id, fase, volume, dias, updated_at').in('aluna_id', ids) : { data: [] };
+    const porId = {};
+    (treinos || []).forEach(function(t){ (porId[t.aluna_id] = porId[t.aluna_id] || []).push(t); });
+    if(regressaoMassa !== r0) return;
+    r0.historicos = {};
+    alunas.forEach(function(a){ const id = idPorEmail[a.email.toLowerCase()]; r0.historicos[a.nome] = id ? (porId[id] || []) : []; });
+    recalcularRegressaoEmMassa(true);
+  } catch(e){
+    if(regressaoMassa === r0){ r0.erroCarregar = 'Sem conexão pra buscar os treinos agora. Tenta de novo.'; renderRegressaoEmMassa(); }
+  }
+}
+function recalcularRegressaoEmMassa(marcarTodas){
+  const r = regressaoMassa; if(!r || !r.historicos) return;
+  const corteMs = corteDaRegressaoMs();
+  r.linhas = Object.keys(r.historicos).map(function(nome){ return { nome: nome, s: situacaoRegressaoDaAluna(r.historicos[nome], corteMs) }; });
+  if(marcarTodas){ r.marcadas = {}; r.escolha = {}; r.linhas.forEach(function(l){ if(l.s.tipo === 'regredir'){ r.marcadas[l.nome] = true; r.escolha[l.nome] = 0; } }); }
+  renderRegressaoEmMassa();
+}
+function mudarCorteDaRegressao(v){ if(!regressaoMassa || !v || isNaN(new Date(v).getTime())) return; regressaoMassa.corte = v; recalcularRegressaoEmMassa(true); }
+function marcarRegressao(nome, marcar){ if(!regressaoMassa) return; if(marcar) regressaoMassa.marcadas[nome] = true; else delete regressaoMassa.marcadas[nome]; renderRegressaoEmMassa(); }
+function escolherVersaoRegressao(nome, i){ if(!regressaoMassa) return; regressaoMassa.escolha[nome] = Number(i) || 0; renderRegressaoEmMassa(); }
+function renderRegressaoEmMassa(){
+  const area = document.getElementById('regressao-massa-area');
+  const r = regressaoMassa;
+  if(!area || !r) return;
+  const nj = function(n){ return JSON.stringify(n).replace(/"/g, '&quot;'); };
+  let h = '<div class="et-box"><h3>Regredir treinos</h3>' +
+    '<p class="et-sub">Cada aluna volta pro último treino salvo antes da data de corte. O treino de agora vai pros arquivados (nada se perde) e a próxima progressão parte do treino de antes, com todas as regras.</p>' +
+    '<label class="et-opc" style="gap:8px;">Desfazer o que foi salvo a partir de <input type="datetime-local" class="form-input" style="width:auto;font-size:16px;padding:5px 8px;" value="' + escaparHtmlFicha(r.corte) + '" onchange="mudarCorteDaRegressao(this.value)"></label>';
+  if(r.erroCarregar) return void (area.innerHTML = h + '<p class="txt">' + escaparHtmlFicha(r.erroCarregar) + '</p></div>');
+  if(!r.linhas) return void (area.innerHTML = h + '<p class="txt">Buscando os treinos salvos de cada aluna...</p></div>');
+  const reg = r.linhas.filter(function(l){ return l.s.tipo === 'regredir'; }), semAnt = r.linhas.filter(function(l){ return l.s.tipo === 'sem_anterior'; }),
+    ja = r.linhas.filter(function(l){ return l.s.tipo === 'ja'; }), nada = r.linhas.filter(function(l){ return l.s.tipo === 'nada'; });
+  const n = reg.filter(function(l){ return r.marcadas[l.nome]; }).length;
+  h += '<div class="et-barra"><b>' + n + ' de ' + reg.length + ' marcadas</b>' + (nada.length ? '<span style="color:var(--text-faint);font-size:12px;">' + nada.length + ' sem treino novo depois do corte (ficam como estão)</span>' : '') + '</div><div class="et-lista">';
+  h += reg.map(function(l){
+    const s = l.s, esc = r.escolha[l.nome] || 0, feito = r.feitas[l.nome], erro = r.erros[l.nome];
+    const desfaz = s.depois.map(function(t){ return dataHoraBR(t.updated_at).replace(',', ''); }).reverse().join(', ');
+    const alvo = s.antes.length > 1 ? '<select class="form-input" style="width:auto;font-size:14px;padding:3px 6px;" onclick="event.stopPropagation()" onchange="escolherVersaoRegressao(' + nj(l.nome) + ',this.value)">' +
+        s.antes.map(function(t, i){ return '<option value="' + i + '"' + (i === esc ? ' selected' : '') + '>' + dataHoraBR(t.updated_at).replace(',', '') + (t.fase ? ' · ' + escaparHtmlFicha(t.fase) : '') + '</option>'; }).join('') + '</select>'
+      : '<b>' + dataHoraBR(s.antes[0].updated_at).replace(',', '') + '</b>';
+    const perto = s.perto.length ? '<small style="display:block;color:#C9784A;">Atenção: tem treino salvo ' + s.perto.map(function(t){ return dataHoraBR(t.updated_at).replace(',', ''); }).join(', ') + ', até ' + HORAS_ALERTA_ANTES_DO_CORTE + ' h antes do corte. Confere se esse ainda é do jeito antigo.</small>' : '';
+    return '<div class="et-lin" style="display:flex;gap:10px;align-items:flex-start;">' +
+      (feito ? '<span style="width:16px;color:var(--success);">✓</span>' : '<input type="checkbox"' + (r.marcadas[l.nome] ? ' checked' : '') + (r.rodando ? ' disabled' : '') + ' onchange="marcarRegressao(' + nj(l.nome) + ',this.checked)">') +
+      '<span style="flex:1;"><b>' + escaparHtmlFicha(l.nome) + '</b><small style="display:block;">desfaz: ' + desfaz + '</small><small style="display:block;">volta pro de ' + alvo + '</small>' + perto +
+      (feito ? '<small style="display:block;color:var(--success);">regredida</small>' : '') + (erro ? '<small style="display:block;color:#C9784A;">' + escaparHtmlFicha(erro) + '</small>' : '') + '</span></div>';
+  }).join('');
+  h += semAnt.map(function(l){ return '<div class="et-lin"><span style="width:16px;"></span><span style="flex:1;"><b>' + escaparHtmlFicha(l.nome) + '</b><small style="display:block;">sem treino salvo antes do corte: fica como está</small></span></div>'; }).join('');
+  h += ja.map(function(l){ return '<div class="et-lin"><span style="width:16px;color:var(--success);">✓</span><span style="flex:1;"><b>' + escaparHtmlFicha(l.nome) + '</b><small style="display:block;">já regredida (' + escaparHtmlFicha(l.s.atual.volume) + ')</small></span></div>'; }).join('');
+  h += '</div><p style="font-size:12px;color:var(--text-faint);margin:12px 0 4px;">Próxima progressão:</p>' +
+    '<label class="et-opc"><input type="radio" name="rg-massa-data"' + (r.manterData ? ' checked' : '') + ' onchange="regressaoMassa.manterData=true"> Manter a data que cada uma já tinha</label>' +
+    '<label class="et-opc"><input type="radio" name="rg-massa-data"' + (r.manterData ? '' : ' checked') + ' onchange="regressaoMassa.manterData=false"> Contar 4 semanas a partir de hoje</label>' +
+    '<button class="btn-gold" style="margin-top:12px;"' + (n && !r.rodando ? '' : ' disabled') + ' onclick="confirmarRegressaoEmMassa()">' + (r.rodando ? 'Regredindo...' : 'Regredir ' + n + (n === 1 ? ' aluna' : ' alunas')) + '</button></div>';
+  area.innerHTML = h;
+}
+async function confirmarRegressaoEmMassa(){
+  const r = regressaoMassa; if(!r || !r.linhas || r.rodando) return 0;
+  const lista = r.linhas.filter(function(l){ return l.s.tipo === 'regredir' && r.marcadas[l.nome] && !r.feitas[l.nome]; });
+  if(!lista.length) return 0;
+  if(!confirm('Regredir ' + lista.length + (lista.length === 1 ? ' aluna' : ' alunas') + ' para o treino de antes de ' + dataHoraBR(r.corte).replace(',', '') + '? O treino de agora de cada uma vai pros arquivados (não se perde).')) return 0;
+  r.rodando = true; renderRegressaoEmMassa();
+  let n = 0;
+  for(const l of lista){
+    const a = alunasPersonal.find(function(x){ return x.nome === l.nome; });
+    const v = l.s.antes[r.escolha[l.nome] || 0];
+    if(!a || !v){ r.erros[l.nome] = 'não achei a aluna'; continue; }
+    try {
+      const res = await regredirAlunaParaVersao(a, v, { manterData: r.manterData, motivo: 'desfazer as progressões a partir de ' + dataHoraBR(r.corte).replace(',', '') });
+      if(res && res.ok === false){ r.erros[l.nome] = 'não salvou: ' + (res.motivo || 'erro'); } else { r.feitas[l.nome] = true; delete r.erros[l.nome]; n++; }
+    } catch(e){ r.erros[l.nome] = 'não salvou: ' + (e && e.message || e); }
+    renderRegressaoEmMassa();
+  }
+  r.rodando = false; renderRegressaoEmMassa();
+  mostrarConfirmacaoSalvamento(n === lista.length, n === lista.length ? 'Pronto: ' + n + (n === 1 ? ' aluna regredida.' : ' alunas regredidas.') : n + ' de ' + lista.length + ' regredidas. Veja na lista as que não foram.');
+  return n;
 }
 
 function abrirVersaoArquivada(nomeAluna, idx){
@@ -16944,7 +17120,7 @@ function abrirVersaoArquivada(nomeAluna, idx){
           (clicavel ? '<div id="info-arq-' + idx + '-' + di + '-' + i + '"></div>' : '');
       }).join('');
   }).join('') + (idx > 0 ? '<p style="font-size:11px;color:var(--text-faint);margin-top:8px;">Em dourado: o que era assim nessa versão e não está igual no treino atual.</p>' +
-    '<button class="btn-secondary" style="margin-top:10px;width:auto;padding:8px 14px;" onclick="event.stopPropagation();voltarParaVersaoArquivada(\'' + nomeAluna.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\',' + idx + ')">Voltar o treino pra esta versão</button>' : '') + '</div>';
+    '<button class="btn-secondary" style="margin-top:10px;width:auto;padding:8px 14px;" onclick="event.stopPropagation();abrirConfirmacaoRegredir(\'' + nomeAluna.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\',' + idx + ')">Regredir para este treino</button>' : '') + '</div>';
   return true;
 }
 
@@ -17870,7 +18046,7 @@ function openAlunaDetail(i){
     htmlSugestaoTabataDaFicha(a) +
     '<p class="section-label" style="margin-top:4px;">2 · Gerar o treino</p>' +
     treinoAcoesHtml +
-    '<p class="section-label" style="margin-top:18px;">3 · Treino atual (toque no dia pra ajustar)</p>' + htmlUltimaProgressao(a) +
+    '<p class="section-label" style="margin-top:18px;">3 · Treino atual (toque no dia pra ajustar)</p>' + htmlAvisoVoltaDeVersao(a) + htmlUltimaProgressao(a) +
     '<p style="font-size:12px;color:var(--gold-soft);margin:6px 0 12px;cursor:pointer;" onclick="abrirTreinosArquivados(\'' + a.nome.replace(/'/g,"\\'") + '\')"><i class="ti ti-archive" style="font-size:12px;vertical-align:-1px;margin-right:4px;"></i>Ver treinos arquivados (histórico)</p>' +
     '<div id="treinos-arquivados-area"></div>' +
     treinoHtml +
@@ -24678,7 +24854,8 @@ function renderCardsDoHoje(d){
   if(elA) elA.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px;">' +
     '<button class="pn-btn-gold" onclick="iniciarGeracaoOuProgressaoParaNaoEnviados()">Gerar treinos pendentes' + (d && d.paraEnviar && d.paraEnviar.paraGerar ? ' (' + d.paraEnviar.paraGerar + ')' : '') + '</button>' +
     '<button class="pn-btn-gold pn-btn-sec" onclick="abrirEscolhaDeTreinos()">Progredir ou gerar, escolhendo as alunas</button>' +
-    '<button class="pn-btn-gold pn-btn-sec" onclick="abrirRelatorios()">Relatórios de 30 ou 90 dias</button></div>';
+    '<button class="pn-btn-gold pn-btn-sec" onclick="abrirRelatorios()">Relatórios de 30 ou 90 dias</button>' +
+    '<button class="pn-btn-gold pn-btn-sec" onclick="abrirRegressaoEmMassa()">Regredir treinos</button></div>';
   const elD = document.getElementById('pn-desafios-msg');
   if(elD){
     const ids = Object.keys(DESAFIOS_DO_APP).filter(function(id){ return gruposDosDesafios[id] && gruposDosDesafios[id].grupo; });
