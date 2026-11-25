@@ -1,4 +1,4 @@
-[dna_musa_186.html](https://github.com/user-attachments/files/35330616/dna_musa_186.html)
+[dna_musa_187.html](https://github.com/user-attachments/files/35384714/dna_musa_187.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1288,7 +1288,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-24-CM-PREFERENCIA-DE-CONTATO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-25-CN-RESPOSTA-NO-TESTE</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -2229,7 +2229,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-24-CM-PREFERENCIA-DE-CONTATO';
+const VERSAO_APP = '2026-11-25-CN-RESPOSTA-NO-TESTE';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -10205,7 +10205,7 @@ async function gravarTarefaDeSuporte(linhasAlunas, teste){
 }
 async function criarGrupoDeTesteSuporte(){
   if(!confirm('Criar o grupo de teste "Teste · Time DNA Musa" pelo número da Bianca, só com você e ela, e mandar a boas-vindas lá?')) return false;
-  const t = await gravarTarefaDeSuporte([{ aluna_nome: 'Teste: Thiago', telefone: normalizarTelefoneGrupo(CONFIG_SUPORTE.telefoneTeste), lote: 1, agendado_para: new Date().toISOString() }], true);
+  const t = await gravarTarefaDeSuporte([{ aluna_nome: NOME_ALUNA_TESTE_SUPORTE, telefone: normalizarTelefoneGrupo(CONFIG_SUPORTE.telefoneTeste), lote: 1, agendado_para: new Date().toISOString() }], true);
   if(!t) return false;
   cg.tarefaAberta = t.id; cg.tela = 'tarefa'; renderControleGrupos();
   return true;
@@ -10252,7 +10252,8 @@ function htmlGruposDeSuporte(){
     if(a.alunaDeTeste) return '<label class="et-lin" style="display:flex;align-items:center;gap:10px;border:1px dashed rgba(221,182,115,0.4);border-radius:10px;padding:8px 10px;margin-bottom:6px;">' +
       (x.tipo === 'sem' ? '<input type="checkbox"' + (marcadasSuporte[a.nome] ? ' checked' : '') + ' onchange="marcarSuporte(' + i + ',this.checked)">' : '<span style="width:16px;"></span>') +
       '<span style="flex:1;"><b>' + escaparHtmlFicha(a.nome) + '</b><small>teu número · grupo "Thiago · Time DNA Musa" igual ao de uma aluna · pode criar de novo quando quiser</small></span>' +
-      (x.tipo === 'fila' ? '<span class="tag">Na fila</span>' : '<button class="pg-b" onclick="event.stopPropagation();criarGrupoSuporteDaAluna(' + JSON.stringify(a.nome).replace(/"/g, '&quot;') + ')">Criar agora</button>') + '</label>';
+      (x.tipo === 'fila' ? '<span class="tag">Na fila</span>' : '<button class="pg-b" onclick="event.stopPropagation();criarGrupoSuporteDaAluna(' + JSON.stringify(a.nome).replace(/"/g, '&quot;') + ')">Criar agora</button>') + '</label>' +
+      (gruposDeSuporte[a.nome] ? '<div style="margin:-2px 0 10px;padding:0 10px;font-size:12px;color:var(--text-faint);">Contato: ' + escaparHtmlFicha(textoPreferenciaContato(a)) + '</div><div style="padding:0 10px;">' + htmlBlocoConversaDoGrupo(a) + '</div>' : '');
     const rotulo = x.tipo === 'tem' ? '<span class="tag" style="color:var(--success);">Tem grupo' + (x.em ? ' · ' + dt(x.em) : '') + '</span>'
       : x.tipo === 'fila' ? '<span class="tag">' + (x.pausada ? 'Fila pausada' : 'Na fila · ' + dt(x.em)) + '</span>'
       : x.tipo === 'semtel' ? '<span class="tag" style="color:#C9784A;">Sem telefone</span>'
