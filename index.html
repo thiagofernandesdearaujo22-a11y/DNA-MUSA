@@ -1287,7 +1287,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-25-CP-REGREDIR-ABRE-NA-TELA</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-25-CQ-CONTATO-ANTES-DO-OBJETIVO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -2229,7 +2229,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-25-CP-REGREDIR-ABRE-NA-TELA';
+const VERSAO_APP = '2026-11-25-CQ-CONTATO-ANTES-DO-OBJETIVO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -10064,6 +10064,21 @@ async function perguntarPreferenciaNoGrupo(nome){
   if(r && r.ok !== false){ preferenciasContato[nome] = Object.assign({}, preferenciasContato[nome] || {}, { perguntadoEm: new Date().toISOString(), paraConferir: null }); }
   return r;
 }
+// Depois de marcar a preferência na mão (resposta que o app não entendeu): manda a confirmação + a pergunta do objetivo
+function textoConfirmacaoComObjetivo(nome, pref){
+  const base = CONFIG_SUPORTE.confirmacoes[pref];
+  if(!base) return '';
+  return base.replace(/\{nome\}/g, String(nome).trim().split(/\s+/)[0]) + '\n\n' + CONFIG_SUPORTE.perguntaObjetivo;
+}
+async function mandarPerguntaDoObjetivo(nome){
+  const g = gruposDeSuporte[nome], p = preferenciasContato[nome] || {};
+  if(!g || !g.grupo) return { ok: false, erro: 'sem grupo de suporte' };
+  if(!p.pref){ alert('Marque primeiro a preferência de contato dela.'); return { ok: false, erro: 'sem preferência' }; }
+  const r = await chamarFuncaoGrupos('mensagem', { remetente: CONFIG_SUPORTE.remetente, grupoId: g.grupo, texto: textoConfirmacaoComObjetivo(nome, p.pref), perguntaObjetivo: true, alunaNome: nome });
+  if(r && r.ok !== false){ preferenciasContato[nome] = Object.assign({}, p, { objetivoPerguntadoEm: new Date().toISOString() }); mostrarConfirmacaoSalvamento(true, 'Pergunta do objetivo enviada no grupo.'); }
+  else mostrarConfirmacaoSalvamento(false, 'Não consegui mandar: ' + ((r && r.erro) || 'erro'));
+  return r;
+}
 function alunasPraPerguntarPreferencia(){
   return alunasParaEscolherTreino().filter(function(a){ return gruposDeSuporte[a.nome] && situacaoPreferenciaContato(a).tipo === 'nao_perguntada'; });
 }
@@ -10081,6 +10096,12 @@ async function perguntarPreferenciaPraQuemJaTemGrupo(){
   }
   try { renderControleGrupos(); } catch(e){}
   return n;
+}
+// O que ela respondeu no grupo sobre objetivo, incômodos e dores
+function htmlObjetivoDoGrupo(a){
+  const o = preferenciaContatoDaAluna(a).objetivo;
+  if(!o || !o.texto) return preferenciaContatoDaAluna(a).objetivoPerguntadoEm ? '<p class="txt" style="font-size:12px;margin:10px 0 0;">Objetivo e incômodos: perguntado, ainda sem resposta.</p>' : '';
+  return '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);"><p style="font-size:12px;color:var(--text-faint);margin:0 0 4px;">Objetivo e incômodos (respondido no grupo em ' + dataBR(dataLocalISO(new Date(o.em))) + ')</p><p class="txt" style="font-size:12.5px;margin:0;white-space:pre-wrap;">' + escaparHtmlFicha(o.texto) + '</p></div>';
 }
 function htmlBotoesPreferencia(nome){
   const nj = JSON.stringify(nome).replace(/"/g, '&quot;');
@@ -10141,16 +10162,28 @@ const CONFIG_SUPORTE = {
   telefoneTeste: '51986396740',
   nome: '{nome} · Time DNA Musa',
   porLote: 2, intervaloMin: 5, maxPorDia: 20,
+  // 25/11: a boas-vindas já leva a pergunta do contato (numa mensagem só). Quando ela responde 1, 2 ou 3, o servidor
+  // manda a confirmação junto com a pergunta do objetivo, incômodos e dores (função quick-responder).
   mensagem: 'Buenas, {nome}, bem-vinda ao teu grupo do Time DNA Musa!\n\n' +
-    'Aqui tu tem a mim e a Bia pra te dar todo o suporte que precisar. Dúvidas de treino, vídeos de execução e as nossas conversas semanais ficam por aqui.\n\n' +
-    'Pra começar, me conta: qual é o teu objetivo principal agora? Seja bem específica e conta também o que mais te incomoda no teu corpo hoje.\n\n' +
-    'Essas informações vão nos dar o norte pra fechar o ano e começar 2027 com o teu treino ajustado de forma ainda mais assertiva. Conta tudo!!\n\n' +
-    'Thiago, Time DNA Musa',
-  // 24/11: a pergunta da preferência de contato, numa mensagem separada logo depois da boas-vindas (e de novo na renovação)
-  pergunta: 'Uma última coisa, {nome}, pra gente te acompanhar do teu jeito: como tu prefere o nosso contato? Responde só com o número:\n\n' +
+    'Aqui tu tem a mim e a Bia pra te dar todo o suporte que precisar. Dúvidas de treino, vídeos de execução e as nossas conversas ficam por aqui.\n\n' +
+    'Pra gente te acompanhar do teu jeito, me conta: como tu prefere o nosso contato? Responde só com o número:\n\n' +
     '1. Quero que vocês me chamem toda semana pra saber como eu tô\n' +
     '2. Pode me chamar de vez em quando, a cada 15 dias\n' +
-    '3. Prefiro chamar vocês quando eu precisar'
+    '3. Prefiro chamar vocês quando eu precisar\n\n' +
+    'Thiago, Time DNA Musa',
+  // Na renovação (e pra quem já tinha grupo): só a pergunta do contato
+  pergunta: '{nome}, pra gente seguir te acompanhando do teu jeito: como tu prefere o nosso contato? Responde só com o número:\n\n' +
+    '1. Quero que vocês me chamem toda semana pra saber como eu tô\n' +
+    '2. Pode me chamar de vez em quando, a cada 15 dias\n' +
+    '3. Prefiro chamar vocês quando eu precisar',
+  // Igual ao servidor: a confirmação de cada escolha + a pergunta do objetivo (usado quando vocês marcam na mão)
+  confirmacoes: {
+    semanal: 'Anotado, {nome}! Toda semana a gente te chama pra saber como tu tá.',
+    quinzenal: 'Anotado, {nome}! A cada 15 dias a gente te chama pra ver como estão as coisas, e qualquer dúvida antes disso, é só chamar aqui.',
+    quando_precisar: 'Anotado, {nome}! A gente fica no aguardo, é só chamar aqui sempre que precisar.'
+  },
+  perguntaObjetivo: 'Agora me conta: qual é o teu objetivo principal hoje? Seja bem específica e conta também o que mais te incomoda no teu corpo e se tu sente alguma dor ou desconforto em algum lugar.\n\n' +
+    'Essas informações vão nos dar o norte pra fechar o ano e começar 2027 com o teu treino ajustado de forma ainda mais assertiva. Conta tudo!!'
 };
 let gruposDeSuporte = {};      // nome da aluna -> { grupo, nome, link, em } (vem do servidor, tipo "grupo_suporte")
 let marcadasSuporte = {};
@@ -10192,7 +10225,7 @@ async function gravarTarefaDeSuporte(linhasAlunas, teste){
   if(!supabaseClient){ alert('Sem conexão com o servidor.'); return null; }
   const c = CONFIG_SUPORTE;
   const t = await supabaseClient.from('tarefas_grupo_whatsapp').insert({ tipo: 'suporte', grupo_nome: teste ? 'Teste · Time DNA Musa' : c.nome, remetente: c.remetente,
-    por_lote: c.porLote, intervalo_min: c.intervaloMin, mensagem: c.mensagem, mensagem2: c.pergunta, admins: c.admins.join(','), teste: !!teste }).select().single();
+    por_lote: c.porLote, intervalo_min: c.intervaloMin, mensagem: c.mensagem, mensagem2: null, admins: c.admins.join(','), teste: !!teste }).select().single();
   if(t.error || !t.data){ mostrarConfirmacaoSalvamento(false, 'Não consegui começar: ' + ((t.error && t.error.message) || 'erro desconhecido') + '. Confira se o SQL dos grupos de suporte (5_grupos_de_suporte.sql) foi rodado no Supabase.'); return null; }
   const i = await supabaseClient.from('itens_grupo_whatsapp').insert(linhasAlunas.map(function(l){ return Object.assign({ tarefa_id: t.data.id, status: 'na_fila' }, l); }));
   if(i.error){
@@ -17666,7 +17699,9 @@ function htmlPlanoEDados(a){
       (veValoresDoPlano() && x.valor != null ? ' · ' + formatarReaisPainel(x.valor) + (x.pagamento === 'pendente' ? ' (pendente)' : '') : '')); }).join('')
       : '<p class="txt" style="margin:0;">Nenhuma renovação registrada ainda. As próximas aparecem aqui.</p>') + '</div>';
   h += '<p class="section-label" style="margin-top:16px;">Preferência de contato</p><div class="info-box">' + linha('Como prefere o contato', escaparHtmlFicha(textoPreferenciaContato(a))) +
-    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">' + htmlBotoesPreferencia(a.nome) + (gruposDeSuporte[a.nome] ? '<button class="pg-b" onclick="perguntarPreferenciaNoGrupo(' + JSON.stringify(a.nome).replace(/"/g, '&quot;') + ').then(function(){ mostrarConfirmacaoSalvamento(true, \'Pergunta enviada no grupo.\'); })">Perguntar de novo no grupo</button>' : '') + '</div></div>';
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">' + htmlBotoesPreferencia(a.nome) + (gruposDeSuporte[a.nome] ? '<button class="pg-b" onclick="perguntarPreferenciaNoGrupo(' + JSON.stringify(a.nome).replace(/"/g, '&quot;') + ').then(function(){ mostrarConfirmacaoSalvamento(true, \'Pergunta enviada no grupo.\'); })">Perguntar de novo no grupo</button>' : '') +
+    (gruposDeSuporte[a.nome] && preferenciaContatoDaAluna(a).pref && preferenciaContatoDaAluna(a).origem === 'manual' && !preferenciaContatoDaAluna(a).objetivoPerguntadoEm ? '<button class="pg-b" onclick="mandarPerguntaDoObjetivo(' + JSON.stringify(a.nome).replace(/"/g, '&quot;') + ')">Mandar a pergunta dos objetivos</button>' : '') + '</div>' +
+    htmlObjetivoDoGrupo(a) + '</div>';
   h += '<p class="section-label" style="margin-top:16px;">Anamnese</p><div class="info-box">' +
     linha('Respondida em', a.dataAnamnese ? dataBR(a.dataAnamnese) : NAO_INFORMADO) + linha('Objetivo', textoGenuino(a, 'objetivo')) + linha('Pirâmide', textoGenuino(a, 'piramide')) +
     linha('Restrições', textoGenuino(a, 'restricoes')) + linha('Academia', textoGenuino(a, 'academia')) + linha('Frequência', textoGenuino(a, 'freq')) + linha('Nível', textoGenuino(a, 'nivel')) + '</div>';
