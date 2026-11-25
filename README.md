@@ -1,4 +1,4 @@
-[dna_musa_189.html](https://github.com/user-attachments/files/35387495/dna_musa_189.html)
+[dna_musa_190.html](https://github.com/user-attachments/files/35388482/dna_musa_190.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1288,7 +1288,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-25-CO-REGREDIR-TREINOS</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-25-CP-REGREDIR-ABRE-NA-TELA</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -2230,7 +2230,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-25-CO-REGREDIR-TREINOS';
+const VERSAO_APP = '2026-11-25-CP-REGREDIR-ABRE-NA-TELA';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -15328,6 +15328,7 @@ async function verificarReplicasDeTreino(){
 async function executarGeracaoEmMassa(elegiveis, rotuloAcao, opcoesMassa){
   const om = opcoesMassa || { modo: 'progredir', mesmoFora: false };
   const area = document.getElementById('geracao-massa-area');
+  rolarAteArea(area); // o andamento aparece no topo do painel, longe do botão
   const resultados = { geradas: 0, progredidas: 0, verificadas: 0, apenasBackup: 0, erros: [], comPendencia: [], foraDasRegras: [] };
 
   for(let idx = 0; idx < elegiveis.length; idx++){
@@ -15641,6 +15642,7 @@ function abrirRelatorios(){
   if(relatorios){ relatorios = null; area.innerHTML = ''; return; }
   relatorios = { dias: 30, textos: {}, dados: {}, geral: '', enviados: {}, busca: '', aberto: null };
   renderRelatorios();
+  rolarAteArea(area);
 }
 function mudarPeriodoDosRelatorios(dias){
   if(!relatorios || relatorios.dias === dias) return;
@@ -15757,6 +15759,7 @@ function abrirEscolhaDeTreinos(){
   if(escolhaTreinos){ escolhaTreinos = null; area.innerHTML = ''; return true; }
   escolhaTreinos = { marcadas: {}, modo: 'progredir', mesmoFora: false, busca: '' };
   renderEscolhaDeTreinos();
+  rolarAteArea(area);
   return true;
 }
 function situacaoNaEscolha(a){
@@ -16991,8 +16994,20 @@ function abrirRegressaoEmMassa(){
   if(regressaoMassa){ regressaoMassa = null; area.innerHTML = ''; return true; }
   regressaoMassa = { corte: CORTE_REGRESSAO_PADRAO, linhas: null, marcadas: {}, escolha: {}, manterData: true, rodando: false, feitas: {}, erros: {} };
   renderRegressaoEmMassa();
+  rolarAteArea(area); // a caixa abre no topo do painel, longe do botão: leva a tela até ela
   carregarRegressaoEmMassa();
   return true;
+}
+function rolarAteArea(el){ try { if(el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(e){} }
+// Busca em pedaços: com centenas de alunas, um pedido só fica grande demais pro servidor
+async function buscarEmPedacos(tabela, colunas, campo, valores, tamanho){
+  const saida = [];
+  for(let i = 0; i < valores.length; i += (tamanho || 40)){
+    const r = await supabaseClient.from(tabela).select(colunas).in(campo, valores.slice(i, i + (tamanho || 40)));
+    if(r.error) throw new Error(r.error.message || 'erro do servidor');
+    (r.data || []).forEach(function(x){ saida.push(x); });
+  }
+  return saida;
 }
 function corteDaRegressaoMs(){ return new Date(regressaoMassa.corte).getTime(); } // horário do aparelho (Brasília)
 // Monta a situação de cada aluna a partir dos treinos salvos dela (do mais novo pro mais velho)
@@ -17019,11 +17034,11 @@ async function carregarRegressaoEmMassa(){
   const alunas = alunasPersonal.filter(function(a){ return a.email; });
   try {
     const emails = alunas.map(function(a){ return a.email; });
-    const { data: linhasAlunas } = await supabaseClient.from('alunas').select('email, auth_id').in('email', emails);
+    const linhasAlunas = await buscarEmPedacos('alunas', 'email, auth_id', 'email', emails, 40);
     const idPorEmail = {};
     (linhasAlunas || []).forEach(function(l){ if(l.email && l.auth_id) idPorEmail[l.email.toLowerCase()] = l.auth_id; });
     const ids = Object.keys(idPorEmail).map(function(k){ return idPorEmail[k]; });
-    const { data: treinos } = ids.length ? await supabaseClient.from('treinos').select('id, aluna_id, fase, volume, dias, updated_at').in('aluna_id', ids) : { data: [] };
+    const treinos = ids.length ? await buscarEmPedacos('treinos', 'id, aluna_id, fase, volume, dias, updated_at', 'aluna_id', ids, 25) : [];
     const porId = {};
     (treinos || []).forEach(function(t){ (porId[t.aluna_id] = porId[t.aluna_id] || []).push(t); });
     if(regressaoMassa !== r0) return;
@@ -17031,7 +17046,7 @@ async function carregarRegressaoEmMassa(){
     alunas.forEach(function(a){ const id = idPorEmail[a.email.toLowerCase()]; r0.historicos[a.nome] = id ? (porId[id] || []) : []; });
     recalcularRegressaoEmMassa(true);
   } catch(e){
-    if(regressaoMassa === r0){ r0.erroCarregar = 'Sem conexão pra buscar os treinos agora. Tenta de novo.'; renderRegressaoEmMassa(); }
+    if(regressaoMassa === r0){ r0.erroCarregar = 'Não consegui buscar os treinos agora (' + String((e && e.message) || e).slice(0, 120) + '). Fecha e abre de novo.'; renderRegressaoEmMassa(); }
   }
 }
 function recalcularRegressaoEmMassa(marcarTodas){
