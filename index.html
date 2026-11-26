@@ -1287,7 +1287,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-25-CQ-CONTATO-ANTES-DO-OBJETIVO</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-25-CR-POR-VENCER-E-BLOQUEIO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -2229,7 +2229,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-25-CQ-CONTATO-ANTES-DO-OBJETIVO';
+const VERSAO_APP = '2026-11-25-CR-POR-VENCER-E-BLOQUEIO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -5710,6 +5710,14 @@ function alternarFiltroAlunas(filtro){
   renderAlunas();
 }
 
+// 25/11: "em acompanhamento" = ativa ou por vencer. A por vencer ainda está pagando: continua no Controle, nas
+// progressões, nas conversas e nos grupos. Só a vencida sai.
+function emAcompanhamento(a){ const st = statusDoPlano(a); return st === 'ativas' || st === 'porvencer'; }
+function htmlEtiquetaVencimento(a){
+  if(statusDoPlano(a) !== 'porvencer') return '';
+  const d = a ? diasAteVencerPlano(a, Date.now()) : null;
+  return ' <span class="tag" style="font-size:10px;color:#E2A33D;">' + (d == null ? 'por vencer' : d <= 0 ? 'vence hoje' : 'vence em ' + d + (d === 1 ? ' dia' : ' dias')) + '</span>';
+}
 function statusDoPlano(a){
   if(a.statusPlanoManual) return a.statusPlanoManual; // ajuste manual sempre vale mais que o cálculo automático
   if(!a.dataFechouPlano || !a.duracaoPlanoDias) return 'ativas'; // sem plano registrado ainda, considera ativa por padrão
@@ -13430,7 +13438,7 @@ function escolherFichaPrincipal(email){
   if(candidatas.length === 0) return null;
   const atual = fichaPrincipalPorEmail[chave];
   if(atual && candidatas.indexOf(atual) !== -1) return atual;
-  const ativas = candidatas.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  const ativas = candidatas.filter(function(a){ return emAcompanhamento(a); });
   const universo = ativas.length > 0 ? ativas : candidatas;
   fichaPrincipalPorEmail[chave] = universo[universo.length - 1];
   return fichaPrincipalPorEmail[chave];
@@ -15420,7 +15428,7 @@ async function executarGeracaoEmMassa(elegiveis, rotuloAcao, opcoesMassa){
 // Alunas ativas SEM e-mail nunca entram (não tem como salvar login nem vincular treino), sempre
 // pelo status real (statusPlanoManual), nunca mais pelo campo antigo "status" (lead/ok).
 function alunasAtivasElegiveis(){
-  return alunasPersonal.filter(function(a){ return a.email && statusDoPlano(a) === 'ativas'; });
+  return alunasPersonal.filter(function(a){ return a.email && emAcompanhamento(a); });
 }
 
 async function iniciarGeracaoParaSemTreino(){
@@ -15826,7 +15834,7 @@ function htmlListaDaEscolha(){
   return alunasDaEscolhaNaTela.map(function(a, i){
     const sit = situacaoNaEscolha(a);
     return '<label class="et-lin"><input type="checkbox"' + (escolhaTreinos.marcadas[a.nome] ? ' checked' : '') + ' onchange="marcarNaEscolha(' + i + ',this.checked)">' +
-      '<span><b>' + escaparHtmlFicha(a.nome) + '</b><small' + (sit.fora ? ' class="fora"' : '') + '>' + escaparHtmlFicha(sit.txt) + '</small></span></label>';
+      '<span><b>' + escaparHtmlFicha(a.nome) + '</b>' + htmlEtiquetaVencimento(a) + '<small' + (sit.fora ? ' class="fora"' : '') + '>' + escaparHtmlFicha(sit.txt) + '</small></span></label>';
   }).join('');
 }
 function renderListaDaEscolha(){
@@ -17840,6 +17848,7 @@ function cabecalhoFichaAluna(a, agora){
     const fim = new Date(agora + faltam * 86400000);
     chips.push('<span class="fc fc-ouro">' + (faltam < 0 ? 'Plano venceu em ' : 'Plano vence em ') + dataCurtaPainel(fim.toISOString()) + '</span>');
   }
+  if(sit === 'vencidas' && a.email) chips.push('<span class="fc fc-ruim">Acesso ao app bloqueado até renovar</span>');
   if(sit === 'ativas'){ const ctl = situacaoDoControleDaAluna(a, agora); chips.push('<span class="fc ' + ctl.classe + '">' + ctl.texto + '</span>'); }
   const ultimo = ultimoTreinoRegistrado(prog);
   if(ultimo) chips.push('<span class="fc">Último treino: ' + quandoFoiTexto(ultimo, agora) + '</span>');
@@ -18660,7 +18669,7 @@ function soDesafioComDesafioVigente(a, agora){
   return true;
 }
 function entraNoControleDeTreinos(a, agora){
-  return statusDoPlano(a) === 'ativas' && !soDesafioComDesafioVigente(a, agora);
+  return emAcompanhamento(a) && !soDesafioComDesafioVigente(a, agora);
 }
 
 function htmlPrazoDoControle(){
@@ -18742,7 +18751,7 @@ function htmlAvisosDoControle(){
       '<span class="acao-pill" style="margin-top:8px;display:inline-block;" onclick="salvarPendenciasAgora()">Salvar agora</span></div>';
   }
   // Fichas ativas que, por como estão cadastradas, NUNCA conseguem guardar uma mudança (mostra antes de você mexer)
-  const ativasAgora = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  const ativasAgora = alunasPersonal.filter(function(a){ return emAcompanhamento(a); });
   const ativasSemEmail = ativasAgora.filter(function(a){ return !a.email; }).map(function(a){ return a.nome; });
   const ativasRepetidas = ativasAgora.filter(function(a){ return a.email && ehFichaDuplicada(a); }).map(function(a){ return a.nome; });
   if(ativasSemEmail.length > 0 || ativasRepetidas.length > 0){
@@ -18798,7 +18807,7 @@ function renderControleTreinos(){
   if(!container) return;
   const agora = Date.now();
   const ativas = alunasPersonal.filter(function(a){ return entraNoControleDeTreinos(a, agora); });
-  const soDesafio = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas' && soDesafioComDesafioVigente(a, agora); });
+  const soDesafio = alunasPersonal.filter(function(a){ return emAcompanhamento(a) && soDesafioComDesafioVigente(a, agora); });
   const efetivo = function(a){ return statusEfetivoDoControle(a, agora); };
   const tempoDaEntrega = function(a){ const t = new Date(a.dataFicouVerde).getTime(); return isNaN(t) ? 0 : t; };
 
@@ -18830,7 +18839,7 @@ function renderControleTreinos(){
     const i = alunasPersonal.indexOf(a);
     return '<div class="ctl-it" onclick="openAlunaDetail(' + i + ')">' +
       '<div class="pn-av">' + escaparHtmlFicha(iniciaisDaAluna(a.nome)) + '</div>' +
-      '<div class="ctl-txt"><span class="ctl-nome">' + escaparHtmlFicha(a.nome) + '</span><span class="ctl-sub' + (classeSub ? ' ' + classeSub : '') + '">' + sub + '</span></div>' +
+      '<div class="ctl-txt"><span class="ctl-nome">' + escaparHtmlFicha(a.nome) + htmlEtiquetaVencimento(a) + '</span><span class="ctl-sub' + (classeSub ? ' ' + classeSub : '') + '">' + sub + '</span></div>' +
       botao.replace('IDX', i) +
     '</div>';
   };
@@ -20590,7 +20599,7 @@ function converterDataBrParaDate(dataBr){
 
 // --- 1) Frequência de treino da semana ---
 async function calcularRelatorioFrequenciaSemanal(){
-  const ativas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  const ativas = alunasPersonal.filter(function(a){ return emAcompanhamento(a); });
   const totalDiasSemana = totalDiasDeTreino();
 
   // Busca o progresso DE VERDADE de cada uma no banco antes de contar. Até agora, o painel do
@@ -20636,7 +20645,7 @@ async function gerarRelatorioFrequenciaSemanal(){
 
 // --- 2) Respostas e comentários (dúvidas pendentes + desconforto relatado) ---
 function calcularRelatorioRespostas(){
-  const ativas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  const ativas = alunasPersonal.filter(function(a){ return emAcompanhamento(a); });
   const duvidas = [], feedbacksComDesconforto = [];
   ativas.forEach(function(a){
     const prog = getProgressoAluna(a.nome);
@@ -20676,7 +20685,7 @@ async function gerarRelatorioRespostas(){
 
 // --- 3) Resumo de fechamento da semana ---
 function calcularResumoFechamentoSemana(){
-  const ativas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  const ativas = alunasPersonal.filter(function(a){ return emAcompanhamento(a); });
   const totalDiasSemana = totalDiasDeTreino();
   let precisamAtencao = 0, precisamThiago = 0;
   const problemas = { frequencia: 0, exercicio: 0, alimentacao: 0, revisarTreino: 0 };
@@ -20755,7 +20764,7 @@ async function enviarRelatorioWhatsApp(chaveTexto, idResultado){
 
 // ===== DESTAQUES DA SEMANA (conquistas visíveis pra todas no Ranking) =====
 function detectarDestaquesSemana(){
-  const ativas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas'; });
+  const ativas = alunasPersonal.filter(function(a){ return emAcompanhamento(a); });
   const totalDiasSemana = totalDiasDeTreino();
   const destaques = [];
 
@@ -21049,7 +21058,7 @@ function alternarLiberacaoDoCurso(nomeAluna, idCurso){
 function liberarCursoParaTodasAtivas(idCurso){
   const curso = cursoDoAppPorId(idCurso);
   if(!curso) return;
-  const ativas = alunasPersonal.filter(function(a){ return statusDoPlano(a) === 'ativas' && !ehFichaDuplicada(a); });
+  const ativas = alunasPersonal.filter(function(a){ return emAcompanhamento(a) && !ehFichaDuplicada(a); });
   const comEmail = ativas.filter(function(a){ return a.email; });
   const semEmail = ativas.length - comEmail.length;
   const faltam = comEmail.filter(function(a){ return !alunaTemCursoLiberado(a, idCurso); });
@@ -21492,6 +21501,7 @@ async function loginAluna(){
 
     sessaoTipo = 'aluna';
     document.getElementById('card-personal-launcher').style.display = 'none';
+    verificarBloqueioDaAluna(alunaRow);
 
     await carregarELigarTreinoDaAluna(data.user.id);
     await carregarProgressoDoSupabase(data.user.id, NOME_ALUNA_LOGADA);
@@ -21530,6 +21540,37 @@ function entrarLocalPorEmail(email){
   sessaoTipo = 'aluna';
   document.getElementById('card-personal-launcher').style.display = 'none';
   irParaInicioDaAluna();
+}
+
+// ===== BLOQUEIO DA ALUNA COM PLANO VENCIDO (25/11) =====
+// Quando o plano dela está vencido (pela data ou marcado como "Vencida" na ficha), o app mostra uma tela por cima de
+// tudo: sem treino, só a mensagem e o botão pra chamar no WhatsApp. Renovou (ou vocês mudaram a situação dela pra
+// Ativa), na próxima vez que ela abrir, o acesso volta sozinho.
+// Decide SÓ pelo que está no servidor (a linha dela em "alunas"): as fichas antigas que ficam no código podem vir
+// marcadas "vencidas" e nunca podem bloquear ninguém. Sem dado de plano no servidor, não bloqueia.
+const WHATSAPP_RENOVACAO = '5551989999669'; // número do suporte (Bianca)
+function planoDoServidor(alunaRow){
+  const ex = alunaRow && alunaRow.dados_extras && typeof alunaRow.dados_extras === 'object' ? alunaRow.dados_extras : null;
+  if(!ex) return null;
+  return { nome: alunaRow.nome, statusPlanoManual: ex.statusPlanoManual || null, dataFechouPlano: ex.dataFechouPlano || null, duracaoPlanoDias: ex.duracaoPlanoDias || null };
+}
+function alunaLogadaEstaBloqueada(alunaRow){ const pl = planoDoServidor(alunaRow); return !!pl && statusDoPlano(pl) === 'vencidas'; }
+function verificarBloqueioDaAluna(alunaRow){
+  if(sessaoTipo !== 'aluna') return false;
+  const a = planoDoServidor(alunaRow);
+  let tela = document.getElementById('tela-plano-vencido');
+  if(!alunaLogadaEstaBloqueada(alunaRow)){ if(tela) tela.remove(); return false; }
+  if(!tela){ tela = document.createElement('div'); tela.id = 'tela-plano-vencido'; document.body.appendChild(tela); }
+  const primeiro = String((a && a.nome) || '').trim().split(/\s+/)[0];
+  const fim = fimDoPlanoISO(a);
+  const texto = 'Oi! Sou a ' + primeiro + ', meu plano do Time DNA Musa venceu e quero renovar.';
+  tela.setAttribute('style', 'position:fixed;inset:0;z-index:2147483000;background:var(--bg,#0B0A09);display:flex;align-items:center;justify-content:center;padding:24px;');
+  tela.innerHTML = '<div style="max-width:380px;width:100%;text-align:center;">' +
+    '<p style="font-family:\'EB Garamond\',Georgia,serif;font-size:26px;margin:0 0 10px;color:var(--text,#EDE6DA);">' + escaparHtmlFicha(primeiro) + ', teu plano venceu' + (fim ? ' em ' + dataBR(fim) : '') + '</p>' +
+    '<p style="font-size:14px;line-height:1.55;color:var(--text-faint,#857C70);margin:0 0 22px;">Pra continuar com os teus treinos e o acompanhamento, chama o teu personal no WhatsApp. Teu histórico e as tuas cargas ficam guardados.</p>' +
+    '<a class="btn-gold" style="display:block;text-decoration:none;padding:13px;" href="https://wa.me/' + WHATSAPP_RENOVACAO + '?text=' + encodeURIComponent(texto) + '" target="_blank" rel="noopener">Chamar no WhatsApp</a>' +
+    '<button class="btn-secondary" style="margin-top:10px;" onclick="sairDeVerdade()">Sair</button></div>';
+  return true;
 }
 
 async function carregarELigarTreinoDaAluna(userId){
@@ -22667,6 +22708,7 @@ async function restaurarSessaoAtiva(){
       sessaoTipo = 'aluna';
       const cardPersonal = document.getElementById('card-personal-launcher');
       if(cardPersonal) cardPersonal.style.display = 'none';
+      verificarBloqueioDaAluna(alunaRow);
       await carregarELigarTreinoDaAluna(sessao.user.id);
       await carregarProgressoDoSupabase(sessao.user.id, NOME_ALUNA_LOGADA);
       mostrarDiagnostico('Restaurada com sucesso, indo pra tela dela.', false);
