@@ -1,4 +1,4 @@
-[dna_musa_195.html](https://github.com/user-attachments/files/35489649/dna_musa_195.html)
+[dna_musa_196.html](https://github.com/user-attachments/files/35491792/dna_musa_196.html)
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1288,7 +1288,7 @@
     </div>
   </div>
   <div class="screen">
-    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-26-CS-FILAS-E-RESPOSTA-VAZIA</p>
+    <p id="carimbo-versao" style="position:fixed;top:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-faint);z-index:999999;letter-spacing:1px;pointer-events:none;">versão 2026-11-26-CT-RESPOSTA-NO-GRUPO</p>
 
     <div id="backbar" class="backbar" style="display:none;" onclick="goBack()">
       <i class="ti ti-arrow-left"></i>
@@ -2230,7 +2230,7 @@
 // 2) a tela cheia fica só pra erro na abertura do app ou erros em sequência (o app quebrou mesmo);
 // 3) todo erro é gravado com versão, aparelho e tela. Se o servidor recusar ou estiver sem internet,
 //    fica guardado no aparelho e é reenviado depois.
-const VERSAO_APP = '2026-11-26-CS-FILAS-E-RESPOSTA-VAZIA';
+const VERSAO_APP = '2026-11-26-CT-RESPOSTA-NO-GRUPO';
 const JANELA_ERROS_SEGUIDOS_MS = 20000; // 3 erros dentro de 20 s = algo quebrou de verdade
 const LIMITE_ERROS_SEGUIDOS = 3;
 const CHAVE_FILA_ERROS = 'musaFilaErros';
@@ -12775,23 +12775,48 @@ function montarMensagemDeResposta(x, resposta){
   const sobre = x.tipo === 'duvida' ? 'a dúvida que você mandou no app' : 'o que você comentou no app' + (x.f.dia ? ' (' + String(x.f.dia).toLowerCase() + (quando ? ', ' + quando : '') + ')' : (quando ? ' (' + quando + ')' : ''));
   return 'Oi ' + primeiroNomeEnvio(x.aluna) + '! Sobre ' + sobre + ':\n_"' + trechoDoFeedback(x) + '"_\n\n' + String(resposta || '').trim();
 }
-function abrirRespostaWhatsApp(chave){
+// 26/11: quem já tem grupo de suporte recebe a resposta no grupo dela (pelo número de quem está logado, que está em
+// todos os grupos). Sem grupo ainda, vai no privado como antes. Dá pra trocar pro privado num clique.
+function grupoDeSuporteDaAluna(nome){ const g = gruposDeSuporte[nome]; return g && g.grupo && !g.teste ? g : null; }
+function remetenteDoLogado(){ return NOME_PERSONAL_LOGADO === 'Bianca' ? 'Bianca' : 'Thiago'; }
+function escolherDestinoResposta(destino){
+  if(!respostaWhatsAppAberta) return;
+  const x = itensFeedbackAlunas().find(function(i){ return i.chave === respostaWhatsAppAberta.chave; });
+  if(destino === 'grupo' && !(x && grupoDeSuporteDaAluna(x.aluna))) return;
+  const texto = (document.getElementById('resp-wpp-texto') || {}).value || '';
+  respostaWhatsAppAberta.destino = destino;
+  abrirRespostaWhatsApp(respostaWhatsAppAberta.chave, destino);
+  const campo = document.getElementById('resp-wpp-texto'); if(campo){ campo.value = texto; atualizarPreviaRespostaWhatsApp(); }
+}
+function abrirRespostaWhatsApp(chave, destinoForcado){
   const x = itensFeedbackAlunas().find(function(i){ return i.chave === chave; });
   if(!x) return false;
   const a = alunasPersonal.find(function(al){ return al.nome === x.aluna; });
-  respostaWhatsAppAberta = { chave: chave };
+  const g = grupoDeSuporteDaAluna(x.aluna);
+  const destino = destinoForcado || (g ? 'grupo' : 'privado');
+  respostaWhatsAppAberta = { chave: chave, destino: destino };
+  const situ = a ? situacaoSuporteDaAluna(a) : { tipo: 'sem' };
+  const naFila = !g && situ.tipo === 'fila' && situ.em ? ' (está na fila: ' + new Date(situ.em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + ')' : '';
+  const nomeGrupo = g ? (g.nome || nomeDoGrupoSuporteApp(x.aluna)) : '';
+  const htmlDestino = '<div style="display:flex;gap:8px;margin:0 0 12px;">' +
+    '<div class="et-lin" style="flex:1;cursor:' + (g ? 'pointer' : 'default') + ';border:1px solid ' + (destino === 'grupo' ? 'var(--gold)' : 'var(--border)') + ';border-radius:12px;padding:9px 11px;' + (g ? '' : 'opacity:.45;') + '"' + (g ? ' onclick="escolherDestinoResposta(\'grupo\')"' : '') + '><span><b>Grupo de suporte</b><small style="display:block;">' + (g ? escaparHtmlFicha(nomeGrupo) : 'ainda não criado') + '</small></span></div>' +
+    '<div class="et-lin" style="flex:1;cursor:pointer;border:1px solid ' + (destino === 'privado' ? 'var(--gold)' : 'var(--border)') + ';border-radius:12px;padding:9px 11px;" onclick="escolherDestinoResposta(\'privado\')"><span><b>WhatsApp individual</b><small style="display:block;">privado dela</small></span></div></div>';
   let el = document.getElementById('modal-resposta-wpp');
   if(!el){ el = document.createElement('div'); el.id = 'modal-resposta-wpp'; el.className = 'resp-wpp-fundo'; document.body.appendChild(el); }
   el.style.display = 'flex';
+  const podeEnviar = destino === 'grupo' ? !!g : !!(a && a.telefone);
   el.innerHTML = '<div class="resp-wpp">' +
-    '<p class="resp-tit">Responder ' + escaparHtmlFicha(primeiroNomeEnvio(x.aluna)) + ' no WhatsApp</p>' +
-    '<p class="resp-sub">' + (a && a.telefone ? 'Ela recebe a mensagem dela citada e a sua resposta. Sai pelo seu WhatsApp (' + escaparHtmlFicha(NOME_PERSONAL_LOGADO || '') + ').' : '<b style="color:#E2A33D;">Ela não tem telefone cadastrado na ficha.</b>') + '</p>' +
+    '<p class="resp-tit">Responder ' + escaparHtmlFicha(primeiroNomeEnvio(x.aluna)) + (destino === 'grupo' ? ' no grupo dela' : ' no WhatsApp') + '</p>' +
+    (destino === 'grupo' ? '<p class="resp-sub">Vai no grupo "' + escaparHtmlFicha(nomeGrupo) + '", pelo seu número (' + escaparHtmlFicha(remetenteDoLogado()) + '). Ela recebe a mensagem dela citada e a sua resposta, e a equipe acompanha.</p>'
+      : (!g ? '<p class="resp-sub" style="color:#E2A33D;">Ela ainda não tem grupo de suporte' + naFila + '. Por enquanto vai no privado dela.</p>' : '') +
+        '<p class="resp-sub">' + (a && a.telefone ? 'Ela recebe a mensagem dela citada e a sua resposta. Sai pelo seu WhatsApp (' + escaparHtmlFicha(NOME_PERSONAL_LOGADO || '') + ').' : '<b style="color:#E2A33D;">Ela não tem telefone cadastrado na ficha.</b>') + '</p>') +
+    htmlDestino +
     '<div class="resp-cit">"' + escaparHtmlFicha(trechoDoFeedback(x)) + '"</div>' +
     '<textarea class="form-input" id="resp-wpp-texto" rows="4" placeholder="Escreva a sua resposta..." oninput="atualizarPreviaRespostaWhatsApp()"></textarea>' +
-    '<p class="resp-sub" style="margin:10px 0 4px;">Como chega pra ela</p><div class="resp-previa" id="resp-wpp-previa"></div>' +
+    '<p class="resp-sub" style="margin:10px 0 4px;">' + (destino === 'grupo' ? 'Como chega no grupo' : 'Como chega pra ela') + '</p><div class="resp-previa" id="resp-wpp-previa"></div>' +
     '<label class="resp-marca"><input type="checkbox" id="resp-wpp-lido" checked> ' + (x.tipo === 'duvida' ? 'Marcar como respondida ao enviar' : 'Marcar como lido ao enviar') + '</label>' +
     '<div class="resp-rod"><button class="fb-bt" onclick="fecharRespostaWhatsApp()">Cancelar</button>' +
-    '<button class="fb-bt wpp" id="resp-wpp-enviar" onclick="enviarRespostaWhatsApp()"' + (a && a.telefone ? '' : ' disabled') + '>Enviar pelo WhatsApp</button></div></div>';
+    '<button class="fb-bt wpp" id="resp-wpp-enviar" onclick="enviarRespostaWhatsApp()"' + (podeEnviar ? '' : ' disabled') + '>' + (destino === 'grupo' ? 'Enviar no grupo' : 'Enviar pelo WhatsApp') + '</button></div></div>';
   atualizarPreviaRespostaWhatsApp();
   return true;
 }
@@ -12816,23 +12841,30 @@ async function enviarRespostaWhatsApp(){
   const resposta = String((campo && campo.value) || '').trim();
   if(!x || !a) return false;
   if(!resposta){ alert('Escreva a resposta antes de enviar.'); return false; }
-  if(!a.telefone){ alert('Ela não tem telefone cadastrado na ficha.'); return false; }
+  const g = grupoDeSuporteDaAluna(a.nome);
+  const noGrupo = respostaWhatsAppAberta.destino === 'grupo' && !!g;
+  if(!noGrupo && !a.telefone){ alert('Ela não tem telefone cadastrado na ficha.'); return false; }
   const marcarLido = !!(document.getElementById('resp-wpp-lido') || {}).checked;
   const botao = document.getElementById('resp-wpp-enviar');
+  const rotulo = noGrupo ? 'Enviar no grupo' : 'Enviar pelo WhatsApp';
   if(botao){ botao.disabled = true; botao.textContent = 'Enviando...'; }
-  const saida = await enviarWhatsApp(a.telefone, montarMensagemDeResposta(x, resposta));
+  let saida;
+  if(noGrupo){
+    const r = await chamarFuncaoGrupos('mensagem', { remetente: remetenteDoLogado(), grupoId: g.grupo, texto: montarMensagemDeResposta(x, resposta) });
+    saida = { sucesso: !!(r && r.ok !== false), motivo: r && (r.erro || r.error) };
+  } else saida = await enviarWhatsApp(a.telefone, montarMensagemDeResposta(x, resposta));
   if(!saida || !saida.sucesso){
-    if(botao){ botao.disabled = false; botao.textContent = 'Enviar pelo WhatsApp'; }
-    mostrarConfirmacaoSalvamento(false, 'Não consegui enviar pro WhatsApp dela: ' + ((saida && saida.motivo) || 'motivo não informado'));
+    if(botao){ botao.disabled = false; botao.textContent = rotulo; }
+    mostrarConfirmacaoSalvamento(false, 'Não consegui enviar ' + (noGrupo ? 'no grupo dela' : 'pro WhatsApp dela') + ': ' + ((saida && saida.motivo) || 'motivo não informado'));
     return false;
   }
-  const registro = { chaveFeedback: chave, aluna: a.nome, texto: resposta, por: NOME_PERSONAL_LOGADO || '', em: new Date().toISOString() };
+  const registro = { chaveFeedback: chave, aluna: a.nome, texto: resposta, por: NOME_PERSONAL_LOGADO || '', em: new Date().toISOString(), onde: noGrupo ? 'grupo' : 'privado' };
   const id = 'resp_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   respostasFeedback.push(Object.assign({ id: id }, registro));
   salvarCatalogoPersonalConferindo('resposta_feedback', id, registro);
   fecharRespostaWhatsApp();
   if(marcarLido) marcarFeedbackAlunaLido(chave); else renderFeedbackAlunas();
-  mostrarConfirmacaoSalvamento(true, 'Resposta enviada pro WhatsApp da ' + primeiroNomeEnvio(a.nome) + '.');
+  mostrarConfirmacaoSalvamento(true, noGrupo ? 'Resposta enviada no grupo da ' + primeiroNomeEnvio(a.nome) + '.' : 'Resposta enviada pro WhatsApp da ' + primeiroNomeEnvio(a.nome) + '.');
   return true;
 }
 
